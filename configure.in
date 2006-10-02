@@ -1,0 +1,41 @@
+AC_PREREQ(2.13)
+AC_INIT(src/libxtract.c)
+
+PACKAGE=libxtract
+VERSION=0.1.0
+
+AM_INIT_AUTOMAKE($PACKAGE, $VERSION)
+AM_CONFIG_HEADER(config.h)
+AC_PROG_CC
+AC_PROG_INSTALL
+AC_ENABLE_STATIC(no)
+AC_ENABLE_SHARED(yes)
+AC_PROG_LIBTOOL
+#AC_ARG_WITH(fftw, AC_HELP_STRING([--with-vector], [build vector features]),
+#            [ if test $withval = "yes"; then with_vector=yes ;
+#                           else with_vector=no ; fi ], with_vector=no)
+
+AC_CHECK_HEADERS([math.h])
+
+AC_ARG_ENABLE(vector, 
+              [  --enable-vector    Turn fft-based vector processing on],
+              [case "${enableval}" in
+               yes) vector=true ;;
+               no)  vector=false ;;
+               *) AC_MSG_ERROR(bad value ${enableval} for --enable-vector) ;;
+           esac],[vector=false])
+
+XTRACT_SO_VERSION=0:0:0
+CFLAGS="-pedantic -ansi"
+LDFLAGS="-lm"
+
+dnl Are we building with fftw?
+#if [[ "$with_vector" = "yes" ]] ; then
+if [[ "$vector" = "true" ]] ; then
+    LDFLAGS="$LDFLAGS -lfftw3f"
+    AC_DEFINE([BUILD_VECTOR], [1], [Build the vector functions])
+fi
+
+AM_CONDITIONAL(BUILD_VECTOR, test "x${vector}" = 'xtrue')
+
+AC_OUTPUT(Makefile src/Makefile xtract/Makefile)
