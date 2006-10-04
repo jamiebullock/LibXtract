@@ -18,7 +18,7 @@
  * USA.
  */
 
-/* xtract_types.h: declares specialised variable types used by libxtract */
+/* \file xtract_types.h: declares specialised variable types used by libxtract */
 
 #ifndef XTRACT_TYPES
 #define XTRACT_TYPES
@@ -27,8 +27,7 @@
 extern "C" {
 #endif
 
-/* Data structure used to store amplitude data between calls to xtract_attack_time and other functions. */
-    
+/* \brief Data structure used to store amplitude data between calls to xtract_attack_time and other functions. */
 typedef struct _xtract_amp_tracker {
     int count;
     float previous_amp;

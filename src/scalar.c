@@ -259,6 +259,7 @@ int xtract_noisiness(float *data, int N, void *argv, float *result){
    NOT_IMPLEMENTED;
    
 }
+
 int xtract_rms_amplitude(float *data, int N, void *argv, float *result){
 
     int n = N;

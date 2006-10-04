@@ -18,7 +18,7 @@
  * USA.
  */
 
-/* xtract_delta.h: declares functions that extract a feature as a single value from more than one input vector */
+/** \file xtract_delta.h: declares functions that extract a feature as a single value or vector from more than one input vector */
 
 #ifndef XTRACT_DELTA
 #define XTRACT_DELTA
@@ -28,26 +28,21 @@ extern "C" {
 #endif
 
 #include "xtract_types.h"
-/* Flux/temporal variation */
 
-/* Gaël Richard (2006)*/
+/* \brief Extract spectral flux as defined by Gaël Richard (2006)*/
 int xtract_flux(float *data, int N, void *argv , float *result);
 /*xtract_frame_tracker *xf */
 
-/* Attack Time */
-
+/** \brief Extract attack Time */
 int xtract_attack_time(float *data, int N, void *argv , float *result);
 /* xtract_amp_tracker *xa */
 
-/* Temporal decrease */
-
+/** Extract temporal decrease */
 int xtract_decay_time(float *data, int N, void *argv, float *result);
 /* xtract_amp_tracker *xa */
 
 
-/* Delta vector */
-/* Generic function to calculate the delta of a feature over a given period (in frames */
-
+/** \brief A generic function to calculate the delta of a feature over a given period (in frames) */
 int xtract_delta_feature(float *data, int N, void *argv, float *result);
 /*xtract_frame_tracker *xf */
 /*float frames*/

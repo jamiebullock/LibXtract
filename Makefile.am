@@ -1,2 +1,2 @@
-SUBDIRS = src xtract
+SUBDIRS = src xtract @DOXYGEN@
 

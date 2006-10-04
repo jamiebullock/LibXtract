@@ -44,7 +44,6 @@ extern "C" {
 #define BARK_BANDS 26
 
 /** \brief Enumeration of features, elements are used as indixes to an array of pointers to feature extracton functions */
-
 enum features_ {
     MEAN,
     VARIANCE,
@@ -90,7 +89,6 @@ enum features_ {
 };
 
 /** \brief Enumeration of feature types */
-
 enum feature_types_ {
     SCALAR,
     VECTOR,
@@ -98,14 +96,12 @@ enum feature_types_ {
 };
 
 /** \brief Enumeration of mfcc types */
-
 enum mfcc_types_ {
     EQUAL_GAIN,
     EQUAL_AREA
 };
 
 /** \brief Enumeration of return codes */
-
 enum return_codes_ {
     SUCCESS,
     MALLOC_FAILED,
@@ -115,30 +111,18 @@ enum return_codes_ {
 
 /**
  *                                                                          
- * \brief Perform feature extraction
- *
- * \param
- *                                                                           
- * In general functions in this library conform to the following prototpe:  
+ * \brief An array of pointers to functions that perform the extraction
  *                                                                          
- * int xtract_featurename(float *data, int N, void *argv, float *result)    
+ * \param *data: a pointer to the start of the input data (usually the first element in an array)                         
  *                                                                          
+ * \param N: the number of elements to be processed          
  *                                                                          
- *      float *data: a pointer to an array element                          
+ * \param *argv: an abitrary number of additional arguments, used to pass additional parameters to the function being called
  *                                                                          
- *      int N: the number of elements to be processed by the function          
- *                                                                          
- *      void *argv: an abitrary number of additional arguments 
- *                                                                          
- *      float *result: a pointer to the result                              
- *                                                                          
+ * \param *result: a pointer to the first element in the result                              
  *                                                                          
  * Each function will iterate over N array elements, the first of which is  
- * pointed to by *data. It is therefore up to the caller to ensure that an  
- * approriate range of data is provided. For example, if the function expects
- * an array containing an harmonic spectrum, then they array pointed to by 
- * *data must contain the amplitudes of harmonic frequencies in adjacent 
- * elemets
+ * pointed to by *data. It is up to the calling function to ensure that the array is in the format expected by the function being called.
  *                                                                          
  * For scalar and delta features, *result will point to a single value.     
  *                                                                          
@@ -149,27 +133,28 @@ enum return_codes_ {
  *  
  *  All functions return an integer error code as descibed in the enumeration
  *  return_codes_
- *                                                                          
- * */
+ *
+ * example:<br>
+ * xtract[PEAKS](amplitude_spectrum, 512, threshold, peaks)                                                                           
+ */
+int(*xtract[XTRACT_FEATURES])(float *data, int N, void *argv, float *result);
 
-
-int(*xtract[XTRACT_FEATURES])(float *, int, void *, float *);
-
-/* Data structures */
-
+/** \brief A structure to store a set of n_filters Mel filters */
 typedef struct xtract_mel_filter_ {
     int n_filters;
     float **filters;
 } xtract_mel_filter;
 
-
-/* Initialisation functions */
-/* xtract_init_mfcc */
-/* It is up to the caller to pass in a pointer to memory allocated for freq_bands arrays of length N. This function populates these arrays with magnitude coefficients representing the mel filterbank on a linear scale */
+/** \brief A function to initialise a mel filter bank 
+ * 
+ * It is up to the caller to pass in a pointer to memory allocated for freq_bands arrays of length N. This function populates these arrays with magnitude coefficients representing the mel filterbank on a linear scale 
+ */
 int xtract_init_mfcc(int N, float nyquist, int style, float freq_max, float freq_min, int freq_bands, float **fft_tables);
 
-/* xtract_init_bark */
-/* A pointer to an array of BARK_BANDS ints most be passed in, and is populated with BARK_BANDS fft bin numbers representing the limits of each band */
+/** \brief A function to initialise bark filter bounds
+ * 
+ * A pointer to an array of BARK_BANDS ints most be passed in, and is populated with BARK_BANDS fft bin numbers representing the limits of each band 
+ */
 int xtract_init_bark(int N, float nyquist, int *band_limits);
 
 

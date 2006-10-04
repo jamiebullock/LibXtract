@@ -20,7 +20,7 @@
 
 
 
-/* xtract_delta.h: defines useful macros */
+/** \file xtract_delta.h: defines useful macros */
 
 #ifndef XTRACT_MACROS
 #define XTRACT_MACROS
