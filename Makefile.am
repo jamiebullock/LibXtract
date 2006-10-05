@@ -1,2 +1,2 @@
-SUBDIRS = src xtract @DOXYGEN@
+SUBDIRS = src xtract examples/puredata @DOXYGEN@
 
