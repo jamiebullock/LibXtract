@@ -89,12 +89,14 @@ int xtract_amdf(float *data, int N, void *argv, float *result){
 
     int n = N, i;
     
-    float md;
+    float md, temp;
 
     while(n--){
        md = 0;
         for(i = 0; i < N - n; i++){
-            md += abs(data[i] - data[i + n]);
+            temp = data[i] - data[i + n];
+			temp = (temp < 0 ? -temp : temp);
+			md += temp;
         }
         result[n] = md / N;
     }
@@ -109,7 +111,7 @@ int xtract_asdf(float *data, int N, void *argv, float *result){
     while(n--){
        sd = 0;
         for(i = 0; i < N - n; i++){
-            sd = 1;
+            /*sd = 1;*/
             sd += SQ(data[i] - data[i + n]);
         }
         result[n] = sd / N;
