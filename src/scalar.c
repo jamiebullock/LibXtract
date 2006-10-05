@@ -23,6 +23,7 @@
 
 #include "xtract/libxtract.h"
 #include "math.h"
+#include <stdlib.h>
 
 int xtract_mean(float *data, int N, void *argv, float *result){
    
@@ -324,7 +325,7 @@ int xtract_slope(float *data, int N, void *argv, float *result){
     
 }
 
-int xtract_f0(float *data, int N, void *argv, float *result){
+int xtract_lowest_match(float *data, int N, void *argv, float *result){
 
 /*    int n, M = N >> 1;
     float guess, error, minimum_error = 1000000, f0, freq;
@@ -412,4 +413,10 @@ int xtract_hps(float *data, int N, void *argv, float *result){
     free(product);
     
 }
-    
+
+
+int xtract_f0(float *data, int N, void *argv, float *result){
+
+   NOT_IMPLEMENTED;
+   
+}

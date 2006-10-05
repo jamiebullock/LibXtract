@@ -256,15 +256,15 @@ int xtract_sharpness(float *data, int N, void *argv, float *result);
  */
 int xtract_slope(float *data, int N, void *argv, float *result);
 
-/** \brief Extract the value of the first partial in an input vector 
+/** \brief Extract the value of the first partial in an input vector that closely matches a certain 'guess'
  * 
  * \param *data: a pointer to the first element in an array of floats that represents the frequencies of the spectral peaks of an audio vector
  * \param N: the number of elements to be considered
- * \param *argv: a pointer to a float value representing the approximate F0
+ * \param *argv: a pointer to a float value representing the guess
  * \param *result: the F0 of N values from the array pointed to by *data
  * 
  * This method takes a guess which can come from taking the ZCR of an autocorrelation function, and then finds the spectral peak that most closely matches the gess */
-int xtract_f0(float *data, int N, void *argv, float *result);
+int xtract_lowest_match(float *data, int N, void *argv, float *result);
 
 /** \brief Extract the Pitch of an input vector using Harmonic Product Spectrum (HPS) analysis
  * 
@@ -274,6 +274,15 @@ int xtract_f0(float *data, int N, void *argv, float *result);
  * \param *result: the pitch of N values from the array pointed to by *data
  */
 int xtract_hps(float *data, int N, void *argv, float *result);
+
+/** \brief Extract the fundamental frequency of an input vector 
+ * 
+ * \param *data: a pointer to the first element in an array of floats representing an audio vector 
+ * \param N: the number of elements to be considered
+ * \param *argv: a pointer to NULL
+ * \param *result: the pitch of N values from the array pointed to by *data
+ */
+int xtract_f0(float *data, int N, void *argv, float *result);
 
 #ifdef __cplusplus
 }

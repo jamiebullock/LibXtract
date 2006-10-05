@@ -67,8 +67,9 @@ int(*xtract[])(float *, int, void *, float *) = {
     xtract_odd_even_ratio,
     xtract_sharpness,
     xtract_slope,
-    xtract_f0,
+    xtract_lowest_match,
     xtract_hps,
+	xtract_f0,
     /* xtract_vector.h */
     xtract_magnitude_spectrum,
     xtract_autocorrelation,

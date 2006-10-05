@@ -29,7 +29,7 @@ extern "C" {
  * \file libxtract.h: main header file and API definition 
  */
 
-#define VERSION "0.1"
+#define VERSION "0.11"
 
     
 #include "xtract_scalar.h"
@@ -38,8 +38,9 @@ extern "C" {
 #include "xtract_types.h"
 #include "xtract_macros.h"
 
-#define XTRACT_FEATURES 40
+#define XTRACT_FEATURES 41
 #define LOG_LIMIT 10e-10
+#define VERY_BIG_NUMBER 2e10
 #define SR_LIMIT 192000
 #define BARK_BANDS 26
 
@@ -71,8 +72,9 @@ enum features_ {
     ODD_EVEN_RATIO,
     SHARPNESS,
     SLOPE,
-    F0,
+    LOWEST_MATCH,
     HPS,
+	F0,
     MAGNITUDE_SPECTRUM,
     AUTOCORRELATION,
     AUTOCORRELATION_FFT,
