@@ -1,5 +1,5 @@
 
-SUFFIXES = .pd_linux
+SUFFIXES = .@PD_SUFFIX@
 PDDIR = $(prefix)/lib/pd
 pddir = $(PDDIR)
 
@@ -9,7 +9,7 @@ pdinstallrefdir = $(pddir)/doc/5.reference
 pdinstallexpdir = $(pddir)/doc/xtract
 
 # Automake won't accept something ending in ".pd_linux" as a library
-pdinstall_PROGRAMS = xtract~.pd_linux
+pdinstall_PROGRAMS = xtract~.@PD_SUFFIX@
 
 if BUILD_PD_EXAMPLE
 xtract_pd_linux_SOURCES = xtract~.c

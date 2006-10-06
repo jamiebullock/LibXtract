@@ -74,7 +74,7 @@ dnl ------------------------------------------
 AC_ARG_WITH(pd_dir,
     [  --with-pd-dir=path   pd header path (default=/usr/local/include) ],
     [
-    CPPFLAGS="$CPPFLAGS -I$withval"
+    CFLAGS="$CFLAGS -I$withval"
     echo
     echo "pd dir is $withval"
     echo
@@ -97,9 +97,11 @@ dnl ------------------------------------------
 dnl ----  do some magic to gues the host opsys
 dnl ----  taken from libvorbis configure.in
 dnl ------------------------------------------
-AC_CANONICAL_HOST
+dnl AC_CANONICAL_HOST
 
-PD_LDFLAGS="$PD_LDFLAGS -L/usr/local/lib -ldl"
+dnl AC_SUBST(PD_CFLAGS,"$PD_CFLAGS -DUNIX -Wno-deprecated -Wall -Wimplicit -Wunused -Wmissing-prototypes -O1")
+dnl AC_SUBST(PD_LDFLAGS,"$PD_LDFLAGS -shared")
+dnl pd_ldflags="$PD_LDFLAGS -L/usr/local/lib -ldl"
 if test -z "$GCC"; then
         case $host in
         *-*-irix*)
@@ -120,38 +122,42 @@ else
 
         case $host in
         *86-*-linux*)
-                PD_CPPFLAGS="$PD_CPPFLAGS -DUNIX -Wno-deprecated -Wall -Wimplicit -Wunused -Wmissing-prototypes -O1"
+                PD_CFLAGS="$PD_CFLAGS -DUNIX -Wno-deprecated -Wall -Wimplicit -Wunused -Wmissing-prototypes -O1"
         PD_LDFLAGS="$PD_LDFLAGS -shared"
         dnl we could test for bad glibc here, but don't
-        pd_suffix=pd_linux
+        PD_SUFFIX=pd_linux
         ;;
         powerpc-*-linux*)
-                PD_CPPFLAGS="$PD_CPPFLAGS -DUNIX -Wno-deprecated -Wall -Wimplicit -Wunused -Wmissing-prototypes -O1 "
+                PD_CFLAGS="$PD_CFLAGS -DUNIX -Wno-deprecated -Wall -Wimplicit -Wunused -Wmissing-prototypes -O1 "
         PD_LDFLAGS="$PD_LDFLAGS -shared"
-        pd_suffix=pd_linux
+        PD_SUFFIX=pd_linux
         ;;
         *-*-linux*)
-                PD_CPPFLAGS="$PD_CPPFLAGS -DUNIX -Wno-deprecated -Wall -Wimplicit -Wunused -Wmissing-prototypes -O1 -fPIC"
+                PD_CFLAGS="$PD_CFLAGS -DUNIX -Wno-deprecated -Wall -Wimplicit -Wunused -Wmissing-prototypes -O1 -fPIC"
         PD_LDFLAGS="$PD_LDFLAGS -shared"
-        pd_suffix=pd_linux
+        PD_SUFFIX=pd_linux
         ;;
         sparc-sun-*)
         echo "YOU HAVE A SPARC STATION, not setting any flags, not supported yet"
         ;;
         *-*-darwin*)
-                PD_CPPFLAGS="$PD_CPPFLAGS -DUNIX -Wno-deprecated -Wall -Wimplicit -Wunused -Wmissing-prototypes -O3 "
+                PD_CFLAGS="$PD_CFLAGS -DUNIX -Wno-deprecated -Wall -Wimplicit -Wunused -Wmissing-prototypes -O3 "
         PD_LDFLAGS="$PD_LDFLAGS -bundle -undefined suppress -flat_namespace"
-        pd_suffix=pd_darwin
+        PD_SUFFIX=pd_darwin
 ;;
         *)
         dnl assume unix
-                PD_CPPFLAGS="$PD_CPPFLAGS -DUNIX -Wno-deprecated -Wall -Wimplicit -Wunused -Wmissing-prototypes -O1"
+                PD_CFLAGS="$PD_CFLAGS -DUNIX -Wno-deprecated -Wall -Wimplicit -Wunused -Wmissing-prototypes -O1"
         PD_LDFLAGS="$PD_LDFLAGS -shared"
-        pd_suffix=pd_linux
+        PD_SUFFIX=pd_linux
         ;;
         esac
 fi
 
+AC_SUBST(PD_CFLAGS)
+AC_SUBST(PD_LDFLAGS)
+AC_SUBST(PD_SUFFIX)
+		
 AC_CONFIG_FILES([doc/documentation.doxygen])
 
-AC_OUTPUT(Makefile src/Makefile xtract/Makefile doc/Makefile examples/puredata/Makefile)
+AC_OUTPUT(Makefile src/Makefile xtract/Makefile doc/Makefile examples/Makefile examples/puredata/Makefile)
