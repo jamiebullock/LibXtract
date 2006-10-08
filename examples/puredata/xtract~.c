@@ -101,6 +101,7 @@ static void *xtract_new(t_symbol *me, t_int argc, t_atom *argv) {
     else if(tmp == gensym("average_deviation")) x->feature = AVERAGE_DEVIATION;
     else if(tmp == gensym("skewness")) x->feature = SKEWNESS;
     else if(tmp == gensym("kurtosis")) x->feature = KURTOSIS;
+    else if(tmp == gensym("centroid")) x->feature = CENTROID;
     else if(tmp == gensym("irregularity_k")) x->feature = IRREGULARITY_K;
     else if(tmp == gensym("irregularity_j")) x->feature = IRREGULARITY_J;
     else if(tmp == gensym("tristimulus_1")) x->feature = TRISTIMULUS_1;

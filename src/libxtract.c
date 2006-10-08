@@ -29,6 +29,7 @@ int(*xtract[])(float *, int, void *, float *) = {
     xtract_average_deviation,
     xtract_skewness,
     xtract_kurtosis,
+    xtract_centroid,
     xtract_irregularity_k,
     xtract_irregularity_j,
     xtract_tristimulus_1,

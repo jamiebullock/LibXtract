@@ -38,7 +38,7 @@ extern "C" {
 #include "xtract_types.h"
 #include "xtract_macros.h"
 
-#define XTRACT_FEATURES 42
+#define XTRACT_FEATURES 43
 #define LOG_LIMIT 10e-10
 #define VERY_BIG_NUMBER 2e10
 #define SR_LIMIT 192000
@@ -52,6 +52,7 @@ enum features_ {
     AVERAGE_DEVIATION,
     SKEWNESS,
     KURTOSIS,
+	CENTROID,
     IRREGULARITY_K,
     IRREGULARITY_J,
     TRISTIMULUS_1,

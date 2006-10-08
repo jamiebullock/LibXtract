@@ -84,6 +84,25 @@ int xtract_kurtosis(float *data, int N, void *argv,  float *result){
     
 }
 
+
+int xtract_centroid(float *data, int N, void *argv,  float *result){
+    
+    int n = N;
+
+	float *freqs, *amps, FA, A;
+
+	freqs = data;
+	amps = data + (N  >>  1);
+	
+    while(n--){
+		  FA += freqs[n] * amps[n];
+		  A += amps[n];
+	}
+  
+   *result = FA / A;
+
+}
+
 int xtract_irregularity_k(float *data, int N, void *argv, float *result){
    
     int n,

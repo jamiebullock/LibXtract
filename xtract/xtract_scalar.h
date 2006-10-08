@@ -82,6 +82,15 @@ int xtract_skewness(float *data, int N, void *argv,  float *result);
  */
 int xtract_kurtosis(float *data, int N, void *argv,  float *result);
 
+/** \brief Extract the kurtosis of an input vector
+ * 
+ * \param *data: a pointer to the first element in an array of floats represeting a frequency spectrum of size N/2 and a magnitude peak spectrum of size N/2 (This is the output format of xtract_peaks)
+ * \param N: the number of elements to be considered
+ * \param *argv: a pointer to NULL
+ * \param *result: the centroid of the values pointed to by *data
+ */
+int xtract_centroid(float *data, int N, void *argv,  float *result);
+
 /** \brief Calculate the Irregularity of an input vector using a method described by Krimphoff (1994)
  * 
  * \param *data: a pointer to the first element in an array of floats representing the magnitude spectrum of an audio vector
