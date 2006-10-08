@@ -18,6 +18,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 /* calculates the spectral xtract of one frame, given peak frequency and amplitude to first and second inputs respectively */
 
+#define XTRACT 
 #include "xtract/libxtract.h"
 #include "m_pd.h"
 

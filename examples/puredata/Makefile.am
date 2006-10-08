@@ -8,14 +8,9 @@ pdinstalldir = $(pddir)/extra
 pdinstallrefdir = $(pddir)/doc/5.reference
 pdinstallexpdir = $(pddir)/doc/xtract
 
-# Automake won't accept something ending in ".pd_linux" as a library
-pdinstall_PROGRAMS = xtract~.@PD_SUFFIX@
+pdinstall_PROGRAMS = xtract.@PD_SUFFIX@
 
-if BUILD_PD_EXAMPLE
-xtract_pd_linux_SOURCES = xtract~.c
-else
-xtract_pd_linux_SOURCES = 
-endif
+xtract_@PD_SUFFIX@_SOURCES = xtract~.c
 
 pdincludedir = $(pddir)/src
 
@@ -30,6 +25,9 @@ AM_CFLAGS = @PD_CFLAGS@
 AM_LDFLAGS = @PD_LDFLAGS@ -lxtract
 		
 ## Install the documentation.
+
+install:
+	-mv xtract.@PD_SUFFIX@ $(pdinstalldir)/xtract~.@PD_SUFFIX@
 
 #pdinstallref_DATA = \
 #	help/aubioonset-help.pd \

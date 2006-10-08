@@ -27,12 +27,10 @@ AC_ARG_ENABLE(vector,
 AC_ARG_ENABLE(pd_example, 
               [  --enable-pd_example    Compile the Pure Data external example],
               [case "${enableval}" in
-               yes) vector=true ;;
-               no)  vector=false ;;
+               yes) pd_example=true ;;
+               no)  pd_example=false ;;
                *) AC_MSG_ERROR(bad value ${enableval} for --enable-pd_external) ;;
-           esac],[vector=false])
-
-
+           esac],[pd_example=false])
 
 # libtool version: current:revision:age
 #
@@ -49,28 +47,9 @@ AC_ARG_ENABLE(pd_example,
 # age to 0.
 XTRACT_SO_VERSION=0:0:0
 
-CFLAGS="-pedantic -ansi"
-LDFLAGS="-lm"
+CFLAGS="$CFLAGS -pedantic -ansi"
+LDFLAGS="$LDFLAGS -lm"
 
-dnl Are we building with fftw?
-#if [[ "$with_vector" = "yes" ]] ; then
-if [[ "$vector" = "true" ]] ; then
-    LDFLAGS="$LDFLAGS -lfftw3f"
-    AC_DEFINE([BUILD_VECTOR], [1], [Build the vector functions])
-fi
-
-AM_CONDITIONAL(BUILD_VECTOR, test "x${vector}" = 'xtrue')
-
-if [[ "$pd_example" = "true" ]] ; then
-    AC_DEFINE([BUILD_PD_EXAMPLE], [1], [Build the pd example])
-dnl At some point we need to support other platforms, and include checks
-	pd_suffix=pd_linux
-fi
-
-dnl ------------------------------------------
-dnl ----  add PureData includes dir
-dnl ----  usually /usr/local/include
-dnl ------------------------------------------
 AC_ARG_WITH(pd_dir,
     [  --with-pd-dir=path   pd header path (default=/usr/local/include) ],
     [
@@ -80,16 +59,45 @@ AC_ARG_WITH(pd_dir,
     echo
     ])
 
-dnl ------------------------------------------
-dnl ---- check for PureData Header
-dnl ------------------------------------------
-AC_CHECK_HEADER(m_pd.h, [have_pd_hdr=yes ], [
+AC_ARG_WITH(fftw3_dir,
+    [  --with-fftw3-dir=path   fftw3 header path (default=/usr/local/include) ],
+    [
+    CFLAGS="$CFLAGS -I$withval"
+    echo
+    echo "fftw3 dir is $withval"
+    echo
+    ])
+
+dnl Are we building with fftw?
+#if [[ "$with_vector" = "yes" ]] ; then
+if [[ "$vector" = "true" ]] ; then
+    LDFLAGS="$LDFLAGS -lfftw3f"
+    AC_DEFINE([BUILD_VECTOR], [1], [Build the vector functions])
+    AC_CHECK_HEADER(fftw3.h, [have_fftw3_hdr=yes ], [
+    have_pd_hdr=no
+    echo
+    echo "no fftw3.h header found.  try with option --with-fftw3-dir=/path/to/fftw3/header"
+    echo
+    exit
+    ])
+fi
+
+AM_CONDITIONAL(BUILD_VECTOR, test "x${vector}" = 'xtrue')
+
+dnl Are we building the PD examples?
+if [[ "$pd_example" = "true" ]] ; then
+    PD_SOURCES="xtract~.c"
+    AC_DEFINE([BUILD_PD_EXAMPLE], [1], [Build the pd example])
+    AC_CHECK_HEADER(m_pd.h, [have_pd_hdr=yes ], [
     have_pd_hdr=no
     echo
     echo "no m_pd.h header found.  try with option --with-pd-dir=/path/to/pd/src"
     echo
     exit
     ])
+dnl At some point we need to support other platforms, and include checks
+dnl pd_suffix=pd_linux
+fi
 
 AM_CONDITIONAL(BUILD_PD_EXAMPLE, test "x${pd_example}" = 'xtrue')
 
@@ -99,7 +107,7 @@ dnl ----  taken from libvorbis configure.in
 dnl ------------------------------------------
 dnl AC_CANONICAL_HOST
 
-dnl AC_SUBST(PD_CFLAGS,"$PD_CFLAGS -DUNIX -Wno-deprecated -Wall -Wimplicit -Wunused -Wmissing-prototypes -O1")
+dnl AC_SUBST(PD_CFLAGS,"$PD_CFLAGS -DUNIX -Wall -Wimplicit -Wunused -Wmissing-prototypes -O1")
 dnl AC_SUBST(PD_LDFLAGS,"$PD_LDFLAGS -shared")
 dnl pd_ldflags="$PD_LDFLAGS -L/usr/local/lib -ldl"
 if test -z "$GCC"; then
@@ -122,18 +130,18 @@ else
 
         case $host in
         *86-*-linux*)
-                PD_CFLAGS="$PD_CFLAGS -DUNIX -Wno-deprecated -Wall -Wimplicit -Wunused -Wmissing-prototypes -O1"
+                PD_CFLAGS="$PD_CFLAGS -DUNIX -Wall -Wimplicit -Wunused -Wmissing-prototypes -O1"
         PD_LDFLAGS="$PD_LDFLAGS -shared"
         dnl we could test for bad glibc here, but don't
         PD_SUFFIX=pd_linux
         ;;
         powerpc-*-linux*)
-                PD_CFLAGS="$PD_CFLAGS -DUNIX -Wno-deprecated -Wall -Wimplicit -Wunused -Wmissing-prototypes -O1 "
+                PD_CFLAGS="$PD_CFLAGS -DUNIX -Wall -Wimplicit -Wunused -Wmissing-prototypes -O1 "
         PD_LDFLAGS="$PD_LDFLAGS -shared"
         PD_SUFFIX=pd_linux
         ;;
         *-*-linux*)
-                PD_CFLAGS="$PD_CFLAGS -DUNIX -Wno-deprecated -Wall -Wimplicit -Wunused -Wmissing-prototypes -O1 -fPIC"
+                PD_CFLAGS="$PD_CFLAGS -DUNIX -Wall -Wimplicit -Wunused -Wmissing-prototypes -O1 -fPIC"
         PD_LDFLAGS="$PD_LDFLAGS -shared"
         PD_SUFFIX=pd_linux
         ;;
@@ -141,22 +149,25 @@ else
         echo "YOU HAVE A SPARC STATION, not setting any flags, not supported yet"
         ;;
         *-*-darwin*)
-                PD_CFLAGS="$PD_CFLAGS -DUNIX -Wno-deprecated -Wall -Wimplicit -Wunused -Wmissing-prototypes -O3 "
+                PD_CFLAGS="$PD_CFLAGS -DUNIX -Wall -Wimplicit -Wunused -Wmissing-prototypes -O3 "
         PD_LDFLAGS="$PD_LDFLAGS -bundle -undefined suppress -flat_namespace"
         PD_SUFFIX=pd_darwin
 ;;
         *)
         dnl assume unix
-                PD_CFLAGS="$PD_CFLAGS -DUNIX -Wno-deprecated -Wall -Wimplicit -Wunused -Wmissing-prototypes -O1"
+                PD_CFLAGS="$PD_CFLAGS -DUNIX -Wall -Wimplicit -Wunused -Wmissing-prototypes -O1"
         PD_LDFLAGS="$PD_LDFLAGS -shared"
         PD_SUFFIX=pd_linux
         ;;
         esac
 fi
 
+PD_CFLAGS="$PD_CFLAGS -DPD"
+
 AC_SUBST(PD_CFLAGS)
 AC_SUBST(PD_LDFLAGS)
 AC_SUBST(PD_SUFFIX)
+AC_SUBST(PD_SOURCES)
 		
 AC_CONFIG_FILES([doc/documentation.doxygen])
 

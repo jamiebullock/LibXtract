@@ -38,7 +38,7 @@ extern "C" {
 #include "xtract_types.h"
 #include "xtract_macros.h"
 
-#define XTRACT_FEATURES 41
+#define XTRACT_FEATURES 42
 #define LOG_LIMIT 10e-10
 #define VERY_BIG_NUMBER 2e10
 #define SR_LIMIT 192000
@@ -74,7 +74,7 @@ enum features_ {
     SLOPE,
     LOWEST_MATCH,
     HPS,
-	F0,
+    F0,
     MAGNITUDE_SPECTRUM,
     AUTOCORRELATION,
     AUTOCORRELATION_FFT,
@@ -136,10 +136,30 @@ enum return_codes_ {
  *  All functions return an integer error code as descibed in the enumeration
  *  return_codes_
  *
+ *	The preprocessor macro: XTRACT must be defined before  this  can be used
+ * 
  * example:<br>
- * xtract[PEAKS](amplitude_spectrum, 512, threshold, peaks)                                                                           
+ *
+ * #include <stdio.h>
+ * #define XTRACT
+ * #include "libxtract.h"
+ *
+ * main () {
+ * float values[] = {1.0, 2.0, 3.0, 4.0, 5.0};
+ * int N = 5;
+ * float mean;
+ *
+ * xtract[MEAN]((void *)values, N, NULL, &mean);
+ *
+ * printf("Mean = %.2f\n", mean);
+ * }
+ *
+ * The calling function may additionally make some tests against the value returned by xtract
+ * 
  */
+#ifdef XTRACT
 int(*xtract[XTRACT_FEATURES])(float *data, int N, void *argv, float *result);
+#endif
 
 /** \brief A structure to store a set of n_filters Mel filters */
 typedef struct xtract_mel_filter_ {
