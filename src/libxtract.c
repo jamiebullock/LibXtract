@@ -18,26 +18,8 @@
  * USA.
  */
 
-/* libxtract - library for feature extraction from 1D vectors
-Copyright (C) 2006  Jamie Bullock
-
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-as published by the Free Software Foundation; either version 2
-of the License, or (at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-*/
-
-
 #include "xtract/libxtract.h"
+#define XTRACT
 
 int(*xtract[])(float *, int, void *, float *) = {
     /* xtract_scalar.h */
@@ -69,7 +51,7 @@ int(*xtract[])(float *, int, void *, float *) = {
     xtract_slope,
     xtract_lowest_match,
     xtract_hps,
-	xtract_f0,
+    xtract_f0,
     /* xtract_vector.h */
     xtract_magnitude_spectrum,
     xtract_autocorrelation,
@@ -86,3 +68,4 @@ int(*xtract[])(float *, int, void *, float *) = {
     xtract_decay_time,
     xtract_delta_feature
 };
+
