@@ -109,7 +109,8 @@ enum return_codes_ {
     SUCCESS,
     MALLOC_FAILED,
     BAD_ARGV,
-    BAD_VECTOR_SIZE
+    BAD_VECTOR_SIZE,
+	NO_RESULT
 };
 
 /**

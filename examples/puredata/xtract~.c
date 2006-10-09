@@ -123,11 +123,14 @@ static void *xtract_new(t_symbol *me, t_int argc, t_atom *argv) {
     else if(tmp == gensym("sharpness")) x->feature = SHARPNESS;
     else if(tmp == gensym("slope")) x->feature = SLOPE;
     else if(tmp == gensym("f0")){
-        x->feature = F0;
-        x->argv = getbytes(sizeof(t_float));
-    }
+			x->feature = F0;
+			x->argv = getbytes(sizeof(t_float));
+	}
     else if(tmp == gensym("hps"))x->feature = HPS;
-    else if(tmp == gensym("lowest_match"))x->feature = LOWEST_MATCH;
+    else if(tmp == gensym("lowest_match")){
+		x->feature = LOWEST_MATCH;
+        x->argv = getbytes(sizeof(t_float));
+	}
     else if(tmp == gensym("magnitude_spectrum")) 
                                         x->feature = MAGNITUDE_SPECTRUM;
     else if(tmp == gensym("autocorrelation")) x->feature = AUTOCORRELATION;

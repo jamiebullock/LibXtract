@@ -436,6 +436,25 @@ int xtract_hps(float *data, int N, void *argv, float *result){
 
 int xtract_f0(float *data, int N, void *argv, float *result){
 
-   NOT_IMPLEMENTED;
-   
+  int M, sr, tau, n;
+  float f0, err_tau_1, err_tau_x;
+ 
+  sr = *(float*)argv;
+  M = N >> 1;
+  err_tau_1 = 0;
+  for (n = 1; n < M; n++){
+    err_tau_1 = err_tau_1 + fabs(data[n] - data[n+1]);
+  }
+  for (tau = 2; tau < M; tau++){
+    err_tau_x = 0;
+    for (n = 1; n < M; n++){
+      err_tau_x = err_tau_x + fabs(data[n] - data[n+tau]);
+    }
+	if (err_tau_x < err_tau_1) {
+		f0 = sr / (tau + (err_tau_x / err_tau_1));
+	  	*result = f0;
+      	return SUCCESS;
+	}
+  }
+  return NO_RESULT;
 }

@@ -288,8 +288,11 @@ int xtract_hps(float *data, int N, void *argv, float *result);
  * 
  * \param *data: a pointer to the first element in an array of floats representing an audio vector 
  * \param N: the number of elements to be considered
- * \param *argv: a pointer to NULL
+ * \param *argv: a pointer to a float representing the sample rate of the vector
  * \param *result: the pitch of N values from the array pointed to by *data
+ *
+ * This algorithm is based on the AMDF and would benefit from further refinement
+ * 
  */
 int xtract_f0(float *data, int N, void *argv, float *result);
 
