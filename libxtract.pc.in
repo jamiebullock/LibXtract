@@ -1,0 +1,10 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: libxtract
+Description: A lightweight feature extraction library
+Version: @VERSION@
+Libs: -L${libdir} -lxtract
+Cflags: -I${includedir} 

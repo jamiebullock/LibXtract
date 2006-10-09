@@ -169,6 +169,7 @@ AC_SUBST(PD_LDFLAGS)
 AC_SUBST(PD_SUFFIX)
 AC_SUBST(PD_SOURCES)
 		
-AC_CONFIG_FILES([doc/documentation.doxygen])
+AC_CONFIG_FILES([doc/documentation.doxygen
+				libxtract.pc])
 
 AC_OUTPUT(Makefile src/Makefile xtract/Makefile doc/Makefile examples/Makefile examples/puredata/Makefile)
