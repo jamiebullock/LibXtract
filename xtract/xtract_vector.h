@@ -26,6 +26,13 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+	
+/**
+  * \defgroup vector extraction functions
+  *
+  * Defines vectorr extraction functions, and their parameters.
+  * @{
+  */
 
 /** \brief Extract normalized (0-1) frequency domain magnitude spectrum from time domain signal 
  * 
@@ -110,7 +117,9 @@ int xtract_dct(float *data, int N, void *argv, float *result);
  * \param *result: a pointer to an array of size N, containing N/2 freqs and N/2 amplitudes, amplitudes are on a decibel scale with dbFS = 0 
  */
 int xtract_peaks(float *data, int N, void *argv, float *result);
-    
+
+/** @} */
+
 #ifdef __cplusplus
 }
 #endif

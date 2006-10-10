@@ -27,6 +27,12 @@
 extern "C" {
 #endif
 
+/**
+  * \defgroup scalar extraction functions
+  *
+  * Defines scalar extraction functions, and their parameters.
+  * @{
+  */
 
 /** \brief Extract the mean of an input vector
  * 
@@ -295,6 +301,8 @@ int xtract_hps(float *data, int N, void *argv, float *result);
  * 
  */
 int xtract_f0(float *data, int N, void *argv, float *result);
+
+/** @} */
 
 #ifdef __cplusplus
 }

@@ -18,6 +18,17 @@
  * USA.
  */
 
+/** \mainpage 
+  *
+  * LibXtract is a simple, portable, lightweight library of audio feature extraction functions. The purpose of the library is to provide a relatively exhaustive set of feature extraction primatives that are designed to be 'cascaded' to create a extraction hierarchies. 
+  * For example, 'variance', 'average deviation', 'skewness' and 'kurtosis', all require the 'mean' of the input vector to be precomputed. However, rather than compute the 'mean' 'inside' each function, it is expected that the 'mean' will be passed in as an argument. This means that if the user wishes to use all of these features, the mean is calculated only once, and then passed to any functions that require it.
+  * 
+  * This philosophy of 'cascading' features is followed throughout the library, for example with features that operate on the magnitude spectrum of a signal vector (e.g. 'irregularity'), the magnitude spectrum is not calculated 'inside' the respective function, instead, a pointer to the first element in an array containing the magnitude spectrum is passed in as an argument. 
+  *
+  * Hopefully this not only makes the library more efficient when computing large numbers of features, but also makes it more flexible because extraction functions can be combined arbitrarily (one can take the irregularility of the Mel Frequency Cepstral Coefficients for example).
+  *
+  */
+
 #ifndef XTRACT_H
 #define XTRACT_H
 
@@ -28,15 +39,18 @@ extern "C" {
 /** 
  * \file libxtract.h: main header file and API definition 
  */
-
-#define VERSION "0.11"
-
     
 #include "xtract_scalar.h"
 #include "xtract_vector.h"
 #include "xtract_delta.h"
 #include "xtract_types.h"
 #include "xtract_macros.h"
+
+/** \defgroup libxtract API
+  *
+  * Defines a very simple API that provides access to the functions in the library
+  * @{
+  */
 
 #define XTRACT_FEATURES 43
 #define LOG_LIMIT 10e-10
@@ -183,6 +197,8 @@ int xtract_init_bark(int N, float nyquist, int *band_limits);
 
 
 /* Free functions */
+
+/** @} */
 
 #ifdef __cplusplus
 }
