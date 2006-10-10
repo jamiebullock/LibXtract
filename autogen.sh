@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # This works on Gentoo, whose automake wrapper is based on Mandrake:
-WANT_AUTOMAKE=1.7
+WANT_AUTOMAKE=1.6
 export WANT_AUTOMAKE
 
 
@@ -12,14 +12,14 @@ case `uname -s` in
       ;;
   Darwin)
       LIBTOOLIZE=glibtoolize
-      ACLOCALARGS='-I /usr/local/share/aclocal'
+      ACLOCALARGS='-I /usr/share/aclocal'
       ;;
   *)  echo error: unrecognized OS
       exit 1
       ;;
 esac
 
-AUTOMAKE_REQ=1.7
+AUTOMAKE_REQ=1.6
 
 # Automake version check from MusE
 lessthan () {
