@@ -22,12 +22,12 @@ INCLUDES = -I$(top_srcdir)/src -I$(pdincludedir)
 #AM_LDFLAGS = -L$(top_builddir)/src/.libs -lxtract -export_dynamic -shared 
 
 AM_CFLAGS = @PD_CFLAGS@
-AM_LDFLAGS = @PD_LDFLAGS@ -lxtract
+AM_LDFLAGS = @PD_LDFLAGS@ -lxtract -L$(top_builddir)/src/
 		
 ## Install the documentation.
 
 install:
-	-mv xtract.@PD_SUFFIX@ $(pdinstalldir)/xtract~.@PD_SUFFIX@
+	-mv $(top_builddir)/examples/puredata/.libs/xtract.@PD_SUFFIX@ $(pdinstalldir)/xtract~.@PD_SUFFIX@
 
 #pdinstallref_DATA = \
 #	help/aubioonset-help.pd \
