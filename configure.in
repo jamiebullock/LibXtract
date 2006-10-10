@@ -173,3 +173,27 @@ AC_CONFIG_FILES([doc/documentation.doxygen
 				libxtract.pc])
 
 AC_OUTPUT(Makefile src/Makefile xtract/Makefile doc/Makefile examples/Makefile examples/puredata/Makefile)
+
+echo
+echo "**************************************************************"
+echo "Summary:"
+
+
+if test "${BUILD_VECTOR}" = "1"; then
+  echo "Fftw3:                   yes (using fftw3f)"
+else
+if test "${BUILD_VECTOR}" = "1"; then
+  echo "Fftw3:                   yes (not using fftw3f)"
+else
+  echo "Fftw3:                   no (that should not happen)"
+fi
+fi
+if test "${BUILD_PD_EXAMPLE}" = "1"; then
+  echo "PD external:              yes"
+else
+  echo "PD external:              no"
+fi
+echo "**************************************************************"
+echo Configuration completed successfully. Type \'make\' to build ${PACKAGE}
+
+
