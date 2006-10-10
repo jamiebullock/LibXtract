@@ -1,0 +1,54 @@
+LibXtract  
+---------
+
+LibXtract is a simple, portable, lightweight library of audio feature extraction functions. The purpose of the library is to provide a relatively exhaustive set of feature extraction primatives that are designed to be 'cascaded' to create a extraction hierarchies. 
+
+For example, 'variance', 'average deviation', 'skewness' and 'kurtosis', all require the 'mean' of the input vector to be precomputed. However, rather than compute the 'mean' 'inside' each function, it is expected that the 'mean' will be passed in as an argument. This means that if the user wishes to use all of these features, the mean is calculated only once, and then passed to any functions that require it.
+
+ This philosophy of 'cascading' features is followed throughout the library, for example with features that operate on the magnitude spectrum of a signal vector (e.g. 'irregularity'), the magnitude spectrum is not calculated 'inside' the respective function, instead, a pointer to the first element in an array containing the magnitude spectrum is passed in as an argument. 
+
+Hopefully this not only makes the library more efficient when computing large numbers of features, but also makes it more flexible because extraction functions can be combined arbitrarily (one can take the irregularility of the Mel Frequency Cepstral Coefficients for example).
+
+A complete list of features can be found by viewing the header files, or reading the doxygen documentation, available with this package, or at http://libxtract.sourceforge.net
+
+Dependencies
+------------
+
+To compile LibXtract, the following software is also needed:
+
+automake >= 1.6
+fftw3 (compiled with floating-point support)
+
+To build the PD external, the PD header 'm_pd.h' is required
+
+Installation
+------------
+
+Type:
+
+./configure --enable-pd_example --enable-vector
+make
+sudo make install
+
+There following configure flags are optional:
+
+--enable-pd_example (to build the PD example)
+--enable-vector (to enable functions that require fftw3)
+
+Disclaimer
+----------
+ 
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+ 
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+ 
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, 
+USA.
