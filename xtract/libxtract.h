@@ -36,8 +36,9 @@
 extern "C" {
 #endif
 
-/** 
- * \file libxtract.h: main header file and API definition 
+/**
+ * \file libxtract.h 
+ * \brief main header file and API definition 
  */
     
 #include "xtract_scalar.h"
@@ -149,27 +150,27 @@ enum return_codes_ {
  * Memory for this array must be allocated and freed by the calling         
  * function.                                                                
  *  
- *  All functions return an integer error code as descibed in the enumeration
- *  return_codes_
+ * All functions return an integer error code as descibed in the enumeration
+ * return_codes_
  *
- *	The preprocessor macro: XTRACT must be defined before  this  can be used
+ * The preprocessor macro: XTRACT must be defined before  this  can be used
  * 
  * example:<br>
- *
- * #include <stdio.h>
- * #define XTRACT
- * #include "libxtract.h"
- *
- * main () {
- * float values[] = {1.0, 2.0, 3.0, 4.0, 5.0};
- * int N = 5;
- * float mean;
- *
- * xtract[MEAN]((void *)values, N, NULL, &mean);
- *
- * printf("Mean = %.2f\n", mean);
- * }
- *
+ * \verbatim
+#include <stdio.h>
+#define XTRACT
+#include "libxtract.h"
+
+main () {
+float values[] = {1.0, 2.0, 3.0, 4.0, 5.0};
+int N = 5;
+float mean;
+
+xtract[MEAN]((void *)values, N, NULL, &mean);
+
+printf("Mean = %.2f\n", mean);
+}
+\endverbatim
  * The calling function may additionally make some tests against the value returned by xtract
  * 
  */
