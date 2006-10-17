@@ -1,11 +1,18 @@
 AC_PREREQ(2.13)
-LIBXTRACT_MAJOR_VERSION=0
-LIBXTRACT_MINOR_VERSION=11
-PACKAGE=libxtract
-VERSION=${LIBXTRACT_MAJOR_VERSION}.${LIBXTRACT_MINOR_VERSION}
+# Increment for major changes, e.g. new feature types, major API changes
+m4_define(libxtract_major_version, 0)
+# Increment for feature additions and enhancements
+m4_define(libxtract_minor_version, 1)
+# Increment for fixes 
+m4_define(libxtract_fix_version, 2)
 
-AC_INIT([libxtract], [0.11], [bugs@postlude.co.uk])
-AM_INIT_AUTOMAKE($PACKAGE, $VERSION)
+m4_define(libxtract_version, libxtract_major_version.libxtract_minor_version.libxtract_fix_version)
+		
+PACKAGE=libxtract
+
+AC_INIT(libxtract, libxtract_version, bugs@postlude.co.uk)
+AC_DEFINE(LIBXTRACT_VERSION, libxtract_version, [LibXtract Version])
+AM_INIT_AUTOMAKE($PACKAGE, $LIBXTRACT_VERSION)
 AM_CONFIG_HEADER(config.h)
 AC_PROG_CC
 AC_PROG_LIBTOOL
