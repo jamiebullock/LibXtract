@@ -345,33 +345,16 @@ int xtract_slope(float *data, int N, void *argv, float *result){
 }
 
 int xtract_lowest_match(float *data, int N, void *argv, float *result){
-
-/*    int n, M = N >> 1;
-    float guess, error, minimum_error = 1000000, f0, freq;
-
-    guess = *(float *)argv;
-
-    for(n = 0; n < M; n++){
-        if(freq = data[n]){
-            error = abs(guess - freq);
-            if(error < minimum_error){
-                f0 = freq;
-                minimum_error = error;
-            }
-        }
-    }
-    *result = f0;*/
-
     
-    float f0 = SR_LIMIT;
+    float lowest_match = SR_LIMIT;
     int n = N;
 
     while(n--) {
         if(data[n] > 0)
-            f0 = MIN(f0, data[n]);
+            lowest_match = MIN(lowest_match, data[n]);
     }
 
-    *result = (f0 == SR_LIMIT ? 0 : f0);
+    *result = (lowest_match == SR_LIMIT ? 0 : lowest_match);
     
 }
 
@@ -379,8 +362,10 @@ int xtract_hps(float *data, int N, void *argv, float *result){
 
     int n = N, M, m, l, peak_index, position1_lwr;
     float *coeffs2, *coeffs3, *product, L, 
-            largest1_lwr, peak, ratio1;
+            largest1_lwr, peak, ratio1, sr;
 
+  	sr = *(float*)argv;
+	
     coeffs2 = (float *)malloc(N * sizeof(float));
     coeffs3 = (float *)malloc(N * sizeof(float));
     product = (float *)malloc(N * sizeof(float));
@@ -425,7 +410,7 @@ int xtract_hps(float *data, int N, void *argv, float *result){
                                 peak_index * 0.6 && ratio1 > 0.1)
                                 peak_index = position1_lwr;
 
-    *result = 22050 * (float)peak_index / (float)N;
+    *result = sr / (float)peak_index; 
         
     free(coeffs2);
     free(coeffs3);
@@ -437,24 +422,61 @@ int xtract_hps(float *data, int N, void *argv, float *result){
 int xtract_f0(float *data, int N, void *argv, float *result){
 
   int M, sr, tau, n;
-  float f0, err_tau_1, err_tau_x;
+  float f0, err_tau_1, err_tau_x, array_max, threshold_peak, threshold_centre;
  
-  sr = *(float*)argv;
+  sr = *(float *)argv;
+/*  threshold_peak = *((float *)argv+1);
+  threshold_centre = *((float *)argv+2);
+  printf("peak: %.2f\tcentre: %.2f\n", threshold_peak, threshold_centre);*/
+  /* add temporary dynamic control over thresholds to test clipping effects */
+
+/* FIX: tweak and  make into macros */
+  threshold_peak = .8;
+  threshold_centre = .3;
   M = N >> 1;
   err_tau_1 = 0;
-  for (n = 1; n < M; n++){
-    err_tau_1 = err_tau_1 + fabs(data[n] - data[n+1]);
+  array_max = 0;
+
+  /* Find the array max */
+  for(n = 0; n < N; n++){
+ 		if (data[n] > array_max)
+			array_max = data[n];
   }
+  
+  threshold_peak *= array_max;
+  
+  /* peak clip */
+  for(n = 0; n < N; n++){
+		if(data[n] > threshold_peak)
+			data[n] = threshold_peak;
+		else if(data[n] < -threshold_peak)
+			data[n] = -threshold_peak;
+  }
+  
+  threshold_centre *= array_max;
+  
+  /* Centre clip */
+  for(n = 0; n < N; n++){
+		if (data[n] < threshold_centre)
+			data[n] = 0;
+		else 
+			data[n] -= threshold_centre;
+  }
+  
+  /* Estimate fundamental freq */
+  for (n = 1; n < M; n++)
+    err_tau_1 = err_tau_1 + fabs(data[n] - data[n+1]);
+  /* FIX: this doesn't pose too much load if it returns 'early', but if it can't find f0, load can be significant for larger block sizes M^2 iterations! */  
   for (tau = 2; tau < M; tau++){
     err_tau_x = 0;
     for (n = 1; n < M; n++){
       err_tau_x = err_tau_x + fabs(data[n] - data[n+tau]);
     }
-	if (err_tau_x < err_tau_1) {
-		f0 = sr / (tau + (err_tau_x / err_tau_1));
+		if (err_tau_x < err_tau_1) {
+			f0 = sr / (tau + (err_tau_x / err_tau_1));
 	  	*result = f0;
-      	return SUCCESS;
-	}
+      return SUCCESS;
+		}
   }
   return NO_RESULT;
 }

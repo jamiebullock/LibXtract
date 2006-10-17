@@ -283,6 +283,8 @@ int xtract_lowest_match(float *data, int N, void *argv, float *result);
 
 /** \brief Extract the Pitch of an input vector using Harmonic Product Spectrum (HPS) analysis
  * 
+ * \warning {This function doesn't work properly}
+ * 
  * \param *data: a pointer to the first element in an array of floats representing the magnitude spectrum of an audio vector 
  * \param N: the number of elements to be considered
  * \param *argv: a pointer to NULL
@@ -294,10 +296,10 @@ int xtract_hps(float *data, int N, void *argv, float *result);
  * 
  * \param *data: a pointer to the first element in an array of floats representing an audio vector 
  * \param N: the number of elements to be considered
- * \param *argv: a pointer to a float representing the sample rate of the vector
+ * \param *argv: a pointer to a float representing the audio sample rate
  * \param *result: the pitch of N values from the array pointed to by *data
  *
- * This algorithm is based on the AMDF and would benefit from further refinement
+ * This algorithm is based on the AMDF, with peak and centre clipping. It would benefit from further improvements to improve noise robustness and overall efficiency
  * 
  */
 int xtract_f0(float *data, int N, void *argv, float *result);

@@ -1,5 +1,7 @@
+Improve noise robustness of xtract_f0
+Fix xtract_hps - it doesn't work!
 Add Pure Data help file
 Add delta functions
 Add Max/MSP external example
 ...do other stuff and eventually...
-...optimise the code for speed
+...optimise!
