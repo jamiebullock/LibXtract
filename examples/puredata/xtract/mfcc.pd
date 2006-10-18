@@ -67,6 +67,30 @@ xlabel -120 0 5 10 15 20;
 #X obj 331 73 inlet cf;
 #X obj 282 316 tabread4~ \$0-hann;
 #X obj 466 426 table \$0-hann;
+#N canvas 0 0 450 300 hann 0;
+#X obj 136 98 samplerate~;
+#X obj 139 166 phasor~;
+#X msg 225 96 0;
+#X obj 139 195 expr~ 0.5 - cos($v1 * 6.28) * 0.5;
+#X obj 114 51 t b b b b;
+#X obj 114 23 inlet;
+#X obj 261 117 s \$0-hann;
+#X obj 139 220 tabwrite~ \$0-hann;
+#X msg 259 93 resize 512;
+#X obj 136 120 /~ 512;
+#X connect 0 0 9 0;
+#X connect 1 0 3 0;
+#X connect 2 0 1 1;
+#X connect 3 0 7 0;
+#X connect 4 0 7 0;
+#X connect 4 1 2 0;
+#X connect 4 2 0 0;
+#X connect 4 3 8 0;
+#X connect 5 0 4 0;
+#X connect 8 0 6 0;
+#X connect 9 0 1 0;
+#X restore 466 390 pd hann;
+#X obj 466 362 r \$0-window-gen;
 #X connect 0 0 1 0;
 #X connect 1 0 20 0;
 #X connect 2 0 21 0;
@@ -102,6 +126,7 @@ xlabel -120 0 5 10 15 20;
 #X connect 26 0 25 0;
 #X connect 27 0 0 0;
 #X connect 28 0 2 1;
+#X connect 31 0 30 0;
 #X restore 35 80 pd paf;
 #X obj 85 25 r \$0-cf;
 #X obj 140 23 r \$0-bw;
@@ -118,13 +143,13 @@ xlabel -120 0 5 10 15 20;
 #X obj 184 -202 cnv 15 250 150 empty empty empty 20 12 0 14 -262131
 -66577 0;
 #X obj 465 -187 vsl 10 100 0 127 0 0 \$0-master-lvl-stereo \$0-master-lvl-stereo
-out -4 -8 0 8 -262131 -1 -1 4677 1;
+out -4 -8 0 8 -262131 -1 -1 6100 1;
 #X obj 465 -77 bng 10 250 50 0 \$0-master-lvl-mute empty mute -6 16
 0 8 -262131 -1 -1;
-#X obj 32 -114 hsl 128 15 20 2000 0 0 \$0-cf empty centre_frequency
--2 -6 0 8 -225271 -1 -1 4000 1;
+#X obj 32 -114 hsl 128 15 20 150 0 0 \$0-cf empty centre_frequency
+-2 -6 0 8 -225271 -1 -1 1000 1;
 #X obj 33 -153 hsl 128 15 80 2000 0 0 \$0-fund empty fundamental -2
--6 0 8 -225271 -1 -1 3100 1;
+-6 0 8 -225271 -1 -1 400 1;
 #X text 19 7 Notes:;
 #X text 20 36 In this patch [xtract~ magnitude_spectrum] is first used
 to extract the magnitude spectrum from an audio signal in overlapping
@@ -144,11 +169,11 @@ Mel filters as well as the range of frequencies over which they operate
 \, sensible defaults have been chosen to improve usability;
 #N canvas 0 0 450 300 graph2 0;
 #X array \$0-mfcc 20 float 5;
-#A 0 -173.776 -23.5876 -0.366171 -3.06397 -0.349543 -1.22577 -0.205707
--0.846186 -0.420453 -0.62197 -0.362943 -0.731029 -0.492134 -0.787504
--0.453503 -0.578885 -0.402549 -0.51454 -0.395146 -0.515564;
+#A 0 -241.398 87.462 -6.0369 -7.30858 -8.26749 0.337816 1.44736 0.73507
+-2.33864 -1.38718 -0.545284 -0.269468 -0.985905 -0.89323 -1.33766 -1.09721
+-0.614915 -0.242816 -0.894777 -1.20686;
 #X coords 0 50 19 -100 200 100 1;
 #X restore 212 -178 graph;
 #X text 28 -188 PAF synthesiser;
-#X obj 34 -71 hsl 128 15 1 500 0 0 \$0-bw empty formant_bandwidth -2
--6 0 8 -225271 -1 -1 5300 1;
+#X obj 34 -71 hsl 128 15 1 10 0 0 \$0-bw empty formant_bandwidth -2
+-6 0 8 -225271 -1 -1 4400 1;

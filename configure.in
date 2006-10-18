@@ -205,9 +205,10 @@ AC_OUTPUT(Makefile src/Makefile xtract/Makefile doc/Makefile examples/Makefile e
 
 echo
 echo "**************************************************************"
+echo
 echo "Summary:"
-
-echo you are using the ${host} architecture 
+echo
+dnl echo you are using the ${host} architecture 
 
 if test "$vector" = "true"; then
   echo "Fftw3:                   yes (using fftw3f)"
@@ -215,11 +216,18 @@ else
   echo "Fftw3:                   no (not using fftw3, the vector functions will not work)"
 fi
 if test "$pd_example" = "true"; then
-  echo "PD external:              yes"
+  echo "PD external:             yes"
+  echo 
+  echo "The PD help files will be installed in:" 
+  echo ${prefix}"/lib/doc/5.reference/xtract/" 
+  echo "You must make sure that this is in your PD help path"
 else
   echo "PD external:              no"
 fi
+echo
 echo "**************************************************************"
+echo
 echo Configuration completed successfully. Type \'make\' to build ${PACKAGE}
+echo
 
 
