@@ -1,0 +1,154 @@
+#N canvas 667 28 576 568 10;
+#N canvas 397 309 590 228 guts 0;
+#X obj 318 37 loadbang;
+#X obj 318 64 f \$0;
+#N canvas 0 0 450 300 dacs 0;
+#X obj 164 152 a_output~;
+#X msg 251 100 0;
+#X obj 249 59 r \$0-master-lvl-stereo;
+#X obj 251 81 r \$0-master-lvl-mute;
+#X obj 251 120 s \$0-master-lvl-stereo;
+#X obj 174 110 inlet~;
+#X connect 1 0 0 2;
+#X connect 1 0 4 0;
+#X connect 2 0 0 2;
+#X connect 3 0 1 0;
+#X connect 5 0 0 0;
+#X connect 5 0 0 1;
+#X restore 85 126 pd dacs;
+#N canvas 0 0 450 300 analysis 0;
+#X obj 191 201 xtract~ mfcc;
+#X obj 195 176 xtract~ magnitude_spectrum;
+#X obj 194 153 *~;
+#X obj 219 104 r \$0-window-gen;
+#X obj 190 225 tabsend~ \$0-mfcc;
+#X obj 181 69 inlet~;
+#X obj 299 45 block~ 1024 2 1;
+#X obj 219 125 a_hann 1024;
+#X connect 0 0 4 0;
+#X connect 1 0 0 0;
+#X connect 2 0 1 0;
+#X connect 3 0 7 0;
+#X connect 5 0 2 0;
+#X connect 7 0 2 1;
+#X restore 32 167 pd analysis;
+#X obj 16 24 r \$0-fund;
+#X msg 318 88 \; pd dsp 1 \; \$1-master-lvl-stereo 60 \; \$1-window-gen
+bang \; \$1-mfcc xticks 0 5 5 \; \$1-mfcc yticks 0 50 1 \; \$1-mfcc
+xlabel -120 0 5 10 15 20;
+#N canvas 308 141 679 510 paf 0;
+#X obj 331 95 / 10;
+#X obj 331 120 pack 0 50;
+#X obj 139 412 fexpr~ $x1 * $x2;
+#X obj 241 188 cos~;
+#X obj 241 166 expr~ ($v1 * 0.5) - 0.25;
+#X obj 380 197 *~ 256;
+#X obj 462 209 line~;
+#X obj 462 189 pack 0 50;
+#X obj 289 194 *~;
+#X obj 282 216 +~ 256;
+#X obj 118 328 cos~;
+#X obj 118 305 *~;
+#X obj 161 328 cos~;
+#X obj 161 305 +~;
+#X obj 154 358 -~;
+#X obj 174 390 *~;
+#X obj 136 390 +~;
+#X obj 230 291 wrap~;
+#X obj 199 291 -~;
+#X obj 199 259 samphold~;
+#X obj 331 142 line~;
+#X obj 138 438 outlet~;
+#X obj 462 167 inlet bandwidth;
+#X obj 47 121 phasor~;
+#X obj 48 100 line~;
+#X msg 47 78 \$1 20;
+#X obj 48 57 inlet fund;
+#X obj 331 73 inlet cf;
+#X obj 282 316 tabread4~ \$0-hann;
+#X obj 466 426 table \$0-hann;
+#X connect 0 0 1 0;
+#X connect 1 0 20 0;
+#X connect 2 0 21 0;
+#X connect 3 0 8 0;
+#X connect 4 0 3 0;
+#X connect 5 0 8 1;
+#X connect 6 0 5 0;
+#X connect 7 0 6 0;
+#X connect 8 0 9 0;
+#X connect 9 0 28 0;
+#X connect 10 0 14 1;
+#X connect 10 0 16 0;
+#X connect 11 0 13 0;
+#X connect 11 0 10 0;
+#X connect 12 0 14 0;
+#X connect 13 0 12 0;
+#X connect 14 0 15 0;
+#X connect 15 0 16 1;
+#X connect 16 0 2 0;
+#X connect 17 0 18 1;
+#X connect 17 0 15 1;
+#X connect 18 0 11 1;
+#X connect 19 0 18 0;
+#X connect 19 0 17 0;
+#X connect 20 0 19 0;
+#X connect 22 0 7 0;
+#X connect 23 0 19 1;
+#X connect 23 0 13 1;
+#X connect 23 0 11 0;
+#X connect 23 0 4 0;
+#X connect 24 0 23 0;
+#X connect 25 0 24 0;
+#X connect 26 0 25 0;
+#X connect 27 0 0 0;
+#X connect 28 0 2 1;
+#X restore 35 80 pd paf;
+#X obj 85 25 r \$0-cf;
+#X obj 140 23 r \$0-bw;
+#X connect 0 0 1 0;
+#X connect 1 0 5 0;
+#X connect 4 0 6 0;
+#X connect 6 0 2 0;
+#X connect 6 0 3 0;
+#X connect 7 0 6 1;
+#X connect 8 0 6 2;
+#X restore 516 -222 pd guts;
+#X obj 6 -225 cnv 15 500 200 empty empty MFCC 20 12 0 14 -261681 -66577
+0;
+#X obj 184 -202 cnv 15 250 150 empty empty empty 20 12 0 14 -262131
+-66577 0;
+#X obj 465 -187 vsl 10 100 0 127 0 0 \$0-master-lvl-stereo \$0-master-lvl-stereo
+out -4 -8 0 8 -262131 -1 -1 4677 1;
+#X obj 465 -77 bng 10 250 50 0 \$0-master-lvl-mute empty mute -6 16
+0 8 -262131 -1 -1;
+#X obj 32 -114 hsl 128 15 20 2000 0 0 \$0-cf empty centre_frequency
+-2 -6 0 8 -225271 -1 -1 4000 1;
+#X obj 33 -153 hsl 128 15 80 2000 0 0 \$0-fund empty fundamental -2
+-6 0 8 -225271 -1 -1 3100 1;
+#X text 19 7 Notes:;
+#X text 20 36 In this patch [xtract~ magnitude_spectrum] is first used
+to extract the magnitude spectrum from an audio signal in overlapping
+blocks of 1024 samples.;
+#X text 20 87 [xtract~ mfcc] outputs a series 20 Mel-Frequency Cepstral
+Coefficients. When it is instantiated \, an initialisation function
+creates a bank of 20 mel-spaced filters \, between 80Hz and 1800Hz
+on a linear scale. All filters have the same gain;
+#X text 23 165 Whilst DSP is running the input vector (magnitude spectrum)
+is filtered by this filterbank \, and the total energy output from
+each filter is appended to a new vector. This new vector (mel-filtered
+spectrum) is then subjected to a fast cosine transfor. The output can
+be visualised in the graph labelled \$0-mfcc.;
+#X text 23 255 With LibXtract it is possible to change the number of
+Mel filters as well as the range of frequencies over which they operate
+\, and the filter scaling (equal area/equal gain). With this PD example
+\, sensible defaults have been chosen to improve usability;
+#N canvas 0 0 450 300 graph2 0;
+#X array \$0-mfcc 20 float 5;
+#A 0 -173.776 -23.5876 -0.366171 -3.06397 -0.349543 -1.22577 -0.205707
+-0.846186 -0.420453 -0.62197 -0.362943 -0.731029 -0.492134 -0.787504
+-0.453503 -0.578885 -0.402549 -0.51454 -0.395146 -0.515564;
+#X coords 0 50 19 -100 200 100 1;
+#X restore 212 -178 graph;
+#X text 28 -188 PAF synthesiser;
+#X obj 34 -71 hsl 128 15 1 500 0 0 \$0-bw empty formant_bandwidth -2
+-6 0 8 -225271 -1 -1 5300 1;

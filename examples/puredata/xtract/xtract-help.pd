@@ -1,0 +1,69 @@
+#N canvas 685 60 450 725 10;
+#X text 21 12 [xtract~];
+#X text 24 19 ________;
+#X text 22 52 [xtract~] provides a wrapper for the feature extraction
+library: LibXtract. Please refer to the documentation at libxtract.sourceforge.net
+\, for a full explanation of the library and the functions it provides.
+Only the operation of the PD external will be explained here along
+with a few use case scenarios.;
+#X text 20 148 [xtract~] must always be called with one argument \,
+in the following form: [xtract~ <feature>] \, where <feature> is a
+feature supported by the LibXtract library. A complete list of features
+may be obtained by sending the external a |help( message:;
+#X obj 27 262 xtract~;
+#X msg 27 233 help;
+#X text 26 298 Other than this help message \, the data sent to the
+left inlet should always be a 'signal' (i.e. audio rate). This is the
+data from a which a given feature will be extracted.;
+#X text 27 405 Any additional arguments that need to be passed to the
+feature extraction funtion must be provided as a list to the right
+inlet \, e.g.;
+#X obj 182 490 xtract~ mean;
+#X floatatom 132 586 10 0 0 0 - - -;
+#X floatatom 253 523 5 0 0 0 - - -;
+#X msg 182 522 list \$1;
+#X obj 132 556 xtract~ variance;
+#X obj 181 466 phasor~ 0.1;
+#X text 39 641 Below are some possible use cases (click to open):;
+#X text 26 352 The outlet may be a scalar (control rate) \, or a vector
+(audio rate) \, depending on the nature of the feature that is being
+extracted.;
+#X obj 44 674 cnv 15 82 22 empty empty empty 20 12 0 14 -99865 -66577
+0;
+#X obj 47 675 bng 15 250 50 0 f0-open empty empty 0 -6 0 8 -262144
+-1 -1;
+#X obj 64 675 bng 15 250 50 0 f0-open empty empty 0 -6 0 8 -262144
+-1 -1;
+#X obj 79 675 bng 15 250 50 0 f0-open empty empty 0 -6 0 8 -262144
+-1 -1;
+#X obj 96 675 bng 15 250 50 0 f0-open empty empty 0 -6 0 8 -262144
+-1 -1;
+#X obj 42 672 cnv 15 80 20 f0-open empty f0 20 12 0 14 -195568 -66577
+0;
+#N canvas 0 0 450 300 hidden 0;
+#X msg 27 133 \; pd open f0.pd ./ \;;
+#X obj 27 110 r f0-open;
+#X obj 26 42 r mfcc-open;
+#X msg 26 65 \; pd open mfcc.pd ./ \;;
+#X connect 1 0 0 0;
+#X connect 2 0 3 0;
+#X restore 379 736 pd hidden;
+#X obj 136 675 cnv 15 82 22 empty empty empty 20 12 0 14 -99865 -66577
+0;
+#X obj 140 678 bng 15 250 50 0 mfcc-open empty empty 0 -6 0 8 -262144
+-1 -1;
+#X obj 155 678 bng 15 250 50 0 mfcc-open empty empty 0 -6 0 8 -262144
+-1 -1;
+#X obj 170 678 bng 15 250 50 0 mfcc-open empty empty 0 -6 0 8 -262144
+-1 -1;
+#X obj 185 678 bng 15 250 50 0 mfcc-open empty empty 0 -6 0 8 -262144
+-1 -1;
+#X obj 134 673 cnv 15 80 20 f0-open empty MFCC 20 12 0 14 -195568 -66577
+0;
+#X connect 5 0 4 0;
+#X connect 8 0 10 0;
+#X connect 8 0 11 0;
+#X connect 11 0 12 1;
+#X connect 12 0 9 0;
+#X connect 13 0 8 0;
+#X connect 13 0 12 0;

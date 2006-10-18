@@ -27,7 +27,9 @@ AM_LDFLAGS = @PD_LDFLAGS@ -lxtract -L$(top_builddir)/src/
 ## Install the documentation.
 
 install:
-	-mv $(top_builddir)/examples/puredata/.libs/xtract.@PD_SUFFIX@ $(pdinstalldir)/xtract~.@PD_SUFFIX@
+	install -m 644 $(top_builddir)/examples/puredata/.libs/xtract.@PD_SUFFIX@ $(pdinstalldir)/xtract~.@PD_SUFFIX@
+	install -d $(pddir)/doc/5.reference/xtract
+	cp xtract/* $(PDDIR)/doc/5.reference/xtract
 
 #pdinstallref_DATA = \
 #	help/aubioonset-help.pd \

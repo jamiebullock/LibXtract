@@ -1,0 +1,21 @@
+#N canvas 0 0 450 300 10;
+#X obj 153 112 inlet~;
+#X obj 152 229 outlet~;
+#X obj 153 186 expr~ $v1 * $v2;
+#X obj 252 162 line~;
+#X msg 258 121 1 20;
+#X msg 299 121 0 20;
+#X obj 255 14 inlet;
+#X obj 255 36 > 0;
+#X obj 255 63 select 1 0;
+#X text 49 261 Audio spigot. Same behaviour as spigot but for audio
+;
+#X connect 0 0 2 0;
+#X connect 2 0 1 0;
+#X connect 3 0 2 1;
+#X connect 4 0 3 0;
+#X connect 5 0 3 0;
+#X connect 6 0 7 0;
+#X connect 7 0 8 0;
+#X connect 8 0 4 0;
+#X connect 8 1 5 0;
