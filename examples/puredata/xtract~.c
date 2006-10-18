@@ -124,7 +124,7 @@ static void *xtract_new(t_symbol *me, t_int argc, t_atom *argv) {
     else if(tmp == gensym("slope")) x->feature = SLOPE;
     else if(tmp == gensym("f0")){
 			x->feature = F0;
-			x->argv = getbytes(sizeof(t_float));
+			x->argv = getbytes(3 * sizeof(t_float));
 	}
     else if(tmp == gensym("hps"))x->feature = HPS;
     else if(tmp == gensym("lowest_match")){
@@ -181,8 +181,6 @@ static void *xtract_new(t_symbol *me, t_int argc, t_atom *argv) {
         x->feature_type = DELTA;
        
     else x->feature_type = SCALAR;
-    
-    post("Type: %d", x->feature);
 
     /* argv through right inlet */
     inlet_new(&x->x_obj, &x->x_obj.ob_pd, gensym("list"), gensym("list"));
@@ -212,6 +210,19 @@ t_int argc, t_atom *argv) {
  /*   }*/
 }
 
+static void xtract_tilde_show_help(t_xtract_tilde *x, t_symbol *s){
+    
+    int i;
+
+    i = XTRACT_FEATURES;
+
+    post("\n\txtract~: Feature List\n");
+    
+    while(i--){
+	post("\t%s", xtract_help_strings[i]+7);
+    }
+}
+
 static void xtract_tilde_free(t_xtract_tilde *x) {
     /*FIX */
     if(x->argv != NULL)
@@ -227,9 +238,11 @@ void xtract_tilde_setup(void) {
     A_GIMME, 0);
 
     class_addmethod(xtract_class,
-    (t_method)xtract_dsp, gensym("dsp"), 0);
+	    (t_method)xtract_dsp, gensym("dsp"), 0);
     class_addmethod(xtract_class,
-    (t_method)xtract_tilde_get_args, gensym("list"), A_GIMME, 0);
+	    (t_method)xtract_tilde_get_args, gensym("list"), A_GIMME, 0);
+    class_addmethod(xtract_class,
+	    (t_method)xtract_tilde_show_help, gensym("help"), A_DEFSYMBOL, 0);
     CLASS_MAINSIGNALIN(xtract_class, t_xtract_tilde, f);
     class_sethelpsymbol(xtract_class, gensym("help-flib"));
 }

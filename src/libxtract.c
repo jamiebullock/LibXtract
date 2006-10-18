@@ -18,6 +18,7 @@
  * USA.
  */
 
+
 #include "xtract/libxtract.h"
 #define XTRACT
 
@@ -70,3 +71,48 @@ int(*xtract[])(float *, int, void *, float *) = {
     xtract_delta_feature
 };
 
+char *xtract_help_strings[] = {
+   "xtract_mean",
+   "xtract_variance",
+   "xtract_standard_deviation",
+   "xtract_average_deviation",
+   "xtract_skewness",
+   "xtract_kurtosis",
+   "xtract_centroid",
+   "xtract_irregularity_k",
+   "xtract_irregularity_j",
+   "xtract_tristimulus_1",
+   "xtract_tristimulus_2",
+   "xtract_tristimulus_3",
+   "xtract_smoothness",
+   "xtract_spread",
+   "xtract_zcr",
+   "xtract_rolloff",
+   "xtract_loudness",
+   "xtract_flatness",
+   "xtract_tonality",
+   "xtract_crest",
+   "xtract_noisiness",
+   "xtract_rms_amplitude",
+   "xtract_inharmonicity",
+   "xtract_power",
+   "xtract_odd_even_ratio",
+   "xtract_sharpness",
+   "xtract_slope",
+   "xtract_lowest_match",
+   "xtract_hps",
+   "xtract_f0",
+   "xtract_magnitude_spectrum",
+   "xtract_autocorrelation",
+   "xtract_autocorrelation_fft",
+   "xtract_amdf",
+   "xtract_asdf",
+   "xtract_mfcc",
+   "xtract_dct",
+   "xtract_bark_coefficients",
+   "xtract_peaks",
+   "xtract_flux",
+   "xtract_attack_time",
+   "xtract_decay_time",
+   "xtract_delta_feature"
+};

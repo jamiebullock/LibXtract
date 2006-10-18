@@ -1,5 +1,4 @@
 Improve noise robustness of xtract_f0
-Add help facilities
 Add feature advertisement
 Fix xtract_hps - it doesn't work!
 Add Pure Data help file

@@ -1,9 +1,15 @@
-2006-09-10 Jamie Bullock <jamie@postlude.co.uk>
-    * Released version 0.1.1
-	
-2006-09-10 Jamie Bullock <jamie@postlude.co.uk>
+2006-18-10 Jamie Bullock <jamie@postlude.co.uk>
+    * version 0.2.0
+	* added PD help files
+	* added simple help system
+
+2006-12-10 Jamie Bullock <jamie@postlude.co.uk>
     * version 0.1.2
 	* improved xtract_f0
 	* changed versioning scheme
+
+2006-09-10 Jamie Bullock <jamie@postlude.co.uk>
+    * Released version 0.11
+	
 
 		

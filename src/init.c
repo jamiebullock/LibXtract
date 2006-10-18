@@ -22,7 +22,7 @@
 
 #include "xtract/libxtract.h"
 #include <math.h>
-#include <string.h>
+#include <stdlib.h>
 
 int xtract_init_mfcc(int N, float nyquist, int style, float freq_max, float freq_min, int freq_bands, float **fft_tables){
 
