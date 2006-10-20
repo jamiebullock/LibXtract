@@ -21,10 +21,6 @@ AC_PATH_PROG(PKG_CONFIG, pkg-config, no)
 AC_ENABLE_STATIC(no)
 AC_ENABLE_SHARED(yes)
 AC_PROG_LIBTOOL
-#AC_ARG_WITH(fftw, AC_HELP_STRING([--with-vector], [build vector features]),
-#            [ if test $withval = "yes"; then with_vector=yes ;
-#                           else with_vector=no ; fi ], with_vector=no)
-
 AC_CHECK_HEADERS([math.h, stdlib.h, stdio.h])
 AC_CHECK_PROG([DOXYGEN], [doxygen], [doc], [])
 AC_SUBST(DOXYGEN)
@@ -44,6 +40,14 @@ AC_ARG_ENABLE(pd_example,
                no)  pd_example=false ;;
                *) AC_MSG_ERROR(bad value ${enableval} for --enable-pd_external) ;;
            esac],[pd_example=false])
+	   
+AC_ARG_ENABLE(simpletest, 
+              [  --enable-simpletest    Compile the 'simpletest' example],
+              [case "${enableval}" in
+               yes) simpletest=true ;;
+               no)  simpletest=false ;;
+               *) AC_MSG_ERROR(bad value ${enableval} for --enable-simpletest) ;;
+           esac],[simpletest=false])
 
 # libtool version: current:revision:age
 #
@@ -61,7 +65,7 @@ AC_ARG_ENABLE(pd_example,
 XTRACT_SO_VERSION=0:0:0
 
 CFLAGS="$CFLAGS -pedantic -ansi -O3"
-LDFLAGS="$LDFLAGS -lm"
+LDFLAGS="$LDFLAGS -lm --allow-shlib-undefined"
 
 AC_ARG_WITH(pd_dir,
     [  --with-pd-dir=path   pd header path (default=/usr/local/include) ],
@@ -82,7 +86,6 @@ AC_ARG_WITH(fftw3_dir,
     ])
 
 dnl Are we building with fftw?
-#if [[ "$with_vector" = "yes" ]] ; then
 if [[ "$vector" = "true" ]] ; then
     LDFLAGS="$LDFLAGS -lfftw3f"
     AC_DEFINE([BUILD_VECTOR], [1], [Build the vector functions])
@@ -95,8 +98,16 @@ if [[ "$vector" = "true" ]] ; then
     ])
 fi
 
-
 AM_CONDITIONAL(BUILD_VECTOR, test "x${vector}" = 'xtrue')
+
+
+dnl are we building the simpletest example
+if [[ "$simpletest" = "true" ]] ; then
+    AC_DEFINE([BUILD_SIMPLETEST], [1], [Build the simpletest example])
+fi
+
+AM_CONDITIONAL(BUILD_SIMPLETEST, test "x${simpletest}" = 'xtrue')
+
 
 dnl Are we building the PD examples?
 if [[ "$pd_example" = "true" ]] ; then
@@ -201,7 +212,7 @@ AC_SUBST(PD_SOURCES)
 AC_CONFIG_FILES([doc/documentation.doxygen
 				libxtract.pc])
 
-AC_OUTPUT(Makefile src/Makefile xtract/Makefile doc/Makefile examples/Makefile examples/puredata/Makefile)
+AC_OUTPUT(Makefile src/Makefile xtract/Makefile doc/Makefile examples/Makefile examples/puredata/Makefile examples/simpletest/Makefile)
 
 echo
 echo "**************************************************************"
@@ -213,7 +224,12 @@ dnl echo you are using the ${host} architecture
 if test "$vector" = "true"; then
   echo "Fftw3:                   yes (using fftw3f)"
 else
-  echo "Fftw3:                   no (not using fftw3, the vector functions will not work)"
+  echo "Fftw3:                   no (not using fftw3, no vector functions)"
+fi
+if test "$simpletest" = "true"; then
+  echo "simpletest example:	yes"
+else
+  echo "simpletest example:     no"
 fi
 if test "$pd_example" = "true"; then
   echo "PD external:             yes"
@@ -222,8 +238,9 @@ if test "$pd_example" = "true"; then
   echo ${prefix}"/lib/doc/5.reference/xtract/" 
   echo "You must make sure that this is in your PD help path"
 else
-  echo "PD external:              no"
+  echo "PD external:             no"
 fi
+
 echo
 echo "**************************************************************"
 echo

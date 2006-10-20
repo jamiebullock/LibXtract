@@ -3,6 +3,9 @@
 /* Build the pd example */
 #undef BUILD_PD_EXAMPLE
 
+/* Build the simpletest example */
+#undef BUILD_SIMPLETEST
+
 /* Build the vector functions */
 #undef BUILD_VECTOR
 

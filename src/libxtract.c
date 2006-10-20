@@ -55,6 +55,7 @@ int(*xtract[])(float *, int, void *, float *) = {
     xtract_hps,
     xtract_f0,
     /* xtract_vector.h */
+#ifdef VECTORFUNCS
     xtract_magnitude_spectrum,
     xtract_autocorrelation,
     xtract_autocorrelation_fft,
@@ -64,6 +65,7 @@ int(*xtract[])(float *, int, void *, float *) = {
     xtract_dct,
     xtract_bark_coefficients,
     xtract_peaks,
+#endif
     /* xtract_delta.h */
     xtract_flux,
     xtract_attack_time,

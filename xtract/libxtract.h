@@ -67,7 +67,7 @@ enum features_ {
     AVERAGE_DEVIATION,
     SKEWNESS,
     KURTOSIS,
-	CENTROID,
+    CENTROID,
     IRREGULARITY_K,
     IRREGULARITY_J,
     TRISTIMULUS_1,
@@ -125,7 +125,7 @@ enum return_codes_ {
     MALLOC_FAILED,
     BAD_ARGV,
     BAD_VECTOR_SIZE,
-	NO_RESULT
+    NO_RESULT
 };
 
 /**

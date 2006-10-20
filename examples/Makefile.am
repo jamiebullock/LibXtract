@@ -1,4 +1,9 @@
 if BUILD_PD_EXAMPLE 
-SUBDIRS = puredata
+PUREDATA_DIR = puredata
 endif
 
+if BUILD_SIMPLETEST
+SIMPLETEST_DIR = simpletest
+endif
+
+SUBDIRS = $(PUREDATA_DIR) $(SIMPLETEST_DIR)
