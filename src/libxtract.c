@@ -54,23 +54,21 @@ int(*xtract[])(float *, int, void *, float *) = {
     xtract_lowest_match,
     xtract_hps,
     xtract_f0,
-    /* xtract_vector.h */
-#ifdef VECTORFUNCS
-    xtract_magnitude_spectrum,
-    xtract_autocorrelation,
-    xtract_autocorrelation_fft,
-    xtract_amdf,
-    xtract_asdf,
-    xtract_mfcc,
-    xtract_dct,
-    xtract_bark_coefficients,
-    xtract_peaks,
-#endif
-    /* xtract_delta.h */
+/* xtract_delta.h */
     xtract_flux,
     xtract_attack_time,
     xtract_decay_time,
-    xtract_delta_feature
+    xtract_delta_feature,
+/* xtract_vector.h */
+    xtract_autocorrelation,
+    xtract_amdf,
+    xtract_asdf,
+    xtract_bark_coefficients,
+    xtract_peaks,
+    xtract_magnitude_spectrum,
+    xtract_autocorrelation_fft,
+    xtract_mfcc,
+    xtract_dct
 };
 
 char *xtract_help_strings[] = {
@@ -104,17 +102,17 @@ char *xtract_help_strings[] = {
    "xtract_lowest_match",
    "xtract_hps",
    "xtract_f0",
-   "xtract_magnitude_spectrum",
-   "xtract_autocorrelation",
-   "xtract_autocorrelation_fft",
-   "xtract_amdf",
-   "xtract_asdf",
-   "xtract_mfcc",
-   "xtract_dct",
-   "xtract_bark_coefficients",
-   "xtract_peaks",
    "xtract_flux",
    "xtract_attack_time",
    "xtract_decay_time",
    "xtract_delta_feature"
-};
+   "xtract_autocorrelation",
+   "xtract_amdf",
+   "xtract_asdf",
+   "xtract_bark_coefficients",
+   "xtract_peaks",
+   "xtract_magnitude_spectrum",
+   "xtract_autocorrelation_fft",
+   "xtract_mfcc",
+   "xtract_dct",
+   };

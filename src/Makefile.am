@@ -1,17 +1,15 @@
 
 
 
-SOURCES = libxtract.c scalar.c delta.c init.c
+SOURCES = libxtract.c scalar.c vector.c delta.c init.c
 
-if BUILD_VECTOR
-VECTOR  = vector.c
-VECTOR_DEFINE = -DVECTORFUNCS
+if BUILD_FFT
+FFT_DEFINE = -DXTRACT_FFT
 else
-VECTOR =
-VECTOR_DEFINE = 
+FFT_DEFINE = 
 endif
 
 lib_LTLIBRARIES = libxtract.la
-libxtract_la_CFLAGS = $(VECTOR_DEFINE)
-libxtract_la_SOURCES = $(SOURCES) $(VECTOR)
+libxtract_la_CFLAGS = $(FFT_DEFINE)
+libxtract_la_SOURCES = $(SOURCES)
 libxtract_la_LDFLAGS = -shared 

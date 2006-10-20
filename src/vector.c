@@ -23,6 +23,9 @@
 
 #include "xtract/libxtract.h"
 #include <math.h>
+
+#ifdef XTRACT_FFT
+
 #include <fftw3.h>
 
 int xtract_magnitude_spectrum(float *data, int N, void *argv, float *result){
@@ -50,23 +53,6 @@ int xtract_magnitude_spectrum(float *data, int N, void *argv, float *result){
     
 }
 
-int xtract_autocorrelation(float *data, int N, void *argv, float *result){
-
-    /* Naive time domain implementation  */
-    
-    int n = N, i;
-    
-    float corr;
-
-    while(n--){
-       corr = 0;
-        for(i = 0; i < N - n; i++){
-            corr += data[i] * data[i + n];
-        }
-        result[n] = corr / N;
-    }
-}
-
 int xtract_autocorrelation_fft(float *data, int N, void *argv, float *result){
     
     float *temp;
@@ -83,39 +69,6 @@ int xtract_autocorrelation_fft(float *data, int N, void *argv, float *result){
     
     fftwf_destroy_plan(plan);
     fftwf_free(temp);
-}
-
-int xtract_amdf(float *data, int N, void *argv, float *result){
-
-    int n = N, i;
-    
-    float md, temp;
-
-    while(n--){
-       md = 0;
-        for(i = 0; i < N - n; i++){
-            temp = data[i] - data[i + n];
-			temp = (temp < 0 ? -temp : temp);
-			md += temp;
-        }
-        result[n] = md / N;
-    }
-}
-
-int xtract_asdf(float *data, int N, void *argv, float *result){
-    
-    int n = N, i;
-    
-    float sd;
-
-    while(n--){
-       sd = 0;
-        for(i = 0; i < N - n; i++){
-            /*sd = 1;*/
-            sd += SQ(data[i] - data[i + n]);
-        }
-        result[n] = sd / N;
-    }
 }
 
 int xtract_mfcc(float *data, int N, void *argv, float *result){
@@ -149,6 +102,84 @@ int xtract_dct(float *data, int N, void *argv, float *result){
     
     fftwf_execute(plan);
     fftwf_destroy_plan(plan);
+}
+
+#else
+
+int xtract_magnitude_spectrum(float *data, int N, void *argv, float *result){
+
+    NOT_IMPLEMENTED;
+
+}
+
+int xtract_autocorrelation_fft(float *data, int N, void *argv, float *result){
+
+    NOT_IMPLEMENTED;
+
+}
+
+int xtract_mfcc(float *data, int N, void *argv, float *result){
+
+    NOT_IMPLEMENTED;
+
+}
+
+int xtract_dct(float *data, int N, void *argv, float *result){
+
+    NOT_IMPLEMENTED;
+
+}
+
+#endif
+
+int xtract_autocorrelation(float *data, int N, void *argv, float *result){
+
+    /* Naive time domain implementation  */
+    
+    int n = N, i;
+    
+    float corr;
+
+    while(n--){
+       corr = 0;
+        for(i = 0; i < N - n; i++){
+            corr += data[i] * data[i + n];
+        }
+        result[n] = corr / N;
+    }
+}
+
+int xtract_amdf(float *data, int N, void *argv, float *result){
+
+    int n = N, i;
+    
+    float md, temp;
+
+    while(n--){
+       md = 0;
+        for(i = 0; i < N - n; i++){
+            temp = data[i] - data[i + n];
+			temp = (temp < 0 ? -temp : temp);
+			md += temp;
+        }
+        result[n] = md / N;
+    }
+}
+
+int xtract_asdf(float *data, int N, void *argv, float *result){
+    
+    int n = N, i;
+    
+    float sd;
+
+    while(n--){
+       sd = 0;
+        for(i = 0; i < N - n; i++){
+            /*sd = 1;*/
+            sd += SQ(data[i] - data[i + n]);
+        }
+        result[n] = sd / N;
+    }
 }
 
 int xtract_bark_coefficients(float *data, int N, void *argv, float *result){

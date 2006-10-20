@@ -53,7 +53,8 @@ extern "C" {
   * @{
   */
 
-#define XTRACT_FEATURES 43
+#define XTRACT_FEATURES 42
+    
 #define LOG_LIMIT 10e-10
 #define VERY_BIG_NUMBER 2e10
 #define SR_LIMIT 192000
@@ -91,19 +92,19 @@ enum features_ {
     LOWEST_MATCH,
     HPS,
     F0,
-    MAGNITUDE_SPECTRUM,
-    AUTOCORRELATION,
-    AUTOCORRELATION_FFT,
-    AMDF,
-    ASDF,
-    MFCC,
-    DCT,
-    BARK_COEFFICIENTS,
-    PEAKS,
     FLUX,
     ATTACK_TIME,
     DECAY_TIME,
-    DELTA_FEATURE
+    DELTA_FEATURE,
+    AUTOCORRELATION,
+    AMDF,
+    ASDF,
+    BARK_COEFFICIENTS,
+    PEAKS,
+    MAGNITUDE_SPECTRUM,
+    AUTOCORRELATION_FFT,
+    MFCC,
+    DCT
 };
 
 /** \brief Enumeration of feature types */

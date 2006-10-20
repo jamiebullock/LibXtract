@@ -25,13 +25,13 @@ AC_CHECK_HEADERS([math.h, stdlib.h, stdio.h])
 AC_CHECK_PROG([DOXYGEN], [doxygen], [doc], [])
 AC_SUBST(DOXYGEN)
 
-AC_ARG_ENABLE(vector, 
-              [  --enable-vector    Turn fft-based vector processing on],
+AC_ARG_ENABLE(fft, 
+              [  --enable-fft    Turn fft-based fft processing on],
               [case "${enableval}" in
-               yes) vector=true ;;
-               no)  vector=false ;;
-               *) AC_MSG_ERROR(bad value ${enableval} for --enable-vector) ;;
-           esac],[vector=false])
+               yes) fft=true ;;
+               no)  fft=false ;;
+               *) AC_MSG_ERROR(bad value ${enableval} for --enable-fft) ;;
+           esac],[fft=false])
 
 AC_ARG_ENABLE(pd_example, 
               [  --enable-pd_example    Compile the Pure Data external example],
@@ -86,9 +86,9 @@ AC_ARG_WITH(fftw3_dir,
     ])
 
 dnl Are we building with fftw?
-if [[ "$vector" = "true" ]] ; then
+if [[ "$fft" = "true" ]] ; then
     LDFLAGS="$LDFLAGS -lfftw3f"
-    AC_DEFINE([BUILD_VECTOR], [1], [Build the vector functions])
+    AC_DEFINE([BUILD_FFT], [1], [Build the fft functions])
     AC_CHECK_HEADER(fftw3.h, [have_fftw3_hdr=yes ], [
     have_pd_hdr=no
     echo
@@ -98,7 +98,7 @@ if [[ "$vector" = "true" ]] ; then
     ])
 fi
 
-AM_CONDITIONAL(BUILD_VECTOR, test "x${vector}" = 'xtrue')
+AM_CONDITIONAL(BUILD_FFT, test "x${fft}" = 'xtrue')
 
 
 dnl are we building the simpletest example
@@ -221,10 +221,10 @@ echo "Summary:"
 echo
 dnl echo you are using the ${host} architecture 
 
-if test "$vector" = "true"; then
-  echo "Fftw3:                   yes (using fftw3f)"
+if test "$fft" = "true"; then
+  echo "fft:                   yes (using fftw3f)"
 else
-  echo "Fftw3:                   no (not using fftw3, no vector functions)"
+  echo "fft:                   no (not using fftw3, no fft functions)"
 fi
 if test "$simpletest" = "true"; then
   echo "simpletest example:	yes"

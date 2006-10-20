@@ -1,13 +1,13 @@
 /* config.h.in.  Generated from configure.in by autoheader.  */
 
+/* Build the fft functions */
+#undef BUILD_FFT
+
 /* Build the pd example */
 #undef BUILD_PD_EXAMPLE
 
 /* Build the simpletest example */
 #undef BUILD_SIMPLETEST
-
-/* Build the vector functions */
-#undef BUILD_VECTOR
 
 /* Define to enable debug */
 #undef DEBUG
