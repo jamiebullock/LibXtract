@@ -12,4 +12,4 @@ endif
 lib_LTLIBRARIES = libxtract.la
 libxtract_la_CFLAGS = $(FFT_DEFINE)
 libxtract_la_SOURCES = $(SOURCES)
-libxtract_la_LDFLAGS = -shared 
+libxtract_la_LDFLAGS = -export-dynamic

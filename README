@@ -26,14 +26,15 @@ Installation
 
 Type:
 
-./configure --enable-pd_example --enable-vector
+./configure --enable-pd_example --enable-fft
 make
 sudo make install
 
 There following configure flags are optional:
 
 --enable-pd_example (to build the PD example)
---enable-vector (to enable functions that require fftw3)
+--enable-fft (to enable functions that require fftw3)
+--enable-simpletest (to build the simpletest example)
 
 Disclaimer
 ----------

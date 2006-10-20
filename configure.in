@@ -64,8 +64,8 @@ AC_ARG_ENABLE(simpletest,
 # age to 0.
 XTRACT_SO_VERSION=0:0:0
 
-CFLAGS="$CFLAGS -pedantic -ansi -O3"
-LDFLAGS="$LDFLAGS -lm --allow-shlib-undefined"
+CFLAGS="$CFLAGS -pedantic -ansi"
+LDFLAGS="$LDFLAGS -lm"
 
 AC_ARG_WITH(pd_dir,
     [  --with-pd-dir=path   pd header path (default=/usr/local/include) ],
@@ -184,7 +184,7 @@ else
         ;;
         *86-*-darwin*)
                 PD_CFLAGS="$PD_CFLAGS -DUNIX -Wall -Wimplicit -Wunused -Wmissing-prototypes"
-        PD_LDFLAGS="$PD_LDFLAGS -bundle -arch i686 -undefined suppress -flat_namespace"
+        PD_LDFLAGS="$PD_LDFLAGS -dynamiclib -mmacosx-version-min=10.3 -undefined dynamic_lookup -single_module"
         PD_SUFFIX=pd_darwin
 	;;
 	*-*-darwin*)
