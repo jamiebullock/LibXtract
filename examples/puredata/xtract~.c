@@ -244,5 +244,5 @@ void xtract_tilde_setup(void) {
     class_addmethod(xtract_class,
 	    (t_method)xtract_tilde_show_help, gensym("help"), A_DEFSYMBOL, 0);
     CLASS_MAINSIGNALIN(xtract_class, t_xtract_tilde, f);
-    class_sethelpsymbol(xtract_class, gensym("help-flib"));
+    class_sethelpsymbol(xtract_class, gensym("help-xtract"));
 }
