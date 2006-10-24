@@ -24,7 +24,7 @@ int main() {
 
     float mean = 0, vector[] = {1, 2, 3};
     
-    xtract[MEAN]((void *)&vector, 6, NULL, (void *)&mean);
+    xtract[MEAN]((void *)&vector, 3, NULL, (void *)&mean);
 
     printf("\nThe mean of [1, 2, 3] = %.1f\n\n", mean);
 	
