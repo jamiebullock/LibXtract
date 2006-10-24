@@ -105,7 +105,7 @@ char *xtract_help_strings[] = {
    "xtract_flux",
    "xtract_attack_time",
    "xtract_decay_time",
-   "xtract_delta_feature"
+   "xtract_delta_feature",
    "xtract_autocorrelation",
    "xtract_amdf",
    "xtract_asdf",
@@ -114,5 +114,5 @@ char *xtract_help_strings[] = {
    "xtract_magnitude_spectrum",
    "xtract_autocorrelation_fft",
    "xtract_mfcc",
-   "xtract_dct",
+   "xtract_dct"
    };

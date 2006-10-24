@@ -108,25 +108,25 @@ int xtract_dct(float *data, int N, void *argv, float *result){
 
 int xtract_magnitude_spectrum(float *data, int N, void *argv, float *result){
 
-    NOT_IMPLEMENTED;
+    NEEDS_FFTW;
 
 }
 
 int xtract_autocorrelation_fft(float *data, int N, void *argv, float *result){
 
-    NOT_IMPLEMENTED;
+    NEEDS_FFTW;
 
 }
 
 int xtract_mfcc(float *data, int N, void *argv, float *result){
 
-    NOT_IMPLEMENTED;
+    NEEDS_FFTW;
 
 }
 
 int xtract_dct(float *data, int N, void *argv, float *result){
 
-    NOT_IMPLEMENTED;
+    NEEDS_FFTW;
 
 }
 

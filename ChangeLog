@@ -1,14 +1,19 @@
-2006-18-10 Jamie Bullock <jamie@postlude.co.uk>
+2006-10-24 Jamie Bullock <jamie@postlude.co.uk>
+    * version 0.2.1
+	* Fixed _xtract and _xtract_help_strings memory alloc bug
+	* Added new macro
+	_
+2006-10-18 Jamie Bullock <jamie@postlude.co.uk>
     * version 0.2.0
 	* added PD help files
 	* added simple help system
 
-2006-12-10 Jamie Bullock <jamie@postlude.co.uk>
+2006-10-12 Jamie Bullock <jamie@postlude.co.uk>
     * version 0.1.2
 	* improved xtract_f0
 	* changed versioning scheme
 
-2006-09-10 Jamie Bullock <jamie@postlude.co.uk>
+2006-10-09 Jamie Bullock <jamie@postlude.co.uk>
     * Released version 0.11
 	
 

@@ -53,7 +53,7 @@ extern "C" {
   * @{
   */
 
-#define XTRACT_FEATURES 42
+#define XTRACT_FEATURES 43
     
 #define LOG_LIMIT 10e-10
 #define VERY_BIG_NUMBER 2e10
