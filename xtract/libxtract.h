@@ -176,14 +176,14 @@ printf("Mean = %.2f\n", mean);
  * 
  */
 #ifdef XTRACT
-int(*xtract[XTRACT_FEATURES])(float *data, int N, void *argv, float *result);
+extern int(*xtract[XTRACT_FEATURES])(float *data, int N, void *argv, float *result);
 
 
 /** \brief An array of pointers to function help strings
  *
  * Defined in libxtract.c. As a minimum this will contain pointers to the names of all of the feature extraction functions in the library. This is intended as a 'quick reference' to be queried as necessary.
  */
-char *xtract_help_strings[XTRACT_FEATURES];
+extern char *xtract_help_strings[XTRACT_FEATURES];
 #endif
 
 /** \brief A structure to store a set of n_filters Mel filters */

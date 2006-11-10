@@ -1,3 +1,7 @@
+2006-11-10 Jamie Bullock <jamie@postlude.co.uk>
+    * version 0.2.2
+	* Fixed 'bus error' crash on Mac OS X by adding 'extern' declarations
+	to xtract and xtract_help_strings	
 2006-10-24 Jamie Bullock <jamie@postlude.co.uk>
     * version 0.2.1
 	* Fixed _xtract and _xtract_help_strings memory alloc bug
