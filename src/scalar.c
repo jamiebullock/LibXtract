@@ -87,9 +87,9 @@ int xtract_kurtosis(float *data, int N, void *argv,  float *result){
 
 int xtract_centroid(float *data, int N, void *argv,  float *result){
 
-    int n = N;
+    int n = (N >> 1);
 
-    float *freqs, *amps, FA, A;
+    float *freqs, *amps, FA = 0.f, A = 0.f;
 
     freqs = data;
     amps = data + (N  >>  1);
@@ -106,7 +106,7 @@ int xtract_centroid(float *data, int N, void *argv,  float *result){
 int xtract_irregularity_k(float *data, int N, void *argv, float *result){
 
     int n,
-	M = M - 1;
+	M = N - 1;
 
     for(n = 1; n < M; n++)
 	*result += abs(data[n] - (data[n-1] + data[n] + data[n+1]) / 3);
@@ -117,7 +117,7 @@ int xtract_irregularity_j(float *data, int N, void *argv, float *result){
 
     int n = N;
 
-    float num, den;
+    float num = 0.f, den = 0.f;
 
     while(n--){
 	num += data[n] - data[n+1];
@@ -132,7 +132,7 @@ int xtract_tristimulus_1(float *data, int N, void *argv, float *result){
 
     int n = N;
 
-    float den;
+    float den = 0.f;
 
     while(n--)
 	den += data[n];
@@ -145,7 +145,7 @@ int xtract_tristimulus_2(float *data, int N, void *argv, float *result){
 
     int n = N;
 
-    float den;
+    float den = 0.f;
 
     while(n--)
 	den += data[n];
@@ -158,7 +158,7 @@ int xtract_tristimulus_3(float *data, int N, void *argv, float *result){
 
     int n = N;
 
-    float den, num;
+    float den = 0.f, num = 0.f;
 
     while(n--)
 	den += data[n];
@@ -187,7 +187,7 @@ int xtract_spread(float *data, int N, void *argv, float *result){
 
     int n = N;
 
-    float num, den, tmp;
+    float num = 0.f, den = 0.f, tmp;
 
     while(n--){
 	tmp = n - *(float *)argv;
@@ -213,7 +213,7 @@ int xtract_zcr(float *data, int N, void *argv, float *result){
 int xtract_rolloff(float *data, int N, void *argv, float *result){
 
     int n = N;
-    float pivot, temp;
+    float pivot = 0.f, temp = 0.f;
 
     while(n--) pivot += data[n];   
 
@@ -240,7 +240,7 @@ int xtract_flatness(float *data, int N, void *argv, float *result){
 
     int n = N;
 
-    float num, den;
+    float num = 0.f, den = 0.f;
 
     while(n--){
 	if(data[n] !=0){
@@ -293,7 +293,7 @@ int xtract_rms_amplitude(float *data, int N, void *argv, float *result){
 int xtract_inharmonicity(float *data, int N, void *argv, float *result){
 
     int n = N;
-    float num, den,
+    float num = 0.f, den = 0.f,
 	  *fund, *freq;
 
     fund = *(float **)argv;
@@ -319,7 +319,7 @@ int xtract_odd_even_ratio(float *data, int N, void *argv, float *result){
 
     int n = N >> 1, j, k;
 
-    float num, den;
+    float num = 0.f, den = 0.f;
 
     while(n--){
 	j = n * 2;
