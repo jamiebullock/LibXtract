@@ -112,7 +112,7 @@ int xtract_init_mfcc(int N, float nyquist, int style, float freq_max, float freq
 
 int xtract_init_bark(int N, float nyquist, int *band_limits){
 
-    float  bark_freq_max, bark_freq_min, freq_bw_bark, temp, edges[] = {0, 100, 200, 300, 400, 510, 630, 770, 920, 1080, 1270, 1480, 1720, 2000, 2320, 2700, 3150, 3700, 4400, 5300, 6400, 7700, 9500, 12000, 15500, 20500, 27000}; /* Takes us up to sr = 54kHz (CCRMA: JOS)*/
+    float  edges[] = {0, 100, 200, 300, 400, 510, 630, 770, 920, 1080, 1270, 1480, 1720, 2000, 2320, 2700, 3150, 3700, 4400, 5300, 6400, 7700, 9500, 12000, 15500, 20500, 27000}; /* Takes us up to sr = 54kHz (CCRMA: JOS)*/
 
     int M, bands = BARK_BANDS;
     
@@ -121,4 +121,6 @@ int xtract_init_bark(int N, float nyquist, int *band_limits){
     while(bands--)
         band_limits[bands] = edges[bands] / nyquist * M;
         /*FIX shohuld use rounding, but couldn't get it to work */
+
+    return SUCCESS;
 }

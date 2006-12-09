@@ -109,13 +109,21 @@ int xtract_asdf(float *data, int N, void *argv, float *result);
  */
 int xtract_bark_coefficients(float *data, int N, void *argv, float *result);
 
-/** \brief Extract the frequency and amplitude of spectral peaks from a of a magnitude spectrum
+/** \brief Extract the frequency and amplitude of spectral peaks from a magnitude spectrum
  * \param *data: a pointer to the first element in an array of floats representing the magnitude spectrum of an audio vector
  * \param N: the number of array elements to be considered
  * \param *argv: a pointer to an array containing peak threshold as percentage below max peak, and sample rate 
  * \param *result: a pointer to an array of size N, containing N/2 freqs and N/2 amplitudes, amplitudes are on a decibel scale with dbFS = 0 
  */
 int xtract_peaks(float *data, int N, void *argv, float *result);
+
+/** \brief Extract the harmonic spectrum of from a of a peak spectrum 
+ * \param *data: a pointer to the first element in an array of floats representing the peak spectrum of an audio vector (e.g. *result from  xtract_peaks). It is expected that the first half of the array pointed to by *data will contain frequencies for each peak considered, and the the second half will contain the respective amplitudes
+ * \param N: the size of the array pointed to by *data
+ * \param *argv: a pointer to an array containing the fundamental (f0) of the spectrum, and a threshold (t) where 0<=t<=1.0, and t determines the distance from the nearest harmonic number within which a partial can be considered harmonic.
+ * \param *result: a pointer to an array of size N containing N/2 freqs and N/2 amplitudes, amplitudes are on a decibel scale with dbFS = 0
+ */
+int xtract_harmonics(float *data, int N, void *argv, float *result);
 
 /** @} */
 

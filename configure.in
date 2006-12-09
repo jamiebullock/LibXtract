@@ -2,9 +2,9 @@ AC_PREREQ(2.13)
 # Increment for major API changes, release status changes
 m4_define(libxtract_major_version, 0)
 # Increment for feature additions and enhancements
-m4_define(libxtract_minor_version, 2)
+m4_define(libxtract_minor_version, 3)
 # Increment for fixes 
-m4_define(libxtract_fix_version, 2)
+m4_define(libxtract_fix_version, 0)
 
 m4_define(libxtract_version, libxtract_major_version.libxtract_minor_version.libxtract_fix_version)
 		
@@ -64,7 +64,7 @@ AC_ARG_ENABLE(simpletest,
 # age to 0.
 XTRACT_SO_VERSION=0:0:0
 
-CFLAGS="$CFLAGS -pedantic -ansi -Wall"
+CFLAGS="$CFLAGS -pedantic -ansi -Wall -std=c99"
 LDFLAGS="$LDFLAGS -lm"
 
 AC_ARG_WITH(pd_dir,

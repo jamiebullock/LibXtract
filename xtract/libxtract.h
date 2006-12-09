@@ -53,7 +53,7 @@ extern "C" {
   * @{
   */
 
-#define XTRACT_FEATURES 43
+#define XTRACT_FEATURES 44
     
 #define LOG_LIMIT 10e-10
 #define VERY_BIG_NUMBER 2e10
@@ -104,7 +104,8 @@ enum features_ {
     MAGNITUDE_SPECTRUM,
     AUTOCORRELATION_FFT,
     MFCC,
-    DCT
+    DCT,
+    HARMONICS
 };
 
 /** \brief Enumeration of feature types */
@@ -126,7 +127,8 @@ enum return_codes_ {
     MALLOC_FAILED,
     BAD_ARGV,
     BAD_VECTOR_SIZE,
-    NO_RESULT
+    NO_RESULT,
+    FEATURE_NOT_IMPLEMENTED
 };
 
 /**
@@ -178,12 +180,18 @@ printf("Mean = %.2f\n", mean);
 #ifdef XTRACT
 extern int(*xtract[XTRACT_FEATURES])(float *data, int N, void *argv, float *result);
 
-
 /** \brief An array of pointers to function help strings
  *
  * Defined in libxtract.c. As a minimum this will contain pointers to the names of all of the feature extraction functions in the library. This is intended as a 'quick reference' to be queried as necessary.
  */
 extern char *xtract_help_strings[XTRACT_FEATURES];
+
+/** \brief An array of pointers to strings giving function output units
+ *
+ * Defined in libxtract.c. This contains pointers to strings giving the output units of all of the feature extraction functions in the library. This is intended as a 'quick reference' to be queried as necessary.
+ */
+extern char *xtract_units[XTRACT_FEATURES];
+
 #endif
 
 /** \brief A structure to store a set of n_filters Mel filters */

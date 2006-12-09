@@ -20,30 +20,29 @@
 
 /* xtract_delta.c: defines functions that extract a feature as a single value from more than one input vector */
 
-#include "xtract/xtract_delta.h"
-#include "xtract/xtract_macros.h"
+#include "xtract/libxtract.h"
 
 int xtract_flux(float *data, int N, void *argv , float *result){
 
-    NOT_IMPLEMENTED;
+    return FEATURE_NOT_IMPLEMENTED;
 
 }
 
 int xtract_attack_time(float *data, int N, void *argv , float *result){
 
-    NOT_IMPLEMENTED;
+    return FEATURE_NOT_IMPLEMENTED;
 
 }
 
 int xtract_decay_time(float *data, int N, void *argv, float *result){
 
-    NOT_IMPLEMENTED;
+    return FEATURE_NOT_IMPLEMENTED;
 
 }
 
 int xtract_delta_feature(float *data, int N, void *argv, float *result){
 
-    NOT_IMPLEMENTED;
+    return FEATURE_NOT_IMPLEMENTED;
 
 }
 

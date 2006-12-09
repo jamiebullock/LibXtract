@@ -39,10 +39,14 @@ static t_int *xtract_perform(t_int *w) {
     t_sample *in = (t_sample *)(w[1]);
     t_xtract_tilde *x = (t_xtract_tilde *)(w[2]);
     t_int N = (t_int)(w[3]);
+    t_int return_code = 0;
     float result = 0;
 
-    xtract[x->feature]((float *)in, N, x->argv, &result);
+    return_code = xtract[x->feature]((float *)in, N, x->argv, &result);
 
+    if(return_code == FEATURE_NOT_IMPLEMENTED)
+	pd_error(x, "Feature not implemented");
+    
     outlet_float(x->x_obj.ob_outlet, result);
     return (w+4);
 }
@@ -53,11 +57,15 @@ static t_int *xtract_perform_vector(t_int *w) {
     t_float *tmp_in, *tmp_out;
     t_xtract_tilde *x = (t_xtract_tilde *)(w[3]);
     t_int N = (t_int)(w[4]), n;
+    t_int return_code = 0;
 
     tmp_in = copybytes(in, N * sizeof(t_float));
     tmp_out = getbytes(N * sizeof(t_float));
     
-    xtract[x->feature](tmp_in, N, x->argv, tmp_out);
+    return_code = xtract[x->feature](tmp_in, N, x->argv, tmp_out);
+    
+    if(return_code == FEATURE_NOT_IMPLEMENTED)
+	pd_error(x, "Feature not implemented");
     
     n = N;
 
@@ -158,6 +166,10 @@ static void *xtract_new(t_symbol *me, t_int argc, t_atom *argv) {
         80.0f, f->n_filters, f->filters);
     }
     else if(tmp == gensym("dct")) x->feature = DCT;
+    else if(tmp == gensym("harmonics")){ 
+	x->feature = HARMONICS;
+	x->argv = getbytes(3 * sizeof(t_float));
+    }
     else if(tmp == gensym("bark_coefficients")){
         x->feature = BARK_COEFFICIENTS;
         x->argv = (t_int *)getbytes(BARK_BANDS * sizeof(t_int));
@@ -173,7 +185,8 @@ static void *xtract_new(t_symbol *me, t_int argc, t_atom *argv) {
     if(x->feature == AUTOCORRELATION || x->feature == AUTOCORRELATION_FFT ||
     x->feature == MFCC || x->feature == AMDF || x->feature == ASDF|| 
     x->feature == DCT || x->feature == BARK_COEFFICIENTS || 
-    x->feature == MAGNITUDE_SPECTRUM || x->feature == PEAKS) 
+    x->feature == MAGNITUDE_SPECTRUM || x->feature == PEAKS || 
+    x->feature == HARMONICS) 
         x->feature_type = VECTOR;
                 
     else if (x->feature == FLUX || x->feature == ATTACK_TIME || 

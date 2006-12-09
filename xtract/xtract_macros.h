@@ -34,7 +34,6 @@ extern "C" {
 #define SQ(a) ((a) * (a))
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
-#define NOT_IMPLEMENTED printf("Feature not implemented yet.\n")
 #define NEEDS_FFTW printf("LibXtract must be compiled with fftw support to use this function.\n")
 
 #ifdef __cplusplus

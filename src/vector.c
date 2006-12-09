@@ -51,6 +51,7 @@ int xtract_magnitude_spectrum(float *data, int N, void *argv, float *result){
     fftwf_destroy_plan(plan);
     fftwf_free(temp);
     
+    return SUCCESS;
 }
 
 int xtract_autocorrelation_fft(float *data, int N, void *argv, float *result){
@@ -69,13 +70,14 @@ int xtract_autocorrelation_fft(float *data, int N, void *argv, float *result){
     
     fftwf_destroy_plan(plan);
     fftwf_free(temp);
+
+    return SUCCESS;
 }
 
 int xtract_mfcc(float *data, int N, void *argv, float *result){
 
     xtract_mel_filter *f;
     int n, filter;
-    fftwf_plan plan;
 
     f = (xtract_mel_filter *)argv;
 
@@ -91,6 +93,7 @@ int xtract_mfcc(float *data, int N, void *argv, float *result){
     
     xtract_dct(result, f->n_filters, NULL, result);
 
+    return SUCCESS;
 }
 
 int xtract_dct(float *data, int N, void *argv, float *result){
@@ -102,6 +105,8 @@ int xtract_dct(float *data, int N, void *argv, float *result){
     
     fftwf_execute(plan);
     fftwf_destroy_plan(plan);
+
+    return SUCCESS;
 }
 
 #else
@@ -147,6 +152,8 @@ int xtract_autocorrelation(float *data, int N, void *argv, float *result){
         }
         result[n] = corr / N;
     }
+
+    return SUCCESS;
 }
 
 int xtract_amdf(float *data, int N, void *argv, float *result){
@@ -164,6 +171,8 @@ int xtract_amdf(float *data, int N, void *argv, float *result){
         }
         result[n] = md / N;
     }
+
+    return SUCCESS;
 }
 
 int xtract_asdf(float *data, int N, void *argv, float *result){
@@ -180,6 +189,8 @@ int xtract_asdf(float *data, int N, void *argv, float *result){
         }
         result[n] = sd / N;
     }
+
+    return SUCCESS;
 }
 
 int xtract_bark_coefficients(float *data, int N, void *argv, float *result){
@@ -192,12 +203,14 @@ int xtract_bark_coefficients(float *data, int N, void *argv, float *result){
         for(n = limits[band]; n < limits[band + 1]; n++)
             result[band] += data[n];
     }
+
+    return SUCCESS;
 }
 
 int xtract_peaks(float *data, int N, void *argv, float *result){
 
     float thresh, max, y, y2, y3, p, width, sr; 
-    int n = N, M, return_code;
+    int n = N, M, return_code = SUCCESS;
     
     if(argv != NULL){
         thresh = ((float *)argv)[0];
@@ -259,3 +272,32 @@ int xtract_peaks(float *data, int N, void *argv, float *result){
     return (return_code ? return_code : SUCCESS);
 }
 
+int xtract_harmonics(float *data, int N, void *argv, float *result){
+    
+    int n = (N >> 1), M = n; 
+
+    float *freqs, *amps, f0, thresh, ratio, nearest, distance;
+
+    freqs = data;
+    amps = data + n;
+    f0 = *((float *)argv);
+    thresh = *((float *)argv+1);
+
+    ratio = nearest = distance = 0.f;
+
+    while(n--){
+	if(freqs[n]){
+	    ratio = freqs[n] / f0;
+	    nearest = round(ratio);
+	    distance = fabs(nearest - ratio);
+	    if(distance > thresh)
+		result[n] = result[M + n] = 0.f;
+	    else
+		result[n] = result[M + n] = freqs[n];
+	}
+	else
+	    result[n] = result[M + n] = 0.f;
+    }
+    return SUCCESS;
+}
+	    

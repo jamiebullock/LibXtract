@@ -33,6 +33,8 @@ int xtract_mean(float *data, int N, void *argv, float *result){
 	*result += *data++;
 
     *result /= N;
+
+    return SUCCESS;
 }
 
 int xtract_variance(float *data, int N, void *argv, float *result){
@@ -43,12 +45,15 @@ int xtract_variance(float *data, int N, void *argv, float *result){
 	*result += *data++ - *(float *)argv;
 
     *result = SQ(*result) / (N - 1);
+    
+    return SUCCESS;
 }
 
 int xtract_standard_deviation(float *data, int N, void *argv, float *result){
 
     *result = sqrt(*(float *)argv);
 
+    return SUCCESS;
 }
 
 int xtract_average_deviation(float *data, int N, void *argv, float *result){
@@ -60,6 +65,7 @@ int xtract_average_deviation(float *data, int N, void *argv, float *result){
 
     *result /= N;
 
+    return SUCCESS;
 }
 
 int xtract_skewness(float *data, int N, void *argv,  float *result){
@@ -71,6 +77,7 @@ int xtract_skewness(float *data, int N, void *argv,  float *result){
 
     *result = pow(*result, 3) / N;
 
+    return SUCCESS;
 }
 
 int xtract_kurtosis(float *data, int N, void *argv,  float *result){
@@ -82,6 +89,7 @@ int xtract_kurtosis(float *data, int N, void *argv,  float *result){
 
     *result = pow(*result, 4) / N - 3;
 
+    return SUCCESS;
 }
 
 
@@ -92,7 +100,7 @@ int xtract_centroid(float *data, int N, void *argv,  float *result){
     float *freqs, *amps, FA = 0.f, A = 0.f;
 
     freqs = data;
-    amps = data + (N  >>  1);
+    amps = data + n;
 
     while(n--){
 	FA += freqs[n] * amps[n];
@@ -101,6 +109,7 @@ int xtract_centroid(float *data, int N, void *argv,  float *result){
 
     *result = FA / A;
 
+    return SUCCESS;
 }
 
 int xtract_irregularity_k(float *data, int N, void *argv, float *result){
@@ -111,6 +120,7 @@ int xtract_irregularity_k(float *data, int N, void *argv, float *result){
     for(n = 1; n < M; n++)
 	*result += abs(data[n] - (data[n-1] + data[n] + data[n+1]) / 3);
 
+    return SUCCESS;
 }
 
 int xtract_irregularity_j(float *data, int N, void *argv, float *result){
@@ -126,6 +136,7 @@ int xtract_irregularity_j(float *data, int N, void *argv, float *result){
 
     *result = num / den;
 
+    return SUCCESS;
 }
 
 int xtract_tristimulus_1(float *data, int N, void *argv, float *result){
@@ -139,6 +150,7 @@ int xtract_tristimulus_1(float *data, int N, void *argv, float *result){
 
     *result = data[0] / den;
 
+    return SUCCESS;
 }
 
 int xtract_tristimulus_2(float *data, int N, void *argv, float *result){
@@ -152,6 +164,7 @@ int xtract_tristimulus_2(float *data, int N, void *argv, float *result){
 
     *result = (data[1] + data[2] + data[3])  / den;
 
+    return SUCCESS;
 }
 
 int xtract_tristimulus_3(float *data, int N, void *argv, float *result){
@@ -167,6 +180,7 @@ int xtract_tristimulus_3(float *data, int N, void *argv, float *result){
 
     *result = num / den;
 
+    return SUCCESS;
 }
 
 int xtract_smoothness(float *data, int N, void *argv, float *result){
@@ -181,6 +195,8 @@ int xtract_smoothness(float *data, int N, void *argv, float *result){
 	*result += abs(20 * log(data[n-1]) - (20 * log(data[n-2]) + 
 		    20 * log(data[n-1]) + 20 * log(data[n])) / 3);
     }
+    
+    return SUCCESS;
 }
 
 int xtract_spread(float *data, int N, void *argv, float *result){
@@ -197,6 +213,7 @@ int xtract_spread(float *data, int N, void *argv, float *result){
 
     *result = sqrt(num / den);
 
+    return SUCCESS;
 }
 
 int xtract_zcr(float *data, int N, void *argv, float *result){
@@ -208,6 +225,7 @@ int xtract_zcr(float *data, int N, void *argv, float *result){
 
     *result /= N;
 
+    return SUCCESS;
 }
 
 int xtract_rolloff(float *data, int N, void *argv, float *result){
@@ -223,6 +241,7 @@ int xtract_rolloff(float *data, int N, void *argv, float *result){
 
     *result = n;
 
+    return SUCCESS;
 }
 
 int xtract_loudness(float *data, int N, void *argv, float *result){
@@ -233,6 +252,8 @@ int xtract_loudness(float *data, int N, void *argv, float *result){
 
     while(n--)
 	*result += pow(data[n], 0.23);
+
+    return SUCCESS;
 }
 
 
@@ -254,6 +275,7 @@ int xtract_flatness(float *data, int N, void *argv, float *result){
 
     *result = 10 * log10(num / den);
 
+    return SUCCESS;
 }
 
 int xtract_tonality(float *data, int N, void *argv, float *result){
@@ -266,17 +288,18 @@ int xtract_tonality(float *data, int N, void *argv, float *result){
 
     *result = MIN(sfmdb, 1);
 
+    return SUCCESS;
 }
 
 int xtract_crest(float *data, int N, void *argv, float *result){
 
-    NOT_IMPLEMENTED;
+    return FEATURE_NOT_IMPLEMENTED;
 
 }
 
 int xtract_noisiness(float *data, int N, void *argv, float *result){
 
-    NOT_IMPLEMENTED;
+    return FEATURE_NOT_IMPLEMENTED;
 
 }
 
@@ -288,6 +311,7 @@ int xtract_rms_amplitude(float *data, int N, void *argv, float *result){
 
     *result = sqrt(*result / N);
 
+    return SUCCESS;
 }
 
 int xtract_inharmonicity(float *data, int N, void *argv, float *result){
@@ -306,18 +330,19 @@ int xtract_inharmonicity(float *data, int N, void *argv, float *result){
 
     *result = (2 * num) / (*fund * den); 
 
+    return SUCCESS;
 }
 
 
 int xtract_power(float *data, int N, void *argv, float *result){
 
-    NOT_IMPLEMENTED;
+    return FEATURE_NOT_IMPLEMENTED;
 
 }
 
 int xtract_odd_even_ratio(float *data, int N, void *argv, float *result){
 
-    int n = N >> 1, j, k;
+    int n = N, j, k;
 
     float num = 0.f, den = 0.f;
 
@@ -330,17 +355,18 @@ int xtract_odd_even_ratio(float *data, int N, void *argv, float *result){
 
     *result = num / den;
 
+    return SUCCESS;
 }
 
 int xtract_sharpness(float *data, int N, void *argv, float *result){
 
-    NOT_IMPLEMENTED;
+    return FEATURE_NOT_IMPLEMENTED;
 
 }
 
 int xtract_slope(float *data, int N, void *argv, float *result){
 
-    NOT_IMPLEMENTED;
+    return FEATURE_NOT_IMPLEMENTED;
 
 }
 
@@ -356,6 +382,7 @@ int xtract_lowest_match(float *data, int N, void *argv, float *result){
 
     *result = (lowest_match == SR_LIMIT ? 0 : lowest_match);
 
+    return SUCCESS;
 }
 
 int xtract_hps(float *data, int N, void *argv, float *result){
@@ -416,6 +443,7 @@ int xtract_hps(float *data, int N, void *argv, float *result){
     free(coeffs3);
     free(product);
 
+    return SUCCESS;
 }
 
 

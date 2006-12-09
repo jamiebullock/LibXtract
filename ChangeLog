@@ -1,4 +1,9 @@
 2006-11-10 Jamie Bullock <jamie@postlude.co.uk>
+    * version 0.3.0
+	* Corrected typos in scalar.c
+	* Added -Wall to CFLAGS and corrected problems relating to warnings
+	* Added xtract_harmonics and corresponding documentation
+2006-11-10 Jamie Bullock <jamie@postlude.co.uk>
     * version 0.2.2
 	* Fixed 'bus error' crash on Mac OS X by adding 'extern' declarations
 	to xtract and xtract_help_strings	

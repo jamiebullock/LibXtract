@@ -68,7 +68,8 @@ int(*xtract[])(float *, int, void *, float *) = {
     xtract_magnitude_spectrum,
     xtract_autocorrelation_fft,
     xtract_mfcc,
-    xtract_dct
+    xtract_dct,
+    xtract_harmonics
 };
 
 char *xtract_help_strings[] = {
@@ -114,5 +115,6 @@ char *xtract_help_strings[] = {
    "xtract_magnitude_spectrum",
    "xtract_autocorrelation_fft",
    "xtract_mfcc",
-   "xtract_dct"
+   "xtract_dct",
+   "xtract_harmonics"
    };
