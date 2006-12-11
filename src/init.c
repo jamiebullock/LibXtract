@@ -26,10 +26,9 @@
 
 int xtract_init_mfcc(int N, float nyquist, int style, float freq_max, float freq_min, int freq_bands, float **fft_tables){
 
-    int n,i, *fft_peak, M; 
+    int n, i, k, *fft_peak, M, next_peak; 
     float norm, mel_freq_max, mel_freq_min, norm_fact, height, inc, val, 
         freq_bw_mel, *mel_peak, *height_norm, *lin_peak;
-
 
     mel_peak = height_norm = lin_peak = NULL;
     fft_peak = NULL;
@@ -48,7 +47,7 @@ int xtract_init_mfcc(int N, float nyquist, int style, float freq_max, float freq
     if(mel_peak == NULL || height_norm == NULL || 
                     lin_peak == NULL || fft_peak == NULL)
                     return MALLOC_FAILED;
-        
+    
     M = N >> 1;
 
     mel_peak[0] = mel_freq_min;
@@ -79,28 +78,41 @@ int xtract_init_mfcc(int N, float nyquist, int style, float freq_max, float freq
     i = 0;
    
     for(n = 0; n < freq_bands; n++){
+	
+	/*calculate the rise increment*/
         if(n > 0)
-            /*calculate the rise increment*/
             inc = height_norm[n] / (fft_peak[n] - fft_peak[n - 1]);
         else
             inc = height_norm[n] / fft_peak[n];
         val = 0;	
+	
+	/*zero the start of the array*/
+	for(k = 0; k < i; k++)
+	   fft_tables[n][k] = 0.f;
+	
+	/*fill in the rise */
         for(; i <= fft_peak[n]; i++){ 
-            /*fill in the 'rise' */
             fft_tables[n][i] = val;
             val += inc;
         }
-        inc = height_norm[n] / (fft_peak[n + 1] - fft_peak[n]);
+	
         /*calculate the fall increment */
+        inc = height_norm[n] / (fft_peak[n + 1] - fft_peak[n]);
+	
         val = 0;
-        for(i = fft_peak[n + 1]; i > fft_peak[n]; i--){ 
-            /*reverse fill the 'fall' */
+	next_peak = fft_peak[n + 1];
+	
+	/*reverse fill the 'fall' */
+        for(i = next_peak; i > fft_peak[n]; i--){ 
             fft_tables[n][i] = val;
             val += inc;
         }
+
+	/*zero the rest of the array*/
+	for(k = next_peak + 1; k < N; k++)
+	    fft_tables[n][k] = 0.f;
     }
 
-    
     free(mel_peak);
     free(lin_peak);
     free(height_norm);

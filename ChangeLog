@@ -1,4 +1,7 @@
 2006-11-10 Jamie Bullock <jamie@postlude.co.uk>
+    * version 0.3.1
+	* Fixed xtract_init_mfcc (array entries zeroed out if not set)
+2006-11-10 Jamie Bullock <jamie@postlude.co.uk>
     * version 0.3.0
 	* Corrected typos in scalar.c
 	* Added -Wall to CFLAGS and corrected problems relating to warnings

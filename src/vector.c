@@ -80,7 +80,7 @@ int xtract_mfcc(float *data, int N, void *argv, float *result){
     int n, filter;
 
     f = (xtract_mel_filter *)argv;
-
+    
     for(filter = 0; filter < f->n_filters; filter++){
         for(n = 0; n < N; n++){
             result[filter] += data[n] * f->filters[filter][n];
