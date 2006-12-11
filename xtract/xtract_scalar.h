@@ -47,7 +47,7 @@ int xtract_mean(float *data, int N, void *argv, float *result);
  * 
  * \param *data: a pointer to the first element in an array of floats
  * \param N: the number of elements to be considered
- * \param *argv: a pointer to a value representing the mean of the input vector
+ * \param *argv: a pointer to a float representing the mean of the input vector
  * \param *result: the variance of N values from the array pointed to by *data
  */
 int xtract_variance(float *data, int N, void *argv, float *result);
@@ -56,7 +56,7 @@ int xtract_variance(float *data, int N, void *argv, float *result);
  * 
  * \param *data: a pointer to the first element in an array of floats
  * \param N: the number of elements to be considered
- * \param *argv: a pointer to a value representing the variance of the input vector
+ * \param *argv: a pointer to a float representing the variance of the input vector
  * \param *result: the deviation of N values from the array pointed to by *data
  */
 int xtract_standard_deviation(float *data, int N, void *argv, float *result);
@@ -65,7 +65,7 @@ int xtract_standard_deviation(float *data, int N, void *argv, float *result);
  * 
  * \param *data: a pointer to the first element in an array of floats
  * \param N: the number of elements to be considered
- * \param *argv: a pointer to a value representing the mean of the input vector
+ * \param *argv: a pointer to a float representing the mean of the input vector
  * \param *result: the  average deviation of N values from the array pointed to by *data
  */
 int xtract_average_deviation(float *data, int N, void *argv, float *result);
@@ -74,7 +74,7 @@ int xtract_average_deviation(float *data, int N, void *argv, float *result);
  * 
  * \param *data: a pointer to the first element in an array of floats
  * \param N: the number of elements to be considered
- * \param *argv: a pointer to an array of values representing the mean and standard deviation of the input vector
+ * \param *argv: a pointer to an array of floats representing the mean and standard deviation of the input vector
  * \param *result: the skewness of N values from the array pointed to by *data
  */
 int xtract_skewness(float *data, int N, void *argv,  float *result);
@@ -88,7 +88,7 @@ int xtract_skewness(float *data, int N, void *argv,  float *result);
  */
 int xtract_kurtosis(float *data, int N, void *argv,  float *result);
 
-/** \brief Extract the kurtosis of an input vector
+/** \brief Extract the centroid of an input vector
  * 
  * \param *data: a pointer to the first element in an array of floats represeting a frequency spectrum of size N/2 and a magnitude peak spectrum of size N/2 (This is the output format of xtract_peaks)
  * \param N: the number of elements to be considered
@@ -218,9 +218,9 @@ int xtract_rms_amplitude(float *data, int N, void *argv, float *result);
 
 /** \brief Extract the Inharmonicity of an input vector 
  * 
- * \param *data: a pointer to the first element in an array of floats representing the amplitudes of the spectral peaks in an audio vector
+ * \param *data: a pointer to the first element in an array of floats represeting a frequency spectrum of size N/2 and a magnitude peak spectrum of size N/2 (This is the output format of xtract_peaks)
  * \param N: the number of elements to be considered
- * \param *argv: a pointer to a multidimensional array containing the fundamental frequency of the input vector in the first element of the first dimension, and the frequencies of the spectral peaks in the second dimension
+ * \param *argv: a pointer to a float representing the fundamental frequency of the input vector.
  * \param *result: the inharmonicity of N values from the array pointed to by *data
  */
 int xtract_inharmonicity(float *data, int N, void *argv, float *result);

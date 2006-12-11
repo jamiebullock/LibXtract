@@ -316,19 +316,20 @@ int xtract_rms_amplitude(float *data, int N, void *argv, float *result){
 
 int xtract_inharmonicity(float *data, int N, void *argv, float *result){
 
-    int n = N;
+    int n = N >> 1;
     float num = 0.f, den = 0.f,
-	  *fund, *freq;
+	  fund, *freqs, *amps;
 
-    fund = *(float **)argv;
-    freq = fund+1;
+    fund = *(float *)argv;
+    freqs = data;
+    amps = data + n;
 
     while(n--){
-	num += abs(freq[n] - n * *fund) * SQ(data[n]);
-	den += SQ(data[n]);
+	num += abs(freqs[n] - n * fund) * SQ(amps[n]);
+	den += SQ(amps[n]);
     }
 
-    *result = (2 * num) / (*fund * den); 
+    *result = (2 * num) / (fund * den); 
 
     return SUCCESS;
 }

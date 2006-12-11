@@ -18,20 +18,27 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 /* calculates the spectral xtract of one frame, given peak frequency and amplitude to first and second inputs respectively */
 
+#include "m_pd.h"
+
 #define XTRACT 
 #include "xtract/libxtract.h"
-#include "m_pd.h"
 
 #define BLOCKSIZE 1024
 #define NYQUIST 22050.0f
 
 static t_class *xtract_class;
 
+/* Struct for keeping track of memory allocations */
+typedef struct _tracked_memory {
+    char argv;
+} tracked_memory;
+
 typedef struct _xtract {
     t_object  x_obj;
     t_float f;
     t_int feature;
     t_int feature_type;
+    tracked_memory memory;
     void *argv;
 } t_xtract_tilde;
 
@@ -92,7 +99,7 @@ static void *xtract_new(t_symbol *me, t_int argc, t_atom *argv) {
     t_symbol *tmp;
     t_xtract_tilde *x = (t_xtract_tilde *)pd_new(xtract_class);
     xtract_mel_filter *f;
-    t_int n, N;
+    t_int n, N, floatargs = 0;
    
     N = BLOCKSIZE;
     
@@ -100,12 +107,10 @@ static void *xtract_new(t_symbol *me, t_int argc, t_atom *argv) {
     
     tmp = atom_getsymbol(argv);
 
+    /* map creation args to features */
     if(tmp == gensym("mean")) x->feature = MEAN;
-    else if(tmp == gensym("variance")) {
-        x->feature = VARIANCE;
-        x->argv = getbytes(sizeof(t_float));
-    }
-    else if(tmp == gensym("standard_deviation")) x->feature = STANDARD_DEVIATION;
+    else if(tmp == gensym("variance")) x->feature = VARIANCE;
+    else if(tmp == gensym("standard_deviation"))x->feature = STANDARD_DEVIATION;
     else if(tmp == gensym("average_deviation")) x->feature = AVERAGE_DEVIATION;
     else if(tmp == gensym("skewness")) x->feature = SKEWNESS;
     else if(tmp == gensym("kurtosis")) x->feature = KURTOSIS;
@@ -130,15 +135,10 @@ static void *xtract_new(t_symbol *me, t_int argc, t_atom *argv) {
     else if(tmp == gensym("odd_even_ratio")) x->feature = ODD_EVEN_RATIO;
     else if(tmp == gensym("sharpness")) x->feature = SHARPNESS;
     else if(tmp == gensym("slope")) x->feature = SLOPE;
-    else if(tmp == gensym("f0")){
-			x->feature = F0;
-			x->argv = getbytes(3 * sizeof(t_float));
-	}
+    else if(tmp == gensym("f0")) x->feature = F0;
     else if(tmp == gensym("hps"))x->feature = HPS;
-    else if(tmp == gensym("lowest_match")){
-		x->feature = LOWEST_MATCH;
-        x->argv = getbytes(sizeof(t_float));
-	}
+    else if(tmp == gensym("lowest_match"))x->feature = LOWEST_MATCH;
+    else if(tmp == gensym("dct")) x->feature = DCT;
     else if(tmp == gensym("magnitude_spectrum")) 
                                         x->feature = MAGNITUDE_SPECTRUM;
     else if(tmp == gensym("autocorrelation")) x->feature = AUTOCORRELATION;
@@ -146,17 +146,96 @@ static void *xtract_new(t_symbol *me, t_int argc, t_atom *argv) {
                                         x->feature = AUTOCORRELATION_FFT;
     else if(tmp == gensym("amdf")) x->feature = AMDF;
     else if(tmp == gensym("asdf")) x->feature = ASDF;
-    else if(tmp == gensym("mfcc")){
+    else if(tmp == gensym("peaks")) x->feature = PEAKS;
+    else if(tmp == gensym("flux")) x->feature = FLUX;
+    else if(tmp == gensym("attack_time")) x->feature = ATTACK_TIME;
+    else if(tmp == gensym("decay_time")) x->feature = DECAY_TIME;
+    else if(tmp == gensym("delta")) x->feature = DELTA_FEATURE;
+    else if(tmp == gensym("mfcc")) x->feature = MFCC;
+    else if(tmp == gensym("harmonics")) x->feature = HARMONICS;
+    else if(tmp == gensym("bark_coefficients")) x->feature = BARK_COEFFICIENTS;
+    else post("xtract~: No feature selected");
 
-    x->argv = (xtract_mel_filter *)getbytes(sizeof(xtract_mel_filter));
-        /* Change! can use x->argv because it is a pointer to void */
-        /* put the malloc here */
-        x->feature = MFCC;
+    /* allocate memory for feature arguments */
+    switch(x->feature){
+	case  MEAN: 
+	case  VARIANCE:
+	case  STANDARD_DEVIATION:
+	case  AVERAGE_DEVIATION:
+	case  ROLLOFF:
+	case  INHARMONICITY:
+	case  LOWEST_MATCH:
+	case  F0:
+	    floatargs = 1;
+	    break;
+	case  SKEWNESS:
+	case  KURTOSIS:
+	case  PEAKS:
+	case  HARMONICS:
+	    floatargs = 2;
+	    break;
+	case  CENTROID:
+	case  IRREGULARITY_K:
+	case  IRREGULARITY_J:
+	case  TRISTIMULUS_1:
+	case  TRISTIMULUS_2:
+	case  TRISTIMULUS_3:
+	case  SMOOTHNESS:
+	case  SPREAD:
+	case  ZCR:
+	case  LOUDNESS:
+	case  FLATNESS:
+	case  TONALITY:
+	case  CREST:
+	case  NOISINESS:
+	case  RMS_AMPLITUDE:
+	case  POWER:
+	case  ODD_EVEN_RATIO:
+	case  SHARPNESS:
+	case  SLOPE:
+	case  HPS:
+	case  FLUX: /*not implemented */
+	case  ATTACK_TIME: /*not implemented */
+	case  DECAY_TIME: /*not implemented */
+	case  DELTA_FEATURE: /*not implemented */
+	case  AUTOCORRELATION_FFT:
+	case  MAGNITUDE_SPECTRUM:
+	case  MFCC:
+	case  DCT:
+	case  AUTOCORRELATION:
+	case  AMDF:
+	case  ASDF:
+	case  BARK_COEFFICIENTS:
+	    floatargs = 0;
+	    break;
+	default:
+	    floatargs = 0;
+	    break;
+    }
+
+    if(x->feature == MFCC){
+	x->memory.argv = (size_t)(sizeof(xtract_mel_filter));
+	x->argv = (xtract_mel_filter *)getbytes(x->memory.argv);
+    }
+    else if(x->feature == BARK_COEFFICIENTS){
+	x->memory.argv = (size_t)(sizeof(BARK_BANDS * sizeof(t_int)));
+        x->argv = (t_int *)getbytes(x->memory.argv);
+    }
+    else if (floatargs){
+	x->memory.argv = (size_t)(floatargs * sizeof(t_float));
+	x->argv = (t_float *)getbytes(x->memory.argv);
+    }
+    else
+	x->memory.argv = 0;
+    
+    /* do init if needed */
+    if(x->feature == MFCC){
+
         f = x->argv;
         
         f->n_filters = 20;
         
-        post("filters = %d", ((xtract_mel_filter *)x->argv)->n_filters);
+        post("xtract~: mfcc: filters = %d", ((xtract_mel_filter *)x->argv)->n_filters);
         f->filters = 
             (t_float **)getbytes(f->n_filters * sizeof(t_float *));
         for(n = 0; n < f->n_filters; n++)
@@ -165,23 +244,9 @@ static void *xtract_new(t_symbol *me, t_int argc, t_atom *argv) {
         xtract_init_mfcc(N, NYQUIST, EQUAL_GAIN, 18000.0f,
         80.0f, f->n_filters, f->filters);
     }
-    else if(tmp == gensym("dct")) x->feature = DCT;
-    else if(tmp == gensym("harmonics")){ 
-	x->feature = HARMONICS;
-	x->argv = getbytes(3 * sizeof(t_float));
-    }
-    else if(tmp == gensym("bark_coefficients")){
-        x->feature = BARK_COEFFICIENTS;
-        x->argv = (t_int *)getbytes(BARK_BANDS * sizeof(t_int));
+    else if(x->feature == BARK_COEFFICIENTS)
         xtract_init_bark(N, NYQUIST, x->argv);
-    }
-    else if(tmp == gensym("peaks")) x->feature = PEAKS;
-    else if(tmp == gensym("flux")) x->feature = FLUX;
-    else if(tmp == gensym("attack_time")) x->feature = ATTACK_TIME;
-    else if(tmp == gensym("decay_time")) x->feature = DECAY_TIME;
-    else if(tmp == gensym("delta")) x->feature = DELTA_FEATURE;
-    else post("xtract~: No feature selected");
-
+    
     if(x->feature == AUTOCORRELATION || x->feature == AUTOCORRELATION_FFT ||
     x->feature == MFCC || x->feature == AMDF || x->feature == ASDF|| 
     x->feature == DCT || x->feature == BARK_COEFFICIENTS || 
@@ -197,7 +262,6 @@ static void *xtract_new(t_symbol *me, t_int argc, t_atom *argv) {
 
     /* argv through right inlet */
     inlet_new(&x->x_obj, &x->x_obj.ob_pd, gensym("list"), gensym("list"));
-
 
     /* if feature is vector, create signal out */
     if(x->feature_type == VECTOR) outlet_new(&x->x_obj, &s_signal);
@@ -237,9 +301,9 @@ static void xtract_tilde_show_help(t_xtract_tilde *x, t_symbol *s){
 }
 
 static void xtract_tilde_free(t_xtract_tilde *x) {
-    /*FIX */
-    if(x->argv != NULL)
-        freebytes(x->argv, 0);
+
+    if(x->argv != NULL && x->memory.argv)
+        freebytes(x->argv, x->memory.argv);
 }
 
 void xtract_tilde_setup(void) {

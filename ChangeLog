@@ -1,4 +1,11 @@
-2006-11-10 Jamie Bullock <jamie@postlude.co.uk>
+2006-12-11 Jamie Bullock <jamie@postlude.co.uk>
+    * version 0.3.2
+	* changed xtract_inharmonicity so that it takes frequencies AND
+	amplitudes of peaks from *data rather than via *argv. This is
+	consistent with xtract_centroid and others, and it means the data can
+	come directly from xtract_peaks
+	* Improvements to pd example (fixed memory allocation bugs)
+2006-12-10 Jamie Bullock <jamie@postlude.co.uk>
     * version 0.3.1
 	* Fixed xtract_init_mfcc (array entries zeroed out if not set)
 2006-11-10 Jamie Bullock <jamie@postlude.co.uk>

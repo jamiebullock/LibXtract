@@ -271,7 +271,7 @@ int xtract_peaks(float *data, int N, void *argv, float *result){
    
     return (return_code ? return_code : SUCCESS);
 }
-
+	    
 int xtract_harmonics(float *data, int N, void *argv, float *result){
     
     int n = (N >> 1), M = n; 
