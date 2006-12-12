@@ -292,8 +292,10 @@ int xtract_harmonics(float *data, int N, void *argv, float *result){
 	    distance = fabs(nearest - ratio);
 	    if(distance > thresh)
 		result[n] = result[M + n] = 0.f;
-	    else
-		result[n] = result[M + n] = freqs[n];
+	    else {
+		result[n] = freqs[n];
+		result[M + n] = amps[n];
+	    }
 	}
 	else
 	    result[n] = result[M + n] = 0.f;

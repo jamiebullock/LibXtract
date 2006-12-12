@@ -101,7 +101,7 @@ int xtract_asdf(float *data, int N, void *argv, float *result);
 /** \brief Extract Bark band coefficients based on a method   
  * \param *data: a pointer to the first element in an array of floats representing the magnitude spectrum of an audio vector
  * \param N: the number of array elements to be considered
- * \param *argv: a pointer to an array of ints representing the limits of each bark band
+ * \param *argv: a pointer to an array of ints representing the limits of each bark band. This can be obtained  by calling xtract_init_bark.
  * \param *result: a pointer to an array containing resultant bark coefficients
  *
  * The limits array pointed to by *argv must be obtained by first calling xtract_init_bark

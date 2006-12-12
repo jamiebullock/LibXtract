@@ -117,7 +117,7 @@ int xtract_irregularity_j(float *data, int N, void *argv, float *result);
 
 /** \brief Calculate the Tristimulus of an input vector using a method described by Pollard and Jansson (1982)
  * 
- * \param *data: a pointer to the first element in an array of floats representing the amplitudes of the harmonic spectrum of an audio vector e.g. a pointer to the second half of the array pointed to by *result from xtract_harmonics()
+ * \param *data: a pointer to the first element in an array of floats representing the amplitudes of the harmonic spectrum of an audio vector e.g. a pointer to the second half of the array pointed to by *result from xtract_harmonics(). The amplitudes of the peak spectrum (e.g. *result from xtract_peaks()) can be used if one wishes to consider all partials not just harmonics.
  * \param N: the number of elements to be considered
  * \param *argv: a pointer to NULL
  * \param *result: the tristimulus of N values from the array pointed to by *data
@@ -162,8 +162,8 @@ int xtract_zcr(float *data, int N, void *argv, float *result);
  * 
  * \param *data: a pointer to the first element in an array of floats representing the magnitude spectrum of an audio vector
  * \param N: the number of elements to be considered
- * \param *argv: a pointer to a floating point value representing the threshold for rolloff, i.e. the percentile at which the rolloff is determined
- * \param *result: the spectral rolloff of N values from the array pointed to by *data
+ * \param *argv: a pointer to an array containing a floating point value representing the threshold for rolloff, i.e. the percentile at which the rolloff is determined, expressed in the range 0-1.0, and a float representing the sample rate in Hz
+ * \param *result: the spectral rolloff in Hz of N values from the array pointed to by *data. This is the point in the spectrum below which argv[0] of the energy is distributed.
  */
 int xtract_rolloff(float *data, int N, void *argv, float *result);
 
@@ -191,9 +191,9 @@ int xtract_flatness(float *data, int N, void *argv, float *result);
 
 /** \brief Extract the tonality factor of an input vector using a method described by Tristan Jehan (2005)
  * 
- * \param *data: a pointer to the first element in an array of floats representing the spectral peaks of an audio vector
- * \param N: the number of elements to be considered
- * \param *argv: a pointer to NULL
+ * \param *data: not used.
+ * \param N: not used
+ * \param *argv: a pointer to the spectral flatness measure of an audio vector (e.g. the output from xtract_flatness)
  * \param *result: the tonality factor of N values from the array pointed to by *data
  */
 int xtract_tonality(float *data, int N, void *argv, float *result);

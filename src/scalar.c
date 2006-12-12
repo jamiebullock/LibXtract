@@ -30,7 +30,7 @@ int xtract_mean(float *data, int N, void *argv, float *result){
     int n = N;
 
     while(n--)
-	*result += *data++;
+	*result += data[n];
 
     *result /= N;
 
@@ -42,7 +42,7 @@ int xtract_variance(float *data, int N, void *argv, float *result){
     int n = N;
 
     while(n--)
-	*result += *data++ - *(float *)argv;
+	*result += data[n] - *(float *)argv;
 
     *result = SQ(*result) / (N - 1);
     
@@ -59,9 +59,9 @@ int xtract_standard_deviation(float *data, int N, void *argv, float *result){
 int xtract_average_deviation(float *data, int N, void *argv, float *result){
 
     int n = N;
-
+    
     while(n--)
-	*result += fabs(*data++ - *(float *)argv);
+	*result += fabs(data[n] - *(float *)argv);
 
     *result /= N;
 
@@ -72,11 +72,15 @@ int xtract_skewness(float *data, int N, void *argv,  float *result){
 
     int n = N;
 
-    while(n--)
-	*result += (*data++ - ((float *)argv)[0]) / ((float *)argv)[1];
+    float temp;
 
-    *result = pow(*result, 3) / N;
+    while(n--){
+	temp = (data[n] - ((float *)argv)[0]) / ((float *)argv)[1];
+	*result += pow(temp, 3);
+    }
 
+    *result /= N;
+	
     return SUCCESS;
 }
 
@@ -84,11 +88,16 @@ int xtract_kurtosis(float *data, int N, void *argv,  float *result){
 
     int n = N;
 
-    while(n--)
-	*result += (*data++ - ((float *)argv)[0]) / ((float *)argv)[1];
+    float temp;
 
-    *result = pow(*result, 4) / N - 3;
+    while(n--){
+	temp = (data[n] - ((float *)argv)[0]) / ((float *)argv)[1];
+	*result += pow(temp, 4);
+    }
 
+    *result /= N;
+    *result -= 3.0f;
+  
     return SUCCESS;
 }
 
@@ -118,7 +127,7 @@ int xtract_irregularity_k(float *data, int N, void *argv, float *result){
 	M = N - 1;
 
     for(n = 1; n < M; n++)
-	*result += abs(data[n] - (data[n-1] + data[n] + data[n+1]) / 3);
+	*result += fabs(data[n] - (data[n-1] + data[n] + data[n+1]) / 3);
 
     return SUCCESS;
 }
@@ -130,8 +139,8 @@ int xtract_irregularity_j(float *data, int N, void *argv, float *result){
     float num = 0.f, den = 0.f;
 
     while(n--){
-	num += data[n] - data[n+1];
-	den += data[n] * data[n];
+	num += pow(data[n] - data[n+1], 2);
+	den += pow(data[n], 2);
     }
 
     *result = num / den;
@@ -143,12 +152,19 @@ int xtract_tristimulus_1(float *data, int N, void *argv, float *result){
 
     int n = N;
 
-    float den = 0.f;
+    float den, p1, temp;
 
-    while(n--)
-	den += data[n];
+    den = p1 = temp = 0.f;
 
-    *result = data[0] / den;
+    for(n = 0; n < N; n++){
+	if((temp = data[n])){
+	    den += temp;
+	    if(!p1)
+		p1 = temp;
+	}
+    }
+
+    *result = p1 / den;
 
     return SUCCESS;
 }
@@ -157,26 +173,43 @@ int xtract_tristimulus_2(float *data, int N, void *argv, float *result){
 
     int n = N;
 
-    float den = 0.f;
+    float den, p2, p3, p4, temp;
 
-    while(n--)
-	den += data[n];
+    den = p2 = p3 = p4 = temp = 0.f;
 
-    *result = (data[1] + data[2] + data[3])  / den;
+    for(n = 0; n < N; n++){
+	if((temp = data[n])){
+	    den += temp;
+	    if(!p2)
+		p2 = temp;
+	    else if(!p3)
+		p3 = temp;
+	    else if(!p4)
+		p4 = temp;
+	}
+    }
+
+    *result = (p2 + p3 + p4)  / den;
 
     return SUCCESS;
 }
 
 int xtract_tristimulus_3(float *data, int N, void *argv, float *result){
 
-    int n = N;
+    int n = N, count = 0;
 
-    float den = 0.f, num = 0.f;
+    float den, num, temp;
 
-    while(n--)
-	den += data[n];
+    den = num = temp = 0.f;
 
-    num = den - data[0] + data[1] + data[2] + data[3];
+    for(n = 0; n < N; n++){
+	if((temp = data[n])){
+	    den += temp;
+	    if(count >= 5)
+		num += temp;
+	    count++;
+	}
+    }
 
     *result = num / den;
 
@@ -231,15 +264,18 @@ int xtract_zcr(float *data, int N, void *argv, float *result){
 int xtract_rolloff(float *data, int N, void *argv, float *result){
 
     int n = N;
-    float pivot = 0.f, temp = 0.f;
+    float pivot, temp;
+
+    pivot = temp = 0.f;
 
     while(n--) pivot += data[n];   
 
-    pivot *= *(float *)argv;
+    pivot *= ((float *)argv)[0];
 
-    for(n = 0; temp < pivot; temp += data[n++]);
+    for(n = 0; temp < pivot; n++)
+	temp += data[n];
 
-    *result = n;
+    *result = (n / (float)N) * (((float *)argv)[1] * .5);
 
     return SUCCESS;
 }
@@ -259,21 +295,27 @@ int xtract_loudness(float *data, int N, void *argv, float *result){
 
 int xtract_flatness(float *data, int N, void *argv, float *result){
 
-    int n = N;
+    int n;
 
-    float num = 0.f, den = 0.f;
+    float num, den, temp;
 
-    while(n--){
-	if(data[n] !=0){
-	    num *= data[n];
-	    den += data[n];
+    den = temp = num = 0.f;
+
+    for(n = 0; n < N; n++){
+	if((temp = data[n])){
+	    if(!num)
+		num = den = temp;
+	    else{
+		num *= temp;
+		den += temp;
+	    }
 	}
     }
-
-    num = pow(num, 1 / N); 
+    
+    num = powf(num, 1.0f / N); 
     den /= N;
 
-    *result = 10 * log10(num / den);
+    *result = num / den;
 
     return SUCCESS;
 }

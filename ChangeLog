@@ -1,3 +1,10 @@
+2006-12-12 Jamie Bullock <jamie@postlude.co.uk>
+    * version 0.3.3
+	* Fixed errors in skewnes, kurtosis, irregularity_k, irregularity_j,
+	tristimulus_1, tristimulus_2, and tristimulus_3.
+	* Tested the above
+	* Changed rolloff so output is in Hz. This means that a second
+	argument (samplerate) needs to be passed in as argv[1]
 2006-12-11 Jamie Bullock <jamie@postlude.co.uk>
     * version 0.3.2
 	* changed xtract_inharmonicity so that it takes frequencies AND

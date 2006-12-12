@@ -19,6 +19,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 /* calculates the spectral xtract of one frame, given peak frequency and amplitude to first and second inputs respectively */
 
 #include "m_pd.h"
+#include <math.h>
 
 #define XTRACT 
 #include "xtract/libxtract.h"
@@ -53,6 +54,9 @@ static t_int *xtract_perform(t_int *w) {
 
     if(return_code == FEATURE_NOT_IMPLEMENTED)
 	pd_error(x, "Feature not implemented");
+
+    /* set nan, inf or -inf to 0 */
+    result = (isinf(result) || isnan(result) ? 0 : result);
     
     outlet_float(x->x_obj.ob_outlet, result);
     return (w+4);
@@ -166,6 +170,7 @@ static void *xtract_new(t_symbol *me, t_int argc, t_atom *argv) {
 	case  INHARMONICITY:
 	case  LOWEST_MATCH:
 	case  F0:
+	case  TONALITY:
 	    floatargs = 1;
 	    break;
 	case  SKEWNESS:
@@ -185,7 +190,6 @@ static void *xtract_new(t_symbol *me, t_int argc, t_atom *argv) {
 	case  ZCR:
 	case  LOUDNESS:
 	case  FLATNESS:
-	case  TONALITY:
 	case  CREST:
 	case  NOISINESS:
 	case  RMS_AMPLITUDE:
@@ -218,7 +222,7 @@ static void *xtract_new(t_symbol *me, t_int argc, t_atom *argv) {
 	x->argv = (xtract_mel_filter *)getbytes(x->memory.argv);
     }
     else if(x->feature == BARK_COEFFICIENTS){
-	x->memory.argv = (size_t)(sizeof(BARK_BANDS * sizeof(t_int)));
+	x->memory.argv = (size_t)(BARK_BANDS * sizeof(t_int));
         x->argv = (t_int *)getbytes(x->memory.argv);
     }
     else if (floatargs){

@@ -4,5 +4,7 @@ Fix xtract_hps - it doesn't work!
 Add Pure Data help file
 Add delta functions
 Add Max/MSP external example
+Add self documentation
+Check sfm and tonality
 ...do other stuff and eventually...
 ...optimise!
