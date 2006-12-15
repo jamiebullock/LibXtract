@@ -30,20 +30,20 @@ extern "C" {
 #include "xtract_types.h"
 
 /* \brief Extract spectral flux as defined by Gaël Richard (2006)*/
-int xtract_flux(float *data, int N, void *argv , float *result);
+int xtract_flux(const float *data, const int N, const void *argv , float *result);
 /*xtract_frame_tracker *xf */
 
 /** \brief Extract attack Time */
-int xtract_attack_time(float *data, int N, void *argv , float *result);
+int xtract_attack_time(const float *data, const int N, const void *argv , float *result);
 /* xtract_amp_tracker *xa */
 
 /** Extract temporal decrease */
-int xtract_decay_time(float *data, int N, void *argv, float *result);
+int xtract_decay_time(const float *data, const int N, const void *argv, float *result);
 /* xtract_amp_tracker *xa */
 
 
 /** \brief A generic function to calculate the delta of a feature over a given period (in frames) */
-int xtract_delta_feature(float *data, int N, void *argv, float *result);
+int xtract_delta_feature(const float *data, const int N, const void *argv, float *result);
 /*xtract_frame_tracker *xf */
 /*float frames*/
 

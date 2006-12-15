@@ -1,3 +1,17 @@
+2006-12-15 Jamie Bullock <jamie@postlude.co.uk>
+    * version 0.3.4
+	* Changed xtract_lowest_match(), to xtract_lowest(). It just returns the
+	lowest non-zero component in the input array, between two bounds
+	* qualified int *data, int N, and void *argv as const, thus insuring
+	that they won't be modified by the called function.
+	* added facilities for some functions to operate on copies of input
+	data instead of modifying it. This will need to be optimised at some
+	point maybe.
+	* Added arguments to spectral flatness to allow for control over input
+	band and pre-scaling
+	* Fixed confusing xtract_init_mfcc() parameter order
+	* Added new xtractor xtract_failsafe_f0
+
 2006-12-12 Jamie Bullock <jamie@postlude.co.uk>
     * version 0.3.3
 	* Fixed errors in skewnes, kurtosis, irregularity_k, irregularity_j,

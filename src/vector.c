@@ -23,20 +23,25 @@
 
 #include "xtract/libxtract.h"
 #include <math.h>
+#include <string.h>
+#include <stdlib.h>
 
 #ifdef XTRACT_FFT
 
 #include <fftw3.h>
 
-int xtract_magnitude_spectrum(float *data, int N, void *argv, float *result){
+int xtract_magnitude_spectrum(const float *data, const int N, const void *argv, float *result){
 
-    float *temp;
+    float *temp, *input;
+    size_t bytes;
     int n , M = N >> 1;
     fftwf_plan plan;
 
     temp = (float *)fftwf_malloc(N * sizeof(float));
+    input = (float *)malloc(bytes = N * sizeof(float));
+    input = memcpy(input, data, bytes);
 
-    plan = fftwf_plan_r2r_1d(N, data, temp, FFTW_R2HC, FFTW_ESTIMATE);
+    plan = fftwf_plan_r2r_1d(N, input, temp, FFTW_R2HC, FFTW_ESTIMATE);
     
     fftwf_execute(plan);
     
@@ -50,18 +55,23 @@ int xtract_magnitude_spectrum(float *data, int N, void *argv, float *result){
     
     fftwf_destroy_plan(plan);
     fftwf_free(temp);
+    free(input);
     
     return SUCCESS;
 }
 
-int xtract_autocorrelation_fft(float *data, int N, void *argv, float *result){
+int xtract_autocorrelation_fft(const float *data, const int N, const void *argv, float *result){
     
-    float *temp;
+    float *temp, *input;
+    size_t bytes;
     int n;
     fftwf_plan plan;
 
     temp = (float *)fftwf_malloc(N * sizeof(float));
-    plan = fftwf_plan_r2r_1d(N, data, temp, FFTW_HC2R, FFTW_ESTIMATE);
+    input = (float *)malloc(bytes = N * sizeof(float));
+    input = memcpy(input, data, bytes);
+
+    plan = fftwf_plan_r2r_1d(N, input, temp, FFTW_HC2R, FFTW_ESTIMATE);
 
     fftwf_execute(plan);
     
@@ -70,20 +80,26 @@ int xtract_autocorrelation_fft(float *data, int N, void *argv, float *result){
     
     fftwf_destroy_plan(plan);
     fftwf_free(temp);
+    free(input);
 
     return SUCCESS;
 }
 
-int xtract_mfcc(float *data, int N, void *argv, float *result){
+int xtract_mfcc(const float *data, const int N, const void *argv, float *result){
 
     xtract_mel_filter *f;
+    float *input;
+    size_t bytes;
     int n, filter;
 
     f = (xtract_mel_filter *)argv;
     
+    input = (float *)malloc(bytes = N * sizeof(float));
+    input = memcpy(input, data, bytes);
+    
     for(filter = 0; filter < f->n_filters; filter++){
         for(n = 0; n < N; n++){
-            result[filter] += data[n] * f->filters[filter][n];
+            result[filter] += input[n] * f->filters[filter][n];
         }
         if(result[filter] < LOG_LIMIT) result[filter] = LOG_LIMIT;
         result[filter] = log(result[filter]);
@@ -93,43 +109,51 @@ int xtract_mfcc(float *data, int N, void *argv, float *result){
     
     xtract_dct(result, f->n_filters, NULL, result);
 
+    free(input);
+    
     return SUCCESS;
 }
 
-int xtract_dct(float *data, int N, void *argv, float *result){
+int xtract_dct(const float *data, const int N, const void *argv, float *result){
     
     fftwf_plan plan;
+    float *input;
+    size_t bytes;
 
+    input = (float *)malloc(bytes = N * sizeof(float));
+    input = memcpy(input, data, bytes);
+    
     plan = 
-        fftwf_plan_r2r_1d(N, data, result, FFTW_REDFT00, FFTW_ESTIMATE);
+        fftwf_plan_r2r_1d(N, input, result, FFTW_REDFT00, FFTW_ESTIMATE);
     
     fftwf_execute(plan);
     fftwf_destroy_plan(plan);
+    free(input);
 
     return SUCCESS;
 }
 
 #else
 
-int xtract_magnitude_spectrum(float *data, int N, void *argv, float *result){
+int xtract_magnitude_spectrum(const float *data, const int N, const void *argv, float *result){
 
     NEEDS_FFTW;
 
 }
 
-int xtract_autocorrelation_fft(float *data, int N, void *argv, float *result){
+int xtract_autocorrelation_fft(const float *data, const int N, const void *argv, float *result){
 
     NEEDS_FFTW;
 
 }
 
-int xtract_mfcc(float *data, int N, void *argv, float *result){
+int xtract_mfcc(const float *data, const int N, const void *argv, float *result){
 
     NEEDS_FFTW;
 
 }
 
-int xtract_dct(float *data, int N, void *argv, float *result){
+int xtract_dct(const float *data, const int N, const void *argv, float *result){
 
     NEEDS_FFTW;
 
@@ -137,7 +161,7 @@ int xtract_dct(float *data, int N, void *argv, float *result){
 
 #endif
 
-int xtract_autocorrelation(float *data, int N, void *argv, float *result){
+int xtract_autocorrelation(const float *data, const int N, const void *argv, float *result){
 
     /* Naive time domain implementation  */
     
@@ -156,7 +180,7 @@ int xtract_autocorrelation(float *data, int N, void *argv, float *result){
     return SUCCESS;
 }
 
-int xtract_amdf(float *data, int N, void *argv, float *result){
+int xtract_amdf(const float *data, const int N, const void *argv, float *result){
 
     int n = N, i;
     
@@ -175,7 +199,7 @@ int xtract_amdf(float *data, int N, void *argv, float *result){
     return SUCCESS;
 }
 
-int xtract_asdf(float *data, int N, void *argv, float *result){
+int xtract_asdf(const float *data, const int N, const void *argv, float *result){
     
     int n = N, i;
     
@@ -193,7 +217,7 @@ int xtract_asdf(float *data, int N, void *argv, float *result){
     return SUCCESS;
 }
 
-int xtract_bark_coefficients(float *data, int N, void *argv, float *result){
+int xtract_bark_coefficients(const float *data, const int N, const void *argv, float *result){
 
     int *limits, band, n;
 
@@ -207,9 +231,12 @@ int xtract_bark_coefficients(float *data, int N, void *argv, float *result){
     return SUCCESS;
 }
 
-int xtract_peaks(float *data, int N, void *argv, float *result){
+int xtract_peaks(const float *data, const int N, const void *argv, float *result){
 
-    float thresh, max, y, y2, y3, p, width, sr; 
+    float thresh, max, y, y2, 
+	  y3, p, width, sr,
+	  *input = NULL;
+    size_t bytes;
     int n = N, M, return_code = SUCCESS;
     
     if(argv != NULL){
@@ -221,6 +248,13 @@ int xtract_peaks(float *data, int N, void *argv, float *result){
         thresh = 0;
         sr = 44100;
     }
+
+    input = (float *)malloc(bytes = N * sizeof(float));
+
+    if(input != NULL)
+	input = memcpy(input, data, bytes);
+    else
+	return MALLOC_FAILED;
 
     M = N >> 1;
     width = sr / N;
@@ -238,12 +272,12 @@ int xtract_peaks(float *data, int N, void *argv, float *result){
     }
 
     while(n--){
-        max = MAX(max, data[n]);
+        max = MAX(max, input[n]);
         /* ensure we never take log10(0) */
-        /*data[n] = (data[n] < LOG_LIMIT ? LOG_LIMIT : data[n]);*/
-        if ((data[n] * 100000) <= 1)
+        /*input[n] = (input[n] < LOG_LIMIT ? LOG_LIMIT : input[n]);*/
+        if ((input[n] * 100000) <= 1)
         /* We get a more stable peak this way */
-		    data[n] = 1;
+		    input[n] = 1;
         
     }
     
@@ -253,9 +287,9 @@ int xtract_peaks(float *data, int N, void *argv, float *result){
     result[M] = 0;
 
     for(n = 1; n < M; n++){
-        if(data[n] >= thresh){
-            if(data[n] > data[n - 1] && data[n] > data[n + 1]){
-                result[n] = width * (n + (p = .5 * (y = 20 * log10(data[n-1]) - (y3 = 20 * log10(data[n+1]))) / (20 * log10(data[n - 1]) - 2 * (y2 = 20 * log10(data[n])) + 20 * log10(data[n + 1]))));
+        if(input[n] >= thresh){
+            if(input[n] > input[n - 1] && input[n] > input[n + 1]){
+                result[n] = width * (n + (p = .5 * (y = 20 * log10(input[n-1]) - (y3 = 20 * log10(input[n+1]))) / (20 * log10(input[n - 1]) - 2 * (y2 = 20 * log10(input[n])) + 20 * log10(input[n + 1]))));
                 result[M + n] = y2 - .25 * (y - y3) * p;
             }
             else{
@@ -269,14 +303,16 @@ int xtract_peaks(float *data, int N, void *argv, float *result){
         }
     }	  
    
+    free(input);
     return (return_code ? return_code : SUCCESS);
 }
 	    
-int xtract_harmonics(float *data, int N, void *argv, float *result){
+int xtract_harmonics(const float *data, const int N, const void *argv, float *result){
     
     int n = (N >> 1), M = n; 
 
-    float *freqs, *amps, f0, thresh, ratio, nearest, distance;
+    const float *freqs, *amps;
+    float f0, thresh, ratio, nearest, distance;
 
     freqs = data;
     amps = data + n;

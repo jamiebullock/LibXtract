@@ -22,25 +22,25 @@
 
 #include "xtract/libxtract.h"
 
-int xtract_flux(float *data, int N, void *argv , float *result){
+int xtract_flux(const float *data, const int N, const void *argv , float *result){
 
     return FEATURE_NOT_IMPLEMENTED;
 
 }
 
-int xtract_attack_time(float *data, int N, void *argv , float *result){
+int xtract_attack_time(const float *data, const int N, const void *argv , float *result){
 
     return FEATURE_NOT_IMPLEMENTED;
 
 }
 
-int xtract_decay_time(float *data, int N, void *argv, float *result){
+int xtract_decay_time(const float *data, const int N, const void *argv, float *result){
 
     return FEATURE_NOT_IMPLEMENTED;
 
 }
 
-int xtract_delta_feature(float *data, int N, void *argv, float *result){
+int xtract_delta_feature(const float *data, const int N, const void *argv, float *result){
 
     return FEATURE_NOT_IMPLEMENTED;
 

@@ -22,7 +22,7 @@
 #include "xtract/libxtract.h"
 #define XTRACT
 
-int(*xtract[])(float *, int, void *, float *) = {
+int(*xtract[])(const float *, const int, const void *, float *) = {
     /* xtract_scalar.h */
     xtract_mean,
     xtract_variance,
@@ -51,9 +51,10 @@ int(*xtract[])(float *, int, void *, float *) = {
     xtract_odd_even_ratio,
     xtract_sharpness,
     xtract_slope,
-    xtract_lowest_match,
+    xtract_lowest,
     xtract_hps,
     xtract_f0,
+    xtract_failsafe_f0,
 /* xtract_delta.h */
     xtract_flux,
     xtract_attack_time,
@@ -100,9 +101,10 @@ char *xtract_help_strings[] = {
    "xtract_odd_even_ratio",
    "xtract_sharpness",
    "xtract_slope",
-   "xtract_lowest_match",
+   "xtract_lowest",
    "xtract_hps",
    "xtract_f0",
+   "xtract_failsafe_f0",
    "xtract_flux",
    "xtract_attack_time",
    "xtract_decay_time",

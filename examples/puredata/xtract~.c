@@ -141,7 +141,7 @@ static void *xtract_new(t_symbol *me, t_int argc, t_atom *argv) {
     else if(tmp == gensym("slope")) x->feature = SLOPE;
     else if(tmp == gensym("f0")) x->feature = F0;
     else if(tmp == gensym("hps"))x->feature = HPS;
-    else if(tmp == gensym("lowest_match"))x->feature = LOWEST_MATCH;
+    else if(tmp == gensym("lowest"))x->feature = LOWEST;
     else if(tmp == gensym("dct")) x->feature = DCT;
     else if(tmp == gensym("magnitude_spectrum")) 
                                         x->feature = MAGNITUDE_SPECTRUM;
@@ -168,7 +168,7 @@ static void *xtract_new(t_symbol *me, t_int argc, t_atom *argv) {
 	case  AVERAGE_DEVIATION:
 	case  ROLLOFF:
 	case  INHARMONICITY:
-	case  LOWEST_MATCH:
+	case  ODD_EVEN_RATIO:
 	case  F0:
 	case  TONALITY:
 	    floatargs = 1;
@@ -176,6 +176,7 @@ static void *xtract_new(t_symbol *me, t_int argc, t_atom *argv) {
 	case  SKEWNESS:
 	case  KURTOSIS:
 	case  PEAKS:
+	case  LOWEST:
 	case  HARMONICS:
 	    floatargs = 2;
 	    break;
@@ -194,7 +195,6 @@ static void *xtract_new(t_symbol *me, t_int argc, t_atom *argv) {
 	case  NOISINESS:
 	case  RMS_AMPLITUDE:
 	case  POWER:
-	case  ODD_EVEN_RATIO:
 	case  SHARPNESS:
 	case  SLOPE:
 	case  HPS:

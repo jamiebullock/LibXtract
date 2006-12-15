@@ -53,7 +53,7 @@ extern "C" {
   * @{
   */
 
-#define XTRACT_FEATURES 44
+#define XTRACT_FEATURES 45
     
 #define LOG_LIMIT 10e-10
 #define VERY_BIG_NUMBER 2e10
@@ -89,9 +89,10 @@ enum features_ {
     ODD_EVEN_RATIO,
     SHARPNESS,
     SLOPE,
-    LOWEST_MATCH,
+    LOWEST,
     HPS,
     F0,
+    FAILSAFE_F0,
     FLUX,
     ATTACK_TIME,
     DECAY_TIME,
@@ -178,7 +179,7 @@ printf("Mean = %.2f\n", mean);
  * 
  */
 #ifdef XTRACT
-extern int(*xtract[XTRACT_FEATURES])(float *data, int N, void *argv, float *result);
+extern int(*xtract[XTRACT_FEATURES])(const float *data, const int N, const void *argv, float *result);
 
 /** \brief An array of pointers to function help strings
  *

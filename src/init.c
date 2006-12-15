@@ -24,7 +24,7 @@
 #include <math.h>
 #include <stdlib.h>
 
-int xtract_init_mfcc(int N, float nyquist, int style, float freq_max, float freq_min, int freq_bands, float **fft_tables){
+int xtract_init_mfcc(int N, float nyquist, int style, float freq_min, float freq_max, int freq_bands, float **fft_tables){
 
     int n, i, k, *fft_peak, M, next_peak; 
     float norm, mel_freq_max, mel_freq_min, norm_fact, height, inc, val, 
