@@ -171,7 +171,9 @@ static void *xtract_new(t_symbol *me, t_int argc, t_atom *argv) {
 	case  AVERAGE_DEVIATION:
 	case  ROLLOFF:
 	case  INHARMONICITY:
+	case  MAGNITUDE_SPECTRUM:
 	case  ODD_EVEN_RATIO:
+	case  LOWEST_VALUE:
 	case  F0:
 	case  FAILSAFE_F0:
 	case  TONALITY:
@@ -196,7 +198,6 @@ static void *xtract_new(t_symbol *me, t_int argc, t_atom *argv) {
 	case  SPREAD:
 	case  ZCR:
 	case  LOUDNESS:
-	case  LOWEST_VALUE:
 	case  HIGHEST_VALUE:
 	case  SUM:
 	case  RMS_AMPLITUDE:
@@ -209,7 +210,6 @@ static void *xtract_new(t_symbol *me, t_int argc, t_atom *argv) {
 	case  DECAY_TIME: /*not implemented */
 	case  DELTA_FEATURE: /*not implemented */
 	case  AUTOCORRELATION_FFT:
-	case  MAGNITUDE_SPECTRUM:
 	case  MFCC:
 	case  DCT:
 	case  AUTOCORRELATION:

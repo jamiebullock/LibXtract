@@ -32,7 +32,7 @@
 
 int xtract_magnitude_spectrum(const float *data, const int N, const void *argv, float *result){
 
-    float *temp, *input;
+    float *temp, *input, q;
     size_t bytes;
     int n , M = N >> 1;
     fftwf_plan plan;
@@ -41,17 +41,22 @@ int xtract_magnitude_spectrum(const float *data, const int N, const void *argv, 
     input = (float *)malloc(bytes = N * sizeof(float));
     input = memcpy(input, data, bytes);
 
+    q = 0.f;
+
+    q = *(float *)argv; 
+    q = (q ? (q * .5) / M : 0.f);
+
     plan = fftwf_plan_r2r_1d(N, input, temp, FFTW_R2HC, FFTW_ESTIMATE);
     
     fftwf_execute(plan);
     
     for(n = 1; n < M; n++){
         result[n] = sqrt(SQ(temp[n]) + SQ(temp[N - n])) / N;
-        result[N-n] = 0.0f;
+        result[M + n] = n * q;
     }
     
     result[0] = fabs(temp[0]) / N;
-    result[M] = fabs(temp[M]) / N;
+    result[M] = q * .5;
     
     fftwf_destroy_plan(plan);
     fftwf_free(temp);

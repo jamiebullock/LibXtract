@@ -456,7 +456,7 @@ int xtract_lowest_value(const float *data, const int N, const void *argv, float 
     int n = N;
     float temp;
 
-    *result = data[N];
+    *result = data[--n];
 
     while(n--){
        if((temp = data[n]) > *(float *)argv)	
@@ -470,7 +470,7 @@ int xtract_highest_value(const float *data, const int N, const void *argv, float
 
     int n = N;
 
-    *result = data[N];
+    *result = data[--n];
 
     while(n--) 
 	*result = MAX(*result, data[n]);
@@ -633,7 +633,7 @@ int xtract_failsafe_f0(const float *data, const int N, const void *argv, float *
 
 	magnitudes = (float *)malloc(N * sizeof(float));
 	peaks = (float *)malloc(N * sizeof(float));
-	xtract_magnitude_spectrum(data, N, NULL, magnitudes);
+	xtract_magnitude_spectrum(data, N, argv, magnitudes);
 	argf[0] = 10.f;
 	argf[1] = *(float *)argv;
 	xtract_peaks(magnitudes, N, argf, peaks);
