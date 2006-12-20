@@ -187,10 +187,10 @@ static void *xtract_new(t_symbol *me, t_int argc, t_atom *argv) {
 	case  TRISTIMULUS_2:
 	case  TRISTIMULUS_3:
 	case  SMOOTHNESS:
+	case  FLATNESS:
 	case  SPREAD:
 	case  ZCR:
 	case  LOUDNESS:
-	case  FLATNESS:
 	case  CREST:
 	case  NOISINESS:
 	case  RMS_AMPLITUDE:
