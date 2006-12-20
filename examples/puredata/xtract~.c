@@ -140,8 +140,11 @@ static void *xtract_new(t_symbol *me, t_int argc, t_atom *argv) {
     else if(tmp == gensym("sharpness")) x->feature = SHARPNESS;
     else if(tmp == gensym("slope")) x->feature = SLOPE;
     else if(tmp == gensym("f0")) x->feature = F0;
+    else if(tmp == gensym("failsafe_f0")) x->feature = FAILSAFE_F0;
     else if(tmp == gensym("hps"))x->feature = HPS;
-    else if(tmp == gensym("lowest"))x->feature = LOWEST;
+    else if(tmp == gensym("lowest_value"))x->feature = LOWEST_VALUE;
+    else if(tmp == gensym("highest_value"))x->feature = HIGHEST_VALUE;
+    else if(tmp == gensym("sum"))x->feature = SUM;
     else if(tmp == gensym("dct")) x->feature = DCT;
     else if(tmp == gensym("magnitude_spectrum")) 
                                         x->feature = MAGNITUDE_SPECTRUM;
@@ -170,14 +173,16 @@ static void *xtract_new(t_symbol *me, t_int argc, t_atom *argv) {
 	case  INHARMONICITY:
 	case  ODD_EVEN_RATIO:
 	case  F0:
+	case  FAILSAFE_F0:
 	case  TONALITY:
 	    floatargs = 1;
 	    break;
 	case  SKEWNESS:
 	case  KURTOSIS:
 	case  PEAKS:
-	case  LOWEST:
 	case  HARMONICS:
+	case  NOISINESS:
+	case  CREST:
 	    floatargs = 2;
 	    break;
 	case  CENTROID:
@@ -191,8 +196,9 @@ static void *xtract_new(t_symbol *me, t_int argc, t_atom *argv) {
 	case  SPREAD:
 	case  ZCR:
 	case  LOUDNESS:
-	case  CREST:
-	case  NOISINESS:
+	case  LOWEST_VALUE:
+	case  HIGHEST_VALUE:
+	case  SUM:
 	case  RMS_AMPLITUDE:
 	case  POWER:
 	case  SHARPNESS:

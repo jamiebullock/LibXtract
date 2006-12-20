@@ -320,11 +320,11 @@ int xtract_flatness(const float *data, const int N, const void *argv, float *res
     num = pow(num, 1.f / N);
     den /= N;
 
-    if(num < 1e-20) 
-	num = 1e-20;
+    if(num < VERY_SMALL_NUMBER) 
+	num = VERY_SMALL_NUMBER;
 
-    if(den < 1e-20) 
-	den = 1e-20;
+    if(den < VERY_SMALL_NUMBER) 
+	den = VERY_SMALL_NUMBER;
 
     *result = num / den;
 
@@ -338,7 +338,7 @@ int xtract_tonality(const float *data, const int N, const void *argv, float *res
 
     sfm = *(float *)argv;
 
-    sfmdb = (sfm > 0 ? (10 * log10(sfm)) / -60 : 0);
+    sfmdb = (sfm > 0 ? ((10 * log10(sfm)) / -60) : 0);
 
     *result = MIN(sfmdb, 1);
 
@@ -347,13 +347,33 @@ int xtract_tonality(const float *data, const int N, const void *argv, float *res
 
 int xtract_crest(const float *data, const int N, const void *argv, float *result){
 
-    return FEATURE_NOT_IMPLEMENTED;
+    float max, mean; 
+
+    max = mean = 0.f;
+
+    max = *(float *)argv;
+    mean = *((float *)argv+1);
+
+    *result = max / mean;
+
+    return SUCCESS;
 
 }
 
 int xtract_noisiness(const float *data, const int N, const void *argv, float *result){
 
-    return FEATURE_NOT_IMPLEMENTED;
+    float h, i, p; /*harmonics, inharmonics, partials */
+
+    i = p = h = 0.f;
+
+    h = *(float *)argv;
+    p = *((float *)argv+1);
+
+    i = p - h;
+
+    *result = i / p;
+
+    return SUCCESS;
 
 }
 
@@ -431,24 +451,43 @@ int xtract_slope(const float *data, const int N, const void *argv, float *result
 
 }
 
-int xtract_lowest(const float *data, const int N, const void *argv, float *result){
+int xtract_lowest_value(const float *data, const int N, const void *argv, float *result){
 
-    float lower, upper, lowest;
     int n = N;
+    float temp;
 
-    lower = *(float *)argv;
-    upper = *((float *)argv+1);
+    *result = data[N];
 
-    lowest = upper;
-
-    while(n--) {
-	if(data[n] > lower)
-	    *result = MIN(lowest, data[n]);
+    while(n--){
+       if((temp = data[n]) > *(float *)argv)	
+	    *result = MIN(*result, data[n]);
     }
 
-    *result = (*result == upper ? -0 : *result);
+    return SUCCESS;
+}
+
+int xtract_highest_value(const float *data, const int N, const void *argv, float *result){
+
+    int n = N;
+
+    *result = data[N];
+
+    while(n--) 
+	*result = MAX(*result, data[n]);
 
     return SUCCESS;
+}
+
+
+int xtract_sum(const float *data, const int N, const void *argv, float *result){
+
+    int n = N;
+
+    while(n--)
+	*result += *data++;
+
+    return SUCCESS;
+
 }
 
 int xtract_hps(const float *data, const int N, const void *argv, float *result){
@@ -599,8 +638,7 @@ int xtract_failsafe_f0(const float *data, const int N, const void *argv, float *
 	argf[1] = *(float *)argv;
 	xtract_peaks(magnitudes, N, argf, peaks);
 	argf[0] = 0.f;
-	argf[1] = N >> 1;
-	xtract_lowest(peaks, argf[1], argf, result);
+	xtract_lowest_value(peaks, N >> 1, argf, result);
 
 	free(magnitudes);
 	free(peaks);

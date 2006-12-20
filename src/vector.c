@@ -245,8 +245,8 @@ int xtract_peaks(const float *data, const int N, const void *argv, float *result
         return_code = BAD_ARGV;
     }
     else{
-        thresh = 0;
-        sr = 44100;
+        thresh = 0.f;
+        sr = 44100.f;
     }
 
     input = (float *)malloc(bytes = N * sizeof(float));
@@ -259,7 +259,7 @@ int xtract_peaks(const float *data, const int N, const void *argv, float *result
     M = N >> 1;
     width = sr / N;
     
-    y = y2 = y3 = p = max = 0;
+    y = y2 = y3 = p = max = 0.f;
 
     if(thresh < 0 || thresh > 100){
         thresh = 0;
@@ -267,19 +267,12 @@ int xtract_peaks(const float *data, const int N, const void *argv, float *result
     }
 
     if(!sr){
-        sr = 44100;
+        sr = 44100.f;
         return_code = BAD_ARGV;
     }
 
-    while(n--){
+    while(n--)
         max = MAX(max, input[n]);
-        /* ensure we never take log10(0) */
-        /*input[n] = (input[n] < LOG_LIMIT ? LOG_LIMIT : input[n]);*/
-        if ((input[n] * 100000) <= 1)
-        /* We get a more stable peak this way */
-		    input[n] = 1;
-        
-    }
     
     thresh *= .01 * max;
 
@@ -289,7 +282,7 @@ int xtract_peaks(const float *data, const int N, const void *argv, float *result
     for(n = 1; n < M; n++){
         if(input[n] >= thresh){
             if(input[n] > input[n - 1] && input[n] > input[n + 1]){
-                result[n] = width * (n + (p = .5 * (y = 20 * log10(input[n-1]) - (y3 = 20 * log10(input[n+1]))) / (20 * log10(input[n - 1]) - 2 * (y2 = 20 * log10(input[n])) + 20 * log10(input[n + 1]))));
+                result[n] = width * (n + (p = .5 * (y = input[n-1] - (y3 = input[n+1])) / (input[n - 1] - 2 * (y2 = input[n]) + input[n + 1])));
                 result[M + n] = y2 - .25 * (y - y3) * p;
             }
             else{

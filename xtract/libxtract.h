@@ -53,13 +53,8 @@ extern "C" {
   * @{
   */
 
-#define XTRACT_FEATURES 45
+#define XTRACT_FEATURES 47
     
-#define LOG_LIMIT 10e-10
-#define VERY_BIG_NUMBER 2e10
-#define SR_LIMIT 192000
-#define BARK_BANDS 26
-
 /** \brief Enumeration of features, elements are used as indixes to an array of pointers to feature extracton functions */
 enum features_ {
     MEAN,
@@ -89,7 +84,9 @@ enum features_ {
     ODD_EVEN_RATIO,
     SHARPNESS,
     SLOPE,
-    LOWEST,
+    LOWEST_VALUE,
+    HIGHEST_VALUE,
+    SUM,
     HPS,
     F0,
     FAILSAFE_F0,

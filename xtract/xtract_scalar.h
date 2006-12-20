@@ -271,15 +271,35 @@ int xtract_sharpness(const float *data, const int N, const void *argv, float *re
  */
 int xtract_slope(const float *data, const int N, const void *argv, float *result);
 
-/** \brief Extract the value of the lowest value in an input vector that between two bounds
+/** \brief Extract the value of the lowest value in an input vector
  * 
  * \param *data: a pointer to the first element in an array of floats
  * \param N: the number of elements to be considered
- * \param *argv: a pointer to an array containing a lower and upper bounds for search, where lower < n < upper.
- * \param *result: a pointer to a value representing the lowest non-zero component in *data. If no match is found then -0 is returned.
+ * \param *argv: a pointer to a float representing the lower limit for the search. i.e. (*result > *argv) returns 1.
+ * \param *result: a pointer to a value representing the lowest component in *data that falls above a given threshold. 
  * 
  */
-int xtract_lowest(const float *data, const int N, const void *argv, float *result);
+int xtract_lowest_value(const float *data, const int N, const void *argv, float *result);
+
+/** \brief Extract the value of the highest value in an input vector
+ * 
+ * \param *data: a pointer to the first element in an array of floats
+ * \param N: the number of elements to be considered
+ * \param *argv: a pointer to NULL.
+ * \param *result: a pointer to a value representing the highest component in *data. 
+ * 
+ */
+int xtract_highest_value(const float *data, const int N, const void *argv, float *result);
+
+/** \brief Extract the sum of the values in an input vector
+ * 
+ * \param *data: a pointer to the first element in an array of floats
+ * \param N: the number of elements to be considered
+ * \param *argv: a pointer to NULL.
+ * \param *result: a pointer to a value representing the sum of all of the values pointed to by *data. 
+ * 
+ */
+int xtract_sum(const float *data, const int N, const void *argv, float *result);
 
 /** \brief Extract the Pitch of an input vector using Harmonic Product Spectrum (HPS) analysis
  * 

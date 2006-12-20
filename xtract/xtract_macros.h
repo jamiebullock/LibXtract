@@ -36,6 +36,13 @@ extern "C" {
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 #define NEEDS_FFTW printf("LibXtract must be compiled with fftw support to use this function.\n")
 
+#define VERY_SMALL_NUMBER 1e-20
+#define LOG_LIMIT VERY_SMALL_NUMBER
+#define VERY_BIG_NUMBER 1e20
+#define SR_LIMIT 192000
+#define BARK_BANDS 26
+
+
 #ifdef __cplusplus
 }
 #endif
