@@ -245,11 +245,11 @@ int xtract_spread(const float *data, const int N, const void *argv, float *resul
 
     int n = N;
 
-    float num = 0.f, den = 0.f, tmp;
+    float num = 0.f, den = 0.f, temp;
 
     while(n--){
-	tmp = n - *(float *)argv;
-	num += SQ(tmp) * data[n];
+	temp = n - *(float *)argv;
+	num += SQ(temp) * data[n];
 	den += data[n];
     }
 
@@ -444,13 +444,54 @@ int xtract_odd_even_ratio(const float *data, const int N, const void *argv, floa
 
 int xtract_sharpness(const float *data, const int N, const void *argv, float *result){
 
-    return FEATURE_NOT_IMPLEMENTED;
+    int n = N, rv;
+    float sl, g, temp; /* sl = specific loudness */
+
+    sl = g = temp = 0.f;
+
+    if(n > BARK_BANDS) 
+	rv = BAD_VECTOR_SIZE; 
+    else
+	rv = SUCCESS;
+
+
+    while(n--){
+	sl = pow(data[n], 0.23);
+	g = (n < 15 ? 1.f : 0.066 * exp(0.171 * n));
+	temp = n * g * sl;
+    }
+
+    *result = 0.11 * temp / N;
+
+    return rv;
 
 }
 
 int xtract_slope(const float *data, const int N, const void *argv, float *result){
 
-    return FEATURE_NOT_IMPLEMENTED;
+    const float *freqs, *amps; 
+    float f, a,
+	  F, A, FA, FSQ; /* sums of freqs, amps, freq * amps, freq squared */
+    int n, M; 
+    
+    F = A = FA = FSQ = 0.f;
+    n = M = N >> 1;
+
+    freqs = data;
+    amps = data + n;
+
+    while(n--){
+	f = freqs[n];
+	a = amps[n];
+	F += f;
+	A += a;
+	FA += f * a;
+	FSQ += f * f;
+    }
+
+    *result = (1.f / A) * (M * FA - F * A) / (M * FSQ - F * F); 
+
+    return SUCCESS;
 
 }
 

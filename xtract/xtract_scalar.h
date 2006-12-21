@@ -170,9 +170,6 @@ int xtract_zcr(const float *data, const int N, const void *argv, float *result);
  */
 int xtract_rolloff(const float *data, const int N, const void *argv, float *result);
 
-/* Loudness */
-/* A set of BARK_BANDS bark coefficients must be passed in, the loudness is calculated approximately according to Moore, Glasberg et al, 1997 */
-
 /** \brief Extract the 'total loudness' of an input vector using a method described by Moore, Glasberg et al (2005)
  * 
  * \param *data: a pointer to the first element in an array of floats representing a set of BARK_BANDS bark coefficients
@@ -269,9 +266,8 @@ int xtract_odd_even_ratio(const float *data, const int N, const void *argv, floa
  */
 int xtract_sharpness(const float *data, const int N, const void *argv, float *result);
 
-/** \brief Extract the Slope of an input vector 
+/** \brief Extract the Slope of an input vector using a method described by Peeters(2003)
  * 
- * \param *data: a pointer to the first element in an array of floats representing the magnitude spectrum of an audio vector 
  * \param *data: a pointer to the first element in an array of floats representing the magnitude coefficients from the magnitude spectrum of an audio vector, (e.g. the second half of the array pointed to by *result from xtract_magnitude_spectrum().
  * \param N: the number of elements to be considered
  * \param *argv: a pointer to NULL
