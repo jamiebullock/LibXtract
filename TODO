@@ -5,6 +5,6 @@ Add Pure Data help file
 Add delta functions
 Add Max/MSP external example
 Add self documentation
-Check sfm and tonality
+Check and add return values as appropriate. Make them more sensible!
 ...do other stuff and eventually...
 ...optimise!

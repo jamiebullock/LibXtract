@@ -258,7 +258,6 @@ int xtract_odd_even_ratio(const float *data, const int N, const void *argv, floa
 
 /** \brief Extract the Sharpness of an input vector 
  * 
- * \param *data: a pointer to the first element in an array of floats representing the magnitude spectrum of an audio vector 
  * \param *data: a pointer to the first element in an array of floats representing the magnitude coefficients from the magnitude spectrum of an audio vector, (e.g. the second half of the array pointed to by *result from xtract_magnitude_spectrum().
  * \param N: the number of elements to be considered
  * \param *argv: a pointer to NULL
@@ -268,7 +267,7 @@ int xtract_sharpness(const float *data, const int N, const void *argv, float *re
 
 /** \brief Extract the Slope of an input vector using a method described by Peeters(2003)
  * 
- * \param *data: a pointer to the first element in an array of floats representing the magnitude coefficients from the magnitude spectrum of an audio vector, (e.g. the second half of the array pointed to by *result from xtract_magnitude_spectrum().
+ * \param *data: a pointer to the first element in an array of floats representing a set of BARK_BANDS bark coefficients
  * \param N: the number of elements to be considered
  * \param *argv: a pointer to NULL
  * \param *result: the Slope of N values from the array pointed to by *data

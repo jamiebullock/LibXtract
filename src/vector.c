@@ -32,7 +32,7 @@
 
 int xtract_magnitude_spectrum(const float *data, const int N, const void *argv, float *result){
 
-    float *temp, *input, q;
+    float *temp, *input, q, sr;
     size_t bytes;
     int n , M = N >> 1;
     fftwf_plan plan;
@@ -41,10 +41,13 @@ int xtract_magnitude_spectrum(const float *data, const int N, const void *argv, 
     input = (float *)malloc(bytes = N * sizeof(float));
     input = memcpy(input, data, bytes);
 
-    q = 0.f;
+    q = sr = 0.f;
 
-    q = *(float *)argv; 
-    q = (q ? (q * .5) / M : 0.f);
+    sr = *(float *)argv;
+
+    CHECK_SR;
+
+    q = (sr * .5) / M;
 
     plan = fftwf_plan_r2r_1d(N, input, temp, FFTW_R2HC, FFTW_ESTIMATE);
     
@@ -242,17 +245,23 @@ int xtract_peaks(const float *data, const int N, const void *argv, float *result
 	  y3, p, width, sr,
 	  *input = NULL;
     size_t bytes;
-    int n = N, M, return_code = SUCCESS;
+    int n = N, M, rv = SUCCESS;
+
+    thresh = max = y = y2 = y3 = p = width = sr = 0.f;
     
     if(argv != NULL){
         thresh = ((float *)argv)[0];
         sr = ((float *)argv)[1];
-        return_code = BAD_ARGV;
     }
-    else{
-        thresh = 0.f;
-        sr = 44100.f;
+    else
+        rv = BAD_ARGV;
+
+    if(thresh < 0 || thresh > 100){
+        thresh = 0;
+        rv = BAD_ARGV;
     }
+
+    CHECK_SR;
 
     input = (float *)malloc(bytes = N * sizeof(float));
 
@@ -263,18 +272,6 @@ int xtract_peaks(const float *data, const int N, const void *argv, float *result
 
     M = N >> 1;
     width = sr / N;
-    
-    y = y2 = y3 = p = max = 0.f;
-
-    if(thresh < 0 || thresh > 100){
-        thresh = 0;
-        return_code = BAD_ARGV;
-    }
-
-    if(!sr){
-        sr = 44100.f;
-        return_code = BAD_ARGV;
-    }
 
     while(n--)
         max = MAX(max, input[n]);
@@ -302,7 +299,7 @@ int xtract_peaks(const float *data, const int N, const void *argv, float *result
     }	  
    
     free(input);
-    return (return_code ? return_code : SUCCESS);
+    return (rv ? rv : SUCCESS);
 }
 	    
 int xtract_harmonics(const float *data, const int N, const void *argv, float *result){

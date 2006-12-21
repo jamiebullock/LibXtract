@@ -458,7 +458,7 @@ int xtract_sharpness(const float *data, const int N, const void *argv, float *re
     while(n--){
 	sl = pow(data[n], 0.23);
 	g = (n < 15 ? 1.f : 0.066 * exp(0.171 * n));
-	temp = n * g * sl;
+	temp += n * g * sl;
     }
 
     *result = 0.11 * temp / N;
