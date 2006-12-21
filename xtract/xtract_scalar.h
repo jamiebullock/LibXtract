@@ -90,16 +90,19 @@ int xtract_kurtosis(const float *data, const int N, const void *argv,  float *re
 
 /** \brief Extract the centroid of an input vector
  * 
- * \param *data: a pointer to the first element in an array of floats represeting a frequency spectrum of size N/2 and a magnitude peak spectrum of size N/2 (This is the output format of xtract_peaks)
+ * \param *data: a pointer to the first element in an array of floats representing the magnitude spectrum of an audio vector, (e.g. the array pointed to by *result from xtract_magnitude_spectrum().
  * \param N: the number of elements to be considered
  * \param *argv: a pointer to NULL
  * \param *result: the centroid of the values pointed to by *data
+ *
+ * Note: for a more 'accurate' result *result from xtract_peaks() can be passed in. This gives the interpolated peak frequency locations.
+ *
  */
 int xtract_centroid(const float *data, const int N, const void *argv,  float *result);
 
 /** \brief Calculate the Irregularity of an input vector using a method described by Krimphoff (1994)
  * 
- * \param *data: a pointer to the first element in an array of floats representing the magnitude spectrum of an audio vector
+ * \param *data: a pointer to the first element in an array of floats representing the magnitude coefficients from the magnitude spectrum of an audio vector, (e.g. the second half of the array pointed to by *result from xtract_magnitude_spectrum().
  * \param N: the number of elements to be considered
  * \param *argv: a pointer to NULL
  * \param *result: the irregularity of N values from the array pointed to by *data
@@ -108,7 +111,7 @@ int xtract_irregularity_k(const float *data, const int N, const void *argv, floa
 
 /** \brief Calculate the Irregularity of an input vector using a method described by Jensen (1999)
  * 
- * \param *data: a pointer to the first element in an array of floats representing the magnitude spectrum of an audio vector
+ * \param *data: a pointer to the first element in an array of floats representing the magnitude coefficients from the magnitude spectrum of an audio vector, (e.g. the second half of the array pointed to by *result from xtract_magnitude_spectrum().
  * \param N: the number of elements to be considered
  * \param *argv: a pointer to NULL
  * \param *result: the irregularity of N values from the array pointed to by *data
@@ -117,7 +120,7 @@ int xtract_irregularity_j(const float *data, const int N, const void *argv, floa
 
 /** \brief Calculate the Tristimulus of an input vector using a method described by Pollard and Jansson (1982)
  * 
- * \param *data: a pointer to the first element in an array of floats representing the amplitudes of the harmonic spectrum of an audio vector e.g. a pointer to the second half of the array pointed to by *result from xtract_harmonics(). The amplitudes of the peak spectrum (e.g. *result from xtract_peaks()) can be used if one wishes to consider all partials not just harmonics.
+ * \param *data: a pointer to the first element in an array of floats representing the magnitude coefficients of the harmonic spectrum of an audio vector e.g. a pointer to the second half of the array pointed to by *result from xtract_harmonics(). The amplitudes of the peak spectrum (e.g. *result from xtract_peaks()) can be used if one wishes to consider all partials not just harmonics.
  * \param N: the number of elements to be considered
  * \param *argv: a pointer to NULL
  * \param *result: the tristimulus of N values from the array pointed to by *data
@@ -131,7 +134,7 @@ int xtract_tristimulus_3(const float *data, const int N, const void *argv, float
 
 /** \brief Extract the smoothness of an input vector using a method described by McAdams (1999)
  * 
- * \param *data: a pointer to the first element in an array of floats representing the magnitude spectrum of an audio vector
+ * \param *data: a pointer to the first element in an array of floats representing the magnitude coefficients from the magnitude spectrum of an audio vector, (e.g. the second half of the array pointed to by *result from xtract_magnitude_spectrum().
  * \param N: the number of elements to be considered
  * \param *argv: a pointer to the first element of an array of integers containing the lower bound, upper bound, and pre-scaling factor, whereby array data in the range lower < n < upper will be pre-scaled by p before processing. 
  * \param *result: the smoothness of N values from the array pointed to by *data
@@ -140,7 +143,7 @@ int xtract_smoothness(const float *data, const int N, const void *argv, float *r
 
 /** \brief Extract the spectral spread of an input vector using a method described by Casagrande(2005)
  * 
- * \param *data: a pointer to the first element in an array of floats representing the magnitude spectrum of an audio vector
+ * \param *data: a pointer to the first element in an array of floats representing the magnitude coefficients from the magnitude spectrum of an audio vector, (e.g. the second half of the array pointed to by *result from xtract_magnitude_spectrum().
  * \param N: the number of elements to be considered
  * \param *argv: a pointer to NULL
  * \param *result: the spectral spread of N values from the array pointed to by *data
@@ -160,7 +163,7 @@ int xtract_zcr(const float *data, const int N, const void *argv, float *result);
 
 /** \brief Extract the spectral rolloff of an input vector using a method described by Bee Suan Ong (2005)
  * 
- * \param *data: a pointer to the first element in an array of floats representing the magnitude spectrum of an audio vector
+ * \param *data: a pointer to the first element in an array of floats representing the magnitude coefficients from the magnitude spectrum of an audio vector, (e.g. the second half of the array pointed to by *result from xtract_magnitude_spectrum().
  * \param N: the number of elements to be considered
  * \param *argv: a pointer to an array containing a floating point value representing the threshold for rolloff, i.e. the percentile at which the rolloff is determined, expressed in the range 0-1.0, and a float representing the sample rate in Hz
  * \param *result: the spectral rolloff in Hz of N values from the array pointed to by *data. This is the point in the spectrum below which argv[0] of the energy is distributed.
@@ -170,18 +173,21 @@ int xtract_rolloff(const float *data, const int N, const void *argv, float *resu
 /* Loudness */
 /* A set of BARK_BANDS bark coefficients must be passed in, the loudness is calculated approximately according to Moore, Glasberg et al, 1997 */
 
-/** \brief Extract the loudness of an input vector using a method described by Moore, Glasberg et al (2005)
+/** \brief Extract the 'total loudness' of an input vector using a method described by Moore, Glasberg et al (2005)
  * 
  * \param *data: a pointer to the first element in an array of floats representing a set of BARK_BANDS bark coefficients
  * \param N: the number of coefficients to be considered
  * \param *argv: a pointer to NULL
- * \param *result: the loudness of N values from the array pointed to by *data
+ * \param *result: the total loudness of N values from the array pointed to by *data
+ *
+ * Note: if N = 1, the 'specific loudness' of the bark band pointed to by *data will be given by *result
+ *
  */
 int xtract_loudness(const float *data, const int N, const void *argv, float *result);
 
 /** \brief Extract the spectral flatness measure of an input vector using a method described by Tristan Jehan (2005)
  * 
- * \param *data: a pointer to the first element in an array of floats representing the magnitude spectrum of an audio vector 
+ * \param *data: a pointer to the first element in an array of floats representing the magnitude coefficients from the magnitude spectrum of an audio vector, (e.g. the second half of the array pointed to by *result from xtract_magnitude_spectrum().
  * \param N: the number of elements to be considered
  * \param *argv: a pointer to NULL
  * \param *result: the spectral flatness of N values from the array pointed to by *data
@@ -200,7 +206,7 @@ int xtract_tonality(const float *data, const int N, const void *argv, float *res
 
 /** \brief Extract the noisiness of an input vector using a method described by Tae Hong Park (2000)
  * 
- * \param *data: a pointer to the first element in an array of floats representing the magnitude spectrum of an audio vector 
+ * \param *data: a pointer to the first element in an array of floats representing the magnitude coefficients from the magnitude spectrum of an audio vector, (e.g. the second half of the array pointed to by *result from xtract_magnitude_spectrum().
  * \param N: the number of elements to be considered
  * \param *argv: a pointer to NULL
  * \param *result: the noisiness of N values from the array pointed to by *data
@@ -227,7 +233,7 @@ int xtract_inharmonicity(const float *data, const int N, const void *argv, float
 
 /** \brief Extract the spectral crest of an input vector using a method described by Peeters (2003)
  * 
- * \param *data: a pointer to the first element in an array of floats representing the magnitude spectrum of an audio vector 
+ * \param *data: a pointer to the first element in an array of floats representing the magnitude coefficients from the magnitude spectrum of an audio vector, (e.g. the second half of the array pointed to by *result from xtract_magnitude_spectrum().
  * \param N: the number of elements to be considered
  * \param *argv: a pointer to NULL
  * \param *result: the spectral crest of N values from the array pointed to by *data
@@ -236,7 +242,7 @@ int xtract_crest(const float *data, const int N, const void *argv, float *result
     
 /** \brief Extract the Spectral Power of an input vector using a method described by Bee Suan Ong (2005)
  * 
- * \param *data: a pointer to the first element in an array of floats representing the magnitude spectrum of an audio vector 
+ * \param *data: a pointer to the first element in an array of floats representing the magnitude coefficients from the magnitude spectrum of an audio vector, (e.g. the second half of the array pointed to by *result from xtract_magnitude_spectrum().
  * \param N: the number of elements to be considered
  * \param *argv: a pointer to NULL
  * \param *result: the spectral power of N values from the array pointed to by *data
@@ -256,6 +262,7 @@ int xtract_odd_even_ratio(const float *data, const int N, const void *argv, floa
 /** \brief Extract the Sharpness of an input vector 
  * 
  * \param *data: a pointer to the first element in an array of floats representing the magnitude spectrum of an audio vector 
+ * \param *data: a pointer to the first element in an array of floats representing the magnitude coefficients from the magnitude spectrum of an audio vector, (e.g. the second half of the array pointed to by *result from xtract_magnitude_spectrum().
  * \param N: the number of elements to be considered
  * \param *argv: a pointer to NULL
  * \param *result: the Sharpness of N values from the array pointed to by *data
@@ -265,6 +272,7 @@ int xtract_sharpness(const float *data, const int N, const void *argv, float *re
 /** \brief Extract the Slope of an input vector 
  * 
  * \param *data: a pointer to the first element in an array of floats representing the magnitude spectrum of an audio vector 
+ * \param *data: a pointer to the first element in an array of floats representing the magnitude coefficients from the magnitude spectrum of an audio vector, (e.g. the second half of the array pointed to by *result from xtract_magnitude_spectrum().
  * \param N: the number of elements to be considered
  * \param *argv: a pointer to NULL
  * \param *result: the Slope of N values from the array pointed to by *data
@@ -305,7 +313,7 @@ int xtract_sum(const float *data, const int N, const void *argv, float *result);
  * 
  * \warning {This function doesn't work properly}
  * 
- * \param *data: a pointer to the first element in an array of floats representing the magnitude spectrum of an audio vector 
+ * \param *data: a pointer to the first element in an array of floats representing the magnitude coefficients from the magnitude spectrum of an audio vector, (e.g. the second half of the array pointed to by *result from xtract_magnitude_spectrum().
  * \param N: the number of elements to be considered
  * \param *argv: a pointer to NULL
  * \param *result: the pitch of N values from the array pointed to by *data

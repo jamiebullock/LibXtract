@@ -51,12 +51,12 @@ int xtract_magnitude_spectrum(const float *data, const int N, const void *argv, 
     fftwf_execute(plan);
     
     for(n = 1; n < M; n++){
-        result[n] = sqrt(SQ(temp[n]) + SQ(temp[N - n])) / N;
-        result[M + n] = n * q;
+        result[M + n] = sqrt(SQ(temp[n]) + SQ(temp[N - n])) / N;
+        result[n] = n * q;
     }
     
-    result[0] = fabs(temp[0]) / N;
-    result[M] = q * .5;
+    result[M] = fabs(temp[0]) / N;
+    result[0] = q * .5;
     
     fftwf_destroy_plan(plan);
     fftwf_free(temp);

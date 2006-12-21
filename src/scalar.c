@@ -291,14 +291,17 @@ int xtract_rolloff(const float *data, const int N, const void *argv, float *resu
 
 int xtract_loudness(const float *data, const int N, const void *argv, float *result){
 
-    int n = BARK_BANDS;
+    int n = N, rv;
 
-    /*if(n != N) return BAD_VECTOR_SIZE; */
+    if(n > BARK_BANDS) 
+	rv = BAD_VECTOR_SIZE; 
+    else
+	rv = SUCCESS;
 
     while(n--)
 	*result += pow(data[n], 0.23);
 
-    return SUCCESS;
+    return rv;
 }
 
 int xtract_flatness(const float *data, const int N, const void *argv, float *result){
