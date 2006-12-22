@@ -75,7 +75,8 @@ int(*xtract[])(const float *, const int, const void *, float *) = {
     xtract_harmonics
 };
 
-char *xtract_help_strings[] = {
+
+/*char *xtract_help_strings[] = {
    "xtract_mean",
    "xtract_variance",
    "xtract_standard_deviation",
@@ -123,4 +124,4 @@ char *xtract_help_strings[] = {
    "xtract_mfcc",
    "xtract_dct",
    "xtract_harmonics"
-   };
+   }; */

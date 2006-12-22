@@ -129,6 +129,80 @@ enum return_codes_ {
     FEATURE_NOT_IMPLEMENTED
 };
 
+/** \brief Enumeration of data types*/
+typedef enum type_ {
+    FLOAT,
+    INT,
+    MEL_FILTER,
+} t_type;
+
+/** \brief Enumeration of units*/
+typedef enum unit_ {
+    HERTZ,
+    DBFS
+} t_unit;
+
+/** \brief Boolean */
+typedef enum {
+    FALSE,
+    TRUE
+} t_bool;
+
+/** \brief Enumeration of vector format types*/
+typedef enum vector_ {
+    MAGNITUDES,
+    FREQUENCIES,
+    FREQUENCIES_AND_MAGNITUDES,
+    BARK_COEFFS,
+    MEL_COEFFS,
+    SAMPLES,
+} t_vector;
+
+/** \brief Data structure containing useful information about functions provided by LibXtract. */
+typedef struct _function_descriptor {
+
+    struct {
+	char name[MAX_NAME_LENGTH];
+	char pretty_name[MAX_NAME_LENGTH];
+	char description[MAX_DESC_LENGTH];
+	char author[MAX_AUTHOR_LENGTH];
+	int year;
+    } algo;
+
+    struct {
+	t_vector format;
+	t_unit unit;
+    } data;
+
+    int n_args;
+
+    struct {
+	t_type type;
+	float min[MAXARGS];
+	float max[MAXARGS];
+	float def[MAXARGS];
+	t_unit unit[MAXARGS];
+    } argv;
+
+    t_bool is_scalar;
+
+    union {
+
+	struct {
+	    float min;
+	    float max;	   
+	    t_unit unit;
+	} scalar;
+
+	struct {
+	    t_vector format;
+	    t_unit unit;
+	} vector;
+
+    } result;
+
+} t_function_descriptor;
+
 /**
  *                                                                          
  * \brief An array of pointers to functions that perform the extraction
@@ -178,17 +252,11 @@ printf("Mean = %.2f\n", mean);
 #ifdef XTRACT
 extern int(*xtract[XTRACT_FEATURES])(const float *data, const int N, const void *argv, float *result);
 
-/** \brief An array of pointers to function help strings
+/** \brief An array of pointers to function descriptors
  *
- * Defined in libxtract.c. As a minimum this will contain pointers to the names of all of the feature extraction functions in the library. This is intended as a 'quick reference' to be queried as necessary.
+ * Defined in libxtract.c. This is an array of pointers to function descriptors designed to be queried for useful information such as the expected input and output units of a function, or the number of arguments it takes.
  */
-extern char *xtract_help_strings[XTRACT_FEATURES];
-
-/** \brief An array of pointers to strings giving function output units
- *
- * Defined in libxtract.c. This contains pointers to strings giving the output units of all of the feature extraction functions in the library. This is intended as a 'quick reference' to be queried as necessary.
- */
-extern char *xtract_units[XTRACT_FEATURES];
+//extern t_function_descriptor *xtract_help[XTRACT_FEATURES];
 
 #endif
 
@@ -210,7 +278,11 @@ int xtract_init_mfcc(int N, float nyquist, int style, float freq_max, float freq
  */
 int xtract_init_bark(int N, float nyquist, int *band_limits);
 
+/* \brief A function to build an array of function descriptors */
+void *xtract_make_descriptors();
 
+/* \brief A function to free an array of function descriptors */
+int xtract_free_descriptors(void *fd);
 /* Free functions */
 
 /** @} */

@@ -102,157 +102,70 @@ static void *xtract_new(t_symbol *me, t_int argc, t_atom *argv) {
     
     t_symbol *tmp;
     t_xtract_tilde *x = (t_xtract_tilde *)pd_new(xtract_class);
-    xtract_mel_filter *f;
-    t_int n, N, floatargs = 0;
+    xtract_mel_filter *mf;
+    t_int n, N, f, F, n_args, type;
+    t_function_descriptor *fd;
    
+    n_args = type = 0;
+
+    f = F = XTRACT_FEATURES;
+
     N = BLOCKSIZE;
     
     x->argv = NULL;
     
     tmp = atom_getsymbol(argv);
 
-    /* map creation args to features */
-    if(tmp == gensym("mean")) x->feature = MEAN;
-    else if(tmp == gensym("variance")) x->feature = VARIANCE;
-    else if(tmp == gensym("standard_deviation"))x->feature = STANDARD_DEVIATION;
-    else if(tmp == gensym("average_deviation")) x->feature = AVERAGE_DEVIATION;
-    else if(tmp == gensym("skewness")) x->feature = SKEWNESS;
-    else if(tmp == gensym("kurtosis")) x->feature = KURTOSIS;
-    else if(tmp == gensym("centroid")) x->feature = CENTROID;
-    else if(tmp == gensym("irregularity_k")) x->feature = IRREGULARITY_K;
-    else if(tmp == gensym("irregularity_j")) x->feature = IRREGULARITY_J;
-    else if(tmp == gensym("tristimulus_1")) x->feature = TRISTIMULUS_1;
-    else if(tmp == gensym("tristimulus_2")) x->feature = TRISTIMULUS_2;
-    else if(tmp == gensym("tristimulus_3")) x->feature = TRISTIMULUS_3;
-    else if(tmp == gensym("smoothness")) x->feature = SMOOTHNESS;
-    else if(tmp == gensym("spread")) x->feature = SPREAD;
-    else if(tmp == gensym("zcr")) x->feature = ZCR;
-    else if(tmp == gensym("rolloff")) x->feature = ROLLOFF;
-    else if(tmp == gensym("loudness")) x->feature = LOUDNESS;
-    else if(tmp == gensym("flatness")) x->feature = FLATNESS;
-    else if(tmp == gensym("tonality")) x->feature = TONALITY;
-    else if(tmp == gensym("crest")) x->feature = CREST;
-    else if(tmp == gensym("noisiness")) x->feature = NOISINESS;
-    else if(tmp == gensym("rms_amplitude")) x->feature = RMS_AMPLITUDE;
-    else if(tmp == gensym("inharmonicity")) x->feature = INHARMONICITY;
-    else if(tmp == gensym("power")) x->feature = POWER;
-    else if(tmp == gensym("odd_even_ratio")) x->feature = ODD_EVEN_RATIO;
-    else if(tmp == gensym("sharpness")) x->feature = SHARPNESS;
-    else if(tmp == gensym("slope")) x->feature = SLOPE;
-    else if(tmp == gensym("f0")) x->feature = F0;
-    else if(tmp == gensym("failsafe_f0")) x->feature = FAILSAFE_F0;
-    else if(tmp == gensym("hps"))x->feature = HPS;
-    else if(tmp == gensym("lowest_value"))x->feature = LOWEST_VALUE;
-    else if(tmp == gensym("highest_value"))x->feature = HIGHEST_VALUE;
-    else if(tmp == gensym("sum"))x->feature = SUM;
-    else if(tmp == gensym("dct")) x->feature = DCT;
-    else if(tmp == gensym("magnitude_spectrum")) 
-                                        x->feature = MAGNITUDE_SPECTRUM;
-    else if(tmp == gensym("autocorrelation")) x->feature = AUTOCORRELATION;
-    else if(tmp == gensym("autocorrelation_fft")) 
-                                        x->feature = AUTOCORRELATION_FFT;
-    else if(tmp == gensym("amdf")) x->feature = AMDF;
-    else if(tmp == gensym("asdf")) x->feature = ASDF;
-    else if(tmp == gensym("peaks")) x->feature = PEAKS;
-    else if(tmp == gensym("flux")) x->feature = FLUX;
-    else if(tmp == gensym("attack_time")) x->feature = ATTACK_TIME;
-    else if(tmp == gensym("decay_time")) x->feature = DECAY_TIME;
-    else if(tmp == gensym("delta")) x->feature = DELTA_FEATURE;
-    else if(tmp == gensym("mfcc")) x->feature = MFCC;
-    else if(tmp == gensym("harmonics")) x->feature = HARMONICS;
-    else if(tmp == gensym("bark_coefficients")) x->feature = BARK_COEFFICIENTS;
-    else post("xtract~: No feature selected");
+    /* get function descriptors */
+    fd = (t_function_descriptor *)xtract_make_descriptors();
+
+    /* iterate over descriptors */
+    while(f--){
+	/* map creation arg to feature */
+	if(tmp == gensym(fd[f].algo.name)){ 
+	    x->feature = f;
+	    break;
+	}
+    }
 
     /* allocate memory for feature arguments */
-    switch(x->feature){
-	case  MEAN: 
-	case  VARIANCE:
-	case  STANDARD_DEVIATION:
-	case  AVERAGE_DEVIATION:
-	case  ROLLOFF:
-	case  INHARMONICITY:
-	case  MAGNITUDE_SPECTRUM:
-	case  ODD_EVEN_RATIO:
-	case  LOWEST_VALUE:
-	case  F0:
-	case  FAILSAFE_F0:
-	case  TONALITY:
-	    floatargs = 1;
-	    break;
-	case  SKEWNESS:
-	case  KURTOSIS:
-	case  PEAKS:
-	case  HARMONICS:
-	case  NOISINESS:
-	case  CREST:
-	    floatargs = 2;
-	    break;
-	case  CENTROID:
-	case  IRREGULARITY_K:
-	case  IRREGULARITY_J:
-	case  TRISTIMULUS_1:
-	case  TRISTIMULUS_2:
-	case  TRISTIMULUS_3:
-	case  SMOOTHNESS:
-	case  FLATNESS:
-	case  SPREAD:
-	case  ZCR:
-	case  LOUDNESS:
-	case  HIGHEST_VALUE:
-	case  SUM:
-	case  RMS_AMPLITUDE:
-	case  POWER:
-	case  SHARPNESS:
-	case  SLOPE:
-	case  HPS:
-	case  FLUX: /*not implemented */
-	case  ATTACK_TIME: /*not implemented */
-	case  DECAY_TIME: /*not implemented */
-	case  DELTA_FEATURE: /*not implemented */
-	case  AUTOCORRELATION_FFT:
-	case  MFCC:
-	case  DCT:
-	case  AUTOCORRELATION:
-	case  AMDF:
-	case  ASDF:
-	case  BARK_COEFFICIENTS:
-	    floatargs = 0;
-	    break;
-	default:
-	    floatargs = 0;
-	    break;
-    }
+    n_args = fd[f].n_args;
+    type = fd[f].argv.type;
 
-    if(x->feature == MFCC){
-	x->memory.argv = (size_t)(sizeof(xtract_mel_filter));
-	x->argv = (xtract_mel_filter *)getbytes(x->memory.argv);
+    if(n_args){
+	if(type == MEL_FILTER){
+	    x->memory.argv = (size_t)(n_args * sizeof(xtract_mel_filter));
+	    x->argv = (xtract_mel_filter *)getbytes(x->memory.argv);
+	}
+	else if(type == INT){
+	    x->memory.argv = (size_t)(n_args * sizeof(t_int));
+	    x->argv = (t_int *)getbytes(x->memory.argv);
+	}
+	else if (type == FLOAT){
+	    x->memory.argv = (size_t)(n_args * sizeof(t_float));
+	    x->argv = (t_float *)getbytes(x->memory.argv);
+	}
+	else
+	    x->memory.argv = 0;
     }
-    else if(x->feature == BARK_COEFFICIENTS){
-	x->memory.argv = (size_t)(BARK_BANDS * sizeof(t_int));
-        x->argv = (t_int *)getbytes(x->memory.argv);
-    }
-    else if (floatargs){
-	x->memory.argv = (size_t)(floatargs * sizeof(t_float));
-	x->argv = (t_float *)getbytes(x->memory.argv);
-    }
-    else
-	x->memory.argv = 0;
     
+    post("xtract~: %s", fd[f].algo.pretty_name);
+
     /* do init if needed */
     if(x->feature == MFCC){
 
-        f = x->argv;
+        mf = x->argv;
         
-        f->n_filters = 20;
+        mf->n_filters = 20;
         
         post("xtract~: mfcc: filters = %d", ((xtract_mel_filter *)x->argv)->n_filters);
-        f->filters = 
-            (t_float **)getbytes(f->n_filters * sizeof(t_float *));
-        for(n = 0; n < f->n_filters; n++)
-            f->filters[n] = (float *)getbytes(N * sizeof(float));
+        mf->filters = 
+            (t_float **)getbytes(mf->n_filters * sizeof(t_float *));
+        for(n = 0; n < mf->n_filters; n++)
+            mf->filters[n] = (float *)getbytes(N * sizeof(float));
                  
         xtract_init_mfcc(N, NYQUIST, EQUAL_GAIN, 18000.0f,
-        80.0f, f->n_filters, f->filters);
+        80.0f, mf->n_filters, mf->filters);
     }
     else if(x->feature == BARK_COEFFICIENTS)
         xtract_init_bark(N, NYQUIST, x->argv);
@@ -279,6 +192,9 @@ static void *xtract_new(t_symbol *me, t_int argc, t_atom *argv) {
     /* otherwise: float */
     else outlet_new(&x->x_obj, &s_float);
     
+    /* free the function descriptors */
+    xtract_free_descriptors(fd);
+    
     return (void *)x;
 }
 
@@ -304,10 +220,10 @@ static void xtract_tilde_show_help(t_xtract_tilde *x, t_symbol *s){
     i = XTRACT_FEATURES;
 
     post("\n\txtract~: Feature List\n");
-    
+   /* 
     while(i--){
 	post("\t%s", xtract_help_strings[i]+7);
-    }
+    }*/
 }
 
 static void xtract_tilde_free(t_xtract_tilde *x) {

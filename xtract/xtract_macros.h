@@ -42,7 +42,11 @@ extern "C" {
 #define VERY_BIG_NUMBER 1e20
 #define SR_LIMIT 192000
 #define BARK_BANDS 26
-
+#define NONE 0
+#define MAXARGS 4
+#define MAX_NAME_LENGTH 64
+#define MAX_AUTHOR_LENGTH 128
+#define MAX_DESC_LENGTH 256
 
 #ifdef __cplusplus
 }
