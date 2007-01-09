@@ -106,7 +106,7 @@ static void *xtract_new(t_symbol *me, t_int argc, t_atom *argv) {
     t_int n, N, f, F, n_args, type;
     t_function_descriptor *fd;
    
-    n_args = type = 0;
+    n_args = type = x->feature = 0;
 
     f = F = XTRACT_FEATURES;
 
@@ -124,12 +124,13 @@ static void *xtract_new(t_symbol *me, t_int argc, t_atom *argv) {
 	/* map creation arg to feature */
 	if(tmp == gensym(fd[f].algo.name)){ 
 	    x->feature = f;
+	    /* FIX: possible bug if no argument given */
 	    break;
 	}
     }
 
     /* allocate memory for feature arguments */
-    n_args = fd[f].n_args;
+    n_args = fd[f].argc;
     type = fd[f].argv.type;
 
     if(n_args){
@@ -149,7 +150,7 @@ static void *xtract_new(t_symbol *me, t_int argc, t_atom *argv) {
 	    x->memory.argv = 0;
     }
     
-    post("xtract~: %s", fd[f].algo.pretty_name);
+    post("xtract~: %s", fd[f].algo.p_name);
 
     /* do init if needed */
     if(x->feature == MFCC){

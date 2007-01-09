@@ -133,7 +133,7 @@ enum return_codes_ {
 typedef enum type_ {
     FLOAT,
     INT,
-    MEL_FILTER,
+    MEL_FILTER
 } t_type;
 
 /** \brief Enumeration of units*/
@@ -163,8 +163,9 @@ typedef struct _function_descriptor {
 
     struct {
 	char name[MAX_NAME_LENGTH];
-	char pretty_name[MAX_NAME_LENGTH];
-	char description[MAX_DESC_LENGTH];
+	char p_name[MAX_NAME_LENGTH]; /* pretty name */
+	char desc[MAX_DESC_LENGTH];
+	char p_desc[MAX_DESC_LENGTH]; /* pretty description */
 	char author[MAX_AUTHOR_LENGTH];
 	int year;
     } algo;
@@ -174,14 +175,15 @@ typedef struct _function_descriptor {
 	t_unit unit;
     } data;
 
-    int n_args;
+    int argc;
 
     struct {
-	t_type type;
+	t_type type; /* type of the array/value pointed to by argv */
 	float min[MAXARGS];
 	float max[MAXARGS];
-	float def[MAXARGS];
+	float def[MAXARGS]; /* defaults */
 	t_unit unit[MAXARGS];
+	char donor[MAXARGS]; /* suggested donor functions for argv */
     } argv;
 
     t_bool is_scalar;
