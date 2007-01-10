@@ -130,14 +130,21 @@ int xtract_spectral_mean(const float *data, const int N, const void *argv, float
 
 int xtract_spectral_variance(const float *data, const int N, const void *argv, float *result){
 
-    int M, m;
+    int m;
+    float A = 0.f;
+    const float *freqs, *amps;
 
-    m = M = N >> 1;
+    m = N >> 1;
 
-    while(m--)
-	*result += pow((data[m] * data[M +m])  - *(float *)argv, 2);
+    amps = data;
+    freqs = data + m;
 
-    *result = *result / (M - 1);
+    while(m--){
+	A += amps[m];
+	*result += pow((freqs[m]  - *(float *)argv) * amps[m], 2);
+    }
+
+    *result = *result / (A - 1);
 
     return SUCCESS;
 }
@@ -151,50 +158,67 @@ int xtract_spectral_standard_deviation(const float *data, const int N, const voi
 
 int xtract_spectral_average_deviation(const float *data, const int N, const void *argv, float *result){
 
-    int M, m;
+    int m;
+    float A = 0.f;
+    const float *freqs, *amps;
 
-    m = M = N >> 1;
+    m = N >> 1;
 
-    while(m--)
-	*result += fabs((data[m] * data[M + m]) - *(float *)argv);
+    amps = data;
+    freqs = data + m;
 
-    *result /= M;
+    while(m--){
+	A += amps[m];
+	*result += fabs((amps[m] * freqs[m]) - *(float *)argv);
+    }
+
+    *result /= A;
 
     return SUCCESS;
 }
 
 int xtract_spectral_skewness(const float *data, const int N, const void *argv,  float *result){
 
-    int M, m;
-    float temp;
+    int m;
+    float temp, A = 0.f;
+    const float *freqs, *amps;
 
-    m = M = N >> 1;
+    m = N >> 1;
+
+    amps = data;
+    freqs = data + m;
 
     while(m--){
-	temp = ((data[m] * data[M + m]) - 
+	A += amps[m];
+	temp = ((amps[m] * freqs[m]) - 
 		((float *)argv)[0]) / ((float *)argv)[1];
 	*result += pow(temp, 3);
     }
 
-    *result /= M;
+    *result /= A;
 
     return SUCCESS;
 }
 
 int xtract_spectral_kurtosis(const float *data, const int N, const void *argv,  float *result){
 
-    int M, m;
-    float temp;
+    int m;
+    float temp, A = 0.f;
+    const float *freqs, *amps;
 
-    m = M = N >> 1;
+    m = N >> 1;
+
+    amps = data;
+    freqs = data + m;
 
     while(m--){
-	temp = ((data[m] * data[M + m]) - 
+	A += amps[m];
+	temp = ((amps[m] * freqs[m]) - 
 		((float *)argv)[0]) / ((float *)argv)[1];
 	*result += pow(temp, 4);
     }
 
-    *result /= M;
+    *result /= A;
     *result -= 3.0f;
 
     return SUCCESS;
