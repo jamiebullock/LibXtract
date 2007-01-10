@@ -32,7 +32,7 @@
 
 int xtract_magnitude_spectrum(const float *data, const int N, const void *argv, float *result){
 
-    float *temp, *input, q, sr;
+    float *temp, *input, q;
     size_t bytes;
     int n , M = N >> 1;
     fftwf_plan plan;
@@ -41,25 +41,21 @@ int xtract_magnitude_spectrum(const float *data, const int N, const void *argv, 
     input = (float *)malloc(bytes = N * sizeof(float));
     input = memcpy(input, data, bytes);
 
-    q = sr = 0.f;
+    q = *(float *)argv;
 
-    sr = *(float *)argv;
-
-    CHECK_SR;
-
-    q = (sr * .5) / M;
+    CHECK_q;
 
     plan = fftwf_plan_r2r_1d(N, input, temp, FFTW_R2HC, FFTW_ESTIMATE);
     
     fftwf_execute(plan);
     
     for(n = 1; n < M; n++){
-        result[M + n] = sqrt(SQ(temp[n]) + SQ(temp[N - n])) / N;
-        result[n] = n * q;
+        result[n] = sqrt(SQ(temp[n]) + SQ(temp[N - n])) / N;
+        result[M + n] = n * q;
     }
     
-    result[M] = fabs(temp[0]) / N;
-    result[0] = q * .5;
+    result[0] = fabs(temp[0]) / N;
+    result[M] = q * .5;
     
     fftwf_destroy_plan(plan);
     fftwf_free(temp);
@@ -239,19 +235,17 @@ int xtract_bark_coefficients(const float *data, const int N, const void *argv, f
     return SUCCESS;
 }
 
-int xtract_peaks(const float *data, const int N, const void *argv, float *result){
+int xtract_peak_spectrum(const float *data, const int N, const void *argv, float *result){
 
-    float thresh, max, y, y2, 
-	  y3, p, width, sr,
-	  *input = NULL;
+    float thresh, max, y, y2, y3, p, q, *input = NULL;
     size_t bytes;
     int n = N, M, rv = SUCCESS;
 
-    thresh = max = y = y2 = y3 = p = width = sr = 0.f;
+    thresh = max = y = y2 = y3 = p = q = 0.f;
     
     if(argv != NULL){
         thresh = ((float *)argv)[0];
-        sr = ((float *)argv)[1];
+        q = ((float *)argv)[1];
     }
     else
         rv = BAD_ARGV;
@@ -261,7 +255,7 @@ int xtract_peaks(const float *data, const int N, const void *argv, float *result
         rv = BAD_ARGV;
     }
 
-    CHECK_SR;
+    CHECK_q;
 
     input = (float *)malloc(bytes = N * sizeof(float));
 
@@ -271,7 +265,6 @@ int xtract_peaks(const float *data, const int N, const void *argv, float *result
 	return MALLOC_FAILED;
 
     M = N >> 1;
-    width = sr / N;
 
     while(n--)
         max = MAX(max, input[n]);
@@ -284,8 +277,10 @@ int xtract_peaks(const float *data, const int N, const void *argv, float *result
     for(n = 1; n < M; n++){
         if(input[n] >= thresh){
             if(input[n] > input[n - 1] && input[n] > input[n + 1]){
-                result[n] = width * (n + (p = .5 * (y = input[n-1] - (y3 = input[n+1])) / (input[n - 1] - 2 * (y2 = input[n]) + input[n + 1])));
-                result[M + n] = y2 - .25 * (y - y3) * p;
+                result[M + n] = q * (n + (p = .5 * (y = input[n-1] - 
+				(y3 = input[n+1])) / (input[n - 1] - 2 * 
+				    (y2 = input[n]) + input[n + 1])));
+                result[n] = y2 - .25 * (y - y3) * p;
             }
             else{
                 result[n] = 0;
@@ -302,15 +297,15 @@ int xtract_peaks(const float *data, const int N, const void *argv, float *result
     return (rv ? rv : SUCCESS);
 }
 	    
-int xtract_harmonics(const float *data, const int N, const void *argv, float *result){
+int xtract_harmonic_spectrum(const float *data, const int N, const void *argv, float *result){
     
     int n = (N >> 1), M = n; 
 
     const float *freqs, *amps;
     float f0, thresh, ratio, nearest, distance;
 
-    freqs = data;
-    amps = data + n;
+    amps = data;
+    freqs = data + n;
     f0 = *((float *)argv);
     thresh = *((float *)argv+1);
 
@@ -324,8 +319,8 @@ int xtract_harmonics(const float *data, const int N, const void *argv, float *re
 	    if(distance > thresh)
 		result[n] = result[M + n] = 0.f;
 	    else {
-		result[n] = freqs[n];
-		result[M + n] = amps[n];
+		result[n] = amps[n];
+		result[M + n] = freqs[n];
 	    }
 	}
 	else

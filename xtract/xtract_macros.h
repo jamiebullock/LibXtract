@@ -35,7 +35,7 @@ extern "C" {
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 #define NEEDS_FFTW printf("LibXtract must be compiled with fftw support to use this function.\n")
-#define CHECK_SR if(!sr) sr = 44100.f
+#define CHECK_q if(!q) q = 44100.f / N
 
 #define VERY_SMALL_NUMBER 1e-20
 #define LOG_LIMIT VERY_SMALL_NUMBER

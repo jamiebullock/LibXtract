@@ -38,9 +38,8 @@ extern "C" {
  * 
  * \param *data: a pointer to the first element in an array of floats representing an audio vector
  * \param N: the number of array elements to be considered
- * \param *argv: a pointer to a float representing the sample rate of the audio 
- * \param *result: a pointer to an array containing N/2 bin frequencies, and N/2
- * magnitude coefficients.
+ * \param *argv: a pointer to a float representing (samplerate / N)
+ * \param *result: a pointer to an array of size N containing N/2 magnitude coefficients and N/2 bin frequencies.
  */
 int xtract_magnitude_spectrum(const float *data, const int N, const void *argv, float *result);
 
@@ -110,23 +109,23 @@ int xtract_asdf(const float *data, const int N, const void *argv, float *result)
  */
 int xtract_bark_coefficients(const float *data, const int N, const void *argv, float *result);
 
-/** \brief Extract the frequency and amplitude of spectral peaks from a magnitude spectrum
- * \param *data: a pointer to the first element in an array of floats representing the magnitude coefficients from the magnitude spectrum of an audio vector, (e.g. the second half of the array pointed to by *result from xtract_magnitude_spectrum().
- * \param N: the number of array elements to be considered
- * \param *argv: a pointer to an array containing the peak threshold as percentage of the magnitude of the maximum peak found, and the sample rate in Hz.  
- * \param *result: a pointer to an array of size N, containing N/2 freqs and N/2 amplitudes 
+/** \brief Extract the amplitude and frequency of spectral peaks from a magnitude spectrum
+ * \param *data: a pointer to the first element in an array of floats representing N/2 magnitude coefficients from the magnitude spectrum of an audio vector, (e.g. the first half of the array pointed to by *result from xtract_magnitude_spectrum(), or xtract_magnitudes().
+ * \param N: the size of the output array (note: the input array can be of size N/2)
+ * \param *argv: a pointer to an array containing the peak threshold as percentage of the magnitude of the maximum peak found, and a float representing (samplerate / N)  
+ * \param *result: a pointer to an array of size N containing N/2 magnitude coefficients and N/2 bin frequencies.
  *
  */
 
-int xtract_peaks(const float *data, const int N, const void *argv, float *result);
+int xtract_peak_spectrum(const float *data, const int N, const void *argv, float *result);
 
 /** \brief Extract the harmonic spectrum of from a of a peak spectrum 
- * \param *data: a pointer to the first element in an array of floats representing the peak spectrum of an audio vector (e.g. *result from  xtract_peaks). It is expected that the first half of the array pointed to by *data will contain frequencies for each peak considered, and the the second half will contain the respective amplitudes
+ * \param *data: a pointer to the first element in an array of floats representing the peak spectrum of an audio vector (e.g. *result from  xtract_peaks). It is expected that the first half of the array pointed to by *data will contain amplitudes for each peak considered, and the the second half will contain the respective frequencies
  * \param N: the size of the array pointed to by *data
  * \param *argv: a pointer to an array containing the fundamental (f0) of the spectrum, and a threshold (t) where 0<=t<=1.0, and t determines the distance from the nearest harmonic number within which a partial can be considered harmonic.
- * \param *result: a pointer to an array of size N containing N/2 freqs and N/2 amplitudes.
+ * \param *result: a pointer to an array of size N containing N/2 magnitude coefficients and N/2 bin frequencies.
  */
-int xtract_harmonics(const float *data, const int N, const void *argv, float *result);
+int xtract_harmonic_spectrum(const float *data, const int N, const void *argv, float *result);
 
 /** @} */
 

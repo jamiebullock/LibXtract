@@ -20,6 +20,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "m_pd.h"
 #include <math.h>
+#include <string.h>
 
 #define XTRACT 
 #include "xtract/libxtract.h"
@@ -105,6 +106,10 @@ static void *xtract_new(t_symbol *me, t_int argc, t_atom *argv) {
     xtract_mel_filter *mf;
     t_int n, N, f, F, n_args, type;
     t_function_descriptor *fd;
+    char *p_name, *p_desc, *author;
+    int *year;
+
+    p_name = p_desc = author = NULL;
    
     n_args = type = x->feature = 0;
 
@@ -124,7 +129,6 @@ static void *xtract_new(t_symbol *me, t_int argc, t_atom *argv) {
 	/* map creation arg to feature */
 	if(tmp == gensym(fd[f].algo.name)){ 
 	    x->feature = f;
-	    /* FIX: possible bug if no argument given */
 	    break;
 	}
     }
@@ -149,8 +153,24 @@ static void *xtract_new(t_symbol *me, t_int argc, t_atom *argv) {
 	else
 	    x->memory.argv = 0;
     }
+
+
+    p_name = fd[f].algo.p_name;
+    p_desc = fd[f].algo.p_desc;
+    author = fd[f].algo.author;
+    year = &fd[f].algo.year; 
+
+    if(argc){
+	if(strcmp(p_name, ""))	
+	    post("xtract~: %s", p_name );
+	if(strcmp(p_desc, ""))	
+	    post("xtract~: %s", p_desc );
+	if(strcmp(author, "") && year)	
+	    post("xtract~: %s(%d)", author, *year);
+    }	
+    else
+	post("xtract~: No arguments given");
     
-    post("xtract~: %s", fd[f].algo.p_name);
 
     /* do init if needed */
     if(x->feature == MFCC){
@@ -174,8 +194,8 @@ static void *xtract_new(t_symbol *me, t_int argc, t_atom *argv) {
     if(x->feature == AUTOCORRELATION || x->feature == AUTOCORRELATION_FFT ||
     x->feature == MFCC || x->feature == AMDF || x->feature == ASDF|| 
     x->feature == DCT || x->feature == BARK_COEFFICIENTS || 
-    x->feature == MAGNITUDE_SPECTRUM || x->feature == PEAKS || 
-    x->feature == HARMONICS) 
+    x->feature == MAGNITUDE_SPECTRUM || x->feature == PEAK_SPECTRUM || 
+    x->feature == HARMONIC_SPECTRUM) 
         x->feature_type = VECTOR;
                 
     else if (x->feature == FLUX || x->feature == ATTACK_TIME || 

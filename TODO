@@ -1,3 +1,7 @@
+Add spectral_flux
+Add geometric_mean
+Add spectral_mean, spectral_deviation, spectral_geometric_mean etc.
+Add weighted temporal features as per Peeters (xtract_weighted_mean etc) weight given as argv?
 Improve noise robustness of xtract_f0
 Add feature advertisement
 Fix xtract_hps - it doesn't work!

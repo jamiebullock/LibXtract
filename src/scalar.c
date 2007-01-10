@@ -102,16 +102,15 @@ int xtract_kurtosis(const float *data, const int N, const void *argv,  float *re
     return SUCCESS;
 }
 
-
-int xtract_centroid(const float *data, const int N, const void *argv,  float *result){
+int xtract_spectral_centroid(const float *data, const int N, const void *argv,  float *result){
 
     int n = (N >> 1);
 
     const float *freqs, *amps;
     float FA = 0.f, A = 0.f;
 
-    freqs = data;
-    amps = data + n;
+    amps = data;
+    freqs = data + n;
 
     while(n--){
 	FA += freqs[n] * amps[n];
@@ -119,6 +118,84 @@ int xtract_centroid(const float *data, const int N, const void *argv,  float *re
     }
 
     *result = FA / A;
+
+    return SUCCESS;
+}
+
+int xtract_spectral_mean(const float *data, const int N, const void *argv, float *result){
+
+    return xtract_spectral_centroid(data, N, argv, result);
+
+}
+
+int xtract_spectral_variance(const float *data, const int N, const void *argv, float *result){
+
+    int M, m;
+
+    m = M = N >> 1;
+
+    while(m--)
+	*result += pow((data[m] * data[M +m])  - *(float *)argv, 2);
+
+    *result = *result / (M - 1);
+
+    return SUCCESS;
+}
+
+int xtract_spectral_standard_deviation(const float *data, const int N, const void *argv, float *result){
+
+    *result = sqrt(*(float *)argv);
+
+    return SUCCESS;
+}
+
+int xtract_spectral_average_deviation(const float *data, const int N, const void *argv, float *result){
+
+    int M, m;
+
+    m = M = N >> 1;
+
+    while(m--)
+	*result += fabs((data[m] * data[M + m]) - *(float *)argv);
+
+    *result /= M;
+
+    return SUCCESS;
+}
+
+int xtract_spectral_skewness(const float *data, const int N, const void *argv,  float *result){
+
+    int M, m;
+    float temp;
+
+    m = M = N >> 1;
+
+    while(m--){
+	temp = ((data[m] * data[M + m]) - 
+		((float *)argv)[0]) / ((float *)argv)[1];
+	*result += pow(temp, 3);
+    }
+
+    *result /= M;
+
+    return SUCCESS;
+}
+
+int xtract_spectral_kurtosis(const float *data, const int N, const void *argv,  float *result){
+
+    int M, m;
+    float temp;
+
+    m = M = N >> 1;
+
+    while(m--){
+	temp = ((data[m] * data[M + m]) - 
+		((float *)argv)[0]) / ((float *)argv)[1];
+	*result += pow(temp, 4);
+    }
+
+    *result /= M;
+    *result -= 3.0f;
 
     return SUCCESS;
 }
@@ -391,15 +468,15 @@ int xtract_rms_amplitude(const float *data, const int N, const void *argv, float
     return SUCCESS;
 }
 
-int xtract_inharmonicity(const float *data, const int N, const void *argv, float *result){
+int xtract_spectral_inharmonicity(const float *data, const int N, const void *argv, float *result){
 
     int n = N >> 1;
     float num = 0.f, den = 0.f, fund; 
     const float *freqs, *amps;
 
     fund = *(float *)argv;
-    freqs = data;
-    amps = data + n;
+    amps = data;
+    freqs = data + n;
 
     while(n--){
 	num += abs(freqs[n] - n * fund) * SQ(amps[n]);
@@ -467,7 +544,7 @@ int xtract_sharpness(const float *data, const int N, const void *argv, float *re
 
 }
 
-int xtract_slope(const float *data, const int N, const void *argv, float *result){
+int xtract_spectral_slope(const float *data, const int N, const void *argv, float *result){
 
     const float *freqs, *amps; 
     float f, a,
@@ -477,8 +554,8 @@ int xtract_slope(const float *data, const int N, const void *argv, float *result
     F = A = FA = FSQ = 0.f;
     n = M = N >> 1;
 
-    freqs = data;
-    amps = data + n;
+    amps = data;
+    freqs = data + n;
 
     while(n--){
 	f = freqs[n];
@@ -680,7 +757,7 @@ int xtract_failsafe_f0(const float *data, const int N, const void *argv, float *
 	xtract_magnitude_spectrum(data, N, argv, magnitudes);
 	argf[0] = 10.f;
 	argf[1] = *(float *)argv;
-	xtract_peaks(magnitudes, N, argf, peaks);
+	xtract_peak_spectrum(magnitudes, N, argf, peaks);
 	argf[0] = 0.f;
 	xtract_lowest_value(peaks, N >> 1, argf, result);
 

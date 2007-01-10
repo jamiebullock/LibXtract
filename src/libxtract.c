@@ -30,7 +30,13 @@ int(*xtract[])(const float *, const int, const void *, float *) = {
     xtract_average_deviation,
     xtract_skewness,
     xtract_kurtosis,
-    xtract_centroid,
+    xtract_spectral_mean,
+    xtract_spectral_variance,
+    xtract_spectral_standard_deviation,
+    xtract_spectral_average_deviation,
+    xtract_spectral_skewness,
+    xtract_spectral_kurtosis,
+    xtract_spectral_centroid,
     xtract_irregularity_k,
     xtract_irregularity_j,
     xtract_tristimulus_1,
@@ -46,11 +52,11 @@ int(*xtract[])(const float *, const int, const void *, float *) = {
     xtract_crest,
     xtract_noisiness,
     xtract_rms_amplitude,
-    xtract_inharmonicity,
+    xtract_spectral_inharmonicity,
     xtract_power,
     xtract_odd_even_ratio,
     xtract_sharpness,
-    xtract_slope,
+    xtract_spectral_slope,
     xtract_lowest_value,
     xtract_highest_value,
     xtract_sum,
@@ -67,12 +73,12 @@ int(*xtract[])(const float *, const int, const void *, float *) = {
     xtract_amdf,
     xtract_asdf,
     xtract_bark_coefficients,
-    xtract_peaks,
+    xtract_peak_spectrum,
     xtract_magnitude_spectrum,
     xtract_autocorrelation_fft,
     xtract_mfcc,
     xtract_dct,
-    xtract_harmonics
+    xtract_harmonic_spectrum
 };
 
 

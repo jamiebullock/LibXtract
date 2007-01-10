@@ -53,7 +53,7 @@ extern "C" {
   * @{
   */
 
-#define XTRACT_FEATURES 47
+#define XTRACT_FEATURES 53
     
 /** \brief Enumeration of features, elements are used as indixes to an array of pointers to feature extracton functions */
 enum features_ {
@@ -63,7 +63,13 @@ enum features_ {
     AVERAGE_DEVIATION,
     SKEWNESS,
     KURTOSIS,
-    CENTROID,
+    SPECTRAL_MEAN,
+    SPECTRAL_VARIANCE,
+    SPECTRAL_STANDARD_DEVIATION,
+    SPECTRAL_AVERAGE_DEVIATION,
+    SPECTRAL_SKEWNESS,
+    SPECTRAL_KURTOSIS,
+    SPECTRAL_CENTROID,
     IRREGULARITY_K,
     IRREGULARITY_J,
     TRISTIMULUS_1,
@@ -79,11 +85,11 @@ enum features_ {
     CREST,
     NOISINESS,
     RMS_AMPLITUDE,
-    INHARMONICITY,
+    SPECTRAL_INHARMONICITY,
     POWER,
     ODD_EVEN_RATIO,
     SHARPNESS,
-    SLOPE,
+    SPECTRAL_SLOPE,
     LOWEST_VALUE,
     HIGHEST_VALUE,
     SUM,
@@ -98,12 +104,12 @@ enum features_ {
     AMDF,
     ASDF,
     BARK_COEFFICIENTS,
-    PEAKS,
+    PEAK_SPECTRUM,
     MAGNITUDE_SPECTRUM,
     AUTOCORRELATION_FFT,
     MFCC,
     DCT,
-    HARMONICS
+    HARMONIC_SPECTRUM
 };
 
 /** \brief Enumeration of feature types */

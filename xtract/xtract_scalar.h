@@ -36,7 +36,7 @@ extern "C" {
 
 /** \brief Extract the mean of an input vector
  * 
- * \param *data: a pointer to the first element in an array of floats
+ * \param *data: a pointer to the first element 
  * \param N: the number of array elements to be considered
  * \param *argv: a pointer to NULL 
  * \param *result: the mean of N values from the array pointed to by *data 
@@ -88,17 +88,72 @@ int xtract_skewness(const float *data, const int N, const void *argv,  float *re
  */
 int xtract_kurtosis(const float *data, const int N, const void *argv,  float *result);
 
+/** \brief Extract the mean of an input spectrum
+ * 
+ * \param *data: a pointer to the first element in an array of floats representing the spectrum of an audio vector, (e.g. the array pointed to by *result from xtract_magnitude_spectrum(), xtract_spectral_peaks() or xtract_spectral_harmonics()).
+ * \param N: the size of the array pointed to by *data
+ * \param *argv: a pointer to NULL 
+ * \param *result: the mean of the spectrum pointed to by *data 
+ */
+int xtract_spectral_mean(const float *data, const int N, const void *argv, float *result);
+
+/** \brief Extract the variance of an input spectrum
+ * 
+ * \param *data: a pointer to the first element in an array of floats representing the spectrum of an audio vector, (e.g. the array pointed to by *result from xtract_magnitude_spectrum(), xtract_spectral_peaks() or xtract_spectral_harmonics()).
+ * \param N: the number of elements to be considered
+ * \param N: the size of the array pointed to by *data
+ * \param *argv: a pointer to a float representing the mean of the input spectrum
+ * \param *result: the variance of the spectrum pointed to by *data
+ */
+int xtract_spectral_variance(const float *data, const int N, const void *argv, float *result);
+
+/** \brief Extract the deviation of an input spectrum
+ * 
+ * \param *data: a pointer to the first element in an array of floats representing the spectrum of an audio vector, (e.g. the array pointed to by *result from xtract_magnitude_spectrum(), xtract_spectral_peaks() or xtract_spectral_harmonics()).
+ * \param N: the size of the array pointed to by *data
+ * \param *argv: a pointer to a float representing the variance of the input spectrum
+ * \param *result: the deviation of the spectrum pointed to by *data
+ */
+int xtract_spectral_standard_deviation(const float *data, const int N, const void *argv, float *result);
+
+/** \brief Extract the average deviation of an input spectrum
+ * 
+ * \param *data: a pointer to the first element in an array of floats representing the spectrum of an audio vector, (e.g. the array pointed to by *result from xtract_magnitude_spectrum(), xtract_spectral_peaks() or xtract_spectral_harmonics()).
+ * \param N: the size of the array pointed to by *data
+ * \param *argv: a pointer to a float representing the mean of the input spectrum
+ * \param *result: the  average deviation of the spectrum pointed to by *data
+ */
+int xtract_spectral_average_deviation(const float *data, const int N, const void *argv, float *result);
+
+/** \brief Extract the skewness of an input spectrum
+ * 
+ * \param *data: a pointer to the first element in an array of floats representing the spectrum of an audio vector, (e.g. the array pointed to by *result from xtract_magnitude_spectrum(), xtract_spectral_peaks() or xtract_spectral_harmonics()).
+ * \param N: the size of the array pointed to by *data
+ * \param *argv: a pointer to an array of floats representing the mean and standard deviation of the input spectrum
+ * \param *result: the skewness of the spectrum pointed to by *data
+ */
+int xtract_spectral_skewness(const float *data, const int N, const void *argv,  float *result);
+
+/** \brief Extract the kurtosis of an input spectrum
+ * 
+ * \param *data: a pointer to the first element in an array of floats representing the spectrum of an audio vector, (e.g. the array pointed to by *result from xtract_magnitude_spectrum(), xtract_spectral_peaks() or xtract_spectral_harmonics()).
+ * \param N: the size of the array pointed to by *data
+ * \param *argv: a pointer to an array of values representing the mean and standard deviation of the input spectrum
+ * \param *result: the kurtosis of the spectrum pointed to by *data
+ */
+int xtract_spectral_kurtosis(const float *data, const int N, const void *argv,  float *result);
+
 /** \brief Extract the centroid of an input vector
  * 
- * \param *data: a pointer to the first element in an array of floats representing the magnitude spectrum of an audio vector, (e.g. the array pointed to by *result from xtract_magnitude_spectrum().
+ * \param *data: a pointer to the first element in an array of floats representing the spectrum of an audio vector, (e.g. the array pointed to by *result from xtract_magnitude_spectrum(), xtract_spectral_peaks() or xtract_spectral_harmonics()).
  * \param N: the number of elements to be considered
  * \param *argv: a pointer to NULL
  * \param *result: the centroid of the values pointed to by *data
  *
- * Note: for a more 'accurate' result *result from xtract_peaks() can be passed in. This gives the interpolated peak frequency locations.
+ * Note: for a more 'accurate' result *result from xtract_spectral_peaks() can be passed in. This gives the interpolated peak frequency locations.
  *
  */
-int xtract_centroid(const float *data, const int N, const void *argv,  float *result);
+int xtract_spectral_centroid(const float *data, const int N, const void *argv,  float *result);
 
 /** \brief Calculate the Irregularity of an input vector using a method described by Krimphoff (1994)
  * 
@@ -226,7 +281,7 @@ int xtract_rms_amplitude(const float *data, const int N, const void *argv, float
  * \param *argv: a pointer to a float representing the fundamental frequency of the input vector.
  * \param *result: the inharmonicity of N values from the array pointed to by *data
  */
-int xtract_inharmonicity(const float *data, const int N, const void *argv, float *result);
+int xtract_spectral_inharmonicity(const float *data, const int N, const void *argv, float *result);
 
 /** \brief Extract the spectral crest of an input vector using a method described by Peeters (2003)
  * 
@@ -272,7 +327,7 @@ int xtract_sharpness(const float *data, const int N, const void *argv, float *re
  * \param *argv: a pointer to NULL
  * \param *result: the Slope of N values from the array pointed to by *data
  */
-int xtract_slope(const float *data, const int N, const void *argv, float *result);
+int xtract_spectral_slope(const float *data, const int N, const void *argv, float *result);
 
 /** \brief Extract the value of the lowest value in an input vector
  * 

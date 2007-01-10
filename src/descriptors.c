@@ -24,13 +24,13 @@
 #define XTRACT
 
 void *xtract_make_descriptors(){
-    
+
     t_function_descriptor *fd, *d;
     t_type *type;
     int f , F;
     char *name, *p_name, *desc, *p_desc, *author;
     int *argc, *year;
-    
+
     f = F = XTRACT_FEATURES;
 
     fd = malloc(XTRACT_FEATURES * sizeof(t_function_descriptor));
@@ -43,12 +43,17 @@ void *xtract_make_descriptors(){
 	type = &d->argv.type;
 
 	switch(f){
+
 	    case  MEAN: 
 	    case  VARIANCE:
 	    case  STANDARD_DEVIATION:
 	    case  AVERAGE_DEVIATION:
+	    case  SPECTRAL_MEAN:
+	    case  SPECTRAL_VARIANCE:
+	    case  SPECTRAL_STANDARD_DEVIATION:
+	    case  SPECTRAL_AVERAGE_DEVIATION:
 	    case  ROLLOFF:
-	    case  INHARMONICITY:
+	    case  SPECTRAL_INHARMONICITY:
 	    case  MAGNITUDE_SPECTRUM:
 	    case  ODD_EVEN_RATIO:
 	    case  LOWEST_VALUE:
@@ -56,26 +61,28 @@ void *xtract_make_descriptors(){
 	    case  FAILSAFE_F0:
 	    case  TONALITY:
 		*argc = 1;
-		d->argv.type = FLOAT;
+		*type = FLOAT;
 		break;
 	    case  SKEWNESS:
 	    case  KURTOSIS:
-	    case  PEAKS:
-	    case  HARMONICS:
+	    case  SPECTRAL_SKEWNESS:
+	    case  SPECTRAL_KURTOSIS:
+	    case  PEAK_SPECTRUM:
+	    case  HARMONIC_SPECTRUM:
 	    case  NOISINESS:
 	    case  CREST:
 		*argc = 2;
-		d->argv.type = FLOAT;
+		*type = FLOAT;
 		break;
 	    case  MFCC:
 		*argc = 1;
-		d->argv.type = MEL_FILTER;
+		*type = MEL_FILTER;
 		break;
 	    case  BARK_COEFFICIENTS:
 		*argc = BARK_BANDS;
-		d->argv.type = INT;
+		*type = INT;
 		break;
-	    case  CENTROID:
+	    case  SPECTRAL_CENTROID:
 	    case  IRREGULARITY_K:
 	    case  IRREGULARITY_J:
 	    case  TRISTIMULUS_1:
@@ -91,7 +98,7 @@ void *xtract_make_descriptors(){
 	    case  RMS_AMPLITUDE:
 	    case  POWER:
 	    case  SHARPNESS:
-	    case  SLOPE:
+	    case  SPECTRAL_SLOPE:
 	    case  HPS:
 	    case  FLUX: 
 	    case  ATTACK_TIME: 
@@ -121,67 +128,101 @@ void *xtract_make_descriptors(){
 	switch(f){
 	    case  MEAN: 
 		strcpy(name, "mean");
-		strcpy(p_name, "Spectral Mean");
+		strcpy(p_name, "Mean");
 		strcpy(desc, "Extract the mean of an input vector");
-		strcpy(p_desc, "Extract the mean of a audio spectrum");
+		strcpy(p_desc, "Extract the mean of a range of values");
 		strcpy(author, "");
 		break;
 	    case  VARIANCE:
 		strcpy(name, "variance");
 		strcpy(p_name, "Variance");
 		strcpy(desc, "Extract the variance of an input vector");
-		strcpy(p_desc, "Extract the variance of an audio spectrum");
+		strcpy(p_desc, "Extract the variance of a range of values");
 		strcpy(author, "");
 		break;
 	    case  STANDARD_DEVIATION:
 		strcpy(name, "standard_deviation");
 		strcpy(p_name, "Standard Deviation");
-		strcpy(desc, "Extract the standard deviation of an input \
-			vector");
-		strcpy(p_desc, "Extract the standard deviation of an audio \
-		       	spectrum");
+		strcpy(desc, 
+			"Extract the standard deviation of an input vector");
+		strcpy(p_desc, 
+			"Extract the standard deviation of a range of values");
 		strcpy(author, "");
 		break;
 	    case  AVERAGE_DEVIATION:
 		strcpy(name, "average_deviation");
 		strcpy(p_name, "Average Deviation");
-		strcpy(desc, "Extract the average deviation of an input vector");
-		strcpy(p_desc, "Extract the average deviation of an audio \
-			spectrum");
+		strcpy(desc, 
+			"Extract the average deviation of an input vector");
+		strcpy(p_desc, 
+			"Extract the average deviation of a range of values");
+		strcpy(author, "");
+		break;
+	   case  SPECTRAL_MEAN: 
+		strcpy(name, "spectral_mean");
+		strcpy(p_name, "Spectral Mean");
+		strcpy(desc, "Extract the mean of an input spectrum");
+		strcpy(p_desc, "Extract the mean of an audio spectrum");
+		strcpy(author, "");
+		break;
+	    case  SPECTRAL_VARIANCE:
+		strcpy(name, "spectral_variance");
+		strcpy(p_name, "Spectral Variance");
+		strcpy(desc, "Extract the variance of an input spectrum");
+		strcpy(p_desc, "Extract the variance of an audio spectrum");
+		strcpy(author, "");
+		break;
+	    case  SPECTRAL_STANDARD_DEVIATION:
+		strcpy(name, "spectral_standard_deviation");
+		strcpy(p_name, "Spectral Standard Deviation");
+		strcpy(desc, 
+			"Extract the standard deviation of an input spectrum");
+		strcpy(p_desc, 
+			"Extract the standard deviation of an audio spectrum");
+		strcpy(author, "");
+		break;
+	    case  SPECTRAL_AVERAGE_DEVIATION:
+		strcpy(name, "spectral_average_deviation");
+		strcpy(p_name, "Spectral Average Deviation");
+		strcpy(desc, 
+			"Extract the average deviation of an input spectrum");
+		strcpy(p_desc, 
+			"Extract the average deviation of an audio spectrum");
 		strcpy(author, "");
 		break;
 	    case  ROLLOFF:
-		strcpy(name, "rolloff");
+		strcpy(name, "spectral_rolloff");
 		strcpy(p_name, "Spectral Rolloff");
-		strcpy(desc, "Extract the rolloff point of a spectrum");
-		strcpy(p_desc, "Extract the rolloff point of an audio \
-		       	spectrum");
-		strcpy(author, "");
+		strcpy(desc, 
+			"Extract the rolloff point of a spectrum");
+		strcpy(p_desc, 
+			"Extract the rolloff point of an audio spectrum");
+		strcpy(author, "Bee Suan Ong");
+		*year = 2005;
 		break;
-	    case  INHARMONICITY:
-		strcpy(name, "inharmonicity");
+	    case  SPECTRAL_INHARMONICITY:
+		strcpy(name, "spectral_inharmonicity");
 		strcpy(p_name, "Inharmonicity");
 		strcpy(desc, "Extract the inharmonicity of a spectrum");
-		strcpy(p_desc, "Extract the inharmonicity of an audio \
-			spectrum");
-		strcpy(author, "");
+		strcpy(p_desc, 
+			"Extract the inharmonicity of an audio spectrum");
 		break;
 	    case  MAGNITUDE_SPECTRUM:
 		strcpy(name, "magnitude_spectrum");
 		strcpy(p_name, "Magnitude Spectrum");
-		strcpy(desc, "Extract the magnitude spectrum of an input \
-			vector");
-		strcpy(p_desc, "Extract the magnitude spectrum of an \
-		       	audio signal");
+		strcpy(desc, 
+			"Extract the magnitude spectrum of an input vector");
+		strcpy(p_desc, 
+			"Extract the magnitude spectrum of an audio signal");
 		strcpy(author, "");
 		break;
 	    case  ODD_EVEN_RATIO:
 		strcpy(name, "odd_even_ratio");
 		strcpy(p_name, "Odd/Even Harmonic Ratio");
-		strcpy(desc, "Extract the odd-to-even harmonic ratio of a \
-			spectrum");
-		strcpy(p_desc, "Extract the odd-to-even harmonic ratio of an \
-			audio spectrum");
+		strcpy(desc, 
+			"Extract the odd-to-even harmonic ratio of a spectrum");
+		strcpy(p_desc, 
+		 "Extract the odd-to-even harmonic ratio of an audio spectrum");
 		strcpy(author, "");
 		break;
 	    case  LOWEST_VALUE:
@@ -195,16 +236,16 @@ void *xtract_make_descriptors(){
 		strcpy(name, "f0");
 		strcpy(p_name, "Fundamental Frequency");
 		strcpy(desc, "Extract the fundamental frequency	of a signal");
-		strcpy(p_desc, "Extract the fundamental frequency of an audio \
-		       	signal");
+		strcpy(p_desc, 
+			"Extract the fundamental frequency of an audio signal");
 		strcpy(author, "");
 		break;
 	    case  FAILSAFE_F0:
 		strcpy(name, "failsafe_f0");
 		strcpy(p_name, "Fundamental Frequency (failsafe)");
 		strcpy(desc, "Extract the fundamental frequency of a signal");
-		strcpy(p_desc, "Extract the fundamental frequency of an audio \
-			signal");
+		strcpy(p_desc, 
+			"Extract the fundamental frequency of an audio signal");
 		strcpy(author, "");
 		break;
 	    case  TONALITY:
@@ -212,33 +253,34 @@ void *xtract_make_descriptors(){
 		strcpy(p_name, "Tonality");
 		strcpy(desc, "Extract the tonality of a spectrum");
 		strcpy(p_desc, "Extract the tonality an audio spectrum");
-		strcpy(author, "");
+		strcpy(author, "Tristan Jehan");
+		*year = 2005;
 		break;
-	    case  SKEWNESS:
-		strcpy(name, "skewness");
+	    case  SPECTRAL_SKEWNESS:
+		strcpy(name, "spectral_skewness");
 		strcpy(p_name, "Spectral Skewness");
-		strcpy(desc, "Extract the skewness of an input vector");
+		strcpy(desc, "Extract the skewness of an input spectrum");
 		strcpy(p_desc, "Extract the skewness of an audio spectrum");
 		strcpy(author, "");
 		break;
-	    case  KURTOSIS:
-		strcpy(name, "kurtosis");
+	    case  SPECTRAL_KURTOSIS:
+		strcpy(name, "spectral_kurtosis");
 		strcpy(p_name, "Spectral Kurtosis");
-		strcpy(desc, "Extract the kurtosis of an input vector");
+		strcpy(desc, "Extract the kurtosis of an input spectrum");
 		strcpy(p_desc, "Extract the kurtosis of an audio spectrum");
 		strcpy(author, "");
 		break;
-	    case  PEAKS:
-		strcpy(name, "peaks");
-		strcpy(p_name, "Spectral Peaks");
+	    case  PEAK_SPECTRUM:
+		strcpy(name, "peak_spectrum");
+		strcpy(p_name, "Peak Spectrum");
 		strcpy(desc, "Extract the spectral peaks from of a spectrum");
-		strcpy(p_desc, "Extract the spectral peaks from an audio \
-			spectrum");
+		strcpy(p_desc, 
+			"Extract the spectral peaks from an audio spectrum");
 		strcpy(author, "");
 		break;
-	    case  HARMONICS:
-		strcpy(name, "harmonics");
-		strcpy(p_name, "Spectral Harmonics");
+	    case  HARMONIC_SPECTRUM:
+		strcpy(p_name, "harmonic_spectrum");
+		strcpy(p_name, "Harmonic Spectrum");
 		strcpy(desc, "Extract the harmonics from a spectrum");
 		strcpy(p_desc, "Extract the harmonics from an audio spectrum");
 		strcpy(author, "");
@@ -248,120 +290,132 @@ void *xtract_make_descriptors(){
 		strcpy(p_name, "Noisiness");
 		strcpy(desc, "Extract the noisiness of a spectrum");
 		strcpy(p_desc, "Extract the noisiness of an audio  spectrum");
-		strcpy(author, "");
+		strcpy(author, "Tae Hong Park");
+		*year = 2000;
 		break;
 	    case  CREST:
 		strcpy(name, "crest");
 		strcpy(p_name, "Spectral Crest Measure");
-		strcpy(desc, "Extract the spectral crest measure of a \
-			spectrum");
-		strcpy(p_desc, "Extract the spectral crest measure of a \
-			audio spectrum");
-		strcpy(author, "");
+		strcpy(desc, 
+			"Extract the spectral crest measure of a spectrum");
+		strcpy(p_desc, 
+		    "Extract the spectral crest measure of a audio spectrum");
+		strcpy(author, "Peeters");
+		*year = 2003;
 		break;
 	    case  MFCC:
 		strcpy(name, "mfcc");
-		strcpy(p_name, "Mel Frequency Cepstral Coefficients");
+		strcpy(p_name, "Mel-Frequency Cepstral Coefficients");
 		strcpy(desc, "Extract MFCC from a spectrum");
 		strcpy(p_desc, "Extract MFCC from an audio spectrum");
-		strcpy(author, "");
+		strcpy(author, "Rabiner");
 		break;
 	    case  BARK_COEFFICIENTS:
 		strcpy(name, "bark_coefficients");
 		strcpy(p_name, "Bark Coefficients");
 		strcpy(desc, "Extract bark coefficients from a spectrum");
-		strcpy(p_desc, "Extract bark coefficients from an audio \
-			spectrum");
+		strcpy(p_desc, 
+			"Extract bark coefficients from an audio spectrum");
 		strcpy(author, "");
 		break;
-	    case  CENTROID:
-		strcpy(name, "centroid");
+	    case  SPECTRAL_CENTROID:
+		strcpy(name, "spectral_centroid");
 		strcpy(p_name, "Spectral Centroid");
 		strcpy(desc, "Extract the spectral centroid of a spectrum");
-		strcpy(p_desc, "Extract the spectral centroid of an audio \
-			spectrum");
+		strcpy(p_desc, 
+			"Extract the spectral centroid of an audio spectrum");
 		strcpy(author, "");
 		break;
 	    case  IRREGULARITY_K:
 		strcpy(name, "irregularity_k");
 		strcpy(p_name, "Irregularity I");
 		strcpy(desc, "Extract the irregularity of a spectrum");
-		strcpy(p_desc, "Extract the irregularity of an audio \
-			spectrum");
-		strcpy(author, "");
+		strcpy(p_desc, 
+			"Extract the irregularity of an audio spectrum");
+		strcpy(author, "Krimphoff");
+		*year = 1994;
 		break;
 	    case  IRREGULARITY_J:
 		strcpy(name, "irregularity_j");
 		strcpy(p_name, "Irregularity II");
 		strcpy(desc, "Extract the irregularity of a spectrum");
-		strcpy(p_desc, "Extract the irregularity of an audio \
-			spectrum");
-		strcpy(author, "");
+		strcpy(p_desc, 
+			"Extract the irregularity of an audio spectrum");
+		strcpy(author, "Jensen");
+		*year = 1999;
 		break;
 	    case  TRISTIMULUS_1:
 		strcpy(name, "tristimulus_1");
 		strcpy(p_name, "Tristimulus I");
 		strcpy(desc, "Extract the tristimulus (type I) of a spectrum");
-		strcpy(p_desc, "Extract the tristimulus (type I) of an audio \
-			spectrum");
-		strcpy(author, "");
+		strcpy(p_desc, 
+		    "Extract the tristimulus (type I) of an audio spectrum");
+		strcpy(author, "Pollard and Jansson");
+		*year = 1982;
 		break;
 	    case  TRISTIMULUS_2:
 		strcpy(name, "tristimulus_2");
 		strcpy(p_name, "Tristimulus II");
 		strcpy(desc, "Extract the tristimulus (type II) of a spectrum");
-		strcpy(p_desc, "Extract the tristimulus (type II) of an audio \
-			spectrum");
-		strcpy(author, "");
+		strcpy(p_desc, 
+		    "Extract the tristimulus (type II) of an audio spectrum");
+		strcpy(author, "Pollard and Jansson");
+		*year = 1982;
 		break;
 	    case  TRISTIMULUS_3:
 		strcpy(name, "tristimulus_3");
 		strcpy(p_name, "Tristimulus III");
-		strcpy(desc, "Extract the tristimulus (type III) of a spectrum");
-		strcpy(p_desc, "Extract the tristimulus (type III) of an audio \
-			spectrum");
-		strcpy(author, "");
+		strcpy(desc, 
+			"Extract the tristimulus (type III) of a spectrum");
+		strcpy(p_desc, 
+		    "Extract the tristimulus (type III) of an audio spectrum");
+		strcpy(author, "Pollard and Jansson");
+		*year = 1982;
 		break;
 	    case  SMOOTHNESS:
 		strcpy(name, "smoothness");
 		strcpy(p_name, "Spectral Smoothness");
 		strcpy(desc, "Extract the spectral smoothness of a spectrum");
-		strcpy(p_desc, "Extract the spectral smoothness of an audio \
-			spectrum");
-		strcpy(author, "");
+		strcpy(p_desc, 
+			"Extract the spectral smoothness of an audio spectrum");
+		strcpy(author, "McAdams");
+		*year = 1999;
 		break;
 	    case  FLATNESS:
 		strcpy(name, "flatness");
 		strcpy(p_name, "Spectral Flatness");
 		strcpy(desc, "Extract the spectral flatness of a spectrum");
-		strcpy(p_desc, "Extract the spectral flatness of an audio \
-			spectrum");
-		strcpy(author, "");
+		strcpy(p_desc, 
+			"Extract the spectral flatness of an audio spectrum");
+		strcpy(author, "Tristan Jehan");
+		*year = 2005;
 		break;
 	    case  SPREAD:
 		strcpy(name, "spread");
 		strcpy(p_name, "Spectral Spread");
 		strcpy(desc, "Extract the spectral spread of a spectrum");
-		strcpy(p_desc, "Extract the spectral spread of an audio \
-			spectrum");
-		strcpy(author, "");
+		strcpy(p_desc, 
+			"Extract the spectral spread of an audio spectrum");
+		strcpy(author, "Norman Casagrande");
+		*year = 2005;
 		break;
 	    case  ZCR:
 		strcpy(name, "zcr");
 		strcpy(p_name, "Zero Crossing Rate");
 		strcpy(desc, "Extract the zero crossing rate of a vector");
-		strcpy(p_desc, "Extract the zero crossing rate of an audio \
-			signal");
+		strcpy(p_desc, 
+			"Extract the zero crossing rate of an audio signal");
 		strcpy(author, "");
 		break;
 	    case  LOUDNESS:
 		strcpy(name, "loudness");
 		strcpy(p_name, "Loudness");
-		strcpy(desc, "Extract the loudness of a signal from its \
-			spectrum");
-		strcpy(p_desc, "Extract the loudness of an audio signal from \
-			its spectrum");
-		strcpy(author, "");
+		strcpy(desc, 
+			"Extract the loudness of a signal from its spectrum");
+		strcpy(p_desc, 
+		 "Extract the loudness of an audio signal from its spectrum");
+		strcpy(author, "Moore, Glasberg et al");
+		*year = 2005;
 		break;
 	    case  HIGHEST_VALUE:
 		strcpy(name, "highest_value");
@@ -373,10 +427,10 @@ void *xtract_make_descriptors(){
 	    case  SUM:
 		strcpy(name, "sum");
 		strcpy(p_name, "Sum of Values");
-		strcpy(desc, "Extract the sum of the values in an input \
-			vector");
-		strcpy(p_desc, "Extract the sum of the values in a given \
-			range");
+		strcpy(desc, 
+			"Extract the sum of the values in an input vector");
+		strcpy(p_desc, 
+			"Extract the sum of the values in a given range");
 		strcpy(author, "");
 		break;
 	    case  RMS_AMPLITUDE:
@@ -390,41 +444,42 @@ void *xtract_make_descriptors(){
 		strcpy(name, "power");
 		strcpy(p_name, "Spectral Power");
 		strcpy(desc, "Extract the spectral power of a spectrum");
-		strcpy(p_desc, "Extract the spectral power of an audio \
-			spectrum");
-		strcpy(author, "");
+		strcpy(p_desc, 
+			"Extract the spectral power of an audio spectrum");
+		strcpy(author, "Bee Suan Ong");
+		*year = 2005;
 		break;
 	    case  SHARPNESS:
 		strcpy(name, "sharpness");
 		strcpy(p_name, "Spectral Sharpness");
 		strcpy(desc, "Extract the spectral sharpness of a spectrum");
-		strcpy(p_desc, "Extract the spectral sharpness of an audio \
-			spectrum");
+		strcpy(p_desc, 
+			"Extract the spectral sharpness of an audio spectrum");
 		strcpy(author, "");
 		break;
-	    case  SLOPE:
-		strcpy(name, "slope");
+	    case  SPECTRAL_SLOPE:
+		strcpy(name, "spectral_slope");
 		strcpy(p_name, "Spectral Slope");
 		strcpy(desc, "Extract the spectral slope of a spectrum");
-		strcpy(p_desc, "Extract the spectral slope of an audio \
-		       	spectrum");
+		strcpy(p_desc, 
+			"Extract the spectral slope of an audio spectrum");
 		strcpy(author, "");
 		break;
 	    case  HPS:
 		strcpy(name, "hps");
 		strcpy(p_name, "Harmonic Product Spectrum");
-		strcpy(desc, "Extract the harmonic product spectrum of a \
-			spectrum");
-		strcpy(p_desc, "Extract the harmonic product spectrum of an \
-			audio spectrum");
+		strcpy(desc, 
+			"Extract the harmonic product spectrum of a spectrum");
+		strcpy(p_desc, 
+		 "Extract the harmonic product spectrum of an audio spectrum");
 		strcpy(author, "");
 		break;
 	    case  FLUX: 
 		strcpy(name, "flux");
 		strcpy(p_name, "Spectral Flux");
 		strcpy(desc, "Extract the spectral flux of a spectrum");
-		strcpy(p_desc, "Extract the spectral flux of an audio \
-			spectrum");
+		strcpy(p_desc, 
+			"Extract the spectral flux of an audio spectrum");
 		strcpy(author, "");
 		break;
 	    case  ATTACK_TIME: 
@@ -466,7 +521,8 @@ void *xtract_make_descriptors(){
 		strcpy(name, "autocorrelation");
 		strcpy(p_name, "Autocorrelation");
 		strcpy(desc, "Extract the autocorrelation of a signal");
-		strcpy(p_desc, "Extract the autocorrelation of an audio signal");
+		strcpy(p_desc, 
+			"Extract the autocorrelation of an audio signal");
 		strcpy(author, "");
 		break;
 	    case  AMDF:
@@ -485,6 +541,7 @@ void *xtract_make_descriptors(){
 		break;
 	    default:
 		strcpy(name, "");
+		strcpy(p_name, "");
 		strcpy(desc, "");
 		strcpy(p_desc, "");
 		strcpy(author, "");
