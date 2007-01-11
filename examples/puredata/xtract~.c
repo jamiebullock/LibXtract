@@ -194,7 +194,7 @@ static void *xtract_new(t_symbol *me, t_int argc, t_atom *argv) {
     if(x->feature == AUTOCORRELATION || x->feature == AUTOCORRELATION_FFT ||
     x->feature == MFCC || x->feature == AMDF || x->feature == ASDF|| 
     x->feature == DCT || x->feature == BARK_COEFFICIENTS || 
-    x->feature == MAGNITUDE_SPECTRUM || x->feature == PEAK_SPECTRUM || 
+    x->feature == SPECTRUM || x->feature == PEAK_SPECTRUM || 
     x->feature == HARMONIC_SPECTRUM) 
         x->feature_type = VECTOR;
                 

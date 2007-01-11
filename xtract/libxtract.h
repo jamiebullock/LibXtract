@@ -105,7 +105,7 @@ enum features_ {
     ASDF,
     BARK_COEFFICIENTS,
     PEAK_SPECTRUM,
-    MAGNITUDE_SPECTRUM,
+    SPECTRUM,
     AUTOCORRELATION_FFT,
     MFCC,
     DCT,
@@ -135,6 +135,14 @@ enum return_codes_ {
     FEATURE_NOT_IMPLEMENTED
 };
 
+/** \brief Enumeration of spectrum types */
+enum spectrum_ {
+    MAGNITUDE_SPECTRUM,
+    LOG_MAGNITUDE_SPECTRUM,
+    POWER_SPECTRUM,
+    LOG_POWER_SPECTRUM
+};
+
 /** \brief Enumeration of data types*/
 typedef enum type_ {
     FLOAT,
@@ -156,12 +164,27 @@ typedef enum {
 
 /** \brief Enumeration of vector format types*/
 typedef enum vector_ {
-    MAGNITUDES,
-    FREQUENCIES,
-    FREQUENCIES_AND_MAGNITUDES,
+    /* N/2 magnitude/log-magnitude/power/log-power coeffs and N/2 frequencies */
+    SPECTRAL,     
+    /* N spectral amplitudes */
+    SPECTRAL_MAGNITUDES, 
+    /* N/2 magnitude/log-magnitude/power/log-power peak coeffs and N/2 
+     * frequencies */
+    SPECTRAL_PEAKS,
+    /* N spectral peak amplitudes */
+    SPECTRAL_PEAK_MAGNITUDES,
+    /* N/2 magnitude/log-magnitude/power/log-power harmonic peak coeffs and N/2 
+     * frequencies */
+    SPECTRAL_HARMONICS,
+    /* N spectral harmonic amplitudes */
+    SPECTRAL_HARMONICS_MAGNITUDES,
+    /* N spectral harmonic frequencies */
+    SPECTRAL_HARMONICS_FREQUENCIES,
+    ARBITRARY_SERIES,
+    AUDIO_SAMPLES,
+    MEL_COEFFS, 
     BARK_COEFFS,
-    MEL_COEFFS,
-    SAMPLES,
+    NO_DATA
 } t_vector;
 
 /** \brief Data structure containing useful information about functions provided by LibXtract. */

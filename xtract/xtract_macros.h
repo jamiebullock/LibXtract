@@ -37,9 +37,11 @@ extern "C" {
 #define NEEDS_FFTW printf("LibXtract must be compiled with fftw support to use this function.\n")
 #define CHECK_q if(!q) q = 44100.f / N
 
-#define VERY_SMALL_NUMBER 1e-20
+#define VERY_SMALL_NUMBER 2e-42
 #define LOG_LIMIT VERY_SMALL_NUMBER
-#define VERY_BIG_NUMBER 1e20
+#define LOG_LIMIT_DB -96
+#define DB_SCALE_OFFSET 96
+#define VERY_BIG_NUMBER 2e42
 #define SR_LIMIT 192000
 #define BARK_BANDS 26
 #define NONE 0

@@ -778,7 +778,7 @@ int xtract_failsafe_f0(const float *data, const int N, const void *argv, float *
 
 	magnitudes = (float *)malloc(N * sizeof(float));
 	peaks = (float *)malloc(N * sizeof(float));
-	xtract_magnitude_spectrum(data, N, argv, magnitudes);
+	xtract_spectrum(data, N, argv, magnitudes);
 	argf[0] = 10.f;
 	argf[1] = *(float *)argv;
 	xtract_peak_spectrum(magnitudes, N, argf, peaks);

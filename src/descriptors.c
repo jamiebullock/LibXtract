@@ -30,6 +30,8 @@ void *xtract_make_descriptors(){
     int f , F;
     char *name, *p_name, *desc, *p_desc, *author;
     int *argc, *year;
+    t_vector *data_format; 
+    /* *result_format; */
 
     f = F = XTRACT_FEATURES;
 
@@ -54,7 +56,6 @@ void *xtract_make_descriptors(){
 	    case  SPECTRAL_AVERAGE_DEVIATION:
 	    case  ROLLOFF:
 	    case  SPECTRAL_INHARMONICITY:
-	    case  MAGNITUDE_SPECTRUM:
 	    case  ODD_EVEN_RATIO:
 	    case  LOWEST_VALUE:
 	    case  F0:
@@ -67,6 +68,7 @@ void *xtract_make_descriptors(){
 	    case  KURTOSIS:
 	    case  SPECTRAL_SKEWNESS:
 	    case  SPECTRAL_KURTOSIS:
+	    case  SPECTRUM:
 	    case  PEAK_SPECTRUM:
 	    case  HARMONIC_SPECTRUM:
 	    case  NOISINESS:
@@ -113,6 +115,86 @@ void *xtract_make_descriptors(){
 		break;
 	    default:
 		*argc = 0;
+		break;
+	}
+
+        data_format = &d->data.format;
+
+	switch(f){
+
+	    case  MEAN: 
+	    case  VARIANCE:
+	    case  STANDARD_DEVIATION:
+	    case  AVERAGE_DEVIATION:
+	    case  SKEWNESS:
+	    case  KURTOSIS:
+	    case  LOWEST_VALUE:
+	    case  HIGHEST_VALUE:
+	    case  SUM:
+	    case  ZCR:
+		*data_format = ARBITRARY_SERIES;
+		break;
+	    case  SPECTRAL_MEAN:
+	    case  SPECTRAL_VARIANCE:
+	    case  SPECTRAL_STANDARD_DEVIATION:
+	    case  SPECTRAL_AVERAGE_DEVIATION:
+	    case  SPECTRAL_SKEWNESS:
+	    case  SPECTRAL_KURTOSIS:
+	    case  SPECTRAL_CENTROID:
+	    case  SPECTRAL_SLOPE:
+	    case  PEAK_SPECTRUM:
+	    case  HARMONIC_SPECTRUM:
+	        *data_format = SPECTRAL;     
+		break;
+	    case  ROLLOFF:
+	    case  NOISINESS:
+	    case  BARK_COEFFICIENTS:
+	    case  CREST:
+	    case  IRREGULARITY_K:
+	    case  IRREGULARITY_J:
+	    case  SMOOTHNESS:
+	    case  FLATNESS:
+	    case  SPREAD:
+	    case  RMS_AMPLITUDE:
+	    case  POWER:
+	    case  SHARPNESS:
+	    case  HPS:
+		*data_format = SPECTRAL_MAGNITUDES;
+		break;
+	    case  SPECTRAL_INHARMONICITY:
+		*data_format = SPECTRAL_PEAKS;
+		break;
+	    case  ODD_EVEN_RATIO:
+		*data_format = SPECTRAL_HARMONICS_FREQUENCIES;
+		break;
+	    case  F0:
+	    case  FAILSAFE_F0:
+	    case  SPECTRUM:
+	    case  MFCC:
+	    case  AUTOCORRELATION:
+	    case  AUTOCORRELATION_FFT:
+	    case  DCT:
+	    case  AMDF:
+	    case  ASDF:
+		*data_format = AUDIO_SAMPLES;
+		break;
+	    case  TONALITY:
+		*data_format = NO_DATA;
+		break;
+	    case  TRISTIMULUS_1:
+	    case  TRISTIMULUS_2:
+	    case  TRISTIMULUS_3:
+		*data_format = SPECTRAL_HARMONICS_MAGNITUDES;
+		break;
+	    case  LOUDNESS:
+		*data_format = BARK_COEFFS;
+		break;
+	    case  FLUX: 
+	    case  ATTACK_TIME: 
+	    case  DECAY_TIME: 
+	    case  DELTA_FEATURE: 
+	    default:
+		*data_format = NO_DATA;
 		break;
 	}
 
@@ -207,13 +289,13 @@ void *xtract_make_descriptors(){
 		strcpy(p_desc, 
 			"Extract the inharmonicity of an audio spectrum");
 		break;
-	    case  MAGNITUDE_SPECTRUM:
-		strcpy(name, "magnitude_spectrum");
-		strcpy(p_name, "Magnitude Spectrum");
+	    case  SPECTRUM:
+		strcpy(name, "spectrum");
+		strcpy(p_name, "Spectrum");
 		strcpy(desc, 
-			"Extract the magnitude spectrum of an input vector");
+			"Extract the spectrum of an input vector");
 		strcpy(p_desc, 
-			"Extract the magnitude spectrum of an audio signal");
+			"Extract the spectrum of an audio signal");
 		strcpy(author, "");
 		break;
 	    case  ODD_EVEN_RATIO:

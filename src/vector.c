@@ -30,35 +30,77 @@
 
 #include <fftw3.h>
 
-int xtract_magnitude_spectrum(const float *data, const int N, const void *argv, float *result){
+int xtract_spectrum(const float *data, const int N, const void *argv, float *result){
 
-    float *temp, *input, q;
+    float *input, *rfft, q, temp;
     size_t bytes;
-    int n , M = N >> 1;
+    int n , NxN, M, vector;
     fftwf_plan plan;
 
-    temp = (float *)fftwf_malloc(N * sizeof(float));
+    M = N >> 1;
+    NxN = SQ(N);
+
+    rfft = (float *)fftwf_malloc(N * sizeof(float));
     input = (float *)malloc(bytes = N * sizeof(float));
     input = memcpy(input, data, bytes);
 
     q = *(float *)argv;
+    vector = (int)*((float *)argv+1);
 
     CHECK_q;
 
-    plan = fftwf_plan_r2r_1d(N, input, temp, FFTW_R2HC, FFTW_ESTIMATE);
+    plan = fftwf_plan_r2r_1d(N, input, rfft, FFTW_R2HC, FFTW_ESTIMATE);
     
     fftwf_execute(plan);
-    
-    for(n = 1; n < M; n++){
-        result[n] = sqrt(SQ(temp[n]) + SQ(temp[N - n])) / N;
-        result[M + n] = n * q;
+
+    switch(vector){
+	case MAGNITUDE_SPECTRUM:
+	    for(n = 0; n < M; n++){
+		result[n] = sqrt(SQ(rfft[n]) + SQ(rfft[N - n])) / N; 
+		result[M + n] = n * q;
+	    }
+	    break;
+	case LOG_MAGNITUDE_SPECTRUM:
+	    for(n = 0; n < M; n++){
+		if ((temp = SQ(rfft[n]) + SQ(rfft[N - n])) > LOG_LIMIT)
+		    temp = log(sqrt(temp) / N);
+		else
+		    temp = LOG_LIMIT_DB;
+		/*Normalise*/
+		result[n] = (temp + DB_SCALE_OFFSET) / DB_SCALE_OFFSET; 
+		result[M + n] = n * q;
+	    }
+	    break;
+	case POWER_SPECTRUM:
+	    for(n = 0; n < M; n++){
+		result[n] = (SQ(rfft[n]) + SQ(rfft[N - n])) / NxN;
+		result[M + n] = n * q;
+	    }
+	    break;
+	case LOG_POWER_SPECTRUM:
+	    for(n = 0; n < M; n++){
+		if ((temp = SQ(rfft[n]) + SQ(rfft[N - n])) > LOG_LIMIT)
+		    temp = log(temp / NxN);
+		else
+		    temp = LOG_LIMIT_DB; 		
+		result[n] = (temp + DB_SCALE_OFFSET) / DB_SCALE_OFFSET; 
+		result[M + n] = n * q;
+	    }
+	    break;
+	default:
+	    /* MAGNITUDE_SPECTRUM */
+	    for(n = 0; n < M; n++){
+		result[n] = sqrt(SQ(rfft[n]) + SQ(rfft[N - n])) / N; 
+		result[M + n] = n * q;
+	    }
+	    break;
     }
     
-    result[0] = fabs(temp[0]) / N;
+    /* result[0] = fabs(temp[0]) / N  */
     result[M] = q * .5;
     
     fftwf_destroy_plan(plan);
-    fftwf_free(temp);
+    fftwf_free(rfft);
     free(input);
     
     return SUCCESS;

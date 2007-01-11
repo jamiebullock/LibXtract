@@ -74,7 +74,7 @@ int(*xtract[])(const float *, const int, const void *, float *) = {
     xtract_asdf,
     xtract_bark_coefficients,
     xtract_peak_spectrum,
-    xtract_magnitude_spectrum,
+    xtract_spectrum,
     xtract_autocorrelation_fft,
     xtract_mfcc,
     xtract_dct,

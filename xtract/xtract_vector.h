@@ -34,14 +34,14 @@ extern "C" {
   * @{
   */
 
-/** \brief Extract normalized (0-1) frequency domain magnitude spectrum from time domain signal 
+/** \brief Extract normalized (0-1) frequency domain spectrum from time domain signal 
  * 
  * \param *data: a pointer to the first element in an array of floats representing an audio vector
  * \param N: the number of array elements to be considered
- * \param *argv: a pointer to a float representing (samplerate / N)
- * \param *result: a pointer to an array of size N containing N/2 magnitude coefficients and N/2 bin frequencies.
+ * \param *argv: a pointer to an array of floats, the first representing (samplerate / N), the second will be cast to an integer and determines the spectrum type (e.g. MAGNITUDE_SPECTRUM, LOG_POWER_SPECTRUM)
+ * \param *result: a pointer to an array of size N containing N/2 magnitude/power/log magnitude/log power coefficients and N/2 bin frequencies.
  */
-int xtract_magnitude_spectrum(const float *data, const int N, const void *argv, float *result);
+int xtract_spectrum(const float *data, const int N, const void *argv, float *result);
 
 /** \brief Extract autocorrelation from time domain signal using FFT based method
  * 
@@ -99,7 +99,7 @@ int xtract_amdf(const float *data, const int N, const void *argv, float *result)
 int xtract_asdf(const float *data, const int N, const void *argv, float *result);
     
 /** \brief Extract Bark band coefficients based on a method   
- * \param *data: a pointer to the first element in an array of floats representing the magnitude coefficients from the magnitude spectrum of an audio vector, (e.g. the second half of the array pointed to by *result from xtract_magnitude_spectrum().
+ * \param *data: a pointer to the first element in an array of floats representing the magnitude coefficients from the magnitude spectrum of an audio vector, (e.g. the first half of the array pointed to by *result from xtract_spectrum().
  * \param N: the number of array elements to be considered
  * \param *argv: a pointer to an array of ints representing the limits of each bark band. This can be obtained  by calling xtract_init_bark.
  * \param *result: a pointer to an array containing resultant bark coefficients
@@ -110,10 +110,10 @@ int xtract_asdf(const float *data, const int N, const void *argv, float *result)
 int xtract_bark_coefficients(const float *data, const int N, const void *argv, float *result);
 
 /** \brief Extract the amplitude and frequency of spectral peaks from a magnitude spectrum
- * \param *data: a pointer to the first element in an array of floats representing N/2 magnitude coefficients from the magnitude spectrum of an audio vector, (e.g. the first half of the array pointed to by *result from xtract_magnitude_spectrum(), or xtract_magnitudes().
- * \param N: the size of the output array (note: the input array can be of size N/2)
+ * \param *data: a pointer to an array of size N containing N/2 magnitude/power/log magnitude/log power coefficients and N/2 bin frequencies. (e.g. the first half of the array pointed to by *result from xtract_spectrum().
+ * \param N: the size of the output array (note: the input array can be of size N/2, i.e. just the magnitudes)
  * \param *argv: a pointer to an array containing the peak threshold as percentage of the magnitude of the maximum peak found, and a float representing (samplerate / N)  
- * \param *result: a pointer to an array of size N containing N/2 magnitude coefficients and N/2 bin frequencies.
+ * \param *result: a pointer to an array of size N containing N/2 magnitude/power/log magnitude/log power coefficients and N/2 bin frequencies.
  *
  */
 
