@@ -220,7 +220,7 @@ int xtract_zcr(const float *data, const int N, const void *argv, float *result);
  * 
  * \param *data: a pointer to the first element in an array of floats representing the magnitude coefficients from the spectrum of an audio vector, (e.g. the first half of the array pointed to by *result from xtract_spectrum().
  * \param N: the number of elements to be considered
- * \param *argv: a pointer to an array containing a floating point value representing the threshold for rolloff, i.e. the percentile at which the rolloff is determined, expressed in the range 0-1.0, and a float representing the sample rate in Hz
+ * \param *argv: a pointer to an array containing a float representing (samplerate / N ) and  a float representing the threshold for rolloff, i.e. the percentile at which the rolloff is determined, expressed as a percentage, and  
  * \param *result: the spectral rolloff in Hz of N values from the array pointed to by *data. This is the point in the spectrum below which argv[0] of the energy is distributed.
  */
 int xtract_rolloff(const float *data, const int N, const void *argv, float *result);
@@ -258,10 +258,10 @@ int xtract_tonality(const float *data, const int N, const void *argv, float *res
 
 /** \brief Extract the noisiness of an input vector using a method described by Tae Hong Park (2000)
  * 
- * \param *data: a pointer to the first element in an array of floats representing the magnitude coefficients from the spectrum of an audio vector, (e.g. the first half of the array pointed to by *result from xtract_spectrum().
- * \param N: the number of elements to be considered
- * \param *argv: a pointer to NULL
- * \param *result: the noisiness of N values from the array pointed to by *data
+ * \param *data: a pointer to NULL
+ * \param N: 
+ * \param *argv: a pointer to an array containing a float represnting the number of harmonic partials in a spectrum, and a float representing the number of partials in a spectrum
+ * \param *result: the noisiness coefficient as calculated from argv
  */
 int xtract_noisiness(const float *data, const int N, const void *argv, float *result);
 
@@ -285,9 +285,9 @@ int xtract_spectral_inharmonicity(const float *data, const int N, const void *ar
 
 /** \brief Extract the spectral crest of an input vector using a method described by Peeters (2003)
  * 
- * \param *data: a pointer to the first element in an array of floats representing the magnitude coefficients from the spectrum of an audio vector, (e.g. the first half of the array pointed to by *result from xtract_spectrum().
- * \param N: the number of elements to be considered
- * \param *argv: a pointer to NULL
+ * \param *data: a pointer to NULL
+ * \param N: not used 
+ * \param *argv: a pointer to an array containing a float representing the maximum value in a spectrum, and a float representing the mean value of a spectrum
  * \param *result: the spectral crest of N values from the array pointed to by *data
  */
 int xtract_crest(const float *data, const int N, const void *argv, float *result);
@@ -306,7 +306,7 @@ int xtract_power(const float *data, const int N, const void *argv, float *result
  * 
  * \param *data: a pointer to the first element in an array of floats representing the frequencies of the harmonic spectrum of an audio vector. It is sufficient to pass in a pointer to the second half of the array pointed to by *result from xtract_harmonic_spectrum().
  * \param N: the number of elements to be considered. If using the array pointed to by *result from xtract_harmonics, N should equal half the total array size i.e., just the frequencies of the peaks.
- * \param *argv: a pointer to NULL
+ * \param *argv: a pointer to a float representing the fundamental frequency of the input vector.
  * \param *result: the odd/even harmonic ratio of N values from the array pointed to by *data
  */
 int xtract_odd_even_ratio(const float *data, const int N, const void *argv, float *result);

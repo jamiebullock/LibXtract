@@ -112,11 +112,10 @@ int xtract_bark_coefficients(const float *data, const int N, const void *argv, f
 /** \brief Extract the amplitude and frequency of spectral peaks from a magnitude spectrum
  * \param *data: a pointer to an array of size N containing N/2 magnitude/power/log magnitude/log power coefficients and N/2 bin frequencies. (e.g. the first half of the array pointed to by *result from xtract_spectrum().
  * \param N: the size of the output array (note: the input array can be of size N/2, i.e. just the magnitudes)
- * \param *argv: a pointer to an array containing the peak threshold as percentage of the magnitude of the maximum peak found, and a float representing (samplerate / N)  
+ * \param *argv: a pointer to an array of floats, the first representing (samplerate / N), the second representing the peak threshold as percentage of the magnitude of the maximum peak found
  * \param *result: a pointer to an array of size N containing N/2 magnitude/power/log magnitude/log power coefficients and N/2 bin frequencies.
  *
  */
-
 int xtract_peak_spectrum(const float *data, const int N, const void *argv, float *result);
 
 /** \brief Extract the harmonic spectrum of from a of a peak spectrum 

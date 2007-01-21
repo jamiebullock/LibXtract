@@ -374,18 +374,20 @@ int xtract_zcr(const float *data, const int N, const void *argv, float *result){
 int xtract_rolloff(const float *data, const int N, const void *argv, float *result){
 
     int n = N;
-    float pivot, temp;
+    float pivot, temp, percentile;
 
     pivot = temp = 0.f;
+    percentile = ((float *)argv)[1];
 
     while(n--) pivot += data[n];   
 
-    pivot *= ((float *)argv)[0];
+    pivot *= percentile / 100.f;
 
     for(n = 0; temp < pivot; n++)
 	temp += data[n];
 
-    *result = (n / (float)N) * (((float *)argv)[1] * .5);
+    *result = n * ((float *)argv)[0];
+    /* *result = (n / (float)N) * (((float *)argv)[1] * .5); */
 
     return SUCCESS;
 }

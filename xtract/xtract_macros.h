@@ -35,16 +35,29 @@ extern "C" {
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 #define NEEDS_FFTW printf("LibXtract must be compiled with fftw support to use this function.\n")
-#define CHECK_q if(!q) q = 44100.f / N
 
 #define VERY_SMALL_NUMBER 2e-42
 #define LOG_LIMIT VERY_SMALL_NUMBER
 #define LOG_LIMIT_DB -96
 #define DB_SCALE_OFFSET 96
 #define VERY_BIG_NUMBER 2e42
-#define SR_LIMIT 192000
+#define SR_UPPER_LIMIT 192000
+#define SR_LOWER_LIMIT 22050
+#define SR_DEFAULT 44100
+#define FUNDAMENTAL_DEFAULT 440
+#define CHECK_nyquist if(!nyquist) nyquist = SR_DEFAULT / N
+#define SR_LIMIT SR_UPPER_LIMIT
+#define FFT_BANDS_MIN 16
+#define FFT_BANDS_MAX 65536
+#define FFT_BANDS_DEF 1024
+#define SPEC_BW_MIN 0.168 /* Minimum spectral bandwidth (= SR_LOWER_LIMIT / \
+		      FFT_BANDS_MAX*/ 
+#define SPEC_BW_MAX 12000 /* SR_UPPER_LIMIT / FFT_BANDS_MIN */
+#define SPEC_BW_DEF 43.066 /* SR_DEFAULT / FFT_BANDS_DEF */
 #define BARK_BANDS 26
 #define NONE 0
+#define ANY -1
+#define UNKNOWN -2
 #define MAXARGS 4
 #define MAX_NAME_LENGTH 64
 #define MAX_AUTHOR_LENGTH 128

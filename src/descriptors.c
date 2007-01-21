@@ -26,35 +26,36 @@
 void *xtract_make_descriptors(){
 
     t_function_descriptor *fd, *d;
-    t_type *type;
+    t_type *argv_type;
     int f , F;
-    char *name, *p_name, *desc, *p_desc, *author;
+    char *name, *p_name, *desc, *p_desc, *author, *argv_donor;
+    float *argv_min, *argv_max, *argv_def, *result_min, *result_max;
     int *argc, *year;
     t_vector *data_format; 
-    /* *result_format; */
+    t_unit *data_unit, *argv_unit, *result_unit;
+    t_bool *is_scalar;
+    t_vector *result_format;
 
     f = F = XTRACT_FEATURES;
 
     fd = malloc(XTRACT_FEATURES * sizeof(t_function_descriptor));
 
+    /* FIX - this file probably needs a rewrite for readability */
 
     while(f--){
 
 	d = &fd[f];
 	argc = &d->argc;
-	type = &d->argv.type;
+	argv_type = &d->argv.type;
 
 	switch(f){
 
-	    case  MEAN: 
 	    case  VARIANCE:
 	    case  STANDARD_DEVIATION:
 	    case  AVERAGE_DEVIATION:
-	    case  SPECTRAL_MEAN:
 	    case  SPECTRAL_VARIANCE:
 	    case  SPECTRAL_STANDARD_DEVIATION:
 	    case  SPECTRAL_AVERAGE_DEVIATION:
-	    case  ROLLOFF:
 	    case  SPECTRAL_INHARMONICITY:
 	    case  ODD_EVEN_RATIO:
 	    case  LOWEST_VALUE:
@@ -62,7 +63,7 @@ void *xtract_make_descriptors(){
 	    case  FAILSAFE_F0:
 	    case  TONALITY:
 		*argc = 1;
-		*type = FLOAT;
+		*argv_type = FLOAT;
 		break;
 	    case  SKEWNESS:
 	    case  KURTOSIS:
@@ -73,17 +74,20 @@ void *xtract_make_descriptors(){
 	    case  HARMONIC_SPECTRUM:
 	    case  NOISINESS:
 	    case  CREST:
+	    case  ROLLOFF:
 		*argc = 2;
-		*type = FLOAT;
+		*argv_type = FLOAT;
 		break;
 	    case  MFCC:
 		*argc = 1;
-		*type = MEL_FILTER;
+		*argv_type = MEL_FILTER;
 		break;
 	    case  BARK_COEFFICIENTS:
 		*argc = BARK_BANDS;
-		*type = INT;
+		*argv_type = INT;
 		break;
+	    case  MEAN:
+	    case  SPECTRAL_MEAN:
 	    case  SPECTRAL_CENTROID:
 	    case  IRREGULARITY_K:
 	    case  IRREGULARITY_J:
@@ -111,10 +115,175 @@ void *xtract_make_descriptors(){
 	    case  AUTOCORRELATION:
 	    case  AMDF:
 	    case  ASDF:
-		*argc = 0;
-		break;
 	    default:
 		*argc = 0;
+		break;
+	}
+		
+	argv_min = &d->argv.min[0];
+	argv_max = &d->argv.max[0];
+	argv_def = &d->argv.def[0];
+	argv_unit = &d->argv.unit[0];
+
+	switch (f) {
+	    /* argc = 1 */
+	    case  VARIANCE:
+	    case  SPECTRAL_VARIANCE:
+	    case  STANDARD_DEVIATION:
+	    case  AVERAGE_DEVIATION:
+	    case  SPECTRAL_STANDARD_DEVIATION:
+	    case  SPECTRAL_AVERAGE_DEVIATION:
+	    case  LOWEST_VALUE:
+	    case  TONALITY:
+	    case  MFCC:
+		*argv_min = ANY;
+		*argv_max = ANY;
+		*argv_def = ANY;
+		*argv_unit = ANY;
+	    case  SPECTRAL_INHARMONICITY:
+	    case  ODD_EVEN_RATIO:
+		*argv_min = 0.f;
+		*argv_max = SR_UPPER_LIMIT / 2;
+		*argv_def = FUNDAMENTAL_DEFAULT;
+		*argv_unit = HERTZ;
+	    case  F0:
+	    case  FAILSAFE_F0:
+		*argv_min = SR_LOWER_LIMIT;
+		*argv_max = SR_UPPER_LIMIT;
+		*argv_def = SR_DEFAULT; 
+		*argv_unit = HERTZ;
+	    /* argc = 2 */;
+	    case  ROLLOFF:
+		*argv_min  = FFT_BANDS_MIN;
+		*argv_max = FFT_BANDS_MAX;
+		*argv_def = SPEC_BW_DEF ;
+		*argv_unit = HERTZ;
+		*(argv_min + 1) = 0.f;
+		*(argv_max + 1) = 100.f;
+		*(argv_def + 1) = 95.f;
+		*(argv_unit + 1) = PERCENT;
+	    case  SPECTRUM:
+		*argv_min  = SR_LOWER_LIMIT / 2; 
+		*argv_max = SR_UPPER_LIMIT / 2;
+		*argv_def = SR_DEFAULT / 2;
+		*argv_unit = HERTZ;
+		*(argv_min + 1) = 0;
+		*(argv_max + 1) = 3 ;
+		*(argv_def + 1) = 0;
+		*(argv_unit + 1) = NONE;
+	    case  PEAK_SPECTRUM:
+		*argv_min  = SR_LOWER_LIMIT / 2; 
+		*argv_max = SR_UPPER_LIMIT / 2;
+		*argv_def = SR_DEFAULT / 2;
+		*argv_unit = HERTZ;
+		*(argv_min + 1) = 0.f;
+		*(argv_max + 1) = 100.f ;
+		*(argv_def + 1) = 10.f ;
+		*(argv_unit + 1) = PERCENT;
+	    case  HARMONIC_SPECTRUM:
+		*argv_min = 0.f;
+		*argv_max = SR_UPPER_LIMIT / 2;
+		*argv_def = FUNDAMENTAL_DEFAULT;
+		*argv_unit = HERTZ;
+		*(argv_min + 1) = 0.f;
+		*(argv_max + 1) = 1.f ;
+		*(argv_def + 1) = .1f ;
+		*(argv_unit + 1) = NONE;
+	    case  NOISINESS:
+	    case  SKEWNESS:
+	    case  KURTOSIS:
+	    case  SPECTRAL_SKEWNESS:
+	    case  SPECTRAL_KURTOSIS:
+	    case  CREST:
+		*argv_min = NONE;
+		*argv_max = NONE;
+		*argv_def = NONE;
+		*argv_unit = NONE;
+		*(argv_min + 1) = NONE;
+		*(argv_max + 1) = NONE;
+		*(argv_def + 1) = NONE;
+		*(argv_unit + 1) = NONE;
+	    case  BARK_COEFFICIENTS:
+	    /* BARK_COEFFICIENTS is special because argc = BARK_BANDS */
+	    default:
+		*argv_min = NONE;
+		*argv_max = NONE;
+		*argv_def = NONE;
+		*argv_unit = NONE;
+	}
+
+	argv_donor = &d->argv.donor[0];
+
+	switch (f) {
+	    /* argc = 1 */
+	    case  VARIANCE:
+		*argv_donor = MEAN;
+		break;
+	    case  SPECTRAL_VARIANCE:
+		*argv_donor = SPECTRAL_MEAN;
+		break;
+	    case  STANDARD_DEVIATION:
+		*argv_donor = VARIANCE;
+		break;
+	    case  AVERAGE_DEVIATION:
+		*argv_donor = MEAN;
+		break;
+	    case  SPECTRAL_STANDARD_DEVIATION:
+		*argv_donor = SPECTRAL_VARIANCE;
+		break;
+	    case  SPECTRAL_AVERAGE_DEVIATION:
+		*argv_donor = SPECTRAL_MEAN;
+		break;
+	    case  SPECTRAL_INHARMONICITY:
+	    case  ODD_EVEN_RATIO:
+		*argv_donor = FAILSAFE_F0;
+		break;
+	    case  TONALITY:
+		*argv_donor = FLATNESS;
+		break;
+	    case  LOWEST_VALUE:
+	    case  F0:
+	    case  FAILSAFE_F0:
+		*argv_donor = ANY;
+		break;
+	    case  MFCC:
+		*argv_donor = INIT_MFCC;
+		break;
+	    /* argc = 2 */;
+	    case  SPECTRUM:
+	    case  ROLLOFF:
+	    case  PEAK_SPECTRUM:
+		*argv_donor = ANY;
+		*(argv_donor + 1) = ANY;
+		break;
+	    case  SKEWNESS:
+	    case  KURTOSIS:
+		*argv_donor = MEAN;
+		*(argv_donor + 1) = STANDARD_DEVIATION;
+		break;
+	    case  SPECTRAL_SKEWNESS:
+	    case  SPECTRAL_KURTOSIS:
+		*argv_donor = SPECTRAL_MEAN;
+		*(argv_donor + 1) = SPECTRAL_STANDARD_DEVIATION;
+		break;
+	    case  HARMONIC_SPECTRUM:
+		*argv_donor = FAILSAFE_F0;
+		*(argv_donor + 1) = ANY;
+		break;
+	    case  NOISINESS:
+		*argv_donor = SUM;
+		*(argv_donor + 1) = SUM;
+		break;
+	    case  CREST:
+		*argv_donor = HIGHEST_VALUE;
+		*(argv_donor + 1) = SPECTRAL_MEAN;
+		break;
+	    /* argc = BARK_BANDS */
+	    case  BARK_COEFFICIENTS:
+		*argv_donor = INIT_BARK;
+		break;
+	    default:
+		*argv_donor = ANY;
 		break;
 	}
 
@@ -198,6 +367,71 @@ void *xtract_make_descriptors(){
 		break;
 	}
 
+        data_unit = &d->data.unit;
+
+	switch(f){
+
+	    case  MEAN: 
+	    case  VARIANCE:
+	    case  STANDARD_DEVIATION:
+	    case  AVERAGE_DEVIATION:
+	    case  SKEWNESS:
+	    case  KURTOSIS:
+	    case  LOWEST_VALUE:
+	    case  HIGHEST_VALUE:
+	    case  SUM:
+	    case  ZCR:
+	    case  PEAK_SPECTRUM:
+	    case  TRISTIMULUS_1:
+	    case  TRISTIMULUS_2:
+	    case  TRISTIMULUS_3:
+	    case  DCT:
+	    case  AMDF:
+	    case  ASDF:
+	    case  IRREGULARITY_K:
+	    case  IRREGULARITY_J:
+	    case  ATTACK_TIME: 
+	    case  DECAY_TIME: 
+	    case  DELTA_FEATURE: 
+	    case  FLUX: 
+	    case  F0:
+	    case  FAILSAFE_F0:
+	    case  MFCC:
+	    case  AUTOCORRELATION:
+	    case  AUTOCORRELATION_FFT:
+	    case  ROLLOFF:
+	    case  NOISINESS:
+	    case  CREST:
+	    case  FLATNESS:
+	    case  POWER:
+	    case  BARK_COEFFICIENTS:
+	    case  RMS_AMPLITUDE:
+	    case  SMOOTHNESS:
+	    case  SPREAD:
+	    case  SHARPNESS:
+	    case  HPS:
+	    case  SPECTRUM:
+	    case  TONALITY:
+	    case  LOUDNESS:
+		*data_unit = ANY;
+		break;
+	    case  SPECTRAL_MEAN:
+	    case  SPECTRAL_VARIANCE:
+	    case  SPECTRAL_STANDARD_DEVIATION:
+	    case  SPECTRAL_AVERAGE_DEVIATION:
+	    case  SPECTRAL_SKEWNESS:
+	    case  SPECTRAL_KURTOSIS:
+	    case  SPECTRAL_CENTROID:
+	    case  SPECTRAL_SLOPE:
+	    case  HARMONIC_SPECTRUM:
+	    case  SPECTRAL_INHARMONICITY:
+		*data_unit = ANY_AMPLITUDE_HERTZ;
+		break;
+	    case  ODD_EVEN_RATIO:
+		*data_unit = HERTZ;
+		break;
+	}
+
 	name = d->algo.name;
 	p_name = d->algo.p_name;
 	desc = d->algo.desc;
@@ -214,6 +448,7 @@ void *xtract_make_descriptors(){
 		strcpy(desc, "Extract the mean of an input vector");
 		strcpy(p_desc, "Extract the mean of a range of values");
 		strcpy(author, "");
+		d->argv.type = NONE;
 		break;
 	    case  VARIANCE:
 		strcpy(name, "variance");
@@ -628,6 +863,241 @@ void *xtract_make_descriptors(){
 		strcpy(p_desc, "");
 		strcpy(author, "");
 		break;
+	}
+
+
+	switch(f){
+
+	    case  VARIANCE:
+	    case  STANDARD_DEVIATION:
+	    case  AVERAGE_DEVIATION:
+	    case  SPECTRAL_VARIANCE:
+	    case  SPECTRAL_STANDARD_DEVIATION:
+	    case  SPECTRAL_AVERAGE_DEVIATION:
+	    case  SPECTRAL_INHARMONICITY:
+	    case  ODD_EVEN_RATIO:
+	    case  LOWEST_VALUE:
+	    case  F0:
+	    case  FAILSAFE_F0:
+	    case  TONALITY:
+		*argc = 1;
+		*argv_type = FLOAT;
+		break;
+	    case  SKEWNESS:
+	    case  KURTOSIS:
+	    case  SPECTRAL_SKEWNESS:
+	    case  SPECTRAL_KURTOSIS:
+	    case  SPECTRUM:
+	    case  PEAK_SPECTRUM:
+	    case  HARMONIC_SPECTRUM:
+	    case  NOISINESS:
+	    case  CREST:
+	    case  ROLLOFF:
+		*argc = 2;
+		*argv_type = FLOAT;
+		break;
+	    case  MFCC:
+		*argc = 1;
+		*argv_type = MEL_FILTER;
+		break;
+	    case  BARK_COEFFICIENTS:
+		*argc = BARK_BANDS;
+		*argv_type = INT;
+		break;
+	    case  MEAN:
+	    case  SPECTRAL_MEAN:
+	    case  SPECTRAL_CENTROID:
+	    case  IRREGULARITY_K:
+	    case  IRREGULARITY_J:
+	    case  TRISTIMULUS_1:
+	    case  TRISTIMULUS_2:
+	    case  TRISTIMULUS_3:
+	    case  SMOOTHNESS:
+	    case  FLATNESS:
+	    case  SPREAD:
+	    case  ZCR:
+	    case  LOUDNESS:
+	    case  HIGHEST_VALUE:
+	    case  SUM:
+	    case  RMS_AMPLITUDE:
+	    case  POWER:
+	    case  SHARPNESS:
+	    case  SPECTRAL_SLOPE:
+	    case  HPS:
+	    case  FLUX: 
+	    case  ATTACK_TIME: 
+	    case  DECAY_TIME: 
+	    case  DELTA_FEATURE: 
+	    case  AUTOCORRELATION_FFT:
+	    case  DCT:
+	    case  AUTOCORRELATION:
+	    case  AMDF:
+	    case  ASDF:
+	    default:
+		*argc = 0;
+		break;
+	}
+    
+	is_scalar = &d->is_scalar;
+
+	switch(f){
+	    case  MEAN:
+	    case  VARIANCE:
+	    case  STANDARD_DEVIATION:
+	    case  AVERAGE_DEVIATION:
+	    case  SKEWNESS:
+	    case  KURTOSIS:
+	    case  SPECTRAL_MEAN:
+	    case  SPECTRAL_VARIANCE:
+	    case  SPECTRAL_STANDARD_DEVIATION:
+	    case  SPECTRAL_AVERAGE_DEVIATION:
+	    case  SPECTRAL_SKEWNESS:
+	    case  SPECTRAL_KURTOSIS:
+	    case  SPECTRAL_CENTROID:
+	    case  IRREGULARITY_K:
+	    case  IRREGULARITY_J:
+	    case  TRISTIMULUS_1:
+	    case  TRISTIMULUS_2:
+	    case  TRISTIMULUS_3:
+	    case  SMOOTHNESS:
+	    case  SPREAD:
+	    case  ZCR:
+	    case  ROLLOFF:
+	    case  LOUDNESS:
+	    case  FLATNESS:
+	    case  TONALITY:
+	    case  CREST:
+	    case  NOISINESS:
+	    case  RMS_AMPLITUDE:
+	    case  SPECTRAL_INHARMONICITY:
+	    case  POWER:
+	    case  ODD_EVEN_RATIO:
+	    case  SHARPNESS:
+	    case  SPECTRAL_SLOPE:
+	    case  LOWEST_VALUE:
+	    case  HIGHEST_VALUE:
+	    case  SUM:
+	    case  HPS:
+	    case  F0:
+	    case  FAILSAFE_F0:
+		*is_scalar = TRUE;
+		break;
+	    case  AUTOCORRELATION:
+	    case  AMDF:
+	    case  ASDF:
+	    case  BARK_COEFFICIENTS:
+	    case  PEAK_SPECTRUM:
+	    case  SPECTRUM:
+	    case  AUTOCORRELATION_FFT:
+	    case  MFCC:
+	    case  DCT:
+	    case  HARMONIC_SPECTRUM:
+		*is_scalar = FALSE;
+		break;
+	    default:
+		*is_scalar = TRUE;
+		break;
+
+	}
+
+	if(*is_scalar){
+
+	    result_unit = &d->result.scalar.unit;
+	    result_min = &d->result.scalar.min;
+	    result_max = &d->result.scalar.max;
+
+	    switch(f){
+		case  MEAN:
+		case  VARIANCE:
+		case  STANDARD_DEVIATION:
+		case  AVERAGE_DEVIATION:
+		case  SKEWNESS:
+		case  KURTOSIS:
+		case  RMS_AMPLITUDE:
+		case  LOWEST_VALUE:
+		case  HIGHEST_VALUE:
+		case  SUM:
+		    *result_unit = ANY;
+		    *result_min = ANY;
+		    *result_max = ANY;
+		    break;
+		case  SPECTRAL_SKEWNESS:
+		case  SPECTRAL_KURTOSIS:
+		case  IRREGULARITY_K:
+		case  IRREGULARITY_J:
+		case  TRISTIMULUS_1:
+		case  TRISTIMULUS_2:
+		case  TRISTIMULUS_3:
+		case  NOISINESS:
+		case  SMOOTHNESS:
+		    *result_unit = NONE;
+		    *result_min = ANY; /* FIX: need to check these */
+		    *result_max = ANY;
+		    break;
+		case  SPECTRAL_MEAN:
+		case  SPECTRAL_VARIANCE:
+		case  SPECTRAL_STANDARD_DEVIATION:
+		case  SPECTRAL_AVERAGE_DEVIATION:
+		case  SPECTRAL_CENTROID:
+		case  SPREAD:
+		case  F0:
+		case  FAILSAFE_F0:
+		case  HPS:
+		case  ROLLOFF:
+		    *result_unit = HERTZ;
+		    *result_min = 0.f;
+		    *result_max = SR_UPPER_LIMIT / 2;
+		case  ZCR:
+		    *result_unit = HERTZ;
+		    *result_min = 0.f;
+		    *result_max = ANY;
+		case  ODD_EVEN_RATIO:
+		    *result_unit = NONE;
+		    *result_min = 0.f;
+		    *result_max = 1.f; 
+		case  LOUDNESS:
+		case  FLATNESS:
+		case  TONALITY:
+		case  CREST:
+		case  SPECTRAL_INHARMONICITY:
+		case  POWER:
+		case  SHARPNESS:
+		case  SPECTRAL_SLOPE:
+		default:
+		    *result_unit = UNKNOWN;
+		    *result_min = UNKNOWN;
+		    *result_max = UNKNOWN; 
+	    }
+	}
+	else {
+
+	    result_min = NULL;
+	    result_max = NULL;
+	    result_unit = &d->result.vector.unit;
+	    result_format = &d->result.vector.format;
+
+	    switch(f) {
+		case  AUTOCORRELATION:
+		case  AMDF:
+		case  ASDF:
+		case  DCT:
+		    *result_format = ARBITRARY_SERIES;
+		    *result_unit = ANY;
+		case  BARK_COEFFICIENTS:
+		    *result_format = BARK_COEFFS;
+		    *result_unit = UNKNOWN; /* FIX: check */
+		case  PEAK_SPECTRUM:
+		case  SPECTRUM:
+		case  HARMONIC_SPECTRUM:
+		    *result_format = SPECTRAL;
+		    *result_unit = ANY_AMPLITUDE_HERTZ;
+		case  AUTOCORRELATION_FFT:
+		case  MFCC:
+		    *result_format = MEL_COEFFS;
+		    *result_unit = UNKNOWN; /* FIX: check */
+		default:
+		    break;
+	    }
 	}
     }
 

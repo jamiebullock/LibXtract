@@ -105,6 +105,7 @@ static void *xtract_new(t_symbol *me, t_int argc, t_atom *argv) {
     t_xtract_tilde *x = (t_xtract_tilde *)pd_new(xtract_class);
     xtract_mel_filter *mf;
     t_int n, N, f, F, n_args, type;
+    t_float *argv_max;
     t_function_descriptor *fd;
     char *p_name, *p_desc, *author;
     int *year;
@@ -138,6 +139,10 @@ static void *xtract_new(t_symbol *me, t_int argc, t_atom *argv) {
     type = fd[f].argv.type;
 
     if(n_args){
+	for(n = 0; n < n_args; n++){
+		    argv_max = &fd[f].argv.max[n]; 
+		    post("Argument %d, max: %.2f", n, *argv_max);
+	}
 	if(type == MEL_FILTER){
 	    x->memory.argv = (size_t)(n_args * sizeof(xtract_mel_filter));
 	    x->argv = (xtract_mel_filter *)getbytes(x->memory.argv);

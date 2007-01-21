@@ -32,7 +32,7 @@
 
 int xtract_spectrum(const float *data, const int N, const void *argv, float *result){
 
-    float *input, *rfft, q, temp;
+    float *input, *rfft, nyquist, temp;
     size_t bytes;
     int n , NxN, M, vector;
     fftwf_plan plan;
@@ -44,10 +44,10 @@ int xtract_spectrum(const float *data, const int N, const void *argv, float *res
     input = (float *)malloc(bytes = N * sizeof(float));
     input = memcpy(input, data, bytes);
 
-    q = *(float *)argv;
+    nyquist = *(float *)argv;
     vector = (int)*((float *)argv+1);
 
-    CHECK_q;
+    CHECK_nyquist;
 
     plan = fftwf_plan_r2r_1d(N, input, rfft, FFTW_R2HC, FFTW_ESTIMATE);
     
@@ -57,7 +57,7 @@ int xtract_spectrum(const float *data, const int N, const void *argv, float *res
 	case MAGNITUDE_SPECTRUM:
 	    for(n = 0; n < M; n++){
 		result[n] = sqrt(SQ(rfft[n]) + SQ(rfft[N - n])) / N; 
-		result[M + n] = n * q;
+		result[M + n] = n * nyquist;
 	    }
 	    break;
 	case LOG_MAGNITUDE_SPECTRUM:
@@ -68,13 +68,13 @@ int xtract_spectrum(const float *data, const int N, const void *argv, float *res
 		    temp = LOG_LIMIT_DB;
 		/*Normalise*/
 		result[n] = (temp + DB_SCALE_OFFSET) / DB_SCALE_OFFSET; 
-		result[M + n] = n * q;
+		result[M + n] = n * nyquist;
 	    }
 	    break;
 	case POWER_SPECTRUM:
 	    for(n = 0; n < M; n++){
 		result[n] = (SQ(rfft[n]) + SQ(rfft[N - n])) / NxN;
-		result[M + n] = n * q;
+		result[M + n] = n * nyquist;
 	    }
 	    break;
 	case LOG_POWER_SPECTRUM:
@@ -84,20 +84,20 @@ int xtract_spectrum(const float *data, const int N, const void *argv, float *res
 		else
 		    temp = LOG_LIMIT_DB; 		
 		result[n] = (temp + DB_SCALE_OFFSET) / DB_SCALE_OFFSET; 
-		result[M + n] = n * q;
+		result[M + n] = n * nyquist;
 	    }
 	    break;
 	default:
 	    /* MAGNITUDE_SPECTRUM */
 	    for(n = 0; n < M; n++){
 		result[n] = sqrt(SQ(rfft[n]) + SQ(rfft[N - n])) / N; 
-		result[M + n] = n * q;
+		result[M + n] = n * nyquist;
 	    }
 	    break;
     }
     
     /* result[0] = fabs(temp[0]) / N  */
-    result[M] = q * .5;
+    result[M] = nyquist * .5;
     
     fftwf_destroy_plan(plan);
     fftwf_free(rfft);
@@ -279,25 +279,25 @@ int xtract_bark_coefficients(const float *data, const int N, const void *argv, f
 
 int xtract_peak_spectrum(const float *data, const int N, const void *argv, float *result){
 
-    float thresh, max, y, y2, y3, p, q, *input = NULL;
+    float threshold, max, y, y2, y3, p, nyquist, *input = NULL;
     size_t bytes;
     int n = N, M, rv = SUCCESS;
 
-    thresh = max = y = y2 = y3 = p = q = 0.f;
+    threshold = max = y = y2 = y3 = p = nyquist = 0.f;
     
     if(argv != NULL){
-        thresh = ((float *)argv)[0];
-        q = ((float *)argv)[1];
+        nyquist = ((float *)argv)[0];
+        threshold = ((float *)argv)[1];
     }
     else
         rv = BAD_ARGV;
 
-    if(thresh < 0 || thresh > 100){
-        thresh = 0;
+    if(threshold < 0 || threshold > 100){
+        threshold = 0;
         rv = BAD_ARGV;
     }
 
-    CHECK_q;
+    CHECK_nyquist;
 
     input = (float *)malloc(bytes = N * sizeof(float));
 
@@ -311,15 +311,15 @@ int xtract_peak_spectrum(const float *data, const int N, const void *argv, float
     while(n--)
         max = MAX(max, input[n]);
     
-    thresh *= .01 * max;
+    threshold *= .01 * max;
 
     result[0] = 0;
     result[M] = 0;
 
     for(n = 1; n < M; n++){
-        if(input[n] >= thresh){
+        if(input[n] >= threshold){
             if(input[n] > input[n - 1] && input[n] > input[n + 1]){
-                result[M + n] = q * (n + (p = .5 * (y = input[n-1] - 
+                result[M + n] = nyquist * (n + (p = .5 * (y = input[n-1] - 
 				(y3 = input[n+1])) / (input[n - 1] - 2 * 
 				    (y2 = input[n]) + input[n + 1])));
                 result[n] = y2 - .25 * (y - y3) * p;
@@ -344,12 +344,12 @@ int xtract_harmonic_spectrum(const float *data, const int N, const void *argv, f
     int n = (N >> 1), M = n; 
 
     const float *freqs, *amps;
-    float f0, thresh, ratio, nearest, distance;
+    float f0, threshold, ratio, nearest, distance;
 
     amps = data;
     freqs = data + n;
     f0 = *((float *)argv);
-    thresh = *((float *)argv+1);
+    threshold = *((float *)argv+1);
 
     ratio = nearest = distance = 0.f;
 
@@ -358,7 +358,7 @@ int xtract_harmonic_spectrum(const float *data, const int N, const void *argv, f
 	    ratio = freqs[n] / f0;
 	    nearest = round(ratio);
 	    distance = fabs(nearest - ratio);
-	    if(distance > thresh)
+	    if(distance > threshold)
 		result[n] = result[M + n] = 0.f;
 	    else {
 		result[n] = amps[n];

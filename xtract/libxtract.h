@@ -112,6 +112,12 @@ enum features_ {
     HARMONIC_SPECTRUM
 };
 
+/** \brief Enumeration of feature initialisation functions */
+enum feature_init_ {
+    INIT_MFCC = 100,
+    INIT_BARK
+};
+
 /** \brief Enumeration of feature types */
 enum feature_types_ {
     SCALAR,
@@ -146,14 +152,20 @@ enum spectrum_ {
 /** \brief Enumeration of data types*/
 typedef enum type_ {
     FLOAT,
+    FLOATARRAY,
     INT,
     MEL_FILTER
 } t_type;
 
 /** \brief Enumeration of units*/
 typedef enum unit_ {
-    HERTZ,
-    DBFS
+    /* NONE, ANY */
+    HERTZ = 2,
+    ANY_AMPLITUDE_HERTZ,
+    DBFS,
+    DBFS_HERTZ,
+    PERCENT,
+    SONE
 } t_unit;
 
 /** \brief Boolean */
@@ -217,6 +229,7 @@ typedef struct _function_descriptor {
 
     t_bool is_scalar;
 
+    /* The result.<> entries in descritors.c need to be checked */
     union {
 
 	struct {
