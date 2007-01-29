@@ -20,7 +20,7 @@
 
 
 #include "xtract/libxtract.h"
-#define XTRACT
+#define XTRACT_H
 
 int(*xtract[])(const float *, const int, const void *, float *) = {
     /* xtract_scalar.h */
@@ -81,53 +81,3 @@ int(*xtract[])(const float *, const int, const void *, float *) = {
     xtract_harmonic_spectrum
 };
 
-
-/*char *xtract_help_strings[] = {
-   "xtract_mean",
-   "xtract_variance",
-   "xtract_standard_deviation",
-   "xtract_average_deviation",
-   "xtract_skewness",
-   "xtract_kurtosis",
-   "xtract_centroid",
-   "xtract_irregularity_k",
-   "xtract_irregularity_j",
-   "xtract_tristimulus_1",
-   "xtract_tristimulus_2",
-   "xtract_tristimulus_3",
-   "xtract_smoothness",
-   "xtract_spread",
-   "xtract_zcr",
-   "xtract_rolloff",
-   "xtract_loudness",
-   "xtract_flatness",
-   "xtract_tonality",
-   "xtract_crest",
-   "xtract_noisiness",
-   "xtract_rms_amplitude",
-   "xtract_inharmonicity",
-   "xtract_power",
-   "xtract_odd_even_ratio",
-   "xtract_sharpness",
-   "xtract_slope",
-   "xtract_lowest_value",
-   "xtract_highest_value",
-   "xtract_sum",
-   "xtract_hps",
-   "xtract_f0",
-   "xtract_failsafe_f0",
-   "xtract_flux",
-   "xtract_attack_time",
-   "xtract_decay_time",
-   "xtract_delta_feature",
-   "xtract_autocorrelation",
-   "xtract_amdf",
-   "xtract_asdf",
-   "xtract_bark_coefficients",
-   "xtract_peaks",
-   "xtract_magnitude_spectrum",
-   "xtract_autocorrelation_fft",
-   "xtract_mfcc",
-   "xtract_dct",
-   "xtract_harmonics"
-   }; */

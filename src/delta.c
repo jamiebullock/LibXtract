@@ -24,25 +24,25 @@
 
 int xtract_flux(const float *data, const int N, const void *argv , float *result){
 
-    return FEATURE_NOT_IMPLEMENTED;
+    return XTRACT_FEATURE_NOT_IMPLEMENTED;
 
 }
 
 int xtract_attack_time(const float *data, const int N, const void *argv , float *result){
 
-    return FEATURE_NOT_IMPLEMENTED;
+    return XTRACT_FEATURE_NOT_IMPLEMENTED;
 
 }
 
 int xtract_decay_time(const float *data, const int N, const void *argv, float *result){
 
-    return FEATURE_NOT_IMPLEMENTED;
+    return XTRACT_FEATURE_NOT_IMPLEMENTED;
 
 }
 
 int xtract_delta_feature(const float *data, const int N, const void *argv, float *result){
 
-    return FEATURE_NOT_IMPLEMENTED;
+    return XTRACT_FEATURE_NOT_IMPLEMENTED;
 
 }
 

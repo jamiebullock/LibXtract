@@ -20,8 +20,8 @@
 
 /* xtract_scalar.h: declares functions that extract a feature as a vector from an input vector */
 
-#ifndef XTRACT_VECTOR
-#define XTRACT_VECTOR
+#ifndef XTRACT_VECTOR_H
+#define XTRACT_VECTOR_H
 
 #ifdef __cplusplus
 extern "C" {

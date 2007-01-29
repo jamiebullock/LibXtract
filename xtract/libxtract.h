@@ -56,178 +56,178 @@ extern "C" {
 #define XTRACT_FEATURES 53
     
 /** \brief Enumeration of features, elements are used as indixes to an array of pointers to feature extracton functions */
-enum features_ {
-    MEAN,
-    VARIANCE,
-    STANDARD_DEVIATION,
-    AVERAGE_DEVIATION,
-    SKEWNESS,
-    KURTOSIS,
-    SPECTRAL_MEAN,
-    SPECTRAL_VARIANCE,
-    SPECTRAL_STANDARD_DEVIATION,
-    SPECTRAL_AVERAGE_DEVIATION,
-    SPECTRAL_SKEWNESS,
-    SPECTRAL_KURTOSIS,
-    SPECTRAL_CENTROID,
-    IRREGULARITY_K,
-    IRREGULARITY_J,
-    TRISTIMULUS_1,
-    TRISTIMULUS_2,
-    TRISTIMULUS_3,
-    SMOOTHNESS,
-    SPREAD,
-    ZCR,
-    ROLLOFF,
-    LOUDNESS,
-    FLATNESS,
-    TONALITY,
-    CREST,
-    NOISINESS,
-    RMS_AMPLITUDE,
-    SPECTRAL_INHARMONICITY,
-    POWER,
-    ODD_EVEN_RATIO,
-    SHARPNESS,
-    SPECTRAL_SLOPE,
-    LOWEST_VALUE,
-    HIGHEST_VALUE,
-    SUM,
-    HPS,
-    F0,
-    FAILSAFE_F0,
-    FLUX,
-    ATTACK_TIME,
-    DECAY_TIME,
-    DELTA_FEATURE,
-    AUTOCORRELATION,
-    AMDF,
-    ASDF,
-    BARK_COEFFICIENTS,
-    PEAK_SPECTRUM,
-    SPECTRUM,
-    AUTOCORRELATION_FFT,
-    MFCC,
-    DCT,
-    HARMONIC_SPECTRUM
+enum xtract_features_ {
+    XTRACT_MEAN,
+    XTRACT_VARIANCE,
+    XTRACT_STANDARD_DEVIATION,
+    XTRACT_AVERAGE_DEVIATION,
+    XTRACT_SKEWNESS,
+    XTRACT_KURTOSIS,
+    XTRACT_SPECTRAL_MEAN,
+    XTRACT_SPECTRAL_VARIANCE,
+    XTRACT_SPECTRAL_STANDARD_DEVIATION,
+    XTRACT_SPECTRAL_AVERAGE_DEVIATION,
+    XTRACT_SPECTRAL_SKEWNESS,
+    XTRACT_SPECTRAL_KURTOSIS,
+    XTRACT_SPECTRAL_CENTROID,
+    XTRACT_IRREGULARITY_K,
+    XTRACT_IRREGULARITY_J,
+    XTRACT_TRISTIMULUS_1,
+    XTRACT_TRISTIMULUS_2,
+    XTRACT_TRISTIMULUS_3,
+    XTRACT_SMOOTHNESS,
+    XTRACT_SPREAD,
+    XTRACT_ZCR,
+    XTRACT_ROLLOFF,
+    XTRACT_LOUDNESS,
+    XTRACT_FLATNESS,
+    XTRACT_TONALITY,
+    XTRACT_CREST,
+    XTRACT_NOISINESS,
+    XTRACT_RMS_AMPLITUDE,
+    XTRACT_SPECTRAL_INHARMONICITY,
+    XTRACT_POWER,
+    XTRACT_ODD_EVEN_RATIO,
+    XTRACT_SHARPNESS,
+    XTRACT_SPECTRAL_SLOPE,
+    XTRACT_LOWEST_VALUE,
+    XTRACT_HIGHEST_VALUE,
+    XTRACT_SUM,
+    XTRACT_HPS,
+    XTRACT_F0,
+    XTRACT_FAILSAFE_F0,
+    XTRACT_FLUX,
+    XTRACT_ATTACK_TIME,
+    XTRACT_DECAY_TIME,
+    XTRACT_DELTA_FEATURE,
+    XTRACT_AUTOCORRELATION,
+    XTRACT_AMDF,
+    XTRACT_ASDF,
+    XTRACT_BARK_COEFFICIENTS,
+    XTRACT_PEAK_SPECTRUM,
+    XTRACT_SPECTRUM,
+    XTRACT_AUTOCORRELATION_FFT,
+    XTRACT_MFCC,
+    XTRACT_DCT,
+    XTRACT_HARMONIC_SPECTRUM
 };
 
 /** \brief Enumeration of feature initialisation functions */
-enum feature_init_ {
-    INIT_MFCC = 100,
-    INIT_BARK
+enum xtract_feature_init_ {
+    XTRACT_INIT_MFCC = 100,
+    XTRACT_INIT_BARK
 };
 
 /** \brief Enumeration of feature types */
-enum feature_types_ {
-    SCALAR,
-    VECTOR,
-    DELTA
+enum xtract_feature_types_ {
+    XTRACT_SCALAR,
+    XTRACT_VECTOR,
+    XTRACT_DELTA
 };
 
 /** \brief Enumeration of mfcc types */
-enum mfcc_types_ {
-    EQUAL_GAIN,
-    EQUAL_AREA
+enum xtract_mfcc_types_ {
+    XTRACT_EQUAL_GAIN,
+    XTRACT_EQUAL_AREA
 };
 
 /** \brief Enumeration of return codes */
-enum return_codes_ {
-    SUCCESS,
-    MALLOC_FAILED,
-    BAD_ARGV,
-    BAD_VECTOR_SIZE,
-    NO_RESULT,
-    FEATURE_NOT_IMPLEMENTED
+enum xtract_return_codes_ {
+    XTRACT_SUCCESS,
+    XTRACT_MALLOC_FAILED,
+    XTRACT_BAD_ARGV,
+    XTRACT_BAD_VECTOR_SIZE,
+    XTRACT_NO_RESULT,
+    XTRACT_FEATURE_NOT_IMPLEMENTED
 };
 
 /** \brief Enumeration of spectrum types */
-enum spectrum_ {
-    MAGNITUDE_SPECTRUM,
-    LOG_MAGNITUDE_SPECTRUM,
-    POWER_SPECTRUM,
-    LOG_POWER_SPECTRUM
+enum xtract_spectrum_ {
+    XTRACT_MAGNITUDE_SPECTRUM,
+    XTRACT_LOG_MAGNITUDE_SPECTRUM,
+    XTRACT_POWER_SPECTRUM,
+    XTRACT_LOG_POWER_SPECTRUM
 };
 
 /** \brief Enumeration of data types*/
 typedef enum type_ {
-    FLOAT,
-    FLOATARRAY,
-    INT,
-    MEL_FILTER
-} t_type;
+    XTRACT_FLOAT,
+    XTRACT_FLOATARRAY,
+    XTRACT_INT,
+    XTRACT_MEL_FILTER
+} xtract_type_t;
 
 /** \brief Enumeration of units*/
 typedef enum unit_ {
     /* NONE, ANY */
-    HERTZ = 2,
-    ANY_AMPLITUDE_HERTZ,
-    DBFS,
-    DBFS_HERTZ,
-    PERCENT,
-    SONE
-} t_unit;
+    XTRACT_HERTZ = 2,
+    XTRACT_ANY_AMPLITUDE_HERTZ,
+    XTRACT_DBFS,
+    XTRACT_DBFS_HERTZ,
+    XTRACT_PERCENT,
+    XTRACT_SONE
+} xtract_unit_t;
 
 /** \brief Boolean */
 typedef enum {
-    FALSE,
-    TRUE
-} t_bool;
+    XTRACT_FALSE,
+    XTRACT_TRUE
+} xtract_bool_t;
 
 /** \brief Enumeration of vector format types*/
-typedef enum vector_ {
+typedef enum xtract_vector_ {
     /* N/2 magnitude/log-magnitude/power/log-power coeffs and N/2 frequencies */
-    SPECTRAL,     
+    XTRACT_SPECTRAL,     
     /* N spectral amplitudes */
-    SPECTRAL_MAGNITUDES, 
+    XTRACT_SPECTRAL_MAGNITUDES, 
     /* N/2 magnitude/log-magnitude/power/log-power peak coeffs and N/2 
      * frequencies */
-    SPECTRAL_PEAKS,
+    XTRACT_SPECTRAL_PEAKS,
     /* N spectral peak amplitudes */
-    SPECTRAL_PEAK_MAGNITUDES,
+    XTRACT_SPECTRAL_PEAK_MAGNITUDES,
     /* N/2 magnitude/log-magnitude/power/log-power harmonic peak coeffs and N/2 
      * frequencies */
-    SPECTRAL_HARMONICS,
+    XTRACT_SPECTRAL_HARMONICS,
     /* N spectral harmonic amplitudes */
-    SPECTRAL_HARMONICS_MAGNITUDES,
+    XTRACT_SPECTRAL_HARMONICS_MAGNITUDES,
     /* N spectral harmonic frequencies */
-    SPECTRAL_HARMONICS_FREQUENCIES,
-    ARBITRARY_SERIES,
-    AUDIO_SAMPLES,
-    MEL_COEFFS, 
-    BARK_COEFFS,
-    NO_DATA
-} t_vector;
+    XTRACT_SPECTRAL_HARMONICS_FREQUENCIES,
+    XTRACT_ARBITRARY_SERIES,
+    XTRACT_AUDIO_SAMPLES,
+    XTRACT_MEL_COEFFS, 
+    XTRACT_BARK_COEFFS,
+    XTRACT_NO_DATA
+} xtract_vector_t;
 
 /** \brief Data structure containing useful information about functions provided by LibXtract. */
-typedef struct _function_descriptor {
+typedef struct _xtract_function_descriptor {
 
     struct {
-	char name[MAX_NAME_LENGTH];
-	char p_name[MAX_NAME_LENGTH]; /* pretty name */
-	char desc[MAX_DESC_LENGTH];
-	char p_desc[MAX_DESC_LENGTH]; /* pretty description */
-	char author[MAX_AUTHOR_LENGTH];
+	char name[XTRACT_MAX_NAME_LENGTH];
+	char p_name[XTRACT_MAX_NAME_LENGTH]; /* pretty name */
+	char desc[XTRACT_MAX_DESC_LENGTH];
+	char p_desc[XTRACT_MAX_DESC_LENGTH]; /* pretty description */
+	char author[XTRACT_MAX_AUTHOR_LENGTH];
 	int year;
     } algo;
 
     struct {
-	t_vector format;
-	t_unit unit;
+	xtract_vector_t format;
+	xtract_unit_t unit;
     } data;
 
     int argc;
 
     struct {
-	t_type type; /* type of the array/value pointed to by argv */
-	float min[MAXARGS];
-	float max[MAXARGS];
-	float def[MAXARGS]; /* defaults */
-	t_unit unit[MAXARGS];
-	char donor[MAXARGS]; /* suggested donor functions for argv */
+	xtract_type_t type; /* type of the array/value pointed to by argv */
+	float min[XTRACT_MAXARGS];
+	float max[XTRACT_MAXARGS];
+	float def[XTRACT_MAXARGS]; /* defaults */
+	xtract_unit_t unit[XTRACT_MAXARGS];
+	int donor[XTRACT_MAXARGS]; /* suggested donor functions for argv */
     } argv;
 
-    t_bool is_scalar;
+    xtract_bool_t is_scalar;
 
     /* The result.<> entries in descritors.c need to be checked */
     union {
@@ -235,17 +235,17 @@ typedef struct _function_descriptor {
 	struct {
 	    float min;
 	    float max;	   
-	    t_unit unit;
+	    xtract_unit_t unit;
 	} scalar;
 
 	struct {
-	    t_vector format;
-	    t_unit unit;
+	    xtract_vector_t format;
+	    xtract_unit_t unit;
 	} vector;
 
     } result;
 
-} t_function_descriptor;
+} xtract_function_descriptor_t;
 
 /**
  *                                                                          
@@ -293,14 +293,8 @@ printf("Mean = %.2f\n", mean);
  * The calling function may additionally make some tests against the value returned by xtract
  * 
  */
-#ifdef XTRACT
+#ifdef XTRACT_H
 extern int(*xtract[XTRACT_FEATURES])(const float *data, const int N, const void *argv, float *result);
-
-/** \brief An array of pointers to function descriptors
- *
- * Defined in libxtract.c. This is an array of pointers to function descriptors designed to be queried for useful information such as the expected input and output units of a function, or the number of arguments it takes.
- */
-//extern t_function_descriptor *xtract_help[XTRACT_FEATURES];
 
 #endif
 
@@ -314,7 +308,7 @@ typedef struct xtract_mel_filter_ {
  * 
  * It is up to the caller to pass in a pointer to memory allocated for freq_bands arrays of length N. This function populates these arrays with magnitude coefficients representing the mel filterbank on a linear scale 
  */
-int xtract_init_mfcc(int N, float nyquist, int style, float freq_max, float freq_min, int freq_bands, float **fft_tables);
+int xtract_init_mfcc(int N, float nyquist, int style, float freq_min, float freq_max, int freq_bands, float **fft_tables);
 
 /** \brief A function to initialise bark filter bounds
  * 

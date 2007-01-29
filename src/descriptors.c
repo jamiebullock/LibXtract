@@ -19,26 +19,26 @@
  */
 
 #include "xtract/libxtract.h"
+#include "xtract_macros_private.h"
 #include <stdlib.h>
 #include <string.h>
 #define XTRACT
 
 void *xtract_make_descriptors(){
 
-    t_function_descriptor *fd, *d;
-    t_type *argv_type;
     int f , F;
-    char *name, *p_name, *desc, *p_desc, *author, *argv_donor;
+    char *name, *p_name, *desc, *p_desc, *author; 
     float *argv_min, *argv_max, *argv_def, *result_min, *result_max;
-    int *argc, *year;
-    t_vector *data_format; 
-    t_unit *data_unit, *argv_unit, *result_unit;
-    t_bool *is_scalar;
-    t_vector *result_format;
+    int *argc, *year, *argv_donor;
+    xtract_vector_t *data_format, *result_format; 
+    xtract_unit_t *data_unit, *argv_unit, *result_unit;
+    xtract_bool_t *is_scalar;
+    xtract_function_descriptor_t *fd, *d;
+    xtract_type_t *argv_type;
 
     f = F = XTRACT_FEATURES;
 
-    fd = malloc(XTRACT_FEATURES * sizeof(t_function_descriptor));
+    fd = malloc(XTRACT_FEATURES * sizeof(xtract_function_descriptor_t));
 
     /* FIX - this file probably needs a rewrite for readability */
 
@@ -50,71 +50,71 @@ void *xtract_make_descriptors(){
 
 	switch(f){
 
-	    case  VARIANCE:
-	    case  STANDARD_DEVIATION:
-	    case  AVERAGE_DEVIATION:
-	    case  SPECTRAL_VARIANCE:
-	    case  SPECTRAL_STANDARD_DEVIATION:
-	    case  SPECTRAL_AVERAGE_DEVIATION:
-	    case  SPECTRAL_INHARMONICITY:
-	    case  ODD_EVEN_RATIO:
-	    case  LOWEST_VALUE:
-	    case  F0:
-	    case  FAILSAFE_F0:
-	    case  TONALITY:
+	    case XTRACT_VARIANCE:
+	    case XTRACT_STANDARD_DEVIATION:
+	    case XTRACT_AVERAGE_DEVIATION:
+	    case XTRACT_SPECTRAL_VARIANCE:
+	    case XTRACT_SPECTRAL_STANDARD_DEVIATION:
+	    case XTRACT_SPECTRAL_AVERAGE_DEVIATION:
+	    case XTRACT_SPECTRAL_INHARMONICITY:
+	    case XTRACT_ODD_EVEN_RATIO:
+	    case XTRACT_LOWEST_VALUE:
+	    case XTRACT_F0:
+	    case XTRACT_FAILSAFE_F0:
+	    case XTRACT_TONALITY:
 		*argc = 1;
-		*argv_type = FLOAT;
+		*argv_type = XTRACT_FLOAT;
 		break;
-	    case  SKEWNESS:
-	    case  KURTOSIS:
-	    case  SPECTRAL_SKEWNESS:
-	    case  SPECTRAL_KURTOSIS:
-	    case  SPECTRUM:
-	    case  PEAK_SPECTRUM:
-	    case  HARMONIC_SPECTRUM:
-	    case  NOISINESS:
-	    case  CREST:
-	    case  ROLLOFF:
+	    case XTRACT_SKEWNESS:
+	    case XTRACT_KURTOSIS:
+	    case XTRACT_SPECTRAL_SKEWNESS:
+	    case XTRACT_SPECTRAL_KURTOSIS:
+	    case XTRACT_SPECTRUM:
+	    case XTRACT_PEAK_SPECTRUM:
+	    case XTRACT_HARMONIC_SPECTRUM:
+	    case XTRACT_NOISINESS:
+	    case XTRACT_CREST:
+	    case XTRACT_ROLLOFF:
 		*argc = 2;
-		*argv_type = FLOAT;
+		*argv_type = XTRACT_FLOAT;
 		break;
-	    case  MFCC:
+	    case XTRACT_MFCC:
 		*argc = 1;
-		*argv_type = MEL_FILTER;
+		*argv_type = XTRACT_MEL_FILTER;
 		break;
-	    case  BARK_COEFFICIENTS:
-		*argc = BARK_BANDS;
-		*argv_type = INT;
+	    case XTRACT_BARK_COEFFICIENTS:
+		*argc = XTRACT_BARK_BANDS;
+		*argv_type = XTRACT_INT;
 		break;
-	    case  MEAN:
-	    case  SPECTRAL_MEAN:
-	    case  SPECTRAL_CENTROID:
-	    case  IRREGULARITY_K:
-	    case  IRREGULARITY_J:
-	    case  TRISTIMULUS_1:
-	    case  TRISTIMULUS_2:
-	    case  TRISTIMULUS_3:
-	    case  SMOOTHNESS:
-	    case  FLATNESS:
-	    case  SPREAD:
-	    case  ZCR:
-	    case  LOUDNESS:
-	    case  HIGHEST_VALUE:
-	    case  SUM:
-	    case  RMS_AMPLITUDE:
-	    case  POWER:
-	    case  SHARPNESS:
-	    case  SPECTRAL_SLOPE:
-	    case  HPS:
-	    case  FLUX: 
-	    case  ATTACK_TIME: 
-	    case  DECAY_TIME: 
-	    case  DELTA_FEATURE: 
-	    case  AUTOCORRELATION_FFT:
-	    case  DCT:
-	    case  AUTOCORRELATION:
-	    case  AMDF:
-	    case  ASDF:
+	    case XTRACT_MEAN:
+	    case XTRACT_SPECTRAL_MEAN:
+	    case XTRACT_SPECTRAL_CENTROID:
+	    case XTRACT_IRREGULARITY_K:
+	    case XTRACT_IRREGULARITY_J:
+	    case XTRACT_TRISTIMULUS_1:
+	    case XTRACT_TRISTIMULUS_2:
+	    case XTRACT_TRISTIMULUS_3:
+	    case XTRACT_SMOOTHNESS:
+	    case XTRACT_FLATNESS:
+	    case XTRACT_SPREAD:
+	    case XTRACT_ZCR:
+	    case XTRACT_LOUDNESS:
+	    case XTRACT_HIGHEST_VALUE:
+	    case XTRACT_SUM:
+	    case XTRACT_RMS_AMPLITUDE:
+	    case XTRACT_POWER:
+	    case XTRACT_SHARPNESS:
+	    case XTRACT_SPECTRAL_SLOPE:
+	    case XTRACT_HPS:
+	    case XTRACT_FLUX: 
+	    case XTRACT_ATTACK_TIME: 
+	    case XTRACT_DECAY_TIME: 
+	    case XTRACT_DELTA_FEATURE: 
+	    case XTRACT_AUTOCORRELATION_FFT:
+	    case XTRACT_DCT:
+	    case XTRACT_AUTOCORRELATION:
+	    case XTRACT_AMDF:
+	    case XTRACT_ASDF:
 	    default:
 		*argc = 0;
 		break;
@@ -127,163 +127,163 @@ void *xtract_make_descriptors(){
 
 	switch (f) {
 	    /* argc = 1 */
-	    case  VARIANCE:
-	    case  SPECTRAL_VARIANCE:
-	    case  STANDARD_DEVIATION:
-	    case  AVERAGE_DEVIATION:
-	    case  SPECTRAL_STANDARD_DEVIATION:
-	    case  SPECTRAL_AVERAGE_DEVIATION:
-	    case  LOWEST_VALUE:
-	    case  TONALITY:
-	    case  MFCC:
-		*argv_min = ANY;
-		*argv_max = ANY;
-		*argv_def = ANY;
-		*argv_unit = ANY;
-	    case  SPECTRAL_INHARMONICITY:
-	    case  ODD_EVEN_RATIO:
+	    case XTRACT_VARIANCE:
+	    case XTRACT_SPECTRAL_VARIANCE:
+	    case XTRACT_STANDARD_DEVIATION:
+	    case XTRACT_AVERAGE_DEVIATION:
+	    case XTRACT_SPECTRAL_STANDARD_DEVIATION:
+	    case XTRACT_SPECTRAL_AVERAGE_DEVIATION:
+	    case XTRACT_LOWEST_VALUE:
+	    case XTRACT_TONALITY:
+	    case XTRACT_MFCC:
+		*argv_min = XTRACT_ANY;
+		*argv_max = XTRACT_ANY;
+		*argv_def = XTRACT_ANY;
+		*argv_unit = XTRACT_ANY;
+	    case XTRACT_SPECTRAL_INHARMONICITY:
+	    case XTRACT_ODD_EVEN_RATIO:
 		*argv_min = 0.f;
-		*argv_max = SR_UPPER_LIMIT / 2;
-		*argv_def = FUNDAMENTAL_DEFAULT;
-		*argv_unit = HERTZ;
-	    case  F0:
-	    case  FAILSAFE_F0:
-		*argv_min = SR_LOWER_LIMIT;
-		*argv_max = SR_UPPER_LIMIT;
-		*argv_def = SR_DEFAULT; 
-		*argv_unit = HERTZ;
+		*argv_max = XTRACT_SR_UPPER_LIMIT / 2;
+		*argv_def = XTRACT_FUNDAMENTAL_DEFAULT;
+		*argv_unit = XTRACT_HERTZ;
+	    case XTRACT_F0:
+	    case XTRACT_FAILSAFE_F0:
+		*argv_min = XTRACT_SR_LOWER_LIMIT;
+		*argv_max = XTRACT_SR_UPPER_LIMIT;
+		*argv_def = XTRACT_SR_DEFAULT; 
+		*argv_unit = XTRACT_HERTZ;
 	    /* argc = 2 */;
-	    case  ROLLOFF:
-		*argv_min  = FFT_BANDS_MIN;
-		*argv_max = FFT_BANDS_MAX;
-		*argv_def = SPEC_BW_DEF ;
-		*argv_unit = HERTZ;
+	    case XTRACT_ROLLOFF:
+		*argv_min  = XTRACT_FFT_BANDS_MIN;
+		*argv_max = XTRACT_FFT_BANDS_MAX;
+		*argv_def = XTRACT_SPEC_BW_DEF ;
+		*argv_unit = XTRACT_HERTZ;
 		*(argv_min + 1) = 0.f;
 		*(argv_max + 1) = 100.f;
 		*(argv_def + 1) = 95.f;
-		*(argv_unit + 1) = PERCENT;
-	    case  SPECTRUM:
-		*argv_min  = SR_LOWER_LIMIT / 2; 
-		*argv_max = SR_UPPER_LIMIT / 2;
-		*argv_def = SR_DEFAULT / 2;
-		*argv_unit = HERTZ;
+		*(argv_unit + 1) = XTRACT_PERCENT;
+	    case XTRACT_SPECTRUM:
+		*argv_min  = XTRACT_SR_LOWER_LIMIT / 2; 
+		*argv_max = XTRACT_SR_UPPER_LIMIT / 2;
+		*argv_def = XTRACT_SR_DEFAULT / 2;
+		*argv_unit = XTRACT_HERTZ;
 		*(argv_min + 1) = 0;
 		*(argv_max + 1) = 3 ;
 		*(argv_def + 1) = 0;
-		*(argv_unit + 1) = NONE;
-	    case  PEAK_SPECTRUM:
-		*argv_min  = SR_LOWER_LIMIT / 2; 
-		*argv_max = SR_UPPER_LIMIT / 2;
-		*argv_def = SR_DEFAULT / 2;
-		*argv_unit = HERTZ;
+		*(argv_unit + 1) = XTRACT_NONE;
+	    case XTRACT_PEAK_SPECTRUM:
+		*argv_min  = XTRACT_SR_LOWER_LIMIT / 2; 
+		*argv_max = XTRACT_SR_UPPER_LIMIT / 2;
+		*argv_def = XTRACT_SR_DEFAULT / 2;
+		*argv_unit = XTRACT_HERTZ;
 		*(argv_min + 1) = 0.f;
 		*(argv_max + 1) = 100.f ;
 		*(argv_def + 1) = 10.f ;
-		*(argv_unit + 1) = PERCENT;
-	    case  HARMONIC_SPECTRUM:
+		*(argv_unit + 1) = XTRACT_PERCENT;
+	    case XTRACT_HARMONIC_SPECTRUM:
 		*argv_min = 0.f;
-		*argv_max = SR_UPPER_LIMIT / 2;
-		*argv_def = FUNDAMENTAL_DEFAULT;
-		*argv_unit = HERTZ;
+		*argv_max = XTRACT_SR_UPPER_LIMIT / 2;
+		*argv_def = XTRACT_FUNDAMENTAL_DEFAULT;
+		*argv_unit = XTRACT_HERTZ;
 		*(argv_min + 1) = 0.f;
 		*(argv_max + 1) = 1.f ;
 		*(argv_def + 1) = .1f ;
-		*(argv_unit + 1) = NONE;
-	    case  NOISINESS:
-	    case  SKEWNESS:
-	    case  KURTOSIS:
-	    case  SPECTRAL_SKEWNESS:
-	    case  SPECTRAL_KURTOSIS:
-	    case  CREST:
-		*argv_min = NONE;
-		*argv_max = NONE;
-		*argv_def = NONE;
-		*argv_unit = NONE;
-		*(argv_min + 1) = NONE;
-		*(argv_max + 1) = NONE;
-		*(argv_def + 1) = NONE;
-		*(argv_unit + 1) = NONE;
-	    case  BARK_COEFFICIENTS:
+		*(argv_unit + 1) = XTRACT_NONE;
+	    case XTRACT_NOISINESS:
+	    case XTRACT_SKEWNESS:
+	    case XTRACT_KURTOSIS:
+	    case XTRACT_SPECTRAL_SKEWNESS:
+	    case XTRACT_SPECTRAL_KURTOSIS:
+	    case XTRACT_CREST:
+		*argv_min = XTRACT_NONE;
+		*argv_max = XTRACT_NONE;
+		*argv_def = XTRACT_NONE;
+		*argv_unit = XTRACT_NONE;
+		*(argv_min + 1) = XTRACT_NONE;
+		*(argv_max + 1) = XTRACT_NONE;
+		*(argv_def + 1) = XTRACT_NONE;
+		*(argv_unit + 1) = XTRACT_NONE;
+	    case XTRACT_BARK_COEFFICIENTS:
 	    /* BARK_COEFFICIENTS is special because argc = BARK_BANDS */
 	    default:
-		*argv_min = NONE;
-		*argv_max = NONE;
-		*argv_def = NONE;
-		*argv_unit = NONE;
+		*argv_min = XTRACT_NONE;
+		*argv_max = XTRACT_NONE;
+		*argv_def = XTRACT_NONE;
+		*argv_unit = XTRACT_NONE;
 	}
 
 	argv_donor = &d->argv.donor[0];
 
 	switch (f) {
 	    /* argc = 1 */
-	    case  VARIANCE:
-		*argv_donor = MEAN;
+	    case XTRACT_VARIANCE:
+		*argv_donor = XTRACT_MEAN;
 		break;
-	    case  SPECTRAL_VARIANCE:
-		*argv_donor = SPECTRAL_MEAN;
+	    case XTRACT_SPECTRAL_VARIANCE:
+		*argv_donor = XTRACT_SPECTRAL_MEAN;
 		break;
-	    case  STANDARD_DEVIATION:
-		*argv_donor = VARIANCE;
+	    case XTRACT_STANDARD_DEVIATION:
+		*argv_donor = XTRACT_VARIANCE;
 		break;
-	    case  AVERAGE_DEVIATION:
-		*argv_donor = MEAN;
+	    case XTRACT_AVERAGE_DEVIATION:
+		*argv_donor = XTRACT_MEAN;
 		break;
-	    case  SPECTRAL_STANDARD_DEVIATION:
-		*argv_donor = SPECTRAL_VARIANCE;
+	    case XTRACT_SPECTRAL_STANDARD_DEVIATION:
+		*argv_donor = XTRACT_SPECTRAL_VARIANCE;
 		break;
-	    case  SPECTRAL_AVERAGE_DEVIATION:
-		*argv_donor = SPECTRAL_MEAN;
+	    case XTRACT_SPECTRAL_AVERAGE_DEVIATION:
+		*argv_donor = XTRACT_SPECTRAL_MEAN;
 		break;
-	    case  SPECTRAL_INHARMONICITY:
-	    case  ODD_EVEN_RATIO:
-		*argv_donor = FAILSAFE_F0;
+	    case XTRACT_SPECTRAL_INHARMONICITY:
+	    case XTRACT_ODD_EVEN_RATIO:
+		*argv_donor = XTRACT_FAILSAFE_F0;
 		break;
-	    case  TONALITY:
-		*argv_donor = FLATNESS;
+	    case XTRACT_TONALITY:
+		*argv_donor = XTRACT_FLATNESS;
 		break;
-	    case  LOWEST_VALUE:
-	    case  F0:
-	    case  FAILSAFE_F0:
-		*argv_donor = ANY;
+	    case XTRACT_LOWEST_VALUE:
+	    case XTRACT_F0:
+	    case XTRACT_FAILSAFE_F0:
+		*argv_donor = XTRACT_ANY;
 		break;
-	    case  MFCC:
-		*argv_donor = INIT_MFCC;
+	    case XTRACT_MFCC:
+		*argv_donor = XTRACT_INIT_MFCC;
 		break;
 	    /* argc = 2 */;
-	    case  SPECTRUM:
-	    case  ROLLOFF:
-	    case  PEAK_SPECTRUM:
-		*argv_donor = ANY;
-		*(argv_donor + 1) = ANY;
+	    case XTRACT_SPECTRUM:
+	    case XTRACT_ROLLOFF:
+	    case XTRACT_PEAK_SPECTRUM:
+		*argv_donor = XTRACT_ANY;
+		*(argv_donor + 1) = XTRACT_ANY;
 		break;
-	    case  SKEWNESS:
-	    case  KURTOSIS:
-		*argv_donor = MEAN;
-		*(argv_donor + 1) = STANDARD_DEVIATION;
+	    case XTRACT_SKEWNESS:
+	    case XTRACT_KURTOSIS:
+		*argv_donor = XTRACT_MEAN;
+		*(argv_donor + 1) = XTRACT_STANDARD_DEVIATION;
 		break;
-	    case  SPECTRAL_SKEWNESS:
-	    case  SPECTRAL_KURTOSIS:
-		*argv_donor = SPECTRAL_MEAN;
-		*(argv_donor + 1) = SPECTRAL_STANDARD_DEVIATION;
+	    case XTRACT_SPECTRAL_SKEWNESS:
+	    case XTRACT_SPECTRAL_KURTOSIS:
+		*argv_donor = XTRACT_SPECTRAL_MEAN;
+		*(argv_donor + 1) = XTRACT_SPECTRAL_STANDARD_DEVIATION;
 		break;
-	    case  HARMONIC_SPECTRUM:
-		*argv_donor = FAILSAFE_F0;
-		*(argv_donor + 1) = ANY;
+	    case XTRACT_HARMONIC_SPECTRUM:
+		*argv_donor = XTRACT_FAILSAFE_F0;
+		*(argv_donor + 1) = XTRACT_ANY;
 		break;
-	    case  NOISINESS:
-		*argv_donor = SUM;
-		*(argv_donor + 1) = SUM;
+	    case XTRACT_NOISINESS:
+		*argv_donor = XTRACT_SUM;
+		*(argv_donor + 1) = XTRACT_SUM;
 		break;
-	    case  CREST:
-		*argv_donor = HIGHEST_VALUE;
-		*(argv_donor + 1) = SPECTRAL_MEAN;
+	    case XTRACT_CREST:
+		*argv_donor = XTRACT_HIGHEST_VALUE;
+		*(argv_donor + 1) = XTRACT_SPECTRAL_MEAN;
 		break;
 	    /* argc = BARK_BANDS */
-	    case  BARK_COEFFICIENTS:
-		*argv_donor = INIT_BARK;
+	    case XTRACT_BARK_COEFFICIENTS:
+		*argv_donor = XTRACT_INIT_BARK;
 		break;
 	    default:
-		*argv_donor = ANY;
+		*argv_donor = XTRACT_ANY;
 		break;
 	}
 
@@ -291,79 +291,79 @@ void *xtract_make_descriptors(){
 
 	switch(f){
 
-	    case  MEAN: 
-	    case  VARIANCE:
-	    case  STANDARD_DEVIATION:
-	    case  AVERAGE_DEVIATION:
-	    case  SKEWNESS:
-	    case  KURTOSIS:
-	    case  LOWEST_VALUE:
-	    case  HIGHEST_VALUE:
-	    case  SUM:
-	    case  ZCR:
-		*data_format = ARBITRARY_SERIES;
+	    case XTRACT_MEAN: 
+	    case XTRACT_VARIANCE:
+	    case XTRACT_STANDARD_DEVIATION:
+	    case XTRACT_AVERAGE_DEVIATION:
+	    case XTRACT_SKEWNESS:
+	    case XTRACT_KURTOSIS:
+	    case XTRACT_LOWEST_VALUE:
+	    case XTRACT_HIGHEST_VALUE:
+	    case XTRACT_SUM:
+	    case XTRACT_ZCR:
+		*data_format = XTRACT_ARBITRARY_SERIES;
 		break;
-	    case  SPECTRAL_MEAN:
-	    case  SPECTRAL_VARIANCE:
-	    case  SPECTRAL_STANDARD_DEVIATION:
-	    case  SPECTRAL_AVERAGE_DEVIATION:
-	    case  SPECTRAL_SKEWNESS:
-	    case  SPECTRAL_KURTOSIS:
-	    case  SPECTRAL_CENTROID:
-	    case  SPECTRAL_SLOPE:
-	    case  PEAK_SPECTRUM:
-	    case  HARMONIC_SPECTRUM:
-	        *data_format = SPECTRAL;     
+	    case XTRACT_SPECTRAL_MEAN:
+	    case XTRACT_SPECTRAL_VARIANCE:
+	    case XTRACT_SPECTRAL_STANDARD_DEVIATION:
+	    case XTRACT_SPECTRAL_AVERAGE_DEVIATION:
+	    case XTRACT_SPECTRAL_SKEWNESS:
+	    case XTRACT_SPECTRAL_KURTOSIS:
+	    case XTRACT_SPECTRAL_CENTROID:
+	    case XTRACT_SPECTRAL_SLOPE:
+	    case XTRACT_PEAK_SPECTRUM:
+	    case XTRACT_HARMONIC_SPECTRUM:
+	        *data_format = XTRACT_SPECTRAL;     
 		break;
-	    case  ROLLOFF:
-	    case  NOISINESS:
-	    case  BARK_COEFFICIENTS:
-	    case  CREST:
-	    case  IRREGULARITY_K:
-	    case  IRREGULARITY_J:
-	    case  SMOOTHNESS:
-	    case  FLATNESS:
-	    case  SPREAD:
-	    case  RMS_AMPLITUDE:
-	    case  POWER:
-	    case  SHARPNESS:
-	    case  HPS:
-		*data_format = SPECTRAL_MAGNITUDES;
+	    case XTRACT_ROLLOFF:
+	    case XTRACT_NOISINESS:
+	    case XTRACT_BARK_COEFFICIENTS:
+	    case XTRACT_CREST:
+	    case XTRACT_IRREGULARITY_K:
+	    case XTRACT_IRREGULARITY_J:
+	    case XTRACT_SMOOTHNESS:
+	    case XTRACT_FLATNESS:
+	    case XTRACT_SPREAD:
+	    case XTRACT_RMS_AMPLITUDE:
+	    case XTRACT_POWER:
+	    case XTRACT_SHARPNESS:
+	    case XTRACT_HPS:
+		*data_format = XTRACT_SPECTRAL_MAGNITUDES;
 		break;
-	    case  SPECTRAL_INHARMONICITY:
-		*data_format = SPECTRAL_PEAKS;
+	    case XTRACT_SPECTRAL_INHARMONICITY:
+		*data_format = XTRACT_SPECTRAL_PEAKS;
 		break;
-	    case  ODD_EVEN_RATIO:
-		*data_format = SPECTRAL_HARMONICS_FREQUENCIES;
+	    case XTRACT_ODD_EVEN_RATIO:
+		*data_format = XTRACT_SPECTRAL_HARMONICS_FREQUENCIES;
 		break;
-	    case  F0:
-	    case  FAILSAFE_F0:
-	    case  SPECTRUM:
-	    case  MFCC:
-	    case  AUTOCORRELATION:
-	    case  AUTOCORRELATION_FFT:
-	    case  DCT:
-	    case  AMDF:
-	    case  ASDF:
-		*data_format = AUDIO_SAMPLES;
+	    case XTRACT_F0:
+	    case XTRACT_FAILSAFE_F0:
+	    case XTRACT_SPECTRUM:
+	    case XTRACT_MFCC:
+	    case XTRACT_AUTOCORRELATION:
+	    case XTRACT_AUTOCORRELATION_FFT:
+	    case XTRACT_DCT:
+	    case XTRACT_AMDF:
+	    case XTRACT_ASDF:
+		*data_format = XTRACT_AUDIO_SAMPLES;
 		break;
-	    case  TONALITY:
-		*data_format = NO_DATA;
+	    case XTRACT_TONALITY:
+		*data_format = XTRACT_NO_DATA;
 		break;
-	    case  TRISTIMULUS_1:
-	    case  TRISTIMULUS_2:
-	    case  TRISTIMULUS_3:
-		*data_format = SPECTRAL_HARMONICS_MAGNITUDES;
+	    case XTRACT_TRISTIMULUS_1:
+	    case XTRACT_TRISTIMULUS_2:
+	    case XTRACT_TRISTIMULUS_3:
+		*data_format = XTRACT_SPECTRAL_HARMONICS_MAGNITUDES;
 		break;
-	    case  LOUDNESS:
-		*data_format = BARK_COEFFS;
+	    case XTRACT_LOUDNESS:
+		*data_format = XTRACT_BARK_COEFFS;
 		break;
-	    case  FLUX: 
-	    case  ATTACK_TIME: 
-	    case  DECAY_TIME: 
-	    case  DELTA_FEATURE: 
+	    case XTRACT_FLUX: 
+	    case XTRACT_ATTACK_TIME: 
+	    case XTRACT_DECAY_TIME: 
+	    case XTRACT_DELTA_FEATURE: 
 	    default:
-		*data_format = NO_DATA;
+		*data_format = XTRACT_NO_DATA;
 		break;
 	}
 
@@ -371,64 +371,64 @@ void *xtract_make_descriptors(){
 
 	switch(f){
 
-	    case  MEAN: 
-	    case  VARIANCE:
-	    case  STANDARD_DEVIATION:
-	    case  AVERAGE_DEVIATION:
-	    case  SKEWNESS:
-	    case  KURTOSIS:
-	    case  LOWEST_VALUE:
-	    case  HIGHEST_VALUE:
-	    case  SUM:
-	    case  ZCR:
-	    case  PEAK_SPECTRUM:
-	    case  TRISTIMULUS_1:
-	    case  TRISTIMULUS_2:
-	    case  TRISTIMULUS_3:
-	    case  DCT:
-	    case  AMDF:
-	    case  ASDF:
-	    case  IRREGULARITY_K:
-	    case  IRREGULARITY_J:
-	    case  ATTACK_TIME: 
-	    case  DECAY_TIME: 
-	    case  DELTA_FEATURE: 
-	    case  FLUX: 
-	    case  F0:
-	    case  FAILSAFE_F0:
-	    case  MFCC:
-	    case  AUTOCORRELATION:
-	    case  AUTOCORRELATION_FFT:
-	    case  ROLLOFF:
-	    case  NOISINESS:
-	    case  CREST:
-	    case  FLATNESS:
-	    case  POWER:
-	    case  BARK_COEFFICIENTS:
-	    case  RMS_AMPLITUDE:
-	    case  SMOOTHNESS:
-	    case  SPREAD:
-	    case  SHARPNESS:
-	    case  HPS:
-	    case  SPECTRUM:
-	    case  TONALITY:
-	    case  LOUDNESS:
-		*data_unit = ANY;
+	    case XTRACT_MEAN: 
+	    case XTRACT_VARIANCE:
+	    case XTRACT_STANDARD_DEVIATION:
+	    case XTRACT_AVERAGE_DEVIATION:
+	    case XTRACT_SKEWNESS:
+	    case XTRACT_KURTOSIS:
+	    case XTRACT_LOWEST_VALUE:
+	    case XTRACT_HIGHEST_VALUE:
+	    case XTRACT_SUM:
+	    case XTRACT_ZCR:
+	    case XTRACT_PEAK_SPECTRUM:
+	    case XTRACT_TRISTIMULUS_1:
+	    case XTRACT_TRISTIMULUS_2:
+	    case XTRACT_TRISTIMULUS_3:
+	    case XTRACT_DCT:
+	    case XTRACT_AMDF:
+	    case XTRACT_ASDF:
+	    case XTRACT_IRREGULARITY_K:
+	    case XTRACT_IRREGULARITY_J:
+	    case XTRACT_ATTACK_TIME: 
+	    case XTRACT_DECAY_TIME: 
+	    case XTRACT_DELTA_FEATURE: 
+	    case XTRACT_FLUX: 
+	    case XTRACT_F0:
+	    case XTRACT_FAILSAFE_F0:
+	    case XTRACT_MFCC:
+	    case XTRACT_AUTOCORRELATION:
+	    case XTRACT_AUTOCORRELATION_FFT:
+	    case XTRACT_ROLLOFF:
+	    case XTRACT_NOISINESS:
+	    case XTRACT_CREST:
+	    case XTRACT_FLATNESS:
+	    case XTRACT_POWER:
+	    case XTRACT_BARK_COEFFICIENTS:
+	    case XTRACT_RMS_AMPLITUDE:
+	    case XTRACT_SMOOTHNESS:
+	    case XTRACT_SPREAD:
+	    case XTRACT_SHARPNESS:
+	    case XTRACT_HPS:
+	    case XTRACT_SPECTRUM:
+	    case XTRACT_TONALITY:
+	    case XTRACT_LOUDNESS:
+		*data_unit = XTRACT_ANY;
 		break;
-	    case  SPECTRAL_MEAN:
-	    case  SPECTRAL_VARIANCE:
-	    case  SPECTRAL_STANDARD_DEVIATION:
-	    case  SPECTRAL_AVERAGE_DEVIATION:
-	    case  SPECTRAL_SKEWNESS:
-	    case  SPECTRAL_KURTOSIS:
-	    case  SPECTRAL_CENTROID:
-	    case  SPECTRAL_SLOPE:
-	    case  HARMONIC_SPECTRUM:
-	    case  SPECTRAL_INHARMONICITY:
-		*data_unit = ANY_AMPLITUDE_HERTZ;
+	    case XTRACT_SPECTRAL_MEAN:
+	    case XTRACT_SPECTRAL_VARIANCE:
+	    case XTRACT_SPECTRAL_STANDARD_DEVIATION:
+	    case XTRACT_SPECTRAL_AVERAGE_DEVIATION:
+	    case XTRACT_SPECTRAL_SKEWNESS:
+	    case XTRACT_SPECTRAL_KURTOSIS:
+	    case XTRACT_SPECTRAL_CENTROID:
+	    case XTRACT_SPECTRAL_SLOPE:
+	    case XTRACT_HARMONIC_SPECTRUM:
+	    case XTRACT_SPECTRAL_INHARMONICITY:
+		*data_unit = XTRACT_ANY_AMPLITUDE_HERTZ;
 		break;
-	    case  ODD_EVEN_RATIO:
-		*data_unit = HERTZ;
+	    case XTRACT_ODD_EVEN_RATIO:
+		*data_unit = XTRACT_HERTZ;
 		break;
 	}
 
@@ -442,22 +442,22 @@ void *xtract_make_descriptors(){
 	*year = 0;
 
 	switch(f){
-	    case  MEAN: 
+	    case XTRACT_MEAN: 
 		strcpy(name, "mean");
 		strcpy(p_name, "Mean");
 		strcpy(desc, "Extract the mean of an input vector");
 		strcpy(p_desc, "Extract the mean of a range of values");
 		strcpy(author, "");
-		d->argv.type = NONE;
+		d->argv.type = XTRACT_NONE;
 		break;
-	    case  VARIANCE:
+	    case XTRACT_VARIANCE:
 		strcpy(name, "variance");
 		strcpy(p_name, "Variance");
 		strcpy(desc, "Extract the variance of an input vector");
 		strcpy(p_desc, "Extract the variance of a range of values");
 		strcpy(author, "");
 		break;
-	    case  STANDARD_DEVIATION:
+	    case XTRACT_STANDARD_DEVIATION:
 		strcpy(name, "standard_deviation");
 		strcpy(p_name, "Standard Deviation");
 		strcpy(desc, 
@@ -466,7 +466,7 @@ void *xtract_make_descriptors(){
 			"Extract the standard deviation of a range of values");
 		strcpy(author, "");
 		break;
-	    case  AVERAGE_DEVIATION:
+	    case XTRACT_AVERAGE_DEVIATION:
 		strcpy(name, "average_deviation");
 		strcpy(p_name, "Average Deviation");
 		strcpy(desc, 
@@ -475,21 +475,21 @@ void *xtract_make_descriptors(){
 			"Extract the average deviation of a range of values");
 		strcpy(author, "");
 		break;
-	   case  SPECTRAL_MEAN: 
+	   case XTRACT_SPECTRAL_MEAN: 
 		strcpy(name, "spectral_mean");
 		strcpy(p_name, "Spectral Mean");
 		strcpy(desc, "Extract the mean of an input spectrum");
 		strcpy(p_desc, "Extract the mean of an audio spectrum");
 		strcpy(author, "");
 		break;
-	    case  SPECTRAL_VARIANCE:
+	    case XTRACT_SPECTRAL_VARIANCE:
 		strcpy(name, "spectral_variance");
 		strcpy(p_name, "Spectral Variance");
 		strcpy(desc, "Extract the variance of an input spectrum");
 		strcpy(p_desc, "Extract the variance of an audio spectrum");
 		strcpy(author, "");
 		break;
-	    case  SPECTRAL_STANDARD_DEVIATION:
+	    case XTRACT_SPECTRAL_STANDARD_DEVIATION:
 		strcpy(name, "spectral_standard_deviation");
 		strcpy(p_name, "Spectral Standard Deviation");
 		strcpy(desc, 
@@ -498,7 +498,7 @@ void *xtract_make_descriptors(){
 			"Extract the standard deviation of an audio spectrum");
 		strcpy(author, "");
 		break;
-	    case  SPECTRAL_AVERAGE_DEVIATION:
+	    case XTRACT_SPECTRAL_AVERAGE_DEVIATION:
 		strcpy(name, "spectral_average_deviation");
 		strcpy(p_name, "Spectral Average Deviation");
 		strcpy(desc, 
@@ -507,7 +507,7 @@ void *xtract_make_descriptors(){
 			"Extract the average deviation of an audio spectrum");
 		strcpy(author, "");
 		break;
-	    case  ROLLOFF:
+	    case XTRACT_ROLLOFF:
 		strcpy(name, "spectral_rolloff");
 		strcpy(p_name, "Spectral Rolloff");
 		strcpy(desc, 
@@ -517,14 +517,14 @@ void *xtract_make_descriptors(){
 		strcpy(author, "Bee Suan Ong");
 		*year = 2005;
 		break;
-	    case  SPECTRAL_INHARMONICITY:
+	    case XTRACT_SPECTRAL_INHARMONICITY:
 		strcpy(name, "spectral_inharmonicity");
 		strcpy(p_name, "Inharmonicity");
 		strcpy(desc, "Extract the inharmonicity of a spectrum");
 		strcpy(p_desc, 
 			"Extract the inharmonicity of an audio spectrum");
 		break;
-	    case  SPECTRUM:
+	    case XTRACT_SPECTRUM:
 		strcpy(name, "spectrum");
 		strcpy(p_name, "Spectrum");
 		strcpy(desc, 
@@ -533,7 +533,7 @@ void *xtract_make_descriptors(){
 			"Extract the spectrum of an audio signal");
 		strcpy(author, "");
 		break;
-	    case  ODD_EVEN_RATIO:
+	    case XTRACT_ODD_EVEN_RATIO:
 		strcpy(name, "odd_even_ratio");
 		strcpy(p_name, "Odd/Even Harmonic Ratio");
 		strcpy(desc, 
@@ -542,14 +542,14 @@ void *xtract_make_descriptors(){
 		 "Extract the odd-to-even harmonic ratio of an audio spectrum");
 		strcpy(author, "");
 		break;
-	    case  LOWEST_VALUE:
+	    case XTRACT_LOWEST_VALUE:
 		strcpy(name, "lowest_value");
 		strcpy(p_name, "Lowest Value");
 		strcpy(desc, "Extract the lowest value from an input vector");
 		strcpy(p_desc, "Extract the lowest value from a given range");
 		strcpy(author, "");
 		break;
-	    case  F0:
+	    case XTRACT_F0:
 		strcpy(name, "f0");
 		strcpy(p_name, "Fundamental Frequency");
 		strcpy(desc, "Extract the fundamental frequency	of a signal");
@@ -557,7 +557,7 @@ void *xtract_make_descriptors(){
 			"Extract the fundamental frequency of an audio signal");
 		strcpy(author, "");
 		break;
-	    case  FAILSAFE_F0:
+	    case XTRACT_FAILSAFE_F0:
 		strcpy(name, "failsafe_f0");
 		strcpy(p_name, "Fundamental Frequency (failsafe)");
 		strcpy(desc, "Extract the fundamental frequency of a signal");
@@ -565,7 +565,7 @@ void *xtract_make_descriptors(){
 			"Extract the fundamental frequency of an audio signal");
 		strcpy(author, "");
 		break;
-	    case  TONALITY:
+	    case XTRACT_TONALITY:
 		strcpy(name, "tonality");
 		strcpy(p_name, "Tonality");
 		strcpy(desc, "Extract the tonality of a spectrum");
@@ -573,21 +573,21 @@ void *xtract_make_descriptors(){
 		strcpy(author, "Tristan Jehan");
 		*year = 2005;
 		break;
-	    case  SPECTRAL_SKEWNESS:
+	    case XTRACT_SPECTRAL_SKEWNESS:
 		strcpy(name, "spectral_skewness");
 		strcpy(p_name, "Spectral Skewness");
 		strcpy(desc, "Extract the skewness of an input spectrum");
 		strcpy(p_desc, "Extract the skewness of an audio spectrum");
 		strcpy(author, "");
 		break;
-	    case  SPECTRAL_KURTOSIS:
+	    case XTRACT_SPECTRAL_KURTOSIS:
 		strcpy(name, "spectral_kurtosis");
 		strcpy(p_name, "Spectral Kurtosis");
 		strcpy(desc, "Extract the kurtosis of an input spectrum");
 		strcpy(p_desc, "Extract the kurtosis of an audio spectrum");
 		strcpy(author, "");
 		break;
-	    case  PEAK_SPECTRUM:
+	    case XTRACT_PEAK_SPECTRUM:
 		strcpy(name, "peak_spectrum");
 		strcpy(p_name, "Peak Spectrum");
 		strcpy(desc, "Extract the spectral peaks from of a spectrum");
@@ -595,14 +595,14 @@ void *xtract_make_descriptors(){
 			"Extract the spectral peaks from an audio spectrum");
 		strcpy(author, "");
 		break;
-	    case  HARMONIC_SPECTRUM:
+	    case XTRACT_HARMONIC_SPECTRUM:
 		strcpy(p_name, "harmonic_spectrum");
 		strcpy(p_name, "Harmonic Spectrum");
 		strcpy(desc, "Extract the harmonics from a spectrum");
 		strcpy(p_desc, "Extract the harmonics from an audio spectrum");
 		strcpy(author, "");
 		break;
-	    case  NOISINESS:
+	    case XTRACT_NOISINESS:
 		strcpy(name, "noisiness");
 		strcpy(p_name, "Noisiness");
 		strcpy(desc, "Extract the noisiness of a spectrum");
@@ -610,7 +610,7 @@ void *xtract_make_descriptors(){
 		strcpy(author, "Tae Hong Park");
 		*year = 2000;
 		break;
-	    case  CREST:
+	    case XTRACT_CREST:
 		strcpy(name, "crest");
 		strcpy(p_name, "Spectral Crest Measure");
 		strcpy(desc, 
@@ -620,14 +620,14 @@ void *xtract_make_descriptors(){
 		strcpy(author, "Peeters");
 		*year = 2003;
 		break;
-	    case  MFCC:
+	    case XTRACT_MFCC:
 		strcpy(name, "mfcc");
 		strcpy(p_name, "Mel-Frequency Cepstral Coefficients");
 		strcpy(desc, "Extract MFCC from a spectrum");
 		strcpy(p_desc, "Extract MFCC from an audio spectrum");
 		strcpy(author, "Rabiner");
 		break;
-	    case  BARK_COEFFICIENTS:
+	    case XTRACT_BARK_COEFFICIENTS:
 		strcpy(name, "bark_coefficients");
 		strcpy(p_name, "Bark Coefficients");
 		strcpy(desc, "Extract bark coefficients from a spectrum");
@@ -635,7 +635,7 @@ void *xtract_make_descriptors(){
 			"Extract bark coefficients from an audio spectrum");
 		strcpy(author, "");
 		break;
-	    case  SPECTRAL_CENTROID:
+	    case XTRACT_SPECTRAL_CENTROID:
 		strcpy(name, "spectral_centroid");
 		strcpy(p_name, "Spectral Centroid");
 		strcpy(desc, "Extract the spectral centroid of a spectrum");
@@ -643,7 +643,7 @@ void *xtract_make_descriptors(){
 			"Extract the spectral centroid of an audio spectrum");
 		strcpy(author, "");
 		break;
-	    case  IRREGULARITY_K:
+	    case XTRACT_IRREGULARITY_K:
 		strcpy(name, "irregularity_k");
 		strcpy(p_name, "Irregularity I");
 		strcpy(desc, "Extract the irregularity of a spectrum");
@@ -652,7 +652,7 @@ void *xtract_make_descriptors(){
 		strcpy(author, "Krimphoff");
 		*year = 1994;
 		break;
-	    case  IRREGULARITY_J:
+	    case XTRACT_IRREGULARITY_J:
 		strcpy(name, "irregularity_j");
 		strcpy(p_name, "Irregularity II");
 		strcpy(desc, "Extract the irregularity of a spectrum");
@@ -661,7 +661,7 @@ void *xtract_make_descriptors(){
 		strcpy(author, "Jensen");
 		*year = 1999;
 		break;
-	    case  TRISTIMULUS_1:
+	    case XTRACT_TRISTIMULUS_1:
 		strcpy(name, "tristimulus_1");
 		strcpy(p_name, "Tristimulus I");
 		strcpy(desc, "Extract the tristimulus (type I) of a spectrum");
@@ -670,7 +670,7 @@ void *xtract_make_descriptors(){
 		strcpy(author, "Pollard and Jansson");
 		*year = 1982;
 		break;
-	    case  TRISTIMULUS_2:
+	    case XTRACT_TRISTIMULUS_2:
 		strcpy(name, "tristimulus_2");
 		strcpy(p_name, "Tristimulus II");
 		strcpy(desc, "Extract the tristimulus (type II) of a spectrum");
@@ -679,7 +679,7 @@ void *xtract_make_descriptors(){
 		strcpy(author, "Pollard and Jansson");
 		*year = 1982;
 		break;
-	    case  TRISTIMULUS_3:
+	    case XTRACT_TRISTIMULUS_3:
 		strcpy(name, "tristimulus_3");
 		strcpy(p_name, "Tristimulus III");
 		strcpy(desc, 
@@ -689,7 +689,7 @@ void *xtract_make_descriptors(){
 		strcpy(author, "Pollard and Jansson");
 		*year = 1982;
 		break;
-	    case  SMOOTHNESS:
+	    case XTRACT_SMOOTHNESS:
 		strcpy(name, "smoothness");
 		strcpy(p_name, "Spectral Smoothness");
 		strcpy(desc, "Extract the spectral smoothness of a spectrum");
@@ -698,7 +698,7 @@ void *xtract_make_descriptors(){
 		strcpy(author, "McAdams");
 		*year = 1999;
 		break;
-	    case  FLATNESS:
+	    case XTRACT_FLATNESS:
 		strcpy(name, "flatness");
 		strcpy(p_name, "Spectral Flatness");
 		strcpy(desc, "Extract the spectral flatness of a spectrum");
@@ -707,7 +707,7 @@ void *xtract_make_descriptors(){
 		strcpy(author, "Tristan Jehan");
 		*year = 2005;
 		break;
-	    case  SPREAD:
+	    case XTRACT_SPREAD:
 		strcpy(name, "spread");
 		strcpy(p_name, "Spectral Spread");
 		strcpy(desc, "Extract the spectral spread of a spectrum");
@@ -716,7 +716,7 @@ void *xtract_make_descriptors(){
 		strcpy(author, "Norman Casagrande");
 		*year = 2005;
 		break;
-	    case  ZCR:
+	    case XTRACT_ZCR:
 		strcpy(name, "zcr");
 		strcpy(p_name, "Zero Crossing Rate");
 		strcpy(desc, "Extract the zero crossing rate of a vector");
@@ -724,7 +724,7 @@ void *xtract_make_descriptors(){
 			"Extract the zero crossing rate of an audio signal");
 		strcpy(author, "");
 		break;
-	    case  LOUDNESS:
+	    case XTRACT_LOUDNESS:
 		strcpy(name, "loudness");
 		strcpy(p_name, "Loudness");
 		strcpy(desc, 
@@ -734,14 +734,14 @@ void *xtract_make_descriptors(){
 		strcpy(author, "Moore, Glasberg et al");
 		*year = 2005;
 		break;
-	    case  HIGHEST_VALUE:
+	    case XTRACT_HIGHEST_VALUE:
 		strcpy(name, "highest_value");
 		strcpy(p_name, "Highest Value");
 		strcpy(desc, "Extract the highest value from an input vector");
 		strcpy(p_desc, "Extract the highest value from a given range");
 		strcpy(author, "");
 		break;
-	    case  SUM:
+	    case XTRACT_SUM:
 		strcpy(name, "sum");
 		strcpy(p_name, "Sum of Values");
 		strcpy(desc, 
@@ -750,14 +750,14 @@ void *xtract_make_descriptors(){
 			"Extract the sum of the values in a given range");
 		strcpy(author, "");
 		break;
-	    case  RMS_AMPLITUDE:
+	    case XTRACT_RMS_AMPLITUDE:
 		strcpy(name, "rms_amplitude");
 		strcpy(p_name, "RMS Amplitude");
 		strcpy(desc, "Extract the RMS amplitude of a signal");
 		strcpy(p_desc, "Extract the RMS amplitude of an audio signal");
 		strcpy(author, "");
 		break;
-	    case  POWER:
+	    case XTRACT_POWER:
 		strcpy(name, "power");
 		strcpy(p_name, "Spectral Power");
 		strcpy(desc, "Extract the spectral power of a spectrum");
@@ -766,7 +766,7 @@ void *xtract_make_descriptors(){
 		strcpy(author, "Bee Suan Ong");
 		*year = 2005;
 		break;
-	    case  SHARPNESS:
+	    case XTRACT_SHARPNESS:
 		strcpy(name, "sharpness");
 		strcpy(p_name, "Spectral Sharpness");
 		strcpy(desc, "Extract the spectral sharpness of a spectrum");
@@ -774,7 +774,7 @@ void *xtract_make_descriptors(){
 			"Extract the spectral sharpness of an audio spectrum");
 		strcpy(author, "");
 		break;
-	    case  SPECTRAL_SLOPE:
+	    case XTRACT_SPECTRAL_SLOPE:
 		strcpy(name, "spectral_slope");
 		strcpy(p_name, "Spectral Slope");
 		strcpy(desc, "Extract the spectral slope of a spectrum");
@@ -782,7 +782,7 @@ void *xtract_make_descriptors(){
 			"Extract the spectral slope of an audio spectrum");
 		strcpy(author, "");
 		break;
-	    case  HPS:
+	    case XTRACT_HPS:
 		strcpy(name, "hps");
 		strcpy(p_name, "Harmonic Product Spectrum");
 		strcpy(desc, 
@@ -791,7 +791,7 @@ void *xtract_make_descriptors(){
 		 "Extract the harmonic product spectrum of an audio spectrum");
 		strcpy(author, "");
 		break;
-	    case  FLUX: 
+	    case XTRACT_FLUX: 
 		strcpy(name, "flux");
 		strcpy(p_name, "Spectral Flux");
 		strcpy(desc, "Extract the spectral flux of a spectrum");
@@ -799,42 +799,42 @@ void *xtract_make_descriptors(){
 			"Extract the spectral flux of an audio spectrum");
 		strcpy(author, "");
 		break;
-	    case  ATTACK_TIME: 
+	    case XTRACT_ATTACK_TIME: 
 		strcpy(name, "attack_time");
 		strcpy(p_name, "Attack Time");
 		strcpy(desc, "Extract the attack time of a signal");
 		strcpy(p_desc, "Extract the attack time of an audio signal");
 		strcpy(author, "");
 		break;
-	    case  DECAY_TIME: 
+	    case XTRACT_DECAY_TIME: 
 		strcpy(name, "decay_time");
 		strcpy(p_name, "Decay Time");
 		strcpy(desc, "Extract the decay time of a signal");
 		strcpy(p_desc, "Extract the decay time of an audio signal");
 		strcpy(author, "");
 		break;
-	    case  DELTA_FEATURE: 
+	    case XTRACT_DELTA_FEATURE: 
 		strcpy(name, "delta_feature");
 		strcpy(p_name, "Delta Feature");
 		strcpy(desc, "Extract the time derivative of a feature");
 		strcpy(p_desc, "Extract the time derivative of a feature");
 		strcpy(author, "");
 		break;
-	    case  AUTOCORRELATION_FFT:
+	    case XTRACT_AUTOCORRELATION_FFT:
 		strcpy(name, "autocorrelation_fft");
 		strcpy(p_name, "Autocorrelation (FFT method)");
 		strcpy(desc, "Extract the autocorrelation of a signal");
 		strcpy(p_desc, "Extract the autocorrelation of an audio signal");
 		strcpy(author, "");
 		break;
-	    case  DCT:
+	    case XTRACT_DCT:
 		strcpy(name, "dct");
 		strcpy(p_name, "Discrete Cosine Transform");
 		strcpy(desc, "Extract the DCT of a signal");
 		strcpy(p_desc, "Extract the DCT of an audio signal");
 		strcpy(author, "");
 		break;
-	    case  AUTOCORRELATION:
+	    case XTRACT_AUTOCORRELATION:
 		strcpy(name, "autocorrelation");
 		strcpy(p_name, "Autocorrelation");
 		strcpy(desc, "Extract the autocorrelation of a signal");
@@ -842,14 +842,14 @@ void *xtract_make_descriptors(){
 			"Extract the autocorrelation of an audio signal");
 		strcpy(author, "");
 		break;
-	    case  AMDF:
+	    case XTRACT_AMDF:
 		strcpy(name, "amdf");
 		strcpy(p_name, "Average Magnitude Difference Function");
 		strcpy(desc, "Extract the AMDF of a signal");
 		strcpy(p_desc, "Extract the AMDF of an audio signal");
 		strcpy(author, "");
 		break;
-	    case  ASDF:
+	    case XTRACT_ASDF:
 		strcpy(name, "asdf");
 		strcpy(p_name, "Average Squared Difference Function");
 		strcpy(desc, "Extract the ASDF of a signal");
@@ -868,71 +868,71 @@ void *xtract_make_descriptors(){
 
 	switch(f){
 
-	    case  VARIANCE:
-	    case  STANDARD_DEVIATION:
-	    case  AVERAGE_DEVIATION:
-	    case  SPECTRAL_VARIANCE:
-	    case  SPECTRAL_STANDARD_DEVIATION:
-	    case  SPECTRAL_AVERAGE_DEVIATION:
-	    case  SPECTRAL_INHARMONICITY:
-	    case  ODD_EVEN_RATIO:
-	    case  LOWEST_VALUE:
-	    case  F0:
-	    case  FAILSAFE_F0:
-	    case  TONALITY:
+	    case XTRACT_VARIANCE:
+	    case XTRACT_STANDARD_DEVIATION:
+	    case XTRACT_AVERAGE_DEVIATION:
+	    case XTRACT_SPECTRAL_VARIANCE:
+	    case XTRACT_SPECTRAL_STANDARD_DEVIATION:
+	    case XTRACT_SPECTRAL_AVERAGE_DEVIATION:
+	    case XTRACT_SPECTRAL_INHARMONICITY:
+	    case XTRACT_ODD_EVEN_RATIO:
+	    case XTRACT_LOWEST_VALUE:
+	    case XTRACT_F0:
+	    case XTRACT_FAILSAFE_F0:
+	    case XTRACT_TONALITY:
 		*argc = 1;
-		*argv_type = FLOAT;
+		*argv_type = XTRACT_FLOAT;
 		break;
-	    case  SKEWNESS:
-	    case  KURTOSIS:
-	    case  SPECTRAL_SKEWNESS:
-	    case  SPECTRAL_KURTOSIS:
-	    case  SPECTRUM:
-	    case  PEAK_SPECTRUM:
-	    case  HARMONIC_SPECTRUM:
-	    case  NOISINESS:
-	    case  CREST:
-	    case  ROLLOFF:
+	    case XTRACT_SKEWNESS:
+	    case XTRACT_KURTOSIS:
+	    case XTRACT_SPECTRAL_SKEWNESS:
+	    case XTRACT_SPECTRAL_KURTOSIS:
+	    case XTRACT_SPECTRUM:
+	    case XTRACT_PEAK_SPECTRUM:
+	    case XTRACT_HARMONIC_SPECTRUM:
+	    case XTRACT_NOISINESS:
+	    case XTRACT_CREST:
+	    case XTRACT_ROLLOFF:
 		*argc = 2;
-		*argv_type = FLOAT;
+		*argv_type = XTRACT_FLOAT;
 		break;
-	    case  MFCC:
+	    case XTRACT_MFCC:
 		*argc = 1;
-		*argv_type = MEL_FILTER;
+		*argv_type = XTRACT_MEL_FILTER;
 		break;
-	    case  BARK_COEFFICIENTS:
-		*argc = BARK_BANDS;
-		*argv_type = INT;
+	    case XTRACT_BARK_COEFFICIENTS:
+		*argc = XTRACT_BARK_BANDS;
+		*argv_type = XTRACT_INT;
 		break;
-	    case  MEAN:
-	    case  SPECTRAL_MEAN:
-	    case  SPECTRAL_CENTROID:
-	    case  IRREGULARITY_K:
-	    case  IRREGULARITY_J:
-	    case  TRISTIMULUS_1:
-	    case  TRISTIMULUS_2:
-	    case  TRISTIMULUS_3:
-	    case  SMOOTHNESS:
-	    case  FLATNESS:
-	    case  SPREAD:
-	    case  ZCR:
-	    case  LOUDNESS:
-	    case  HIGHEST_VALUE:
-	    case  SUM:
-	    case  RMS_AMPLITUDE:
-	    case  POWER:
-	    case  SHARPNESS:
-	    case  SPECTRAL_SLOPE:
-	    case  HPS:
-	    case  FLUX: 
-	    case  ATTACK_TIME: 
-	    case  DECAY_TIME: 
-	    case  DELTA_FEATURE: 
-	    case  AUTOCORRELATION_FFT:
-	    case  DCT:
-	    case  AUTOCORRELATION:
-	    case  AMDF:
-	    case  ASDF:
+	    case XTRACT_MEAN:
+	    case XTRACT_SPECTRAL_MEAN:
+	    case XTRACT_SPECTRAL_CENTROID:
+	    case XTRACT_IRREGULARITY_K:
+	    case XTRACT_IRREGULARITY_J:
+	    case XTRACT_TRISTIMULUS_1:
+	    case XTRACT_TRISTIMULUS_2:
+	    case XTRACT_TRISTIMULUS_3:
+	    case XTRACT_SMOOTHNESS:
+	    case XTRACT_FLATNESS:
+	    case XTRACT_SPREAD:
+	    case XTRACT_ZCR:
+	    case XTRACT_LOUDNESS:
+	    case XTRACT_HIGHEST_VALUE:
+	    case XTRACT_SUM:
+	    case XTRACT_RMS_AMPLITUDE:
+	    case XTRACT_POWER:
+	    case XTRACT_SHARPNESS:
+	    case XTRACT_SPECTRAL_SLOPE:
+	    case XTRACT_HPS:
+	    case XTRACT_FLUX: 
+	    case XTRACT_ATTACK_TIME: 
+	    case XTRACT_DECAY_TIME: 
+	    case XTRACT_DELTA_FEATURE: 
+	    case XTRACT_AUTOCORRELATION_FFT:
+	    case XTRACT_DCT:
+	    case XTRACT_AUTOCORRELATION:
+	    case XTRACT_AMDF:
+	    case XTRACT_ASDF:
 	    default:
 		*argc = 0;
 		break;
@@ -941,61 +941,61 @@ void *xtract_make_descriptors(){
 	is_scalar = &d->is_scalar;
 
 	switch(f){
-	    case  MEAN:
-	    case  VARIANCE:
-	    case  STANDARD_DEVIATION:
-	    case  AVERAGE_DEVIATION:
-	    case  SKEWNESS:
-	    case  KURTOSIS:
-	    case  SPECTRAL_MEAN:
-	    case  SPECTRAL_VARIANCE:
-	    case  SPECTRAL_STANDARD_DEVIATION:
-	    case  SPECTRAL_AVERAGE_DEVIATION:
-	    case  SPECTRAL_SKEWNESS:
-	    case  SPECTRAL_KURTOSIS:
-	    case  SPECTRAL_CENTROID:
-	    case  IRREGULARITY_K:
-	    case  IRREGULARITY_J:
-	    case  TRISTIMULUS_1:
-	    case  TRISTIMULUS_2:
-	    case  TRISTIMULUS_3:
-	    case  SMOOTHNESS:
-	    case  SPREAD:
-	    case  ZCR:
-	    case  ROLLOFF:
-	    case  LOUDNESS:
-	    case  FLATNESS:
-	    case  TONALITY:
-	    case  CREST:
-	    case  NOISINESS:
-	    case  RMS_AMPLITUDE:
-	    case  SPECTRAL_INHARMONICITY:
-	    case  POWER:
-	    case  ODD_EVEN_RATIO:
-	    case  SHARPNESS:
-	    case  SPECTRAL_SLOPE:
-	    case  LOWEST_VALUE:
-	    case  HIGHEST_VALUE:
-	    case  SUM:
-	    case  HPS:
-	    case  F0:
-	    case  FAILSAFE_F0:
-		*is_scalar = TRUE;
+	    case XTRACT_MEAN:
+	    case XTRACT_VARIANCE:
+	    case XTRACT_STANDARD_DEVIATION:
+	    case XTRACT_AVERAGE_DEVIATION:
+	    case XTRACT_SKEWNESS:
+	    case XTRACT_KURTOSIS:
+	    case XTRACT_SPECTRAL_MEAN:
+	    case XTRACT_SPECTRAL_VARIANCE:
+	    case XTRACT_SPECTRAL_STANDARD_DEVIATION:
+	    case XTRACT_SPECTRAL_AVERAGE_DEVIATION:
+	    case XTRACT_SPECTRAL_SKEWNESS:
+	    case XTRACT_SPECTRAL_KURTOSIS:
+	    case XTRACT_SPECTRAL_CENTROID:
+	    case XTRACT_IRREGULARITY_K:
+	    case XTRACT_IRREGULARITY_J:
+	    case XTRACT_TRISTIMULUS_1:
+	    case XTRACT_TRISTIMULUS_2:
+	    case XTRACT_TRISTIMULUS_3:
+	    case XTRACT_SMOOTHNESS:
+	    case XTRACT_SPREAD:
+	    case XTRACT_ZCR:
+	    case XTRACT_ROLLOFF:
+	    case XTRACT_LOUDNESS:
+	    case XTRACT_FLATNESS:
+	    case XTRACT_TONALITY:
+	    case XTRACT_CREST:
+	    case XTRACT_NOISINESS:
+	    case XTRACT_RMS_AMPLITUDE:
+	    case XTRACT_SPECTRAL_INHARMONICITY:
+	    case XTRACT_POWER:
+	    case XTRACT_ODD_EVEN_RATIO:
+	    case XTRACT_SHARPNESS:
+	    case XTRACT_SPECTRAL_SLOPE:
+	    case XTRACT_LOWEST_VALUE:
+	    case XTRACT_HIGHEST_VALUE:
+	    case XTRACT_SUM:
+	    case XTRACT_HPS:
+	    case XTRACT_F0:
+	    case XTRACT_FAILSAFE_F0:
+		*is_scalar = XTRACT_TRUE;
 		break;
-	    case  AUTOCORRELATION:
-	    case  AMDF:
-	    case  ASDF:
-	    case  BARK_COEFFICIENTS:
-	    case  PEAK_SPECTRUM:
-	    case  SPECTRUM:
-	    case  AUTOCORRELATION_FFT:
-	    case  MFCC:
-	    case  DCT:
-	    case  HARMONIC_SPECTRUM:
-		*is_scalar = FALSE;
+	    case XTRACT_AUTOCORRELATION:
+	    case XTRACT_AMDF:
+	    case XTRACT_ASDF:
+	    case XTRACT_BARK_COEFFICIENTS:
+	    case XTRACT_PEAK_SPECTRUM:
+	    case XTRACT_SPECTRUM:
+	    case XTRACT_AUTOCORRELATION_FFT:
+	    case XTRACT_MFCC:
+	    case XTRACT_DCT:
+	    case XTRACT_HARMONIC_SPECTRUM:
+		*is_scalar = XTRACT_FALSE;
 		break;
 	    default:
-		*is_scalar = TRUE;
+		*is_scalar = XTRACT_TRUE;
 		break;
 
 	}
@@ -1007,66 +1007,66 @@ void *xtract_make_descriptors(){
 	    result_max = &d->result.scalar.max;
 
 	    switch(f){
-		case  MEAN:
-		case  VARIANCE:
-		case  STANDARD_DEVIATION:
-		case  AVERAGE_DEVIATION:
-		case  SKEWNESS:
-		case  KURTOSIS:
-		case  RMS_AMPLITUDE:
-		case  LOWEST_VALUE:
-		case  HIGHEST_VALUE:
-		case  SUM:
-		    *result_unit = ANY;
-		    *result_min = ANY;
-		    *result_max = ANY;
+		case XTRACT_MEAN:
+		case XTRACT_VARIANCE:
+		case XTRACT_STANDARD_DEVIATION:
+		case XTRACT_AVERAGE_DEVIATION:
+		case XTRACT_SKEWNESS:
+		case XTRACT_KURTOSIS:
+		case XTRACT_RMS_AMPLITUDE:
+		case XTRACT_LOWEST_VALUE:
+		case XTRACT_HIGHEST_VALUE:
+		case XTRACT_SUM:
+		    *result_unit = XTRACT_ANY;
+		    *result_min = XTRACT_ANY;
+		    *result_max = XTRACT_ANY;
 		    break;
-		case  SPECTRAL_SKEWNESS:
-		case  SPECTRAL_KURTOSIS:
-		case  IRREGULARITY_K:
-		case  IRREGULARITY_J:
-		case  TRISTIMULUS_1:
-		case  TRISTIMULUS_2:
-		case  TRISTIMULUS_3:
-		case  NOISINESS:
-		case  SMOOTHNESS:
-		    *result_unit = NONE;
-		    *result_min = ANY; /* FIX: need to check these */
-		    *result_max = ANY;
+		case XTRACT_SPECTRAL_SKEWNESS:
+		case XTRACT_SPECTRAL_KURTOSIS:
+		case XTRACT_IRREGULARITY_K:
+		case XTRACT_IRREGULARITY_J:
+		case XTRACT_TRISTIMULUS_1:
+		case XTRACT_TRISTIMULUS_2:
+		case XTRACT_TRISTIMULUS_3:
+		case XTRACT_NOISINESS:
+		case XTRACT_SMOOTHNESS:
+		    *result_unit = XTRACT_NONE;
+		    *result_min = XTRACT_ANY; /* FIX: need to check these */
+		    *result_max = XTRACT_ANY;
 		    break;
-		case  SPECTRAL_MEAN:
-		case  SPECTRAL_VARIANCE:
-		case  SPECTRAL_STANDARD_DEVIATION:
-		case  SPECTRAL_AVERAGE_DEVIATION:
-		case  SPECTRAL_CENTROID:
-		case  SPREAD:
-		case  F0:
-		case  FAILSAFE_F0:
-		case  HPS:
-		case  ROLLOFF:
-		    *result_unit = HERTZ;
+		case XTRACT_SPECTRAL_MEAN:
+		case XTRACT_SPECTRAL_VARIANCE:
+		case XTRACT_SPECTRAL_STANDARD_DEVIATION:
+		case XTRACT_SPECTRAL_AVERAGE_DEVIATION:
+		case XTRACT_SPECTRAL_CENTROID:
+		case XTRACT_SPREAD:
+		case XTRACT_F0:
+		case XTRACT_FAILSAFE_F0:
+		case XTRACT_HPS:
+		case XTRACT_ROLLOFF:
+		    *result_unit = XTRACT_HERTZ;
 		    *result_min = 0.f;
-		    *result_max = SR_UPPER_LIMIT / 2;
-		case  ZCR:
-		    *result_unit = HERTZ;
+		    *result_max = XTRACT_SR_UPPER_LIMIT / 2;
+		case XTRACT_ZCR:
+		    *result_unit = XTRACT_HERTZ;
 		    *result_min = 0.f;
-		    *result_max = ANY;
-		case  ODD_EVEN_RATIO:
-		    *result_unit = NONE;
+		    *result_max = XTRACT_ANY;
+		case XTRACT_ODD_EVEN_RATIO:
+		    *result_unit = XTRACT_NONE;
 		    *result_min = 0.f;
 		    *result_max = 1.f; 
-		case  LOUDNESS:
-		case  FLATNESS:
-		case  TONALITY:
-		case  CREST:
-		case  SPECTRAL_INHARMONICITY:
-		case  POWER:
-		case  SHARPNESS:
-		case  SPECTRAL_SLOPE:
+		case XTRACT_LOUDNESS:
+		case XTRACT_FLATNESS:
+		case XTRACT_TONALITY:
+		case XTRACT_CREST:
+		case XTRACT_SPECTRAL_INHARMONICITY:
+		case XTRACT_POWER:
+		case XTRACT_SHARPNESS:
+		case XTRACT_SPECTRAL_SLOPE:
 		default:
-		    *result_unit = UNKNOWN;
-		    *result_min = UNKNOWN;
-		    *result_max = UNKNOWN; 
+		    *result_unit = XTRACT_UNKNOWN;
+		    *result_min = XTRACT_UNKNOWN;
+		    *result_max = XTRACT_UNKNOWN; 
 	    }
 	}
 	else {
@@ -1077,24 +1077,24 @@ void *xtract_make_descriptors(){
 	    result_format = &d->result.vector.format;
 
 	    switch(f) {
-		case  AUTOCORRELATION:
-		case  AMDF:
-		case  ASDF:
-		case  DCT:
-		    *result_format = ARBITRARY_SERIES;
-		    *result_unit = ANY;
-		case  BARK_COEFFICIENTS:
-		    *result_format = BARK_COEFFS;
-		    *result_unit = UNKNOWN; /* FIX: check */
-		case  PEAK_SPECTRUM:
-		case  SPECTRUM:
-		case  HARMONIC_SPECTRUM:
-		    *result_format = SPECTRAL;
-		    *result_unit = ANY_AMPLITUDE_HERTZ;
-		case  AUTOCORRELATION_FFT:
-		case  MFCC:
-		    *result_format = MEL_COEFFS;
-		    *result_unit = UNKNOWN; /* FIX: check */
+		case XTRACT_AUTOCORRELATION:
+		case XTRACT_AMDF:
+		case XTRACT_ASDF:
+		case XTRACT_DCT:
+		    *result_format = XTRACT_ARBITRARY_SERIES;
+		    *result_unit = XTRACT_ANY;
+		case XTRACT_BARK_COEFFICIENTS:
+		    *result_format = XTRACT_BARK_COEFFS;
+		    *result_unit = XTRACT_UNKNOWN; /* FIX: check */
+		case XTRACT_PEAK_SPECTRUM:
+		case XTRACT_SPECTRUM:
+		case XTRACT_HARMONIC_SPECTRUM:
+		    *result_format = XTRACT_SPECTRAL;
+		    *result_unit = XTRACT_ANY_AMPLITUDE_HERTZ;
+		case XTRACT_AUTOCORRELATION_FFT:
+		case XTRACT_MFCC:
+		    *result_format = XTRACT_MEL_COEFFS;
+		    *result_unit = XTRACT_UNKNOWN; /* FIX: check */
 		default:
 		    break;
 	    }
@@ -1110,7 +1110,7 @@ int xtract_free_descriptors(void *fd){
 	free(fd);
     }
 
-    return SUCCESS;
+    return XTRACT_SUCCESS;
 }
 
 

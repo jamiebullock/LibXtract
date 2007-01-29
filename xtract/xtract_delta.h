@@ -20,8 +20,8 @@
 
 /** \file xtract_delta.h: declares functions that extract a feature as a single value or vector from more than one input vector */
 
-#ifndef XTRACT_DELTA
-#define XTRACT_DELTA
+#ifndef XTRACT_DELTA_H
+#define XTRACT_DELTA_H
 
 #ifdef __cplusplus
 extern "C" {

@@ -20,8 +20,8 @@
 
 /* \file xtract_types.h: declares specialised variable types used by libxtract */
 
-#ifndef XTRACT_TYPES
-#define XTRACT_TYPES
+#ifndef XTRACT_TYPES_H
+#define XTRACT_TYPES_H
 
 #ifdef __cplusplus
 extern "C" {

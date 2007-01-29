@@ -16,7 +16,6 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#define XTRACT 
 #include "xtract/libxtract.h"
 #include <stdio.h>
 
@@ -24,7 +23,7 @@ int main() {
 
     float mean = 0, vector[] = {1, 2, 3};
     
-    xtract[MEAN]((void *)&vector, 3, NULL, (void *)&mean);
+    xtract[XTRACT_MEAN]((void *)&vector, 3, NULL, (void *)&mean);
 
     printf("\nThe mean of [1, 2, 3] = %.1f\n\n", mean);
 	
