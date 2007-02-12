@@ -53,7 +53,8 @@ int xtract_variance(const float *data, const int N, const void *argv, float *res
 
 int xtract_standard_deviation(const float *data, const int N, const void *argv, float *result){
 
-    *result = sqrt(*(float *)argv);
+    //*result = sqrt(*(float *)argv);
+    *result = sqrt(-40.);
 
     return XTRACT_SUCCESS;
 }
@@ -74,7 +75,7 @@ int xtract_skewness(const float *data, const int N, const void *argv,  float *re
 
     int n = N;
 
-    float temp;
+    float temp = 0.f;
 
     while(n--){
 	temp = (data[n] - ((float *)argv)[0]) / ((float *)argv)[1];
@@ -82,6 +83,7 @@ int xtract_skewness(const float *data, const int N, const void *argv,  float *re
     }
 
     *result /= N;
+
 
     return XTRACT_SUCCESS;
 }
@@ -142,17 +144,17 @@ int xtract_spectral_variance(const float *data, const int N, const void *argv, f
 
     while(m--){
 	A += amps[m];
-	*result += pow((freqs[m]  - *(float *)argv) * amps[m], 2);
+	*result += powf((freqs[m]  - *(float *)argv) * amps[m], 2);
     }
 
-    *result = *result / (A - 1);
+    *result = *result / (A /*- 1*/);
 
     return XTRACT_SUCCESS;
 }
 
 int xtract_spectral_standard_deviation(const float *data, const int N, const void *argv, float *result){
 
-    *result = sqrt(*(float *)argv);
+    *result = sqrt(*(float *)argv); 
 
     return XTRACT_SUCCESS;
 }
@@ -240,14 +242,14 @@ int xtract_irregularity_j(const float *data, const int N, const void *argv, floa
 
     int n = N;
 
-    float num = 0.f, den = 0.f;
+    double num = 0.f, den = 0.f;
 
     while(n--){
 	num += pow(data[n] - data[n+1], 2);
 	den += pow(data[n], 2);
     }
 
-    *result = num / den;
+    *result = (float)(num / den);
 
     return XTRACT_SUCCESS;
 }
@@ -322,20 +324,21 @@ int xtract_tristimulus_3(const float *data, const int N, const void *argv, float
 
 int xtract_smoothness(const float *data, const int N, const void *argv, float *result){
 
-    int n = N;
+    int n, M;
 
     float *input;
 
     input = (float *)malloc(N * sizeof(float));
-    input = memcpy(input, data, N * sizeof(float));
+    memcpy(input, data, N * sizeof(float));
 
     if (input[0] <= 0) input[0] = 1;
-    if (input[1] <= 0) input[1] = 1;
 
-    for(n = 2; n < N; n++){ 
+    M = N - 1;
+
+    for(n = 1; n < M; n++){ 
 	if(input[n] <= 0) input[n] = 1;
-	*result += abs(20 * log(input[n-1]) - (20 * log(input[n-2]) + 
-		    20 * log(input[n-1]) + 20 * log(input[n])) / 3);
+	*result += fabs(20 * log(input[n]) - (20 * log(input[n-1]) + 
+		    20 * log(input[n]) + 20 * log(input[n+1])) / 3);
     }
 
     free(input);
@@ -403,7 +406,7 @@ int xtract_loudness(const float *data, const int N, const void *argv, float *res
 	rv = XTRACT_SUCCESS;
 
     while(n--)
-	*result += pow(data[n], 0.23);
+	*result += powf(data[n], 0.23);
 
     return rv;
 }
@@ -424,7 +427,7 @@ int xtract_flatness(const float *data, const int N, const void *argv, float *res
 	}
     }
 
-    num = pow(num, 1.f / N);
+    num = powf(num, 1.f / N);
     den /= N;
 
     if(num < XTRACT_VERY_SMALL_NUMBER) 
@@ -433,7 +436,7 @@ int xtract_flatness(const float *data, const int N, const void *argv, float *res
     if(den < XTRACT_VERY_SMALL_NUMBER) 
 	den = XTRACT_VERY_SMALL_NUMBER;
 
-    *result = num / den;
+    *result = 10 * log10(num / den);
 
     return XTRACT_SUCCESS;
 
@@ -445,9 +448,10 @@ int xtract_tonality(const float *data, const int N, const void *argv, float *res
 
     sfm = *(float *)argv;
 
-    sfmdb = (sfm > 0 ? ((10 * log10(sfm)) / -60) : 0);
+    sfmdb = sfm / -60.f;
 
     *result = XTRACT_MIN(sfmdb, 1);
+    //*result = sfmdb;
 
     return XTRACT_SUCCESS;
 }
@@ -506,8 +510,10 @@ int xtract_spectral_inharmonicity(const float *data, const int N, const void *ar
     freqs = data + n;
 
     while(n--){
-	num += abs(freqs[n] - n * fund) * XTRACT_SQ(amps[n]);
-	den += XTRACT_SQ(amps[n]);
+	if(amps[n]){
+	    num += fabs(freqs[n] - n * fund) * XTRACT_SQ(amps[n]);
+	    den += XTRACT_SQ(amps[n]);
+	}
     }
 
     *result = (2 * num) / (fund * den); 
@@ -526,17 +532,15 @@ int xtract_odd_even_ratio(const float *data, const int N, const void *argv, floa
 
     int M = (N >> 1), n;
 
-    float num = 0.f, den = 0.f,  temp, f0;
-
-    f0 = *(float *)argv;
+    float num = 0.f, den = 0.f,  temp;
 
     for(n = 0; n < M; n++){
 	if((temp = data[n])){
-	    if(((int)(rintf(temp / f0)) % 2) != 0){
-		num += data[M + n];
+	    if(XTRACT_IS_ODD(n)){
+		num += temp;
 	    }
 	    else{
-		den += data[M + n];
+		den += temp;
 	    }
 	}
     }
@@ -560,8 +564,8 @@ int xtract_sharpness(const float *data, const int N, const void *argv, float *re
 
 
     while(n--){
-	sl = pow(data[n], 0.23);
-	g = (n < 15 ? 1.f : 0.066 * exp(0.171 * n));
+	sl = powf(data[n], 0.23);
+	g = (n < 15 ? 1.f : 0.066 * expf(0.171 * n));
 	temp += n * g * sl;
     }
 
@@ -633,6 +637,17 @@ int xtract_sum(const float *data, const int N, const void *argv, float *result){
 
     while(n--)
 	*result += *data++;
+
+    return XTRACT_SUCCESS;
+
+}
+
+int xtract_nonzero_count(const float *data, const int N, const void *argv, float *result){
+
+    int n = N;
+
+    while(n--)
+	*result += (*data++ ? 1 : 0);
 
     return XTRACT_SUCCESS;
 
@@ -773,22 +788,24 @@ int xtract_f0(const float *data, const int N, const void *argv, float *result){
 
 int xtract_failsafe_f0(const float *data, const int N, const void *argv, float *result){
 
-    float *magnitudes = NULL, argf[2], *peaks = NULL, return_code;
+    float *spectrum = NULL, argf[2], *peaks = NULL, return_code, sr;
 
     return_code = xtract_f0(data, N, argv, result);
 
     if(return_code == XTRACT_NO_RESULT){
 
-	magnitudes = (float *)malloc(N * sizeof(float));
+	sr = *(float *)argv;
+	spectrum = (float *)malloc(N * sizeof(float));
 	peaks = (float *)malloc(N * sizeof(float));
-	xtract_spectrum(data, N, argv, magnitudes);
-	argf[0] = 10.f;
-	argf[1] = *(float *)argv;
-	xtract_peak_spectrum(magnitudes, N, argf, peaks);
+	argf[0] = sr;
+	argf[1] = XTRACT_MAGNITUDE_SPECTRUM;
+	xtract_spectrum(data, N, argf, spectrum);
+	argf[1] = 10.f;
+	xtract_peak_spectrum(spectrum, N >> 1, argf, peaks);
 	argf[0] = 0.f;
-	xtract_lowest_value(peaks, N >> 1, argf, result);
+	xtract_lowest_value(peaks+(N >> 1), N >> 1, argf, result);
 
-	free(magnitudes);
+	free(spectrum);
 	free(peaks);
     }
 

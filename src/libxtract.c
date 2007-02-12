@@ -60,6 +60,7 @@ int(*xtract[])(const float *, const int, const void *, float *) = {
     xtract_lowest_value,
     xtract_highest_value,
     xtract_sum,
+    xtract_nonzero_count,
     xtract_hps,
     xtract_f0,
     xtract_failsafe_f0,

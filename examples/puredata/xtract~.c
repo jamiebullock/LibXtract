@@ -140,7 +140,7 @@ static void *xtract_new(t_symbol *me, t_int argc, t_atom *argv) {
     if(n_args){
 	for(n = 0; n < n_args; n++){
 		    argv_max = &fd[f].argv.max[n]; 
-		    post("Argument %d, max: %.2f", n, *argv_max);
+		    //post("Argument %d, max: %.2f", n, *argv_max);
 	}
 	if(type == XTRACT_MEL_FILTER){
 	    x->memory.argv = (size_t)(n_args * sizeof(xtract_mel_filter));

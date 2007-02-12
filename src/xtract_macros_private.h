@@ -40,6 +40,7 @@
 #define XTRACT_FUNDAMENTAL_DEFAULT 440
 #define XTRACT_CHECK_nyquist if(!nyquist) nyquist = XTRACT_SR_DEFAULT / 2
 #define XTRACT_CHECK_q if(!q) q = XTRACT_SR_DEFAULT / N
+#define XTRACT_IS_ODD(x) (x % 2 != 0 ? 1 : 0) 
 #define XTRACT_SR_LIMIT SR_UPPER_LIMIT
 #define XTRACT_FFT_BANDS_MIN 16
 #define XTRACT_FFT_BANDS_MAX 65536

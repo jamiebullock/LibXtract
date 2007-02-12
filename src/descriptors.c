@@ -57,7 +57,6 @@ void *xtract_make_descriptors(){
 	    case XTRACT_SPECTRAL_STANDARD_DEVIATION:
 	    case XTRACT_SPECTRAL_AVERAGE_DEVIATION:
 	    case XTRACT_SPECTRAL_INHARMONICITY:
-	    case XTRACT_ODD_EVEN_RATIO:
 	    case XTRACT_LOWEST_VALUE:
 	    case XTRACT_F0:
 	    case XTRACT_FAILSAFE_F0:
@@ -115,6 +114,8 @@ void *xtract_make_descriptors(){
 	    case XTRACT_AUTOCORRELATION:
 	    case XTRACT_AMDF:
 	    case XTRACT_ASDF:
+	    case XTRACT_NONZERO_COUNT:
+	    case XTRACT_ODD_EVEN_RATIO:
 	    default:
 		*argc = 0;
 		break;
@@ -141,7 +142,6 @@ void *xtract_make_descriptors(){
 		*argv_def = XTRACT_ANY;
 		*argv_unit = XTRACT_ANY;
 	    case XTRACT_SPECTRAL_INHARMONICITY:
-	    case XTRACT_ODD_EVEN_RATIO:
 		*argv_min = 0.f;
 		*argv_max = XTRACT_SR_UPPER_LIMIT / 2;
 		*argv_def = XTRACT_FUNDAMENTAL_DEFAULT;
@@ -235,7 +235,6 @@ void *xtract_make_descriptors(){
 		*argv_donor = XTRACT_SPECTRAL_MEAN;
 		break;
 	    case XTRACT_SPECTRAL_INHARMONICITY:
-	    case XTRACT_ODD_EVEN_RATIO:
 		*argv_donor = XTRACT_FAILSAFE_F0;
 		break;
 	    case XTRACT_TONALITY:
@@ -276,7 +275,7 @@ void *xtract_make_descriptors(){
 		break;
 	    case XTRACT_CREST:
 		*argv_donor = XTRACT_HIGHEST_VALUE;
-		*(argv_donor + 1) = XTRACT_SPECTRAL_MEAN;
+		*(argv_donor + 1) = XTRACT_MEAN;
 		break;
 	    /* argc = BARK_BANDS */
 	    case XTRACT_BARK_COEFFICIENTS:
@@ -300,7 +299,6 @@ void *xtract_make_descriptors(){
 	    case XTRACT_LOWEST_VALUE:
 	    case XTRACT_HIGHEST_VALUE:
 	    case XTRACT_SUM:
-	    case XTRACT_ZCR:
 		*data_format = XTRACT_ARBITRARY_SERIES;
 		break;
 	    case XTRACT_SPECTRAL_MEAN:
@@ -311,8 +309,6 @@ void *xtract_make_descriptors(){
 	    case XTRACT_SPECTRAL_KURTOSIS:
 	    case XTRACT_SPECTRAL_CENTROID:
 	    case XTRACT_SPECTRAL_SLOPE:
-	    case XTRACT_PEAK_SPECTRUM:
-	    case XTRACT_HARMONIC_SPECTRUM:
 	        *data_format = XTRACT_SPECTRAL;     
 		break;
 	    case XTRACT_ROLLOFF:
@@ -324,17 +320,17 @@ void *xtract_make_descriptors(){
 	    case XTRACT_SMOOTHNESS:
 	    case XTRACT_FLATNESS:
 	    case XTRACT_SPREAD:
-	    case XTRACT_RMS_AMPLITUDE:
 	    case XTRACT_POWER:
-	    case XTRACT_SHARPNESS:
 	    case XTRACT_HPS:
+	    case XTRACT_PEAK_SPECTRUM:
 		*data_format = XTRACT_SPECTRAL_MAGNITUDES;
 		break;
 	    case XTRACT_SPECTRAL_INHARMONICITY:
+	    case XTRACT_HARMONIC_SPECTRUM:
 		*data_format = XTRACT_SPECTRAL_PEAKS;
 		break;
-	    case XTRACT_ODD_EVEN_RATIO:
-		*data_format = XTRACT_SPECTRAL_HARMONICS_FREQUENCIES;
+	    case XTRACT_NONZERO_COUNT:
+		*data_format = XTRACT_SPECTRAL_PEAKS_MAGNITUDES;
 		break;
 	    case XTRACT_F0:
 	    case XTRACT_FAILSAFE_F0:
@@ -345,6 +341,8 @@ void *xtract_make_descriptors(){
 	    case XTRACT_DCT:
 	    case XTRACT_AMDF:
 	    case XTRACT_ASDF:
+	    case XTRACT_ZCR:
+	    case XTRACT_RMS_AMPLITUDE:
 		*data_format = XTRACT_AUDIO_SAMPLES;
 		break;
 	    case XTRACT_TONALITY:
@@ -353,9 +351,11 @@ void *xtract_make_descriptors(){
 	    case XTRACT_TRISTIMULUS_1:
 	    case XTRACT_TRISTIMULUS_2:
 	    case XTRACT_TRISTIMULUS_3:
+	    case XTRACT_ODD_EVEN_RATIO:
 		*data_format = XTRACT_SPECTRAL_HARMONICS_MAGNITUDES;
 		break;
 	    case XTRACT_LOUDNESS:
+	    case XTRACT_SHARPNESS:
 		*data_format = XTRACT_BARK_COEFFS;
 		break;
 	    case XTRACT_FLUX: 
@@ -413,6 +413,7 @@ void *xtract_make_descriptors(){
 	    case XTRACT_SPECTRUM:
 	    case XTRACT_TONALITY:
 	    case XTRACT_LOUDNESS:
+	    case XTRACT_NONZERO_COUNT:
 		*data_unit = XTRACT_ANY;
 		break;
 	    case XTRACT_SPECTRAL_MEAN:
@@ -473,6 +474,24 @@ void *xtract_make_descriptors(){
 			"Extract the average deviation of an input vector");
 		strcpy(p_desc, 
 			"Extract the average deviation of a range of values");
+		strcpy(author, "");
+		break;
+	    case XTRACT_SKEWNESS:
+		strcpy(name, "skewness");
+		strcpy(p_name, "Skewness");
+		strcpy(desc, 
+			"Extract the skewness of an input vector");
+		strcpy(p_desc, 
+			"Extract the skewness of a range of values");
+		strcpy(author, "");
+		break;
+	    case XTRACT_KURTOSIS:
+		strcpy(name, "kurtosis");
+		strcpy(p_name, "Kurtosis");
+		strcpy(desc, 
+			"Extract the kurtosis of an input vector");
+		strcpy(p_desc, 
+			"Extract the kurtosis of a range of values");
 		strcpy(author, "");
 		break;
 	   case XTRACT_SPECTRAL_MEAN: 
@@ -555,23 +574,23 @@ void *xtract_make_descriptors(){
 		strcpy(desc, "Extract the fundamental frequency	of a signal");
 		strcpy(p_desc, 
 			"Extract the fundamental frequency of an audio signal");
-		strcpy(author, "");
+		strcpy(author, "Jamie Bullock");
 		break;
 	    case XTRACT_FAILSAFE_F0:
 		strcpy(name, "failsafe_f0");
 		strcpy(p_name, "Fundamental Frequency (failsafe)");
-		strcpy(desc, "Extract the fundamental frequency of a signal");
+		strcpy(desc, "Extract the fundamental frequency of a signal (failsafe)");
 		strcpy(p_desc, 
-			"Extract the fundamental frequency of an audio signal");
-		strcpy(author, "");
+			"Extract the fundamental frequency of an audio signal (failsafe)");
+		strcpy(author, "Jamie Bullock");
 		break;
 	    case XTRACT_TONALITY:
 		strcpy(name, "tonality");
 		strcpy(p_name, "Tonality");
 		strcpy(desc, "Extract the tonality of a spectrum");
 		strcpy(p_desc, "Extract the tonality an audio spectrum");
-		strcpy(author, "Tristan Jehan");
-		*year = 2005;
+		strcpy(author, "J. D. Johnston");
+		*year = 1988;
 		break;
 	    case XTRACT_SPECTRAL_SKEWNESS:
 		strcpy(name, "spectral_skewness");
@@ -646,18 +665,18 @@ void *xtract_make_descriptors(){
 	    case XTRACT_IRREGULARITY_K:
 		strcpy(name, "irregularity_k");
 		strcpy(p_name, "Irregularity I");
-		strcpy(desc, "Extract the irregularity of a spectrum");
+		strcpy(desc, "Extract the irregularity (type I) of a spectrum");
 		strcpy(p_desc, 
-			"Extract the irregularity of an audio spectrum");
+			"Extract the irregularity (type I) of an audio spectrum");
 		strcpy(author, "Krimphoff");
 		*year = 1994;
 		break;
 	    case XTRACT_IRREGULARITY_J:
 		strcpy(name, "irregularity_j");
 		strcpy(p_name, "Irregularity II");
-		strcpy(desc, "Extract the irregularity of a spectrum");
+		strcpy(desc, "Extract the irregularity (type II) of a spectrum");
 		strcpy(p_desc, 
-			"Extract the irregularity of an audio spectrum");
+			"Extract the irregularity (type II) of an audio spectrum");
 		strcpy(author, "Jensen");
 		*year = 1999;
 		break;
@@ -823,8 +842,8 @@ void *xtract_make_descriptors(){
 	    case XTRACT_AUTOCORRELATION_FFT:
 		strcpy(name, "autocorrelation_fft");
 		strcpy(p_name, "Autocorrelation (FFT method)");
-		strcpy(desc, "Extract the autocorrelation of a signal");
-		strcpy(p_desc, "Extract the autocorrelation of an audio signal");
+		strcpy(desc, "Extract the autocorrelation of a signal (fft method)");
+		strcpy(p_desc, "Extract the autocorrelation of an audio signal (fft method)");
 		strcpy(author, "");
 		break;
 	    case XTRACT_DCT:
@@ -856,6 +875,13 @@ void *xtract_make_descriptors(){
 		strcpy(p_desc, "Extract the ASDF of an audio signal");
 		strcpy(author, "");
 		break;
+	    case XTRACT_NONZERO_COUNT:
+		strcpy(name, "nonzero_count");
+		strcpy(p_name, "Non-zero count");
+		strcpy(desc, "Extract the number of non-zero elements in the input vector");
+		strcpy(p_desc, "Extract the number of non-zero elements in an input spectrum");
+		strcpy(author, "");
+		break;
 	    default:
 		strcpy(name, "");
 		strcpy(p_name, "");
@@ -875,7 +901,6 @@ void *xtract_make_descriptors(){
 	    case XTRACT_SPECTRAL_STANDARD_DEVIATION:
 	    case XTRACT_SPECTRAL_AVERAGE_DEVIATION:
 	    case XTRACT_SPECTRAL_INHARMONICITY:
-	    case XTRACT_ODD_EVEN_RATIO:
 	    case XTRACT_LOWEST_VALUE:
 	    case XTRACT_F0:
 	    case XTRACT_FAILSAFE_F0:
@@ -933,6 +958,8 @@ void *xtract_make_descriptors(){
 	    case XTRACT_AUTOCORRELATION:
 	    case XTRACT_AMDF:
 	    case XTRACT_ASDF:
+	    case XTRACT_NONZERO_COUNT:
+	    case XTRACT_ODD_EVEN_RATIO:
 	    default:
 		*argc = 0;
 		break;
@@ -980,6 +1007,7 @@ void *xtract_make_descriptors(){
 	    case XTRACT_HPS:
 	    case XTRACT_F0:
 	    case XTRACT_FAILSAFE_F0:
+	    case XTRACT_NONZERO_COUNT:
 		*is_scalar = XTRACT_TRUE;
 		break;
 	    case XTRACT_AUTOCORRELATION:
@@ -1017,6 +1045,7 @@ void *xtract_make_descriptors(){
 		case XTRACT_LOWEST_VALUE:
 		case XTRACT_HIGHEST_VALUE:
 		case XTRACT_SUM:
+		case XTRACT_NONZERO_COUNT: 
 		    *result_unit = XTRACT_ANY;
 		    *result_min = XTRACT_ANY;
 		    *result_max = XTRACT_ANY;

@@ -53,7 +53,7 @@ extern "C" {
   * @{
   */
 
-#define XTRACT_FEATURES 53
+#define XTRACT_FEATURES 54
     
 /** \brief Enumeration of features, elements are used as indixes to an array of pointers to feature extracton functions */
 enum xtract_features_ {
@@ -93,6 +93,7 @@ enum xtract_features_ {
     XTRACT_LOWEST_VALUE,
     XTRACT_HIGHEST_VALUE,
     XTRACT_SUM,
+    XTRACT_NONZERO_COUNT,
     XTRACT_HPS,
     XTRACT_F0,
     XTRACT_FAILSAFE_F0,
@@ -184,7 +185,9 @@ typedef enum xtract_vector_ {
      * frequencies */
     XTRACT_SPECTRAL_PEAKS,
     /* N spectral peak amplitudes */
-    XTRACT_SPECTRAL_PEAK_MAGNITUDES,
+    XTRACT_SPECTRAL_PEAKS_MAGNITUDES,
+    /* N spectral peak frequencies */
+    XTRACT_SPECTRAL_PEAKS_FREQUENCIES,
     /* N/2 magnitude/log-magnitude/power/log-power harmonic peak coeffs and N/2 
      * frequencies */
     XTRACT_SPECTRAL_HARMONICS,
@@ -313,8 +316,12 @@ int xtract_init_mfcc(int N, float nyquist, int style, float freq_min, float freq
 /** \brief A function to initialise bark filter bounds
  * 
  * A pointer to an array of BARK_BANDS ints most be passed in, and is populated with BARK_BANDS fft bin numbers representing the limits of each band 
+ *
+ * \param N: the audio block size
+ * \param sr: The sample audio sample rate
+ * \param *band_limits: a pointer to an array of BARK_BANDS ints
  */
-int xtract_init_bark(int N, float nyquist, int *band_limits);
+int xtract_init_bark(int N, float sr, int *band_limits);
 
 /* \brief A function to build an array of function descriptors */
 void *xtract_make_descriptors();

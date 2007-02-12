@@ -270,7 +270,7 @@ int xtract_bark_coefficients(const float *data, const int N, const void *argv, f
 
     limits = (int *)argv;
     
-    for(band = 0; band < XTRACT_BARK_BANDS; band++){
+    for(band = 0; band < XTRACT_BARK_BANDS - 1; band++){
         for(n = limits[band]; n < limits[band + 1]; n++)
             result[band] += data[n];
     }
@@ -282,7 +282,7 @@ int xtract_peak_spectrum(const float *data, const int N, const void *argv, float
 
     float threshold, max, y, y2, y3, p, q, *input = NULL;
     size_t bytes;
-    int n = N, M, rv = XTRACT_SUCCESS;
+    int n = N, rv = XTRACT_SUCCESS;
 
     threshold = max = y = y2 = y3 = p = q = 0.f;
     
@@ -307,32 +307,30 @@ int xtract_peak_spectrum(const float *data, const int N, const void *argv, float
     else
 	return XTRACT_MALLOC_FAILED;
 
-    M = N >> 1;
-
     while(n--)
         max = XTRACT_MAX(max, input[n]);
     
     threshold *= .01 * max;
 
     result[0] = 0;
-    result[M] = 0;
+    result[N] = 0;
 
-    for(n = 1; n < M; n++){
+    for(n = 1; n < N; n++){
         if(input[n] >= threshold){
             if(input[n] > input[n - 1] && input[n] > input[n + 1]){
-                result[M + n] = q * (n + (p = .5 * (y = input[n-1] - 
+                result[N + n] = q * (n + (p = .5 * (y = input[n-1] - 
 				(y3 = input[n+1])) / (input[n - 1] - 2 * 
 				    (y2 = input[n]) + input[n + 1])));
                 result[n] = y2 - .25 * (y - y3) * p;
             }
             else{
                 result[n] = 0;
-                result[M + n] = 0;
+                result[N + n] = 0;
             }
         }
         else{
             result[n] = 0;
-            result[M + n] = 0;
+            result[N + n] = 0;
         }
     }	  
    
