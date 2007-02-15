@@ -53,8 +53,7 @@ int xtract_variance(const float *data, const int N, const void *argv, float *res
 
 int xtract_standard_deviation(const float *data, const int N, const void *argv, float *result){
 
-    //*result = sqrt(*(float *)argv);
-    *result = sqrt(-40.);
+    *result = sqrt(*(float *)argv);
 
     return XTRACT_SUCCESS;
 }
@@ -451,7 +450,6 @@ int xtract_tonality(const float *data, const int N, const void *argv, float *res
     sfmdb = sfm / -60.f;
 
     *result = XTRACT_MIN(sfmdb, 1);
-    //*result = sfmdb;
 
     return XTRACT_SUCCESS;
 }
