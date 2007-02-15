@@ -323,6 +323,7 @@ void *xtract_make_descriptors(){
 	    case XTRACT_POWER:
 	    case XTRACT_HPS:
 	    case XTRACT_PEAK_SPECTRUM:
+	    case XTRACT_MFCC:
 		*data_format = XTRACT_SPECTRAL_MAGNITUDES;
 		break;
 	    case XTRACT_SPECTRAL_INHARMONICITY:
@@ -335,7 +336,6 @@ void *xtract_make_descriptors(){
 	    case XTRACT_F0:
 	    case XTRACT_FAILSAFE_F0:
 	    case XTRACT_SPECTRUM:
-	    case XTRACT_MFCC:
 	    case XTRACT_AUTOCORRELATION:
 	    case XTRACT_AUTOCORRELATION_FFT:
 	    case XTRACT_DCT:
@@ -440,6 +440,7 @@ void *xtract_make_descriptors(){
 	author = d->algo.author;
 	year = &d->algo.year;
 
+	strcpy(author, "");
 	*year = 0;
 
 	switch(f){
@@ -615,7 +616,7 @@ void *xtract_make_descriptors(){
 		strcpy(author, "");
 		break;
 	    case XTRACT_HARMONIC_SPECTRUM:
-		strcpy(p_name, "harmonic_spectrum");
+		strcpy(name, "harmonic_spectrum");
 		strcpy(p_name, "Harmonic Spectrum");
 		strcpy(desc, "Extract the harmonics from a spectrum");
 		strcpy(p_desc, "Extract the harmonics from an audio spectrum");
@@ -635,7 +636,7 @@ void *xtract_make_descriptors(){
 		strcpy(desc, 
 			"Extract the spectral crest measure of a spectrum");
 		strcpy(p_desc, 
-		    "Extract the spectral crest measure of a audio spectrum");
+		    "Extract the spectral crest measure of an audio spectrum");
 		strcpy(author, "Peeters");
 		*year = 2003;
 		break;
