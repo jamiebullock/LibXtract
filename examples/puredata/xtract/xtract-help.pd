@@ -15,9 +15,6 @@ may be obtained by sending the external a |help( message:;
 #X text 26 298 Other than this help message \, the data sent to the
 left inlet should always be a 'signal' (i.e. audio rate). This is the
 data from a which a given feature will be extracted.;
-#X text 27 405 Any additional arguments that need to be passed to the
-feature extraction funtion must be provided as a list to the right
-inlet \, e.g.;
 #X obj 182 490 xtract~ mean;
 #X floatatom 132 586 10 0 0 0 - - -;
 #X floatatom 253 523 5 0 0 0 - - -;
@@ -30,10 +27,13 @@ inlet \, e.g.;
 extracted.;
 #X obj 42 665 f0;
 #X obj 83 665 mfcc;
+#X text 27 405 Any additional arguments that need to be passed to the
+feature extraction function must be provided as a list to the right
+inlet \, e.g.;
 #X connect 5 0 4 0;
-#X connect 8 0 10 0;
-#X connect 8 0 11 0;
-#X connect 11 0 12 1;
-#X connect 12 0 9 0;
-#X connect 13 0 8 0;
-#X connect 13 0 12 0;
+#X connect 7 0 9 0;
+#X connect 7 0 10 0;
+#X connect 10 0 11 1;
+#X connect 11 0 8 0;
+#X connect 12 0 7 0;
+#X connect 12 0 11 0;

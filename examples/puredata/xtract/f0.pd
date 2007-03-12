@@ -1,4 +1,4 @@
-#N canvas 814 127 584 590 10;
+#N canvas 730 93 584 590 10;
 #N canvas 162 173 901 522 guts 0;
 #X obj 205 48 osc~;
 #X obj 338 70 a_spigot~;
@@ -53,18 +53,15 @@
 #X connect 4 0 3 0;
 #X connect 4 0 1 1;
 #X restore 587 66 pd noise;
-#N canvas 604 77 496 580 pda 0;
+#N canvas 135 136 496 580 pda 0;
 #X obj 99 100 xtract~ f0;
 #X obj 197 6 inlet~;
-#X obj 147 195 xtract~ magnitude_spectrum;
-#X obj 149 299 xtract~ lowest_match;
 #X msg 361 203 list \$1;
 #X obj 244 115 *~;
 #X obj 59 25 r sr;
-#X obj 148 222 xtract~ peaks;
-#X obj 148 245 tabsend~ freqs;
+#X obj 149 267 tabsend~ freqs;
 #X obj 401 30 table freqs;
-#X obj 148 276 tabreceive~ freqs;
+#X obj 148 292 tabreceive~ freqs;
 #X obj 6 220 != 0;
 #X obj 4 331 spigot;
 #X obj 57 331 spigot;
@@ -80,36 +77,49 @@
 #X obj 402 8 block~ 2048;
 #X obj 200 51 hip~ 20;
 #X msg 60 48 list \$1;
-#X obj 274 80 a_hann 2048;
 #X obj 274 59 r \$0-window-gen;
-#X connect 0 0 4 0;
+#X obj 274 80 a_hann 2048;
+#X obj 147 195 xtract~ spectrum;
+#X obj 148 222 xtract~ peak_spectrum;
+#X obj 149 315 xtract~ lowest_value;
+#X obj 150 243 a_blockswap~ 2048;
+#X obj 359 127 samplerate~;
+#X obj 358 150 / 2048;
+#X msg 358 171 \$1 10;
+#X obj 356 105 r \$0-peak-args;
+#X connect 0 0 2 0;
+#X connect 0 0 8 0;
+#X connect 0 0 9 0;
 #X connect 0 0 11 0;
-#X connect 0 0 12 0;
-#X connect 0 0 14 0;
-#X connect 1 0 22 0;
-#X connect 2 0 7 0;
-#X connect 3 0 13 0;
-#X connect 4 0 3 1;
-#X connect 5 0 2 0;
-#X connect 6 0 25 0;
-#X connect 7 0 8 0;
-#X connect 10 0 3 0;
-#X connect 11 0 12 1;
-#X connect 12 0 15 0;
+#X connect 1 0 19 0;
+#X connect 2 0 27 1;
+#X connect 3 0 25 0;
+#X connect 4 0 22 0;
+#X connect 7 0 27 0;
+#X connect 8 0 9 1;
+#X connect 9 0 12 0;
+#X connect 10 0 12 0;
+#X connect 11 0 10 1;
+#X connect 12 0 14 0;
 #X connect 13 0 15 0;
-#X connect 14 0 13 1;
-#X connect 15 0 17 0;
-#X connect 16 0 18 0;
-#X connect 17 0 16 0;
-#X connect 18 0 21 0;
-#X connect 19 0 18 0;
-#X connect 21 0 20 0;
-#X connect 22 0 24 0;
-#X connect 24 0 0 0;
-#X connect 24 0 5 0;
-#X connect 25 0 0 1;
-#X connect 26 0 5 1;
-#X connect 27 0 26 0;
+#X connect 14 0 13 0;
+#X connect 15 0 18 0;
+#X connect 16 0 15 0;
+#X connect 18 0 17 0;
+#X connect 19 0 21 0;
+#X connect 21 0 0 0;
+#X connect 21 0 3 0;
+#X connect 22 0 0 1;
+#X connect 23 0 24 0;
+#X connect 24 0 3 1;
+#X connect 25 0 26 0;
+#X connect 26 0 28 0;
+#X connect 27 0 10 0;
+#X connect 28 0 5 0;
+#X connect 29 0 30 0;
+#X connect 30 0 31 0;
+#X connect 31 0 26 1;
+#X connect 32 0 29 0;
 #X restore 357 262 pd pda;
 #N canvas 0 0 596 417 d_saw 0;
 #X obj 382 176 phasor~;
@@ -160,7 +170,7 @@
 #X obj 733 -70 loadbang;
 #X obj 68 241 loadbang;
 #X msg 67 263 symbol;
-#X text 411 283 <-The magic happens in here;
+#X text 411 263 <-The magic happens in here;
 #X obj 660 323 a_output~;
 #X msg 747 271 0;
 #X obj 263 46 r \$0-sine;
@@ -179,14 +189,14 @@
 #X obj 745 230 r \$0-master-lvl-stereo;
 #X obj 747 252 r \$0-master-lvl-mute;
 #X obj 747 291 s \$0-master-lvl-stereo;
-#X msg 733 -20 \; pd dsp 1 \; \; \$1-window-gen bang \; sr 44100 \;
-\; \$1-master-lvl-stereo 50;
 #X obj 733 -45 f \$0;
 #X obj 38 357 s \$0-f0_cent;
 #X obj 19 378 s \$0-f0_8ve;
 #X obj 0 406 s \$0-f0_note;
 #X obj 254 261 s~ \$0-dacs;
 #X obj 670 281 r~ \$0-dacs;
+#X msg 732 -19 \; pd dsp 1 \; \; \$1-window-gen bang \; sr 44100 \;
+\; \$1-master-lvl-stereo 50 \; \$1-peak-args bang;
 #X connect 0 0 2 0;
 #X connect 1 0 9 0;
 #X connect 2 0 9 0;
@@ -201,27 +211,27 @@
 #X connect 8 0 9 0;
 #X connect 9 0 11 0;
 #X connect 9 0 13 0;
-#X connect 9 0 46 0;
+#X connect 9 0 45 0;
 #X connect 10 0 9 1;
 #X connect 11 0 5 0;
 #X connect 12 0 8 0;
 #X connect 13 0 17 0;
 #X connect 14 0 15 0;
 #X connect 15 0 9 0;
-#X connect 16 0 45 0;
-#X connect 16 1 44 0;
-#X connect 16 2 43 0;
+#X connect 16 0 44 0;
+#X connect 16 1 43 0;
+#X connect 16 2 42 0;
 #X connect 17 0 31 0;
 #X connect 17 1 32 0;
 #X connect 17 2 33 0;
 #X connect 18 0 34 0;
 #X connect 18 1 36 0;
 #X connect 18 2 37 0;
-#X connect 19 0 42 0;
+#X connect 19 0 41 0;
 #X connect 20 0 21 0;
 #X connect 21 0 31 0;
 #X connect 21 0 34 0;
-#X connect 21 0 45 0;
+#X connect 21 0 44 0;
 #X connect 24 0 23 2;
 #X connect 24 0 40 0;
 #X connect 25 0 2 1;
@@ -233,21 +243,21 @@
 #X connect 35 0 4 0;
 #X connect 38 0 23 2;
 #X connect 39 0 24 0;
-#X connect 42 0 41 0;
-#X connect 47 0 23 0;
-#X connect 47 0 23 1;
+#X connect 41 0 47 0;
+#X connect 46 0 23 0;
+#X connect 46 0 23 1;
 #X restore 519 -226 pd guts;
 #X obj 11 -226 cnv 15 500 200 empty empty PDA_comparison 20 12 0 14
 -261681 -66577 0;
 #X obj 34 -94 hsl 128 15 2 2.05 0 0 \$0-inharmonicity empty fm-inharmonicity
--2 -6 0 8 -225271 -1 -1 0 1;
+-2 -6 0 8 -225271 -1 -1 800 1;
 #X obj 34 -50 hsl 128 15 0 0.5 0 0 \$0-noisiness empty noisiness -2
 -6 0 8 -225271 -1 -1 0 1;
 #X obj 33 -135 hsl 128 15 30 3000 0 0 \$0-fund empty f0 -2 -6 0 8 -225271
--1 -1 0 1;
+-1 -1 300 1;
 #X obj 32 -172 tgl 15 0 \$0-sine empty sine 0 -6 0 8 -225280 -1 -1
 0 1;
-#X obj 73 -172 tgl 15 0 \$0-fm empty fm 0 -6 0 8 -225280 -1 -1 0 1
+#X obj 73 -172 tgl 15 0 \$0-fm empty fm 0 -6 0 8 -225280 -1 -1 1 1
 ;
 #X obj 110 -172 tgl 15 0 \$0-saw empty saw 0 -6 0 8 -225280 -1 -1 0
 1;
@@ -260,7 +270,7 @@
 #X symbolatom 245 -112 5 0 0 0 f0 #0-fidd_f0_note -;
 #X floatatom 313 -112 5 0 0 0 8ve #0-fidd_f0_8ve -;
 #X text 304 -200 Input;
-#X text 308 -93 xtract~;
+#X text 308 -84 xtract~;
 #X text 305 -134 fiddle~;
 #X floatatom 315 -62 5 0 0 0 8ve #0-pda_f0_8ve -;
 #X symbolatom 247 -62 5 0 0 0 f0 #0-pda_f0_note -;
@@ -276,11 +286,6 @@ but with a larger block size it could go lower!;
 \, with centre and peak clipping used to provide noise robustness.
 This could be further improved \, as could the efficiency of the algorithm.
 ;
-#X text 26 154 If [xtract~ f0] is unable to find a fundamental (i.e.
-its output is 0 \, the lowest frequency in the peak spectrum is used.
-In general this happens for very low frequencies. [xtract~ magnitude_spectrum]
-\, [xtract~ peaks] \, and [xtract~ lowest_match] are used to achieve
-this.;
 #X obj 147 -172 tgl 15 0 \$0-adc empty adc~ 0 -6 0 8 -257472 -1 -1
 0 1;
 #X floatatom 386 -171 5 0 0 0 cent #0-f0_cent -;
@@ -290,3 +295,8 @@ this.;
 out -4 -8 0 8 -262131 -1 -1 3898 1;
 #X obj 465 -77 bng 10 250 50 0 \$0-master-lvl-mute empty mute -6 16
 0 8 -262131 -1 -1;
+#X text 26 154 If [xtract~ f0] is unable to find a fundamental (i.e.
+its output is 0 \, the lowest frequency in the peak spectrum is used.
+In general this happens for very low frequencies. [xtract~ spectrum]
+\, [xtract~ peak_spectrum] \, and [xtract~ lowest_value] are used to
+achieve this.;

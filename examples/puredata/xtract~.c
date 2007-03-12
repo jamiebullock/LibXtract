@@ -24,7 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "xtract/libxtract.h"
 
-#define BLOCKSIZE 1024
+#define BLOCKSIZE 1024 /* FIX: this should be dynamic - somehow */
 #define NYQUIST 22050.0f
 
 static t_class *xtract_class;
@@ -70,15 +70,18 @@ static t_int *xtract_perform_vector(t_int *w) {
     t_int N = (t_int)(w[4]), n;
     t_int return_code = 0;
 
+    n = N;
+
     tmp_in = copybytes(in, N * sizeof(t_float));
     tmp_out = getbytes(N * sizeof(t_float));
+
+    if(x->feature == XTRACT_PEAK_SPECTRUM)
+	N >>= 1;
     
     return_code = xtract[x->feature](tmp_in, N, x->argv, tmp_out);
     
     if(return_code == XTRACT_FEATURE_NOT_IMPLEMENTED)
 	pd_error(x, "Feature not implemented");
-    
-    n = N;
 
     while(n--) out[n] = tmp_out[n];
     
@@ -107,7 +110,7 @@ static void *xtract_new(t_symbol *me, t_int argc, t_atom *argv) {
     t_float *argv_max;
     xtract_function_descriptor_t *fd;
     char *p_name, *p_desc, *author;
-    int *year;
+    int year;
 
     p_name = p_desc = author = NULL;
    
@@ -162,7 +165,7 @@ static void *xtract_new(t_symbol *me, t_int argc, t_atom *argv) {
     p_name = fd[f].algo.p_name;
     p_desc = fd[f].algo.p_desc;
     author = fd[f].algo.author;
-    year = &fd[f].algo.year; 
+    year = fd[f].algo.year; 
 
     if(argc){
 	if(strcmp(p_name, ""))	
@@ -170,7 +173,7 @@ static void *xtract_new(t_symbol *me, t_int argc, t_atom *argv) {
 	if(strcmp(p_desc, ""))	
 	    post("xtract~: %s", p_desc );
 	if(strcmp(author, "") && year)	
-	    post("xtract~: %s(%d)", author, *year);
+	    post("xtract~: %s(%d)", author, year);
     }	
     else
 	post("xtract~: No arguments given");
@@ -190,18 +193,21 @@ static void *xtract_new(t_symbol *me, t_int argc, t_atom *argv) {
         for(n = 0; n < mf->n_filters; n++)
             mf->filters[n] = (float *)getbytes(N * sizeof(float));
                  
-        xtract_init_mfcc(N, NYQUIST, XTRACT_EQUAL_GAIN, 18000.0f,
-        80.0f, mf->n_filters, mf->filters);
+        xtract_init_mfcc(N, NYQUIST, XTRACT_EQUAL_GAIN, 80.0f,
+        18000.0f, mf->n_filters, mf->filters);
     }
     else if(x->feature == XTRACT_BARK_COEFFICIENTS)
         xtract_init_bark(N, NYQUIST, x->argv);
     
-    if(x->feature == XTRACT_AUTOCORRELATION || x->feature == XTRACT_AUTOCORRELATION_FFT ||
-    x->feature == XTRACT_MFCC || x->feature == XTRACT_AMDF || x->feature == XTRACT_ASDF|| 
-    x->feature == XTRACT_DCT || x->feature == XTRACT_BARK_COEFFICIENTS || 
-    x->feature == XTRACT_SPECTRUM || x->feature == XTRACT_PEAK_SPECTRUM || 
-    x->feature == XTRACT_HARMONIC_SPECTRUM) 
-        x->feature_type = XTRACT_VECTOR;
+    if(x->feature == XTRACT_AUTOCORRELATION || 
+	    x->feature == XTRACT_AUTOCORRELATION_FFT || 
+	    x->feature == XTRACT_MFCC || x->feature == XTRACT_AMDF || 
+	    x->feature == XTRACT_ASDF|| x->feature == XTRACT_DCT || 
+	    x->feature == XTRACT_BARK_COEFFICIENTS || 
+	    x->feature == XTRACT_SPECTRUM || 
+	    x->feature == XTRACT_PEAK_SPECTRUM || 
+	    x->feature == XTRACT_HARMONIC_SPECTRUM) 
+	x->feature_type = XTRACT_VECTOR;
                 
     else if (x->feature == XTRACT_FLUX || x->feature == XTRACT_ATTACK_TIME || 
             x->feature == XTRACT_DECAY_TIME || x->feature == XTRACT_DELTA) 
@@ -244,12 +250,17 @@ static void xtract_tilde_show_help(t_xtract_tilde *x, t_symbol *s){
     int i;
 
     i = XTRACT_FEATURES;
+    xtract_function_descriptor_t *fd, *d;
 
-    post("\n\txtract~: Feature List\n");
-   /* 
+    fd = (xtract_function_descriptor_t *)xtract_make_descriptors();
+    post("\nxtract~: Feature List\n");
+   
     while(i--){
-	post("\t%s", xtract_help_strings[i]+7);
-    }*/
+	d = &fd[i];
+	post("\t%s", d->algo.name);
+    }
+
+    xtract_free_descriptors(fd);
 }
 
 static void xtract_tilde_free(t_xtract_tilde *x) {
