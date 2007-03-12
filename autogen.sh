@@ -46,8 +46,8 @@ echo "=============== running libtoolize --force --copy" &&
     aclocal $ACLOCALARGS &&
     echo "=============== running autoheader" &&
     autoheader &&
-    echo "=============== running automake --add-missing --foreign" &&
-    automake --add-missing --foreign &&
+    echo "=============== running automake -c --add-missing --foreign" &&
+    automake -c --add-missing --foreign &&
     echo "=============== running autoconf" &&
     autoconf &&
     echo "=============== done"
