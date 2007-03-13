@@ -184,25 +184,29 @@ int xtract_dct(const float *data, const int N, const void *argv, float *result){
 
 int xtract_magnitude_spectrum(const float *data, const int N, const void *argv, float *result){
 
-    NEEDS_FFTW;
+    XTRACT_NEEDS_FFTW;
+    return XTRACT_NO_RESULT;
 
 }
 
 int xtract_autocorrelation_fft(const float *data, const int N, const void *argv, float *result){
 
-    NEEDS_FFTW;
+    XTRACT_NEEDS_FFTW;
+    return XTRACT_NO_RESULT;
 
 }
 
 int xtract_mfcc(const float *data, const int N, const void *argv, float *result){
 
-    NEEDS_FFTW;
+    XTRACT_NEEDS_FFTW;
+    return XTRACT_NO_RESULT;
 
 }
 
 int xtract_dct(const float *data, const int N, const void *argv, float *result){
 
-    NEEDS_FFTW;
+    XTRACT_NEEDS_FFTW;
+    return XTRACT_NO_RESULT;
 
 }
 
