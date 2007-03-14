@@ -55,49 +55,63 @@ int xtract_spectrum(const float *data, const int N, const void *argv, float *res
     fftwf_execute(plan);
 
     switch(vector){
-	case XTRACT_MAGNITUDE_SPECTRUM:
-	    for(n = 0; n < M; n++){
-		result[n] = sqrt(XTRACT_SQ(rfft[n]) + XTRACT_SQ(rfft[N - n])) / N; 
+
+/*	case XTRACT_MAGNITUDE_SPECTRUM:
+	    for(n = 1; n < M; n++){
+		result[n] = sqrt(XTRACT_SQ(rfft[n]) + 
+			XTRACT_SQ(rfft[N - n - 1])) / N; 
 		result[M + n] = n * q;
 	    }
 	    break;
+*/
 	case XTRACT_LOG_MAGNITUDE_SPECTRUM:
-	    for(n = 0; n < M; n++){
-		if ((temp = XTRACT_SQ(rfft[n]) + XTRACT_SQ(rfft[N - n])) > XTRACT_LOG_LIMIT)
+	    for(n = 1; n < M; n++){
+		if ((temp = XTRACT_SQ(rfft[n]) + 
+			    XTRACT_SQ(rfft[N - n - 1])) > XTRACT_LOG_LIMIT)
 		    temp = log(sqrt(temp) / N);
 		else
 		    temp = XTRACT_LOG_LIMIT_DB;
 		/*Normalise*/
-		result[n] = (temp + XTRACT_DB_SCALE_OFFSET) / XTRACT_DB_SCALE_OFFSET; 
+		result[n] = 
+		    (temp + XTRACT_DB_SCALE_OFFSET) / XTRACT_DB_SCALE_OFFSET; 
 		result[M + n] = n * q;
 	    }
 	    break;
+
 	case XTRACT_POWER_SPECTRUM:
-	    for(n = 0; n < M; n++){
-		result[n] = (XTRACT_SQ(rfft[n]) + XTRACT_SQ(rfft[N - n])) / NxN;
+	    for(n = 1; n < M; n++){
+		result[n] = (XTRACT_SQ(rfft[n]) + XTRACT_SQ(rfft[N - n - 1])) 
+		    / NxN;
 		result[M + n] = n * q;
 	    }
 	    break;
+
 	case XTRACT_LOG_POWER_SPECTRUM:
-	    for(n = 0; n < M; n++){
-		if ((temp = XTRACT_SQ(rfft[n]) + XTRACT_SQ(rfft[N - n])) > XTRACT_LOG_LIMIT)
+	    for(n = 1; n < M; n++){
+		if ((temp = XTRACT_SQ(rfft[n]) + XTRACT_SQ(rfft[N - n - 1])) > 
+			XTRACT_LOG_LIMIT)
 		    temp = log(temp / NxN);
 		else
 		    temp = XTRACT_LOG_LIMIT_DB; 		
-		result[n] = (temp + XTRACT_DB_SCALE_OFFSET) / XTRACT_DB_SCALE_OFFSET; 
+		result[n] = (temp + XTRACT_DB_SCALE_OFFSET) / 
+		    XTRACT_DB_SCALE_OFFSET; 
 		result[M + n] = n * q;
 	    }
 	    break;
+
 	default:
 	    /* MAGNITUDE_SPECTRUM */
-	    for(n = 0; n < M; n++){
-		result[n] = sqrt(XTRACT_SQ(rfft[n]) + XTRACT_SQ(rfft[N - n])) / N; 
+	    for(n = 1; n < M; n++){
+		result[n] = sqrt(XTRACT_SQ(rfft[n]) + 
+			XTRACT_SQ(rfft[N - n - 1])) / N; 
 		result[M + n] = n * q;
 	    }
 	    break;
     }
     
-    /* result[0] = fabs(temp[0]) / N  */
+    /* Set the DC component to 0 */
+    result[0] = result[M] = 0.f;
+    /* Set the Nyquist */
     result[N] = q * M;
     
     fftwf_destroy_plan(plan);
@@ -182,7 +196,7 @@ int xtract_dct(const float *data, const int N, const void *argv, float *result){
 
 #else
 
-int xtract_magnitude_spectrum(const float *data, const int N, const void *argv, float *result){
+int xtract_spectrum(const float *data, const int N, const void *argv, float *result){
 
     XTRACT_NEEDS_FFTW;
     return XTRACT_NO_RESULT;

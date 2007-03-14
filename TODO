@@ -4,12 +4,10 @@ Add geometric_mean
 Add spectral_mean, spectral_deviation, spectral_geometric_mean etc.
 Add weighted temporal features as per Peeters (xtract_weighted_mean etc) weight given as argv?
 Improve noise robustness of xtract_f0
-Add feature advertisement
 Fix xtract_hps - it doesn't work!
 Add Pure Data help file
 Add delta functions
 Add Max/MSP external example
-Add self documentation
 Check and add return values as appropriate. Make them more sensible!
 ...do other stuff and eventually...
 ...optimise!
