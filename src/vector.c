@@ -163,8 +163,7 @@ int xtract_mfcc(const float *data, const int N, const void *argv, float *result)
         for(n = 0; n < N; n++){
             result[filter] += input[n] * f->filters[filter][n];
         }
-        if(result[filter] < XTRACT_LOG_LIMIT) result[filter] = XTRACT_LOG_LIMIT;
-        result[filter] = log(result[filter]);
+        result[filter] = log(result[filter] < XTRACT_LOG_LIMIT ? XTRACT_LOG_LIMIT : result[filter]);
     }
 
     for(n = filter + 1; n < N; n++) result[n] = 0; 
