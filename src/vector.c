@@ -159,6 +159,7 @@ int xtract_mfcc(const float *data, const int N, const void *argv, float *result)
     input = memcpy(input, data, bytes);
     
     for(filter = 0; filter < f->n_filters; filter++){
+        result[filter] = 0.f;
         for(n = 0; n < N; n++){
             result[filter] += input[n] * f->filters[filter][n];
         }
