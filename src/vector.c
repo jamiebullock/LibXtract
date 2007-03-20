@@ -182,19 +182,15 @@ int xtract_autocorrelation_fft(const float *data, const int N, const void *argv,
 int xtract_mfcc(const float *data, const int N, const void *argv, float *result){
 
     xtract_mel_filter *f;
-    float *input;
     size_t bytes;
     int n, filter;
 
     f = (xtract_mel_filter *)argv;
     
-    input = (float *)malloc(bytes = N * sizeof(float));
-    input = memcpy(input, data, bytes);
-    
     for(filter = 0; filter < f->n_filters; filter++){
         result[filter] = 0.f;
         for(n = 0; n < N; n++){
-            result[filter] += input[n] * f->filters[filter][n];
+            result[filter] += data[n] * f->filters[filter][n];
         }
         result[filter] = log(result[filter] < XTRACT_LOG_LIMIT ? XTRACT_LOG_LIMIT : result[filter]);
     }
@@ -202,8 +198,6 @@ int xtract_mfcc(const float *data, const int N, const void *argv, float *result)
     for(n = filter + 1; n < N; n++) result[n] = 0; 
     
     xtract_dct(result, f->n_filters, NULL, result);
-
-    free(input);
     
     return XTRACT_SUCCESS;
 }
@@ -211,18 +205,13 @@ int xtract_mfcc(const float *data, const int N, const void *argv, float *result)
 int xtract_dct(const float *data, const int N, const void *argv, float *result){
     
     fftwf_plan plan;
-    float *input;
     size_t bytes;
-
-    input = (float *)malloc(bytes = N * sizeof(float));
-    input = memcpy(input, data, bytes);
     
     plan = 
-        fftwf_plan_r2r_1d(N, input, result, FFTW_REDFT00, FFTW_ESTIMATE);
+        fftwf_plan_r2r_1d(N, data, result, FFTW_REDFT00, FFTW_ESTIMATE);
     
     fftwf_execute(plan);
     fftwf_destroy_plan(plan);
-    free(input);
 
     return XTRACT_SUCCESS;
 }
