@@ -54,7 +54,7 @@ int xtract_autocorrelation_fft(const float *data, const int N, const void *argv,
 
 /** \brief Extract Mel Frequency Cepstral Coefficients based on a method described by Rabiner
  * 
- * \param *data: a pointer to the first element in an array of floats representing an audio vector
+ * \param *data: a pointer to the first element in an array of spectral magnitudes, e.g. the first half of the array pointed to by *resul from xtract_spectrum()
  * \param N: the number of array elements to be considered
  * \param *argv: a pointer to a data structure of type xtract_mel_filter, containing n_filters coefficient tables to make up a mel-spaced filterbank
  * \param *result: a pointer to an array containing the resultant MFCC
