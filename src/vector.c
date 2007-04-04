@@ -182,7 +182,6 @@ int xtract_autocorrelation_fft(const float *data, const int N, const void *argv,
 int xtract_mfcc(const float *data, const int N, const void *argv, float *result){
 
     xtract_mel_filter *f;
-    size_t bytes;
     int n, filter;
 
     f = (xtract_mel_filter *)argv;
@@ -205,10 +204,9 @@ int xtract_mfcc(const float *data, const int N, const void *argv, float *result)
 int xtract_dct(const float *data, const int N, const void *argv, float *result){
     
     fftwf_plan plan;
-    size_t bytes;
     
     plan = 
-        fftwf_plan_r2r_1d(N, data, result, FFTW_REDFT00, FFTW_ESTIMATE);
+        fftwf_plan_r2r_1d(N, (float *) data, result, FFTW_REDFT00, FFTW_ESTIMATE);
     
     fftwf_execute(plan);
     fftwf_destroy_plan(plan);
