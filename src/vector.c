@@ -171,7 +171,7 @@ int xtract_autocorrelation_fft(const float *data, const int N, const void *argv,
 
     fftwf_execute(plan);
 
-    for(n = 1; n < M / 2; n++){
+    for(n = 1; n < N; n++){
         freq[n] = XTRACT_SQ(freq[n]) + XTRACT_SQ(freq[M - n]);
 	freq[M - n] = 0.f;
     }
