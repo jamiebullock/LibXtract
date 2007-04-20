@@ -1,3 +1,5 @@
+MAINTAINERCLEANFILES = Makefile.in 
+
 if BUILD_PD_EXAMPLE 
 PUREDATA_DIR = puredata
 endif

@@ -156,25 +156,43 @@ int xtract_spectrum(const float *data, const int N, const void *argv, float *res
 
 int xtract_autocorrelation_fft(const float *data, const int N, const void *argv, float *result){
     
-    float *temp, *input;
-    size_t bytes;
-    int n;
+    float *freq, *time;
+    int n, M;
     fftwf_plan plan;
 
-    temp = (float *)fftwf_malloc(N * sizeof(float));
-    input = (float *)malloc(bytes = N * sizeof(float));
-    input = memcpy(input, data, bytes);
+    M = N << 1;
 
-    plan = fftwf_plan_r2r_1d(N, input, temp, FFTW_HC2R, FFTW_ESTIMATE);
+    freq = (float *)fftwf_malloc(M * sizeof(float));
+    /* Zero pad the input vector */
+    time = (float *)calloc(M, sizeof(float));
+    time = memcpy(time, data, N * sizeof(float));
+
+    plan = fftwf_plan_r2r_1d(M, time, freq, FFTW_R2HC, FFTW_ESTIMATE);
 
     fftwf_execute(plan);
+
+    for(n = 1; n < M / 2; n++){
+        freq[n] = XTRACT_SQ(freq[n]) + XTRACT_SQ(freq[M - n]);
+	freq[M - n] = 0.f;
+    }
     
-    for(n = 0; n < N - 1; n++)
-        result[n] = temp[n+1];
-    
+    freq[0] = XTRACT_SQ(freq[0]);
+    freq[N] = XTRACT_SQ(freq[N]);
+
+    plan = fftwf_plan_r2r_1d(M, freq, time, FFTW_HC2R, FFTW_ESTIMATE);
+
+    fftwf_execute(plan);
+   
+    /* Normalisation factor */
+    M = M * N;
+
+    for(n = 0; n < N; n++)
+	result[n] = time[n] / (float)M;
+	/* result[n] = time[n+1] / (float)M; */
+
     fftwf_destroy_plan(plan);
-    fftwf_free(temp);
-    free(input);
+    fftwf_free(freq);
+    free(time);
 
     return XTRACT_SUCCESS;
 }

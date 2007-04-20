@@ -1,3 +1,4 @@
+MAINTAINERCLEANFILES = Makefile.in
 
 SUFFIXES = .@PD_SUFFIX@
 PDDIR = $(prefix)/lib/pd
