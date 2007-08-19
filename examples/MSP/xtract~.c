@@ -260,10 +260,13 @@ t_int argc, t_atom *argv) {
         post("Too many parameters to right inlet");
     else{*/
 
+    t_float temp = 0.f;
     x->argv = getbytes(argc * sizeof(float));
     
-        while(argc--)
-            ((t_float *)x->argv)[argc] = atom_getfloatarg(1, argc, argv);
+        while(argc--){
+	    temp = argv[argc].a_w.w_float;
+            ((t_float *)x->argv)[argc] = temp;
+	}
  /*   }*/
 }
 
