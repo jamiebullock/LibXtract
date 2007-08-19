@@ -28,6 +28,21 @@ universal:
 	$(CC) $(LDFLAGS) $(I386LDFLAGS) -o $(NAME)-i386 $(NAME)-i386.o
 	$(CC) $(LDFLAGS) $(PPCLDFLAGS) -o $(NAME)-ppc $(NAME)-ppc.o
 	$(LIPO) -create $(NAME)-ppc $(NAME)-i386 -output $(NAME)
+	mkdir -p $(NAME).mxo/Contents/MacOS
+	cp Info.plist PkgInfo $(NAME).mxo/Contents/
+	cp $(NAME) $(NAME).mxo/Contents/MacOS
+
+ppc:
+	$(CC) $(CFLAGS) $(PPCCFLAGS) -o $(NAME)-ppc.o -c $(NAME).c
+	$(CC) $(LDFLAGS) $(PPCLDFLAGS) -o $(NAME)-ppc $(NAME)-ppc.o
+	$(LIPO) -create $(NAME)-ppc -output $(NAME)
+	mkdir -p $(NAME).mxo/Contents/MacOS
+	cp Info.plist PkgInfo $(NAME).mxo/Contents/
+	cp $(NAME) $(NAME).mxo/Contents/MacOS
+
+intel:
+	$(CC) $(CFLAGS) $(I386CFLAGS) -o $(NAME)-i386.o -c $(NAME).c
+	$(CC) $(LDFLAGS) $(I386LDFLAGS) -o $(NAME)-i386 $(NAME)-i386.o
 	$(LIPO) -create $(NAME)-i386 -output $(NAME)
 	mkdir -p $(NAME).mxo/Contents/MacOS
 	cp Info.plist PkgInfo $(NAME).mxo/Contents/
