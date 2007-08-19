@@ -26,6 +26,7 @@
 #include "math.h"
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 int xtract_mean(const float *data, const int N, const void *argv, float *result){
 
@@ -658,6 +659,8 @@ int xtract_hps(const float *data, const int N, const void *argv, float *result){
 	  largest1_lwr, peak, ratio1, sr;
 
     sr = *(float*)argv;
+    if(sr == 0)
+	sr = 44100.f;
 
     coeffs2 = (float *)malloc(N * sizeof(float));
     coeffs3 = (float *)malloc(N * sizeof(float));
@@ -715,13 +718,16 @@ int xtract_hps(const float *data, const int N, const void *argv, float *result){
 
 int xtract_f0(const float *data, const int N, const void *argv, float *result){
 
-    int M, sr, tau, n;
+    int M, tau, n;
+    float sr;
     size_t bytes;
     float f0, err_tau_1, err_tau_x, array_max, 
 	  threshold_peak, threshold_centre,
 	  *input;
 
     sr = *(float *)argv;
+    if(sr == 0)
+	sr = 44100.f;
 
     input = (float *)malloc(bytes = N * sizeof(float));
     input = memcpy(input, data, bytes);
@@ -793,6 +799,8 @@ int xtract_failsafe_f0(const float *data, const int N, const void *argv, float *
     if(return_code == XTRACT_NO_RESULT){
 
 	sr = *(float *)argv;
+	if(sr == 0)
+	    sr = 44100.f;
 	spectrum = (float *)malloc(N * sizeof(float));
 	peaks = (float *)malloc(N * sizeof(float));
 	argf[0] = sr;

@@ -46,11 +46,11 @@ typedef struct _xtract {
 } t_xtract_tilde;
 
 static t_int *xtract_perform(t_int *w) {
-    t_sample *in = (t_sample *)(w[1]);
+    t_float *in = (t_float *)(w[1]);
     t_xtract_tilde *x = (t_xtract_tilde *)(w[2]);
     t_int N = (t_int)(w[3]);
     t_int return_code = 0;
-    float result = 0;
+    float result = 0.f;
 
     return_code = xtract[x->feature]((float *)in, N, x->argv, &result);
 
@@ -65,8 +65,8 @@ static t_int *xtract_perform(t_int *w) {
 }
 
 static t_int *xtract_perform_vector(t_int *w) {
-    t_sample *in = (t_sample *)(w[1]);
-    t_sample *out = (t_sample *)(w[2]);
+    t_sample *in = (t_float *)(w[1]);
+    t_sample *out = (t_float *)(w[2]);
     float *temp_in, *temp_out;
     t_xtract_tilde *x = (t_xtract_tilde *)(w[3]);
     t_int N = (t_int)(w[4]), n;
@@ -114,23 +114,31 @@ static void *xtract_tilde_new(t_symbol *me, t_int argc, t_atom *argv) {
     t_symbol *tmp;
     t_xtract_tilde *x = (t_xtract_tilde *)newobject(xtract_tilde_class);
     xtract_mel_filter *mf;
-    t_int n, N, f, F, n_args, type;
+    t_int n, N, f, F, n_args, type, blocksize;
     t_float *argv_max;
     xtract_function_descriptor_t *fd;
     char *p_name, *p_desc, *author;
     int year;
 
+
+    blocksize = BLOCKSIZE; /* Default */
+    tmp = NULL;
     p_name = p_desc = author = NULL;
    
     n_args = type = x->feature = 0;
 
     f = F = XTRACT_FEATURES;
 
-    N = BLOCKSIZE;
+    /* N = BLOCKSIZE;*/
     
     x->argv = NULL;
     
-    tmp = argv->a_w.w_sym; /*atom_getsymbol(argv); */
+    if(argc)
+	tmp = argv[0].a_w.w_sym; /*atom_getsymbol(argv); */
+    if(argc > 1)
+	blocksize = (t_int)argv[1].a_w.w_long;
+
+    N = blocksize;
 
     /* get function descriptors */
     fd = (xtract_function_descriptor_t *)xtract_make_descriptors();
@@ -186,7 +194,6 @@ static void *xtract_tilde_new(t_symbol *me, t_int argc, t_atom *argv) {
     else
 	post("xtract~: No arguments given");
     
-
     /* do init if needed */
     if(x->feature == XTRACT_MFCC){
 
@@ -224,7 +231,7 @@ static void *xtract_tilde_new(t_symbol *me, t_int argc, t_atom *argv) {
     else x->feature_type = XTRACT_SCALAR;
 
     /* argv through right inlet */
-    inlet_new((t_pxobject *)x, "argv"); 
+    inlet_new((t_pxobject *)x, "list"); 
 
     /* DSP inlet */
     dsp_setup((t_pxobject *)x, 1);
@@ -294,7 +301,7 @@ int main(void) {
     	A_GIMME, 0);
 
     addmess((method)xtract_tilde_dsp, "dsp", A_CANT,  0);
-    addmess((method)xtract_tilde_get_args, "argv", A_GIMME, 0);
+    addmess((method)xtract_tilde_get_args, "list", A_GIMME, 0);
     addmess((method)xtract_tilde_show_help, "help", A_DEFSYM, 0); 
     dsp_initclass();
     //class_setname("xtract~", "xtract~");
