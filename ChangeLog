@@ -1,4 +1,8 @@
 2007-04-20 Jamie Bullock <jamie@postlude.co.uk>
+    * version 0.4.7
+	* Added MSP example
+	
+2007-04-20 Jamie Bullock <jamie@postlude.co.uk>
     * version 0.4.5
 	* Fixed autocorrelation_fft()
 	* Added MAINTAINERCLEAN files to Makefile.am 
