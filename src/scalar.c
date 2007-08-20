@@ -350,7 +350,10 @@ int xtract_spread(const float *data, const int N, const void *argv, float *resul
 
     int n = N;
 
-    float num = 0.f, den = 0.f, temp;
+    float num = 0.f, den = 0.f, temp = 0.f;
+
+    if(argv == NULL)
+	return XTRACT_BAD_ARGV;
 
     while(n--){
 	temp = n - *(float *)argv;

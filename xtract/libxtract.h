@@ -27,6 +27,9 @@
   *
   * Hopefully this not only makes the library more efficient when computing large numbers of features, but also makes it more flexible because extraction functions can be combined arbitrarily (one can take the irregularility of the Mel Frequency Cepstral Coefficients for example).
   *
+  *
+  * LibXtract can be downloaded from http://www.sf.net/projects/libxtract
+  *
   */
 
 #ifndef XTRACT_H

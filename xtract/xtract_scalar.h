@@ -28,7 +28,7 @@ extern "C" {
 #endif
 
 /**
-  * \defgroup scalar extraction functions
+  * \defgroup scalar scalar extraction functions
   *
   * Defines scalar extraction functions, and their parameters.
   * @{
@@ -200,7 +200,7 @@ int xtract_smoothness(const float *data, const int N, const void *argv, float *r
  * 
  * \param *data: a pointer to the first element in an array of floats representing the magnitude coefficients from the spectrum of an audio vector, (e.g. the first half of the array pointed to by *result from xtract_spectrum().
  * \param N: the number of elements to be considered
- * \param *argv: a pointer to NULL
+ * \param *argv: a pointer to a float corresponding to the spectral centroid 
  * \param *result: the spectral spread of N values from the array pointed to by *data
  */
 int xtract_spread(const float *data, const int N, const void *argv, float *result);

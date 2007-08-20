@@ -28,9 +28,9 @@ extern "C" {
 #endif
 	
 /**
-  * \defgroup vector extraction functions
+  * \defgroup vector vector extraction functions
   *
-  * Defines vectorr extraction functions, and their parameters.
+  * Defines vector extraction functions, and their parameters.
   * @{
   */
 
