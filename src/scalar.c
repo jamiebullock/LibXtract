@@ -231,7 +231,9 @@ int xtract_irregularity_k(const float *data, const int N, const void *argv, floa
 
     int n,
 	M = N - 1;
-
+	
+	*result = 0.f;
+	
     for(n = 1; n < M; n++)
 	*result += fabs(data[n] - (data[n-1] + data[n] + data[n+1]) / 3);
 
