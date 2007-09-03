@@ -64,7 +64,7 @@ AC_ARG_ENABLE(simpletest,
 # age to 0.
 XTRACT_SO_VERSION=0:0:0
 
-CFLAGS="$CFLAGS -pedantic -ansi -Wall -Werror -std=c89 -I/usr/local/include"
+CFLAGS="$CFLAGS -pedantic -ansi -Wall -Werror -std=c99 -I/usr/local/include"
 LDFLAGS="$LDFLAGS -lm"
 
 AC_ARG_WITH(pd_dir,
