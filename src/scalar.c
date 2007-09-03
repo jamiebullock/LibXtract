@@ -28,6 +28,14 @@
 #include <string.h>
 #include <stdio.h>
 
+#ifndef powf
+    #define powf pow
+#endif
+
+#ifndef expf
+    #define expf exp
+#endif
+
 int xtract_mean(const float *data, const int N, const void *argv, float *result){
 
     int n = N;

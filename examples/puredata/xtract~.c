@@ -27,6 +27,15 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define BLOCKSIZE 1024 /* FIX: this should be dynamic - somehow */
 #define NYQUIST 22050.0f
 
+#ifndef isnan
+    /* FIX: should probably try to handle signalling NaNs */
+    int isnan(x){ if(x == x) return 0; else return 1;}
+#endif
+
+#ifndef isinf
+    int isinf(x) {if(x == 1.0 / 0. || x == -1.0 / 0.) return 1; else return 0;}
+#endif
+
 static t_class *xtract_class;
 
 /* Struct for keeping track of memory allocations */
@@ -143,7 +152,7 @@ static void *xtract_new(t_symbol *me, t_int argc, t_atom *argv) {
     if(n_args){
 	for(n = 0; n < n_args; n++){
 		    argv_max = &fd[f].argv.max[n]; 
-		    //post("Argument %d, max: %.2f", n, *argv_max);
+		    /*post("Argument %d, max: %.2f", n, *argv_max); */
 	}
 	if(type == XTRACT_MEL_FILTER){
 	    x->memory.argv = (size_t)(n_args * sizeof(xtract_mel_filter));
@@ -249,8 +258,9 @@ static void xtract_tilde_show_help(t_xtract_tilde *x, t_symbol *s){
     
     int i;
 
-    i = XTRACT_FEATURES;
     xtract_function_descriptor_t *fd, *d;
+
+    i = XTRACT_FEATURES;
 
     fd = (xtract_function_descriptor_t *)xtract_make_descriptors();
     post("\nxtract~: Feature List\n");

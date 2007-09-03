@@ -1,0 +1,8 @@
+#N canvas 0 0 450 300 10;
+#X obj 144 80 xtract~ spectrum;
+#X obj 154 26 osc~ 440;
+#X obj 145 129 xtract~ spectral_mean;
+#X floatatom 146 184 5 0 0 0 - - -;
+#X connect 0 0 2 0;
+#X connect 1 0 0 0;
+#X connect 2 0 3 0;

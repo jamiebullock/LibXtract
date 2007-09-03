@@ -27,6 +27,15 @@
 #include <string.h>
 #include <stdlib.h>
 
+#ifndef roundf
+    float roundf(float f){
+	if (f - (int)f >= 0.5) 
+	    return (float)((int)f + 1);
+	else
+	    return (float)((int)f);
+    }
+#endif
+
 #ifdef XTRACT_FFT
 
 #include <fftw3.h>
@@ -411,7 +420,7 @@ int xtract_harmonic_spectrum(const float *data, const int N, const void *argv, f
     while(n--){
 	if(freqs[n]){
 	    ratio = freqs[n] / f0;
-	    nearest = round(ratio);
+	    nearest = roundf(ratio);
 	    distance = fabs(nearest - ratio);
 	    if(distance > threshold)
 		result[n] = result[M + n] = 0.f;
