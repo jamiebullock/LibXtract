@@ -8,11 +8,11 @@ export WANT_AUTOMAKE
 case `uname -s` in
   Linux)
       LIBTOOLIZE=libtoolize
-      ACLOCALARGS=''
+      ACLOCALARGS='-I m4'
       ;;
   Darwin)
       LIBTOOLIZE=glibtoolize
-      ACLOCALARGS='-I /usr/share/aclocal'
+      ACLOCALARGS='-I /usr/share/aclocal -I m4'
       ;;
   *)  echo error: unrecognized OS
       exit 1

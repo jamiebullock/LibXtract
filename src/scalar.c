@@ -39,10 +39,12 @@
 int xtract_mean(const float *data, const int N, const void *argv, float *result){
 
     int n = N;
+    
+    *result = 0.f;
 
     while(n--)
 	*result += data[n];
-
+    
     *result /= N;
 
     return XTRACT_SUCCESS;
