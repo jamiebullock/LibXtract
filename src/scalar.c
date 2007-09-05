@@ -36,6 +36,10 @@
     #define expf exp
 #endif
 
+int test(void){
+    printf("Hello world");
+}
+
 int xtract_mean(const float *data, const int N, const void *argv, float *result){
 
     int n = N;
