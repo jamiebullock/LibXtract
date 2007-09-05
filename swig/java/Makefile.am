@@ -44,15 +44,15 @@ xtractjavac_wrap_la_LDFLAGS = \
 	$(libxtract)
 
 .java.class: 
-	$(JAVAC) $(AM_JAVACFLAGS) $(JAVACFLAGS) $(swigjavafiles) -d . -classpath .
-	cp xtract/core/$@ .
+	$(JAVAC) $(AM_JAVACFLAGS) $(JAVACFLAGS) $(swigjavafiles)
 
 noinst_DATA = jar-stamp
 #
 jar-stamp: $(javaclasses) $(javafiles) 	
-	$(mkdir_p) xtract/core
-	$(mkdir_p) xtract/core/src
+	mkdir -p xtract/core
+	mkdir -p xtract/core/src
 	cp $(javafiles) xtract/core/src
+	cp $(javaclasses) xtract/core
 	touch jar-stamp
 #
 execjavawrapper_LTLIBRARIES = xtractjavac_wrap.la

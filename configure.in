@@ -98,21 +98,6 @@ AC_ARG_WITH(python,
 
 AM_CONDITIONAL(BUILD_PYTHON, test "x${with_python}" = 'xtrue')
 
-dnl Are we building with fftw?
-if [[ "$fft" = "true" ]] ; then
-    LDFLAGS="$LDFLAGS -lfftw3f"
-    AC_DEFINE([BUILD_FFT], [1], [Build the fft functions])
-    AC_CHECK_HEADER(fftw3.h, [have_fftw3_hdr=yes ], [
-    have_pd_hdr=no
-    echo
-    echo "no fftw3.h header found.  try with option --with-fftw3-dir=/path/to/fftw3/header"
-    echo
-    exit
-    ])
-fi
-
-AM_CONDITIONAL(BUILD_FFT, test "x${fft}" = 'xtrue')
-
 
 dnl are we building the simpletest example
 if [[ "$simpletest" = "true" ]] ; then
@@ -166,12 +151,16 @@ fi
 
 if [[ "$with_java" = "true" ]] ; then
     AC_PROG_JAVAC
-    AC_JNI_INCLUDE_DIR
+    if test "$JAVAC" = "javac"
+    then
+	AC_JNI_INCLUDE_DIR
+    
 
-    for JNI_INCLUDE_DIR in $JNI_INCLUDE_DIRS
-    do
-	CFLAGS="$CFLAGS -I$JNI_INCLUDE_DIR"
-    done
+	for JNI_INCLUDE_DIR in $JNI_INCLUDE_DIRS
+	do
+	    CFLAGS="$CFLAGS -I$JNI_INCLUDE_DIR"
+	done
+    fi
    dnl AC_PROG_JAVAH
    dnl AC_PATH_PROG(JAVAH,javah)
 fi
@@ -183,6 +172,22 @@ fi
 
 
 AM_CONDITIONAL(BUILD_SWIG, test "x${swig}" = 'xtrue')
+
+dnl Are we building with fftw?
+if [[ "$fft" = "true" ]] ; then
+    LDFLAGS="$LDFLAGS -lfftw3f"
+    AC_DEFINE([BUILD_FFT], [1], [Build the fft functions])
+    AC_CHECK_HEADER(fftw3.h, [have_fftw3_hdr=yes ], [
+    have_pd_hdr=no
+    echo
+    echo "no fftw3.h header found.  try with option --with-fftw3-dir=/path/to/fftw3/header"
+    echo
+    exit
+    ])
+fi
+
+AM_CONDITIONAL(BUILD_FFT, test "x${fft}" = 'xtrue')
+
 
 dnl ------------------------------------------
 dnl ----  do some magic to gues the host opsys

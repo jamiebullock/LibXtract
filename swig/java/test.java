@@ -1,5 +1,5 @@
 
-import xtract.core.*;
+import jxtract.core.*;
 
 public class test {
     public static void main(String argv[]) {
