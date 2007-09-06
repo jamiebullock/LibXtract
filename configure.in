@@ -85,6 +85,15 @@ AC_ARG_WITH(fftw3_dir,
     echo
     ])
 
+dnl set a specific java compiler
+AC_ARG_WITH(javac,
+	[  --with-javac=compiler  set a specific java compiler (determined automatically if not set) ],
+	[JAVAC="$withval"
+	echo
+	echo "JAVAC is set to $withval"
+	echo
+	])
+
 dnl If --enable-swig, make with java bindings
 AC_ARG_WITH(java,
     [ --with-java If --enable-swig - make with java bindings (default=no) ],
@@ -150,12 +159,14 @@ if [[ "$swig" = "true" ]] ; then
 fi
 
 if [[ "$with_java" = "true" ]] ; then
-    AC_PROG_JAVAC
+    if test "$JAVAC" = ""
+    then
+	AC_PROG_JAVAC
+    fi
     if test "$JAVAC" = "javac"
     then
 	AC_JNI_INCLUDE_DIR
     
-
 	for JNI_INCLUDE_DIR in $JNI_INCLUDE_DIRS
 	do
 	    CFLAGS="$CFLAGS -I$JNI_INCLUDE_DIR"

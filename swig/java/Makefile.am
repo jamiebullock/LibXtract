@@ -1,22 +1,10 @@
-SWIG_JAVA_DIR = $(top_srcdir)/swig/java
-
-SWIG_CMD = $(SWIG) -I$(SWIG_JAVA_DIR) -I$(top_srcdir) -java 
-
-swigjavafiles = \
+javasources = \
 	xtractJNI.java \
 	xtract.java \
 	floatArray.java \
 	SWIGTYPE_p_float.java \
 	SWIGTYPE_p_void.java   
 
-swigcfiles = xtractjavac_wrap.c
-
-swiggenfiles = $(swigjavafiles) $(swigcfiles)
-
-javafiles = $(swigjavafiles)
-
-# Note : the order of these is important since there is no formal 
-# dependency checking.
 javaclasses = \
 	xtractJNI.class \
 	xtract.class \
@@ -24,46 +12,29 @@ javaclasses = \
 	SWIGTYPE_p_float.class \
 	SWIGTYPE_p_void.class   
 
-$(swiggenfiles): ../xtract.i
-	$(SWIG_CMD) -package xtract.core -o xtractjavac_wrap.c ../xtract.i
+MAINTAINERCLEANFILES = $(javasources) Makefile.in
 
-# Must have "exec" in the name.
-execjavawrapperdir = ${libdir}
+BUILT_SOURCES = $(srcdir)/xtract_wrap.c
+SWIG_SOURCES = ../xtract.i
 
-libxtract = $(top_builddir)/src/libxtract$(LIB_TAG).la
+lib_LTLIBRARIES = libjxtract.la
+libjxtract_la_SOURCES = $(srcdir)/xtract_wrap.c $(SWIG_SOURCES)
+libjxtract_la_CFLAGS = $(SWIG_PYTHON_CPPFLAGS) -I$(top_srcdir)/src
+ibjxtract_la_LDFLAGS = -module -lxtract
+libjxtract_la_LIBADD = $(top_srcdir)/src/libxtract.la
 
-AM_CPPFLAGS = -I$(top_srcdir)/include $(INCLTDL) $(JAVAINCCMD)
+SWIG_JAVA_OPT = -java -package xtract.core
 
-nodist_xtractjavac_wrap_la_SOURCES  = xtractjavac_wrap.c
-
-xtractjavac_wrap_la_LDFLAGS = \
-	-rpath $(execjavawrapperdir) \
-	-module \
-	-avoid-version \
-	-no-undefined \
-	$(libxtract)
-
-.java.class: 
-	$(JAVAC) $(AM_JAVACFLAGS) $(JAVACFLAGS) $(swigjavafiles)
-
-noinst_DATA = jar-stamp
-#
-jar-stamp: $(javaclasses) $(javafiles) 	
+xtract_wrap.c : $(SWIG_SOURCES)
+	$(SWIG) $(SWIG_JAVA_OPT) -I$(top_srcdir) -o $@ $<
+	$(JAVAC) $(javasources)
 	mkdir -p xtract/core
 	mkdir -p xtract/core/src
-	cp $(javafiles) xtract/core/src
-	cp $(javaclasses) xtract/core
-	touch jar-stamp
-#
-execjavawrapper_LTLIBRARIES = xtractjavac_wrap.la
-
-install-exec-hook:
-	( cd $(DESTDIR)$(execjavawrapperdir) ; \
-	  rm -f *.a *.la )
+	mv $(javasources) xtract/core/src
+	mv $(javaclasses) xtract/core
+	$(JAVAC) test.java
 
 clean-local:
-	rm -rf xtract
+	-rm -f libjxtract.so xtract_wrap.c $(javasources) $(javaclasses) test.class
+	-rm -rf xtract
 
-CLEANFILES = $(javaclasses) jar-stamp
-
-MAINTAINERCLEANFILES = $(swiggenfiles) Makefile.in

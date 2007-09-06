@@ -36,7 +36,7 @@
     #define expf exp
 #endif
 
-int test(void){
+void test(void){
     printf("Hello world");
 }
 
