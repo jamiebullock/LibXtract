@@ -36,6 +36,25 @@ There following configure flags are optional:
 --enable-fft (to enable functions that require fftw3)
 --enable-simpletest (to build the simpletest example)
 
+If you wish to build a Universal binary on OS X:
+
+CFLAGS="-isysroot /Developer/SDKs/MacOSX10.4u.sdk -Wl,-syslibroot,/Developer/SDKs/MacOSX10.4u.sdk -arch i386 -arch ppc" \./configure --isable-dependency-tracking --your-options
+
+Building the MSP external
+-------------------------
+
+Type:
+
+cd examples/MSP
+make
+sudo make install
+
+To build for a specific architecture:
+
+make intel
+or
+make ppc
+
 Building the Python bindings
 ----------------------------
 
