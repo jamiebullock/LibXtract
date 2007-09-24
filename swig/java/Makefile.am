@@ -20,7 +20,7 @@ SWIG_SOURCES = ../xtract.i
 lib_LTLIBRARIES = libjxtract.la
 libjxtract_la_SOURCES = $(srcdir)/xtract_wrap.c $(SWIG_SOURCES)
 libjxtract_la_CFLAGS = $(SWIG_PYTHON_CPPFLAGS) -I$(top_srcdir)/src
-ibjxtract_la_LDFLAGS = -module -lxtract
+libjxtract_la_LDFLAGS = -module -lxtract
 libjxtract_la_LIBADD = $(top_srcdir)/src/libxtract.la
 
 SWIG_JAVA_OPT = -java -package xtract.core
