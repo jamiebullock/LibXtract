@@ -38,7 +38,7 @@ extern "C" {
  * 
  * \param *data: a pointer to the first element in an array of floats representing an audio vector
  * \param N: the number of array elements to be considered
- * \param *argv: a pointer to an array of floats, the first representing (samplerate / N), the second will be cast to an integer and determines the spectrum type (e.g. XTRACT_MAGNITUDE_SPECTRUM, XTRACT_LOG_POWER_SPECTRUM). An optional third argument determines whether or not the DC component is included in the output. If argv[2] == 1, then the DC component is included in which case the size of the array pointed to by *result must be N+2. For any further use of the array pointed to by *result, the value of N must reflect the (larger) array size.
+ * \param *argv: a pointer to an array of floats, the first representing (samplerate / N), the second will be cast to an integer and determines the spectrum type (e.g. XTRACT_MAGNITUDE_SPECTRUM, XTRACT_LOG_POWER_SPECTRUM). The third argument determines whether or not the DC component is included in the output. If argv[2] == 1, then the DC component is included in which case the size of the array pointed to by *result must be N+2. For any further use of the array pointed to by *result, the value of N must reflect the (larger) array size.
  * \param *result: a pointer to an array of size N containing N/2 magnitude/power/log magnitude/log power coefficients and N/2 bin frequencies.
  */
 int xtract_spectrum(const float *data, const int N, const void *argv, float *result);

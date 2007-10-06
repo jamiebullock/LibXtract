@@ -20,9 +20,23 @@
 
 /* init.c: defines functions that extract a feature as a single value from an input vector */
 
-#include "xtract/libxtract.h"
+#ifdef HAVE_CONFIG_H
+#    include <config.h>
+#endif
+
 #include <math.h>
 #include <stdlib.h>
+
+#include "xtract/libxtract.h"
+#include "xtract_globals_private.h"
+
+#ifdef XTRACT_FFT
+#include <fftw3.h>
+
+#ifndef XTRACT_FFT_OPTIMISATION_LEVEL
+/* This should never happen */
+#define XTRACT_FFT_OPTIMISATION_LEVEL 1
+#endif
 
 int xtract_init_mfcc(int N, float nyquist, int style, float freq_min, float freq_max, int freq_bands, float **fft_tables){
 
@@ -113,6 +127,10 @@ int xtract_init_mfcc(int N, float nyquist, int style, float freq_min, float freq
 			fft_tables[n][k] = 0.f;
     }
 
+
+    /* Initialise the fft_plan for the DCT */
+    xtract_init_fft(freq_bands, XTRACT_MFCC);
+
     free(mel_peak);
     free(lin_peak);
     free(height_norm);
@@ -121,6 +139,69 @@ int xtract_init_mfcc(int N, float nyquist, int style, float freq_min, float freq
     return XTRACT_SUCCESS;
 
 }
+
+int xtract_init_fft(int N, int feature_name){
+
+    float *input, *output;
+    int optimisation;
+    
+    input = output = NULL;
+    
+    fprintf(stderr, "Optimisation level: %d\n", XTRACT_FFT_OPTIMISATION_LEVEL);
+
+    if(XTRACT_FFT_OPTIMISATION_LEVEL == 0)
+        optimisation = FFTW_ESTIMATE;
+    else if(XTRACT_FFT_OPTIMISATION_LEVEL == 1)
+        optimisation = FFTW_MEASURE;
+    else if(XTRACT_FFT_OPTIMISATION_LEVEL == 2)
+        optimisation = FFTW_PATIENT;
+    else
+        optimisation = FFTW_MEASURE; /* The default */
+
+    if(feature_name == XTRACT_AUTOCORRELATION_FFT)
+        N <<= 1;
+
+    input = malloc(N * sizeof(float));
+    output = malloc(N * sizeof(float));
+
+    switch(feature_name){
+        case XTRACT_SPECTRUM:
+            if(spectrum_plan != NULL)
+                fftwf_destroy_plan(spectrum_plan);
+            spectrum_plan = 
+                fftwf_plan_r2r_1d(N, input, output, FFTW_R2HC, optimisation);
+            break;
+        case XTRACT_AUTOCORRELATION_FFT:
+            if(autocorrelation_fft_plan_1 != NULL)
+                fftwf_destroy_plan(autocorrelation_fft_plan_1);
+            if(autocorrelation_fft_plan_2 != NULL)
+                fftwf_destroy_plan(autocorrelation_fft_plan_2);
+            autocorrelation_fft_plan_1 =
+                fftwf_plan_r2r_1d(N, input, output, FFTW_R2HC, optimisation);
+            autocorrelation_fft_plan_2 =
+                fftwf_plan_r2r_1d(N, input, output, FFTW_HC2R, optimisation);
+            break;
+        case XTRACT_DCT:
+            if(dct_plan != NULL)
+                fftwf_destroy_plan(dct_plan);
+            dct_plan =
+                fftwf_plan_r2r_1d(N, input, output, FFTW_REDFT00, optimisation);
+        case XTRACT_MFCC:
+            if(dct_plan != NULL)
+                fftwf_destroy_plan(dct_plan);
+            dct_plan =
+                fftwf_plan_r2r_1d(N, output, output, FFTW_REDFT00, optimisation);
+            break;
+    }
+
+    free(input);
+    free(output);
+
+    return XTRACT_SUCCESS;
+
+}
+
+#endif
 
 int xtract_init_bark(int N, float sr, int *band_limits){
 
@@ -134,3 +215,4 @@ int xtract_init_bark(int N, float sr, int *band_limits){
 
     return XTRACT_SUCCESS;
 }
+

@@ -49,9 +49,6 @@
 				    (= SR_LOWER_LIMIT / FFT_BANDS_MAX*/ 
 #define XTRACT_SPEC_BW_MAX 12000.0 /* SR_UPPER_LIMIT / FFT_BANDS_MIN */
 #define XTRACT_SPEC_BW_DEF 43.066 /* SR_DEFAULT / FFT_BANDS_DEF */
-
-#ifdef __cplusplus
-}
-#endif
+#define XTRACT_ARRAY_ELEMENTS(_array) (sizeof(_array)/sizeof(_array[0]))
 
 #endif

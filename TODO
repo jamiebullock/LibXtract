@@ -12,3 +12,4 @@ Add Max/MSP external example
 Check and add return values as appropriate. Make them more sensible!
 ...do other stuff and eventually...
 ...optimise!
+Use the fftw guru interface to create multipurpose global plans from xtract_fft_init()

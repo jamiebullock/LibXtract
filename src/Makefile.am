@@ -1,6 +1,6 @@
 MAINTAINERCLEANFILES = Makefile.in
 
-SOURCES = libxtract.c descriptors.c scalar.c vector.c delta.c init.c
+SOURCES = libxtract.c descriptors.c scalar.c vector.c delta.c init.c fini.c
 
 if BUILD_FFT
 FFT_DEFINE = -DXTRACT_FFT

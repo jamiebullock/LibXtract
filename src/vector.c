@@ -21,11 +21,12 @@
 
 /* xtract_vector.c: defines functions that extract a feature as a single value from an input vector */
 
-#include "xtract/libxtract.h"
-#include "xtract_macros_private.h"
 #include <math.h>
 #include <string.h>
 #include <stdlib.h>
+
+#include "xtract/libxtract.h"
+#include "xtract_macros_private.h"
 
 #ifndef roundf
     float roundf(float f){
@@ -39,17 +40,20 @@
 #ifdef XTRACT_FFT
 
 #include <fftw3.h>
+#include "xtract_globals_private.h"
+#include "xtract_macros_private.h"
 
 int xtract_spectrum(const float *data, const int N, const void *argv, float *result){
 
     float *input, *rfft, q, temp;
     size_t bytes;
-    int n , NxN, M, vector, withDC;
-    fftwf_plan plan;
+    int n , NxN, M, vector, withDC, argc;
+    //fftwf_plan plan;
+
+    vector = argc = withDC = 0;
 
     M = N >> 1;
     NxN = XTRACT_SQ(N);
-    withDC = 0;
 
     rfft = (float *)fftwf_malloc(N * sizeof(float));
     input = (float *)malloc(bytes = N * sizeof(float));
@@ -61,9 +65,16 @@ int xtract_spectrum(const float *data, const int N, const void *argv, float *res
 
     XTRACT_CHECK_q;
 
-    plan = fftwf_plan_r2r_1d(N, input, rfft, FFTW_R2HC, FFTW_ESTIMATE);
-    
-    fftwf_execute(plan);
+    if(spectrum_plan == NULL){
+        /* FIX: Not sure this should really be here. Might introduce 
+         * DEBUG_POST macro, or some kind of error handler, or leave it to the 
+         * caller... */
+        fprintf(stderr, 
+                "libxtract: Error: xtract_spectrum() has uninitialised plan\n");
+        return XTRACT_NO_RESULT;
+    }
+
+    fftwf_execute_r2r(spectrum_plan, input, rfft);
 
     switch(vector){
 
@@ -152,11 +163,10 @@ int xtract_spectrum(const float *data, const int N, const void *argv, float *res
     }
     else {
 	/* The Nyquist */ 
-	result[M - 1] = XTRACT_SQ(rfft[M]);
+	result[M - 1] = (float)XTRACT_SQ(rfft[M]);
 	result[N - 1] = q * M;
     }
     
-    fftwf_destroy_plan(plan);
     fftwf_free(rfft);
     free(input);
     
@@ -167,7 +177,7 @@ int xtract_autocorrelation_fft(const float *data, const int N, const void *argv,
     
     float *freq, *time;
     int n, M;
-    fftwf_plan plan;
+    //fftwf_plan plan;
 
     M = N << 1;
 
@@ -176,9 +186,10 @@ int xtract_autocorrelation_fft(const float *data, const int N, const void *argv,
     time = (float *)calloc(M, sizeof(float));
     time = memcpy(time, data, N * sizeof(float));
 
-    plan = fftwf_plan_r2r_1d(M, time, freq, FFTW_R2HC, FFTW_ESTIMATE);
+    fftwf_execute_r2r(autocorrelation_fft_plan_1, time, freq);
+    //plan = fftwf_plan_r2r_1d(M, time, freq, FFTW_R2HC, FFTW_ESTIMATE);
 
-    fftwf_execute(plan);
+    //fftwf_execute(plan);
 
     for(n = 1; n < N; n++){
         freq[n] = XTRACT_SQ(freq[n]) + XTRACT_SQ(freq[M - n]);
@@ -188,9 +199,11 @@ int xtract_autocorrelation_fft(const float *data, const int N, const void *argv,
     freq[0] = XTRACT_SQ(freq[0]);
     freq[N] = XTRACT_SQ(freq[N]);
 
-    plan = fftwf_plan_r2r_1d(M, freq, time, FFTW_HC2R, FFTW_ESTIMATE);
+    //plan = fftwf_plan_r2r_1d(M, freq, time, FFTW_HC2R, FFTW_ESTIMATE);
 
-    fftwf_execute(plan);
+    //fftwf_execute(plan);
+
+    fftwf_execute_r2r(autocorrelation_fft_plan_2, freq, time);
    
     /* Normalisation factor */
     M = M * N;
@@ -199,7 +212,7 @@ int xtract_autocorrelation_fft(const float *data, const int N, const void *argv,
 	result[n] = time[n] / (float)M;
 	/* result[n] = time[n+1] / (float)M; */
 
-    fftwf_destroy_plan(plan);
+    //fftwf_destroy_plan(plan);
     fftwf_free(freq);
     free(time);
 
@@ -228,13 +241,14 @@ int xtract_mfcc(const float *data, const int N, const void *argv, float *result)
 
 int xtract_dct(const float *data, const int N, const void *argv, float *result){
     
-    fftwf_plan plan;
+    //fftwf_plan plan;
     
-    plan = 
-        fftwf_plan_r2r_1d(N, (float *) data, result, FFTW_REDFT00, FFTW_ESTIMATE);
+    //plan = 
+      //  fftwf_plan_r2r_1d(N, (float *) data, result, FFTW_REDFT00, FFTW_ESTIMATE);
     
-    fftwf_execute(plan);
-    fftwf_destroy_plan(plan);
+    fftwf_execute_r2r(dct_plan, (float *)data, result);
+    //fftwf_execute(plan);
+    //fftwf_destroy_plan(plan);
 
     return XTRACT_SUCCESS;
 }
@@ -363,7 +377,9 @@ int xtract_peak_spectrum(const float *data, const int N, const void *argv, float
 
     XTRACT_CHECK_q;
 
-    input = (float *)malloc(bytes = N * sizeof(float));
+    input = (float *)calloc(N,  sizeof(float));
+
+    bytes = N * sizeof(float);
 
     if(input != NULL)
 	input = memcpy(input, data, bytes);

@@ -48,6 +48,9 @@ typedef struct _xtract {
     t_float f;
     t_int feature;
     t_int feature_type;
+    t_symbol *feature_name;
+    t_int init_blocksize;
+    t_int done_init;
     tracked_memory memory;
     void *argv;
 } t_xtract_tilde;
@@ -72,12 +75,18 @@ static t_int *xtract_perform(t_int *w) {
 }
 
 static t_int *xtract_perform_vector(t_int *w) {
+
     t_sample *in = (t_sample *)(w[1]);
     t_sample *out = (t_sample *)(w[2]);
     t_float *tmp_in, *tmp_out;
     t_xtract_tilde *x = (t_xtract_tilde *)(w[3]);
     t_int N = (t_int)(w[4]), n;
     t_int return_code = 0;
+
+    if(N != x->init_blocksize && x->done_init){
+        error("xtract~ %s: Blocksize mismatch, try specifying the blocksize as a second argument", x->feature_name->s_name);
+        return (w+5);
+    }
 
     n = N;
 
@@ -112,7 +121,6 @@ static void xtract_dsp(t_xtract_tilde *x, t_signal **sp) {
 
 static void *xtract_new(t_symbol *me, t_int argc, t_atom *argv) {
     
-    t_symbol *tmp;
     t_xtract_tilde *x = (t_xtract_tilde *)pd_new(xtract_class);
     xtract_mel_filter *mf;
     t_int n, N, f, F, n_args, type;
@@ -130,8 +138,14 @@ static void *xtract_new(t_symbol *me, t_int argc, t_atom *argv) {
     N = BLOCKSIZE;
     
     x->argv = NULL;
+    x->done_init = 0;
     
-    tmp = atom_getsymbol(argv);
+    if(argc)
+        x->feature_name = atom_getsymbol(argv);
+    if(argc > 1)
+        N = atom_getint(&argv[1]);
+
+    x->init_blocksize = N;
 
     /* get function descriptors */
     fd = (xtract_function_descriptor_t *)xtract_make_descriptors();
@@ -139,7 +153,7 @@ static void *xtract_new(t_symbol *me, t_int argc, t_atom *argv) {
     /* iterate over descriptors */
     while(f--){
 	/* map creation arg to feature */
-	if(tmp == gensym(fd[f].algo.name)){ 
+	if(x->feature_name == gensym(fd[f].algo.name)){ 
 	    x->feature = f;
 	    break;
 	}
@@ -169,7 +183,6 @@ static void *xtract_new(t_symbol *me, t_int argc, t_atom *argv) {
 	else
 	    x->memory.argv = 0;
     }
-
 
     p_name = fd[f].algo.p_name;
     p_desc = fd[f].algo.p_desc;
@@ -203,10 +216,21 @@ static void *xtract_new(t_symbol *me, t_int argc, t_atom *argv) {
             mf->filters[n] = (float *)getbytes(N * sizeof(float));
                  
         xtract_init_mfcc(N, NYQUIST, XTRACT_EQUAL_GAIN, 80.0f,
-        18000.0f, mf->n_filters, mf->filters);
+                18000.0f, mf->n_filters, mf->filters);
+        x->done_init = 1;
     }
-    else if(x->feature == XTRACT_BARK_COEFFICIENTS)
+    else if(x->feature == XTRACT_BARK_COEFFICIENTS){
         xtract_init_bark(N, NYQUIST, x->argv);
+        x->done_init = 1;
+    }
+
+    /* Initialise fft_plan if required */
+    if(x->feature == XTRACT_AUTOCORRELATION_FFT ||
+            x->feature == XTRACT_SPECTRUM ||
+            x->feature == XTRACT_DCT){
+        xtract_init_fft(N, x->feature);
+        x->done_init = 1;
+    }
     
     if(x->feature == XTRACT_AUTOCORRELATION || 
 	    x->feature == XTRACT_AUTOCORRELATION_FFT || 

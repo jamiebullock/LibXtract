@@ -2,9 +2,9 @@ AC_PREREQ(2.13)
 # Increment for major API changes, release status changes
 m4_define(libxtract_major_version, 0)
 # Increment for feature additions and enhancements
-m4_define(libxtract_minor_version, 4)
+m4_define(libxtract_minor_version, 5)
 # Increment for fixes 
-m4_define(libxtract_fix_version, 9)
+m4_define(libxtract_fix_version, 0)
 
 m4_define(libxtract_version, libxtract_major_version.libxtract_minor_version.libxtract_fix_version)
 		
@@ -85,6 +85,16 @@ AC_ARG_WITH(fftw3_dir,
     echo
     ])
 
+dnl Set FFT optimisation level
+AC_ARG_WITH(fft_optimisation,
+    [  --with-fft_optimisation=level    set fft optimistaion level (default=1)],
+    [
+    FFT_OPTIMISATION="$withval"
+    echo
+    echo "fft optimisation level is $withval"
+    echo
+    ])
+
 dnl set a specific java compiler
 AC_ARG_WITH(javac,
 	[  --with-javac=compiler  set a specific java compiler (determined automatically if not set) ],
@@ -140,7 +150,7 @@ AC_ARG_ENABLE(debug,
 if test "$with_debug" = "yes"
 then
   AC_DEFINE(DEBUG,1,[Define to enable debug])
-  CFLAGS="$CFLAGS -O0 -ggdb -g"
+  CFLAGS="$CFLAGS -O0 -ggdb -g -Werror"
 fi
 
 AC_ARG_ENABLE(swig,
@@ -188,6 +198,13 @@ dnl Are we building with fftw?
 if [[ "$fft" = "true" ]] ; then
     LDFLAGS="$LDFLAGS -lfftw3f"
     AC_DEFINE([BUILD_FFT], [1], [Build the fft functions])
+    if test "$FFT_OPTIMISATION" = ""
+    then
+        AC_DEFINE([XTRACT_FFT_OPTIMISATION_LEVEL], [1], [fft optimisation 1])
+    else
+       # AC_SUBST(OPTIMISATION_LEVEL, "$FFT_OPTIMISATION")
+        AC_DEFINE_UNQUOTED(XTRACT_FFT_OPTIMISATION_LEVEL, ${FFT_OPTIMISATION})
+    fi
     AC_CHECK_HEADER(fftw3.h, [have_fftw3_hdr=yes ], [
     have_pd_hdr=no
     echo

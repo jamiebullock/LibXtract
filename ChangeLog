@@ -1,3 +1,14 @@
+2007-10-06 Jamie Bullock <jamie@postlude.co.uk>
+    * version 0.5.0
+	* Removed fftw_plan creation from inner loop of functions that use fft
+	* Added new init function xtract_init_fft() for initialisation of
+	fft_plan out-of-place. The actual plans have global scope, and are
+	freed by the library destructor.
+	* Updated Max/MSP and PD examples too reflect the above change
+	* Made the fft optimistation level a compile-time option through
+	--with-fft-optimisation flag (0 = lowest, 2 = highest).
+	* Minor fixes.
+
 2007-10-04 Dan Stowell
     * version 0.4.9
 	* Fixed and tidied MFCC functions

@@ -40,6 +40,9 @@ typedef struct _xtract {
     void *outlet; /*Float outlet */
     t_float f;
     t_int feature;
+    t_symbol *feature_name;
+    t_int init_blocksize;
+    t_int done_init;
     t_int feature_type;
     tracked_memory memory;
     void *argv;
@@ -74,6 +77,11 @@ static t_int *xtract_perform_vector(t_int *w) {
 
     if(x->feature == XTRACT_PEAK_SPECTRUM)
 	N >>= 1;
+
+    if(N != x->init_blocksize && x->done_init){
+        post("xtract~ %s: Blocksize mismatch, try specifying the blocksize as a second argument", x->feature_name->s_name);
+        return (w+5);
+    }
 
     n = N;
     
@@ -114,14 +122,12 @@ static void *xtract_tilde_new(t_symbol *me, t_int argc, t_atom *argv) {
     t_symbol *tmp;
     t_xtract_tilde *x = (t_xtract_tilde *)newobject(xtract_tilde_class);
     xtract_mel_filter *mf;
-    t_int n, N, f, F, n_args, type, blocksize;
+    t_int n, N, f, F, n_args, type;
     t_float *argv_max;
     xtract_function_descriptor_t *fd;
     char *p_name, *p_desc, *author;
     int year;
 
-
-    blocksize = BLOCKSIZE; /* Default */
     tmp = NULL;
     p_name = p_desc = author = NULL;
    
@@ -129,16 +135,17 @@ static void *xtract_tilde_new(t_symbol *me, t_int argc, t_atom *argv) {
 
     f = F = XTRACT_FEATURES;
 
-    /* N = BLOCKSIZE;*/
+    N = BLOCKSIZE;
     
     x->argv = NULL;
+    x->done_init = 0;
     
     if(argc)
 	tmp = argv[0].a_w.w_sym; /*atom_getsymbol(argv); */
     if(argc > 1)
-	blocksize = (t_int)argv[1].a_w.w_long;
+	N = (t_int)argv[1].a_w.w_long;
 
-    N = blocksize;
+    x->init_blocksize = N;
 
     /* get function descriptors */
     fd = (xtract_function_descriptor_t *)xtract_make_descriptors();
@@ -214,6 +221,14 @@ static void *xtract_tilde_new(t_symbol *me, t_int argc, t_atom *argv) {
     else if(x->feature == XTRACT_BARK_COEFFICIENTS)
         xtract_init_bark(N, NYQUIST, x->argv);
     
+    /* Initialise fft_plan if required */
+    if(x->feature == XTRACT_AUTOCORRELATION_FFT ||
+            x->feature == XTRACT_SPECTRUM ||
+            x->feature == XTRACT_DCT){
+        xtract_init_fft(N, x->feature);
+        x->done_init = 1;
+    }
+
     if(x->feature == XTRACT_AUTOCORRELATION || 
 	    x->feature == XTRACT_AUTOCORRELATION_FFT || 
 	    x->feature == XTRACT_MFCC || x->feature == XTRACT_AMDF || 

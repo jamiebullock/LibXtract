@@ -261,7 +261,7 @@ typedef struct _xtract_function_descriptor {
  *                                                                          
  * \param N: the number of elements to be processed          
  *                                                                          
- * \param *argv: an abitrary number of additional arguments, used to pass additional parameters to the function being called
+ * \param *argv: an abitrary number of additional arguments, used to pass additional parameters to the function being called. All arguments are compulsary!
  *                                                                          
  * \param *result: a pointer to the first element in the result                              
  *                                                                          
@@ -325,6 +325,17 @@ int xtract_init_mfcc(int N, float nyquist, int style, float freq_min, float freq
  * \param *band_limits: a pointer to an array of BARK_BANDS ints
  */
 int xtract_init_bark(int N, float sr, int *band_limits);
+
+/** \brief An initialisation function for functions using FFT
+ *
+ * This function initialises global data structures used by functions requiring FFT functionality. It can be called multiple times with different feature names. Calling it more than once with the same feature name is not a valid operation and will result in a memory leak.
+ *
+ * \param N: the size of the FFT
+ * \param feature_name: the name of the feature the FFT is being used for, 
+ * e.g. XTRACT_DCT
+ *
+ */
+int xtract_init_fft(int N, int feature_name);
 
 /* \brief A function to build an array of function descriptors */
 void *xtract_make_descriptors();

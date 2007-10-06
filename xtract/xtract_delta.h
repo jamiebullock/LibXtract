@@ -47,8 +47,6 @@ int xtract_delta_feature(const float *data, const int N, const void *argv, float
 /*xtract_frame_tracker *xf */
 /*float frames*/
 
-
-
 #ifdef __cplusplus
 }
 #endif
