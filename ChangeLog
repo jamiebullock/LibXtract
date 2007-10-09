@@ -1,3 +1,7 @@
+2007-10-09 Dan Stowell
+    * version 0.5.1
+        * Fixed bug in xtract_init_mfcc() which accidentally missed filling in the very top filter frequency value
+
 2007-10-06 Jamie Bullock <jamie@postlude.co.uk>
     * version 0.5.0
 	* Removed fftw_plan creation from inner loop of functions that use fft

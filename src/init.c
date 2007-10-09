@@ -69,15 +69,15 @@ int xtract_init_mfcc(int N, float nyquist, int style, float freq_min, float freq
     fft_peak[0] = lin_peak[0] / nyquist * M;
 
 
-    for (n = 1; n <= freq_bands; n++){	
-    /*roll out peak locations - mel, linear and linear on fft window scale */
+    for (n = 1; n < freq_bands + 2; n++){	
+        //roll out peak locations - mel, linear and linear on fft window scale 
         mel_peak[n] = mel_peak[n - 1] + freq_bw_mel;
         lin_peak[n] = 700 * (exp(mel_peak[n] / 1127) -1);
         fft_peak[n] = lin_peak[n] / nyquist * M;
     }
 
     for (n = 0; n < freq_bands; n++){
-        /*roll out normalised gain of each peak*/
+        //roll out normalised gain of each peak
         if (style == XTRACT_EQUAL_GAIN){
             height = 1;	
             norm_fact = norm;
