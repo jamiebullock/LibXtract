@@ -26,10 +26,10 @@
 #ifdef XTRACT_FFT
 #include <fftw3.h>
 
-fftwf_plan spectrum_plan,
-          autocorrelation_fft_plan_1,
-          autocorrelation_fft_plan_2,
-          dct_plan;
+extern fftwf_plan spectrum_plan,
+    autocorrelation_fft_plan_1,
+    autocorrelation_fft_plan_2,
+    dct_plan;
 #endif
 
 #endif
