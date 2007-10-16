@@ -65,7 +65,7 @@ int xtract_spectrum(const float *data, const int N, const void *argv, float *res
 
     XTRACT_CHECK_q;
 
-    if(spectrum_plan == NULL){
+    if(fft_plans.spectrum_plan == NULL){
         /* FIX: Not sure this should really be here. Might introduce 
          * DEBUG_POST macro, or some kind of error handler, or leave it to the 
          * caller... */
@@ -74,7 +74,7 @@ int xtract_spectrum(const float *data, const int N, const void *argv, float *res
         return XTRACT_NO_RESULT;
     }
 
-    fftwf_execute_r2r(spectrum_plan, input, rfft);
+    fftwf_execute_r2r(fft_plans.spectrum_plan, input, rfft);
 
     switch(vector){
 
@@ -186,7 +186,7 @@ int xtract_autocorrelation_fft(const float *data, const int N, const void *argv,
     time = (float *)calloc(M, sizeof(float));
     time = memcpy(time, data, N * sizeof(float));
 
-    fftwf_execute_r2r(autocorrelation_fft_plan_1, time, freq);
+    fftwf_execute_r2r(fft_plans.autocorrelation_fft_plan_1, time, freq);
     //plan = fftwf_plan_r2r_1d(M, time, freq, FFTW_R2HC, FFTW_ESTIMATE);
 
     //fftwf_execute(plan);
@@ -203,7 +203,7 @@ int xtract_autocorrelation_fft(const float *data, const int N, const void *argv,
 
     //fftwf_execute(plan);
 
-    fftwf_execute_r2r(autocorrelation_fft_plan_2, freq, time);
+    fftwf_execute_r2r(fft_plans.autocorrelation_fft_plan_2, freq, time);
    
     /* Normalisation factor */
     M = M * N;
@@ -246,7 +246,7 @@ int xtract_dct(const float *data, const int N, const void *argv, float *result){
     //plan = 
       //  fftwf_plan_r2r_1d(N, (float *) data, result, FFTW_REDFT00, FFTW_ESTIMATE);
     
-    fftwf_execute_r2r(dct_plan, (float *)data, result);
+    fftwf_execute_r2r(fft_plans.dct_plan, (float *)data, result);
     //fftwf_execute(plan);
     //fftwf_destroy_plan(plan);
 

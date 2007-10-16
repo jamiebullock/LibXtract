@@ -26,11 +26,24 @@
 #ifdef XTRACT_FFT
 #include <fftw3.h>
 
-extern fftwf_plan spectrum_plan,
-    autocorrelation_fft_plan_1,
-    autocorrelation_fft_plan_2,
-    dct_plan;
+struct xtract_fft_plans_ {
+    
+    fftwf_plan spectrum_plan;
+    fftwf_plan autocorrelation_fft_plan_1;
+    fftwf_plan autocorrelation_fft_plan_2;
+    fftwf_plan dct_plan;
+
+};
+
+#ifdef DEFINE_GLOBALS
+#define GLOBAL
+#else
+#define GLOBAL extern
 #endif
 
-#endif
+GLOBAL struct xtract_fft_plans_ fft_plans;
+
+#endif /* FFT */
+
+#endif /* Header guard */
 

@@ -28,6 +28,7 @@
 #include <stdlib.h>
 
 #include "xtract/libxtract.h"
+#define DEFINE_GLOBALS
 #include "xtract_globals_private.h"
 
 #ifdef XTRACT_FFT
@@ -166,30 +167,30 @@ int xtract_init_fft(int N, int feature_name){
 
     switch(feature_name){
         case XTRACT_SPECTRUM:
-            if(spectrum_plan != NULL)
-                fftwf_destroy_plan(spectrum_plan);
-            spectrum_plan = 
+            if(fft_plans.spectrum_plan != NULL)
+                fftwf_destroy_plan(fft_plans.spectrum_plan);
+            fft_plans.spectrum_plan = 
                 fftwf_plan_r2r_1d(N, input, output, FFTW_R2HC, optimisation);
             break;
         case XTRACT_AUTOCORRELATION_FFT:
-            if(autocorrelation_fft_plan_1 != NULL)
-                fftwf_destroy_plan(autocorrelation_fft_plan_1);
-            if(autocorrelation_fft_plan_2 != NULL)
-                fftwf_destroy_plan(autocorrelation_fft_plan_2);
-            autocorrelation_fft_plan_1 =
+            if(fft_plans.autocorrelation_fft_plan_1 != NULL)
+                fftwf_destroy_plan(fft_plans.autocorrelation_fft_plan_1);
+            if(fft_plans.autocorrelation_fft_plan_2 != NULL)
+                fftwf_destroy_plan(fft_plans.autocorrelation_fft_plan_2);
+            fft_plans.autocorrelation_fft_plan_1 =
                 fftwf_plan_r2r_1d(N, input, output, FFTW_R2HC, optimisation);
-            autocorrelation_fft_plan_2 =
+            fft_plans.autocorrelation_fft_plan_2 =
                 fftwf_plan_r2r_1d(N, input, output, FFTW_HC2R, optimisation);
             break;
         case XTRACT_DCT:
-            if(dct_plan != NULL)
-                fftwf_destroy_plan(dct_plan);
-            dct_plan =
+            if(fft_plans.dct_plan != NULL)
+                fftwf_destroy_plan(fft_plans.dct_plan);
+            fft_plans.dct_plan =
                 fftwf_plan_r2r_1d(N, input, output, FFTW_REDFT00, optimisation);
         case XTRACT_MFCC:
-            if(dct_plan != NULL)
-                fftwf_destroy_plan(dct_plan);
-            dct_plan =
+            if(fft_plans.dct_plan != NULL)
+                fftwf_destroy_plan(fft_plans.dct_plan);
+            fft_plans.dct_plan =
                 fftwf_plan_r2r_1d(N, output, output, FFTW_REDFT00, optimisation);
             break;
     }
@@ -216,3 +217,14 @@ int xtract_init_bark(int N, float sr, int *band_limits){
     return XTRACT_SUCCESS;
 }
 
+#ifdef __GNUC__
+__attribute__((constructor)) void init()
+#else
+    void _init()·
+#endif
+{
+    fft_plans.spectrum_plan = NULL;
+    fft_plans.autocorrelation_fft_plan_1 = NULL;
+    fft_plans.autocorrelation_fft_plan_2 = NULL;
+    fft_plans.dct_plan = NULL;
+}

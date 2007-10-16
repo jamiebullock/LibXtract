@@ -32,14 +32,14 @@ void _fini()
 #endif
 {
 #ifdef XTRACT_FFT
-    if(spectrum_plan != NULL)
-        fftwf_destroy_plan(spectrum_plan);
-    if(autocorrelation_fft_plan_1 != NULL)
-        fftwf_destroy_plan(autocorrelation_fft_plan_1);
-    if(autocorrelation_fft_plan_2 != NULL)
-        fftwf_destroy_plan(autocorrelation_fft_plan_2);
-    if(dct_plan != NULL)
-        fftwf_destroy_plan(dct_plan);
+    if(fft_plans.spectrum_plan != NULL)
+        fftwf_destroy_plan(fft_plans.spectrum_plan);
+    if(fft_plans.autocorrelation_fft_plan_1 != NULL)
+        fftwf_destroy_plan(fft_plans.autocorrelation_fft_plan_1);
+    if(fft_plans.autocorrelation_fft_plan_2 != NULL)
+        fftwf_destroy_plan(fft_plans.autocorrelation_fft_plan_2);
+    if(fft_plans.dct_plan != NULL)
+        fftwf_destroy_plan(fft_plans.dct_plan);
     fftwf_cleanup();
 #endif
 }
