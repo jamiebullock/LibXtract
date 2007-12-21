@@ -1,0 +1,11 @@
+#N canvas 642 248 670 289 10;
+#X obj 192 63 osc~ 440;
+#X floatatom 194 187 10 0 0 0 - - -;
+#X obj 194 150 xtract~ spectral_mean;
+#X obj 193 94 *~ 0.3;
+#X text 337 121 Optional second argument gives blocksize;
+#X obj 193 121 xtract~ spectrum 64;
+#X connect 0 0 3 0;
+#X connect 2 0 1 0;
+#X connect 3 0 5 0;
+#X connect 5 0 2 0;

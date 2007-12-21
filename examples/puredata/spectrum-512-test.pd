@@ -1,0 +1,8 @@
+#N canvas 5 48 450 300 10;
+#X obj 127 77 noise~;
+#X obj 262 59 loadbang;
+#X msg 262 86 list 86.1328;
+#X obj 127 112 xtract~ spectrum 64;
+#X connect 0 0 3 0;
+#X connect 1 0 2 0;
+#X connect 2 0 3 1;
