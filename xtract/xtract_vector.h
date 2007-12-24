@@ -126,6 +126,35 @@ int xtract_peak_spectrum(const float *data, const int N, const void *argv, float
  */
 int xtract_harmonic_spectrum(const float *data, const int N, const void *argv, float *result);
 
+/** \brief Extract Linear Predictive Coding Coefficients
+ * 
+ * Based on algorithm in Rabiner and Juang as implemented by Jutta Degener in Dr. Dobb's Journal December, 1994.
+ *
+ * Returns N-1 reflection (PARCOR) coefficients and N-1 LPC coefficients via *result
+ *
+ * \param *data: N autocorrelation values e.g the data pointed to by *result from xtract_autocorrelation() 
+ * \param N: the number of autocorrelation values to be considered
+ * \param *argv: a pointer to NULL
+ * \param *result: a pointer to an array containing N-1 reflection coefficients and N-1 LPC coefficients. 
+ * 
+ * An array of size 2 * (N - 1) must be allocated, and *result must point to its first element.
+ */
+int xtract_lpc(const float *data, const int N, const void *argv, float *result);
+
+/** \brief Extract Linear Predictive Coding Cepstral Coefficients
+ * 
+ * \param *data: a pointer to the first element in an array of LPC coeffiecients e.g. a pointer to the second half of the array pointed to by *result from xtract_lpc()
+ * \param N: the number of LPC coefficients to be considered
+ * \param *argv: a pointer to a float representing the order of the result vector. This must be a whole number. According to Rabiner and Juang the ratio between the number (p) of LPC coefficients and the order (Q) of the LPC cepstrum is given by Q ~ (3/2)p where Q > p.
+ * \param *result: a pointer to an array containing the resultant LPCC.
+ * 
+ * An array of size Q, where Q is given by argv[0] must be allocated, and *result must point to its first element.
+ *
+ */
+int xtract_lpcc(const float *data, const int N, const void *argv, float *result);
+
+
+
 /** @} */
 
 #ifdef __cplusplus

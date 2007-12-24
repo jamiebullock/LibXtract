@@ -1,0 +1,57 @@
+#N canvas 356 233 722 300 10;
+#X obj 160 170 xtract~ autocorrelation;
+#N canvas 0 0 450 300 graph1 0;
+#X array lpcc 16 float 5;
+#A 0 0 0 -0.827113 -0.827113 -0.827113 -0.485055 0.314974 0.657032
+0.810476 0.396513 0.0440753 -0.630112 -0.9456 -0.887411 -1.12995 0.596854
+;
+#X coords 0 16 15 -16 200 140 1;
+#X restore 458 97 graph;
+#X obj 149 34 noise~;
+#N canvas 9 103 450 300 lpc 0;
+#X obj 323 25 block~ 32;
+#X obj 140 52 inlet~;
+#X obj 140 113 xtract~ lpc;
+#N canvas 237 125 450 300 lpcc 0;
+#X obj 26 130 xtract~ lpcc;
+#N canvas 0 0 450 300 graph1 0;
+#X array lpc 16 float 5;
+#A 0 -1.03207 -1.03207 -1.03207 -21.8757 -21.8757 -21.8757 -21.8757
+-0.391539 -0.391539 -0.391539 -0.391539 0.448536 0.448536 0.448536
+0.448536 0.516603;
+#X coords 0 16 15 -16 200 140 1;
+#X restore 219 37 graph;
+#X obj 23 12 block~ 16;
+#X obj 26 51 tabreceive~ lpc;
+#X msg 95 107 list 16;
+#X obj 24 196 tabsend~ lpcc;
+#X obj 95 85 loadbang;
+#X connect 0 0 5 0;
+#X connect 3 0 0 0;
+#X connect 4 0 0 1;
+#X connect 6 0 4 0;
+#X restore 298 172 pd lpcc;
+#X obj 137 220 tabsend~ lpc;
+#X obj 139 152 a_blockswap~ 32;
+#X connect 1 0 2 0;
+#X connect 2 0 5 0;
+#X connect 5 0 4 0;
+#X restore 160 218 pd lpc;
+#X obj 31 52 a_hann 16;
+#X obj 31 25 loadbang;
+#X obj 98 23 bng 15 250 50 0 empty empty empty 0 -6 0 10 -262144 -1
+-1;
+#X obj 156 139 *~;
+#X obj 27 -41 block~ 16 4;
+#X obj 265 81 *~ 0.4;
+#X obj 148 87 *~ 0.1;
+#X obj 266 46 osc~ 1000;
+#X connect 0 0 3 0;
+#X connect 2 0 10 0;
+#X connect 4 0 7 0;
+#X connect 5 0 4 0;
+#X connect 6 0 4 0;
+#X connect 7 0 0 0;
+#X connect 9 0 7 1;
+#X connect 10 0 7 1;
+#X connect 11 0 9 0;

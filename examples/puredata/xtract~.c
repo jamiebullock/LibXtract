@@ -93,7 +93,7 @@ static t_int *xtract_perform_vector(t_int *w) {
     tmp_in = copybytes(in, N * sizeof(t_float));
     tmp_out = getbytes(N * sizeof(t_float));
 
-    if(x->feature == XTRACT_PEAK_SPECTRUM)
+    if(x->feature == XTRACT_PEAK_SPECTRUM || x->feature == XTRACT_LPC)
 	N >>= 1;
     
     return_code = xtract[x->feature](tmp_in, N, x->argv, tmp_out);
@@ -239,7 +239,9 @@ static void *xtract_new(t_symbol *me, t_int argc, t_atom *argv) {
 	    x->feature == XTRACT_BARK_COEFFICIENTS || 
 	    x->feature == XTRACT_SPECTRUM || 
 	    x->feature == XTRACT_PEAK_SPECTRUM || 
-	    x->feature == XTRACT_HARMONIC_SPECTRUM) 
+	    x->feature == XTRACT_HARMONIC_SPECTRUM ||
+            x->feature == XTRACT_LPC ||
+            x->feature == XTRACT_LPCC) 
 	x->feature_type = XTRACT_VECTOR;
                 
     else if (x->feature == XTRACT_FLUX || x->feature == XTRACT_ATTACK_TIME || 
@@ -273,8 +275,8 @@ t_int argc, t_atom *argv) {
 
     x->argv = getbytes(argc * sizeof(float));
     
-        while(argc--)
-            ((t_float *)x->argv)[argc] = atom_getfloat(&argv[argc]);
+    while(argc--)
+        ((t_float *)x->argv)[argc] = atom_getfloat(&argv[argc]);
  /*   }*/
 }
 

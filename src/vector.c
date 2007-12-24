@@ -449,3 +449,90 @@ int xtract_harmonic_spectrum(const float *data, const int N, const void *argv, f
     return XTRACT_SUCCESS;
 }
 	    
+int xtract_lpc(const float *data, const int N, const void *argv, float *result){
+
+    int i, j, k, M, L;
+    float r = 0.f, 
+          error = 0.f;
+
+    float *ref = NULL,
+          *lpc = NULL ;
+
+    error = data[0];
+    k = N; /* The length of *data */
+    L = N - 1; /* The number of LPC coefficients */
+    M = L * 2; /* The length of *result */
+    ref = result;
+    lpc = result+L;
+
+    if(error == 0.0){
+        for(i = 0; i < M; i++)
+            result[i] = 0.f;
+        return XTRACT_NO_RESULT;
+    }
+
+    memset(result, 0, M * sizeof(float));
+
+    for (i = 0; i < L; i++) {
+
+        /* Sum up this iteration's reflection coefficient. */
+        r = -data[i + 1];
+        for (j = 0; j < i; j++) 
+            r -= lpc[j] * data[i - j];
+        ref[i] = r /= error;
+
+        /* Update LPC coefficients and total error. */
+        lpc[i] = r;
+        for (j = 0; j < i / 2; j++) {
+            float tmp      = lpc[j];
+            lpc[j]          = r * lpc[i - 1 - j];
+            lpc[i - 1 - j] += r * tmp;
+        }
+        if (i % 2) lpc[j] += lpc[j] * r;
+
+        error *= 1 - r * r;
+    }
+
+    return XTRACT_SUCCESS;
+}
+
+int xtract_lpcc(const float *data, const int N, const void *argv, float *result){
+
+    /* Given N lpc coefficients extract an LPC cepstrum of size argv[0] */
+    /* Based on an an algorithm by rabiner and Juang */
+
+    int n, k;
+    float sum;
+    int order = N - 1; /* Eventually change this to Q = 3/2 p as suggested in Rabiner */
+    int cep_length; 
+    
+    if(argv == NULL)
+        cep_length = N - 1;
+    else
+        cep_length = (int)((float *)argv)[0];
+
+    memset(result, 0, cep_length * sizeof(float));
+
+    for (n = 1; n <= order && n <= cep_length; n++){
+        sum = 0.f;
+        for (k = 1; k < n; k++)
+            sum += k * result[k-1] * data[n - k];
+        result[n-1] = data[n] + sum / n;
+    }
+
+    /* be wary of these interpolated values */
+    for(n = order + 1; n <= cep_length; n++){
+        sum = 0.f;
+        for (k = n - (order - 1); k < n; k++)
+            sum += k * result[k-1] * data[n - k];
+        result[n-1] = sum / n;
+    }
+
+    return XTRACT_SUCCESS;
+
+}
+//int xtract_lpcc_s(const float *data, const int N, const void *argv, float *result){
+//    return XTRACT_SUCCESS;
+//}
+
+

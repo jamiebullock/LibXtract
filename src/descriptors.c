@@ -137,21 +137,26 @@ void *xtract_make_descriptors(){
 	    case XTRACT_LOWEST_VALUE:
 	    case XTRACT_TONALITY:
 	    case XTRACT_MFCC:
+	    case XTRACT_LPC:
+	    case XTRACT_LPCC:
 		*argv_min = XTRACT_ANY;
 		*argv_max = XTRACT_ANY;
 		*argv_def = XTRACT_ANY;
 		*argv_unit = XTRACT_ANY;
+                break;
 	    case XTRACT_SPECTRAL_INHARMONICITY:
 		*argv_min = 0.f;
 		*argv_max = XTRACT_SR_UPPER_LIMIT / 2;
 		*argv_def = XTRACT_FUNDAMENTAL_DEFAULT;
 		*argv_unit = XTRACT_HERTZ;
+                break;
 	    case XTRACT_F0:
 	    case XTRACT_FAILSAFE_F0:
 		*argv_min = XTRACT_SR_LOWER_LIMIT;
 		*argv_max = XTRACT_SR_UPPER_LIMIT;
 		*argv_def = XTRACT_SR_DEFAULT; 
 		*argv_unit = XTRACT_HERTZ;
+                break;
 	    /* argc = 2 */;
 	    case XTRACT_ROLLOFF:
 		*argv_min  = XTRACT_FFT_BANDS_MIN;
@@ -162,6 +167,7 @@ void *xtract_make_descriptors(){
 		*(argv_max + 1) = 100.f;
 		*(argv_def + 1) = 95.f;
 		*(argv_unit + 1) = XTRACT_PERCENT;
+                break;
 	    case XTRACT_SPECTRUM:
 		*argv_min  = XTRACT_SR_LOWER_LIMIT / 2; 
 		*argv_max = XTRACT_SR_UPPER_LIMIT / 2;
@@ -171,6 +177,7 @@ void *xtract_make_descriptors(){
 		*(argv_max + 1) = 3 ;
 		*(argv_def + 1) = 0;
 		*(argv_unit + 1) = XTRACT_NONE;
+                break;
 	    case XTRACT_PEAK_SPECTRUM:
 		*argv_min  = XTRACT_SR_LOWER_LIMIT / 2; 
 		*argv_max = XTRACT_SR_UPPER_LIMIT / 2;
@@ -180,6 +187,7 @@ void *xtract_make_descriptors(){
 		*(argv_max + 1) = 100.f ;
 		*(argv_def + 1) = 10.f ;
 		*(argv_unit + 1) = XTRACT_PERCENT;
+                break;
 	    case XTRACT_HARMONIC_SPECTRUM:
 		*argv_min = 0.f;
 		*argv_max = XTRACT_SR_UPPER_LIMIT / 2;
@@ -189,6 +197,7 @@ void *xtract_make_descriptors(){
 		*(argv_max + 1) = 1.f ;
 		*(argv_def + 1) = .1f ;
 		*(argv_unit + 1) = XTRACT_NONE;
+                break;
 	    case XTRACT_NOISINESS:
 	    case XTRACT_SKEWNESS:
 	    case XTRACT_KURTOSIS:
@@ -203,6 +212,7 @@ void *xtract_make_descriptors(){
 		*(argv_max + 1) = XTRACT_NONE;
 		*(argv_def + 1) = XTRACT_NONE;
 		*(argv_unit + 1) = XTRACT_NONE;
+                break;
 	    case XTRACT_BARK_COEFFICIENTS:
 	    /* BARK_COEFFICIENTS is special because argc = BARK_BANDS */
 	    default:
@@ -210,6 +220,7 @@ void *xtract_make_descriptors(){
 		*argv_max = XTRACT_NONE;
 		*argv_def = XTRACT_NONE;
 		*argv_unit = XTRACT_NONE;
+                break;
 	}
 
 	argv_donor = &d->argv.donor[0];
@@ -326,6 +337,12 @@ void *xtract_make_descriptors(){
 	    case XTRACT_MFCC:
 		*data_format = XTRACT_SPECTRAL_MAGNITUDES;
 		break;
+            case XTRACT_LPC:
+                *data_format = XTRACT_AUTOCORRELATION_COEFFS;
+                break;
+            case XTRACT_LPCC:
+                *data_format = XTRACT_LPC_COEFFS;
+                break;
 	    case XTRACT_SPECTRAL_INHARMONICITY:
 	    case XTRACT_HARMONIC_SPECTRUM:
 		*data_format = XTRACT_SPECTRAL_PEAKS;
@@ -414,6 +431,8 @@ void *xtract_make_descriptors(){
 	    case XTRACT_TONALITY:
 	    case XTRACT_LOUDNESS:
 	    case XTRACT_NONZERO_COUNT:
+            case XTRACT_LPC:
+            case XTRACT_LPCC:
 		*data_unit = XTRACT_ANY;
 		break;
 	    case XTRACT_SPECTRAL_MEAN:
@@ -646,6 +665,25 @@ void *xtract_make_descriptors(){
 		strcpy(desc, "Extract MFCC from a spectrum");
 		strcpy(p_desc, "Extract MFCC from an audio spectrum");
 		strcpy(author, "Rabiner");
+                break;
+            case XTRACT_LPC:
+		strcpy(name, "lpc");
+		strcpy(p_name, "Linear predictive coding coefficients");
+		strcpy(desc, "Extract LPC from autocorrelation coefficients");
+		strcpy(p_desc, 
+                        "Extract LPC from autocorrelation coefficients");
+		strcpy(author, 
+                        "Rabiner and Juang as implemented by Jutta Degener");
+                *year = 1994;
+                break;
+            case XTRACT_LPCC:
+		strcpy(name, "lpcc");
+		strcpy(p_name, "Linear predictive coding cepstral coefficients");
+		strcpy(desc, "Extract LPC cepstrum from LPC coefficients");
+		strcpy(p_desc, 
+                        "Extract LPC cepstrum from LPC coefficients");
+		strcpy(author, "Rabiner and Juang");
+                *year = 1993;
 		break;
 	    case XTRACT_BARK_COEFFICIENTS:
 		strcpy(name, "bark_coefficients");
@@ -926,6 +964,10 @@ void *xtract_make_descriptors(){
 		*argc = 1;
 		*argv_type = XTRACT_MEL_FILTER;
 		break;
+            case XTRACT_LPCC:
+                *argc = 1;
+                *argv_type = XTRACT_INT;
+                break;
 	    case XTRACT_BARK_COEFFICIENTS:
 		*argc = XTRACT_BARK_BANDS;
 		*argv_type = XTRACT_INT;
@@ -961,6 +1003,7 @@ void *xtract_make_descriptors(){
 	    case XTRACT_ASDF:
 	    case XTRACT_NONZERO_COUNT:
 	    case XTRACT_ODD_EVEN_RATIO:
+            case XTRACT_LPC:
 	    default:
 		*argc = 0;
 		break;
@@ -1019,6 +1062,8 @@ void *xtract_make_descriptors(){
 	    case XTRACT_SPECTRUM:
 	    case XTRACT_AUTOCORRELATION_FFT:
 	    case XTRACT_MFCC:
+	    case XTRACT_LPC:
+	    case XTRACT_LPCC:
 	    case XTRACT_DCT:
 	    case XTRACT_HARMONIC_SPECTRUM:
 		*is_scalar = XTRACT_FALSE;
@@ -1077,14 +1122,17 @@ void *xtract_make_descriptors(){
 		    *result_unit = XTRACT_HERTZ;
 		    *result_min = 0.f;
 		    *result_max = XTRACT_SR_UPPER_LIMIT / 2;
+                    break;
 		case XTRACT_ZCR:
 		    *result_unit = XTRACT_HERTZ;
 		    *result_min = 0.f;
 		    *result_max = XTRACT_ANY;
+                    break;
 		case XTRACT_ODD_EVEN_RATIO:
 		    *result_unit = XTRACT_NONE;
 		    *result_min = 0.f;
 		    *result_max = 1.f; 
+                    break;
 		case XTRACT_LOUDNESS:
 		case XTRACT_FLATNESS:
 		case XTRACT_TONALITY:
@@ -1093,10 +1141,13 @@ void *xtract_make_descriptors(){
 		case XTRACT_POWER:
 		case XTRACT_SHARPNESS:
 		case XTRACT_SPECTRAL_SLOPE:
+                case XTRACT_LPC:
+                case XTRACT_LPCC:
 		default:
 		    *result_unit = XTRACT_UNKNOWN;
 		    *result_min = XTRACT_UNKNOWN;
 		    *result_max = XTRACT_UNKNOWN; 
+                    break;
 	    }
 	}
 	else {
@@ -1113,18 +1164,31 @@ void *xtract_make_descriptors(){
 		case XTRACT_DCT:
 		    *result_format = XTRACT_ARBITRARY_SERIES;
 		    *result_unit = XTRACT_ANY;
+                    break;
 		case XTRACT_BARK_COEFFICIENTS:
 		    *result_format = XTRACT_BARK_COEFFS;
 		    *result_unit = XTRACT_UNKNOWN; /* FIX: check */
+                    break;
 		case XTRACT_PEAK_SPECTRUM:
 		case XTRACT_SPECTRUM:
 		case XTRACT_HARMONIC_SPECTRUM:
 		    *result_format = XTRACT_SPECTRAL;
 		    *result_unit = XTRACT_ANY_AMPLITUDE_HERTZ;
+                    break;
 		case XTRACT_AUTOCORRELATION_FFT:
+                    break;
 		case XTRACT_MFCC:
 		    *result_format = XTRACT_MEL_COEFFS;
 		    *result_unit = XTRACT_UNKNOWN; /* FIX: check */
+                    break;
+                case XTRACT_LPC:
+                    *result_format = XTRACT_LPC_COEFFS;
+                    *result_unit = XTRACT_UNKNOWN;
+                    break;
+                case XTRACT_LPCC:
+                    *result_format = XTRACT_LPCC_COEFFS;
+                    *result_unit = XTRACT_UNKNOWN;
+                    break;
 		default:
 		    break;
 	    }

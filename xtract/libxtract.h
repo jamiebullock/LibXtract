@@ -56,7 +56,7 @@ extern "C" {
   * @{
   */
 
-#define XTRACT_FEATURES 54
+#define XTRACT_FEATURES 56
     
 /** \brief Enumeration of features, elements are used as indixes to an array of pointers to feature extracton functions */
 enum xtract_features_ {
@@ -113,7 +113,9 @@ enum xtract_features_ {
     XTRACT_AUTOCORRELATION_FFT,
     XTRACT_MFCC,
     XTRACT_DCT,
-    XTRACT_HARMONIC_SPECTRUM
+    XTRACT_HARMONIC_SPECTRUM,
+    XTRACT_LPC,
+    XTRACT_LPCC
 };
 
 /** \brief Enumeration of feature initialisation functions */
@@ -198,9 +200,12 @@ typedef enum xtract_vector_ {
     XTRACT_SPECTRAL_HARMONICS_MAGNITUDES,
     /* N spectral harmonic frequencies */
     XTRACT_SPECTRAL_HARMONICS_FREQUENCIES,
+    XTRACT_AUTOCORRELATION_COEFFS,
     XTRACT_ARBITRARY_SERIES,
     XTRACT_AUDIO_SAMPLES,
     XTRACT_MEL_COEFFS, 
+    XTRACT_LPC_COEFFS, 
+    XTRACT_LPCC_COEFFS, 
     XTRACT_BARK_COEFFS,
     XTRACT_NO_DATA
 } xtract_vector_t;

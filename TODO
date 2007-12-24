@@ -13,3 +13,5 @@ Check and add return values as appropriate. Make them more sensible!
 ...do other stuff and eventually...
 ...optimise!
 Use the fftw guru interface to create multipurpose global plans from xtract_fft_init()
+Add LPC via Schur algorithm
+If argv uses an integer, then it should point to a variable of type int. At the moment floats are used to store ints.

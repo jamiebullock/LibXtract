@@ -79,6 +79,8 @@ int(*xtract[])(const float *, const int, const void *, float *) = {
     xtract_autocorrelation_fft,
     xtract_mfcc,
     xtract_dct,
-    xtract_harmonic_spectrum
+    xtract_harmonic_spectrum,
+    xtract_lpc,
+    xtract_lpcc
 };
 
