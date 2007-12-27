@@ -67,7 +67,7 @@ extern "C" {
   * @{
   */
 
-#define XTRACT_FEATURES 56
+#define XTRACT_FEATURES 57
     
 /** \brief Enumeration of features, elements are used as indixes to an array of pointers to feature extracton functions */
 enum xtract_features_ {
@@ -111,10 +111,11 @@ enum xtract_features_ {
     XTRACT_HPS,
     XTRACT_F0,
     XTRACT_FAILSAFE_F0,
+    XTRACT_LNORM,
     XTRACT_FLUX,
     XTRACT_ATTACK_TIME,
     XTRACT_DECAY_TIME,
-    XTRACT_DELTA_FEATURE,
+    XTRACT_DIFFERENCE_VECTOR,
     XTRACT_AUTOCORRELATION,
     XTRACT_AMDF,
     XTRACT_ASDF,
@@ -146,6 +147,11 @@ enum xtract_feature_types_ {
 enum xtract_mfcc_types_ {
     XTRACT_EQUAL_GAIN,
     XTRACT_EQUAL_AREA
+};
+
+enum xtract_lnorm_filter_types_ {
+    XTRACT_POSITIVE_SLOPE,
+    XTRACT_NEGATIVE_SLOPE
 };
 
 /** \brief Enumeration of return codes */

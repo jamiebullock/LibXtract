@@ -197,6 +197,8 @@ void *xtract_make_descriptors(){
 	    /* argc = 2 */;
 	    case XTRACT_ROLLOFF:
 	    case XTRACT_PEAK_SPECTRUM:
+            case XTRACT_FLUX:
+            case XTRACT_LNORM:
 		*argv_donor = XTRACT_ANY;
 		*(argv_donor + 1) = XTRACT_ANY;
 		break;
@@ -301,6 +303,8 @@ void *xtract_make_descriptors(){
 	    case XTRACT_ASDF:
 	    case XTRACT_ZCR:
 	    case XTRACT_RMS_AMPLITUDE:
+	    case XTRACT_FLUX: 
+	    case XTRACT_LNORM: 
 		*data_format = XTRACT_AUDIO_SAMPLES;
 		break;
 	    case XTRACT_TONALITY:
@@ -316,10 +320,9 @@ void *xtract_make_descriptors(){
 	    case XTRACT_SHARPNESS:
 		*data_format = XTRACT_BARK_COEFFS;
 		break;
-	    case XTRACT_FLUX: 
 	    case XTRACT_ATTACK_TIME: 
 	    case XTRACT_DECAY_TIME: 
-	    case XTRACT_DELTA_FEATURE: 
+	    case XTRACT_DIFFERENCE_VECTOR: 
 	    default:
 		*data_format = XTRACT_NO_DATA;
 		break;
@@ -350,8 +353,9 @@ void *xtract_make_descriptors(){
 	    case XTRACT_IRREGULARITY_J:
 	    case XTRACT_ATTACK_TIME: 
 	    case XTRACT_DECAY_TIME: 
-	    case XTRACT_DELTA_FEATURE: 
+	    case XTRACT_DIFFERENCE_VECTOR: 
 	    case XTRACT_FLUX: 
+	    case XTRACT_LNORM: 
 	    case XTRACT_F0:
 	    case XTRACT_FAILSAFE_F0:
 	    case XTRACT_MFCC:
@@ -798,6 +802,13 @@ void *xtract_make_descriptors(){
 			"Extract the spectral flux of an audio spectrum");
 		strcpy(author, "");
 		break;
+            case XTRACT_LNORM: 
+		strcpy(name, "L-norm");
+		strcpy(p_name, "L-norm");
+		strcpy(desc, "Extract the L-norm of a vector");
+		strcpy(p_desc, "Extract the L-norm of a vector");
+		strcpy(author, "");
+		break;
 	    case XTRACT_ATTACK_TIME: 
 		strcpy(name, "attack_time");
 		strcpy(p_name, "Attack Time");
@@ -812,11 +823,11 @@ void *xtract_make_descriptors(){
 		strcpy(p_desc, "Extract the decay time of an audio signal");
 		strcpy(author, "");
 		break;
-	    case XTRACT_DELTA_FEATURE: 
-		strcpy(name, "delta_feature");
-		strcpy(p_name, "Delta Feature");
-		strcpy(desc, "Extract the time derivative of a feature");
-		strcpy(p_desc, "Extract the time derivative of a feature");
+	    case XTRACT_DIFFERENCE_VECTOR: 
+		strcpy(name, "difference_vector");
+		strcpy(p_name, "Difference vector");
+		strcpy(desc, "Extract the difference between two vectors");
+		strcpy(p_desc, "Extract the difference between two vectors");
 		strcpy(author, "");
 		break;
 	    case XTRACT_AUTOCORRELATION_FFT:
@@ -897,6 +908,8 @@ void *xtract_make_descriptors(){
 	    case XTRACT_NOISINESS:
 	    case XTRACT_CREST:
 	    case XTRACT_ROLLOFF:
+	    case XTRACT_FLUX: 
+	    case XTRACT_LNORM: 
 		*argc = 2;
 		*argv_type = XTRACT_FLOAT;
 		break;
@@ -936,10 +949,9 @@ void *xtract_make_descriptors(){
 	    case XTRACT_SHARPNESS:
 	    case XTRACT_SPECTRAL_SLOPE:
 	    case XTRACT_HPS:
-	    case XTRACT_FLUX: 
 	    case XTRACT_ATTACK_TIME: 
 	    case XTRACT_DECAY_TIME: 
-	    case XTRACT_DELTA_FEATURE: 
+	    case XTRACT_DIFFERENCE_VECTOR: 
 	    case XTRACT_AUTOCORRELATION_FFT:
 	    case XTRACT_DCT:
 	    case XTRACT_AUTOCORRELATION:
@@ -995,6 +1007,8 @@ void *xtract_make_descriptors(){
 	    case XTRACT_HPS:
 	    case XTRACT_F0:
 	    case XTRACT_FAILSAFE_F0:
+            case XTRACT_FLUX:
+            case XTRACT_LNORM:
 	    case XTRACT_NONZERO_COUNT:
 		*is_scalar = XTRACT_TRUE;
 		break;
@@ -1035,6 +1049,8 @@ void *xtract_make_descriptors(){
 		case XTRACT_LOWEST_VALUE:
 		case XTRACT_HIGHEST_VALUE:
 		case XTRACT_SUM:
+                case XTRACT_FLUX:
+                case XTRACT_LNORM:
 		case XTRACT_NONZERO_COUNT: 
 		    *result_unit = XTRACT_ANY;
 		    *result_min = XTRACT_ANY;

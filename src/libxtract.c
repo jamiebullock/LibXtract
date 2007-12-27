@@ -65,10 +65,11 @@ int(*xtract[])(const float *, const int, const void *, float *) = {
     xtract_f0,
     xtract_failsafe_f0,
 /* xtract_delta.h */
+    xtract_lnorm,
     xtract_flux,
     xtract_attack_time,
     xtract_decay_time,
-    xtract_delta_feature,
+    xtract_difference_vector,
 /* xtract_vector.h */
     xtract_autocorrelation,
     xtract_amdf,
