@@ -45,12 +45,17 @@
 
 int xtract_spectrum(const float *data, const int N, const void *argv, float *result){
 
-    float *input, *rfft, q, temp;
+    float *input, *rfft, q, temp, max;
     size_t bytes;
-    int n , NxN, M, vector, withDC, argc;
-    //fftwf_plan plan;
+    int n, 
+        NxN, 
+        M, 
+        vector, 
+        withDC, 
+        argc,
+        normalise;
 
-    vector = argc = withDC = 0;
+    vector = argc = withDC = normalise = 0;
 
     M = N >> 1;
     NxN = XTRACT_SQ(N);
@@ -62,13 +67,14 @@ int xtract_spectrum(const float *data, const int N, const void *argv, float *res
     q = *(float *)argv;
     vector = (int)*((float *)argv+1);
     withDC = (int)*((float *)argv+2);
+    normalise = (int)*((float *)argv+3);
+
+    temp = 0.f;
+    max = 0.f;
 
     XTRACT_CHECK_q;
 
     if(fft_plans.spectrum_plan == NULL){
-        /* FIX: Not sure this should really be here. Might introduce 
-         * DEBUG_POST macro, or some kind of error handler, or leave it to the 
-         * caller... */
         fprintf(stderr, 
                 "libxtract: Error: xtract_spectrum() has uninitialised plan\n");
         return XTRACT_NO_RESULT;
@@ -98,6 +104,7 @@ int xtract_spectrum(const float *data, const int N, const void *argv, float *res
 			XTRACT_DB_SCALE_OFFSET; 
 		    result[M + n - 1] = n * q;
 		}
+                max = result[n] > max ? result[n] : max;
 	    }
 	    break;
 
@@ -113,6 +120,7 @@ int xtract_spectrum(const float *data, const int N, const void *argv, float *res
 			(XTRACT_SQ(rfft[n]) + XTRACT_SQ(rfft[N - n])) / NxN;
 		    result[M + n - 1] = n * q;
 		}
+                max = result[n] > max ? result[n] : max;
 	    }
 	    break;
 
@@ -133,6 +141,7 @@ int xtract_spectrum(const float *data, const int N, const void *argv, float *res
 			XTRACT_DB_SCALE_OFFSET; 
 		    result[M + n - 1] = n * q;
 		}
+                max = result[n] > max ? result[n] : max;
 	    }
 	    break;
 
@@ -149,6 +158,7 @@ int xtract_spectrum(const float *data, const int N, const void *argv, float *res
 			    XTRACT_SQ(rfft[N - n])) / N; 
 		    result[M + n - 1] = n * q;
 		}
+                max = result[n] > max ? result[n] : max;
 	    }
 	    break;
     }
@@ -157,16 +167,26 @@ int xtract_spectrum(const float *data, const int N, const void *argv, float *res
 	/* The DC component */
 	result[0] = XTRACT_SQ(rfft[0]);
 	result[M + 1] = 0.f;
+        max = result[0] > max ? result[0] : max;
 	/* The Nyquist */ 
 	result[M] = XTRACT_SQ(rfft[M]);
 	result[N + 1] = q * M;
+        max = result[M] > max ? result[M] : max;
+        M++; /* So we normalise the Nyquist (below) */
     }
     else {
 	/* The Nyquist */ 
 	result[M - 1] = (float)XTRACT_SQ(rfft[M]);
 	result[N - 1] = q * M;
+        max = result[M - 1] > max ? result[M - 1] : max;
     }
     
+
+    if(normalise){
+        for(n = 0; n < M; n++)
+            result[n] /= max;
+    }
+
     fftwf_free(rfft);
     free(input);
     

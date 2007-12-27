@@ -25,8 +25,19 @@
   * 
   * This philosophy of 'cascading' features is followed throughout the library, for example with features that operate on the magnitude spectrum of a signal vector (e.g. 'irregularity'), the magnitude spectrum is not calculated 'inside' the respective function, instead, a pointer to the first element in an array containing the magnitude spectrum is passed in as an argument. 
   *
-  * Hopefully this not only makes the library more efficient when computing large numbers of features, but also makes it more flexible because extraction functions can be combined arbitrarily (one can take the irregularility of the Mel Frequency Cepstral Coefficients for example).
+  * Hopefully this not only makes the library more efficient when computing large numbers of features, but also makes it more flexible because extraction functions can be combined arbitrarily (one can take the irregularility of the Mel Frequency Cepstral Coefficients for example). 
   *
+  * All feature extraction functions follow the same prototype:
+  *
+int xtract_function_name(const float *data, const int N, const void *argv, float *result){
+  *
+  * \param const float *data points to an array of floats representing the input data
+  * \param const int N represents the number of elementes from *data to be considered in the calculation
+  * \param const void *argv represents an arbitrary list of arguments. Used to pass in values required by the feature calculation
+  * \param float *result points to an array of floats, or a single float represnting the result of the calculation
+  *
+  *
+  * It is up to the calling function to allocate enough memory for the *data, *argv, and *result, and to free it when required. Some feature extraction functions may also require an _init() function to be called in order to perform some initialisation. The struct xtract_function_descriptor_t is used to give an indication of recommended default values, and argc for the *argv array.
   *
   * LibXtract can be downloaded from http://www.sf.net/projects/libxtract
   *

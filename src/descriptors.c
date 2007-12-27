@@ -48,79 +48,6 @@ void *xtract_make_descriptors(){
 	argc = &d->argc;
 	argv_type = &d->argv.type;
 
-	switch(f){
-
-	    case XTRACT_VARIANCE:
-	    case XTRACT_STANDARD_DEVIATION:
-	    case XTRACT_AVERAGE_DEVIATION:
-	    case XTRACT_SPECTRAL_VARIANCE:
-	    case XTRACT_SPECTRAL_STANDARD_DEVIATION:
-	    case XTRACT_SPECTRAL_AVERAGE_DEVIATION:
-	    case XTRACT_SPECTRAL_INHARMONICITY:
-	    case XTRACT_LOWEST_VALUE:
-	    case XTRACT_F0:
-	    case XTRACT_FAILSAFE_F0:
-	    case XTRACT_TONALITY:
-		*argc = 1;
-		*argv_type = XTRACT_FLOAT;
-		break;
-	    case XTRACT_SKEWNESS:
-	    case XTRACT_KURTOSIS:
-	    case XTRACT_SPECTRAL_SKEWNESS:
-	    case XTRACT_SPECTRAL_KURTOSIS:
-	    case XTRACT_SPECTRUM:
-	    case XTRACT_PEAK_SPECTRUM:
-	    case XTRACT_HARMONIC_SPECTRUM:
-	    case XTRACT_NOISINESS:
-	    case XTRACT_CREST:
-	    case XTRACT_ROLLOFF:
-		*argc = 2;
-		*argv_type = XTRACT_FLOAT;
-		break;
-	    case XTRACT_MFCC:
-		*argc = 1;
-		*argv_type = XTRACT_MEL_FILTER;
-		break;
-	    case XTRACT_BARK_COEFFICIENTS:
-		*argc = XTRACT_BARK_BANDS;
-		*argv_type = XTRACT_INT;
-		break;
-	    case XTRACT_MEAN:
-	    case XTRACT_SPECTRAL_MEAN:
-	    case XTRACT_SPECTRAL_CENTROID:
-	    case XTRACT_IRREGULARITY_K:
-	    case XTRACT_IRREGULARITY_J:
-	    case XTRACT_TRISTIMULUS_1:
-	    case XTRACT_TRISTIMULUS_2:
-	    case XTRACT_TRISTIMULUS_3:
-	    case XTRACT_SMOOTHNESS:
-	    case XTRACT_FLATNESS:
-	    case XTRACT_SPREAD:
-	    case XTRACT_ZCR:
-	    case XTRACT_LOUDNESS:
-	    case XTRACT_HIGHEST_VALUE:
-	    case XTRACT_SUM:
-	    case XTRACT_RMS_AMPLITUDE:
-	    case XTRACT_POWER:
-	    case XTRACT_SHARPNESS:
-	    case XTRACT_SPECTRAL_SLOPE:
-	    case XTRACT_HPS:
-	    case XTRACT_FLUX: 
-	    case XTRACT_ATTACK_TIME: 
-	    case XTRACT_DECAY_TIME: 
-	    case XTRACT_DELTA_FEATURE: 
-	    case XTRACT_AUTOCORRELATION_FFT:
-	    case XTRACT_DCT:
-	    case XTRACT_AUTOCORRELATION:
-	    case XTRACT_AMDF:
-	    case XTRACT_ASDF:
-	    case XTRACT_NONZERO_COUNT:
-	    case XTRACT_ODD_EVEN_RATIO:
-	    default:
-		*argc = 0;
-		break;
-	}
-		
 	argv_min = &d->argv.min[0];
 	argv_max = &d->argv.max[0];
 	argv_def = &d->argv.def[0];
@@ -169,14 +96,22 @@ void *xtract_make_descriptors(){
 		*(argv_unit + 1) = XTRACT_PERCENT;
                 break;
 	    case XTRACT_SPECTRUM:
-		*argv_min  = XTRACT_SR_LOWER_LIMIT / 2; 
-		*argv_max = XTRACT_SR_UPPER_LIMIT / 2;
-		*argv_def = XTRACT_SR_DEFAULT / 2;
+		*argv_min  = XTRACT_SR_LOWER_LIMIT / XTRACT_FFT_BANDS_MIN; 
+		*argv_max = XTRACT_SR_UPPER_LIMIT / XTRACT_FFT_BANDS_MAX;
+		*argv_def = XTRACT_SR_DEFAULT / XTRACT_FFT_BANDS_DEF;
 		*argv_unit = XTRACT_HERTZ;
 		*(argv_min + 1) = 0;
 		*(argv_max + 1) = 3 ;
 		*(argv_def + 1) = 0;
 		*(argv_unit + 1) = XTRACT_NONE;
+                *(argv_min + 2) = 0;
+                *(argv_max + 2) = 1;
+                *(argv_def + 2) = 0;
+		*(argv_unit + 2) = XTRACT_NONE;
+                *(argv_min + 3) = 0;
+                *(argv_max + 3) = 1;
+                *(argv_def + 3) = 0;
+		*(argv_unit + 3) = XTRACT_NONE;
                 break;
 	    case XTRACT_PEAK_SPECTRUM:
 		*argv_min  = XTRACT_SR_LOWER_LIMIT / 2; 
@@ -260,7 +195,6 @@ void *xtract_make_descriptors(){
 		*argv_donor = XTRACT_INIT_MFCC;
 		break;
 	    /* argc = 2 */;
-	    case XTRACT_SPECTRUM:
 	    case XTRACT_ROLLOFF:
 	    case XTRACT_PEAK_SPECTRUM:
 		*argv_donor = XTRACT_ANY;
@@ -288,7 +222,14 @@ void *xtract_make_descriptors(){
 		*argv_donor = XTRACT_HIGHEST_VALUE;
 		*(argv_donor + 1) = XTRACT_MEAN;
 		break;
-	    /* argc = BARK_BANDS */
+            /* argc = 4 */
+	    case XTRACT_SPECTRUM:
+		*argv_donor = XTRACT_ANY;
+		*(argv_donor + 1) = XTRACT_ANY;
+		*(argv_donor + 2) = XTRACT_ANY;
+		*(argv_donor + 3) = XTRACT_ANY;
+		break;
+	    /* BARK_BANDS */
 	    case XTRACT_BARK_COEFFICIENTS:
 		*argv_donor = XTRACT_INIT_BARK;
 		break;
@@ -951,13 +892,16 @@ void *xtract_make_descriptors(){
 	    case XTRACT_KURTOSIS:
 	    case XTRACT_SPECTRAL_SKEWNESS:
 	    case XTRACT_SPECTRAL_KURTOSIS:
-	    case XTRACT_SPECTRUM:
 	    case XTRACT_PEAK_SPECTRUM:
 	    case XTRACT_HARMONIC_SPECTRUM:
 	    case XTRACT_NOISINESS:
 	    case XTRACT_CREST:
 	    case XTRACT_ROLLOFF:
 		*argc = 2;
+		*argv_type = XTRACT_FLOAT;
+		break;
+	    case XTRACT_SPECTRUM:
+		*argc = 4;
 		*argv_type = XTRACT_FLOAT;
 		break;
 	    case XTRACT_MFCC:
