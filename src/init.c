@@ -18,7 +18,7 @@
  * USA.
  */
 
-/* init.c: defines functions that extract a feature as a single value from an input vector */
+/* init.c: defines initialisation and free functions. Also contains library constructor routine. */
 
 #ifdef HAVE_CONFIG_H
 #    include <config.h>
@@ -28,6 +28,7 @@
 #include <stdlib.h>
 
 #include "xtract/libxtract.h"
+#include "xtract_window_private.h"
 #define DEFINE_GLOBALS
 #include "xtract_globals_private.h"
 
@@ -43,7 +44,7 @@ int xtract_init_mfcc(int N, float nyquist, int style, float freq_min, float freq
 
     int n, i, k, *fft_peak, M, next_peak; 
     float norm, mel_freq_max, mel_freq_min, norm_fact, height, inc, val, 
-        freq_bw_mel, *mel_peak, *height_norm, *lin_peak;
+          freq_bw_mel, *mel_peak, *height_norm, *lin_peak;
 
     mel_peak = height_norm = lin_peak = NULL;
     fft_peak = NULL;
@@ -60,9 +61,9 @@ int xtract_init_mfcc(int N, float nyquist, int style, float freq_min, float freq
     height_norm = (float *)malloc(freq_bands * sizeof(float));
 
     if(mel_peak == NULL || height_norm == NULL || 
-                    lin_peak == NULL || fft_peak == NULL)
-                    return XTRACT_MALLOC_FAILED;
-    
+            lin_peak == NULL || fft_peak == NULL)
+        return XTRACT_MALLOC_FAILED;
+
     M = N >> 1;
 
     mel_peak[0] = mel_freq_min;
@@ -91,41 +92,41 @@ int xtract_init_mfcc(int N, float nyquist, int style, float freq_min, float freq
     }
 
     i = 0;
-   
+
     for(n = 0; n < freq_bands; n++){
-	
-		// calculate the rise increment
+
+        // calculate the rise increment
         if(n==0)
             inc = height_norm[n] / fft_peak[n];
         else
             inc = height_norm[n] / (fft_peak[n] - fft_peak[n - 1]);
         val = 0;	
-	
-		// zero the start of the array
-		for(k = 0; k < i; k++)
-		   fft_tables[n][k] = 0.f;
-	
-		// fill in the rise
+
+        // zero the start of the array
+        for(k = 0; k < i; k++)
+            fft_tables[n][k] = 0.f;
+
+        // fill in the rise
         for(; i <= fft_peak[n]; i++){ 
             fft_tables[n][i] = val;
             val += inc;
         }
-	
+
         // calculate the fall increment
         inc = height_norm[n] / (fft_peak[n + 1] - fft_peak[n]);
-	
+
         val = 0;
-		next_peak = fft_peak[n + 1];
-	
-		// reverse fill the 'fall' 
+        next_peak = fft_peak[n + 1];
+
+        // reverse fill the 'fall' 
         for(i = next_peak; i > fft_peak[n]; i--){ 
             fft_tables[n][i] = val;
             val += inc;
         }
 
-		// zero the rest of the array
-		for(k = next_peak + 1; k < N; k++)
-			fft_tables[n][k] = 0.f;
+        // zero the rest of the array
+        for(k = next_peak + 1; k < N; k++)
+            fft_tables[n][k] = 0.f;
     }
 
 
@@ -145,9 +146,9 @@ int xtract_init_fft(int N, int feature_name){
 
     float *input, *output;
     int optimisation;
-    
+
     input = output = NULL;
-    
+
     fprintf(stderr, "Optimisation level: %d\n", XTRACT_FFT_OPTIMISATION_LEVEL);
 
     if(XTRACT_FFT_OPTIMISATION_LEVEL == 0)
@@ -209,12 +210,61 @@ int xtract_init_bark(int N, float sr, int *band_limits){
     float  edges[] = {0, 100, 200, 300, 400, 510, 630, 770, 920, 1080, 1270, 1480, 1720, 2000, 2320, 2700, 3150, 3700, 4400, 5300, 6400, 7700, 9500, 12000, 15500, 20500, 27000}; /* Takes us up to sr = 54kHz (CCRMA: JOS)*/
 
     int bands = XTRACT_BARK_BANDS;
-    
+
     while(bands--)
         band_limits[bands] = edges[bands] / sr * N;
-        /*FIX shohuld use rounding, but couldn't get it to work */
+    /*FIX shohuld use rounding, but couldn't get it to work */
 
     return XTRACT_SUCCESS;
+}
+
+float *xtract_init_window(const int N, const int type){
+
+    float *window;
+
+    window = malloc(N * sizeof(float));
+
+    switch (type) {
+        case XTRACT_GAUSS:
+            gauss(window, N, 0.4);
+            break;
+        case XTRACT_HAMMING:
+            hamming(window, N);
+            break;
+        case XTRACT_HANN:
+            hann(window, N);
+            break;
+        case XTRACT_BARTLETT:
+            bartlett(window, N);
+            break;
+        case XTRACT_TRIANGULAR:
+            triangular(window, N);
+            break;
+        case XTRACT_BARTLETT_HANN:
+            bartlett_hann(window, N);
+            break;
+        case XTRACT_BLACKMAN:
+            blackman(window, N);
+            break;
+        case XTRACT_KAISER:
+            kaiser(window, N, 3 * PI);
+            break;
+        case XTRACT_BLACKMAN_HARRIS:
+            blackman_harris(window, N);
+            break;
+        default:
+            hann(window, N);
+            break;
+    }
+
+    return window;
+
+}
+
+void xtract_free_window(float *window){
+
+    free(window);
+
 }
 
 #ifdef __GNUC__

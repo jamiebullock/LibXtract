@@ -19,7 +19,7 @@
  */
 
 
-/* xtract_scalar.c: defines functions that extract a feature as a single value from an input vector */
+/* scalar.c: defines functions that extract a feature as a single value from an input vector */
 
 #include "xtract/libxtract.h"
 #include "xtract_macros_private.h"

@@ -32,8 +32,7 @@ int xtract_flux(const float *data, const int N, const void *argv , float *result
 
 int xtract_lnorm(const float *data, const int N, const void *argv , float *result){
 
-    int feature,
-        n,
+    int n,
         type;
 
     float order,
@@ -80,7 +79,7 @@ int xtract_decay_time(const float *data, const int N, const void *argv, float *r
 
 int xtract_difference_vector(const float *data, const int N, const void *argv, float *result){
 
-    float *frame1,
+    const float *frame1,
           *frame2;
 
     int n;

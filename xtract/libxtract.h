@@ -60,6 +60,7 @@ extern "C" {
 #include "xtract_delta.h"
 #include "xtract_types.h"
 #include "xtract_macros.h"
+#include "xtract_helper.h"
 
 /** \defgroup libxtract API
   *
@@ -67,7 +68,7 @@ extern "C" {
   * @{
   */
 
-#define XTRACT_FEATURES 57
+#define XTRACT_FEATURES 58
     
 /** \brief Enumeration of features, elements are used as indixes to an array of pointers to feature extracton functions */
 enum xtract_features_ {
@@ -127,7 +128,9 @@ enum xtract_features_ {
     XTRACT_DCT,
     XTRACT_HARMONIC_SPECTRUM,
     XTRACT_LPC,
-    XTRACT_LPCC
+    XTRACT_LPCC,
+    /* Helper functions */
+    XTRACT_WINDOWED
 };
 
 /** \brief Enumeration of feature initialisation functions */
@@ -196,6 +199,19 @@ typedef enum {
     XTRACT_FALSE,
     XTRACT_TRUE
 } xtract_bool_t;
+
+/** \brief Window types */
+enum xtract_window_types_ {
+    XTRACT_GAUSS,
+    XTRACT_HAMMING,
+    XTRACT_HANN,
+    XTRACT_BARTLETT,
+    XTRACT_TRIANGULAR,
+    XTRACT_BARTLETT_HANN,
+    XTRACT_BLACKMAN,
+    XTRACT_KAISER,
+    XTRACT_BLACKMAN_HARRIS
+};
 
 /** \brief Enumeration of vector format types*/
 typedef enum xtract_vector_ {
@@ -358,6 +374,21 @@ int xtract_init_bark(int N, float sr, int *band_limits);
  *
  */
 int xtract_init_fft(int N, int feature_name);
+
+/** \brief Make a window of a given type and return a pointer to it
+ *
+ * \param N: the size of the window
+ * \param type: the type of the window as given in the enumeration window_types_
+ *
+ */
+float *xtract_init_window(const int N, const int type);
+
+/** \brief Free a window as allocated by xtract_make_window() 
+ * 
+ * \param *window: a pointer to an array of floats as allocated by xtract_make_window()
+ *
+ */
+void xtract_free_window(float *window);
 
 /* \brief A function to build an array of function descriptors */
 void *xtract_make_descriptors();

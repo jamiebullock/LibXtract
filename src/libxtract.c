@@ -64,13 +64,13 @@ int(*xtract[])(const float *, const int, const void *, float *) = {
     xtract_hps,
     xtract_f0,
     xtract_failsafe_f0,
-/* xtract_delta.h */
+    /* xtract_delta.h */
     xtract_lnorm,
     xtract_flux,
     xtract_attack_time,
     xtract_decay_time,
     xtract_difference_vector,
-/* xtract_vector.h */
+    /* xtract_vector.h */
     xtract_autocorrelation,
     xtract_amdf,
     xtract_asdf,
@@ -82,6 +82,8 @@ int(*xtract[])(const float *, const int, const void *, float *) = {
     xtract_dct,
     xtract_harmonic_spectrum,
     xtract_lpc,
-    xtract_lpcc
+    xtract_lpcc,
+    /* xtract_helper.h */
+    xtract_windowed
 };
 
