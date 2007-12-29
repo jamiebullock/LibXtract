@@ -30,6 +30,7 @@ extern "C" {
 #endif
 
 #define XTRACT_BARK_BANDS 26
+#define XTRACT_WINDOW_SIZE 1024/* dummy macro for descriptors where argc is window size */
 #define XTRACT_NONE 0
 #define XTRACT_ANY -1
 #define XTRACT_UNKNOWN -2

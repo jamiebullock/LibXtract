@@ -57,6 +57,9 @@ int xtract_windowed(const float *data, const int N, const void *argv, float *res
  * \param *argv a pointer to the argument vector to be passed to the feature extraction function as determined by feature
  * \param *result a pointer to the 'packed' results of the feature calculation. This may be passed in as *data to xtract_features_from_subframes() to calculate further features on the subframes, or xtract_difference_vector(), to get the difference between the subframes.
  *
+ *
+ * It is important to ensure that any _init_*() functions that are called in preparation for functions that are called on subframes are given the subframe size as 'N', and not the frame size. i.e. if xtract_features_from_subframes() is called with N=64, and feature=XTRACT_SPECTRUM, then xtract_init_fft() should be called with N=32.
+ *
  */
 int xtract_features_from_subframes(const float *data, const int N, const int feature, const void *argv, float *result);
 

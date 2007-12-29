@@ -1,0 +1,131 @@
+#N canvas 667 50 557 639 10;
+#X obj 263 -160 xtract~ subframe windowed 64;
+#X obj 442 -125 tabsend~ windowed;
+#N canvas 0 0 450 300 (subpatch) 0;
+#X array windowed 64 float 5;
+#A 0 0 0.00988792 0.0386044 0.0571912 0.0189603 -0.101949 -0.277669
+-0.42422 -0.437499 -0.251716 0.11162 0.534831 0.846232 0.89682 0.634185
+0.135697 -0.418906 -0.823923 -0.937159 -0.739218 -0.334947 0.101471
+0.40821 0.503437 0.407727 0.215338 0.0353621 -0.0632974 -0.0748772
+-0.0405181 -0.00868179 -3.27457e-15 0 0.00657018 0.0386642 0.0864644
+0.104272 0.0386758 -0.128569 -0.351139 -0.525142 -0.535095 -0.31781
+0.0907861 0.554834 0.890148 0.946246 0.679244 0.177795 -0.372091 -0.768033
+-0.878652 -0.69562 -0.326984 0.0615718 0.325607 0.401064 0.317179 0.162825
+0.0298987 -0.0329445 -0.0328739 -0.0102196 -6.65005e-15;
+#X coords 0 1 63 -1 200 140 1;
+#X restore 46 -552 graph;
+#X obj 264 -125 xtract~ subframe spectrum 64;
+#N canvas 0 0 450 300 (subpatch) 0;
+#X array sf_mags1 16 float 5;
+#A 0 0.00733392 0.14449 0.240482 0.109887 0.00135916 0.000113993 5.63786e-05
+7.59283e-05 7.22785e-05 6.48168e-05 5.62613e-05 5.20935e-05 4.72571e-05
+4.40774e-05 4.34346e-05 1.76297e-06;
+#X coords 0 1 15 -1 200 140 1;
+#X restore 261 -551 graph;
+#N canvas 0 0 450 300 (subpatch) 0;
+#X array sf_mags2 32 float 5;
+#A 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.0077164 0.1443 0.240599 0.109809
+0.00131069 0.00011119 0.000100841 0.00010453 9.17035e-05 7.68611e-05
+6.53814e-05 5.45444e-05 4.76852e-05 4.18391e-05 4.00649e-05 1.43191e-06
+;
+#X coords 0 1 31 -1 200 140 1;
+#X restore 259 -389 graph;
+#N canvas 0 0 450 300 (subpatch) 0;
+#X array both 35 float 5;
+#A 0 0.00733392 0.14449 0.240482 0.109887 0.00135916 0.000113993 5.63786e-05
+7.59283e-05 7.22785e-05 6.48168e-05 5.62613e-05 5.20935e-05 4.72571e-05
+4.40774e-05 4.34346e-05 1.76297e-06 0.0077164 0.1443 0.240599 0.109809
+0.00131069 0.00011119 0.000100841 0.00010453 9.17035e-05 7.68611e-05
+6.53814e-05 5.45444e-05 4.76852e-05 4.18391e-05 4.00649e-05 1.43191e-06
+0 0 0;
+#X coords 0 1 34 -1 200 140 1;
+#X restore 46 -393 graph;
+#N canvas 18 175 447 500 get_mags 0;
+#X obj 71 265 +~;
+#X obj 72 233 tabreceive~ sf_mags1;
+#X obj 221 233 tabreceive~ sf_mags2;
+#X obj 101 30 tabsend~ sf_mags1;
+#X obj 70 86 tabsend~ temp;
+#X obj 69 124 tabreceive~ temp;
+#X obj 70 175 tabsend~ sf_mags2;
+#X obj 70 302 outlet~;
+#X obj 70 -10 inlet~;
+#X obj 70 59 a_blockswap~ 64;
+#X obj 69 151 a_blockswap~ 32;
+#N canvas 0 0 450 300 graph4 0;
+#X array temp 16 float 5;
+#A 0 0.0077164 0.1443 0.240599 0.109809 0.00131069 0.00011119 0.000100841
+0.00010453 9.17035e-05 7.68611e-05 6.53814e-05 5.45444e-05 4.76852e-05
+4.18391e-05 4.00649e-05 1.43191e-06;
+#X coords 0 1 15 -1 200 140 1;
+#X restore 226 -6 graph;
+#X connect 0 0 7 0;
+#X connect 1 0 0 0;
+#X connect 2 0 0 1;
+#X connect 5 0 10 0;
+#X connect 8 0 3 0;
+#X connect 8 0 9 0;
+#X connect 9 0 4 0;
+#X connect 10 0 6 0;
+#X restore 263 -94 pd get_mags;
+#N canvas 0 0 450 300 graph4 0;
+#X array diff 16 float 5;
+#A 0 -0.000382476 0.000189289 -0.000116706 7.71508e-05 4.8466e-05 2.80288e-06
+-4.44625e-05 -2.86015e-05 -1.9425e-05 -1.20443e-05 -9.12002e-06 -2.45091e-06
+-4.28088e-07 2.23831e-06 3.36968e-06 3.31062e-07;
+#X coords 0 1 15 -1 200 140 1;
+#X restore 46 -234 graph;
+#N canvas 6 433 450 300 diff 0;
+#X obj 134 136 tabsend~ diff;
+#X obj 134 49 tabreceive~ both;
+#X obj 135 78 xtract~ difference_vector 32;
+#X obj 348 10 block~ 32;
+#X connect 1 0 2 0;
+#X connect 2 0 0 0;
+#X restore 260 -43 pd diff;
+#N canvas 3 50 450 300 flux 0;
+#X obj 143 17 tabreceive~ diff;
+#X obj 371 -13 block~ 16;
+#X obj 144 53 xtract~ flux 16;
+#X obj 144 90 outlet;
+#X connect 0 0 2 0;
+#X connect 2 0 3 0;
+#X restore 262 -16 pd flux;
+#X obj 262 -70 tabsend~ both;
+#N canvas 9 100 467 310 source 0;
+#X obj 162 -117 noise~;
+#X obj 100 -40 *~;
+#X obj 105 140 hsl 100 10 0 1 0 0 vol vol-set empty -2 -6 0 10 -204786
+-1 -1 9900 1;
+#X msg 212 -58 1;
+#X obj 115 -94 r vol;
+#X obj 161 -40 *~;
+#X obj 212 -89 t b f;
+#X obj 225 -30 -;
+#X obj 101 20 outlet~;
+#X text 111 118 noise <-> sine;
+#X obj 336 -87 loadbang;
+#X obj 100 -115 osc~ 4000;
+#X msg 336 -61 \; vol 1 \; vol-set 1;
+#X connect 0 0 5 0;
+#X connect 1 0 8 0;
+#X connect 3 0 7 0;
+#X connect 4 0 1 1;
+#X connect 4 0 6 0;
+#X connect 5 0 8 0;
+#X connect 6 0 3 0;
+#X connect 6 1 7 1;
+#X connect 7 0 5 1;
+#X connect 10 0 12 0;
+#X connect 11 0 1 0;
+#X coords 0 -1 1 1 110 60 1 100 100;
+#X restore 263 -231 pd source;
+#X floatatom 262 40 5 0 0 0 spectral_flux - -;
+#X obj 262 7 a_bavg 128;
+#X connect 0 0 1 0;
+#X connect 0 0 3 0;
+#X connect 3 0 7 0;
+#X connect 7 0 11 0;
+#X connect 10 0 14 0;
+#X connect 12 0 0 0;
+#X connect 14 0 13 0;

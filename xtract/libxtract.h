@@ -68,7 +68,7 @@ extern "C" {
   * @{
   */
 
-#define XTRACT_FEATURES 58
+#define XTRACT_FEATURES 59
     
 /** \brief Enumeration of features, elements are used as indixes to an array of pointers to feature extracton functions */
 enum xtract_features_ {
@@ -136,7 +136,8 @@ enum xtract_features_ {
 /** \brief Enumeration of feature initialisation functions */
 enum xtract_feature_init_ {
     XTRACT_INIT_MFCC = 100,
-    XTRACT_INIT_BARK
+    XTRACT_INIT_BARK,
+    XTRACT_INIT_WINDOWED
 };
 
 /** \brief Enumeration of feature types */
@@ -153,6 +154,7 @@ enum xtract_mfcc_types_ {
 };
 
 enum xtract_lnorm_filter_types_ {
+    XTRACT_NO_LNORM_FILTER,
     XTRACT_POSITIVE_SLOPE,
     XTRACT_NEGATIVE_SLOPE
 };
@@ -240,6 +242,7 @@ typedef enum xtract_vector_ {
     XTRACT_LPC_COEFFS, 
     XTRACT_LPCC_COEFFS, 
     XTRACT_BARK_COEFFS,
+    XTRACT_SUBFRAMES,
     XTRACT_NO_DATA
 } xtract_vector_t;
 
@@ -272,6 +275,7 @@ typedef struct _xtract_function_descriptor {
     } argv;
 
     xtract_bool_t is_scalar;
+    xtract_bool_t is_delta; /* features in xtract_delta.h can be scalar or vector */ 
 
     /* The result.<> entries in descritors.c need to be checked */
     union {

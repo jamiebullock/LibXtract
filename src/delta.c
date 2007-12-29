@@ -41,7 +41,7 @@ int xtract_lnorm(const float *data, const int N, const void *argv , float *resul
     order = *(float *)argv;
     type = (int)*(float *)argv+1;
 
-    order = order > 0 ? order : 1.f;
+    order = order > 0 ? order : 2.f;
 
     switch(type){
 

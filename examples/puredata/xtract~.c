@@ -46,11 +46,13 @@ typedef struct _tracked_memory {
 typedef struct _xtract {
     t_object  x_obj;
     t_float f;
-    t_int feature;
-    t_int feature_type;
+    t_float *window;
+    t_int feature,
+          is_scalar,
+          is_subframe,
+          init_blocksize,
+          done_init;
     t_symbol *feature_name;
-    t_int init_blocksize;
-    t_int done_init;
     tracked_memory memory;
     void *argv;
 } t_xtract_tilde;
@@ -59,12 +61,12 @@ static t_int *xtract_perform(t_int *w) {
     t_sample *in = (t_sample *)(w[1]);
     t_xtract_tilde *x = (t_xtract_tilde *)(w[2]);
     t_int N = (t_int)(w[3]);
-    t_int return_code = 0;
+    t_int rv = 0;
     float result = 0;
 
-    return_code = xtract[x->feature]((float *)in, N, x->argv, &result);
+    rv = xtract[x->feature]((float *)in, N, x->argv, &result);
 
-    if(return_code == XTRACT_FEATURE_NOT_IMPLEMENTED)
+    if(rv == XTRACT_FEATURE_NOT_IMPLEMENTED)
 	pd_error(x, "Feature not implemented");
 
     /* set nan, inf or -inf to 0 */
@@ -81,7 +83,7 @@ static t_int *xtract_perform_vector(t_int *w) {
     t_float *tmp_in, *tmp_out;
     t_xtract_tilde *x = (t_xtract_tilde *)(w[3]);
     t_int N = (t_int)(w[4]), n;
-    t_int return_code = 0;
+    t_int rv = 0;
 
     if(N != x->init_blocksize && x->done_init){
         error("xtract~ %s: Blocksize mismatch, try specifying the blocksize as a second argument", x->feature_name->s_name);
@@ -96,12 +98,22 @@ static t_int *xtract_perform_vector(t_int *w) {
     if(x->feature == XTRACT_PEAK_SPECTRUM || x->feature == XTRACT_LPC)
 	N >>= 1;
     
-    return_code = xtract[x->feature](tmp_in, N, x->argv, tmp_out);
+    if(x->is_subframe){
+
+        rv = xtract_features_from_subframes(tmp_in, N, x->feature, 
+                x->argv, tmp_out);
+    }
+    else{
+
+        rv = xtract[x->feature](tmp_in, N, x->argv, tmp_out);
     
-    if(return_code == XTRACT_FEATURE_NOT_IMPLEMENTED)
+    }
+
+    if(rv == XTRACT_FEATURE_NOT_IMPLEMENTED)
 	pd_error(x, "Feature not implemented");
 
-    while(n--) out[n] = tmp_out[n];
+    while(n--) 
+        out[n] = tmp_out[n];
     
     freebytes(tmp_in, N * sizeof(t_float));
     freebytes(tmp_out, N * sizeof(t_float));
@@ -111,7 +123,7 @@ static t_int *xtract_perform_vector(t_int *w) {
 
 static void xtract_dsp(t_xtract_tilde *x, t_signal **sp) {
 
-    if(x->feature_type == XTRACT_VECTOR)
+    if(!x->is_scalar)
         dsp_add(xtract_perform_vector, 4, 
             sp[0]->s_vec, sp[1]->s_vec, x, sp[0]->s_n);
             
@@ -123,15 +135,20 @@ static void *xtract_new(t_symbol *me, t_int argc, t_atom *argv) {
     
     t_xtract_tilde *x = (t_xtract_tilde *)pd_new(xtract_class);
     xtract_mel_filter *mf;
-    t_int n, N, f, F, n_args, type;
+    t_int n, N, M, f, F, 
+          n_args, 
+          type;
     t_float *argv_max;
+    t_symbol *arg1;
     xtract_function_descriptor_t *fd;
-    char *p_name, *p_desc, *author;
+    char *p_name, 
+         *p_desc, 
+         *author;
     int year;
 
     p_name = p_desc = author = NULL;
    
-    n_args = type = x->feature = 0;
+    n_args = type = 0;
 
     f = F = XTRACT_FEATURES;
 
@@ -139,13 +156,29 @@ static void *xtract_new(t_symbol *me, t_int argc, t_atom *argv) {
     
     x->argv = NULL;
     x->done_init = 0;
+    x->is_scalar = 0;
+    x->is_subframe = 0;
+    x->feature = -1;
     
-    if(argc)
-        x->feature_name = atom_getsymbol(argv);
-    if(argc > 1)
-        N = atom_getint(&argv[1]);
+    /* Parse arguments */
+    if(argc){
+        arg1 = atom_getsymbol(argv);
+        if(arg1 == gensym("subframe"))
+            x->is_subframe = 1;
+        else
+            x->feature_name = atom_getsymbol(argv);
+    }
+    if(argc > 1){
+        if(x->is_subframe)
+            x->feature_name = atom_getsymbol(argv+1);
+        else
+            N = atom_getint(argv+1);
+    }
+    if(argc > 2)
+        N = atom_getint(argv+2);
 
     x->init_blocksize = N;
+    M = N >> 1;
 
     /* get function descriptors */
     fd = (xtract_function_descriptor_t *)xtract_make_descriptors();
@@ -158,6 +191,9 @@ static void *xtract_new(t_symbol *me, t_int argc, t_atom *argv) {
 	    break;
 	}
     }
+
+    if(x->feature == -1)
+        post("xtract~: feature not found: %s", x->feature_name->s_name);
 
     /* allocate memory for feature arguments */
     n_args = fd[f].argc;
@@ -200,6 +236,11 @@ static void *xtract_new(t_symbol *me, t_int argc, t_atom *argv) {
     else
 	post("xtract~: No arguments given");
     
+    /* Adjust frame size if we are using subframe features */
+    if(x->is_subframe)
+        N = M;
+
+    post("xtract~: window size: %d", N);
 
     /* do init if needed */
     if(x->feature == XTRACT_MFCC){
@@ -223,6 +264,11 @@ static void *xtract_new(t_symbol *me, t_int argc, t_atom *argv) {
         xtract_init_bark(N, NYQUIST, x->argv);
         x->done_init = 1;
     }
+    else if(x->feature == XTRACT_WINDOWED){
+        x->window = xtract_init_window(N, XTRACT_HANN);
+        x->argv = x->window;
+        x->done_init = 1;
+    }
 
     /* Initialise fft_plan if required */
     if(x->feature == XTRACT_AUTOCORRELATION_FFT ||
@@ -232,6 +278,10 @@ static void *xtract_new(t_symbol *me, t_int argc, t_atom *argv) {
         x->done_init = 1;
     }
     
+    if(fd[f].is_scalar)
+	x->is_scalar = 1;
+
+/* 
     if(x->feature == XTRACT_AUTOCORRELATION || 
 	    x->feature == XTRACT_AUTOCORRELATION_FFT || 
 	    x->feature == XTRACT_MFCC || x->feature == XTRACT_AMDF || 
@@ -241,23 +291,31 @@ static void *xtract_new(t_symbol *me, t_int argc, t_atom *argv) {
 	    x->feature == XTRACT_PEAK_SPECTRUM || 
 	    x->feature == XTRACT_HARMONIC_SPECTRUM ||
             x->feature == XTRACT_LPC ||
-            x->feature == XTRACT_LPCC) 
+            x->feature == XTRACT_LPCC ||
+            x->feature == XTRACT_WINDOWED) 
 	x->feature_type = XTRACT_VECTOR;
-                
-    else if (x->feature == XTRACT_FLUX || x->feature == XTRACT_ATTACK_TIME || 
-            x->feature == XTRACT_DECAY_TIME || x->feature == XTRACT_DELTA) 
-        x->feature_type = XTRACT_DELTA;
-       
+        */              
+  /*  else if (x->feature == XTRACT_FLUX || x->feature == XTRACT_ATTACK_TIME || 
+            x->feature == XTRACT_DECAY_TIME || x->feature == XTRACT_DIFFERENCE_VECTOR) 
+        x->feature_type = XTRACT_DELTA; */
+/*       
     else x->feature_type = XTRACT_SCALAR;
+*/
 
     /* argv through right inlet */
     inlet_new(&x->x_obj, &x->x_obj.ob_pd, gensym("list"), gensym("list"));
 
     /* if feature is vector, create signal out */
-    if(x->feature_type == XTRACT_VECTOR) outlet_new(&x->x_obj, &s_signal);
+    if(!x->is_scalar) 
+        outlet_new(&x->x_obj, &s_signal);
 
     /* otherwise: float */
-    else outlet_new(&x->x_obj, &s_float);
+    else 
+        outlet_new(&x->x_obj, &s_float);
+
+    if(x->is_scalar && x->is_subframe)
+        post(
+        "xtract~: warning: subframes not yet supported for scalar features");
     
     /* free the function descriptors */
     xtract_free_descriptors(fd);
@@ -303,6 +361,9 @@ static void xtract_tilde_free(t_xtract_tilde *x) {
 
     if(x->argv != NULL && x->memory.argv)
         freebytes(x->argv, x->memory.argv);
+
+    if(x->window != NULL)
+        xtract_free_window(x->window);
 }
 
 void xtract_tilde_setup(void) {
