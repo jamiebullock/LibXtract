@@ -1,4 +1,4 @@
-#N canvas 534 223 894 462 10;
+#N canvas 520 223 894 462 10;
 #X obj 168 31 noise~;
 #X obj 168 61 xtract~ spectrum;
 #X obj 72 106 xtract~ irregularity_j;
@@ -38,7 +38,7 @@
 #X obj 257 445 xtract~ bark_coefficients;
 #X obj 49 437 xtract~ peak_spectrum;
 #X obj 486 438 xtract~ mfcc;
-#X obj 28 24 block~ 512;
+#X obj 28 24 block~ 1024;
 #X connect 0 0 1 0;
 #X connect 0 0 18 0;
 #X connect 0 0 19 0;

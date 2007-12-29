@@ -34,4 +34,16 @@ xtract.xtract_spectrum(a,len,argv, result)
 for i in range(len):
     print result[i]
 
+
+print 'Computing windowed subframes...'
+
+for i in range(0, len):
+    a[i] = 1.0
+
+window = xtract.xtract_init_window(len / 2, xtract.XTRACT_HANN)
+xtract.xtract_features_from_subframes(a, len, xtract.XTRACT_WINDOWED, window, result) 
+
+for i in range(len):
+    print result[i]
+
 print '\nFinished!\n'
