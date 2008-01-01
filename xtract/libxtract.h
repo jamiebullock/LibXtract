@@ -249,6 +249,8 @@ typedef enum xtract_vector_ {
 /** \brief Data structure containing useful information about functions provided by LibXtract. */
 typedef struct _xtract_function_descriptor {
 
+    int id;
+
     struct {
 	char name[XTRACT_MAX_NAME_LENGTH];
 	char p_name[XTRACT_MAX_NAME_LENGTH]; /* pretty name */
@@ -379,6 +381,12 @@ int xtract_init_bark(int N, float sr, int *band_limits);
  */
 int xtract_init_fft(int N, int feature_name);
 
+/** \brief Free memory used for fft plans
+ *
+ * This function should be used to explicitly free memory allocated for ffts by xtract_init_fft(). It is primarily intended for use if a new FFT needs to be taken with a different blocksize. If only one fft size is required then there is no need to call this function since it will be called when the program exits. 
+ * */
+void xtract_free_fft(void);
+
 /** \brief Make a window of a given type and return a pointer to it
  *
  * \param N: the size of the window
@@ -395,10 +403,10 @@ float *xtract_init_window(const int N, const int type);
 void xtract_free_window(float *window);
 
 /* \brief A function to build an array of function descriptors */
-void *xtract_make_descriptors();
+xtract_function_descriptor_t *xtract_make_descriptors();
 
 /* \brief A function to free an array of function descriptors */
-int xtract_free_descriptors(void *fd);
+int xtract_free_descriptors(xtract_function_descriptor_t *fd);
 /* Free functions */
 
 /** @} */

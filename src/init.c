@@ -203,6 +203,18 @@ int xtract_init_fft(int N, int feature_name){
 
 }
 
+void xtract_free_fft(void){
+    if(fft_plans.spectrum_plan != NULL)
+        fftwf_destroy_plan(fft_plans.spectrum_plan);
+    if(fft_plans.autocorrelation_fft_plan_1 != NULL)
+        fftwf_destroy_plan(fft_plans.autocorrelation_fft_plan_1);
+    if(fft_plans.autocorrelation_fft_plan_2 != NULL)
+        fftwf_destroy_plan(fft_plans.autocorrelation_fft_plan_2);
+    if(fft_plans.dct_plan != NULL)
+        fftwf_destroy_plan(fft_plans.dct_plan);
+//    fftwf_cleanup();
+}
+
 #endif
 
 int xtract_init_bark(int N, float sr, int *band_limits){

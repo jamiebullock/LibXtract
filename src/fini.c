@@ -22,7 +22,8 @@
 
 #ifdef XTRACT_FFT
 #include <fftw3.h>
-#include "xtract_globals_private.h"
+//#include "xtract_globals_private.h"
+#include "xtract/libxtract.h"
 #endif
 
 #ifdef __GNUC__
@@ -32,15 +33,8 @@ void _fini()
 #endif
 {
 #ifdef XTRACT_FFT
-    if(fft_plans.spectrum_plan != NULL)
-        fftwf_destroy_plan(fft_plans.spectrum_plan);
-    if(fft_plans.autocorrelation_fft_plan_1 != NULL)
-        fftwf_destroy_plan(fft_plans.autocorrelation_fft_plan_1);
-    if(fft_plans.autocorrelation_fft_plan_2 != NULL)
-        fftwf_destroy_plan(fft_plans.autocorrelation_fft_plan_2);
-    if(fft_plans.dct_plan != NULL)
-        fftwf_destroy_plan(fft_plans.dct_plan);
-    fftwf_cleanup();
+xtract_free_fft();
+fftwf_cleanup();
 #endif
 }
 

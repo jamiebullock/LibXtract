@@ -16,8 +16,16 @@ for i in range(0, len):
     a[i] = 2 * i
     temp.append(str(a[i]))
 
-print 'The mean of ' + ', '.join(temp) + ' is: %.2f' % \
-	  xtract.xtract_mean(a,len,None)[1]
+mean = xtract.xtract_mean(a,len,None)[1]
+
+print 'The mean of ' + ', '.join(temp) + ' is: %.2f' % mean
+
+argv = xtract.floatArray(1)
+argv[0] = mean
+
+variance = xtract.xtract_variance(a, len, argv)[1]
+
+print 'The variance is %.2f' % variance
 
 print 'Computing spectrum...'
 

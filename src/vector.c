@@ -368,6 +368,7 @@ int xtract_bark_coefficients(const float *data, const int N, const void *argv, f
     limits = (int *)argv;
     
     for(band = 0; band < XTRACT_BARK_BANDS - 1; band++){
+        result[band] = 0.f;
         for(n = limits[band]; n < limits[band + 1]; n++)
             result[band] += data[n];
     }

@@ -24,7 +24,7 @@
 #include <string.h>
 #define XTRACT
 
-void *xtract_make_descriptors(){
+xtract_function_descriptor_t *xtract_make_descriptors(void){
 
     int f , F;
     char *name, *p_name, *desc, *p_desc, *author; 
@@ -45,6 +45,7 @@ void *xtract_make_descriptors(){
     while(f--){
 
         d = &fd[f];
+        d->id = f;
         argc = &d->argc;
         argv_type = &d->argv.type;
 
@@ -502,7 +503,7 @@ void *xtract_make_descriptors(){
                 strcpy(author, "");
                 break;
             case XTRACT_ROLLOFF:
-                strcpy(name, "spectral_rolloff");
+                strcpy(name, "rolloff");
                 strcpy(p_name, "Spectral Rolloff");
                 strcpy(desc, 
                         "Extract the rolloff point of a spectrum");
@@ -1250,7 +1251,7 @@ void *xtract_make_descriptors(){
     return fd;
 }
 
-int xtract_free_descriptors(void *fd){
+int xtract_free_descriptors(xtract_function_descriptor_t *fd){
 
     if (fd != NULL) {
         free(fd);

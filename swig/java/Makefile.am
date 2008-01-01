@@ -1,6 +1,7 @@
 
 javasources = \
 	floatArray.java \
+	intArray.java \
 	SWIGTYPE_p_float.java \
 	SWIGTYPE_p_int.java \
 	SWIGTYPE_p_p_float.java \
@@ -32,6 +33,7 @@ javasources = \
 	
 javaclasses = \
 	floatArray.class \
+	intArray.class \
 	SWIGTYPE_p_float.class \
 	SWIGTYPE_p_int.class \
 	SWIGTYPE_p_p_float.class \
