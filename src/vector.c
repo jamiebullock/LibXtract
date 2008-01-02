@@ -47,7 +47,8 @@ int xtract_spectrum(const float *data, const int N, const void *argv, float *res
 
     float *input, *rfft, q, temp, max;
     size_t bytes;
-    int n, 
+    int n,
+        m,
         NxN, 
         M, 
         vector, 
@@ -91,36 +92,37 @@ int xtract_spectrum(const float *data, const int N, const void *argv, float *res
 		    temp = log(sqrt(temp) / N);
 		else
 		    temp = XTRACT_LOG_LIMIT_DB;
-		if(withDC) {
-		    result[n] = 
-			/*Normalise*/
-			(temp + XTRACT_DB_SCALE_OFFSET) / 
-			XTRACT_DB_SCALE_OFFSET; 
-		    result[M + n + 1] = n * q;
-		}
-		else {
-		    result[n - 1] =
-			(temp + XTRACT_DB_SCALE_OFFSET) / 
-			XTRACT_DB_SCALE_OFFSET; 
-		    result[M + n - 1] = n * q;
-		}
-                max = result[n] > max ? result[n] : max;
+
+                if(withDC){
+                    m = n;
+		    result[M + m + 1] = n * q;
+                }
+                else{
+                    m = n - 1;
+		    result[M + m] = n * q;
+                }
+                
+                result[m] = 
+                    /* Scaling */
+                    (temp + XTRACT_DB_SCALE_OFFSET) / 
+                    XTRACT_DB_SCALE_OFFSET; 
+		
+                max = result[m] > max ? result[m] : max;
 	    }
 	    break;
 
 	case XTRACT_POWER_SPECTRUM:
 	    for(n = 1; n < M; n++){
-		if(withDC){
-		    result[n] = (XTRACT_SQ(rfft[n]) + XTRACT_SQ(rfft[N - n])) 
-			/ NxN;
-		    result[M + n  + 1] = n * q;
-		}
-		else {
-		    result[n - 1] = 
-			(XTRACT_SQ(rfft[n]) + XTRACT_SQ(rfft[N - n])) / NxN;
-		    result[M + n - 1] = n * q;
-		}
-                max = result[n] > max ? result[n] : max;
+                if(withDC){
+                    m = n;
+		    result[M + m + 1] = n * q;
+                }
+                else{
+                    m = n - 1;
+		    result[M + m] = n * q;
+                }
+                result[m] = (XTRACT_SQ(rfft[n]) + XTRACT_SQ(rfft[N - n])) / NxN;
+                max = result[m] > max ? result[m] : max;
 	    }
 	    break;
 
@@ -131,34 +133,37 @@ int xtract_spectrum(const float *data, const int N, const void *argv, float *res
 		    temp = log(temp / NxN);
 		else
 		    temp = XTRACT_LOG_LIMIT_DB; 		
-		if(withDC){
-		    result[n] = (temp + XTRACT_DB_SCALE_OFFSET) / 
+
+                if(withDC){
+                    m = n;
+		    result[M + m + 1] = n * q;
+                }
+                else{
+                    m = n - 1;
+		    result[M + m] = n * q;
+                }
+
+                result[m] = (temp + XTRACT_DB_SCALE_OFFSET) / 
 			XTRACT_DB_SCALE_OFFSET; 
-		    result[M + n + 1] = n * q;
-		}
-		else {
-		    result[n - 1] = (temp + XTRACT_DB_SCALE_OFFSET) / 
-			XTRACT_DB_SCALE_OFFSET; 
-		    result[M + n - 1] = n * q;
-		}
-                max = result[n] > max ? result[n] : max;
+                max = result[m] > max ? result[m] : max;
 	    }
 	    break;
 
 	default:
 	    /* MAGNITUDE_SPECTRUM */
 	    for(n = 1; n < M; n++){
-		if(withDC){
-		    result[n] = sqrt(XTRACT_SQ(rfft[n]) + 
-			    XTRACT_SQ(rfft[N - n])) / N; 
-		    result[M + n + 1] = n * q;
-		}
-		else {
-		    result[n - 1] = sqrt(XTRACT_SQ(rfft[n]) + 
-			    XTRACT_SQ(rfft[N - n])) / N; 
-		    result[M + n - 1] = n * q;
-		}
-                max = result[n] > max ? result[n] : max;
+                if(withDC){
+                    m = n;
+		    result[M + m + 1] = n * q;
+                }
+                else{
+                    m = n - 1;
+		    result[M + m] = n * q;
+                }
+
+                result[m] = sqrt(XTRACT_SQ(rfft[n]) + 
+                        XTRACT_SQ(rfft[N - n])) / N; 
+                max = result[m] > max ? result[m] : max;
 	    }
 	    break;
     }
@@ -172,7 +177,6 @@ int xtract_spectrum(const float *data, const int N, const void *argv, float *res
 	result[M] = XTRACT_SQ(rfft[M]);
 	result[N + 1] = q * M;
         max = result[M] > max ? result[M] : max;
-        M++; /* So we normalise the Nyquist (below) */
     }
     else {
 	/* The Nyquist */ 
@@ -180,7 +184,6 @@ int xtract_spectrum(const float *data, const int N, const void *argv, float *res
 	result[N - 1] = q * M;
         max = result[M - 1] > max ? result[M - 1] : max;
     }
-    
 
     if(normalise){
         for(n = 0; n < M; n++)

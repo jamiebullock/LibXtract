@@ -45,7 +45,7 @@ int xtract_features_from_subframes(const float *data, const int N, const int fea
     float *result1,
           *result2;
 
-    int n,
+    int n, i,
         rv;
 
     n = N >> 1;

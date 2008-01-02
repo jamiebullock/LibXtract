@@ -35,21 +35,21 @@ int xtract_lnorm(const float *data, const int N, const void *argv , float *resul
     int n,
         type;
 
-    float order,
-          temp = 0.f;
+    float order;
 
     order = *(float *)argv;
-    type = (int)*(float *)argv+1;
+    type = *((float *)argv+1);
 
     order = order > 0 ? order : 2.f;
+
+    *result = 0.f;
 
     switch(type){
 
         case XTRACT_POSITIVE_SLOPE:
             for(n = 0; n < N; n++){
-                temp = powf(data[n], order);
                 if(data[n] > 0)
-                    *result += temp;
+                    *result += powf(data[n], order);
             }
             break;
         default:
