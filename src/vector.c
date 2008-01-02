@@ -488,13 +488,13 @@ int xtract_lpc(const float *data, const int N, const void *argv, float *result){
     M = L * 2; /* The length of *result */
     ref = result;
     lpc = result+L;
-
+/*
     if(error == 0.0){
         for(i = 0; i < M; i++)
             result[i] = 0.f;
         return XTRACT_NO_RESULT;
     }
-
+*/
     memset(result, 0, M * sizeof(float));
 
     for (i = 0; i < L; i++) {
