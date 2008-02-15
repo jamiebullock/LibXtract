@@ -21,7 +21,17 @@
 
 /* helper.c: helper functions. */
 
+#include <config.h>
+
+#include <stdio.h>
+
 #include "xtract/libxtract.h"
+
+#ifdef WORDS_BIGENDIAN
+#define INDEX 0
+#else
+#define INDEX 1
+#endif
 
 int xtract_windowed(const float *data, const int N, const void *argv, float *result){
 
@@ -45,8 +55,7 @@ int xtract_features_from_subframes(const float *data, const int N, const int fea
     float *result1,
           *result2;
 
-    int n, i,
-        rv;
+    int n, rv;
 
     n = N >> 1;
 
@@ -63,3 +72,12 @@ int xtract_features_from_subframes(const float *data, const int N, const int fea
     return rv;
 
 }
+
+inline int xtract_is_denormal(double const d){
+    if(sizeof(d) != 2 * sizeof(int))
+        fprintf(stderr, "libxtract: Error: xtract_is_denormal() detects inconsistent wordlength for type 'double'\n");
+
+    int l = ((int *)&d)[INDEX];
+    return (l&0x7ff00000) == 0 && d!=0; //Check for 0 may not be necessary
+}
+

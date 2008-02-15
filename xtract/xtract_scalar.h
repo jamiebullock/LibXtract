@@ -239,21 +239,34 @@ int xtract_rolloff(const float *data, const int N, const void *argv, float *resu
  */
 int xtract_loudness(const float *data, const int N, const void *argv, float *result);
 
-/** \brief Extract the spectral flatness measure of an input vector using a method described by Tristan Jehan (2005)
+/** \brief Extract the spectral flatness measure of an input vector, where the flatness measure (SFM) is defined as the ratio of the geometric mean to the arithmetic mean of a magnitude spectrum.
+ *
+ * \note The computation method used here is the most efficient by a significant margin, but suffers from precision problems due to the multiplication operationin the geometric mean calculation. This is particularly accute for larger values of N (>=256). However, as noted by Peeters (2003), the SFM should generally be computed on a small number of 'bands' rather than on the complete magnitude spectrum. It is therefore highly recommended that xtract_bands() is used prior to calling xtract_flatness().
  * 
- * \param *data: a pointer to the first element in an array of floats representing the magnitude coefficients from the spectrum of an audio vector, (e.g. the first half of the array pointed to by *result from xtract_spectrum().
- * \param N: the number of elements to be considered
+ * \param *data: a pointer to the first element in an array of floats representing the magnitude coefficients from the spectrum of an audio vector, (e.g. the first half of the array pointed to by *result from xtract_spectrum(). Alternatively the magnitudes from a number of 'subbands' can be used by using *result from xtract_bands().
+ * \param N: the number of *data array elements to be considered
  * \param *argv: a pointer to NULL
- * \param *result: the spectral flatness of N values from the array pointed to by *data
+ * \param *result: the flatness of N values from the array pointed to by *data
  */
 int xtract_flatness(const float *data, const int N, const void *argv, float *result);
 
+/** \brief Extract the LOG spectral flatness measure of an input vector
+ *
+ * \param *data: a pointer to NULL.
+ * \param N: not used - can safely be set to 0.
+ * \param *argv: a pointer to a float represnting spectral flatness.
+ * \param *result: the LOG spectral flatness of N values from the array pointed to by *data
+ *
+ *  flatness_db = 10 * log10(flatness)
+ *
+ */
+int xtract_flatness_db(const float *data, const int N, const void *argv, float *result);
 
-/** \brief Extract the tonality factor of an input vector using a method described by Tristan Jehan (2005)
+/** \brief Extract the tonality factor of an input vector using a method described by Peeters 2003
  * 
- * \param *data: not used.
- * \param N: not used
- * \param *argv: a pointer to the spectral flatness measure of an audio vector (e.g. the output from xtract_flatness)
+ * \param *data: a pointer to NULL.
+ * \param N: not used - can safely be set to 0.
+ * \param *argv: a pointer to the LOG spectral flatness measure of an audio vector (e.g. the output from xtract_flatness_db)
  * \param *result: the tonality factor of N values from the array pointed to by *data
  */
 int xtract_tonality(const float *data, const int N, const void *argv, float *result);
@@ -309,7 +322,7 @@ int xtract_power(const float *data, const int N, const void *argv, float *result
  * \param *data: a pointer to the first element in an array of floats representing the amplitudes of the harmonic spectrum of an audio vector. It is sufficient to pass in a pointer to the first half of the array pointed to by *result from xtract_harmonic_spectrum().
  * \param N: the number of elements to be considered. If using the array pointed to by *result from xtract_harmonics, N should equal half the total array size i.e., just the amplitudes of the peaks.
  * \param *argv: a pointer to NULL
- * \param *result: the odd/even harmonic ratio of N values from the array pointed to by *data
+ * \param *result: the even/odd harmonic ratio of N values from the array pointed to by *data
  */
 int xtract_odd_even_ratio(const float *data, const int N, const void *argv, float *result);
 

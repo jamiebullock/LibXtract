@@ -37,6 +37,22 @@
     }
 #endif
 
+#ifndef powf
+    #define powf pow
+#endif
+
+#ifndef expf
+    #define expf exp
+#endif
+
+#ifndef sqrtf
+    #define sqrtf sqrt
+#endif
+
+#ifndef fabsf
+    #define fabsf fabs
+#endif
+
 #ifdef XTRACT_FFT
 
 #include <fftw3.h>
@@ -45,11 +61,10 @@
 
 int xtract_spectrum(const float *data, const int N, const void *argv, float *result){
 
-    float *input, *rfft, q, temp, max;
+    float *input, *rfft, q, temp, max, NxN;
     size_t bytes;
     int n,
         m,
-        NxN, 
         M, 
         vector, 
         withDC, 
@@ -89,7 +104,7 @@ int xtract_spectrum(const float *data, const int N, const void *argv, float *res
 	    for(n = 1; n < M; n++){
 		if ((temp = XTRACT_SQ(rfft[n]) + 
 			    XTRACT_SQ(rfft[N - n])) > XTRACT_LOG_LIMIT)
-		    temp = log(sqrt(temp) / N);
+		    temp = logf(sqrtf(temp) / (float)N);
 		else
 		    temp = XTRACT_LOG_LIMIT_DB;
 
@@ -130,7 +145,7 @@ int xtract_spectrum(const float *data, const int N, const void *argv, float *res
 	    for(n = 1; n < M; n++){
 		if ((temp = XTRACT_SQ(rfft[n]) + XTRACT_SQ(rfft[N - n])) > 
 			XTRACT_LOG_LIMIT)
-		    temp = log(temp / NxN);
+		    temp = logf(temp / NxN);
 		else
 		    temp = XTRACT_LOG_LIMIT_DB; 		
 
@@ -161,8 +176,8 @@ int xtract_spectrum(const float *data, const int N, const void *argv, float *res
 		    result[M + m] = n * q;
                 }
 
-                result[m] = sqrt(XTRACT_SQ(rfft[n]) + 
-                        XTRACT_SQ(rfft[N - n])) / N; 
+                result[m] = sqrtf(XTRACT_SQ(rfft[n]) + 
+                        XTRACT_SQ(rfft[N - n])) / (float)N; 
                 max = result[m] > max ? result[m] : max;
 	    }
 	    break;
@@ -254,7 +269,7 @@ int xtract_mfcc(const float *data, const int N, const void *argv, float *result)
         for(n = 0; n < N; n++){
             result[filter] += data[n] * f->filters[filter][n];
         }
-        result[filter] = log(result[filter] < XTRACT_LOG_LIMIT ? XTRACT_LOG_LIMIT : result[filter]);
+        result[filter] = logf(result[filter] < XTRACT_LOG_LIMIT ? XTRACT_LOG_LIMIT : result[filter]);
     }
 
     xtract_dct(result, f->n_filters, NULL, result);
@@ -334,13 +349,13 @@ int xtract_amdf(const float *data, const int N, const void *argv, float *result)
     float md, temp;
 
     while(n--){
-       md = 0;
+       md = 0.f;
         for(i = 0; i < N - n; i++){
             temp = data[i] - data[i + n];
 			temp = (temp < 0 ? -temp : temp);
 			md += temp;
         }
-        result[n] = md / N;
+        result[n] = md / (float)N;
     }
 
     return XTRACT_SUCCESS;
@@ -353,12 +368,12 @@ int xtract_asdf(const float *data, const int N, const void *argv, float *result)
     float sd;
 
     while(n--){
-       sd = 0;
+       sd = 0.f;
         for(i = 0; i < N - n; i++){
             /*sd = 1;*/
             sd += XTRACT_SQ(data[i] - data[i + n]);
         }
-        result[n] = sd / N;
+        result[n] = sd / (float)N;
     }
 
     return XTRACT_SUCCESS;
@@ -488,13 +503,12 @@ int xtract_lpc(const float *data, const int N, const void *argv, float *result){
     M = L * 2; /* The length of *result */
     ref = result;
     lpc = result+L;
-/*
+
     if(error == 0.0){
-        for(i = 0; i < M; i++)
-            result[i] = 0.f;
+        memset(result, 0, M * sizeof(float));
         return XTRACT_NO_RESULT;
     }
-*/
+
     memset(result, 0, M * sizeof(float));
 
     for (i = 0; i < L; i++) {

@@ -168,6 +168,10 @@ static void *xtract_new(t_symbol *me, t_int argc, t_atom *argv) {
         else
             x->feature_name = atom_getsymbol(argv);
     }
+    else {
+	post("xtract~: No arguments given");
+        return (void *)x;
+    }
     if(argc > 1){
         if(x->is_subframe)
             x->feature_name = atom_getsymbol(argv+1);
@@ -233,8 +237,6 @@ static void *xtract_new(t_symbol *me, t_int argc, t_atom *argv) {
 	if(strcmp(author, "") && year)	
 	    post("xtract~: %s(%d)", author, year);
     }	
-    else
-	post("xtract~: No arguments given");
     
     /* Adjust frame size if we are using subframe features */
     if(x->is_subframe)

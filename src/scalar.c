@@ -21,12 +21,16 @@
 
 /* scalar.c: defines functions that extract a feature as a single value from an input vector */
 
-#include "xtract/libxtract.h"
-#include "xtract_macros_private.h"
-#include "math.h"
+#include <config.h>
+
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <math.h>
+
+#include "xtract/libxtract.h"
+#include "xtract/xtract_helper.h"
+#include "xtract_macros_private.h"
 
 #ifndef powf
     #define powf pow
@@ -36,8 +40,20 @@
     #define expf exp
 #endif
 
+#ifndef sqrtf
+    #define sqrtf sqrt
+#endif
+
+#ifndef fabsf
+    #define fabsf fabs
+#endif
+
+
 void test(void){
-    printf("Hello world");
+    printf("Hello world\n");
+#ifdef WORDS_BIGENDIAN
+    printf("Big endian!\n");
+#endif
 }
 
 int xtract_mean(const float *data, const int N, const void *argv, float *result){
@@ -58,8 +74,10 @@ int xtract_variance(const float *data, const int N, const void *argv, float *res
 
     int n = N;
 
+    *result += 0.f;
+
     while(n--)
-	*result += pow(data[n] - *(float *)argv, 2);
+	*result += powf(data[n] - *(float *)argv, 2);
 
     *result = *result / (N - 1);
 
@@ -68,7 +86,7 @@ int xtract_variance(const float *data, const int N, const void *argv, float *res
 
 int xtract_standard_deviation(const float *data, const int N, const void *argv, float *result){
 
-    *result = sqrt(*(float *)argv);
+    *result = sqrtf(*(float *)argv);
 
     return XTRACT_SUCCESS;
 }
@@ -77,8 +95,10 @@ int xtract_average_deviation(const float *data, const int N, const void *argv, f
 
     int n = N;
 
+    *result += 0.f;
+
     while(n--)
-	*result += fabs(data[n] - *(float *)argv);
+	*result += fabsf(data[n] - *(float *)argv);
 
     *result /= N;
 
@@ -91,9 +111,11 @@ int xtract_skewness(const float *data, const int N, const void *argv,  float *re
 
     float temp = 0.f;
 
+    *result += 0.f;
+
     while(n--){
 	temp = (data[n] - ((float *)argv)[0]) / ((float *)argv)[1];
-	*result += pow(temp, 3);
+	*result += powf(temp, 3);
     }
 
     *result /= N;
@@ -106,11 +128,13 @@ int xtract_kurtosis(const float *data, const int N, const void *argv,  float *re
 
     int n = N;
 
-    float temp;
+    float temp = 0.f;
+
+    *result += 0.f;
 
     while(n--){
 	temp = (data[n] - ((float *)argv)[0]) / ((float *)argv)[1];
-	*result += pow(temp, 4);
+	*result += powf(temp, 4);
     }
 
     *result /= N;
@@ -134,7 +158,10 @@ int xtract_spectral_centroid(const float *data, const int N, const void *argv,  
 	A += amps[n];
     }
 
-    *result = FA / A;
+    if(A == 0.f)
+        *result = 0.f;
+    else
+        *result = FA / A;
 
     return XTRACT_SUCCESS;
 }
@@ -156,6 +183,8 @@ int xtract_spectral_variance(const float *data, const int N, const void *argv, f
     amps = data;
     freqs = data + m;
 
+    *result += 0.f;
+
     while(m--){
 	A += amps[m];
 	*result += powf((freqs[m]  - *(float *)argv) * amps[m], 2);
@@ -168,7 +197,7 @@ int xtract_spectral_variance(const float *data, const int N, const void *argv, f
 
 int xtract_spectral_standard_deviation(const float *data, const int N, const void *argv, float *result){
 
-    *result = sqrt(*(float *)argv); 
+    *result = sqrtf(*(float *)argv); 
 
     return XTRACT_SUCCESS;
 }
@@ -184,9 +213,11 @@ int xtract_spectral_average_deviation(const float *data, const int N, const void
     amps = data;
     freqs = data + m;
 
+    *result += 0.f;
+
     while(m--){
 	A += amps[m];
-	*result += fabs((amps[m] * freqs[m]) - *(float *)argv);
+	*result += fabsf((amps[m] * freqs[m]) - *(float *)argv);
     }
 
     *result /= A;
@@ -205,11 +236,13 @@ int xtract_spectral_skewness(const float *data, const int N, const void *argv,  
     amps = data;
     freqs = data + m;
 
+    *result += 0.f;
+
     while(m--){
 	A += amps[m];
 	temp = ((amps[m] * freqs[m]) - 
 		((float *)argv)[0]) / ((float *)argv)[1];
-	*result += pow(temp, 3);
+	*result += powf(temp, 3);
     }
 
     *result /= A;
@@ -228,11 +261,13 @@ int xtract_spectral_kurtosis(const float *data, const int N, const void *argv,  
     amps = data;
     freqs = data + m;
 
+    *result += 0.f;
+
     while(m--){
 	A += amps[m];
 	temp = ((amps[m] * freqs[m]) - 
 		((float *)argv)[0]) / ((float *)argv)[1];
-	*result += pow(temp, 4);
+	*result += powf(temp, 4);
     }
 
     *result /= A;
@@ -246,10 +281,10 @@ int xtract_irregularity_k(const float *data, const int N, const void *argv, floa
     int n,
 	M = N - 1;
 	
-	*result = 0.f;
+    *result = 0.f;
 	
     for(n = 1; n < M; n++)
-	*result += fabs(data[n] - (data[n-1] + data[n] + data[n+1]) / 3);
+	*result += fabsf(data[n] - (data[n-1] + data[n] + data[n+1]) / 3.f);
 
     return XTRACT_SUCCESS;
 }
@@ -261,8 +296,8 @@ int xtract_irregularity_j(const float *data, const int N, const void *argv, floa
     double num = 0.f, den = 0.f;
 
     while(n--){
-	num += pow(data[n] - data[n+1], 2);
-	den += pow(data[n], 2);
+	num += powf(data[n] - data[n+1], 2);
+	den += powf(data[n], 2);
     }
 
     *result = (float)(num / den);
@@ -286,18 +321,23 @@ int xtract_tristimulus_1(const float *data, const int N, const void *argv, float
 	}
     }
 
-    *result = p1 / den;
-
-    return XTRACT_SUCCESS;
+    if(den == 0.f || p1 == 0.f){
+        *result = 0.f;
+        return XTRACT_NO_RESULT;
+    }
+    else{
+        *result = p1 / den;
+        return XTRACT_SUCCESS;
+    }
 }
 
 int xtract_tristimulus_2(const float *data, const int N, const void *argv, float *result){
 
     int n = N;
 
-    float den, p2, p3, p4, temp;
+    float den, p2, p3, p4, ps, temp;
 
-    den = p2 = p3 = p4 = temp = 0.f;
+    den = p2 = p3 = p4 = ps = temp = 0.f;
 
     for(n = 0; n < N; n++){
 	if((temp = data[n])){
@@ -311,9 +351,17 @@ int xtract_tristimulus_2(const float *data, const int N, const void *argv, float
 	}
     }
 
-    *result = (p2 + p3 + p4)  / den;
+    ps = p2 + p3 + p4;
 
-    return XTRACT_SUCCESS;
+    if(den == 0.f || ps == 0.f){
+        *result = 0.f;
+        return XTRACT_NO_RESULT;
+    }
+    else{
+        *result = ps / den;
+        return XTRACT_SUCCESS;
+    }
+
 }
 
 int xtract_tristimulus_3(const float *data, const int N, const void *argv, float *result){
@@ -333,9 +381,14 @@ int xtract_tristimulus_3(const float *data, const int N, const void *argv, float
 	}
     }
 
-    *result = num / den;
-
-    return XTRACT_SUCCESS;
+    if(den == 0.f || num == 0.f){
+        *result = 0.f;
+        return XTRACT_NO_RESULT;
+    }
+    else{
+        *result = num / den;
+        return XTRACT_SUCCESS;
+    }
 }
 
 int xtract_smoothness(const float *data, const int N, const void *argv, float *result){
@@ -347,14 +400,18 @@ int xtract_smoothness(const float *data, const int N, const void *argv, float *r
     input = (float *)malloc(N * sizeof(float));
     memcpy(input, data, N * sizeof(float));
 
-    if (input[0] <= 0) input[0] = 1;
+    if (input[0] <= 0) 
+        input[0] = XTRACT_LOG_LIMIT;
+    if (input[1] <= 0) 
+        input[1] = XTRACT_LOG_LIMIT;
 
     M = N - 1;
 
     for(n = 1; n < M; n++){ 
-	if(input[n] <= 0) input[n] = 1;
-	*result += fabs(20 * log(input[n]) - (20 * log(input[n-1]) + 
-		    20 * log(input[n]) + 20 * log(input[n+1])) / 3);
+	if(input[n+1] <= 0) 
+            input[n+1] = XTRACT_LOG_LIMIT;
+	*result += fabsf(20.f * logf(input[n]) - (20.f * logf(input[n-1]) + 
+		    20.f * logf(input[n]) + 20.f * logf(input[n+1])) / 3.f);
     }
 
     free(input);
@@ -377,7 +434,7 @@ int xtract_spread(const float *data, const int N, const void *argv, float *resul
 	den += data[n];
     }
 
-    *result = sqrt(num / den);
+    *result = sqrtf(num / den);
 
     return XTRACT_SUCCESS;
 }
@@ -389,7 +446,7 @@ int xtract_zcr(const float *data, const int N, const void *argv, float *result){
     for(n = 1; n < N; n++)
 	if(data[n] * data[n-1] < 0) (*result)++;
 
-    *result /= N;
+    *result /= (float)N;
 
     return XTRACT_SUCCESS;
 }
@@ -419,6 +476,8 @@ int xtract_loudness(const float *data, const int N, const void *argv, float *res
 
     int n = N, rv;
 
+    *result = 0.f;
+
     if(n > XTRACT_BARK_BANDS){
 	n = XTRACT_BARK_BANDS; 
 	rv = XTRACT_BAD_VECTOR_SIZE; 
@@ -434,30 +493,56 @@ int xtract_loudness(const float *data, const int N, const void *argv, float *res
 
 int xtract_flatness(const float *data, const int N, const void *argv, float *result){
 
-    int n;
+    int n, count, denormal_found;
 
     double num, den, temp; 
 
-    den = data[0];
-    num = (data[0] == 0.f ? 1.f : data[0]);
+    num = 1.f;
+    den = temp = 0.f;
 
-    for(n = 1; n < N; n++){
-	if((temp = data[n]) != 0.f) {
-	    num *= temp;
-	    den += temp;
-	}
+    denormal_found = 0;
+    count = 0;
+
+    for(n = 0; n < N; n++){
+        if((temp = data[n]) != 0.f) {
+            if (xtract_is_denormal(num)){
+                denormal_found = 1;
+                break;
+            }
+            num *= temp;
+            den += temp;
+            count++;
+        }
     }
 
-    num = powf(num, 1.f / N);
-    den /= N;
+    if(!count){
+        *result = 0.f;
+        return XTRACT_NO_RESULT;
+    }
 
-    if(num < XTRACT_VERY_SMALL_NUMBER) 
-	num = XTRACT_VERY_SMALL_NUMBER;
+    num = powf(num, 1.f / (float)N);
+    den /= (float)N;
 
-    if(den < XTRACT_VERY_SMALL_NUMBER) 
-	den = XTRACT_VERY_SMALL_NUMBER;
 
-    *result = 10 * log10(num / den);
+    *result = (float) (num / den);
+
+    if(denormal_found)
+        return XTRACT_DENORMAL_FOUND;
+    else
+        return XTRACT_SUCCESS;
+    
+}
+
+int xtract_flatness_db(const float *data, const int N, const void *argv, float *result){
+
+    float flatness_db;
+
+    flatness_db = *(float *)argv;
+
+    if (flatness_db <= 0) 
+        flatness_db = XTRACT_LOG_LIMIT;
+
+    *result = 10 * log10f(flatness_db);
 
     return XTRACT_SUCCESS;
 
@@ -465,13 +550,11 @@ int xtract_flatness(const float *data, const int N, const void *argv, float *res
 
 int xtract_tonality(const float *data, const int N, const void *argv, float *result){
 
-    float sfmdb, sfm;
+    float sfmdb;
 
-    sfm = *(float *)argv;
+    sfmdb = *(float *)argv;
 
-    sfmdb = sfm / -60.f;
-
-    *result = XTRACT_MIN(sfmdb, 1);
+    *result = XTRACT_MIN(sfmdb / -60.f, 1);
 
     return XTRACT_SUCCESS;
 }
@@ -512,9 +595,11 @@ int xtract_rms_amplitude(const float *data, const int N, const void *argv, float
 
     int n = N;
 
+    *result = 0.f;
+
     while(n--) *result += XTRACT_SQ(data[n]);
 
-    *result = sqrt(*result / N);
+    *result = sqrtf(*result / (float)N);
 
     return XTRACT_SUCCESS;
 }
@@ -531,7 +616,7 @@ int xtract_spectral_inharmonicity(const float *data, const int N, const void *ar
 
     while(n--){
 	if(amps[n]){
-	    num += fabs(freqs[n] - n * fund) * XTRACT_SQ(amps[n]);
+	    num += fabsf(freqs[n] - n * fund) * XTRACT_SQ(amps[n]);
 	    den += XTRACT_SQ(amps[n]);
 	}
     }
@@ -552,30 +637,37 @@ int xtract_odd_even_ratio(const float *data, const int N, const void *argv, floa
 
     int M = (N >> 1), n;
 
-    float num = 0.f, den = 0.f,  temp;
+    float odd = 0.f, even = 0.f,  temp;
 
     for(n = 0; n < M; n++){
 	if((temp = data[n])){
 	    if(XTRACT_IS_ODD(n)){
-		num += temp;
+		odd += temp;
 	    }
 	    else{
-		den += temp;
+		even += temp;
 	    }
 	}
     }
 
-    *result = num / den;
-
-    return XTRACT_SUCCESS;
+    if(odd == 0.f || even == 0.f){
+        *result = 0.f;
+        return XTRACT_NO_RESULT;
+    }
+    else {
+        *result = odd / even;
+        return XTRACT_SUCCESS;
+    }
 }
 
 int xtract_sharpness(const float *data, const int N, const void *argv, float *result){
 
     int n = N, rv;
-    float sl, g, temp; /* sl = specific loudness */
+    float sl, g; /* sl = specific loudness */
+    double temp; 
 
-    sl = g = temp = 0.f;
+    sl = g = 0.f;
+    temp = 0.f;
 
     if(n > XTRACT_BARK_BANDS) 
 	rv = XTRACT_BAD_VECTOR_SIZE; 
@@ -589,7 +681,8 @@ int xtract_sharpness(const float *data, const int N, const void *argv, float *re
 	temp += n * g * sl;
     }
 
-    *result = 0.11 * temp / N;
+    temp = 0.11 * temp / (float)N;
+    *result = (float)temp;
 
     return rv;
 
@@ -655,6 +748,8 @@ int xtract_sum(const float *data, const int N, const void *argv, float *result){
 
     int n = N;
 
+    *result = 0.f;
+
     while(n--)
 	*result += *data++;
 
@@ -665,6 +760,8 @@ int xtract_sum(const float *data, const int N, const void *argv, float *result){
 int xtract_nonzero_count(const float *data, const int N, const void *argv, float *result){
 
     int n = N;
+    
+    *result += 0.f;
 
     while(n--)
 	*result += (*data++ ? 1 : 0);
@@ -690,7 +787,7 @@ int xtract_hps(const float *data, const int N, const void *argv, float *result){
     while(n--) coeffs2[n] = coeffs3[n] = 1;
 
     M = N >> 1;
-    L = N / 3;
+    L = N / 3.f;
 
     while(M--){
 	m = M << 1;
@@ -698,7 +795,7 @@ int xtract_hps(const float *data, const int N, const void *argv, float *result){
 
 	if(M < L){
 	    l = M * 3;
-	    coeffs3[M] = (data[l] + data[l+1] + data[l+2]) / 3;
+	    coeffs3[M] = (data[l] + data[l+1] + data[l+2]) / 3.f;
 	}
     }
 
@@ -792,12 +889,12 @@ int xtract_f0(const float *data, const int N, const void *argv, float *result){
 
     /* Estimate fundamental freq */
     for (n = 1; n < M; n++)
-	err_tau_1 = err_tau_1 + fabs(input[n] - input[n+1]);
+	err_tau_1 = err_tau_1 + fabsf(input[n] - input[n+1]);
     /* FIX: this doesn't pose too much load if it returns 'early', but if it can't find f0, load can be significant for larger block sizes M^2 iterations! */  
     for (tau = 2; tau < M; tau++){
 	err_tau_x = 0;
 	for (n = 1; n < M; n++){
-	    err_tau_x = err_tau_x + fabs(input[n] - input[n+tau]);
+	    err_tau_x = err_tau_x + fabsf(input[n] - input[n+tau]);
 	}
 	if (err_tau_x < err_tau_1) {
 	    f0 = sr / (tau + (err_tau_x / err_tau_1));

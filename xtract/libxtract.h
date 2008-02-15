@@ -96,6 +96,7 @@ enum xtract_features_ {
     XTRACT_ROLLOFF,
     XTRACT_LOUDNESS,
     XTRACT_FLATNESS,
+    XTRACT_FLATNESS_DB,
     XTRACT_TONALITY,
     XTRACT_CREST,
     XTRACT_NOISINESS,
@@ -165,7 +166,8 @@ enum xtract_return_codes_ {
     XTRACT_MALLOC_FAILED,
     XTRACT_BAD_ARGV,
     XTRACT_BAD_VECTOR_SIZE,
-    XTRACT_NO_RESULT,
+    XTRACT_DENORMAL_FOUND,
+    XTRACT_NO_RESULT, /* This usually occurs when the correct calculation cannot take place because required data is missing or would result in a NaN or infinity/-infinity. Under these curcumstances 0.f is usually given by *result */
     XTRACT_FEATURE_NOT_IMPLEMENTED
 };
 

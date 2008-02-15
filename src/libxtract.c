@@ -48,6 +48,7 @@ int(*xtract[])(const float *, const int, const void *, float *) = {
     xtract_rolloff,
     xtract_loudness,
     xtract_flatness,
+    xtract_flatness_db,
     xtract_tonality,
     xtract_crest,
     xtract_noisiness,

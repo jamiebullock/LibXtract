@@ -530,7 +530,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void){
                 break;
             case XTRACT_ODD_EVEN_RATIO:
                 strcpy(name, "odd_even_ratio");
-                strcpy(p_name, "Odd/Even Harmonic Ratio");
+                strcpy(p_name, "Odd/even Harmonic Ratio");
                 strcpy(desc, 
                         "Extract the odd-to-even harmonic ratio of a spectrum");
                 strcpy(p_desc, 

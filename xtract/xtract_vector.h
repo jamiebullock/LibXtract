@@ -43,6 +43,8 @@ extern "C" {
  *
  * The magnitude/power coefficients are scaled to the range 0-1 so that for a given coefficient x, 0 <= x <= 1
  *
+ * \note Before calling xtract_spectrum(), the FFT must be initialised by calling xtract_init_fft(N, XTRACT_SPECTRUM)
+ *
  */
 int xtract_spectrum(const float *data, const int N, const void *argv, float *result);
 

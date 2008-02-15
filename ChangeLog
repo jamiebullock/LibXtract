@@ -1,3 +1,16 @@
+2008-2-15 Jamie Bullock <jamie@postlude.co.uk>
+    * version 0.5.9
+	* Fixed bugs in xtract_flatness(), or at least added necessary
+	documentation and error checking to avoid problems
+	* Added xtract_is_denormal() helper function and XTRACT_DENORMAL_FOUND
+	return code
+	* Replaced all instances of log, sqrt, exp etc. with respective
+	floating point counterparts (logf etc.)
+	* Added check for architecture endianness to configure script
+	* Bug fix to PD example, now no longer crashes if no arguments are
+	given
+	* Minor documentation updates
+
 2007-10-09 Dan Stowell
     * version 0.5.1
         * Fixed bug in xtract_init_mfcc() which accidentally missed filling in the very top filter frequency value

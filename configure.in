@@ -4,7 +4,7 @@ m4_define(libxtract_major_version, 0)
 # Increment for feature additions and enhancements
 m4_define(libxtract_minor_version, 5)
 # Increment for fixes 
-m4_define(libxtract_fix_version, 0)
+m4_define(libxtract_fix_version, 9)
 
 m4_define(libxtract_version, libxtract_major_version.libxtract_minor_version.libxtract_fix_version)
 		
@@ -17,6 +17,7 @@ AM_CONFIG_HEADER(config.h)
 AC_PROG_CC
 AC_PROG_LIBTOOL
 AC_PROG_INSTALL
+AC_C_BIGENDIAN
 AC_PATH_PROG(PKG_CONFIG, pkg-config, no)
 AC_ENABLE_STATIC(no)
 AC_ENABLE_SHARED(yes)
@@ -125,7 +126,6 @@ fi
 
 AM_CONDITIONAL(BUILD_SIMPLETEST, test "x${simpletest}" = 'xtrue')
 
-
 dnl Are we building the PD examples?
 if [[ "$pd_example" = "true" ]] ; then
     PD_SOURCES="xtract~.c"
@@ -216,6 +216,14 @@ if [[ "$fft" = "true" ]] ; then
 fi
 
 AM_CONDITIONAL(BUILD_FFT, test "x${fft}" = 'xtrue')
+
+dnl Check for architecture endian-ness
+#AC_C_BIGENDIAN(bigendian=true, bigendian=false, bigendian=undefined)
+#if [[ "$is_bigendian" = "false" ]] ; then
+#    AC_DEFINE([WORDS_BIGENDIAN], [0], [Architecture is big endian])
+#else
+#    AC_DEFINE([WORDS_BIGENDIAN], [1], [Architecture is not big endian])
+#fi
 
 
 dnl ------------------------------------------

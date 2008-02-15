@@ -149,7 +149,7 @@ int xtract_init_fft(int N, int feature_name){
 
     input = output = NULL;
 
-    fprintf(stderr, "Optimisation level: %d\n", XTRACT_FFT_OPTIMISATION_LEVEL);
+    //fprintf(stderr, "Optimisation level: %d\n", XTRACT_FFT_OPTIMISATION_LEVEL);
 
     if(XTRACT_FFT_OPTIMISATION_LEVEL == 0)
         optimisation = FFTW_ESTIMATE;
