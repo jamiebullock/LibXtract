@@ -573,4 +573,52 @@ int xtract_lpcc(const float *data, const int N, const void *argv, float *result)
 //    return XTRACT_SUCCESS;
 //}
 
+int xtract_subbands(const float *data, const int N, const void *argv, float *result){
+
+    int n, bw, xtract_func, nbands, scale, start, lower, *argi, rv;
+
+    argi = (int *)argv;
+
+    xtract_func = argi[0];
+    nbands = argi[1];
+    scale = argi[2];
+    start = argi[3];
+
+
+    if(scale == XTRACT_LINEAR_SUBBANDS)
+        bw = floorf((N - start) / nbands);
+    else
+        bw = start;
+
+    lower = start;
+
+    for(n = 0; n < nbands; n++){
+
+        /* Bounds sanity check */
+        if(lower + bw >= N)
+            result[n] = 0.f
+            continue;
+
+        rv = xtract[xtract_func](data+lower, bw, NULL, &result[n]);
+
+        if(rv != XTRACT_SUCCESS)
+            return rv;
+
+        switch(scale){
+            case XTRACT_OCTAVE_SUBBANDS:
+                lower += bw;
+                bw = lower;
+                break;
+            case XTRACT_LINEAR_SUBBANDS:
+                lower += bw;
+                break;
+        }
+
+    }
+
+    return rv;
+
+}
+
+
 

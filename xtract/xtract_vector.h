@@ -158,8 +158,23 @@ int xtract_lpc(const float *data, const int N, const void *argv, float *result);
  */
 int xtract_lpcc(const float *data, const int N, const void *argv, float *result);
 
-
-
+/** \brief Extract subbands from a spectrum
+ *
+ * \param *data: a pointer to an array of size N containing N magnitude/power/log magnitude/log power coefficients. (e.g. the first half of the array pointed to by *result from xtract_spectrum().
+ * \param N: the number of elements from the array pointed to by *data to be considered
+ * \param *argv: A pointer to an array containing four integers. The first represents the extraction function to applied to each subband e.g. XTRACT_SUM or XTRACT_MEAN, the second represents the number of subbands required, and the third represents the frequency scale to be used for the subband bounds as defined in the enumeration xtract_subband_scales_ (libxtract.h). The fourth integer represent the start point of the subbands as a location in the input array as pointed to by *data (e.g. a value of 5 would start the subband extraction at bin 5)
+ * \param *result: A pointer to an array containing the resultant subband values. The calling function is responsible for allocating and freeing memory for *result. xtract_subbands() assumes that at least argv[1] * sizeof(float) bytes have been allocated. If the requested nbands extends the subband range beyond N, then the remaining bands will be set to 0. If the array pointed to by *result has more than argv[1] elements, the superfluous elements will be unchanged.
+ *
+ * xtract_subbands() divides a spectrum into subbands and applies the function given by argv[0] to the values in each subband to give a 'reduced' representation of the spectrum as *result
+ *
+ * Specifying XTRACT_OCTAVE_SUBBANDS will extract subbands at each octave from the start bin until argv[1] is reached or N is reached
+ * Specifying XTRACT_LINEAR_SUBBANDS will extract argv[1] equal sized subbands between the start bin and N
+ *
+ *
+ * It is assumed that a sensible function will be given in argv[0], and for this function argv will always be NULL. Sensible values for argv[0] are XTRACT_MEAN and XTRACT_SUM, although something like XTRACT_IRREGULARITY_K might yield interesting results.
+ *
+ */
+int xtract_subbands(const float *data, const int N, const void *argv, float *result);
 /** @} */
 
 #ifdef __cplusplus

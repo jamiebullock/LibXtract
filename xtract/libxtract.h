@@ -130,6 +130,7 @@ enum xtract_features_ {
     XTRACT_HARMONIC_SPECTRUM,
     XTRACT_LPC,
     XTRACT_LPCC,
+    XTRACT_SUBBANDS,
     /* Helper functions */
     XTRACT_WINDOWED
 };
@@ -177,6 +178,12 @@ enum xtract_spectrum_ {
     XTRACT_LOG_MAGNITUDE_SPECTRUM,
     XTRACT_POWER_SPECTRUM,
     XTRACT_LOG_POWER_SPECTRUM
+};
+
+/** \brief Subband scales */
+enum xtract_subband_scales_ {
+    XTRACT_OCTAVE_SUBBANDS,
+    XTRACT_LINEAR_SUBBANDS
 };
 
 /** \brief Enumeration of data types*/
