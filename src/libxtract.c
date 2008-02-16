@@ -84,6 +84,7 @@ int(*xtract[])(const float *, const int, const void *, float *) = {
     xtract_harmonic_spectrum,
     xtract_lpc,
     xtract_lpcc,
+    xtract_subbands,
     /* xtract_helper.h */
     xtract_windowed
 };

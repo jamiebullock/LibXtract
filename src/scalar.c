@@ -535,14 +535,14 @@ int xtract_flatness(const float *data, const int N, const void *argv, float *res
 
 int xtract_flatness_db(const float *data, const int N, const void *argv, float *result){
 
-    float flatness_db;
+    float flatness;
 
-    flatness_db = *(float *)argv;
+    flatness = *(float *)argv;
 
-    if (flatness_db <= 0) 
-        flatness_db = XTRACT_LOG_LIMIT;
+    if (flatness <= 0) 
+        flatness = XTRACT_LOG_LIMIT;
 
-    *result = 10 * log10f(flatness_db);
+    *result = 10 * log10f(flatness);
 
     return XTRACT_SUCCESS;
 

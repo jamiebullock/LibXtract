@@ -545,9 +545,10 @@ int xtract_lpcc(const float *data, const int N, const void *argv, float *result)
     int cep_length; 
     
     if(argv == NULL)
-        cep_length = N - 1;
+        cep_length = N - 1; /* FIX: if we're going to have default values, they should come from the descriptor */
     else
-        cep_length = (int)((float *)argv)[0];
+        cep_length = *(int *)argv;
+        //cep_length = (int)((float *)argv)[0];
 
     memset(result, 0, cep_length * sizeof(float));
 
@@ -584,20 +585,22 @@ int xtract_subbands(const float *data, const int N, const void *argv, float *res
     scale = argi[2];
     start = argi[3];
 
-
     if(scale == XTRACT_LINEAR_SUBBANDS)
         bw = floorf((N - start) / nbands);
     else
         bw = start;
 
     lower = start;
+    rv = XTRACT_SUCCESS;
 
     for(n = 0; n < nbands; n++){
 
         /* Bounds sanity check */
-        if(lower + bw >= N)
-            result[n] = 0.f
+        if(lower >= N || lower + bw >= N){
+         //   printf("n: %d\n", n);
+            result[n] = 0.f;
             continue;
+        }
 
         rv = xtract[xtract_func](data+lower, bw, NULL, &result[n]);
 

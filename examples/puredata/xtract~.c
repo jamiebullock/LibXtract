@@ -50,6 +50,7 @@ typedef struct _xtract {
     t_int feature,
           is_scalar,
           is_subframe,
+          argv_type,
           init_blocksize,
           done_init;
     t_symbol *feature_name;
@@ -123,11 +124,13 @@ static t_int *xtract_perform_vector(t_int *w) {
 
 static void xtract_dsp(t_xtract_tilde *x, t_signal **sp) {
 
-    if(!x->is_scalar)
+    if(!x->is_scalar){
         dsp_add(xtract_perform_vector, 4, 
             sp[0]->s_vec, sp[1]->s_vec, x, sp[0]->s_n);
+    }
             
-    else dsp_add(xtract_perform, 3, sp[0]->s_vec, x, sp[0]->s_n);
+    else  
+        dsp_add(xtract_perform, 3, sp[0]->s_vec, x, sp[0]->s_n);
 
 }
 
@@ -155,6 +158,7 @@ static void *xtract_new(t_symbol *me, t_int argc, t_atom *argv) {
     N = BLOCKSIZE;
     
     x->argv = NULL;
+    x->argv_type = 0;
     x->done_init = 0;
     x->is_scalar = 0;
     x->is_subframe = 0;
@@ -202,6 +206,8 @@ static void *xtract_new(t_symbol *me, t_int argc, t_atom *argv) {
     /* allocate memory for feature arguments */
     n_args = fd[f].argc;
     type = fd[f].argv.type;
+
+    x->argv_type = type;
 
     if(n_args){
 	for(n = 0; n < n_args; n++){
@@ -335,8 +341,17 @@ t_int argc, t_atom *argv) {
 
     x->argv = getbytes(argc * sizeof(float));
     
-    while(argc--)
-        ((t_float *)x->argv)[argc] = atom_getfloat(&argv[argc]);
+    while(argc--){
+        switch(x->argv_type){
+            case XTRACT_INT:
+                ((t_int *)x->argv)[argc] = (int)atom_getfloat(&argv[argc]);
+                break;
+            case XTRACT_FLOAT:
+            default:
+                ((t_float *)x->argv)[argc] = atom_getfloat(&argv[argc]);
+                break;
+        }
+    }
  /*   }*/
 }
 

@@ -1,19 +1,12 @@
 Add -fPIC in intelligent way to build system for 64-bit builds
-Rationalise use of powf etc. vs pow
-Add spectral_flux
-Add geometric_mean
-Add spectral_mean, spectral_deviation, spectral_geometric_mean etc.
 Add weighted temporal features as per Peeters (xtract_weighted_mean etc) weight given as argv?
 Improve noise robustness of xtract_f0
 Fix xtract_hps - it doesn't work!
-Add Pure Data help file
-Add delta functions
 Add Max/MSP external example
 Check and add return values as appropriate. Make them more sensible!
 ...do other stuff and eventually...
 ...optimise!
 Use the fftw guru interface to create multipurpose global plans from xtract_fft_init()
 Add LPC via Schur algorithm
-If argv uses an integer, then it should point to a variable of type int. At the moment floats are used to store ints.
 Write macro to truncate numbers <= 0 prior to taking log and integrate into functions across the library
-Add xtract_subbands() - gets subband power or subband magnitude for given bands
+Add functionality to Pd example to convert symbols 'XTRACT_MEAN', 'XTRACT_*' to corresponding integers to ease the construction of argv lists

@@ -71,7 +71,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void){
                 *argv_min = XTRACT_ANY;
                 *argv_max = XTRACT_ANY;
                 *argv_def = XTRACT_ANY;
-                *argv_unit = XTRACT_ANY;
+                *argv_unit = XTRACT_DBFS;
                 break;
             case XTRACT_SPECTRAL_INHARMONICITY:
                 *argv_min = 0.f;
@@ -85,6 +85,12 @@ xtract_function_descriptor_t *xtract_make_descriptors(void){
                 *argv_max = XTRACT_SR_UPPER_LIMIT;
                 *argv_def = XTRACT_SR_DEFAULT; 
                 *argv_unit = XTRACT_HERTZ;
+                break;
+            case XTRACT_FLATNESS_DB:
+                *argv_min = 0;
+                *argv_max = 1.0;
+                *argv_def = XTRACT_ANY;
+                *argv_unit = XTRACT_DBFS;
                 break;
             /* argc = 2 */;
             case XTRACT_ROLLOFF:
@@ -165,9 +171,9 @@ xtract_function_descriptor_t *xtract_make_descriptors(void){
                 *(argv_def + 2) = 0;
                 *(argv_unit + 2) = XTRACT_NONE;
                 *(argv_min + 3) = 0;
-                *(argv_max + 3) = 1;
+                *(argv_max + 3) = XTRACT_ANY;
                 *(argv_def + 3) = 0;
-                *(argv_unit + 3) = XTRACT_NONE;
+                *(argv_unit + 3) = XTRACT_BINS;
                 break;
             case XTRACT_BARK_COEFFICIENTS:
                 /* BARK_COEFFICIENTS is special because argc = BARK_BANDS */
@@ -206,8 +212,11 @@ xtract_function_descriptor_t *xtract_make_descriptors(void){
             case XTRACT_SPECTRAL_INHARMONICITY:
                 *argv_donor = XTRACT_FAILSAFE_F0;
                 break;
-            case XTRACT_TONALITY:
+            case XTRACT_FLATNESS_DB:
                 *argv_donor = XTRACT_FLATNESS;
+                break;
+            case XTRACT_TONALITY:
+                *argv_donor = XTRACT_FLATNESS_DB;
                 break;
             case XTRACT_LOWEST_VALUE:
             case XTRACT_F0:
@@ -249,6 +258,12 @@ xtract_function_descriptor_t *xtract_make_descriptors(void){
                 break;
                 /* argc = 4 */
             case XTRACT_SPECTRUM:
+                *argv_donor = XTRACT_ANY;
+                *(argv_donor + 1) = XTRACT_ANY;
+                *(argv_donor + 2) = XTRACT_ANY;
+                *(argv_donor + 3) = XTRACT_ANY;
+                break;
+            case XTRACT_SUBBANDS:
                 *argv_donor = XTRACT_ANY;
                 *(argv_donor + 1) = XTRACT_ANY;
                 *(argv_donor + 2) = XTRACT_ANY;
@@ -304,6 +319,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void){
             case XTRACT_POWER:
             case XTRACT_HPS:
             case XTRACT_PEAK_SPECTRUM:
+            case XTRACT_SUBBANDS:
             case XTRACT_MFCC:
                 *data_format = XTRACT_SPECTRAL_MAGNITUDES;
                 break;
@@ -335,6 +351,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void){
                 *data_format = XTRACT_AUDIO_SAMPLES;
                 break;
             case XTRACT_TONALITY:
+            case XTRACT_FLATNESS_DB:
                 *data_format = XTRACT_NO_DATA;
                 break;
             case XTRACT_TRISTIMULUS_1:
@@ -394,6 +411,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void){
             case XTRACT_NOISINESS:
             case XTRACT_CREST:
             case XTRACT_FLATNESS:
+            case XTRACT_FLATNESS_DB:
             case XTRACT_POWER:
             case XTRACT_BARK_COEFFICIENTS:
             case XTRACT_RMS_AMPLITUDE:
@@ -408,6 +426,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void){
             case XTRACT_LPC:
             case XTRACT_LPCC:
             case XTRACT_WINDOWED:
+            case XTRACT_SUBBANDS:
                 *data_unit = XTRACT_ANY;
                 break;
             case XTRACT_SPECTRAL_MEAN:
@@ -444,7 +463,6 @@ xtract_function_descriptor_t *xtract_make_descriptors(void){
                 strcpy(desc, "Extract the mean of an input vector");
                 strcpy(p_desc, "Extract the mean of a range of values");
                 strcpy(author, "");
-                d->argv.type = XTRACT_NONE;
                 break;
             case XTRACT_VARIANCE:
                 strcpy(name, "variance");
@@ -660,6 +678,14 @@ xtract_function_descriptor_t *xtract_make_descriptors(void){
                 strcpy(author, "Rabiner and Juang");
                 *year = 1993;
                 break;
+            case XTRACT_SUBBANDS:
+                strcpy(name, "subbands");
+                strcpy(p_name, "Sub band coefficients");
+                strcpy(desc, "Extract subband coefficients from spectral magnitudes");
+                strcpy(p_desc, 
+                        "Extract subband coefficients from spectral magnitudes");
+                strcpy(author, "");
+                break;
             case XTRACT_BARK_COEFFICIENTS:
                 strcpy(name, "bark_coefficients");
                 strcpy(p_name, "Bark Coefficients");
@@ -739,6 +765,15 @@ xtract_function_descriptor_t *xtract_make_descriptors(void){
                         "Extract the spectral flatness of an audio spectrum");
                 strcpy(author, "Tristan Jehan");
                 *year = 2005;
+                break;
+            case XTRACT_FLATNESS_DB:
+                strcpy(name, "flatness_db");
+                strcpy(p_name, "Log Spectral Flatness");
+                strcpy(desc, "Extract the log spectral flatness of a spectrum");
+                strcpy(p_desc, 
+                        "Extract the log spectral flatness of an audio spectrum");
+                strcpy(author, "Peeters");
+                *year = 2003;
                 break;
             case XTRACT_SPREAD:
                 strcpy(name, "spread");
@@ -933,6 +968,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void){
             case XTRACT_LOWEST_VALUE:
             case XTRACT_F0:
             case XTRACT_FAILSAFE_F0:
+            case XTRACT_FLATNESS_DB:
             case XTRACT_TONALITY:
                 *argc = 1;
                 *argv_type = XTRACT_FLOAT;
@@ -954,6 +990,10 @@ xtract_function_descriptor_t *xtract_make_descriptors(void){
             case XTRACT_SPECTRUM:
                 *argc = 4;
                 *argv_type = XTRACT_FLOAT;
+                break;
+            case XTRACT_SUBBANDS:
+                *argc = 4;
+                *argv_type = XTRACT_INT;
                 break;
             case XTRACT_MFCC:
                 *argc = 1;
@@ -1034,6 +1074,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void){
             case XTRACT_ROLLOFF:
             case XTRACT_LOUDNESS:
             case XTRACT_FLATNESS:
+            case XTRACT_FLATNESS_DB:
             case XTRACT_TONALITY:
             case XTRACT_CREST:
             case XTRACT_NOISINESS:
@@ -1060,6 +1101,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void){
             case XTRACT_BARK_COEFFICIENTS:
             case XTRACT_PEAK_SPECTRUM:
             case XTRACT_SPECTRUM:
+            case XTRACT_SUBBANDS:
             case XTRACT_AUTOCORRELATION_FFT:
             case XTRACT_MFCC:
             case XTRACT_LPC:
@@ -1108,6 +1150,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void){
             case XTRACT_ROLLOFF:
             case XTRACT_LOUDNESS:
             case XTRACT_FLATNESS:
+            case XTRACT_FLATNESS_DB:
             case XTRACT_TONALITY:
             case XTRACT_CREST:
             case XTRACT_NOISINESS:
@@ -1130,6 +1173,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void){
             case XTRACT_BARK_COEFFICIENTS:
             case XTRACT_PEAK_SPECTRUM:
             case XTRACT_SPECTRUM:
+            case XTRACT_SUBBANDS:
             case XTRACT_AUTOCORRELATION_FFT:
             case XTRACT_MFCC:
             case XTRACT_LPC:
@@ -1204,6 +1248,11 @@ xtract_function_descriptor_t *xtract_make_descriptors(void){
                     *result_min = 0.f;
                     *result_max = 1.f; 
                     break;
+                case XTRACT_FLATNESS_DB:
+                    *result_unit = XTRACT_DBFS;
+                    *result_min = XTRACT_ANY; /* FIX: check this */
+                    *result_max = XTRACT_ANY; 
+                    break;
                 case XTRACT_LOUDNESS:
                 case XTRACT_FLATNESS:
                 case XTRACT_TONALITY:
@@ -1233,6 +1282,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void){
                 case XTRACT_AMDF:
                 case XTRACT_ASDF:
                 case XTRACT_DCT:
+                case XTRACT_SUBBANDS:
                 case XTRACT_WINDOWED:
                     *result_format = XTRACT_ARBITRARY_SERIES;
                     *result_unit = XTRACT_ANY;

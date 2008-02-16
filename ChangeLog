@@ -1,3 +1,12 @@
+2008-2-16 Jamie Bullock <jamie@postlude.co.uk>
+    * version 0.6.0
+	* Added to pd example the ability to differentiate between different
+	argv types (XTRACT_FLOAT, XTRACT_INT) and pass the correct data type
+	to the xtract[]() function
+	* Added xtract_flatness_db() details to descriptors.c
+	* Fixes to tonality and xtract_subbands descriptors
+	* Added Pd examples for 'subband mean' and tonality calculated using subbands
+
 2008-2-15 Jamie Bullock <jamie@postlude.co.uk>
     * version 0.5.9
 	* Fixed bugs in xtract_flatness(), or at least added necessary
