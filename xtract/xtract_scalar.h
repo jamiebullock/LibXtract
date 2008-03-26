@@ -29,8 +29,9 @@ extern "C" {
 
 /**
   * \defgroup scalar scalar extraction functions
+  * 
+  * Functions that extract a feature as a single value from an input vector
   *
-  * Defines scalar extraction functions, and their parameters.
   * @{
   */
 

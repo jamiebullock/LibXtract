@@ -18,7 +18,7 @@
  * USA.
  */
 
-/** \file xtract_delta.h: declares functions that extract a feature as a single value or vector from more than one input vector */
+/** \file xtract_delta.h: declares functions that scalar or vector value from 2 or more input vectors */
 
 #ifndef XTRACT_DELTA_H
 #define XTRACT_DELTA_H
@@ -27,15 +27,23 @@
 extern "C" {
 #endif
 
+/**
+  * \defgroup delta `delta' extraction functions
+  *
+  * Functions that extract a scalar or vector value from 2 or more input vectors
+  *
+  * @{
+  */
+
 #include "xtract_types.h"
 
-/* \brief Extract flux 
+/** \brief Extract flux 
  *
  * An alias for xtract_lnorm()
  */
 int xtract_flux(const float *data, const int N, const void *argv , float *result);
 
-/* \brief Extract the L-norm of a vector
+/** \brief Extract the L-norm of a vector
  *
  * \param *data: a pointer to the first element in an array of floats representing the difference between two subsequent frames of output from a vector-based feature e.g. the *result from xtract_difference_vector()
  * \param N: the length of the array pointed to by *data
@@ -66,6 +74,8 @@ int xtract_decay_time(const float *data, const int N, const void *argv, float *r
 int xtract_difference_vector(const float *data, const int N, const void *argv, float *result);
 /*xtract_frame_tracker *xf */
 /*float frames*/
+
+/** @} */
 
 #ifdef __cplusplus
 }

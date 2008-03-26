@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in
 #Stolen from Steve Harris' liblo, thanks Steve!
-MAINTAINERCLEANFILES=Makefile.in
+MAINTAINERCLEANFILES=Makefile.in config.log
 
 CLEANFILES=doxygen-build.stamp
 

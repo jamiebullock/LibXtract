@@ -18,8 +18,6 @@
  * USA.
  */
 
-
-
 /** \file xtract_macros.h: defines useful public macros */
 
 #ifndef XTRACT_MACROS_H

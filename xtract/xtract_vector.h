@@ -18,7 +18,7 @@
  * USA.
  */
 
-/* xtract_scalar.h: declares functions that extract a feature as a vector from an input vector */
+/** \file xtract_vector.h: declares functions that extract a feature as a vector from an input vector */
 
 #ifndef XTRACT_VECTOR_H
 #define XTRACT_VECTOR_H
@@ -30,7 +30,8 @@ extern "C" {
 /**
   * \defgroup vector vector extraction functions
   *
-  * Defines vector extraction functions, and their parameters.
+  * Functions that extract a feature as a vector from an input vector
+  *
   * @{
   */
 

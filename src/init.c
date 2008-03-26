@@ -285,8 +285,10 @@ __attribute__((constructor)) void init()
     void _init()·
 #endif
 {
+#ifdef XTRACT_FFT
     fft_plans.spectrum_plan = NULL;
     fft_plans.autocorrelation_fft_plan_1 = NULL;
     fft_plans.autocorrelation_fft_plan_2 = NULL;
     fft_plans.dct_plan = NULL;
+#endif
 }

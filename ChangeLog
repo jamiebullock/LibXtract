@@ -1,3 +1,9 @@
+2008-3-26 Jamie Bullock <jamie@postlude.co.uk>
+    * version 0.6.0
+	* Fixed build fail if --enable-fft not specified
+	* Fixed doxygen build so that it includes libxtract.h
+	* Doxygen tweaks
+
 2008-2-16 Jamie Bullock <jamie@postlude.co.uk>
     * version 0.6.0
 	* Added to pd example the ability to differentiate between different
