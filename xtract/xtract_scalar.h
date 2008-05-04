@@ -394,6 +394,8 @@ int xtract_hps(const float *data, const int N, const void *argv, float *result);
  * \param *result: the pitch of N values from the array pointed to by *data
  *
  * This algorithm is based on the AMDF, with peak and centre clipping. It would benefit from further improvements to improve noise robustness and overall efficiency
+ *
+ * It is based on suggestion by Robert Bristow-Johnson in a discussion on the comp.dsp mailing list, subject "Reference implementation of pitch detection"
  * 
  */
 int xtract_f0(const float *data, const int N, const void *argv, float *result);

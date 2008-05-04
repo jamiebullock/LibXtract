@@ -434,6 +434,8 @@ int xtract_spread(const float *data, const int N, const void *argv, float *resul
 	den += data[n];
     }
 
+    /* FIX: spectral spread is mathematically equivalent to spectral variance --
+     * here we are computing the spectral standard deviation */
     *result = sqrtf(num / den);
 
     return XTRACT_SUCCESS;

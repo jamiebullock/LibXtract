@@ -39,6 +39,7 @@ extern "C" {
 
 /** \brief Extract flux 
  *
+ *  \note FIX: don't be lazy -- take the lnorm of the difference vector! 
  * An alias for xtract_lnorm()
  */
 int xtract_flux(const float *data, const int N, const void *argv , float *result);

@@ -26,6 +26,7 @@
 
 int xtract_flux(const float *data, const int N, const void *argv , float *result){
 
+    /* FIX: don't be lazy -- take the lnorm of the difference vector! */
     return xtract_lnorm(data, N, argv, result);
 
 }
