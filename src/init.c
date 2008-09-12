@@ -187,7 +187,7 @@ int xtract_init_fft(int N, int feature_name){
             if(fft_plans.dct_plan != NULL)
                 fftwf_destroy_plan(fft_plans.dct_plan);
             fft_plans.dct_plan =
-                fftwf_plan_r2r_1d(N, input, output, FFTW_REDFT00, optimisation);
+                fftwf_plan_r2r_1d(N, input, output, FFTW_REDFT10, optimisation);
         case XTRACT_MFCC:
             if(fft_plans.dct_plan != NULL)
                 fftwf_destroy_plan(fft_plans.dct_plan);
