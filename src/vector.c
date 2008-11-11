@@ -435,7 +435,7 @@ int xtract_peak_spectrum(const float *data, const int N, const void *argv, float
 
     for(n = 1; n < N; n++){
         if(input[n] >= threshold){
-            if(input[n] > input[n - 1] && input[n] > input[n + 1]){
+            if(input[n] > input[n - 1] && n + 1 < N && input[n] > input[n + 1]){
                 result[N + n] = q * (n + (p = .5 * ((y = input[n-1]) - 
 				(y3 = input[n+1])) / (input[n - 1] - 2 * 
 				    (y2 = input[n]) + input[n + 1])));
