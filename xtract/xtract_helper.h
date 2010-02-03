@@ -64,7 +64,7 @@ int xtract_windowed(const float *data, const int N, const void *argv, float *res
 int xtract_features_from_subframes(const float *data, const int N, const int feature, const void *argv, float *result);
 
 /** \brief Test whether a number is denormal */
-inline int xtract_is_denormal(double const d);
+int xtract_is_denormal(double const d);
 
 /** @} */
 

@@ -23,12 +23,28 @@
 
 int main(void) {
 
-    float mean = 0, vector[] = {1, 2, 3};
-    
-    xtract[XTRACT_MEAN]((void *)&vector, 3, NULL, (void *)&mean);
+    float mean = 0, vector[] = {.1, .2, .3, .4, -.5, -.4, -.3, -.2, -.1},
+          spectrum[10];
+    int n, N = 9;
+    float argf[4];
 
-    printf("\nThe mean of [1, 2, 3] = %.1f\n\n", mean);
-	
+    argf[0] = 8000.f;
+    argf[1] = XTRACT_MAGNITUDE_SPECTRUM;
+    argf[2] = 0.f;
+    argf[3] = 0.f;
+    
+    xtract[XTRACT_MEAN]((void *)&vector, N, NULL, (void *)&mean);
+    xtract_init_fft(N, XTRACT_SPECTRUM);
+    xtract[XTRACT_SPECTRUM]((void *)&vector, N, &argf[0], (void *)&spectrum[0]);
+
+    printf("\nThe mean of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] = %.1f\n\n", mean);
+    printf("\nResults of xtract_spectrum():\n");
+
+    for(n = 0; n < N; n++){
+        printf("%.3f\t", spectrum[n]);
+    }
+    printf("\n");
+
     return 0;
     
 }

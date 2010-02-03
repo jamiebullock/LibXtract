@@ -30,27 +30,27 @@
 
 #ifndef roundf
     float roundf(float f){
-	if (f - (int)f >= 0.5) 
-	    return (float)((int)f + 1);
-	else
-	    return (float)((int)f);
+        if (f - (int)f >= 0.5) 
+            return (float)((int)f + 1);
+        else
+            return (float)((int)f);
     }
 #endif
 
 #ifndef powf
-    #define powf pow
+#define powf pow
 #endif
 
 #ifndef expf
-    #define expf exp
+#define expf exp
 #endif
 
 #ifndef sqrtf
-    #define sqrtf sqrt
+#define sqrtf sqrt
 #endif
 
 #ifndef fabsf
-    #define fabsf fabs
+#define fabsf fabs
 #endif
 
 #ifdef XTRACT_FFT
@@ -100,104 +100,69 @@ int xtract_spectrum(const float *data, const int N, const void *argv, float *res
 
     switch(vector){
 
-	case XTRACT_LOG_MAGNITUDE_SPECTRUM:
-	    for(n = 1; n < M; n++){
-		if ((temp = XTRACT_SQ(rfft[n]) + 
-			    XTRACT_SQ(rfft[N - n])) > XTRACT_LOG_LIMIT)
-		    temp = logf(sqrtf(temp) / (float)N);
-		else
-		    temp = XTRACT_LOG_LIMIT_DB;
+        case XTRACT_LOG_MAGNITUDE_SPECTRUM:
+            for(n = 0, m = 0; m < M; ++n, ++m){
+                if(!withDC && n == 0){
+                    ++n;
+                }
+                if ((temp = XTRACT_SQ(rfft[n]) + 
+                            XTRACT_SQ(rfft[N - n])) > XTRACT_LOG_LIMIT)
+                    temp = logf(sqrtf(temp) / (float)N);
+                else
+                    temp = XTRACT_LOG_LIMIT_DB;
 
-                if(withDC){
-                    m = n;
-		    result[M + m + 1] = n * q;
-                }
-                else{
-                    m = n - 1;
-		    result[M + m] = n * q;
-                }
-                
-                result[m] = 
+                result[m] =
                     /* Scaling */
-                    (temp + XTRACT_DB_SCALE_OFFSET) / 
-                    XTRACT_DB_SCALE_OFFSET; 
-		
-                max = result[m] > max ? result[m] : max;
-	    }
-	    break;
+                    (temp + XTRACT_DB_SCALE_OFFSET) /
+                    XTRACT_DB_SCALE_OFFSET;
 
-	case XTRACT_POWER_SPECTRUM:
-	    for(n = 1; n < M; n++){
-                if(withDC){
-                    m = n;
-		    result[M + m + 1] = n * q;
-                }
-                else{
-                    m = n - 1;
-		    result[M + m] = n * q;
+                XTRACT_SET_FREQUENCY;
+                XTRACT_GET_MAX;
+            }
+            break;
+
+        case XTRACT_POWER_SPECTRUM:
+            for(n = 0, m = 0; m < M; ++n, ++m){
+                if(!withDC && n == 0){
+                    ++n;
                 }
                 result[m] = (XTRACT_SQ(rfft[n]) + XTRACT_SQ(rfft[N - n])) / NxN;
-                max = result[m] > max ? result[m] : max;
-	    }
-	    break;
+                XTRACT_SET_FREQUENCY;
+                XTRACT_GET_MAX;
+            }
+            break;
 
-	case XTRACT_LOG_POWER_SPECTRUM:
-	    for(n = 1; n < M; n++){
-		if ((temp = XTRACT_SQ(rfft[n]) + XTRACT_SQ(rfft[N - n])) > 
-			XTRACT_LOG_LIMIT)
-		    temp = logf(temp / NxN);
-		else
-		    temp = XTRACT_LOG_LIMIT_DB; 		
-
-                if(withDC){
-                    m = n;
-		    result[M + m + 1] = n * q;
+        case XTRACT_LOG_POWER_SPECTRUM:
+            for(n = 0, m = 0; m < M; ++n, ++m){
+                if(!withDC && n == 0){
+                    ++n;
                 }
-                else{
-                    m = n - 1;
-		    result[M + m] = n * q;
-                }
+                if ((temp = XTRACT_SQ(rfft[n]) + XTRACT_SQ(rfft[N - n])) >
+                        XTRACT_LOG_LIMIT)
+                    temp = logf(temp / NxN);
+                else
+                    temp = XTRACT_LOG_LIMIT_DB;
 
-                result[m] = (temp + XTRACT_DB_SCALE_OFFSET) / 
-			XTRACT_DB_SCALE_OFFSET; 
-                max = result[m] > max ? result[m] : max;
-	    }
-	    break;
+                result[m] = (temp + XTRACT_DB_SCALE_OFFSET) /
+                    XTRACT_DB_SCALE_OFFSET; 
+                XTRACT_SET_FREQUENCY;
+                XTRACT_GET_MAX;
+            }
+            break;
 
-	default:
-	    /* MAGNITUDE_SPECTRUM */
-	    for(n = 1; n < M; n++){
-                if(withDC){
-                    m = n;
-		    result[M + m + 1] = n * q;
+        default:
+            /* MAGNITUDE_SPECTRUM */
+            for(n = 0, m = 0; m < M; ++n, ++m){
+                if(!withDC && n == 0){
+                    ++n;
                 }
-                else{
-                    m = n - 1;
-		    result[M + m] = n * q;
-                }
-
                 result[m] = sqrtf(XTRACT_SQ(rfft[n]) + 
-                        XTRACT_SQ(rfft[N - n])) / (float)N; 
-                max = result[m] > max ? result[m] : max;
-	    }
-	    break;
-    }
-    
-    if(withDC){
-	/* The DC component */
-	result[0] = XTRACT_SQ(rfft[0]);
-	result[M + 1] = 0.f;
-        max = result[0] > max ? result[0] : max;
-	/* The Nyquist */ 
-	result[M] = XTRACT_SQ(rfft[M]);
-	result[N + 1] = q * M;
-        max = result[M] > max ? result[M] : max;
-    }
-    else {
-	/* The Nyquist */ 
-	result[M - 1] = (float)XTRACT_SQ(rfft[M]);
-	result[N - 1] = q * M;
-        max = result[M - 1] > max ? result[M - 1] : max;
+                        XTRACT_SQ(rfft[N - n])) / (float)N;
+                XTRACT_SET_FREQUENCY;
+                XTRACT_GET_MAX;
+            }
+            break;
+
     }
 
     if(normalise){
@@ -207,12 +172,12 @@ int xtract_spectrum(const float *data, const int N, const void *argv, float *res
 
     fftwf_free(rfft);
     free(input);
-    
+
     return XTRACT_SUCCESS;
 }
 
 int xtract_autocorrelation_fft(const float *data, const int N, const void *argv, float *result){
-    
+
     float *freq, *time;
     int n, M;
     //fftwf_plan plan;
@@ -231,9 +196,9 @@ int xtract_autocorrelation_fft(const float *data, const int N, const void *argv,
 
     for(n = 1; n < N; n++){
         freq[n] = XTRACT_SQ(freq[n]) + XTRACT_SQ(freq[M - n]);
-	freq[M - n] = 0.f;
+        freq[M - n] = 0.f;
     }
-    
+
     freq[0] = XTRACT_SQ(freq[0]);
     freq[N] = XTRACT_SQ(freq[N]);
 
@@ -242,13 +207,13 @@ int xtract_autocorrelation_fft(const float *data, const int N, const void *argv,
     //fftwf_execute(plan);
 
     fftwf_execute_r2r(fft_plans.autocorrelation_fft_plan_2, freq, time);
-   
+
     /* Normalisation factor */
     M = M * N;
 
     for(n = 0; n < N; n++)
-	result[n] = time[n] / (float)M;
-	/* result[n] = time[n+1] / (float)M; */
+        result[n] = time[n] / (float)M;
+    /* result[n] = time[n+1] / (float)M; */
 
     //fftwf_destroy_plan(plan);
     fftwf_free(freq);
@@ -263,7 +228,7 @@ int xtract_mfcc(const float *data, const int N, const void *argv, float *result)
     int n, filter;
 
     f = (xtract_mel_filter *)argv;
-    
+
     for(filter = 0; filter < f->n_filters; filter++){
         result[filter] = 0.f;
         for(n = 0; n < N; n++){
@@ -273,17 +238,17 @@ int xtract_mfcc(const float *data, const int N, const void *argv, float *result)
     }
 
     xtract_dct(result, f->n_filters, NULL, result);
-    
+
     return XTRACT_SUCCESS;
 }
 
 int xtract_dct(const float *data, const int N, const void *argv, float *result){
-    
+
     //fftwf_plan plan;
-    
+
     //plan = 
-      //  fftwf_plan_r2r_1d(N, (float *) data, result, FFTW_REDFT00, FFTW_ESTIMATE);
-    
+    //  fftwf_plan_r2r_1d(N, (float *) data, result, FFTW_REDFT00, FFTW_ESTIMATE);
+
     fftwf_execute_r2r(fft_plans.dct_plan, (float *)data, result);
     //fftwf_execute(plan);
     //fftwf_destroy_plan(plan);
@@ -326,13 +291,13 @@ int xtract_dct(const float *data, const int N, const void *argv, float *result){
 int xtract_autocorrelation(const float *data, const int N, const void *argv, float *result){
 
     /* Naive time domain implementation  */
-    
+
     int n = N, i;
-    
+
     float corr;
 
     while(n--){
-       corr = 0;
+        corr = 0;
         for(i = 0; i < N - n; i++){
             corr += data[i] * data[i + n];
         }
@@ -345,15 +310,15 @@ int xtract_autocorrelation(const float *data, const int N, const void *argv, flo
 int xtract_amdf(const float *data, const int N, const void *argv, float *result){
 
     int n = N, i;
-    
+
     float md, temp;
 
     while(n--){
-       md = 0.f;
+        md = 0.f;
         for(i = 0; i < N - n; i++){
             temp = data[i] - data[i + n];
-			temp = (temp < 0 ? -temp : temp);
-			md += temp;
+            temp = (temp < 0 ? -temp : temp);
+            md += temp;
         }
         result[n] = md / (float)N;
     }
@@ -362,13 +327,13 @@ int xtract_amdf(const float *data, const int N, const void *argv, float *result)
 }
 
 int xtract_asdf(const float *data, const int N, const void *argv, float *result){
-    
+
     int n = N, i;
-    
+
     float sd;
 
     while(n--){
-       sd = 0.f;
+        sd = 0.f;
         for(i = 0; i < N - n; i++){
             /*sd = 1;*/
             sd += XTRACT_SQ(data[i] - data[i + n]);
@@ -384,7 +349,7 @@ int xtract_bark_coefficients(const float *data, const int N, const void *argv, f
     int *limits, band, n;
 
     limits = (int *)argv;
-    
+
     for(band = 0; band < XTRACT_BARK_BANDS - 1; band++){
         result[band] = 0.f;
         for(n = limits[band]; n < limits[band + 1]; n++)
@@ -401,7 +366,7 @@ int xtract_peak_spectrum(const float *data, const int N, const void *argv, float
     int n = N, rv = XTRACT_SUCCESS;
 
     threshold = max = y = y2 = y3 = p = q = 0.f;
-    
+
     if(argv != NULL){
         q = ((float *)argv)[0];
         threshold = ((float *)argv)[1];
@@ -421,13 +386,13 @@ int xtract_peak_spectrum(const float *data, const int N, const void *argv, float
     bytes = N * sizeof(float);
 
     if(input != NULL)
-	input = memcpy(input, data, bytes);
+        input = memcpy(input, data, bytes);
     else
-	return XTRACT_MALLOC_FAILED;
+        return XTRACT_MALLOC_FAILED;
 
     while(n--)
         max = XTRACT_MAX(max, input[n]);
-    
+
     threshold *= .01 * max;
 
     result[0] = 0;
@@ -437,8 +402,8 @@ int xtract_peak_spectrum(const float *data, const int N, const void *argv, float
         if(input[n] >= threshold){
             if(input[n] > input[n - 1] && n + 1 < N && input[n] > input[n + 1]){
                 result[N + n] = q * (n + (p = .5 * ((y = input[n-1]) - 
-				(y3 = input[n+1])) / (input[n - 1] - 2 * 
-				    (y2 = input[n]) + input[n + 1])));
+                                (y3 = input[n+1])) / (input[n - 1] - 2 * 
+                                    (y2 = input[n]) + input[n + 1])));
                 result[n] = y2 - .25 * (y - y3) * p;
             }
             else{
@@ -451,13 +416,13 @@ int xtract_peak_spectrum(const float *data, const int N, const void *argv, float
             result[N + n] = 0;
         }
     }	  
-   
+
     free(input);
     return (rv ? rv : XTRACT_SUCCESS);
 }
-	    
+
 int xtract_harmonic_spectrum(const float *data, const int N, const void *argv, float *result){
-    
+
     int n = (N >> 1), M = n; 
 
     const float *freqs, *amps;
@@ -471,23 +436,23 @@ int xtract_harmonic_spectrum(const float *data, const int N, const void *argv, f
     ratio = nearest = distance = 0.f;
 
     while(n--){
-	if(freqs[n]){
-	    ratio = freqs[n] / f0;
-	    nearest = roundf(ratio);
-	    distance = fabs(nearest - ratio);
-	    if(distance > threshold)
-		result[n] = result[M + n] = 0.f;
-	    else {
-		result[n] = amps[n];
-		result[M + n] = freqs[n];
-	    }
-	}
-	else
-	    result[n] = result[M + n] = 0.f;
+        if(freqs[n]){
+            ratio = freqs[n] / f0;
+            nearest = roundf(ratio);
+            distance = fabs(nearest - ratio);
+            if(distance > threshold)
+                result[n] = result[M + n] = 0.f;
+            else {
+                result[n] = amps[n];
+                result[M + n] = freqs[n];
+            }
+        }
+        else
+            result[n] = result[M + n] = 0.f;
     }
     return XTRACT_SUCCESS;
 }
-	    
+
 int xtract_lpc(const float *data, const int N, const void *argv, float *result){
 
     int i, j, k, M, L;
@@ -543,12 +508,12 @@ int xtract_lpcc(const float *data, const int N, const void *argv, float *result)
     float sum;
     int order = N - 1; /* Eventually change this to Q = 3/2 p as suggested in Rabiner */
     int cep_length; 
-    
+
     if(argv == NULL)
         cep_length = N - 1; /* FIX: if we're going to have default values, they should come from the descriptor */
     else
         cep_length = *(int *)argv;
-        //cep_length = (int)((float *)argv)[0];
+    //cep_length = (int)((float *)argv)[0];
 
     memset(result, 0, cep_length * sizeof(float));
 
@@ -597,7 +562,7 @@ int xtract_subbands(const float *data, const int N, const void *argv, float *res
 
         /* Bounds sanity check */
         if(lower >= N || lower + bw >= N){
-         //   printf("n: %d\n", n);
+            //   printf("n: %d\n", n);
             result[n] = 0.f;
             continue;
         }
