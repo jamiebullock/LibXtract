@@ -37,7 +37,7 @@ int main(void) {
     xtract_init_fft(N, XTRACT_SPECTRUM);
     xtract[XTRACT_SPECTRUM]((void *)&vector, N, &argf[0], (void *)&spectrum[0]);
 
-    printf("\nThe mean of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] = %.1f\n\n", mean);
+    printf("\nThe mean of [.1, .2, .3, .4, -.5, -.4, -.3, -.2, -.1] = %.1f\n\n", mean);
     printf("\nResults of xtract_spectrum():\n");
 
     for(n = 0; n < N; n++){

@@ -4,22 +4,28 @@ CSYM=xtract~
 all: universal
 current: universal
 
-MAXINCLUDE = /usr/local/include/max-includes 
-MSPINCLUDE = /usr/local/include/msp-includes 
 FRAMEWORKS = /Library/Frameworks
-INSTALLDIR = /Applications/Audio/MaxMSP\ 4.6.3/Cycling\ \'74/externals/
+MAXINCLUDE = $(FRAMEWORKS)/MaxAPI.framework/Headers
+MSPINCLUDE = $(FRAMEWORKS)/MaxAudioAPI.framework/Headers
+INSTALLDIR = /Applications/Max5/Cycling\ \'74/externals/
+XTRACT_HEADERS = /usr/local/include
+FFTW_LIBS = -lfftw3f #include this if you compiled libxtract with --enable-fft
 
 LIPO = /usr/bin/lipo
 CC = gcc
 
-CFLAGS = -F$(FRAMEWORKS) -Wmost -Wno-four-char-constants -Wno-unknown-pragmas -x c -pipe -Wno-trigraphs -fpascal-strings -fasm-blocks -Os -fmessage-length=0 -I$(MAXINCLUDE) -I$(MSPINCLUDE) -include macho-prefix.h  -Werror
+#DEBUG_FLAGS = -Werror -Wall
+
+CFLAGS = -F$(FRAMEWORKS) -Wmost -Wno-four-char-constants -Wno-unknown-pragmas -x c -pipe -Wno-trigraphs -fpascal-strings -fasm-blocks -Os -fmessage-length=0 -I$(MAXINCLUDE) -I$(MSPINCLUDE) -include macho-prefix.pch $(DEBUG_FLAGS) -isysroot /Developer/SDKs/MacOSX10.5.sdk -mmacosx-version-min=10.5 -I$(XTRACT_HEADERS)
 
 I386CFLAGS = -arch i386 
+IX86_64CFLAGS = -arch x86_64
 PPCCFLAGS = -arch ppc -faltivec -fasm-blocks -Wno-unused
 
-LDFLAGS = -F$(FRAMEWORKS) -L$(MAXINCLUDE) -L$(MSPINCLUDE) -framework Carbon -framework MaxAPI -framework MaxAudioAPI -Wl,-Y,1455 -bundle -L/usr/local/lib -lxtract
+LDFLAGS = -F$(FRAMEWORKS) -L$(MAXINCLUDE) -L$(MSPINCLUDE) -framework Carbon -framework MaxAPI -framework MaxAudioAPI -Wl,-Y,1455 -bundle -L/usr/local/lib -lxtract $(FFTW_LIBS)
 
 I386LDFLAGS = -arch i386
+IX86_64CFLAGS = -arch x86_64
 PPCLDFLAGS = -arch ppc
 
 universal: 
@@ -48,11 +54,18 @@ intel:
 	cp Info.plist PkgInfo $(NAME).mxo/Contents/
 	cp $(NAME) $(NAME).mxo/Contents/MacOS
 
-clean:
-	rm -rf *i386* *ppc* xtract~ *.mxo
+intel64:
+	$(CC) $(CFLAGS) $(IX86_64CFLAGS) -o $(NAME)-64.o -c $(NAME).c
+	$(CC) $(LDFLAGS) $(IX86_64LDFLAGS) -o $(NAME)-64 $(NAME)-64.o
+	$(LIPO) -create $(NAME)-64 -output $(NAME)
+	mkdir -p $(NAME).mxo/Contents/MacOS
+	cp Info.plist PkgInfo $(NAME).mxo/Contents/
+	cp $(NAME) $(NAME).mxo/Contents/MacOS
 
-maintainer-clean:
-	rm -rf *i386* *ppc* xtract~ *.mxo
+
+
+clean:
+	rm -rf *64* *i386* *ppc* xtract~ *.mxo
 
 install:
 	$(INSTALL) cp -r $(NAME).mxo $(INSTALLDIR)
