@@ -74,7 +74,7 @@ int xtract_variance(const float *data, const int N, const void *argv, float *res
 
     int n = N;
 
-    *result += 0.f;
+    *result = 0.f;
 
     while(n--)
 	*result += powf(data[n] - *(float *)argv, 2);
@@ -95,7 +95,7 @@ int xtract_average_deviation(const float *data, const int N, const void *argv, f
 
     int n = N;
 
-    *result += 0.f;
+    *result = 0.f;
 
     while(n--)
 	*result += fabsf(data[n] - *(float *)argv);
@@ -111,7 +111,7 @@ int xtract_skewness(const float *data, const int N, const void *argv,  float *re
 
     float temp = 0.f;
 
-    *result += 0.f;
+    *result = 0.f;
 
     while(n--){
 	temp = (data[n] - ((float *)argv)[0]) / ((float *)argv)[1];
@@ -130,7 +130,7 @@ int xtract_kurtosis(const float *data, const int N, const void *argv,  float *re
 
     float temp = 0.f;
 
-    *result += 0.f;
+    *result = 0.f;
 
     while(n--){
 	temp = (data[n] - ((float *)argv)[0]) / ((float *)argv)[1];
@@ -183,7 +183,7 @@ int xtract_spectral_variance(const float *data, const int N, const void *argv, f
     amps = data;
     freqs = data + m;
 
-    *result += 0.f;
+    *result = 0.f;
 
     while(m--){
 	A += amps[m];
@@ -213,7 +213,7 @@ int xtract_spectral_average_deviation(const float *data, const int N, const void
     amps = data;
     freqs = data + m;
 
-    *result += 0.f;
+    *result = 0.f;
 
     while(m--){
 	A += amps[m];
@@ -236,7 +236,7 @@ int xtract_spectral_skewness(const float *data, const int N, const void *argv,  
     amps = data;
     freqs = data + m;
 
-    *result += 0.f;
+    *result = 0.f;
 
     while(m--){
 	A += amps[m];
@@ -261,7 +261,7 @@ int xtract_spectral_kurtosis(const float *data, const int N, const void *argv,  
     amps = data;
     freqs = data + m;
 
-    *result += 0.f;
+    *result = 0.f;
 
     while(m--){
 	A += amps[m];
@@ -763,7 +763,7 @@ int xtract_nonzero_count(const float *data, const int N, const void *argv, float
 
     int n = N;
     
-    *result += 0.f;
+    *result = 0.f;
 
     while(n--)
 	*result += (*data++ ? 1 : 0);
