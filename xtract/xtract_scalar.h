@@ -71,7 +71,8 @@ int xtract_standard_deviation(const float *data, const int N, const void *argv, 
  * \param *argv: a pointer to a float representing the mean of the input vector
  * \param *result: the  average deviation of N values from the array pointed to by *data
  */
-int xtract_average_deviation(const float *data, const int N, const void *argv, float *result);
+/*int xtract_average_deviation(const float *data, const int N, const void *argv, float *result);
+ */
 
 /** \brief Extract the skewness of an input vector
  * 

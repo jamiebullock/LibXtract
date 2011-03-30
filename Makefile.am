@@ -11,4 +11,4 @@ pkgconfig_DATA = libxtract.pc
 
 ACLOCAL_AMFLAGS = -I m4
 
-EXTRA_DIST = bootstrap autogen.sh README TODO
+EXTRA_DIST = examples/MSP bootstrap autogen.sh README TODO

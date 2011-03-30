@@ -62,7 +62,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void){
             case XTRACT_DIFFERENCE_VECTOR: 
             case XTRACT_AVERAGE_DEVIATION:
             case XTRACT_SPECTRAL_STANDARD_DEVIATION:
-            case XTRACT_SPECTRAL_AVERAGE_DEVIATION:
+            /* case XTRACT_SPECTRAL_AVERAGE_DEVIATION: */
             case XTRACT_LOWEST_VALUE:
             case XTRACT_TONALITY:
             case XTRACT_MFCC:
@@ -206,9 +206,9 @@ xtract_function_descriptor_t *xtract_make_descriptors(void){
             case XTRACT_SPECTRAL_STANDARD_DEVIATION:
                 *argv_donor = XTRACT_SPECTRAL_VARIANCE;
                 break;
-            case XTRACT_SPECTRAL_AVERAGE_DEVIATION:
+            /* case XTRACT_SPECTRAL_AVERAGE_DEVIATION:
                 *argv_donor = XTRACT_SPECTRAL_MEAN;
-                break;
+                break; */
             case XTRACT_SPECTRAL_INHARMONICITY:
                 *argv_donor = XTRACT_FAILSAFE_F0;
                 break;
@@ -300,7 +300,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void){
             case XTRACT_SPECTRAL_MEAN:
             case XTRACT_SPECTRAL_VARIANCE:
             case XTRACT_SPECTRAL_STANDARD_DEVIATION:
-            case XTRACT_SPECTRAL_AVERAGE_DEVIATION:
+            /* case XTRACT_SPECTRAL_AVERAGE_DEVIATION: */
             case XTRACT_SPECTRAL_SKEWNESS:
             case XTRACT_SPECTRAL_KURTOSIS:
             case XTRACT_SPECTRAL_CENTROID:
@@ -432,7 +432,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void){
             case XTRACT_SPECTRAL_MEAN:
             case XTRACT_SPECTRAL_VARIANCE:
             case XTRACT_SPECTRAL_STANDARD_DEVIATION:
-            case XTRACT_SPECTRAL_AVERAGE_DEVIATION:
+            /* case XTRACT_SPECTRAL_AVERAGE_DEVIATION: */
             case XTRACT_SPECTRAL_SKEWNESS:
             case XTRACT_SPECTRAL_KURTOSIS:
             case XTRACT_SPECTRAL_CENTROID:
@@ -530,7 +530,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void){
                         "Extract the standard deviation of an audio spectrum");
                 strcpy(author, "");
                 break;
-            case XTRACT_SPECTRAL_AVERAGE_DEVIATION:
+            /* case XTRACT_SPECTRAL_AVERAGE_DEVIATION:
                 strcpy(name, "spectral_average_deviation");
                 strcpy(p_name, "Spectral Average Deviation");
                 strcpy(desc, 
@@ -539,6 +539,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void){
                         "Extract the average deviation of an audio spectrum");
                 strcpy(author, "");
                 break;
+                */
             case XTRACT_ROLLOFF:
                 strcpy(name, "rolloff");
                 strcpy(p_name, "Spectral Rolloff");
@@ -963,7 +964,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void){
             case XTRACT_AVERAGE_DEVIATION:
             case XTRACT_SPECTRAL_VARIANCE:
             case XTRACT_SPECTRAL_STANDARD_DEVIATION:
-            case XTRACT_SPECTRAL_AVERAGE_DEVIATION:
+            /* case XTRACT_SPECTRAL_AVERAGE_DEVIATION: */
             case XTRACT_SPECTRAL_INHARMONICITY:
             case XTRACT_LOWEST_VALUE:
             case XTRACT_F0:
@@ -1059,7 +1060,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void){
             case XTRACT_SPECTRAL_MEAN:
             case XTRACT_SPECTRAL_VARIANCE:
             case XTRACT_SPECTRAL_STANDARD_DEVIATION:
-            case XTRACT_SPECTRAL_AVERAGE_DEVIATION:
+            /* case XTRACT_SPECTRAL_AVERAGE_DEVIATION: */
             case XTRACT_SPECTRAL_SKEWNESS:
             case XTRACT_SPECTRAL_KURTOSIS:
             case XTRACT_SPECTRAL_CENTROID:
@@ -1135,7 +1136,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void){
             case XTRACT_SPECTRAL_MEAN:
             case XTRACT_SPECTRAL_VARIANCE:
             case XTRACT_SPECTRAL_STANDARD_DEVIATION:
-            case XTRACT_SPECTRAL_AVERAGE_DEVIATION:
+            /* case XTRACT_SPECTRAL_AVERAGE_DEVIATION: */
             case XTRACT_SPECTRAL_SKEWNESS:
             case XTRACT_SPECTRAL_KURTOSIS:
             case XTRACT_SPECTRAL_CENTROID:
@@ -1227,7 +1228,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void){
                 case XTRACT_SPECTRAL_MEAN:
                 case XTRACT_SPECTRAL_VARIANCE:
                 case XTRACT_SPECTRAL_STANDARD_DEVIATION:
-                case XTRACT_SPECTRAL_AVERAGE_DEVIATION:
+                /* case XTRACT_SPECTRAL_AVERAGE_DEVIATION: */
                 case XTRACT_SPECTRAL_CENTROID:
                 case XTRACT_SPREAD:
                 case XTRACT_F0:

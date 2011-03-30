@@ -6,8 +6,6 @@ CLEANFILES=doxygen-build.stamp
 
 DOX=documentation.doxygen
 
-EXTRA_DIST=
-
 INSTIMAGES=html/doxygen.png
 
 DOC_STAMPS=html-build.stamp

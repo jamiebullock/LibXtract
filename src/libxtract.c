@@ -27,7 +27,7 @@ int(*xtract[])(const float *, const int, const void *, float *) = {
     xtract_mean,
     xtract_variance,
     xtract_standard_deviation,
-    xtract_average_deviation,
+    /* xtract_average_deviation, */
     xtract_skewness,
     xtract_kurtosis,
     xtract_spectral_mean,

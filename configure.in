@@ -4,18 +4,20 @@ m4_define(libxtract_major_version, 0)
 # Increment for feature additions and enhancements
 m4_define(libxtract_minor_version, 6)
 # Increment for fixes 
-m4_define(libxtract_fix_version, 1)
+m4_define(libxtract_fix_version, 4)
 # Development status
 m4_define(libIntegra_dev_status, [beta])
 
 m4_define(libxtract_version, libxtract_major_version.libxtract_minor_version.libxtract_fix_version)
-		
+
 PACKAGE=libxtract
 
-AC_INIT(libxtract, libxtract_version, libxtract-devel@lists.sourceforge.net)
+AC_INIT([libxtract], [libxtract_version], [libxtract-devel@lists.sourceforge.net])
 AC_DEFINE(LIBXTRACT_VERSION, libxtract_version, [LibXtract Version])
-AM_INIT_AUTOMAKE($PACKAGE, $LIBXTRACT_VERSION)
+dnl AM_INIT_AUTOMAKE($PACKAGE, $LIBXTRACT_VERSION)
+AM_INIT_AUTOMAKE(1.6)
 AM_CONFIG_HEADER(config.h)
+AC_CONFIG_MACRO_DIR([m4])
 AC_PROG_CC
 AC_PROG_LIBTOOL
 AC_PROG_INSTALL
@@ -240,57 +242,57 @@ dnl pd_ldflags="$PD_LDFLAGS -L/usr/local/lib -ldl"
 if test -z "$GCC"; then
         case $host in
         *-*-irix*)
-                dnl If we're on IRIX, we wanna use cc even if gcc
-                dnl is there (unless the user has overriden us)...
-                if test -z "$CC"; then
-                        CC=cc
-                fi
+            dnl If we're on IRIX, we wanna use cc even if gcc
+            dnl is there (unless the user has overriden us)...
+            if test -z "$CC"; then
+                    CC=cc
+            fi
         ;;
         sparc-sun-solaris*)
-                PD_CFLAGS="-xO4 -fast -w -fsimple -native -xcg92"
+            PD_CFLAGS="-xO4 -fast -w -fsimple -native -xcg92"
         ;;
         *)
-                PD_CFLAGS="-O"
+            PD_CFLAGS="-O"
         ;;
         esac
 else
 
         case $host in
         *86-*-linux*)
-                PD_CFLAGS="$PD_CFLAGS -DUNIX -Wall -Wimplicit -Wunused"
-        PD_LDFLAGS="$PD_LDFLAGS -shared -export_dynamic"
-        dnl we could test for bad glibc here, but don't
-        PD_SUFFIX=pd_linux
+            PD_CFLAGS="$PD_CFLAGS -DUNIX -Wall -Wimplicit -Wunused"
+            PD_LDFLAGS="$PD_LDFLAGS -shared"
+            dnl we could test for bad glibc here, but don't
+            PD_SUFFIX=pd_linux
         ;;
         powerpc-*-linux*)
-                PD_CFLAGS="$PD_CFLAGS -DUNIX -Wall -Wimplicit -Wunused -Wmissing-prototypes"
-        PD_LDFLAGS="$PD_LDFLAGS -shared"
-        PD_SUFFIX=pd_linux
+            PD_CFLAGS="$PD_CFLAGS -DUNIX -Wall -Wimplicit -Wunused -Wmissing-prototypes"
+            PD_LDFLAGS="$PD_LDFLAGS -shared"
+            PD_SUFFIX=pd_linux
         ;;
         *-*-linux*)
-                PD_CFLAGS="$PD_CFLAGS -DUNIX -Wall -Wimplicit -Wunused -Wmissing-prototypes -fPIC"
-        PD_LDFLAGS="$PD_LDFLAGS -shared -export_dynamic"
-        PD_SUFFIX=pd_linux
+            PD_CFLAGS="$PD_CFLAGS -DUNIX -Wall -Wimplicit -Wunused -Wmissing-prototypes -fPIC"
+            PD_LDFLAGS="$PD_LDFLAGS -shared -export_dynamic"
+            PD_SUFFIX=pd_linux
         ;;
         sparc-sun-*)
-        echo "YOU HAVE A SPARC STATION, not setting any flags, not supported yet"
+            echo "YOU HAVE A SPARC STATION, not setting any flags, not supported yet"
         ;;
         *86-*-darwin*)
-                PD_CFLAGS="$PD_CFLAGS -DUNIX -Wall -Wimplicit -Wunused -Wmissing-prototypes"
-        PD_LDFLAGS="$PD_LDFLAGS -dynamiclib -mmacosx-version-min=10.3 -undefined dynamic_lookup -single_module"
-        PD_SUFFIX=pd_darwin
+            PD_CFLAGS="$PD_CFLAGS -DUNIX -Wall -Wimplicit -Wunused -Wmissing-prototypes"
+            PD_LDFLAGS="$PD_LDFLAGS -dynamiclib -mmacosx-version-min=10.3 -undefined dynamic_lookup -single_module"
+            PD_SUFFIX=pd_darwin
 	;;
 	*-*-darwin*)
-                PD_CFLAGS="$PD_CFLAGS -DUNIX -Wall -Wimplicit -Wunused -Wmissing-prototypes"
-        PD_LDFLAGS="$PD_LDFLAGS -bundle -arch ppc -undefined suppress -flat_namespace"
-        PD_SUFFIX=pd_darwin
+            PD_CFLAGS="$PD_CFLAGS -DUNIX -Wall -Wimplicit -Wunused -Wmissing-prototypes"
+            PD_LDFLAGS="$PD_LDFLAGS -bundle -arch ppc -undefined suppress -flat_namespace"
+            PD_SUFFIX=pd_darwin
 	;;
 
         *)
         dnl assume unix
-                PD_CFLAGS="$PD_CFLAGS -DUNIX -Wall -Wimplicit -Wunused -Wmissing-prototypes -O1"
-        PD_LDFLAGS="$PD_LDFLAGS -shared"
-        PD_SUFFIX=pd_linux
+            PD_CFLAGS="$PD_CFLAGS -DUNIX -Wall -Wimplicit -Wunused -Wmissing-prototypes -O1"
+            PD_LDFLAGS="$PD_LDFLAGS -shared"
+            PD_SUFFIX=pd_linux
         ;;
         esac
 fi

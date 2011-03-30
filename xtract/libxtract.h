@@ -68,7 +68,7 @@ extern "C" {
   * @{
   */
 
-#define XTRACT_FEATURES 60
+#define XTRACT_FEATURES 59
     
 /** \brief Enumeration of features, elements are used as indixes to an array of pointers to feature extracton functions */
 enum xtract_features_ {
@@ -81,7 +81,7 @@ enum xtract_features_ {
     XTRACT_SPECTRAL_MEAN,
     XTRACT_SPECTRAL_VARIANCE,
     XTRACT_SPECTRAL_STANDARD_DEVIATION,
-    XTRACT_SPECTRAL_AVERAGE_DEVIATION,
+    /*XTRACT_SPECTRAL_AVERAGE_DEVIATION, */
     XTRACT_SPECTRAL_SKEWNESS,
     XTRACT_SPECTRAL_KURTOSIS,
     XTRACT_SPECTRAL_CENTROID,

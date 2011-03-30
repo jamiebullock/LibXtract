@@ -186,11 +186,11 @@ int xtract_spectral_variance(const float *data, const int N, const void *argv, f
     *result = 0.f;
 
     while(m--){
-	A += amps[m];
-	*result += powf((freqs[m]  - *(float *)argv) * amps[m], 2);
+        A += amps[m];
+        *result += powf(freqs[m] - ((float *)argv)[0], 2) * amps[m];
     }
 
-    *result = *result / (A /*- 1*/);
+    *result = *result / A;
 
     return XTRACT_SUCCESS;
 }
@@ -202,7 +202,7 @@ int xtract_spectral_standard_deviation(const float *data, const int N, const voi
     return XTRACT_SUCCESS;
 }
 
-int xtract_spectral_average_deviation(const float *data, const int N, const void *argv, float *result){
+/*int xtract_spectral_average_deviation(const float *data, const int N, const void *argv, float *result){
 
     int m;
     float A = 0.f;
@@ -216,19 +216,18 @@ int xtract_spectral_average_deviation(const float *data, const int N, const void
     *result = 0.f;
 
     while(m--){
-	A += amps[m];
-	*result += fabsf((amps[m] * freqs[m]) - *(float *)argv);
+        A += amps[m];
+        *result += fabsf((amps[m] * freqs[m]) - *(float *)argv);
     }
 
     *result /= A;
 
     return XTRACT_SUCCESS;
-}
+}*/
 
 int xtract_spectral_skewness(const float *data, const int N, const void *argv,  float *result){
 
     int m;
-    float temp, A = 0.f;
     const float *freqs, *amps;
 
     m = N >> 1;
@@ -238,14 +237,10 @@ int xtract_spectral_skewness(const float *data, const int N, const void *argv,  
 
     *result = 0.f;
 
-    while(m--){
-	A += amps[m];
-	temp = ((amps[m] * freqs[m]) - 
-		((float *)argv)[0]) / ((float *)argv)[1];
-	*result += powf(temp, 3);
-    }
+    while(m--)
+        *result += powf(freqs[m] - ((float *)argv)[0], 3) * amps[m];
 
-    *result /= A;
+    *result /= powf(((float *)argv)[1], 3);
 
     return XTRACT_SUCCESS;
 }
@@ -253,7 +248,6 @@ int xtract_spectral_skewness(const float *data, const int N, const void *argv,  
 int xtract_spectral_kurtosis(const float *data, const int N, const void *argv,  float *result){
 
     int m;
-    float temp, A = 0.f;
     const float *freqs, *amps;
 
     m = N >> 1;
@@ -263,14 +257,10 @@ int xtract_spectral_kurtosis(const float *data, const int N, const void *argv,  
 
     *result = 0.f;
 
-    while(m--){
-	A += amps[m];
-	temp = ((amps[m] * freqs[m]) - 
-		((float *)argv)[0]) / ((float *)argv)[1];
-	*result += powf(temp, 4);
-    }
+    while(m--)
+        *result += powf(freqs[m] - ((float *)argv)[0], 4) * amps[m];
 
-    *result /= A;
+    *result /= powf(((float *)argv)[1], 4);
     *result -= 3.0f;
 
     return XTRACT_SUCCESS;
