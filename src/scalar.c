@@ -411,24 +411,7 @@ int xtract_smoothness(const float *data, const int N, const void *argv, float *r
 
 int xtract_spread(const float *data, const int N, const void *argv, float *result){
 
-    int n = N;
-
-    float num = 0.f, den = 0.f, temp = 0.f;
-
-    if(argv == NULL)
-	return XTRACT_BAD_ARGV;
-
-    while(n--){
-	temp = n - *(float *)argv;
-	num += XTRACT_SQ(temp) * data[n];
-	den += data[n];
-    }
-
-    /* FIX: spectral spread is mathematically equivalent to spectral variance --
-     * here we are computing the spectral standard deviation */
-    *result = sqrtf(num / den);
-
-    return XTRACT_SUCCESS;
+      return xtract_spectral_variance(data, N, argv, result);
 }
 
 int xtract_zcr(const float *data, const int N, const void *argv, float *result){
