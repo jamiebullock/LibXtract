@@ -195,7 +195,7 @@ AM_CONDITIONAL(BUILD_SWIG, test "x${swig}" = 'xtrue')
 
 dnl SWIG stuff
 if [[ "$swig" = "true" ]] ; then
-    AC_PROG_SWIG(1.3.21)
+    AX_PKG_SWIG(1.3.21)
     AC_DEFINE([BUILD_SWIG], [1], [Build the swig bindings])
 fi
 

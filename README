@@ -73,9 +73,13 @@ If you do not have the 'standard' version of Python on OS X, you might need to t
 
 ./configure --your-flags LDFLAGS="-L/Library/Frameworks/Python.framework/Versions/2.5/lib/python2.5/config/"
 
-to find your Python library type:
+To find your Python library type:
 
-locate libpython
+    locate libpython
+
+NOTE: The python module will get installed under the main install prefix, so if your install prefix is set to /usr/local, then the python module will get installed to /usr/local/lib/python2.5/site-packages/libxtract/xtract. You may need to add this to your PYTHONPATH environment variable. For example in ~/.bash_profile add:
+    export PYTHONPATH=/usr/local/lib/python2.7/site-packages
+
 
 Building the Java bindings
 --------------------------
