@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 try:
-    import xtract
+    import libxtract.xtract as xtract
 except ImportError:
     print 'Failed to load the library "xtract"'
 
