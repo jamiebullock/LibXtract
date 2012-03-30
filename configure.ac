@@ -4,7 +4,7 @@ m4_define(libxtract_major_version, 0)
 # Increment for feature additions and enhancements
 m4_define(libxtract_minor_version, 6)
 # Increment for fixes 
-m4_define(libxtract_fix_version, 4)
+m4_define(libxtract_fix_version, 5)
 # Development status
 m4_define(libIntegra_dev_status, [beta])
 
