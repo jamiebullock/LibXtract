@@ -16,35 +16,24 @@ CC = gcc
 
 #DEBUG_FLAGS = -Werror -Wall
 
-CFLAGS = -F$(FRAMEWORKS) -Wmost -Wno-four-char-constants -Wno-unknown-pragmas -x c -pipe -Wno-trigraphs -fpascal-strings -fasm-blocks -Os -fmessage-length=0 -I$(MAXINCLUDE) -I$(MSPINCLUDE) -include macho-prefix.pch $(DEBUG_FLAGS) -isysroot /Developer/SDKs/MacOSX10.5.sdk -mmacosx-version-min=10.5 -I$(XTRACT_HEADERS)
+CFLAGS = -F$(FRAMEWORKS) -Wmost -Wno-four-char-constants -Wno-unknown-pragmas -x c -pipe -Wno-trigraphs -fpascal-strings -fasm-blocks -Os -fmessage-length=0 -I$(MAXINCLUDE) -I$(MSPINCLUDE) $(DEBUG_FLAGS) -I$(XTRACT_HEADERS)
 
 I386CFLAGS = -arch i386 
 IX86_64CFLAGS = -arch x86_64
-PPCCFLAGS = -arch ppc -faltivec -fasm-blocks -Wno-unused
 
 LDFLAGS = -F$(FRAMEWORKS) -L$(MAXINCLUDE) -L$(MSPINCLUDE) -framework Carbon -framework MaxAPI -framework MaxAudioAPI -Wl,-Y,1455 -bundle -L/usr/local/lib -lxtract $(FFTW_LIBS)
 
 I386LDFLAGS = -arch i386
 IX86_64CFLAGS = -arch x86_64
-PPCLDFLAGS = -arch ppc
 
 universal: 
 	$(CC) $(CFLAGS) $(I386CFLAGS) -o $(NAME)-i386.o -c $(NAME).c
-	$(CC) $(CFLAGS) $(PPCCFLAGS) -o $(NAME)-ppc.o -c $(NAME).c
 	$(CC) $(LDFLAGS) $(I386LDFLAGS) -o $(NAME)-i386 $(NAME)-i386.o
-	$(CC) $(LDFLAGS) $(PPCLDFLAGS) -o $(NAME)-ppc $(NAME)-ppc.o
-	$(LIPO) -create $(NAME)-ppc $(NAME)-i386 -output $(NAME)
+	$(LIPO) -create $(NAME)-i386 -output $(NAME)
 	mkdir -p $(NAME).mxo/Contents/MacOS
 	cp Info.plist PkgInfo $(NAME).mxo/Contents/
 	cp $(NAME) $(NAME).mxo/Contents/MacOS
 
-ppc:
-	$(CC) $(CFLAGS) $(PPCCFLAGS) -o $(NAME)-ppc.o -c $(NAME).c
-	$(CC) $(LDFLAGS) $(PPCLDFLAGS) -o $(NAME)-ppc $(NAME)-ppc.o
-	$(LIPO) -create $(NAME)-ppc -output $(NAME)
-	mkdir -p $(NAME).mxo/Contents/MacOS
-	cp Info.plist PkgInfo $(NAME).mxo/Contents/
-	cp $(NAME) $(NAME).mxo/Contents/MacOS
 
 intel:
 	$(CC) $(CFLAGS) $(I386CFLAGS) -o $(NAME)-i386.o -c $(NAME).c
@@ -65,7 +54,7 @@ intel64:
 
 
 clean:
-	rm -rf *64* *i386* *ppc* xtract~ *.mxo
+	rm -rf *64* *i386* xtract~ *.mxo
 
 install:
 	$(INSTALL) cp -r $(NAME).mxo $(INSTALLDIR)

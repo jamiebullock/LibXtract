@@ -277,14 +277,14 @@ else
         sparc-sun-*)
             echo "YOU HAVE A SPARC STATION, not setting any flags, not supported yet"
         ;;
-        *86-*-darwin*)
-            PD_CFLAGS="$PD_CFLAGS -DUNIX -Wall -Wimplicit -Wunused -Wmissing-prototypes"
-            PD_LDFLAGS="$PD_LDFLAGS -dynamiclib -mmacosx-version-min=10.3 -undefined dynamic_lookup -single_module"
-            PD_SUFFIX=pd_darwin
-	;;
+        dnl *86-*-darwin*)
+        dnl    PD_CFLAGS="$PD_CFLAGS -DUNIX -Wall -Wimplicit -Wunused -Wmissing-prototypes"
+        dnl    PD_LDFLAGS="$PD_LDFLAGS -dynamiclib -mmacosx-version-min=10.5 -undefined dynamic_lookup -single_module"
+        dnl    PD_SUFFIX=pd_darwin
+	dnl ;;
 	*-*-darwin*)
             PD_CFLAGS="$PD_CFLAGS -DUNIX -Wall -Wimplicit -Wunused -Wmissing-prototypes"
-            PD_LDFLAGS="$PD_LDFLAGS -bundle -arch ppc -undefined suppress -flat_namespace"
+            PD_LDFLAGS="$PD_LDFLAGS -bundle -undefined dynamic_lookup -flat_namespace"
             PD_SUFFIX=pd_darwin
 	;;
 
