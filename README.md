@@ -10,18 +10,31 @@ Hopefully this not only makes the library more efficient when computing large nu
 
 A complete list of features can be found by viewing the header files, or reading the doxygen documentation, available with this package.
 
+## Downloading
+
+The latest source code release for LibXtract can be downloaded from [https://github.com/jamiebullock/LibXtract/downloads](https://github.com/jamiebullock/LibXtract/downloads).
+
 ## Dependencies
 
-To compile LibXtract, the following software is also needed:
+To compile LibXtract from the source code release, the following optional software is also needed:
 
-    automake >= 1.6
     fftw3 (compiled with floating-point support)
 
-To build the PD external, the PD header 'm_pd.h' is required
+To build the PD external, the PD header 'm_pd.h' is required, this can be found in the [Pure Data source code release](http://puredata.info/downloads/pure-data).
+
+If you are compiling LibXtract compile from SVN, the **autotools** build system is required. This includes:
+
+    automake >= 1.11
+    autoconf >= 2.68
+    libtool >= 2.4
 
 ## Installation
 
-Type:
+If you are installing from SVN first run:
+
+    sh autogen.sh
+
+If autogen.sh was successful, or you downloaded the source release, type:
 
     ./configure --enable-pd_example --enable-fft
     make
@@ -33,7 +46,7 @@ There following configure flags are optional:
     --enable-fft (to enable functions that require fftw3)
     --enable-simpletest (to build the simpletest example)
 
-If you wish to build a Universal binary on OS X:
+If you wish to build a Universal binary on OS X, you may need to do something like this:
 
     CFLAGS="-isysroot /Developer/SDKs/MacOSX10.4u.sdk -Wl,-syslibroot,/Developer/SDKs/MacOSX10.4u.sdk -arch i386 -arch ppc" \./configure --isable-dependency-tracking --your-options
 
