@@ -4,7 +4,7 @@ m4_define(libxtract_major_version, 0)
 # Increment for feature additions and enhancements
 m4_define(libxtract_minor_version, 6)
 # Increment for fixes 
-m4_define(libxtract_fix_version, 5)
+m4_define(libxtract_fix_version, 6)
 # Development status
 m4_define(libIntegra_dev_status, [beta])
 
@@ -195,7 +195,7 @@ AM_CONDITIONAL(BUILD_SWIG, test "x${swig}" = 'xtrue')
 
 dnl SWIG stuff
 if [[ "$swig" = "true" ]] ; then
-    AX_PKG_SWIG(1.3.21)
+    AX_PKG_SWIG(1.3.21, [], [ AC_MSG_ERROR([SWIG is not installed]) ])
     AC_DEFINE([BUILD_SWIG], [1], [Build the swig bindings])
 fi
 

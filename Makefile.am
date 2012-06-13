@@ -11,4 +11,12 @@ pkgconfig_DATA = libxtract.pc
 
 ACLOCAL_AMFLAGS = -I m4
 
-EXTRA_DIST = examples/MSP bootstrap autogen.sh README TODO
+EXTRA_DIST = examples/MSP \
+	     bootstrap \
+	     autogen.sh \
+	     README.md \
+	     TODO \
+	     $(SWIG_DIR)/java/SWIG.java \
+	     $(SWIG_DIR)/java/test.java \
+	     $(SWIG_DIR)/python/test.py \
+	     $(SWIG_DIR)/python/__init__.py

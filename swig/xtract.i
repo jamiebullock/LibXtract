@@ -1,6 +1,6 @@
 %module xtract
-%include carrays.i 
 %include typemaps.i
+%include carrays.i 
 
 %{
 #include "xtract/xtract_scalar.h"
@@ -17,8 +17,23 @@
 %delobject destroy_filterbank; 
 
 
+%typemap(javabase) SWIGTYPE, SWIGTYPE *, SWIGTYPE &, SWIGTYPE [],
+    SWIGTYPE (CLASS::*) "SWIG"
+
+%typemap(javacode) SWIGTYPE, SWIGTYPE *, SWIGTYPE &, SWIGTYPE [],
+    SWIGTYPE (CLASS::*) %{
+        protected long getPointer() {
+            return swigCPtr;
+        }
+%}
+
 /* Helper functions */
 %inline %{
+
+    void *floata_to_voidp(float f[])
+    {
+        return (void *)f;
+    }
 
     xtract_function_descriptor_t 
             *get_descriptor(xtract_function_descriptor_t *fd, int i){
@@ -86,7 +101,8 @@
 %array_class(float, floatArray); 
 %array_class(int, intArray); 
 %apply float *OUTPUT { float *result };
-/* %apply float *INPUT { float *data }; */
+%apply float[] {const float *data};
+
 
 %ignore xtract;
 
