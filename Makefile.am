@@ -16,7 +16,8 @@ EXTRA_DIST = examples/MSP \
 	     autogen.sh \
 	     README.md \
 	     TODO \
-	     $(SWIG_DIR)/java/SWIG.java \
-	     $(SWIG_DIR)/java/test.java \
+	     $(SWIG_DIR)/java/*.java \
+	     $(SWIG_DIR)/java/xtract/core/src/* \
 	     $(SWIG_DIR)/python/test.py \
 	     $(SWIG_DIR)/python/__init__.py
+

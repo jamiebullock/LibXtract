@@ -1,7 +1,5 @@
 
 javasources = \
-	floatArray.java \
-	intArray.java \
 	SWIGTYPE_p_float.java \
 	SWIGTYPE_p_int.java \
 	SWIGTYPE_p_p_float.java \
@@ -34,8 +32,6 @@ javasources = \
 
 	
 javaclasses = \
-	floatArray.class \
-	intArray.class \
 	SWIGTYPE_p_float.class \
 	SWIGTYPE_p_int.class \
 	SWIGTYPE_p_p_float.class \
@@ -64,23 +60,6 @@ javaclasses = \
 	xtract_unit_t.class \
 	xtract_vector_t.class \
 	xtract_window_types_.class 
-	
-nonautojavasources = SWIG.java
-nonautojavaclasses = SWIG.class
-
-#javasources = \
-#	xtractJNI.java \
-#	xtract.java \
-#	floatArray.java \
-#	SWIGTYPE_p_float.java \
-#	SWIGTYPE_p_void.java   
-
-#javaclasses = \
-#	xtractJNI.class \
-#	xtract.class \
-#	floatArray.class \
-#	SWIGTYPE_p_float.class \
-#	SWIGTYPE_p_void.class   
 
 MAINTAINERCLEANFILES = $(javasources) Makefile.in
 
@@ -95,18 +74,24 @@ libjxtract_la_LIBADD = $(top_srcdir)/src/libxtract.la
 
 SWIG_JAVA_OPT = -java -package xtract.core
 
-xtract_wrap.c : $(SWIG_SOURCES)
+xtract_wrap.c: $(SWIG_SOURCES)
+	grep xtract_.*\(const $(top_srcdir)/xtract/xtract_* | grep argv | cut -d: -f 2 | sed 's/const void/void/g' > xtract_redeclare.i
 	$(SWIG) $(SWIG_JAVA_OPT) -I$(top_srcdir) -o $@ $<
-	$(JAVAC) $(nonautojavasources) $(javasources)
 	mkdir -p xtract/core
 	mkdir -p xtract/core/src
 	mv $(javasources) xtract/core/src
-	mv $(javaclasses) xtract/core
-	cp $(nonautojavasources) xtract/core/src
-	cp $(nonautojavaclasses) xtract/core
+
+java-wrap:
+	cd xtract/core/src && $(JAVAC) $(javasources)
+	cd xtract/core/src && mv $(javaclasses) ../
+
+test:
 	$(JAVAC) test.java
 
+all-local: java-wrap test
+
 clean-local:
-	-rm -f libjxtract.so xtract_wrap.c $(javasources) $(javaclasses) $(nonautojavaclasses) test.class
+	-rm xtract_redeclare.i 
+	-rm -f libjxtract.so xtract_wrap.c test.class xtract_subband_scales_.java #$(javasources) $(javaclasses) $(nonautojavaclasses) test.class xtract_subband_scales_.java
 	-rm -rf xtract
 
