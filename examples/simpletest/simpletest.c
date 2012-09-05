@@ -20,31 +20,81 @@
 
 #include "xtract/libxtract.h"
 #include <stdio.h>
+#include <stdlib.h>
 
-int main(void) {
+#define BLOCKSIZE 1024
+#define SAMPLERATE 44100
+#define PERIOD 100
+#define MFCC_FREQ_BANDS 13
+#define MFCC_FREQ_MIN 20
+#define MFCC_FREQ_MAX 20000
 
-    float mean = 0, vector[] = {.1, .2, .3, .4, -.5, -.4, -.3, -.2, -.1},
-          spectrum[10];
-    int n, N = 9;
+int main(void)
+{
+
+    float mean = 0.f; 
+    float input[BLOCKSIZE];
+    float spectrum[BLOCKSIZE];
+    float mfccs[MFCC_FREQ_BANDS * sizeof(float)];
     float argf[4];
+    int n;
+    xtract_mel_filter mel_filters;
 
-    argf[0] = 8000.f;
+    /* fill the input array with a sawtooth wave */
+    for(n = 0; n < BLOCKSIZE; ++n)
+    {
+        input[n] = ((n % PERIOD) / (float)PERIOD) - .5;
+    }
+
+    /* get the mean of the input */
+    xtract[XTRACT_MEAN]((void *)&input, BLOCKSIZE, NULL, (void *)&mean);
+    printf("\nInput mean = %.2f\n\n", mean);
+
+    /* get the spectrum */
+    argf[0] = SAMPLERATE / (float)BLOCKSIZE;
     argf[1] = XTRACT_MAGNITUDE_SPECTRUM;
     argf[2] = 0.f;
     argf[3] = 0.f;
-    
-    xtract[XTRACT_MEAN]((void *)&vector, N, NULL, (void *)&mean);
-    xtract_init_fft(N, XTRACT_SPECTRUM);
-    xtract[XTRACT_SPECTRUM]((void *)&vector, N, &argf[0], (void *)&spectrum[0]);
 
-    printf("\nThe mean of [.1, .2, .3, .4, -.5, -.4, -.3, -.2, -.1] = %.1f\n\n", mean);
-    printf("\nResults of xtract_spectrum():\n");
+    xtract_init_fft(BLOCKSIZE, XTRACT_SPECTRUM);
+    xtract[XTRACT_SPECTRUM]((void *)&input, BLOCKSIZE, &argf[0], (void *)&spectrum[0]);
 
-    for(n = 0; n < N; n++){
-        printf("%.3f\t", spectrum[n]);
+    /* print the spectral bins */
+    printf("\nSpectral bins:\n");
+    for(n = 0; n < (BLOCKSIZE >> 1); ++n){
+        printf("freq: %.1f\tamp: %.6f\n", spectrum[n + (BLOCKSIZE >> 1)], spectrum[n]);
     }
     printf("\n");
 
+    /* compute the MFCCs */
+    mel_filters.n_filters = MFCC_FREQ_BANDS;
+    mel_filters.filters   = malloc(MFCC_FREQ_BANDS * sizeof(float *));
+    for(n = 0; n < MFCC_FREQ_BANDS; ++n)
+    {
+        mel_filters.filters[n] = malloc(BLOCKSIZE * sizeof(float));
+    }
+
+    xtract_init_mfcc(BLOCKSIZE >> 1, SAMPLERATE >> 1, XTRACT_EQUAL_GAIN, MFCC_FREQ_MIN, MFCC_FREQ_MAX, mel_filters.n_filters, mel_filters.filters);
+    xtract_mfcc(spectrum, BLOCKSIZE >> 1, &mel_filters, mfccs);
+
+    /* print the MFCCs */
+    printf("MFCCs:\n");
+    for(n = 0; n < MFCC_FREQ_BANDS; ++n)
+    {
+        printf("band: %d\t", n);
+        if(n < 10) {
+            printf("\t");
+        }
+        printf("coeff: %f\n", mfccs[n]);
+    }
+
+    /* cleanup */
+    for(n = 0; n < MFCC_FREQ_BANDS; ++n)
+    {
+        free(mel_filters.filters[n]);
+    }
+    free(mel_filters.filters);
+
     return 0;
-    
+
 }
