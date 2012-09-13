@@ -4,7 +4,7 @@ LibXtract is a simple, portable, lightweight library of audio feature extraction
 
 For example, 'variance', 'average deviation', 'skewness' and 'kurtosis', all require the 'mean' of the input vector to be precomputed. However, rather than compute the 'mean' 'inside' each function, it is expected that the 'mean' will be passed in as an argument. This means that if the user wishes to use all of these features, the mean is calculated only once, and then passed to any functions that require it.
 
- This philosophy of 'cascading' features is followed throughout the library, for example with features that operate on the magnitude spectrum of a signal vector (e.g. 'irregularity'), the magnitude spectrum is not calculated 'inside' the respective function, instead, a pointer to the first element in an array containing the magnitude spectrum is passed in as an argument.
+This philosophy of 'cascading' features is followed throughout the library, for example with features that operate on the magnitude spectrum of a signal vector (e.g. 'irregularity'), the magnitude spectrum is not calculated 'inside' the respective function, instead, a pointer to the first element in an array containing the magnitude spectrum is passed in as an argument.
 
 Hopefully this not only makes the library more efficient when computing large numbers of features, but also makes it more flexible because extraction functions can be combined arbitrarily (one can take the irregularility of the Mel Frequency Cepstral Coefficients for example).
 
@@ -22,7 +22,7 @@ To compile LibXtract from the source code release, the following optional softwa
 
 To build the PD external, the PD header 'm_pd.h' is required, this can be found in the [Pure Data source code release](http://puredata.info/downloads/pure-data).
 
-If you are compiling LibXtract compile from SVN, the **autotools** build system is required. This includes:
+If you are compiling LibXtract from a GIT clone, the **autotools** build system is required. This includes:
 
     automake >= 1.11
     autoconf >= 2.68
@@ -30,7 +30,7 @@ If you are compiling LibXtract compile from SVN, the **autotools** build system 
 
 ## Installation
 
-If you are installing from SVN first run:
+If you are installing from a GIT clone, first run:
 
     sh autogen.sh
 
