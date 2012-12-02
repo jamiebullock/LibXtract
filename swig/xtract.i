@@ -1,8 +1,6 @@
 %module xtract
 %include typemaps.i
-/*
 %include carrays.i 
-*/
 
 %{
 #include "xtract/xtract_scalar.h"
