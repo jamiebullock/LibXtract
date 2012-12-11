@@ -1,8 +1,6 @@
 %module xtract
 %include typemaps.i
-/*
 %include carrays.i 
-*/
 
 %{
 #include "xtract/xtract_scalar.h"
@@ -12,11 +10,6 @@
 #include "xtract/xtract_delta.h"
 #include "xtract/libxtract.h"
 %}
-
-/* Ensure filterbank gets freed */
-/** FIX: This doesn't work, or I'm not using properly. For now just add an explicit call to destroy_filterbank() in the target code */
-%newobject create_filterbank; 
-%delobject destroy_filterbank; 
 
 /*
 %typemap(javabase) SWIGTYPE, SWIGTYPE *, SWIGTYPE &, SWIGTYPE [],
