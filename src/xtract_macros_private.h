@@ -31,7 +31,6 @@
 #define XTRACT_SQ(a) ((a) * (a))
 #define XTRACT_MIN(a, b) ((a) < (b) ? (a) : (b))
 #define XTRACT_MAX(a, b) ((a) > (b) ? (a) : (b))
-#define XTRACT_NEEDS_FFTW printf("LibXtract must be compiled with fftw support to use this function.\n")
 #define XTRACT_VERY_SMALL_NUMBER 2e-42
 #define XTRACT_LOG_LIMIT XTRACT_VERY_SMALL_NUMBER
 #define XTRACT_LOG_LIMIT_DB -96.0

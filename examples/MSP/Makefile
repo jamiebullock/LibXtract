@@ -9,7 +9,6 @@ MAXINCLUDE = $(FRAMEWORKS)/MaxAPI.framework/Headers
 MSPINCLUDE = $(FRAMEWORKS)/MaxAudioAPI.framework/Headers
 INSTALLDIR = /Applications/Max5/Cycling\ \'74/externals/
 XTRACT_HEADERS = /usr/local/include
-FFTW_LIBS = -lfftw3f #include this if you compiled libxtract with --enable-fft
 
 LIPO = /usr/bin/lipo
 CC = gcc
@@ -21,7 +20,7 @@ CFLAGS = -F$(FRAMEWORKS) -Wmost -Wno-four-char-constants -Wno-unknown-pragmas -x
 I386CFLAGS = -arch i386 
 IX86_64CFLAGS = -arch x86_64
 
-LDFLAGS = -F$(FRAMEWORKS) -L$(MAXINCLUDE) -L$(MSPINCLUDE) -framework Carbon -framework MaxAPI -framework MaxAudioAPI -Wl,-Y,1455 -bundle -L/usr/local/lib -lxtract $(FFTW_LIBS)
+LDFLAGS = -F$(FRAMEWORKS) -L$(MAXINCLUDE) -L$(MSPINCLUDE) -framework Carbon -framework MaxAPI -framework MaxAudioAPI -Wl,-Y,1455 -bundle -L/usr/local/lib -lxtract
 
 I386LDFLAGS = -arch i386
 IX86_64CFLAGS = -arch x86_64

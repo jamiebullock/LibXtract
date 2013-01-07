@@ -16,10 +16,6 @@ The latest source code release for LibXtract can be downloaded from [https://git
 
 ## Dependencies
 
-To compile LibXtract from the source code release, the following optional software is also needed:
-
-    fftw3 (compiled with floating-point support)
-
 To build the PD external, the PD header 'm_pd.h' is required, this can be found in the [Pure Data source code release](http://puredata.info/downloads/pure-data).
 
 If you are compiling LibXtract from a GIT clone, the **autotools** build system is required. This includes:
@@ -36,14 +32,13 @@ If you are installing from a GIT clone, first run:
 
 If autogen.sh was successful, or you downloaded the source release, type:
 
-    ./configure --enable-pd_example --enable-fft
+    ./configure --enable-pd_example
     make
     sudo make install
 
 There following configure flags are optional:
 
     --enable-pd_example (to build the PD example)
-    --enable-fft (to enable functions that require fftw3)
     --enable-simpletest (to build the simpletest example)
 
 If you wish to build a Universal binary on OS X, you may need to do something like this:
