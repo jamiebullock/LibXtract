@@ -2,9 +2,9 @@ AC_PREREQ(2.13)
 # Increment for major API changes, release status changes
 m4_define(libxtract_major_version, 0)
 # Increment for feature additions and enhancements
-m4_define(libxtract_minor_version, 6)
+m4_define(libxtract_minor_version, 7)
 # Increment for fixes 
-m4_define(libxtract_fix_version, 6)
+m4_define(libxtract_fix_version, 0)
 # Development status
 m4_define(libIntegra_dev_status, [beta])
 
@@ -14,7 +14,6 @@ PACKAGE=libxtract
 
 AC_INIT([libxtract], [libxtract_version], [libxtract-devel@lists.sourceforge.net])
 AC_DEFINE(LIBXTRACT_VERSION, libxtract_version, [LibXtract Version])
-dnl AM_INIT_AUTOMAKE($PACKAGE, $LIBXTRACT_VERSION)
 AM_INIT_AUTOMAKE(1.6)
 AM_CONFIG_HEADER(config.h)
 AC_CONFIG_MACRO_DIR([m4])
@@ -29,14 +28,6 @@ AC_PROG_LIBTOOL
 AC_CHECK_HEADERS([math.h, stdlib.h, stdio.h])
 AC_CHECK_PROG([DOXYGEN], [doxygen], [doc], [])
 AC_SUBST(DOXYGEN)
-
-AC_ARG_ENABLE(fft, 
-              [  --enable-fft    Turn fft-based fft processing on],
-              [case "${enableval}" in
-               yes) fft=true ;;
-               no)  fft=false ;;
-               *) AC_MSG_ERROR(bad value ${enableval} for --enable-fft) ;;
-           esac],[fft=false])
 
 AC_ARG_ENABLE(pd_example, 
               [  --enable-pd_example    Compile the Pure Data external example],
@@ -78,25 +69,6 @@ AC_ARG_WITH(pd_dir,
     CFLAGS="$CFLAGS -I$withval"
     echo
     echo "pd dir is $withval"
-    echo
-    ])
-
-AC_ARG_WITH(fftw3_dir,
-    [  --with-fftw3-dir=path   fftw3 header path (default=/usr/local/include) ],
-    [
-    CFLAGS="$CFLAGS -I$withval"
-    echo
-    echo "fftw3 dir is $withval"
-    echo
-    ])
-
-dnl Set FFT optimisation level
-AC_ARG_WITH(fft_optimisation,
-    [  --with-fft_optimisation=level    set fft optimistaion level (default=1)],
-    [
-    FFT_OPTIMISATION="$withval"
-    echo
-    echo "fft optimisation level is $withval"
     echo
     ])
 
@@ -199,28 +171,6 @@ if [[ "$swig" = "true" ]] ; then
     AC_DEFINE([BUILD_SWIG], [1], [Build the swig bindings])
 fi
 
-dnl Are we building with fftw?
-if [[ "$fft" = "true" ]] ; then
-    LDFLAGS="$LDFLAGS -lfftw3f"
-    AC_DEFINE([BUILD_FFT], [1], [Build the fft functions])
-    if test "$FFT_OPTIMISATION" = ""
-    then
-        AC_DEFINE([XTRACT_FFT_OPTIMISATION_LEVEL], [1], [fft optimisation 1])
-    else
-       # AC_SUBST(OPTIMISATION_LEVEL, "$FFT_OPTIMISATION")
-        AC_DEFINE_UNQUOTED(XTRACT_FFT_OPTIMISATION_LEVEL, ${FFT_OPTIMISATION})
-    fi
-    AC_CHECK_HEADER(fftw3.h, [have_fftw3_hdr=yes ], [
-    have_pd_hdr=no
-    echo
-    echo "no fftw3.h header found.  try with option --with-fftw3-dir=/path/to/fftw3/header"
-    echo
-    exit
-    ])
-fi
-
-AM_CONDITIONAL(BUILD_FFT, test "x${fft}" = 'xtrue')
-
 dnl Check for architecture endian-ness
 #AC_C_BIGENDIAN(bigendian=true, bigendian=false, bigendian=undefined)
 #if [[ "$is_bigendian" = "false" ]] ; then
@@ -317,11 +267,6 @@ echo "Summary:"
 echo
 dnl echo you are using the ${host} architecture 
 
-if test "$fft" = "true"; then
-  echo "fft:                   yes (using fftw3f)"
-else
-  echo "fft:                   no (not using fftw3, no fft functions)"
-fi
 if test "$simpletest" = "true"; then
   echo "simpletest example:	yes"
 else

@@ -27,6 +27,8 @@
 extern "C" {
 #endif
 
+#include <stdbool.h>
+
 /**
   * \defgroup helper helper functions
   *
@@ -65,6 +67,9 @@ int xtract_features_from_subframes(const float *data, const int N, const int fea
 
 /** \brief Test whether a number is denormal */
 int xtract_is_denormal(double const d);
+
+/** \brief Test whether a number is a power of two */
+bool xtract_is_poweroftwo(unsigned int x);
 
 /** @} */
 

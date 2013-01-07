@@ -53,8 +53,8 @@ int main(void)
     /* get the spectrum */
     argf[0] = SAMPLERATE / (float)BLOCKSIZE;
     argf[1] = XTRACT_MAGNITUDE_SPECTRUM;
-    argf[2] = 0.f;
-    argf[3] = 0.f;
+    argf[2] = 0.f; /* No DC component */
+    argf[3] = 0.f; /* No Normalisation */
 
     xtract_init_fft(BLOCKSIZE, XTRACT_SPECTRUM);
     xtract[XTRACT_SPECTRUM]((void *)&input, BLOCKSIZE, &argf[0], (void *)&spectrum[0]);

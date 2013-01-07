@@ -23,17 +23,12 @@
 #ifndef XTRACT_GLOBALS_PRIVATE_H
 #define XTRACT_GLOBALS_PRIVATE_H
 
-#ifdef XTRACT_FFT
-#include <fftw3.h>
-
-struct xtract_fft_plans_ {
-    
-    fftwf_plan spectrum_plan;
-    fftwf_plan autocorrelation_fft_plan_1;
-    fftwf_plan autocorrelation_fft_plan_2;
-    fftwf_plan dct_plan;
-
-};
+typedef struct xtract_ooura_data_
+{
+    int *ooura_ip;
+    double *ooura_w;
+    bool initialised;
+} xtract_ooura_data;
 
 #ifdef DEFINE_GLOBALS
 #define GLOBAL
@@ -41,9 +36,10 @@ struct xtract_fft_plans_ {
 #define GLOBAL extern
 #endif
 
-GLOBAL struct xtract_fft_plans_ fft_plans;
-
-#endif /* FFT */
+GLOBAL struct xtract_ooura_data_ ooura_data_dct;
+GLOBAL struct xtract_ooura_data_ ooura_data_mfcc;
+GLOBAL struct xtract_ooura_data_ ooura_data_spectrum;
+GLOBAL struct xtract_ooura_data_ ooura_data_autocorrelation_fft;
 
 #endif /* Header guard */
 

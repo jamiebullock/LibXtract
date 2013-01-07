@@ -1,5 +1,5 @@
 /* libxtract feature extraction library
- *  
+ *
  * Copyright (C) 2006 Jamie Bullock
  *
  * This program is free software; you can redistribute it and/or modify
@@ -14,7 +14,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, 
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  */
 
@@ -24,14 +24,16 @@
 
 #include "xtract/libxtract.h"
 
-int xtract_flux(const float *data, const int N, const void *argv , float *result){
+int xtract_flux(const float *data, const int N, const void *argv , float *result)
+{
 
     /* FIX: don't be lazy -- take the lnorm of the difference vector! */
     return xtract_lnorm(data, N, argv, result);
 
 }
 
-int xtract_lnorm(const float *data, const int N, const void *argv , float *result){
+int xtract_lnorm(const float *data, const int N, const void *argv , float *result)
+{
 
     int n,
         type;
@@ -45,18 +47,20 @@ int xtract_lnorm(const float *data, const int N, const void *argv , float *resul
 
     *result = 0.f;
 
-    switch(type){
+    switch(type)
+    {
 
-        case XTRACT_POSITIVE_SLOPE:
-            for(n = 0; n < N; n++){
-                if(data[n] > 0)
-                    *result += powf(data[n], order);
-            }
-            break;
-        default:
-            for(n = 0; n < N; n++)
+    case XTRACT_POSITIVE_SLOPE:
+        for(n = 0; n < N; n++)
+        {
+            if(data[n] > 0)
                 *result += powf(data[n], order);
-            break;
+        }
+        break;
+    default:
+        for(n = 0; n < N; n++)
+            *result += powf(data[n], order);
+        break;
 
     }
 
@@ -66,19 +70,22 @@ int xtract_lnorm(const float *data, const int N, const void *argv , float *resul
 
 }
 
-int xtract_attack_time(const float *data, const int N, const void *argv , float *result){
+int xtract_attack_time(const float *data, const int N, const void *argv , float *result)
+{
 
     return XTRACT_FEATURE_NOT_IMPLEMENTED;
 
 }
 
-int xtract_decay_time(const float *data, const int N, const void *argv, float *result){
+int xtract_decay_time(const float *data, const int N, const void *argv, float *result)
+{
 
     return XTRACT_FEATURE_NOT_IMPLEMENTED;
 
 }
 
-int xtract_difference_vector(const float *data, const int N, const void *argv, float *result){
+int xtract_difference_vector(const float *data, const int N, const void *argv, float *result)
+{
 
     const float *frame1,
           *frame2;

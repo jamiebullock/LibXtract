@@ -14,17 +14,13 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, 
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  */
 
 /* fini.c: Contains library destructor routine */
 
-#ifdef XTRACT_FFT
-#include <fftw3.h>
-//#include "xtract_globals_private.h"
 #include "xtract/libxtract.h"
-#endif
 
 #ifdef __GNUC__
 __attribute__((destructor)) void fini()
@@ -32,10 +28,7 @@ __attribute__((destructor)) void fini()
 void _fini()
 #endif
 {
-#ifdef XTRACT_FFT
-xtract_free_fft();
-fftwf_cleanup();
-#endif
+    xtract_free_fft();
 }
 
 

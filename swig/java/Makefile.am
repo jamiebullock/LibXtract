@@ -1,3 +1,4 @@
+MAINTAINERCLEANFILES = all-local $(javasources) Makefile.in
 
 javasources = \
 	SWIGTYPE_p_float.java \
@@ -60,8 +61,6 @@ javaclasses = \
 	xtract_unit_t.class \
 	xtract_vector_t.class \
 	xtract_window_types_.class 
-
-MAINTAINERCLEANFILES = $(javasources) Makefile.in
 
 BUILT_SOURCES = $(srcdir)/xtract_wrap.c
 SWIG_SOURCES = jxtract.i

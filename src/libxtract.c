@@ -1,5 +1,5 @@
 /* libxtract feature extraction library
- *  
+ *
  * Copyright (C) 2006 Jamie Bullock
  *
  * This program is free software; you can redistribute it and/or modify
@@ -14,7 +14,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, 
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  */
 
@@ -22,7 +22,8 @@
 #include "xtract/libxtract.h"
 #define XTRACT_H
 
-int(*xtract[])(const float *, const int, const void *, float *) = {
+int(*xtract[])(const float *, const int, const void *, float *) =
+{
     /* xtract_scalar.h */
     xtract_mean,
     xtract_variance,
