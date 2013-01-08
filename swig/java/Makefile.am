@@ -1,4 +1,6 @@
 MAINTAINERCLEANFILES = all-local $(javasources) Makefile.in
+TESTNAME = test
+JAVA = java
 
 javasources = \
 	SWIGTYPE_p_float.java \
@@ -85,12 +87,15 @@ java-wrap:
 	cd xtract/core/src && mv $(javaclasses) ../
 
 test:
-	$(JAVAC) test.java
+	$(JAVAC) $(TESTNAME).java
 
-all-local: java-wrap test
+run:
+	$(JAVA) -Djava.library.path=.libs $(TESTNAME)
+
+all-local: java-wrap $(TESTNAME)
 
 clean-local:
 	-rm xtract_redeclare.i 
-	-rm -f libjxtract.so xtract_wrap.c test.class xtract_subband_scales_.java #$(javasources) $(javaclasses) $(nonautojavaclasses) test.class xtract_subband_scales_.java
+	-rm -f libjxtract.so xtract_wrap.c $(TESTNAME).class xtract_subband_scales_.java #$(javasources) $(javaclasses) $(nonautojavaclasses) $(TESTNAME).class xtract_subband_scales_.java
 	-rm -rf xtract
 

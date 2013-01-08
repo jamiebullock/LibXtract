@@ -1,6 +1,8 @@
 %module xtract
 %include typemaps.i
-%include carrays.i 
+#ifndef SWIGJAVA
+%include carrays.i
+#endif
 
 %{
 #include "xtract/xtract_scalar.h"
@@ -92,9 +94,10 @@
 
 %}
 
-
+#ifndef SWIGJAVA
 %array_class(float, floatArray); 
 %array_class(int, intArray); 
+#endif
 %apply float *OUTPUT { float *result };
 
 /* %apply float[] {const float *data}; */
