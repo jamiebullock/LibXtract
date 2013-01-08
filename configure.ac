@@ -26,8 +26,22 @@ AC_ENABLE_STATIC(no)
 AC_ENABLE_SHARED(yes)
 AC_PROG_LIBTOOL
 AC_CHECK_HEADERS([math.h, stdlib.h, stdio.h])
-AC_CHECK_PROG([DOXYGEN], [doxygen], [doc], [])
-AC_SUBST(DOXYGEN)
+
+dnl DOXYGEN support
+
+AC_CHECK_PROGS([DOXYGEN], [doxygen])
+
+if test -z "$DOXYGEN";
+then AC_MSG_WARN([Doxygen not found - continuing without Doxygen support])
+else
+    AC_MSG_NOTICE([Doxygen found - continuing with Doxygen support])
+fi
+
+AM_CONDITIONAL([HAVE_DOXYGEN], [test -n "$DOXYGEN"])
+AM_COND_IF([HAVE_DOXYGEN], [AC_CONFIG_FILES([doc/documentation.doxygen])])
+
+AC_SUBST(HAVE_DOXYGEN)
+dnl --enable flags
 
 AC_ARG_ENABLE(pd_example, 
               [  --enable-pd_example    Compile the Pure Data external example],
@@ -254,11 +268,10 @@ AC_SUBST(PD_LDFLAGS)
 AC_SUBST(PD_SUFFIX)
 AC_SUBST(PD_SOURCES)
 		
-AC_CONFIG_FILES([doc/documentation.doxygen
-				libxtract.pc])
+AC_CONFIG_FILES([libxtract.pc])
 
 dnl There must be a better way to do this...
-AC_OUTPUT(Makefile src/Makefile xtract/Makefile doc/Makefile examples/Makefile examples/puredata/Makefile examples/simpletest/Makefile swig/Makefile swig/python/Makefile swig/java/Makefile)
+AC_OUTPUT(Makefile src/Makefile doc/Makefile xtract/Makefile examples/Makefile examples/puredata/Makefile examples/simpletest/Makefile swig/Makefile swig/python/Makefile swig/java/Makefile)
 
 echo
 echo "**************************************************************"
@@ -267,30 +280,43 @@ echo "Summary:"
 echo
 dnl echo you are using the ${host} architecture 
 
-if test "$simpletest" = "true"; then
-  echo "simpletest example:	yes"
+
+if test -z "$DOXYGEN"; then
+    echo "doxygen documentation:            no (doxygen not found)"
 else
-  echo "simpletest example:     no"
+    echo "doxygen documentation:            yes"
+fi
+if test "$simpletest" = "true"; then
+    echo "simpletest example:	            yes"
+else
+    echo "simpletest example:               no"
 fi
 if test "$pd_example" = "true"; then
-  echo "PD external:             yes"
-  echo 
-  echo "The PD help files will be installed in:" 
-  echo ${prefix}"/lib/doc/5.reference/xtract/" 
-  echo "You must make sure that this is in your PD help path"
+    echo "PD external:                      yes"
+    echo 
+    echo "The PD help files will be installed in:" 
+    echo ${prefix}"/lib/doc/5.reference/xtract/" 
+    echo "You must make sure that this is in your PD help path"
 else
-  echo "PD external:             no"
+    echo "PD external:                      no"
 fi
 if test "$swig" == "true"; then
-  echo "SWIG bindings:                      yes"
+    echo "SWIG bindings:                    yes"
 else
-  echo "SWIG bindings:                      no"
+    echo "SWIG bindings:                    no"
 fi
 if test "$with_java" == "true"; then
-    echo "with JAVA module:		    yes"
+    echo "with JAVA module:                 yes"
 else
-    echo "with JAVA module:		    no"
+    echo "with JAVA module:                 no"
 fi
+if test "$with_python" == "true"; then
+    echo "with Python module:               yes"
+else
+    echo "with Python module:               no"
+fi
+
+
 echo
 echo "**************************************************************"
 echo

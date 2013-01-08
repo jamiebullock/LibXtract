@@ -1,10 +1,14 @@
-MAINTAINERCLEANFILES = Makefile.in configure depcomp compile config.guess ltmain.sh config.sub missing install-sh aclocal.m4 config.h.in config.h.in~ py-compile
+MAINTAINERCLEANFILES = INSTALL Makefile.in configure depcomp compile config.guess ltmain.sh config.sub missing install-sh aclocal.m4 config.h.in config.h.in~ py-compile m4/ltsugar.m4 m4/libtool.m4 m4/ltversion.m4 m4/lt~obsolete.m4 m4/ltoptions.m4
 
 if BUILD_SWIG
 SWIG_DIR = swig
 endif
 
-SUBDIRS = src xtract examples $(SWIG_DIR) @DOXYGEN@
+if HAVE_DOXYGEN
+DOXY_DIR = @DOXYGEN@
+endif
+
+SUBDIRS = src xtract examples $(SWIG_DIR) doc
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libxtract.pc
