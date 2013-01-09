@@ -23,8 +23,6 @@
 
 /* helper.c: helper functions. */
 
-#include <config.h>
-
 #include <stdio.h>
 
 #include "xtract/libxtract.h"

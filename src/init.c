@@ -24,20 +24,229 @@
 /* init.c: defines initialisation and free functions. Also contains library constructor routine. */
 
 #ifdef HAVE_CONFIG_H
-#    include <config.h>
+#include <config.h>
 #endif
 
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "fftsg.h"
+#include "fft.h"
 
 #include "xtract/libxtract.h"
 #include "xtract_window_private.h"
 #define DEFINE_GLOBALS
 #include "xtract_globals_private.h"
 
+
+
+#ifdef USE_OOURA
+void xtract_init_ooura_data(xtract_ooura_data *ooura_data, unsigned int N)
+{
+    ooura_data->ooura_ip  = (int *)calloc((2 + sqrt(N)), sizeof(int));
+    ooura_data->ooura_w   = (double *)calloc((N - 1), sizeof(double));
+    ooura_data->initialised = true;
+}
+
+void xtract_free_ooura_data(xtract_ooura_data *ooura_data)
+{
+    free(ooura_data->ooura_ip);
+    free(ooura_data->ooura_w);
+    ooura_data->ooura_ip = NULL;
+    ooura_data->ooura_w = NULL;
+    ooura_data->initialised = false;
+}
+
+int xtract_init_ooura_(int N, int feature_name)
+{
+
+    int M = N >> 1;
+
+    if(feature_name == XTRACT_AUTOCORRELATION_FFT)
+    {
+        M = N; /* allow for zero padding */
+    }
+
+    switch(feature_name)
+    {
+    case XTRACT_SPECTRUM:
+        if(ooura_data_spectrum.initialised)
+        {
+            xtract_free_ooura_data(&ooura_data_spectrum);
+        }
+        xtract_init_ooura_data(&ooura_data_spectrum, M);
+        break;
+    case XTRACT_AUTOCORRELATION_FFT:
+        if(ooura_data_autocorrelation_fft.initialised)
+        {
+            xtract_free_ooura_data(&ooura_data_autocorrelation_fft);
+        }
+        xtract_init_ooura_data(&ooura_data_autocorrelation_fft, M);
+        break;
+    case XTRACT_DCT:
+        if(ooura_data_dct.initialised)
+        {
+            xtract_free_ooura_data(&ooura_data_dct);
+        }
+        xtract_init_ooura_data(&ooura_data_dct, M);
+    case XTRACT_MFCC:
+        if(ooura_data_mfcc.initialised)
+        {
+            xtract_free_ooura_data(&ooura_data_mfcc);
+        }
+        xtract_init_ooura_data(&ooura_data_mfcc, M);
+        break;
+    }
+
+    return XTRACT_SUCCESS;
+}
+
+void xtract_free_ooura_(void)
+{
+    if(ooura_data_spectrum.initialised)
+    {
+        xtract_free_ooura_data(&ooura_data_spectrum);
+    }
+    if(ooura_data_autocorrelation_fft.initialised)
+    {
+        xtract_free_ooura_data(&ooura_data_autocorrelation_fft);
+    }
+    if(ooura_data_dct.initialised)
+    {
+        xtract_free_ooura_data(&ooura_data_dct);
+    }
+    if(ooura_data_mfcc.initialised)
+    {
+        xtract_free_ooura_data(&ooura_data_mfcc);
+    }
+}
+
+#else
+
+void xtract_init_vdsp_data(xtract_vdsp_data *vdsp_data, unsigned int N)
+{
+    vdsp_data->setup = vDSP_create_fftsetupD(log2f(N), FFT_RADIX2);
+    vdsp_data->fft.realp = (double *) malloc((N >> 1) * sizeof(double));
+    vdsp_data->fft.imagp = (double *) malloc((N >> 1) * sizeof(double));
+    vdsp_data->log2N = log2f(N);
+    vdsp_data->initialised = true;
+}
+
+void xtract_free_vdsp_data(xtract_vdsp_data *vdsp_data)
+{
+    free(vdsp_data->fft.realp);
+    free(vdsp_data->fft.imagp);
+    vDSP_destroy_fftsetupD(vdsp_data->setup);
+    vdsp_data->fft.realp   = NULL;
+    vdsp_data->fft.imagp   = NULL;
+    vdsp_data->initialised = false;
+}
+
+int xtract_init_vdsp_(int N, int feature_name)
+{
+
+    int M = N >> 1;
+
+    if(feature_name == XTRACT_AUTOCORRELATION_FFT)
+    {
+        M = N; /* allow for zero padding */
+    }
+
+    switch(feature_name)
+    {
+    case XTRACT_SPECTRUM:
+        if(vdsp_data_spectrum.initialised)
+        {
+            xtract_free_vdsp_data(&vdsp_data_spectrum);
+        }
+        xtract_init_vdsp_data(&vdsp_data_spectrum, M);
+        break;
+    case XTRACT_AUTOCORRELATION_FFT:
+        if(vdsp_data_autocorrelation_fft.initialised)
+        {
+            xtract_free_vdsp_data(&vdsp_data_autocorrelation_fft);
+        }
+        xtract_init_vdsp_data(&vdsp_data_autocorrelation_fft, M);
+        break;
+    case XTRACT_DCT:
+        if(vdsp_data_dct.initialised)
+        {
+            xtract_free_vdsp_data(&vdsp_data_dct);
+        }
+        xtract_init_vdsp_data(&vdsp_data_dct, M);
+    case XTRACT_MFCC:
+        if(vdsp_data_mfcc.initialised)
+        {
+            xtract_free_vdsp_data(&vdsp_data_mfcc);
+        }
+        xtract_init_vdsp_data(&vdsp_data_mfcc, M);
+        break;
+    }
+
+    return XTRACT_SUCCESS;
+}
+
+void xtract_free_vdsp_(void)
+{
+    if(vdsp_data_spectrum.initialised)
+    {
+        xtract_free_vdsp_data(&vdsp_data_spectrum);
+    }
+    if(vdsp_data_autocorrelation_fft.initialised)
+    {
+        xtract_free_vdsp_data(&vdsp_data_autocorrelation_fft);
+    }
+    if(vdsp_data_dct.initialised)
+    {
+        xtract_free_vdsp_data(&vdsp_data_dct);
+    }
+    if(vdsp_data_mfcc.initialised)
+    {
+        xtract_free_vdsp_data(&vdsp_data_mfcc);
+    }
+}
+
+
+#endif
+
+int xtract_init_fft(int N, int feature_name)
+{
+    if(!xtract_is_poweroftwo(N))
+    {
+        fprintf(stderr,
+                "libxtract: error: only power-of-two FFT sizes are supported by Ooura FFT.\n");
+        exit(EXIT_FAILURE);
+    }
+#ifdef USE_OOURA
+    return xtract_init_ooura_(N, feature_name);
+#else
+    return xtract_init_vdsp_(N, feature_name);
+#endif
+}
+
+void xtract_free_fft(void)
+{
+#ifdef USE_OOURA
+    xtract_free_ooura_();
+#else
+    xtract_free_vdsp_();
+#endif
+}
+
+
+int xtract_init_bark(int N, double sr, int *band_limits)
+{
+
+    double  edges[] = {0, 100, 200, 300, 400, 510, 630, 770, 920, 1080, 1270, 1480, 1720, 2000, 2320, 2700, 3150, 3700, 4400, 5300, 6400, 7700, 9500, 12000, 15500, 20500, 27000}; /* Takes us up to sr = 54kHz (CCRMA: JOS)*/
+
+    int bands = XTRACT_BARK_BANDS;
+
+    while(bands--)
+        band_limits[bands] = edges[bands] / sr * N;
+    /*FIX shohuld use rounding, but couldn't get it to work */
+
+    return XTRACT_SUCCESS;
+}
 
 int xtract_init_mfcc(int N, double nyquist, int style, double freq_min, double freq_max, int freq_bands, double **fft_tables)
 {
@@ -152,107 +361,6 @@ int xtract_init_mfcc(int N, double nyquist, int style, double freq_min, double f
 
 }
 
-void xtract_init_ooura(xtract_ooura_data *ooura_data, unsigned int N)
-{
-    ooura_data->ooura_ip  = (int *)calloc((2 + sqrt(N)), sizeof(int));
-    ooura_data->ooura_w   = (double *)calloc((N - 1), sizeof(double));
-    ooura_data->initialised = true;
-}
-
-void xtract_free_ooura(xtract_ooura_data *ooura_data)
-{
-    free(ooura_data->ooura_ip);
-    free(ooura_data->ooura_w);
-    ooura_data->ooura_ip = NULL;
-    ooura_data->ooura_w = NULL;
-    ooura_data->initialised = false;
-}
-
-int xtract_init_fft(int N, int feature_name)
-{
-
-    int M = N >> 1;
-
-    if(!xtract_is_poweroftwo(N))
-    {
-        fprintf(stderr,
-            "libxtract: error: only power-of-two FFT sizes are supported.\n");
-		exit(EXIT_FAILURE);
-    }
-
-    if(feature_name == XTRACT_AUTOCORRELATION_FFT)
-    {
-        M = N; /* allow for zero padding */
-    }
-
-    switch(feature_name)
-    {
-    case XTRACT_SPECTRUM:
-        if(ooura_data_spectrum.initialised)
-        {
-            xtract_free_ooura(&ooura_data_spectrum);
-        }
-        xtract_init_ooura(&ooura_data_spectrum, M);
-        break;
-    case XTRACT_AUTOCORRELATION_FFT:
-        if(ooura_data_autocorrelation_fft.initialised)
-        {
-            xtract_free_ooura(&ooura_data_autocorrelation_fft);
-        }
-        xtract_init_ooura(&ooura_data_autocorrelation_fft, M);
-        break;
-    case XTRACT_DCT:
-        if(ooura_data_dct.initialised)
-        {
-            xtract_free_ooura(&ooura_data_dct);
-        }
-        xtract_init_ooura(&ooura_data_dct, M);
-    case XTRACT_MFCC:
-        if(ooura_data_mfcc.initialised)
-        {
-            xtract_free_ooura(&ooura_data_mfcc);
-        }
-        xtract_init_ooura(&ooura_data_mfcc, M);
-        break;
-    }
-
-    return XTRACT_SUCCESS;
-}
-
-void xtract_free_fft(void)
-{
-    if(ooura_data_spectrum.initialised)
-    {
-        xtract_free_ooura(&ooura_data_spectrum);
-    }
-    if(ooura_data_autocorrelation_fft.initialised)
-    {
-        xtract_free_ooura(&ooura_data_autocorrelation_fft);
-    }
-    if(ooura_data_dct.initialised)
-    {
-        xtract_free_ooura(&ooura_data_dct);
-    }
-    if(ooura_data_mfcc.initialised)
-    {
-        xtract_free_ooura(&ooura_data_mfcc);
-    }
-}
-
-int xtract_init_bark(int N, double sr, int *band_limits)
-{
-
-    double  edges[] = {0, 100, 200, 300, 400, 510, 630, 770, 920, 1080, 1270, 1480, 1720, 2000, 2320, 2700, 3150, 3700, 4400, 5300, 6400, 7700, 9500, 12000, 15500, 20500, 27000}; /* Takes us up to sr = 54kHz (CCRMA: JOS)*/
-
-    int bands = XTRACT_BARK_BANDS;
-
-    while(bands--)
-        band_limits[bands] = edges[bands] / sr * N;
-    /*FIX shohuld use rounding, but couldn't get it to work */
-
-    return XTRACT_SUCCESS;
-}
-
 double *xtract_init_window(const int N, const int type)
 {
     double *window;
@@ -307,8 +415,15 @@ __attribute__((constructor)) void init()
 void _init()·
 #endif
 {
+#ifdef USE_OOURA
     ooura_data_dct.initialised = false;
     ooura_data_spectrum.initialised = false;
     ooura_data_autocorrelation_fft.initialised = false;
     ooura_data_mfcc.initialised = false;
+#else
+    vdsp_data_dct.initialised = false;
+    vdsp_data_spectrum.initialised = false;
+    vdsp_data_autocorrelation_fft.initialised = false;
+    vdsp_data_mfcc.initialised = false;
+#endif
 }

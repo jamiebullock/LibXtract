@@ -38,8 +38,6 @@ extern "C" {
   * @{
   */
 
-void test(void);
-
 /** \brief Extract the mean of an input vector
  * 
  * \param *data: a pointer to the first element 

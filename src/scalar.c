@@ -23,8 +23,6 @@
 
 /* scalar.c: defines functions that extract a feature as a single value from an input vector */
 
-#include <config.h>
-
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>

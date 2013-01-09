@@ -26,12 +26,7 @@
 #ifndef XTRACT_GLOBALS_PRIVATE_H
 #define XTRACT_GLOBALS_PRIVATE_H
 
-typedef struct xtract_ooura_data_
-{
-    int *ooura_ip;
-    double *ooura_w;
-    bool initialised;
-} xtract_ooura_data;
+#include "fft.h"
 
 #ifdef DEFINE_GLOBALS
 #define GLOBAL
@@ -39,10 +34,17 @@ typedef struct xtract_ooura_data_
 #define GLOBAL extern
 #endif
 
+#ifdef USE_OOURA
 GLOBAL struct xtract_ooura_data_ ooura_data_dct;
 GLOBAL struct xtract_ooura_data_ ooura_data_mfcc;
 GLOBAL struct xtract_ooura_data_ ooura_data_spectrum;
 GLOBAL struct xtract_ooura_data_ ooura_data_autocorrelation_fft;
+#else
+GLOBAL xtract_vdsp_data vdsp_data_dct;
+GLOBAL xtract_vdsp_data vdsp_data_mfcc;
+GLOBAL xtract_vdsp_data vdsp_data_spectrum;
+GLOBAL xtract_vdsp_data vdsp_data_autocorrelation_fft;
+#endif
 
 #endif /* Header guard */
 

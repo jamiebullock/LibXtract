@@ -44,11 +44,14 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
     double max      = 0.0;
     double NxN      = XTRACT_SQ(N);
     double *marker  = NULL;
-    size_t bytes   = N * sizeof(double);
+    double real = 0.0;
+    double imag = 0.0;
     unsigned int n = 0;
     unsigned int m = 0;
-    unsigned int nx2 = 0;
     unsigned int M = N >> 1;
+#ifndef USE_OOURA
+    DSPDoubleSplitComplex *fft = NULL;
+#endif
 
     q = *(double *)argv;
     vector = (int)*((double *)argv+1);
@@ -56,8 +59,11 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
     normalise = (int)*((double *)argv+3);
 
     XTRACT_CHECK_q;
-
+#ifdef USE_OOURA
     if(!ooura_data_spectrum.initialised)
+#else
+    if(!vdsp_data_spectrum.initialised)
+#endif
     {
         fprintf(stderr,
                 "libxtract: error: xtract_spectrum() failed, "
@@ -65,12 +71,19 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
         return XTRACT_NO_RESULT;
     }
 
+#ifdef USE_OOURA
     /* ooura is in-place
      * the output format is
      * a[0] - DC, a[1] - nyquist, a[2...N-1] - remaining bins
      */
     rdft(N, 1, data, ooura_data_spectrum.ooura_ip, 
             ooura_data_spectrum.ooura_w);
+#else
+    fft = &vdsp_data_spectrum.fft;
+    vDSP_ctozD((DSPDoubleComplex *)data, 2, fft, 1, N >> 1);
+    vDSP_fft_zripD(vdsp_data_spectrum.setup, fft, 1, 
+            vdsp_data_spectrum.log2N, FFT_FORWARD);
+#endif
 
     switch(vector)
     {
@@ -78,12 +91,29 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
         case XTRACT_LOG_MAGNITUDE_SPECTRUM:
         for(n = 0, m = 0; m < M; ++n, ++m)
         {
-            if(!withDC && n == 0)
+            marker = &result[m];
+
+            if(n==0 && !withDC) /* discard DC and keep Nyquist */
             {
-                continue;
+                ++n;
+#ifdef USE_OOURA
+                marker = &result[M-1];
+#endif
             }
-            nx2  = n * 2;
-            temp = XTRACT_SQ(data[nx2]) + XTRACT_SQ(data[nx2+1]);
+#ifdef USE_OOURA
+            if(n==1 && withDC) /* discard Nyquist */
+            {
+                ++n;
+            }
+
+            real = data[n*2];
+            imag = data[n*2+1];
+#else
+            real = fft->realp[n];
+            imag = fft->realp[n];
+#endif
+
+            temp = XTRACT_SQ(real) + XTRACT_SQ(imag);
             if (temp > XTRACT_LOG_LIMIT)
             {
                 temp = log(sqrt(temp) / (double)N);
@@ -105,11 +135,30 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
     case XTRACT_POWER_SPECTRUM:
         for(n = 0, m = 0; m < M; ++n, ++m)
         {
-            if(!withDC && n == 0)
+
+            marker = &result[m];
+
+            if(n==0 && !withDC) /* discard DC and keep Nyquist */
+            {
+                ++n;
+#ifdef USE_OOURA
+                marker = &result[M-1];
+#endif
+            }
+#ifdef USE_OOURA
+            if(n==1 && withDC) /* discard Nyquist */
             {
                 ++n;
             }
-            result[m] = (XTRACT_SQ(data[n]) + XTRACT_SQ(data[N - n])) / NxN;
+
+            real = data[n*2];
+            imag = data[n*2+1];
+#else
+            real = fft->realp[n];
+            imag = fft->realp[n];
+#endif
+
+            result[m] = (XTRACT_SQ(real) + XTRACT_SQ(imag)) / NxN;
             XTRACT_SET_FREQUENCY;
             XTRACT_GET_MAX;
         }
@@ -118,11 +167,29 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
     case XTRACT_LOG_POWER_SPECTRUM:
         for(n = 0, m = 0; m < M; ++n, ++m)
         {
-            if(!withDC && n == 0)
+            marker = &result[m];
+
+            if(n==0 && !withDC) /* discard DC and keep Nyquist */
+            {
+                ++n;
+#ifdef USE_OOURA
+                marker = &result[M-1];
+#endif
+            }
+#ifdef USE_OOURA
+            if(n==1 && withDC) /* discard Nyquist */
             {
                 ++n;
             }
-            if ((temp = XTRACT_SQ(data[n]) + XTRACT_SQ(data[N - n])) >
+
+            real = data[n*2];
+            imag = data[n*2+1];
+#else
+            real = fft->realp[n];
+            imag = fft->realp[n];
+#endif
+
+            if ((temp = XTRACT_SQ(real) + XTRACT_SQ(imag)) >
                     XTRACT_LOG_LIMIT)
                 temp = log(temp / NxN);
             else
@@ -144,19 +211,25 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
             if(n==0 && !withDC) /* discard DC and keep Nyquist */
             {
                 ++n;
+#ifdef USE_OOURA
                 marker = &result[M-1];
+#endif
             }
+#ifdef USE_OOURA
             if(n==1 && withDC) /* discard Nyquist */
             {
                 ++n;
             }
-
-            *marker = (double)(sqrt(XTRACT_SQ(data[n*2]) +
-                        XTRACT_SQ(data[n*2+1])) / (double)N);
+            real = data[n*2];
+            imag = data[n*2+1];
+#else
+            real = fft->realp[n];
+            imag = fft->realp[n];
+#endif
+            *marker = sqrt(XTRACT_SQ(real) + XTRACT_SQ(imag)) / (double)N;
 
             XTRACT_SET_FREQUENCY;
             XTRACT_GET_MAX;
-
         }
         break;
     }
@@ -176,6 +249,10 @@ int xtract_autocorrelation_fft(const double *data, const int N, const void *argv
     double *rfft = NULL;
     int n        = 0;
     int M        = 0;
+    double M_double = 0.0;
+#ifndef USE_OOURA
+    DSPDoubleSplitComplex *fft = NULL;
+#endif
 
     M = N << 1;
 
@@ -183,10 +260,11 @@ int xtract_autocorrelation_fft(const double *data, const int N, const void *argv
     rfft = (double *)calloc(M, sizeof(double));
     memcpy(rfft, data, N * sizeof(double));
 
+#ifdef USE_OOURA
     rdft(M, 1, rfft, ooura_data_autocorrelation_fft.ooura_ip, 
             ooura_data_autocorrelation_fft.ooura_w);
 
-    for(n = 2; n < M; n++)
+    for(n = 2; n < M; ++n)
     {
         rfft[n*2] = XTRACT_SQ(rfft[n*2]) + XTRACT_SQ(rfft[n*2+1]);
         rfft[n*2+1] = 0.0;
@@ -198,13 +276,37 @@ int xtract_autocorrelation_fft(const double *data, const int N, const void *argv
     rdft(M, -1, rfft, ooura_data_autocorrelation_fft.ooura_ip,
             ooura_data_autocorrelation_fft.ooura_w);
 
+#else
+    /* vDSP has its own autocorrelation function, but it doesn't fit the 
+     * LibXtract model, e.g. we can't guarantee it's going to use
+     * an FFT for all values of N */
+    fft = &vdsp_data_autocorrelation_fft.fft;
+    vDSP_ctozD((DSPDoubleComplex *)data, 2, fft, 1, N);
+    vDSP_fft_zripD(vdsp_data_autocorrelation_fft.setup, fft, 1, 
+            vdsp_data_autocorrelation_fft.log2N, FFT_FORWARD);
+
+    for(n = 0; n < N; ++n)
+    {
+        fft->realp[n] = XTRACT_SQ(fft->realp[n]) + XTRACT_SQ(fft->imagp[n]);
+        fft->imagp[n] = 0.0;
+    }
+
+    vDSP_fft_zripD(vdsp_data_autocorrelation_fft.setup, fft, 1, 
+            vdsp_data_autocorrelation_fft.log2N, FFT_INVERSE);
+#endif
+
     /* Normalisation factor */
     M = M * N;
 
+#ifdef USE_OOURA
     for(n = 0; n < N; n++)
         result[n] = rfft[n] / (double)M;
-
     free(rfft);
+#else
+    M_double = (double)M;
+    vDSP_ztocD(fft, 1, (DOUBLE_COMPLEX *)result, 2, N);
+    vDSP_vsdivD(result, 1, &M_double, result, 1, N);
+#endif
 
     return XTRACT_SUCCESS;
 }

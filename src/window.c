@@ -56,7 +56,7 @@ void hamming(double *window, const int N)
     const double M = N - 1;
 
     for (n = 0; n < N; n++)
-        window[n] = 0.53836 - (0.46164 * cos(2.0 * PI * (double)n / M));
+        window[n] = 0.53836 - (0.46164 * cos(2.0 * M_PI * (double)n / M));
 
 }
 
@@ -67,7 +67,7 @@ void hann(double *window, const int N)
     const double M = N - 1;
 
     for (n = 0; n < N; n++)
-        window[n] = 0.5 * (1.0 - cos(2.0 * PI * (double)n / M));
+        window[n] = 0.5 * (1.0 - cos(2.0 * M_PI * (double)n / M));
 
 }
 
@@ -107,7 +107,7 @@ void bartlett_hann(double *window, const int N)
     {
 
         term1 = a1 * fabs(n / M - 0.5);
-        term2 = a2 * cos(2.0 * PI * (double)n / M);
+        term2 = a2 * cos(2.0 * M_PI * (double)n / M);
 
         window[n] = a0 - term1 - term2;
     }
@@ -127,8 +127,8 @@ void blackman(double *window, const int N)
     for (n = 0; n < N; n++)
     {
 
-        term1 = a1 * cos(2.0 * PI * (double)n / M);
-        term2 = a2 * cos(4.0 * PI * (double)n / M);
+        term1 = a1 * cos(2.0 * M_PI * (double)n / M);
+        term2 = a2 * cos(4.0 * M_PI * (double)n / M);
 
         window[n] = a0 - term1 + term2;
     }
@@ -193,9 +193,9 @@ void blackman_harris(double *window, const int N)
     for (n = 0; n < N; n++)
     {
 
-        term1 = a1 * cos(2.0 * PI * n / M);
-        term2 = a2 * cos(4.0 * PI * n / M);
-        term3 = a3 * cos(6.0 * PI * n / M);
+        term1 = a1 * cos(2.0 * M_PI * n / M);
+        term2 = a2 * cos(4.0 * M_PI * n / M);
+        term3 = a3 * cos(6.0 * M_PI * n / M);
 
         window[n] = a0 - term1 + term2 - term3;
     }

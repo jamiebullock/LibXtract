@@ -21,4 +21,34 @@
  *
  */
 
+#ifndef FFT_H
+#define FFT_H
+
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
+#ifdef USE_OOURA
 #include "ooura/fftsg.h"
+#else
+#include <Accelerate/Accelerate.h>
+#endif
+
+#ifdef USE_OOURA
+typedef struct xtract_ooura_data_
+{
+    int *ooura_ip;
+    double *ooura_w;
+    bool initialised;
+} xtract_ooura_data;
+#else
+typedef struct xtract_vdsp_data_
+{
+    FFTSetupD setup;
+    DSPDoubleSplitComplex fft;
+    vDSP_Length log2N;
+    bool initialised;
+} xtract_vdsp_data;
+#endif
+
+#endif /* Header guard */
