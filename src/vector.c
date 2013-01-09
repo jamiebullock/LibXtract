@@ -31,47 +31,19 @@
 
 #include "xtract/libxtract.h"
 #include "xtract_macros_private.h"
-
-#ifndef roundf
-float roundf(float f)
-{
-    if (f - (int)f >= 0.5)
-        return (float)((int)f + 1);
-    else
-        return (float)((int)f);
-}
-#endif
-
-#ifndef powf
-#define powf pow
-#endif
-
-#ifndef expf
-#define expf exp
-#endif
-
-#ifndef sqrtf
-#define sqrtf sqrt
-#endif
-
-#ifndef fabsf
-#define fabsf fabs
-#endif
-
 #include "xtract_globals_private.h"
-#include "xtract_macros_private.h"
 
-int xtract_spectrum(const float *data, const int N, const void *argv, float *result)
+int xtract_spectrum(const double *data, const int N, const void *argv, double *result)
 {
 
     int vector     = 0;
     int withDC     = 0;
     int normalise  = 0;
-    float q        = 0.f;
-    float temp     = 0.f;
-    float max      = 0.f;
-    float NxN      = XTRACT_SQ(N);
-    float *marker  = NULL;
+    double q        = 0.0;
+    double temp     = 0.0;
+    double max      = 0.0;
+    double NxN      = XTRACT_SQ(N);
+    double *marker  = NULL;
     size_t bytes   = N * sizeof(double);
     double *rfft    = NULL;
     unsigned int n = 0;
@@ -86,10 +58,10 @@ int xtract_spectrum(const float *data, const int N, const void *argv, float *res
 		rfft[n] = (double)data[n];
 	}
 
-    q = *(float *)argv;
-    vector = (int)*((float *)argv+1);
-    withDC = (int)*((float *)argv+2);
-    normalise = (int)*((float *)argv+3);
+    q = *(double *)argv;
+    vector = (int)*((double *)argv+1);
+    withDC = (int)*((double *)argv+2);
+    normalise = (int)*((double *)argv+3);
 
     XTRACT_CHECK_q;
 
@@ -122,7 +94,7 @@ int xtract_spectrum(const float *data, const int N, const void *argv, float *res
             temp = XTRACT_SQ(rfft[nx2]) + XTRACT_SQ(rfft[nx2+1]);
             if (temp > XTRACT_LOG_LIMIT)
             {
-                temp = logf(sqrtf(temp) / (float)N);
+                temp = log(sqrt(temp) / (double)N);
             }
             else
             {
@@ -160,7 +132,7 @@ int xtract_spectrum(const float *data, const int N, const void *argv, float *res
             }
             if ((temp = XTRACT_SQ(rfft[n]) + XTRACT_SQ(rfft[N - n])) >
                     XTRACT_LOG_LIMIT)
-                temp = logf(temp / NxN);
+                temp = log(temp / NxN);
             else
                 temp = XTRACT_LOG_LIMIT_DB;
 
@@ -187,7 +159,7 @@ int xtract_spectrum(const float *data, const int N, const void *argv, float *res
                 ++n;
             }
 
-            *marker = (float)(sqrt(XTRACT_SQ(rfft[n*2]) +
+            *marker = (double)(sqrt(XTRACT_SQ(rfft[n*2]) +
                         XTRACT_SQ(rfft[n*2+1])) / (double)N);
 
             XTRACT_SET_FREQUENCY;
@@ -208,7 +180,7 @@ int xtract_spectrum(const float *data, const int N, const void *argv, float *res
     return XTRACT_SUCCESS;
 }
 
-int xtract_autocorrelation_fft(const float *data, const int N, const void *argv, float *result)
+int xtract_autocorrelation_fft(const double *data, const int N, const void *argv, double *result)
 {
 
     double *rfft = NULL;
@@ -219,7 +191,7 @@ int xtract_autocorrelation_fft(const float *data, const int N, const void *argv,
 
     /* Zero pad the input vector */
     rfft = (double *)calloc(M, sizeof(double));
-    memcpy(rfft, data, N * sizeof(float));
+    memcpy(rfft, data, N * sizeof(double));
 
     rdft(M, 1, rfft, ooura_data_autocorrelation_fft.ooura_ip, 
             ooura_data_autocorrelation_fft.ooura_w);
@@ -227,7 +199,7 @@ int xtract_autocorrelation_fft(const float *data, const int N, const void *argv,
     for(n = 2; n < M; n++)
     {
         rfft[n*2] = XTRACT_SQ(rfft[n*2]) + XTRACT_SQ(rfft[n*2+1]);
-        rfft[n*2+1] = 0.f;
+        rfft[n*2+1] = 0.0;
     }
 
     rfft[0] = XTRACT_SQ(rfft[0]);
@@ -240,14 +212,14 @@ int xtract_autocorrelation_fft(const float *data, const int N, const void *argv,
     M = M * N;
 
     for(n = 0; n < N; n++)
-        result[n] = rfft[n] / (float)M;
+        result[n] = rfft[n] / (double)M;
 
     free(rfft);
 
     return XTRACT_SUCCESS;
 }
 
-int xtract_mfcc(const float *data, const int N, const void *argv, float *result)
+int xtract_mfcc(const double *data, const int N, const void *argv, double *result)
 {
 
     xtract_mel_filter *f;
@@ -257,12 +229,12 @@ int xtract_mfcc(const float *data, const int N, const void *argv, float *result)
 
     for(filter = 0; filter < f->n_filters; filter++)
     {
-        result[filter] = 0.f;
+        result[filter] = 0.0;
         for(n = 0; n < N; n++)
         {
             result[filter] += data[n] * f->filters[filter][n];
         }
-        result[filter] = logf(result[filter] < XTRACT_LOG_LIMIT ? XTRACT_LOG_LIMIT : result[filter]);
+        result[filter] = log(result[filter] < XTRACT_LOG_LIMIT ? XTRACT_LOG_LIMIT : result[filter]);
     }
 
     xtract_dct(result, f->n_filters, NULL, result);
@@ -270,31 +242,31 @@ int xtract_mfcc(const float *data, const int N, const void *argv, float *result)
     return XTRACT_SUCCESS;
 }
 
-int xtract_dct(const float *data, const int N, const void *argv, float *result)
+int xtract_dct(const double *data, const int N, const void *argv, double *result)
 {
 
 	int n;
         int m;
-        float *temp = calloc(N, sizeof(float));
+        double *temp = calloc(N, sizeof(double));
 
         for (n = 0; n < N; ++n)
         {
             for(m = 1; m <= N; ++m) {
-                temp[n] += data[m - 1] * cos(M_PI * (n / (float)N) * (m - 0.5));
+                temp[n] += data[m - 1] * cos(M_PI * (n / (double)N) * (m - 0.5));
             }
         }
 
         return XTRACT_SUCCESS;
 }
 
-int xtract_autocorrelation(const float *data, const int N, const void *argv, float *result)
+int xtract_autocorrelation(const double *data, const int N, const void *argv, double *result)
 {
 
     /* Naive time domain implementation  */
 
     int n = N, i;
 
-    float corr;
+    double corr;
 
     while(n--)
     {
@@ -309,50 +281,50 @@ int xtract_autocorrelation(const float *data, const int N, const void *argv, flo
     return XTRACT_SUCCESS;
 }
 
-int xtract_amdf(const float *data, const int N, const void *argv, float *result)
+int xtract_amdf(const double *data, const int N, const void *argv, double *result)
 {
 
     int n = N, i;
 
-    float md, temp;
+    double md, temp;
 
     while(n--)
     {
-        md = 0.f;
+        md = 0.0;
         for(i = 0; i < N - n; i++)
         {
             temp = data[i] - data[i + n];
             temp = (temp < 0 ? -temp : temp);
             md += temp;
         }
-        result[n] = md / (float)N;
+        result[n] = md / (double)N;
     }
 
     return XTRACT_SUCCESS;
 }
 
-int xtract_asdf(const float *data, const int N, const void *argv, float *result)
+int xtract_asdf(const double *data, const int N, const void *argv, double *result)
 {
 
     int n = N, i;
 
-    float sd;
+    double sd;
 
     while(n--)
     {
-        sd = 0.f;
+        sd = 0.0;
         for(i = 0; i < N - n; i++)
         {
             /*sd = 1;*/
             sd += XTRACT_SQ(data[i] - data[i + n]);
         }
-        result[n] = sd / (float)N;
+        result[n] = sd / (double)N;
     }
 
     return XTRACT_SUCCESS;
 }
 
-int xtract_bark_coefficients(const float *data, const int N, const void *argv, float *result)
+int xtract_bark_coefficients(const double *data, const int N, const void *argv, double *result)
 {
 
     int *limits, band, n;
@@ -361,7 +333,7 @@ int xtract_bark_coefficients(const float *data, const int N, const void *argv, f
 
     for(band = 0; band < XTRACT_BARK_BANDS - 1; band++)
     {
-        result[band] = 0.f;
+        result[band] = 0.0;
         for(n = limits[band]; n < limits[band + 1]; n++)
             result[band] += data[n];
     }
@@ -369,19 +341,19 @@ int xtract_bark_coefficients(const float *data, const int N, const void *argv, f
     return XTRACT_SUCCESS;
 }
 
-int xtract_peak_spectrum(const float *data, const int N, const void *argv, float *result)
+int xtract_peak_spectrum(const double *data, const int N, const void *argv, double *result)
 {
 
-    float threshold, max, y, y2, y3, p, q, *input = NULL;
+    double threshold, max, y, y2, y3, p, q, *input = NULL;
     size_t bytes;
     int n = N, rv = XTRACT_SUCCESS;
 
-    threshold = max = y = y2 = y3 = p = q = 0.f;
+    threshold = max = y = y2 = y3 = p = q = 0.0;
 
     if(argv != NULL)
     {
-        q = ((float *)argv)[0];
-        threshold = ((float *)argv)[1];
+        q = ((double *)argv)[0];
+        threshold = ((double *)argv)[1];
     }
     else
         rv = XTRACT_BAD_ARGV;
@@ -394,9 +366,9 @@ int xtract_peak_spectrum(const float *data, const int N, const void *argv, float
 
     XTRACT_CHECK_q;
 
-    input = (float *)calloc(N,  sizeof(float));
+    input = (double *)calloc(N,  sizeof(double));
 
-    bytes = N * sizeof(float);
+    bytes = N * sizeof(double);
 
     if(input != NULL)
         input = memcpy(input, data, bytes);
@@ -439,30 +411,30 @@ int xtract_peak_spectrum(const float *data, const int N, const void *argv, float
     return (rv ? rv : XTRACT_SUCCESS);
 }
 
-int xtract_harmonic_spectrum(const float *data, const int N, const void *argv, float *result)
+int xtract_harmonic_spectrum(const double *data, const int N, const void *argv, double *result)
 {
 
     int n = (N >> 1), M = n;
 
-    const float *freqs, *amps;
-    float f0, threshold, ratio, nearest, distance;
+    const double *freqs, *amps;
+    double f0, threshold, ratio, nearest, distance;
 
     amps = data;
     freqs = data + n;
-    f0 = *((float *)argv);
-    threshold = *((float *)argv+1);
+    f0 = *((double *)argv);
+    threshold = *((double *)argv+1);
 
-    ratio = nearest = distance = 0.f;
+    ratio = nearest = distance = 0.0;
 
     while(n--)
     {
         if(freqs[n])
         {
             ratio = freqs[n] / f0;
-            nearest = roundf(ratio);
+            nearest = round(ratio);
             distance = fabs(nearest - ratio);
             if(distance > threshold)
-                result[n] = result[M + n] = 0.f;
+                result[n] = result[M + n] = 0.0;
             else
             {
                 result[n] = amps[n];
@@ -470,19 +442,19 @@ int xtract_harmonic_spectrum(const float *data, const int N, const void *argv, f
             }
         }
         else
-            result[n] = result[M + n] = 0.f;
+            result[n] = result[M + n] = 0.0;
     }
     return XTRACT_SUCCESS;
 }
 
-int xtract_lpc(const float *data, const int N, const void *argv, float *result)
+int xtract_lpc(const double *data, const int N, const void *argv, double *result)
 {
 
     int i, j, k, M, L;
-    float r = 0.f,
-          error = 0.f;
+    double r = 0.0,
+          error = 0.0;
 
-    float *ref = NULL,
+    double *ref = NULL,
            *lpc = NULL ;
 
     error = data[0];
@@ -494,11 +466,11 @@ int xtract_lpc(const float *data, const int N, const void *argv, float *result)
 
     if(error == 0.0)
     {
-        memset(result, 0, M * sizeof(float));
+        memset(result, 0, M * sizeof(double));
         return XTRACT_NO_RESULT;
     }
 
-    memset(result, 0, M * sizeof(float));
+    memset(result, 0, M * sizeof(double));
 
     for (i = 0; i < L; i++)
     {
@@ -513,7 +485,7 @@ int xtract_lpc(const float *data, const int N, const void *argv, float *result)
         lpc[i] = r;
         for (j = 0; j < i / 2; j++)
         {
-            float tmp      = lpc[j];
+            double tmp      = lpc[j];
             lpc[j]          = r * lpc[i - 1 - j];
             lpc[i - 1 - j] += r * tmp;
         }
@@ -525,14 +497,14 @@ int xtract_lpc(const float *data, const int N, const void *argv, float *result)
     return XTRACT_SUCCESS;
 }
 
-int xtract_lpcc(const float *data, const int N, const void *argv, float *result)
+int xtract_lpcc(const double *data, const int N, const void *argv, double *result)
 {
 
     /* Given N lpc coefficients extract an LPC cepstrum of size argv[0] */
     /* Based on an an algorithm by rabiner and Juang */
 
     int n, k;
-    float sum;
+    double sum;
     int order = N - 1; /* Eventually change this to Q = 3/2 p as suggested in Rabiner */
     int cep_length;
 
@@ -540,13 +512,13 @@ int xtract_lpcc(const float *data, const int N, const void *argv, float *result)
         cep_length = N - 1; /* FIX: if we're going to have default values, they should come from the descriptor */
     else
         cep_length = *(int *)argv;
-    //cep_length = (int)((float *)argv)[0];
+    //cep_length = (int)((double *)argv)[0];
 
-    memset(result, 0, cep_length * sizeof(float));
+    memset(result, 0, cep_length * sizeof(double));
 
     for (n = 1; n <= order && n <= cep_length; n++)
     {
-        sum = 0.f;
+        sum = 0.0;
         for (k = 1; k < n; k++)
             sum += k * result[k-1] * data[n - k];
         result[n-1] = data[n] + sum / n;
@@ -555,7 +527,7 @@ int xtract_lpcc(const float *data, const int N, const void *argv, float *result)
     /* be wary of these interpolated values */
     for(n = order + 1; n <= cep_length; n++)
     {
-        sum = 0.f;
+        sum = 0.0;
         for (k = n - (order - 1); k < n; k++)
             sum += k * result[k-1] * data[n - k];
         result[n-1] = sum / n;
@@ -564,11 +536,11 @@ int xtract_lpcc(const float *data, const int N, const void *argv, float *result)
     return XTRACT_SUCCESS;
 
 }
-//int xtract_lpcc_s(const float *data, const int N, const void *argv, float *result){
+//int xtract_lpcc_s(const double *data, const int N, const void *argv, double *result){
 //    return XTRACT_SUCCESS;
 //}
 
-int xtract_subbands(const float *data, const int N, const void *argv, float *result)
+int xtract_subbands(const double *data, const int N, const void *argv, double *result)
 {
 
     int n, bw, xtract_func, nbands, scale, start, lower, *argi, rv;
@@ -595,7 +567,7 @@ int xtract_subbands(const float *data, const int N, const void *argv, float *res
         if(lower >= N || lower + bw >= N)
         {
             //   printf("n: %d\n", n);
-            result[n] = 0.f;
+            result[n] = 0.0;
             continue;
         }
 

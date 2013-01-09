@@ -32,12 +32,12 @@
   *
   * All feature extraction functions follow the same prototype:
   *
-int xtract_function_name(const float *data, const int N, const void *argv, float *result){
+int xtract_function_name(const double *data, const int N, const void *argv, double *result){
   *
-  * \param const float *data points to an array of floats representing the input data
+  * \param const double *data points to an array of doubles representing the input data
   * \param const int N represents the number of elementes from *data to be considered in the calculation
   * \param const void *argv represents an arbitrary list of arguments. Used to pass in values required by the feature calculation
-  * \param float *result points to an array of floats, or a single float represnting the result of the calculation
+  * \param double *result points to an array of doubles, or a single double represnting the result of the calculation
   *
   *
   * It is up to the calling function to allocate enough memory for the *data, *argv, and *result, and to free it when required. Some feature extraction functions may also require an _init() function to be called in order to perform some initialisation. The struct xtract_function_descriptor_t is used to give an indication of recommended default values, and argc for the *argv array.
@@ -282,9 +282,9 @@ typedef struct _xtract_function_descriptor {
 
     struct {
 	xtract_type_t type; /* type of the array/value pointed to by argv */
-	float min[XTRACT_MAXARGS];
-	float max[XTRACT_MAXARGS];
-	float def[XTRACT_MAXARGS]; /* defaults */
+	double min[XTRACT_MAXARGS];
+	double max[XTRACT_MAXARGS];
+	double def[XTRACT_MAXARGS]; /* defaults */
 	xtract_unit_t unit[XTRACT_MAXARGS];
 	int donor[XTRACT_MAXARGS]; /* suggested donor functions for argv */
     } argv;
@@ -296,8 +296,8 @@ typedef struct _xtract_function_descriptor {
     union {
 
 	struct {
-	    float min;
-	    float max;	   
+	    double min;
+	    double max;	   
 	    xtract_unit_t unit;
 	} scalar;
 
@@ -344,9 +344,9 @@ typedef struct _xtract_function_descriptor {
 #include "libxtract.h"
 
 main () {
-float values[] = {1.0, 2.0, 3.0, 4.0, 5.0};
+double values[] = {1.0, 2.0, 3.0, 4.0, 5.0};
 int N = 5;
-float mean;
+double mean;
 
 xtract[MEAN]((void *)values, N, NULL, &mean);
 
@@ -357,21 +357,21 @@ printf("Mean = %.2f\n", mean);
  * 
  */
 #ifdef XTRACT_H
-extern int(*xtract[XTRACT_FEATURES])(const float *data, const int N, const void *argv, float *result);
+extern int(*xtract[XTRACT_FEATURES])(const double *data, const int N, const void *argv, double *result);
 
 #endif
 
 /** \brief A structure to store a set of n_filters Mel filters */
 typedef struct xtract_mel_filter_ {
     int n_filters;
-    float **filters;
+    double **filters;
 } xtract_mel_filter;
 
 /** \brief A function to initialise a mel filter bank 
  * 
  * It is up to the caller to pass in a pointer to memory allocated for freq_bands arrays of length N. This function populates these arrays with magnitude coefficients representing the mel filterbank on a linear scale 
  */
-int xtract_init_mfcc(int N, float nyquist, int style, float freq_min, float freq_max, int freq_bands, float **fft_tables);
+int xtract_init_mfcc(int N, double nyquist, int style, double freq_min, double freq_max, int freq_bands, double **fft_tables);
 
 /** \brief A function to initialise bark filter bounds
  * 
@@ -381,7 +381,7 @@ int xtract_init_mfcc(int N, float nyquist, int style, float freq_min, float freq
  * \param sr: The sample audio sample rate
  * \param *band_limits: a pointer to an array of BARK_BANDS ints
  */
-int xtract_init_bark(int N, float sr, int *band_limits);
+int xtract_init_bark(int N, double sr, int *band_limits);
 
 /** \brief An initialisation function for functions using FFT
  *
@@ -406,14 +406,14 @@ void xtract_free_fft(void);
  * \param type: the type of the window as given in the enumeration window_types_
  *
  */
-float *xtract_init_window(const int N, const int type);
+double *xtract_init_window(const int N, const int type);
 
 /** \brief Free a window as allocated by xtract_make_window() 
  * 
- * \param *window: a pointer to an array of floats as allocated by xtract_make_window()
+ * \param *window: a pointer to an array of doubles as allocated by xtract_make_window()
  *
  */
-void xtract_free_window(float *window);
+void xtract_free_window(double *window);
 
 /* \brief A function to build an array of function descriptors */
 xtract_function_descriptor_t *xtract_make_descriptors();

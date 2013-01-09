@@ -27,7 +27,7 @@
 
 #include "xtract/libxtract.h"
 
-int xtract_flux(const float *data, const int N, const void *argv , float *result)
+int xtract_flux(const double *data, const int N, const void *argv , double *result)
 {
 
     /* FIX: don't be lazy -- take the lnorm of the difference vector! */
@@ -35,20 +35,20 @@ int xtract_flux(const float *data, const int N, const void *argv , float *result
 
 }
 
-int xtract_lnorm(const float *data, const int N, const void *argv , float *result)
+int xtract_lnorm(const double *data, const int N, const void *argv , double *result)
 {
 
     int n,
         type;
 
-    float order;
+    double order;
 
-    order = *(float *)argv;
-    type = *((float *)argv+1);
+    order = *(double *)argv;
+    type = *((double *)argv+1);
 
-    order = order > 0 ? order : 2.f;
+    order = order > 0 ? order : 2.0;
 
-    *result = 0.f;
+    *result = 0.0;
 
     switch(type)
     {
@@ -57,40 +57,40 @@ int xtract_lnorm(const float *data, const int N, const void *argv , float *resul
         for(n = 0; n < N; n++)
         {
             if(data[n] > 0)
-                *result += powf(data[n], order);
+                *result += pow(data[n], order);
         }
         break;
     default:
         for(n = 0; n < N; n++)
-            *result += powf(data[n], order);
+            *result += pow(data[n], order);
         break;
 
     }
 
-    *result = powf(*result, 1.f / order);
+    *result = pow(*result, 1.0 / order);
 
     return XTRACT_SUCCESS;
 
 }
 
-int xtract_attack_time(const float *data, const int N, const void *argv , float *result)
+int xtract_attack_time(const double *data, const int N, const void *argv , double *result)
 {
 
     return XTRACT_FEATURE_NOT_IMPLEMENTED;
 
 }
 
-int xtract_decay_time(const float *data, const int N, const void *argv, float *result)
+int xtract_decay_time(const double *data, const int N, const void *argv, double *result)
 {
 
     return XTRACT_FEATURE_NOT_IMPLEMENTED;
 
 }
 
-int xtract_difference_vector(const float *data, const int N, const void *argv, float *result)
+int xtract_difference_vector(const double *data, const int N, const void *argv, double *result)
 {
 
-    const float *frame1,
+    const double *frame1,
           *frame2;
 
     int n;

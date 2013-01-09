@@ -51,6 +51,8 @@ typedef struct _xtract {
     t_int feature_type;
     tracked_memory memory;
     void *argv;
+    double *data;
+    double *result;
 } t_xtract_tilde;
 
 static t_int *xtract_perform(t_int *w) {
@@ -58,9 +60,13 @@ static t_int *xtract_perform(t_int *w) {
     t_xtract_tilde *x = (t_xtract_tilde *)(w[2]);
     t_int N = (t_int)(w[3]);
     t_int return_code = 0;
-    float result = 0.f;
+    double result = 0.f;
 
-    return_code = xtract[x->feature]((float *)in, N, x->argv, &result);
+    for(n = 0; n < N; ++n){
+        x->data[n] = (double)in[n];
+    }
+
+    return_code = xtract[x->feature](x->data, N, x->argv, &result);
 
     if(return_code == XTRACT_FEATURE_NOT_IMPLEMENTED)
 	perror("Feature not implemented");
@@ -68,14 +74,13 @@ static t_int *xtract_perform(t_int *w) {
     /* set nan, inf or -inf to 0 */
     result = (isinf(result) || isnan(result) ? 0 : result);
     
-    outlet_float(x->outlet, result);
+    outlet_float(x->outlet, (float)result);
     return (w+4);
 }
 
 static t_int *xtract_perform_vector(t_int *w) {
     t_sample *in = (t_float *)(w[1]);
     t_sample *out = (t_float *)(w[2]);
-    float *temp_in, *temp_out;
     t_xtract_tilde *x = (t_xtract_tilde *)(w[3]);
     t_int N = (t_int)(w[4]), n;
     t_int return_code = 0;
@@ -87,27 +92,19 @@ static t_int *xtract_perform_vector(t_int *w) {
         post("xtract~ %s: Blocksize mismatch, try specifying the blocksize as a second argument", x->feature_name->s_name);
         return (w+5);
     }
-
-    n = N;
     
-    temp_in = (float *)getbytes(N * sizeof(float));
-    temp_out= (float *)getbytes(N * sizeof(float));
+    for(n = 0; n < N; ++n){
+        x->data[n] = (double)in[n];
+    }
 
-    while(n--)
-	temp_in[n] = in[n];
+    return_code = xtract[x->feature](x->data, N, x->argv, x->result);
 
-    n = N;
-
-    return_code = xtract[x->feature](temp_in, N, x->argv, temp_out);
-    
-    while(n--)
-	out[n] = temp_out[n];
+    for(n = 0; n < N; ++n){
+        out[n] = (float)x->result[n];
+    }
 
     if(return_code == XTRACT_FEATURE_NOT_IMPLEMENTED)
 	perror("Feature not implemented");
-
-    freebytes(temp_in, sizeof(float) * N);
-    freebytes(temp_out, sizeof(float) * N);
 
     return (w+5);
 }
@@ -144,6 +141,10 @@ static void *xtract_tilde_new(t_symbol *me, t_int argc, t_atom *argv) {
     
     x->argv = NULL;
     x->done_init = 0;
+
+    x->data = (double *)getbytes(N * sizeof(double));
+    x->result = (double *)getbytes(N * sizeof(double));
+    
     
     if(argc)
 	tmp = argv[0].a_w.w_sym; /*atom_getsymbol(argv); */
@@ -312,6 +313,8 @@ static void xtract_tilde_free(t_xtract_tilde *x) {
 
     if(x->argv != NULL && x->memory.argv)
         freebytes(x->argv, x->memory.argv);
+    freebytes(x->data);
+    freebytes(x->result);
 }
 
 int main(void) {

@@ -35,18 +35,18 @@
 int main(void)
 {
 
-    float mean = 0.f; 
-    float input[BLOCKSIZE];
-    float spectrum[BLOCKSIZE];
-    float mfccs[MFCC_FREQ_BANDS * sizeof(float)];
-    float argf[4];
+    double mean = 0.f; 
+    double input[BLOCKSIZE];
+    double spectrum[BLOCKSIZE];
+    double mfccs[MFCC_FREQ_BANDS * sizeof(double)];
+    double argd[4];
     int n;
     xtract_mel_filter mel_filters;
 
     /* fill the input array with a sawtooth wave */
     for(n = 0; n < BLOCKSIZE; ++n)
     {
-        input[n] = ((n % PERIOD) / (float)PERIOD) - .5;
+        input[n] = ((n % PERIOD) / (double)PERIOD) - .5;
     }
 
     /* get the mean of the input */
@@ -54,13 +54,13 @@ int main(void)
     printf("\nInput mean = %.2f\n\n", mean);
 
     /* get the spectrum */
-    argf[0] = SAMPLERATE / (float)BLOCKSIZE;
-    argf[1] = XTRACT_MAGNITUDE_SPECTRUM;
-    argf[2] = 0.f; /* No DC component */
-    argf[3] = 0.f; /* No Normalisation */
+    argd[0] = SAMPLERATE / (double)BLOCKSIZE;
+    argd[1] = XTRACT_MAGNITUDE_SPECTRUM;
+    argd[2] = 0.f; /* No DC component */
+    argd[3] = 0.f; /* No Normalisation */
 
     xtract_init_fft(BLOCKSIZE, XTRACT_SPECTRUM);
-    xtract[XTRACT_SPECTRUM]((void *)&input, BLOCKSIZE, &argf[0], (void *)&spectrum[0]);
+    xtract[XTRACT_SPECTRUM]((void *)&input, BLOCKSIZE, &argd[0], (void *)&spectrum[0]);
 
     /* print the spectral bins */
     printf("\nSpectral bins:\n");
@@ -71,10 +71,10 @@ int main(void)
 
     /* compute the MFCCs */
     mel_filters.n_filters = MFCC_FREQ_BANDS;
-    mel_filters.filters   = malloc(MFCC_FREQ_BANDS * sizeof(float *));
+    mel_filters.filters   = malloc(MFCC_FREQ_BANDS * sizeof(double *));
     for(n = 0; n < MFCC_FREQ_BANDS; ++n)
     {
-        mel_filters.filters[n] = malloc(BLOCKSIZE * sizeof(float));
+        mel_filters.filters[n] = malloc(BLOCKSIZE * sizeof(double));
     }
 
     xtract_init_mfcc(BLOCKSIZE >> 1, SAMPLERATE >> 1, XTRACT_EQUAL_GAIN, MFCC_FREQ_MIN, MFCC_FREQ_MAX, mel_filters.n_filters, mel_filters.filters);

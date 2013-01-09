@@ -39,11 +39,11 @@
 #include "xtract_globals_private.h"
 
 
-int xtract_init_mfcc(int N, float nyquist, int style, float freq_min, float freq_max, int freq_bands, float **fft_tables)
+int xtract_init_mfcc(int N, double nyquist, int style, double freq_min, double freq_max, int freq_bands, double **fft_tables)
 {
 
     int n, i, k, *fft_peak, M, next_peak;
-    float norm, mel_freq_max, mel_freq_min, norm_fact, height, inc, val,
+    double norm, mel_freq_max, mel_freq_min, norm_fact, height, inc, val,
           freq_bw_mel, *mel_peak, *height_norm, *lin_peak;
 
     mel_peak = height_norm = lin_peak = NULL;
@@ -54,11 +54,11 @@ int xtract_init_mfcc(int N, float nyquist, int style, float freq_min, float freq
     mel_freq_min = 1127 * log(1 + freq_min / 700);
     freq_bw_mel = (mel_freq_max - mel_freq_min) / freq_bands;
 
-    mel_peak = (float *)malloc((freq_bands + 2) * sizeof(float));
+    mel_peak = (double *)malloc((freq_bands + 2) * sizeof(double));
     /* +2 for zeros at start and end */
-    lin_peak = (float *)malloc((freq_bands + 2) * sizeof(float));
+    lin_peak = (double *)malloc((freq_bands + 2) * sizeof(double));
     fft_peak = (int *)malloc((freq_bands + 2) * sizeof(int));
-    height_norm = (float *)malloc(freq_bands * sizeof(float));
+    height_norm = (double *)malloc(freq_bands * sizeof(double));
 
     if(mel_peak == NULL || height_norm == NULL ||
             lin_peak == NULL || fft_peak == NULL)
@@ -109,7 +109,7 @@ int xtract_init_mfcc(int N, float nyquist, int style, float freq_min, float freq
 
         // zero the start of the array
         for(k = 0; k < i; k++)
-            fft_tables[n][k] = 0.f;
+            fft_tables[n][k] = 0.0;
 
         // fill in the rise
         for(; i <= fft_peak[n]; i++)
@@ -133,7 +133,7 @@ int xtract_init_mfcc(int N, float nyquist, int style, float freq_min, float freq
 
         // zero the rest of the array
         for(k = next_peak + 1; k < N; k++)
-            fft_tables[n][k] = 0.f;
+            fft_tables[n][k] = 0.0;
     }
 
 
@@ -239,10 +239,10 @@ void xtract_free_fft(void)
     }
 }
 
-int xtract_init_bark(int N, float sr, int *band_limits)
+int xtract_init_bark(int N, double sr, int *band_limits)
 {
 
-    float  edges[] = {0, 100, 200, 300, 400, 510, 630, 770, 920, 1080, 1270, 1480, 1720, 2000, 2320, 2700, 3150, 3700, 4400, 5300, 6400, 7700, 9500, 12000, 15500, 20500, 27000}; /* Takes us up to sr = 54kHz (CCRMA: JOS)*/
+    double  edges[] = {0, 100, 200, 300, 400, 510, 630, 770, 920, 1080, 1270, 1480, 1720, 2000, 2320, 2700, 3150, 3700, 4400, 5300, 6400, 7700, 9500, 12000, 15500, 20500, 27000}; /* Takes us up to sr = 54kHz (CCRMA: JOS)*/
 
     int bands = XTRACT_BARK_BANDS;
 
@@ -253,11 +253,11 @@ int xtract_init_bark(int N, float sr, int *band_limits)
     return XTRACT_SUCCESS;
 }
 
-float *xtract_init_window(const int N, const int type)
+double *xtract_init_window(const int N, const int type)
 {
-    float *window;
+    double *window;
 
-    window = malloc(N * sizeof(float));
+    window = malloc(N * sizeof(double));
 
     switch (type)
     {
@@ -296,7 +296,7 @@ float *xtract_init_window(const int N, const int type)
     return window;
 }
 
-void xtract_free_window(float *window)
+void xtract_free_window(double *window)
 {
     free(window);
 }

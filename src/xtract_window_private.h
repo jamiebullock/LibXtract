@@ -32,7 +32,7 @@
  * \param sd the standard deviation of the "distribution" represented by the Gaussian curve. The higher the value of sd, the wider the curve. Generally sd <= 0.5
  *
  */
-void gauss(float *window, const int N, const float sd);
+void gauss(double *window, const int N, const double sd);
 
 /** \brief generate a Hamming window
  *
@@ -40,7 +40,7 @@ void gauss(float *window, const int N, const float sd);
  * \param N the number of elements in the array pointed to by *window
  *
  */
-void hamming(float *window, const int N);
+void hamming(double *window, const int N);
 
 /** \brief generate a Hann window
  *
@@ -48,7 +48,7 @@ void hamming(float *window, const int N);
  * \param N the number of elements in the array pointed to by *window
  *
  */
-void hann(float *window, const int N);
+void hann(double *window, const int N);
 
 /** \brief generate a Bartlett window
  *
@@ -56,7 +56,7 @@ void hann(float *window, const int N);
  * \param N the number of elements in the array pointed to by *window
  *
  */
-void bartlett(float *window, const int N);
+void bartlett(double *window, const int N);
 
 /** \brief generate a Triangular window
  *
@@ -64,7 +64,7 @@ void bartlett(float *window, const int N);
  * \param N the number of elements in the array pointed to by *window
  *
  */
-void triangular(float *window, const int N);
+void triangular(double *window, const int N);
 
 /** \brief generate a Bartlett-Hann  window
  *
@@ -72,7 +72,7 @@ void triangular(float *window, const int N);
  * \param N the number of elements in the array pointed to by *window
  *
  */
-void bartlett_hann(float *window, const int N);
+void bartlett_hann(double *window, const int N);
 
 /** \brief generate a Blackman window
  *
@@ -80,7 +80,7 @@ void bartlett_hann(float *window, const int N);
  * \param N the number of elements in the array pointed to by *window
  *
  */
-void blackman(float *window, const int N);
+void blackman(double *window, const int N);
 
 /** \brief generate a Kaiser window
  *
@@ -89,7 +89,7 @@ void blackman(float *window, const int N);
  * \param alpha The larger the value of |alpha|, the narrower the window becomes
  *
  */
-void kaiser(float *window, const int N, const float alpha);
+void kaiser(double *window, const int N, const double alpha);
 
 /** \brief generate a Blackman-Harris window
  *
@@ -97,5 +97,5 @@ void kaiser(float *window, const int N, const float alpha);
  * \param N the number of elements in the array pointed to by *window
  *
  */
-void blackman_harris(float *window, const int N);
+void blackman_harris(double *window, const int N);
 

@@ -35,14 +35,14 @@
 #define INDEX 1
 #endif
 
-int xtract_windowed(const float *data, const int N, const void *argv, float *result)
+int xtract_windowed(const double *data, const int N, const void *argv, double *result)
 {
 
     int n;
-    const float *window;
+    const double *window;
 
     n = N;
-    window = (const float *)argv;
+    window = (const double *)argv;
 
     while(n--)
         result[n] = data[n] * window[n];
@@ -51,12 +51,12 @@ int xtract_windowed(const float *data, const int N, const void *argv, float *res
 
 }
 
-int xtract_features_from_subframes(const float *data, const int N, const int feature, const void *argv, float *result)
+int xtract_features_from_subframes(const double *data, const int N, const int feature, const void *argv, double *result)
 {
 
-    const float *frame1,
+    const double *frame1,
           *frame2;
-    float *result1,
+    double *result1,
           *result2;
 
     int n, rv;

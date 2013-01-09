@@ -51,7 +51,9 @@ typedef struct _tracked_memory {
 typedef struct _xtract {
     t_object  x_obj;
     t_float f;
-    t_float *window;
+    double *window;
+    double *data;
+    double *result;
     t_int feature,
           is_scalar,
           is_subframe,
@@ -68,17 +70,21 @@ static t_int *xtract_perform(t_int *w) {
     t_xtract_tilde *x = (t_xtract_tilde *)(w[2]);
     t_int N = (t_int)(w[3]);
     t_int rv = 0;
-    float result = 0;
+    double result = 0.0;
 
-    rv = xtract[x->feature]((float *)in, N, x->argv, &result);
+    for(n = 0; n < N; ++n) {
+        x->data[n] = (double)in[n];
+    }
+
+    rv = xtract[x->feature](x->data, N, x->argv, &result);
 
     if(rv == XTRACT_FEATURE_NOT_IMPLEMENTED)
 	pd_error(x, "Feature not implemented");
 
     /* set nan, inf or -inf to 0 */
-    result = (isinf(result) || isnan(result) ? 0 : result);
+    result = (isinf(result) || isnan(result) ? 0.0 : result);
     
-    outlet_float(x->x_obj.ob_outlet, result);
+    outlet_float(x->x_obj.ob_outlet, (float)result);
     return (w+4);
 }
 
@@ -86,7 +92,6 @@ static t_int *xtract_perform_vector(t_int *w) {
 
     t_sample *in = (t_sample *)(w[1]);
     t_sample *out = (t_sample *)(w[2]);
-    t_float *tmp_in, *tmp_out;
     t_xtract_tilde *x = (t_xtract_tilde *)(w[3]);
     t_int N = (t_int)(w[4]), n;
     t_int rv = 0;
@@ -98,31 +103,28 @@ static t_int *xtract_perform_vector(t_int *w) {
 
     n = N;
 
-    tmp_in = copybytes(in, N * sizeof(t_float));
-    tmp_out = getbytes(N * sizeof(t_float));
+    for(n = 0; n < N; ++n) {
+        x->data[n] = (double)in[n];
+    }
 
     if(x->feature == XTRACT_PEAK_SPECTRUM || x->feature == XTRACT_LPC)
 	N >>= 1;
     
     if(x->is_subframe){
 
-        rv = xtract_features_from_subframes(tmp_in, N, x->feature, 
-                x->argv, tmp_out);
+        rv = xtract_features_from_subframes(x->data, N, x->feature, 
+                x->argv, x->result);
     }
     else{
 
-        rv = xtract[x->feature](tmp_in, N, x->argv, tmp_out);
-    
+        rv = xtract[x->feature](x->data, N, x->argv, x->result);
     }
 
     if(rv == XTRACT_FEATURE_NOT_IMPLEMENTED)
 	pd_error(x, "Feature not implemented");
 
     while(n--) 
-        out[n] = tmp_out[n];
-    
-    freebytes(tmp_in, N * sizeof(t_float));
-    freebytes(tmp_out, N * sizeof(t_float));
+        out[n] = (float)x->result[n];
     
     return (w+5);
 }
@@ -169,6 +171,10 @@ static void *xtract_new(t_symbol *me, t_int argc, t_atom *argv) {
     x->is_subframe = 0;
     x->feature = -1;
     
+    /* Allocate data area */
+    x->data = (double *)getbytes(N * sizeof(double));
+    x->result = (double *)getbytes(N * sizeof(double));
+
     /* Parse arguments */
     if(argc){
         arg1 = atom_getsymbol(argv);

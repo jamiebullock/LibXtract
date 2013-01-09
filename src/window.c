@@ -27,108 +27,108 @@
 
 #include "xtract_window_private.h"
 
-void gauss(float *window, const int N, const float sd)
+void gauss(double *window, const int N, const double sd)
 {
 
     int n;
-    const float M = N - 1;
-    float num,
+    const double M = N - 1;
+    double num,
           den,
           exponent;
 
     for (n = 0; n < N; n++)
     {
 
-        num = n - M / 2.f;
-        den = sd * M / 2.f;
+        num = n - M / 2.0;
+        den = sd * M / 2.0;
 
-        exponent = -0.5 * powf(num / den, 2);
+        exponent = -0.5 * pow(num / den, 2);
 
         window[n] = exp(exponent);
 
     }
 }
 
-void hamming(float *window, const int N)
+void hamming(double *window, const int N)
 {
 
     int n;
-    const float M = N - 1;
+    const double M = N - 1;
 
     for (n = 0; n < N; n++)
-        window[n] = 0.53836 - (0.46164 * cosf(2.0 * PI * (float)n / M));
+        window[n] = 0.53836 - (0.46164 * cos(2.0 * PI * (double)n / M));
 
 }
 
-void hann(float *window, const int N)
+void hann(double *window, const int N)
 {
 
     int n;
-    const float M = N - 1;
+    const double M = N - 1;
 
     for (n = 0; n < N; n++)
-        window[n] = 0.5 * (1.0 - cosf(2.0 * PI * (float)n / M));
+        window[n] = 0.5 * (1.0 - cos(2.0 * PI * (double)n / M));
 
 }
 
-void bartlett(float *window, const int N)
+void bartlett(double *window, const int N)
 {
 
     int n;
-    const float M = N - 1;
+    const double M = N - 1;
 
     for (n = 0; n < N; n++)
-        window[n] = 2.f / M * (M / 2.f - fabsf(n - M / 2.f));
+        window[n] = 2.0 / M * (M / 2.0 - fabs(n - M / 2.0));
 
 }
 
-void triangular(float *window, const int N)
+void triangular(double *window, const int N)
 {
 
     int n;
-    const float M = N - 1;
+    const double M = N - 1;
 
     for (n = 0; n < N; n++)
-        window[n] = 2.f / N * (N / 2.f - fabsf(n - M / 2.f));
+        window[n] = 2.0 / N * (N / 2.0 - fabs(n - M / 2.0));
 }
 
-void bartlett_hann(float *window, const int N)
+void bartlett_hann(double *window, const int N)
 {
 
     int n;
-    const float M = N - 1,
+    const double M = N - 1,
                 a0 = 0.62,
                 a1 = 0.5,
                 a2 = 0.38;
-    float term1 = 0.f,
-          term2 = 0.f;
+    double term1 = 0.0,
+          term2 = 0.0;
 
     for (n = 0; n < N; n++)
     {
 
-        term1 = a1 * fabsf(n / M - 0.5);
-        term2 = a2 * cosf(2.0 * PI * (float)n / M);
+        term1 = a1 * fabs(n / M - 0.5);
+        term2 = a2 * cos(2.0 * PI * (double)n / M);
 
         window[n] = a0 - term1 - term2;
     }
 }
 
-void blackman(float *window, const int N)
+void blackman(double *window, const int N)
 {
 
     int n;
-    const float M = N - 1,
+    const double M = N - 1,
                 a0 = 0.42,
                 a1 = 0.5,
                 a2 = 0.08;
-    float term1 = 0.f,
-          term2 = 0.f;
+    double term1 = 0.0,
+          term2 = 0.0;
 
     for (n = 0; n < N; n++)
     {
 
-        term1 = a1 * cosf(2.0 * PI * (float)n / M);
-        term2 = a2 * cosf(4.0 * PI * (float)n / M);
+        term1 = a1 * cos(2.0 * PI * (double)n / M);
+        term2 = a2 * cos(4.0 * PI * (double)n / M);
 
         window[n] = a0 - term1 + term2;
     }
@@ -137,19 +137,19 @@ void blackman(float *window, const int N)
 #define BIZ_EPSILON 1E-21 // Max error acceptable 
 
 /* Based on code from mplayer window.c, and somewhat beyond me */
-float besselI0(float x)
+double besselI0(double x)
 {
 
-    float temp;
-    float sum   = 1.0;
-    float u     = 1.0;
-    float halfx = x/2.0;
+    double temp;
+    double sum   = 1.0;
+    double u     = 1.0;
+    double halfx = x/2.0;
     int      n     = 1;
 
     do
     {
 
-        temp = halfx/(float)n;
+        temp = halfx/(double)n;
         u *=temp * temp;
         sum += u;
         n++;
@@ -161,41 +161,41 @@ float besselI0(float x)
 
 }
 
-void kaiser(float *window, const int N, const float alpha)
+void kaiser(double *window, const int N, const double alpha)
 {
 
     int n;
-    const float M = N - 1;
-    float num;
+    const double M = N - 1;
+    double num;
 
     for (n = 0; n < N; n++)
     {
 
-        num = besselI0(alpha * sqrtf(1.0 - powf((2.0 * n / M - 1), 2)));
+        num = besselI0(alpha * sqrt(1.0 - pow((2.0 * n / M - 1), 2)));
         window[n] = num / besselI0(alpha);
 
     }
 }
 
-void blackman_harris(float *window, const int N)
+void blackman_harris(double *window, const int N)
 {
 
     int n;
-    const float M = N - 1,
+    const double M = N - 1,
                 a0 = 0.35875,
                 a1 = 0.48829,
                 a2 = 0.14128,
                 a3 = 0.01168;
-    float term1 = 0.f,
-          term2 = 0.f,
-          term3 = 0.f;
+    double term1 = 0.0,
+          term2 = 0.0,
+          term3 = 0.0;
 
     for (n = 0; n < N; n++)
     {
 
-        term1 = a1 * cosf(2.0 * PI * n / M);
-        term2 = a2 * cosf(4.0 * PI * n / M);
-        term3 = a3 * cosf(6.0 * PI * n / M);
+        term1 = a1 * cos(2.0 * PI * n / M);
+        term2 = a2 * cos(4.0 * PI * n / M);
+        term3 = a3 * cos(6.0 * PI * n / M);
 
         window[n] = a0 - term1 + term2 - term3;
     }

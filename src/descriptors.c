@@ -32,7 +32,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
 
     int f , F;
     char *name, *p_name, *desc, *p_desc, *author;
-    float *argv_min, *argv_max, *argv_def, *result_min, *result_max;
+    double *argv_min, *argv_max, *argv_def, *result_min, *result_max;
     int *argc, *year, *argv_donor;
     xtract_vector_t *data_format, *result_format;
     xtract_unit_t *data_unit, *argv_unit, *result_unit;
@@ -80,8 +80,8 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *argv_unit = XTRACT_DBFS;
             break;
         case XTRACT_SPECTRAL_INHARMONICITY:
-            *argv_min = 0.f;
-            *argv_max = XTRACT_SR_UPPER_LIMIT / 2;
+            *argv_min = 0.0;
+            *argv_max = XTRACT_SR_UPPER_LIMIT / 2.0;
             *argv_def = XTRACT_FUNDAMENTAL_DEFAULT;
             *argv_unit = XTRACT_HERTZ;
             break;
@@ -104,29 +104,29 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *argv_max = XTRACT_FFT_BANDS_MAX;
             *argv_def = XTRACT_SPEC_BW_DEF ;
             *argv_unit = XTRACT_HERTZ;
-            *(argv_min + 1) = 0.f;
-            *(argv_max + 1) = 100.f;
-            *(argv_def + 1) = 95.f;
+            *(argv_min + 1) = 0.0;
+            *(argv_max + 1) = 100.0;
+            *(argv_def + 1) = 95.0;
             *(argv_unit + 1) = XTRACT_PERCENT;
             break;
         case XTRACT_PEAK_SPECTRUM:
-            *argv_min  = XTRACT_SR_LOWER_LIMIT / 2;
-            *argv_max = XTRACT_SR_UPPER_LIMIT / 2;
-            *argv_def = XTRACT_SR_DEFAULT / 2;
+            *argv_min  = XTRACT_SR_LOWER_LIMIT / 2.0;
+            *argv_max = XTRACT_SR_UPPER_LIMIT / 2.0;
+            *argv_def = XTRACT_SR_DEFAULT / 2.0;
             *argv_unit = XTRACT_HERTZ;
-            *(argv_min + 1) = 0.f;
-            *(argv_max + 1) = 100.f ;
-            *(argv_def + 1) = 10.f ;
+            *(argv_min + 1) = 0.0;
+            *(argv_max + 1) = 100.0 ;
+            *(argv_def + 1) = 10.0 ;
             *(argv_unit + 1) = XTRACT_PERCENT;
             break;
         case XTRACT_HARMONIC_SPECTRUM:
-            *argv_min = 0.f;
-            *argv_max = XTRACT_SR_UPPER_LIMIT / 2;
+            *argv_min = 0.0;
+            *argv_max = XTRACT_SR_UPPER_LIMIT / 2.0;
             *argv_def = XTRACT_FUNDAMENTAL_DEFAULT;
             *argv_unit = XTRACT_HERTZ;
-            *(argv_min + 1) = 0.f;
-            *(argv_max + 1) = 1.f ;
-            *(argv_def + 1) = .1f ;
+            *(argv_min + 1) = 0.0;
+            *(argv_max + 1) = 1.0 ;
+            *(argv_def + 1) = .1 ;
             *(argv_unit + 1) = XTRACT_NONE;
             break;
         case XTRACT_NOISINESS:
@@ -1251,18 +1251,18 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             case XTRACT_HPS:
             case XTRACT_ROLLOFF:
                 *result_unit = XTRACT_HERTZ;
-                *result_min = 0.f;
-                *result_max = XTRACT_SR_UPPER_LIMIT / 2;
+                *result_min = 0.0;
+                *result_max = XTRACT_SR_UPPER_LIMIT / 2.0;
                 break;
             case XTRACT_ZCR:
                 *result_unit = XTRACT_HERTZ;
-                *result_min = 0.f;
+                *result_min = 0.0;
                 *result_max = XTRACT_ANY;
                 break;
             case XTRACT_ODD_EVEN_RATIO:
                 *result_unit = XTRACT_NONE;
-                *result_min = 0.f;
-                *result_max = 1.f;
+                *result_min = 0.0;
+                *result_max = 1.0;
                 break;
             case XTRACT_FLATNESS_DB:
                 *result_unit = XTRACT_DBFS;
