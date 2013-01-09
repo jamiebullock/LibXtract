@@ -39,8 +39,20 @@ fi
 
 AM_CONDITIONAL([HAVE_DOXYGEN], [test -n "$DOXYGEN"])
 AM_COND_IF([HAVE_DOXYGEN], [AC_CONFIG_FILES([doc/documentation.doxygen])])
-
 AC_SUBST(HAVE_DOXYGEN)
+
+dnl check if we have Accelerate.h
+
+#AC_CHECK_HEADER(Accelerate/Accelerate.h, [AC_DEFINE(HAVE_ACCELERATE, 1, [Accelerate framework])], [AC_DEFINE(HAVE_ACCELERATE, 0, [Accelerate framework])])
+AC_CHECK_HEADER(Accelerate/Accelerate.h, [use_ooura=false], [use_ooura=true])
+
+
+
+
+dnl if [[ "$have_accelerate" = "true" ]] ; then
+   dnl AC_DEFINE([HAVE_ACCELERATE], [1], [Accelerate headers])
+dnl fi
+
 dnl --enable flags
 
 AC_ARG_ENABLE(pd_example, 
@@ -77,6 +89,23 @@ XTRACT_SO_VERSION=0:0:0
 CFLAGS="$CFLAGS -pedantic -ansi -fno-strict-aliasing -Wall -std=c99 -I/usr/local/include"
 LDFLAGS="$LDFLAGS -lm"
 
+AC_ARG_WITH(ooura,
+    [  --with-ooura   compile with ooura fft backend ],
+    [
+     with_ooura="$withval"
+    ])
+
+if [[ "$with_ooura" = "yes" ]] ; then
+    use_ooura=true
+fi
+
+if [[ "$use_ooura" = "true" ]] ; then
+    AC_DEFINE([USE_OOURA], [1], [Use the Ooura fft backend])
+fi
+
+AM_CONDITIONAL([BUILD_OOURA], test "x$use_ooura" = 'xtrue')
+AC_SUBST(BUILD_OOURA)
+
 AC_ARG_WITH(pd_dir,
     [  --with-pd-dir=path   pd header path (default=/usr/local/include) ],
     [
@@ -107,7 +136,6 @@ AC_ARG_WITH(python,
     [ --with-python If --enable-swig - make with python bindings (default=no) ],    [with_python=true])
 
 AM_CONDITIONAL(BUILD_PYTHON, test "x${with_python}" = 'xtrue')
-
 
 dnl are we building the simpletest example
 if [[ "$simpletest" = "true" ]] ; then
@@ -314,6 +342,11 @@ if test "$with_python" == "true"; then
     echo "with Python module:               yes"
 else
     echo "with Python module:               no"
+fi
+if test "$use_ooura" == "true"; then
+    echo "Ooura FFT backend:                yes"
+else
+    echo "Accelerate FFT backend:           yes"
 fi
 
 
