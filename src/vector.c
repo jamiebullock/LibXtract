@@ -45,18 +45,10 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
     double NxN      = XTRACT_SQ(N);
     double *marker  = NULL;
     size_t bytes   = N * sizeof(double);
-    double *rfft    = NULL;
     unsigned int n = 0;
     unsigned int m = 0;
     unsigned int nx2 = 0;
     unsigned int M = N >> 1;
-
-    rfft = (double *)malloc(bytes);
-    //memcpy(rfft, data, bytes);
-
-	for(n = 0; n < N; ++n){
-		rfft[n] = (double)data[n];
-	}
 
     q = *(double *)argv;
     vector = (int)*((double *)argv+1);
@@ -74,10 +66,10 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
     }
 
     /* ooura is in-place
-     * the output format seems to be
+     * the output format is
      * a[0] - DC, a[1] - nyquist, a[2...N-1] - remaining bins
      */
-    rdft(N, 1, rfft, ooura_data_spectrum.ooura_ip, 
+    rdft(N, 1, data, ooura_data_spectrum.ooura_ip, 
             ooura_data_spectrum.ooura_w);
 
     switch(vector)
@@ -91,7 +83,7 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
                 continue;
             }
             nx2  = n * 2;
-            temp = XTRACT_SQ(rfft[nx2]) + XTRACT_SQ(rfft[nx2+1]);
+            temp = XTRACT_SQ(data[nx2]) + XTRACT_SQ(data[nx2+1]);
             if (temp > XTRACT_LOG_LIMIT)
             {
                 temp = log(sqrt(temp) / (double)N);
@@ -117,7 +109,7 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
             {
                 ++n;
             }
-            result[m] = (XTRACT_SQ(rfft[n]) + XTRACT_SQ(rfft[N - n])) / NxN;
+            result[m] = (XTRACT_SQ(data[n]) + XTRACT_SQ(data[N - n])) / NxN;
             XTRACT_SET_FREQUENCY;
             XTRACT_GET_MAX;
         }
@@ -130,7 +122,7 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
             {
                 ++n;
             }
-            if ((temp = XTRACT_SQ(rfft[n]) + XTRACT_SQ(rfft[N - n])) >
+            if ((temp = XTRACT_SQ(data[n]) + XTRACT_SQ(data[N - n])) >
                     XTRACT_LOG_LIMIT)
                 temp = log(temp / NxN);
             else
@@ -159,8 +151,8 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
                 ++n;
             }
 
-            *marker = (double)(sqrt(XTRACT_SQ(rfft[n*2]) +
-                        XTRACT_SQ(rfft[n*2+1])) / (double)N);
+            *marker = (double)(sqrt(XTRACT_SQ(data[n*2]) +
+                        XTRACT_SQ(data[n*2+1])) / (double)N);
 
             XTRACT_SET_FREQUENCY;
             XTRACT_GET_MAX;
@@ -174,8 +166,6 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
         for(n = 0; n < M; n++)
             result[n] /= max;
     }
-
-    free(rfft);
 
     return XTRACT_SUCCESS;
 }

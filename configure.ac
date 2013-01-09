@@ -287,7 +287,7 @@ else
     echo "doxygen documentation:            yes"
 fi
 if test "$simpletest" = "true"; then
-    echo "simpletest example:	            yes"
+    echo "simpletest example:               yes"
 else
     echo "simpletest example:               no"
 fi
