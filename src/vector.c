@@ -27,7 +27,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "fftsg.h"
+#include "fft.h"
 
 #include "xtract/libxtract.h"
 #include "xtract_macros_private.h"
@@ -235,18 +235,21 @@ int xtract_mfcc(const double *data, const int N, const void *argv, double *resul
 int xtract_dct(const double *data, const int N, const void *argv, double *result)
 {
 
-	int n;
-        int m;
-        double *temp = calloc(N, sizeof(double));
+    int n;
+    int m;
+    double *temp = calloc(N, sizeof(double));
 
-        for (n = 0; n < N; ++n)
-        {
-            for(m = 1; m <= N; ++m) {
-                temp[n] += data[m - 1] * cos(M_PI * (n / (double)N) * (m - 0.5));
-            }
+    for (n = 0; n < N; ++n)
+    {
+        for(m = 1; m <= N; ++m) {
+            temp[n] += data[m - 1] * cos(M_PI * (n / (double)N) * (m - 0.5));
         }
+    }
 
-        return XTRACT_SUCCESS;
+    memcpy(result, temp, N * sizeof(double));
+    free(temp);
+
+    return XTRACT_SUCCESS;
 }
 
 int xtract_autocorrelation(const double *data, const int N, const void *argv, double *result)
