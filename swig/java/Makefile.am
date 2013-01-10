@@ -3,9 +3,9 @@ TESTNAME = test
 JAVA = java
 
 javasources = \
-	SWIGTYPE_p_float.java \
+	SWIGTYPE_p_double.java \
 	SWIGTYPE_p_int.java \
-	SWIGTYPE_p_p_float.java \
+	SWIGTYPE_p_p_double.java \
 	SWIGTYPE_p_unit_.java \
 	SWIGTYPE_p_void.java \
 	xtract_bool_t.java \
@@ -35,9 +35,9 @@ javasources = \
 
 	
 javaclasses = \
-	SWIGTYPE_p_float.class \
+	SWIGTYPE_p_double.class \
 	SWIGTYPE_p_int.class \
-	SWIGTYPE_p_p_float.class \
+	SWIGTYPE_p_p_double.class \
 	SWIGTYPE_p_unit_.class \
 	SWIGTYPE_p_void.class \
 	xtract_bool_t.class \

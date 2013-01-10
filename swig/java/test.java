@@ -18,9 +18,9 @@ public class test {
 
         int len          = 5;
         int retval       = 0;
-        float mean[]     = new float[1];
-        float variance[] = new float[1];
-        float data[]     = new float[len];
+        double mean[]     = new double[1];
+        double variance[] = new double[1];
+        double data[]     = new double[len];
 
         for (int i = 0; i < len; i++){
             System.out.print(i * 3 + ", ");

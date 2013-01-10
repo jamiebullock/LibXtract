@@ -33,6 +33,10 @@
 #include "xtract_macros_private.h"
 #include "xtract_globals_private.h"
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846264338327
+#endif
+
 int xtract_spectrum(const double *data, const int N, const void *argv, double *result)
 {
 
@@ -249,9 +253,9 @@ int xtract_autocorrelation_fft(const double *data, const int N, const void *argv
     double *rfft = NULL;
     int n        = 0;
     int M        = 0;
-    double M_double = 0.0;
 #ifndef USE_OOURA
     DSPDoubleSplitComplex *fft = NULL;
+    double M_double = 0.0;
 #endif
 
     M = N << 1;
@@ -545,7 +549,7 @@ int xtract_harmonic_spectrum(const double *data, const int N, const void *argv, 
 int xtract_lpc(const double *data, const int N, const void *argv, double *result)
 {
 
-    int i, j, k, M, L;
+    int i, j, M, L;
     double r = 0.0,
           error = 0.0;
 
@@ -553,7 +557,6 @@ int xtract_lpc(const double *data, const int N, const void *argv, double *result
            *lpc = NULL ;
 
     error = data[0];
-    k = N; /* The length of *data */
     L = N - 1; /* The number of LPC coefficients */
     M = L * 2; /* The length of *result */
     ref = result;

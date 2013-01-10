@@ -13,21 +13,10 @@
 #include "xtract/libxtract.h"
 %}
 
-/*
-%typemap(javabase) SWIGTYPE, SWIGTYPE *, SWIGTYPE &, SWIGTYPE [],
-    SWIGTYPE (CLASS::*) "SWIG"
-
-%typemap(javacode) SWIGTYPE, SWIGTYPE *, SWIGTYPE &, SWIGTYPE [],
-    SWIGTYPE (CLASS::*) %{
-        protected long getPointer() {
-            return swigCPtr;
-        }
-%}
-*/
 /* Helper functions */
 %inline %{
 
-    void *floata_to_voidp(float f[])
+    void *doublea_to_voidp(double f[])
     {
         return (void *)f;
     }
@@ -41,7 +30,7 @@
     /* Return a pointer to memory allocated for a mel filterbank */
     xtract_mel_filter *create_filterbank(int n_filters, int blocksize){
         
-        float **filters;
+        double **filters;
         xtract_mel_filter *mf;
         int n, N;
 
@@ -50,10 +39,10 @@
         mf = malloc(sizeof(xtract_mel_filter));
         mf->n_filters = n_filters;
 
-        filters = (float **)malloc(n_filters * sizeof(float *));
+        filters = (double **)malloc(n_filters * sizeof(double *));
 
         for(n = 0; n < n_filters; n++)
-            filters[n] = (float *)malloc(N * sizeof(float));
+            filters[n] = (double *)malloc(N * sizeof(double));
 
         mf->filters = filters;
         
@@ -65,7 +54,7 @@
     void destroy_filterbank(xtract_mel_filter *filterbank){
         
         int i = filterbank->n_filters;
-        float **filters;
+        double **filters;
 
         filters = filterbank->filters;
             
@@ -78,29 +67,13 @@
 
     }
 
-    /* Eventually this should be deprecated */
-/*    void destroy_filterbank_explicit(float **filterbank, int n_filters){
-
-        int i = n_filters;
-
-        while(i--)
-            free(filterbank[i]);
-
-        free(filterbank);
-    }
-*/
-
-
-
 %}
 
 #ifndef SWIGJAVA
-%array_class(float, floatArray); 
+%array_class(double, doubleArray); 
 %array_class(int, intArray); 
 #endif
-%apply float *OUTPUT { float *result };
-
-/* %apply float[] {const float *data}; */
+%apply double *OUTPUT { double *result };
 
 
 %ignore xtract;
@@ -110,16 +83,16 @@
 /* We have to put xtract_delta declarations inline because it contains a mixture of vector and scalar functions */
 %inline %{
 
-    int xtract_flux(const float *data, const int N, const void *argv , float *result);
-    int xtract_lnorm(const float *data, const int N, const void *argv , float *result);
+    int xtract_flux(const double *data, const int N, const void *argv , double *result);
+    int xtract_lnorm(const double *data, const int N, const void *argv , double *result);
 
 %}
 
-%clear float *result;
+%clear double *result;
 
 %inline %{
 
-    int xtract_difference_vector(const float *data, const int N, const void *argv, float *result);
+    int xtract_difference_vector(const double *data, const int N, const void *argv, double *result);
 
 %}
 

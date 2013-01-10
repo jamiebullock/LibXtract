@@ -9,7 +9,7 @@ print '\nRunning libxtract Python bindings test...\n'
 
 len = 8
 
-a = xtract.floatArray(len)
+a = xtract.doubleArray(len)
 temp = []
 
 for i in range(0, len):
@@ -20,7 +20,7 @@ mean = xtract.xtract_mean(a,len,None)[1]
 
 print 'The mean of ' + ', '.join(temp) + ' is: %.2f' % mean
 
-argv = xtract.floatArray(1)
+argv = xtract.doubleArray(1)
 argv[0] = mean
 
 variance = xtract.xtract_variance(a, len, argv)[1]
@@ -29,12 +29,12 @@ print 'The variance is %.2f' % variance
 
 print 'Computing spectrum...'
 
-argv = xtract.floatArray(1)
+argv = xtract.doubleArray(1)
 argv[0] = 44100.0 / len  # Fake sample rate
 
 xtract.xtract_init_fft(len, xtract.XTRACT_SPECTRUM);
 
-result = xtract.floatArray(len)
+result = xtract.doubleArray(len)
 
 xtract.xtract_spectrum(a,len,argv, result)
 

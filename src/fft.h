@@ -28,6 +28,8 @@
 #include <config.h>
 #endif
 
+#include <stdbool.h>
+
 #ifdef USE_OOURA
 #include "ooura/fftsg.h"
 #else

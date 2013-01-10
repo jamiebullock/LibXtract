@@ -2,29 +2,22 @@
 %include "../xtract.i"
 %include "arrays_java.i"
 
-/*
-%{
-int mean(const float *data, const int N, void *in, float *result) {
-    return xtract_mean(data, N, in, result);
-}
-%}
-*/
-%apply float[] {const float *data};
-/*%apply void *in {const void *argv}; */
-%apply float *OUTPUT { float *result };
+%apply double[] {const double *data};
+%apply double *OUTPUT { double *result };
 %typemap(in,numinputs=0) JNIEnv *env "$1 = jenv;"
 
-%javamethodmodifiers arr2voidf "private";
+%javamethodmodifiers arr2voidd "private";
 %javamethodmodifiers arr2voidi "private";
-%javamethodmodifiers freearrf "private";
+%javamethodmodifiers freearrd "private";
 %javamethodmodifiers freearri "private";
+
 %inline %{
-jlong arr2voidf(JNIEnv *env, jfloatArray arr) {
+jlong arr2voidd(JNIEnv *env, jdoubleArray arr) {
   void *ptr = (*env)->GetFloatArrayElements(env, arr, NULL);
   return (intptr_t)ptr;
 }
 
-void freearrf(JNIEnv *env, jfloatArray arr, jlong map) {
+void freearrd(JNIEnv *env, jdoubleArray arr, jlong map) {
   void *ptr = 0;
   ptr = *(void **)&map;
   (*env)->ReleaseFloatArrayElements(env, arr, ptr, JNI_ABORT);
@@ -45,8 +38,8 @@ void freearri(JNIEnv *env, jintArray arr, jlong map) {
 
 %pragma(java) modulecode=%{
   private static long arrPtr(Object o) {
-    if (o instanceof float[]) {
-      return arr2voidf((float[])o);
+    if (o instanceof double[]) {
+      return arr2voidd((double[])o);
     }
     else if (o instanceof int[]) {
       return arr2voidi((int[])o);
@@ -58,8 +51,8 @@ void freearri(JNIEnv *env, jintArray arr, jlong map) {
   }
 
   private static void freeArrPtr(Object o, long addr) {
-    if (o instanceof float[]) {
-      freearrf((float[])o, addr);
+    if (o instanceof double[]) {
+      freearrd((double[])o, addr);
       return;
     }
     else if (o instanceof int[]) {
@@ -76,12 +69,5 @@ void freearri(JNIEnv *env, jintArray arr, jlong map) {
 %typemap(jstype) void *argv "Object"
 %typemap(javain,pre="    long tmp$javainput = arrPtr($javainput);",post="      freeArrPtr($javainput, tmp$javainput);") void *argv "tmp$javainput"
 
-/*
-int xtract_mean(const float *data, const int N, void *argv, float *result);
-int xtract_variance(const float *data, const int N, void *argv, float *result);
-*/
 %include xtract_redeclare.i
 
-/*%{
-#include "xtract/xtract_scalar.h"
-%}*/
