@@ -71,10 +71,10 @@ int main(void)
 
     /* compute the MFCCs */
     mel_filters.n_filters = MFCC_FREQ_BANDS;
-    mel_filters.filters   = malloc(MFCC_FREQ_BANDS * sizeof(double *));
+    mel_filters.filters   = (double **)malloc(MFCC_FREQ_BANDS * sizeof(double *));
     for(n = 0; n < MFCC_FREQ_BANDS; ++n)
     {
-        mel_filters.filters[n] = malloc(BLOCKSIZE * sizeof(double));
+        mel_filters.filters[n] = (double *)malloc(BLOCKSIZE * sizeof(double));
     }
 
     xtract_init_mfcc(BLOCKSIZE >> 1, SAMPLERATE >> 1, XTRACT_EQUAL_GAIN, MFCC_FREQ_MIN, MFCC_FREQ_MAX, mel_filters.n_filters, mel_filters.filters);
