@@ -15,7 +15,7 @@ PACKAGE=libxtract
 AC_INIT([libxtract], [libxtract_version], [libxtract-devel@lists.sourceforge.net])
 AC_DEFINE(LIBXTRACT_VERSION, libxtract_version, [LibXtract Version])
 AM_INIT_AUTOMAKE(1.6)
-AM_CONFIG_HEADER(config.h)
+AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIR([m4])
 AC_PROG_CC
 AC_PROG_LIBTOOL
