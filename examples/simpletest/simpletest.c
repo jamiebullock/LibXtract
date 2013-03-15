@@ -50,7 +50,7 @@ int main(void)
     }
 
     /* get the mean of the input */
-    xtract[XTRACT_MEAN]((void *)&input, BLOCKSIZE, NULL, (void *)&mean);
+    xtract[XTRACT_MEAN](input, BLOCKSIZE, NULL, &mean);
     printf("\nInput mean = %.2f\n\n", mean);
 
     /* get the spectrum */
@@ -60,7 +60,7 @@ int main(void)
     argd[3] = 0.f; /* No Normalisation */
 
     xtract_init_fft(BLOCKSIZE, XTRACT_SPECTRUM);
-    xtract[XTRACT_SPECTRUM]((void *)&input, BLOCKSIZE, &argd[0], (void *)&spectrum[0]);
+    xtract[XTRACT_SPECTRUM](input, BLOCKSIZE, &argd[0], spectrum);
 
     /* print the spectral bins */
     printf("\nSpectral bins:\n");
