@@ -28,8 +28,8 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "xtract/libxtract.h"
-#include "xtract/xtract_helper.h"
+#include "../xtract/libxtract.h"
+#include "../xtract/xtract_helper.h"
 #include "xtract_macros_private.h"
 
 int xtract_mean(const double *data, const int N, const void *argv, double *result)

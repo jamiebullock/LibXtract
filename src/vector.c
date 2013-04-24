@@ -29,7 +29,7 @@
 
 #include "fft.h"
 
-#include "xtract/libxtract.h"
+#include "../xtract/libxtract.h"
 #include "xtract_macros_private.h"
 #include "xtract_globals_private.h"
 

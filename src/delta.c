@@ -25,7 +25,7 @@
 
 #include <math.h>
 
-#include "xtract/libxtract.h"
+#include "../xtract/libxtract.h"
 
 int xtract_flux(const double *data, const int N, const void *argv , double *result)
 {
