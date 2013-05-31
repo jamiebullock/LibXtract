@@ -116,6 +116,7 @@ enum xtract_features_ {
     XTRACT_HPS,
     XTRACT_F0,
     XTRACT_FAILSAFE_F0,
+    XTRACT_WAVELET_F0,
     XTRACT_LNORM,
     XTRACT_FLUX,
     XTRACT_ATTACK_TIME,
@@ -360,6 +361,9 @@ printf("Mean = %.2f\n", mean);
 extern int(*xtract[XTRACT_FEATURES])(const double *data, const int N, const void *argv, double *result);
 
 #endif
+
+/** \brief A function to initialise wavelet f0 detector state */
+int xtract_init_wavelet_f0_state(void);
 
 /** \brief A structure to store a set of n_filters Mel filters */
 typedef struct xtract_mel_filter_ {

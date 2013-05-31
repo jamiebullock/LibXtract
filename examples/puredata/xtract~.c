@@ -72,7 +72,7 @@ static t_int *xtract_perform(t_int *w) {
     t_int rv = 0;
     double result = 0.0;
 
-    for(n = 0; n < N; ++n) {
+    for(t_int n = 0; n < N; ++n) {
         x->data[n] = (double)in[n];
     }
 
@@ -148,7 +148,7 @@ static void *xtract_new(t_symbol *me, t_int argc, t_atom *argv) {
     t_int n, N, M, f, F, 
           n_args, 
           type;
-    t_float *argv_max;
+    double *argv_max;
     t_symbol *arg1;
     xtract_function_descriptor_t *fd;
     char *p_name, 
@@ -259,7 +259,7 @@ static void *xtract_new(t_symbol *me, t_int argc, t_atom *argv) {
     if(x->is_subframe)
         N = M;
 
-    post("xtract~: window size: %d", N);
+    post("xtract~: assumed window size: %d", N);
 
     /* do init if needed */
     if(x->feature == XTRACT_MFCC){
@@ -271,9 +271,9 @@ static void *xtract_new(t_symbol *me, t_int argc, t_atom *argv) {
         post("xtract~: mfcc: filters = %d", 
 		((xtract_mel_filter *)x->argv)->n_filters);
         mf->filters = 
-            (t_float **)getbytes(mf->n_filters * sizeof(t_float *));
+            (double **)getbytes(mf->n_filters * sizeof(double *));
         for(n = 0; n < mf->n_filters; n++)
-            mf->filters[n] = (float *)getbytes(N * sizeof(float));
+            mf->filters[n] = (double *)getbytes(N * sizeof(double));
                  
         xtract_init_mfcc(N, NYQUIST, XTRACT_EQUAL_GAIN, 80.0f,
                 18000.0f, mf->n_filters, mf->filters);
@@ -287,6 +287,9 @@ static void *xtract_new(t_symbol *me, t_int argc, t_atom *argv) {
         x->window = xtract_init_window(N, XTRACT_HANN);
         x->argv = x->window;
         x->done_init = 1;
+    }
+    else if(x->feature == XTRACT_WAVELET_F0){
+        xtract_init_wavelet_f0_state();
     }
 
     /* Initialise fft_plan if required */

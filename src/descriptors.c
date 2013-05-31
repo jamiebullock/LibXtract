@@ -87,6 +87,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             break;
         case XTRACT_F0:
         case XTRACT_FAILSAFE_F0:
+        case XTRACT_WAVELET_F0:
             *argv_min = XTRACT_SR_LOWER_LIMIT;
             *argv_max = XTRACT_SR_UPPER_LIMIT;
             *argv_def = XTRACT_SR_DEFAULT;
@@ -228,6 +229,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_LOWEST_VALUE:
         case XTRACT_F0:
         case XTRACT_FAILSAFE_F0:
+        case XTRACT_WAVELET_F0:
             *argv_donor = XTRACT_ANY;
             break;
         case XTRACT_MFCC:
@@ -346,6 +348,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             break;
         case XTRACT_F0:
         case XTRACT_FAILSAFE_F0:
+        case XTRACT_WAVELET_F0:
         case XTRACT_SPECTRUM:
         case XTRACT_AUTOCORRELATION:
         case XTRACT_AUTOCORRELATION_FFT:
@@ -413,6 +416,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_LNORM:
         case XTRACT_F0:
         case XTRACT_FAILSAFE_F0:
+        case XTRACT_WAVELET_F0:
         case XTRACT_MFCC:
         case XTRACT_AUTOCORRELATION:
         case XTRACT_AUTOCORRELATION_FFT:
@@ -607,6 +611,14 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             strcpy(p_desc,
                    "Extract the fundamental frequency of an audio signal (failsafe)");
             strcpy(author, "Jamie Bullock");
+            break;
+        case XTRACT_WAVELET_F0:
+            strcpy(name, "wavelet_f0");
+            strcpy(p_name, "Fundamental Frequency (wavelet method)");
+            strcpy(desc, "Extract the fundamental frequency of a signal (wavelet method)");
+            strcpy(p_desc,
+                   "Extract the fundamental frequency of an audio signal (wavelet method)");
+            strcpy(author, "Antoine Schmitt");
             break;
         case XTRACT_TONALITY:
             strcpy(name, "tonality");
@@ -980,6 +992,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_LOWEST_VALUE:
         case XTRACT_F0:
         case XTRACT_FAILSAFE_F0:
+        case XTRACT_WAVELET_F0:
         case XTRACT_FLATNESS_DB:
         case XTRACT_TONALITY:
             *argc = 1;
@@ -1103,6 +1116,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_HPS:
         case XTRACT_F0:
         case XTRACT_FAILSAFE_F0:
+        case XTRACT_WAVELET_F0:
         case XTRACT_FLUX:
         case XTRACT_LNORM:
         case XTRACT_NONZERO_COUNT:
@@ -1180,6 +1194,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_HPS:
         case XTRACT_F0:
         case XTRACT_FAILSAFE_F0:
+        case XTRACT_WAVELET_F0:
         case XTRACT_NONZERO_COUNT:
         case XTRACT_AUTOCORRELATION:
         case XTRACT_AMDF:
@@ -1248,6 +1263,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             case XTRACT_SPREAD:
             case XTRACT_F0:
             case XTRACT_FAILSAFE_F0:
+            case XTRACT_WAVELET_F0:
             case XTRACT_HPS:
             case XTRACT_ROLLOFF:
                 *result_unit = XTRACT_HERTZ;

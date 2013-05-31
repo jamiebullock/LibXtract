@@ -416,6 +416,21 @@ int xtract_f0(const double *data, const int N, const void *argv, double *result)
  */
 int xtract_failsafe_f0(const double *data, const int N, const void *argv, double *result);
 
+/** \brief Extract the fundamental frequency of an input vector using wavelet-based method
+ * 
+ * \param *data: a pointer to the first element in an array of doubles representing an audio vector 
+ * \param N: the number of elements to be considered
+ * \param *argv: a pointer to a double representing the audio sample rate
+ * \param *result: the pitch of N values from the array pointed to by *data
+ *
+ * This function uses the time-domain wavelet-based method described in Larson and Maddox (2005) and
+ * implemented in the dywapitchtrack library
+ *  
+ * xtract_init_wavelet_f0_state() must be called exactly once prior to calling xtract_wavelet_f0()
+ *
+ */
+int xtract_wavelet_f0(const double *data, const int N, const void *argv, double *result);
+
 /** \brief Extract the number of non-zero elements in an input vector
  * 
  * \param *data: a pointer to the first element in an array of doubles

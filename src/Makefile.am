@@ -16,6 +16,7 @@ SOURCES = libxtract.c \
 	  window.c \
 	  fini.c \
 	  helper.c \
+	  dywapitchtrack/dywapitchtrack.c \
 	  $(OOURA)
 
 lib_LTLIBRARIES = libxtract.la

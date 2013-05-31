@@ -35,6 +35,7 @@
 
 #include "../xtract/libxtract.h"
 #include "xtract_window_private.h"
+#include "xtract_scalar_private.h"
 #define DEFINE_GLOBALS
 #include "xtract_globals_private.h"
 
@@ -359,6 +360,11 @@ int xtract_init_mfcc(int N, double nyquist, int style, double freq_min, double f
 
     return XTRACT_SUCCESS;
 
+}
+
+int xtract_init_wavelet_f0_state(void)
+{
+    dywapitch_inittracking(&wavelet_f0_state);
 }
 
 double *xtract_init_window(const int N, const int type)

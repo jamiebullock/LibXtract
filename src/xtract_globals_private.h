@@ -27,6 +27,7 @@
 #define XTRACT_GLOBALS_PRIVATE_H
 
 #include "fft.h"
+#include "dywapitchtrack/dywapitchtrack.h"
 
 #ifdef DEFINE_GLOBALS
 #define GLOBAL
@@ -45,6 +46,8 @@ GLOBAL xtract_vdsp_data vdsp_data_mfcc;
 GLOBAL xtract_vdsp_data vdsp_data_spectrum;
 GLOBAL xtract_vdsp_data vdsp_data_autocorrelation_fft;
 #endif
+
+GLOBAL dywapitchtracker wavelet_f0_state;
 
 #endif /* Header guard */
 

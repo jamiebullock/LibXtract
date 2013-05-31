@@ -68,6 +68,7 @@ int(*xtract[])(const double *, const int, const void *, double *) =
     xtract_hps,
     xtract_f0,
     xtract_failsafe_f0,
+    xtract_wavelet_f0,
     /* xtract_delta.h */
     xtract_lnorm,
     xtract_flux,
