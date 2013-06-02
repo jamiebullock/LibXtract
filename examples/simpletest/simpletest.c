@@ -24,48 +24,128 @@
 #include "xtract/libxtract.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
+
+typedef enum waveform_type_
+{
+    SINE,
+    SAWTOOTH,
+    SQUARE
+} 
+waveform_type;
 
 #define BLOCKSIZE 1024
 #define SAMPLERATE 44100
-#define PERIOD 100
+#define PERIOD 102
 #define MFCC_FREQ_BANDS 13
 #define MFCC_FREQ_MIN 20
 #define MFCC_FREQ_MAX 20000
 
-int main(void)
+
+double wavetable[BLOCKSIZE];
+
+void fill_wavetable(const float frequency, waveform_type type)
 {
 
-    double mean = 0.f; 
-    double input[BLOCKSIZE];
+    int samples_per_period = SAMPLERATE / frequency;
+
+    for (int i = 0; i < BLOCKSIZE; ++i)
+    {
+        int phase = i % samples_per_period;
+
+        switch (type)
+        {
+            case SINE:
+                wavetable[i] = sin((phase / (double)PERIOD) * 2 * M_PI);
+                break;
+            case SQUARE:
+                if (phase < (samples_per_period / 2.f))     
+                {
+                    wavetable[i] = -1.0;
+                }
+                else
+                {
+                    wavetable[i] = 1.0;
+                }
+                break;
+            case SAWTOOTH:
+                wavetable[i] = ((phase / (double)PERIOD) * 2) - 1.;
+                break;
+        }
+    }
+}
+
+void print_wavetable(void)
+{
+    for (int i = 0; i < BLOCKSIZE; ++i)
+    {
+        printf("%f\n", wavetable[i]);
+    }
+}
+
+int main(void)
+{
+    double mean = 0.0; 
+    double f0 = 0.0;
+    double centroid = 0.0;
     double spectrum[BLOCKSIZE];
+    double windowed[BLOCKSIZE];
+    double peaks[BLOCKSIZE];
+    double harmonics[BLOCKSIZE];
+    double *window = NULL;
     double mfccs[MFCC_FREQ_BANDS * sizeof(double)];
     double argd[4];
+    double samplerate = 44100.0;
     int n;
     xtract_mel_filter mel_filters;
 
-    /* fill the input array with a sawtooth wave */
-    for(n = 0; n < BLOCKSIZE; ++n)
-    {
-        input[n] = ((n % PERIOD) / (double)PERIOD) - .5;
-    }
+    fill_wavetable(344.53125f, SINE); // 344.53125f = 128 samples @ 44100 Hz
+    print_wavetable();
+
+    /* get the F0 */
+    xtract[XTRACT_WAVELET_F0](wavetable, BLOCKSIZE, &samplerate, &f0);
+    printf("\nF0: %f\n", f0);
 
     /* get the mean of the input */
-    xtract[XTRACT_MEAN](input, BLOCKSIZE, NULL, &mean);
-    printf("\nInput mean = %.2f\n\n", mean);
+    xtract[XTRACT_MEAN](wavetable, BLOCKSIZE, NULL, &mean);
+    printf("\nInput mean = %.2f\n\n", mean); /* We expect this to be zero for a square wave */  
+
+    /* create the window function */
+    window = xtract_init_window(BLOCKSIZE, XTRACT_HANN);
+    xtract_windowed(wavetable, BLOCKSIZE, window, windowed);
 
     /* get the spectrum */
     argd[0] = SAMPLERATE / (double)BLOCKSIZE;
     argd[1] = XTRACT_MAGNITUDE_SPECTRUM;
-    argd[2] = 0.f; /* No DC component */
+    argd[2] = 0.f; /* DC component - we expect this to zero for square wave */
     argd[3] = 0.f; /* No Normalisation */
 
     xtract_init_fft(BLOCKSIZE, XTRACT_SPECTRUM);
-    xtract[XTRACT_SPECTRUM](input, BLOCKSIZE, &argd[0], spectrum);
+    xtract[XTRACT_SPECTRUM](windowed, BLOCKSIZE, &argd[0], spectrum);
+
+    xtract[XTRACT_SPECTRAL_CENTROID](spectrum, BLOCKSIZE, NULL, &centroid);
+    printf("\nSpectral Centroid: %f\n", centroid);
+
+    argd[1] = 10.0; /* peak threshold as %  of maximum peak */
+    xtract[XTRACT_PEAK_SPECTRUM](spectrum, BLOCKSIZE / 2, argd, peaks);
+
+    argd[0] = f0;
+    argd[1] = .3; /* harmonic threshold */
+    xtract[XTRACT_HARMONIC_SPECTRUM](peaks, BLOCKSIZE, argd, harmonics);
 
     /* print the spectral bins */
-    printf("\nSpectral bins:\n");
-    for(n = 0; n < (BLOCKSIZE >> 1); ++n){
-        printf("freq: %.1f\tamp: %.6f\n", spectrum[n + (BLOCKSIZE >> 1)], spectrum[n]);
+    printf("\nSpectrum:\n");
+    for(n = 0; n < (BLOCKSIZE >> 1); ++n)
+    {
+        printf("freq: %.1f\tamp: %.6f", spectrum[n + (BLOCKSIZE >> 1)], spectrum[n]);
+        if (peaks[n + (BLOCKSIZE >> 1)] != 0.f)
+        {
+            printf("\tpeak:: freq: %.1f\tamp: %.6f\n", peaks[n + (BLOCKSIZE >> 1)], peaks[n]);
+        }
+        else
+        {
+            printf("\n");
+        }
     }
     printf("\n");
 
