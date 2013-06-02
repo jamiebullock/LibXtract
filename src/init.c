@@ -126,8 +126,8 @@ void xtract_free_ooura_(void)
 void xtract_init_vdsp_data(xtract_vdsp_data *vdsp_data, unsigned int N)
 {
     vdsp_data->setup = vDSP_create_fftsetupD(log2f(N), FFT_RADIX2);
-    vdsp_data->fft.realp = (double *) malloc((N >> 1) * sizeof(double));
-    vdsp_data->fft.imagp = (double *) malloc((N >> 1) * sizeof(double));
+    vdsp_data->fft.realp = (double *) malloc((N >> 1) * sizeof(double) + 1);
+    vdsp_data->fft.imagp = (double *) malloc((N >> 1) * sizeof(double) + 1);
     vdsp_data->log2N = log2f(N);
     vdsp_data->initialised = true;
 }
@@ -144,14 +144,6 @@ void xtract_free_vdsp_data(xtract_vdsp_data *vdsp_data)
 
 int xtract_init_vdsp_(int N, int feature_name)
 {
-
-    int M = N >> 1;
-
-    if(feature_name == XTRACT_AUTOCORRELATION_FFT)
-    {
-        M = N; /* allow for zero padding */
-    }
-
     switch(feature_name)
     {
     case XTRACT_SPECTRUM:
@@ -159,27 +151,27 @@ int xtract_init_vdsp_(int N, int feature_name)
         {
             xtract_free_vdsp_data(&vdsp_data_spectrum);
         }
-        xtract_init_vdsp_data(&vdsp_data_spectrum, M);
+        xtract_init_vdsp_data(&vdsp_data_spectrum, N);
         break;
     case XTRACT_AUTOCORRELATION_FFT:
         if(vdsp_data_autocorrelation_fft.initialised)
         {
             xtract_free_vdsp_data(&vdsp_data_autocorrelation_fft);
         }
-        xtract_init_vdsp_data(&vdsp_data_autocorrelation_fft, M);
+        xtract_init_vdsp_data(&vdsp_data_autocorrelation_fft, N * 2); // allow for zero padding
         break;
     case XTRACT_DCT:
         if(vdsp_data_dct.initialised)
         {
             xtract_free_vdsp_data(&vdsp_data_dct);
         }
-        xtract_init_vdsp_data(&vdsp_data_dct, M);
+        xtract_init_vdsp_data(&vdsp_data_dct, N);
     case XTRACT_MFCC:
         if(vdsp_data_mfcc.initialised)
         {
             xtract_free_vdsp_data(&vdsp_data_mfcc);
         }
-        xtract_init_vdsp_data(&vdsp_data_mfcc, M);
+        xtract_init_vdsp_data(&vdsp_data_mfcc, N);
         break;
     }
 
