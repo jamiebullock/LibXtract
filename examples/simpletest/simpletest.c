@@ -92,13 +92,13 @@ int main(void)
     double mean = 0.0; 
     double f0 = 0.0;
     double centroid = 0.0;
-    double spectrum[BLOCKSIZE];
-    double windowed[BLOCKSIZE];
-    double peaks[BLOCKSIZE];
-    double harmonics[BLOCKSIZE];
+    double *spectrum = calloc(BLOCKSIZE, sizeof(double));
+    double *windowed = calloc(BLOCKSIZE, sizeof(double));
+    double *peaks = calloc(BLOCKSIZE, sizeof(double));
+    double *harmonics = calloc(BLOCKSIZE, sizeof(double));
     double *window = NULL;
-    double mfccs[MFCC_FREQ_BANDS * sizeof(double)];
-    double argd[4];
+    double *mfccs = calloc(MFCC_FREQ_BANDS, sizeof(double));
+    double argd[4] = {0};
     double samplerate = 44100.0;
     int n;
     xtract_mel_filter mel_filters;
@@ -181,6 +181,12 @@ int main(void)
         free(mel_filters.filters[n]);
     }
     free(mel_filters.filters);
+
+    free(spectrum);
+    free(windowed);
+    free(peaks);
+    free(harmonics); 
+    free(mfccs);
 
     return 0;
 
