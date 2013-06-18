@@ -26,6 +26,7 @@
 #include <math.h>
 #include <string.h>
 #include <stdlib.h>
+#include <assert.h>
 
 #include "fft.h"
 
@@ -53,7 +54,9 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
     unsigned int n = 0;
     unsigned int m = 0;
     unsigned int M = N >> 1;
-#ifndef USE_OOURA
+#ifdef USE_OOURA
+    double *fft = NULL;
+#else 
     DSPDoubleSplitComplex *fft = NULL;
 #endif
 
@@ -80,7 +83,11 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
      * the output format is
      * a[0] - DC, a[1] - nyquist, a[2...N-1] - remaining bins
      */
-    rdft(N, 1, data, ooura_data_spectrum.ooura_ip, 
+    fft = malloc(N * sizeof(double));
+    assert(fft != NULL);
+    memcpy(fft, data, N * sizeof(double));
+
+    rdft(N, 1, fft, ooura_data_spectrum.ooura_ip, 
             ooura_data_spectrum.ooura_w);
 #else
     fft = &vdsp_data_spectrum.fft;
@@ -110,8 +117,8 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
                 ++n;
             }
 
-            real = data[n*2];
-            imag = data[n*2+1];
+            real = fft[n*2];
+            imag = fft[n*2+1];
 #else
             real = fft->realp[n];
             imag = fft->realp[n];
@@ -155,8 +162,8 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
                 ++n;
             }
 
-            real = data[n*2];
-            imag = data[n*2+1];
+            real = fft[n*2];
+            imag = fft[n*2+1];
 #else
             real = fft->realp[n];
             imag = fft->realp[n];
@@ -186,8 +193,8 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
                 ++n;
             }
 
-            real = data[n*2];
-            imag = data[n*2+1];
+            real = fft[n*2];
+            imag = fft[n*2+1];
 #else
             real = fft->realp[n];
             imag = fft->realp[n];
@@ -224,8 +231,8 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
             {
                 ++n;
             }
-            real = data[n*2];
-            imag = data[n*2+1];
+            real = fft[n*2];
+            imag = fft[n*2+1];
 #else
             real = fft->realp[n];
             imag = fft->realp[n];
@@ -243,6 +250,10 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
         for(n = 0; n < M; n++)
             result[n] /= max;
     }
+
+#ifdef USE_OOURA
+    free(fft);
+#endif
 
     return XTRACT_SUCCESS;
 }
@@ -506,7 +517,7 @@ int xtract_peak_spectrum(const double *data, const int N, const void *argv, doub
         }
     }
 
-    free(input);
+   // free(input);
     return (rv ? rv : XTRACT_SUCCESS);
 }
 
