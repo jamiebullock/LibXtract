@@ -102,7 +102,7 @@ typedef struct _minmax {
 	struct _minmax *next;
 } minmax;
 
-double _dywapitch_computeWaveletPitch(double * samples, int startsample, int samplecount) {
+double _dywapitch_computeWaveletPitch(const double * samples, int startsample, int samplecount) {
 	double pitchF = 0.0;
 	
 	int i, j;
@@ -439,7 +439,7 @@ void dywapitch_inittracking(dywapitchtracker *pitchtracker) {
 	pitchtracker->_pitchConfidence = -1;
 }
 
-double dywapitch_computepitch(dywapitchtracker *pitchtracker, double * samples, int startsample, int samplecount) {
+double dywapitch_computepitch(dywapitchtracker *pitchtracker, const double * samples, int startsample, int samplecount) {
 	double raw_pitch = _dywapitch_computeWaveletPitch(samples, startsample, samplecount);
 	return _dywapitch_dynamicprocess(pitchtracker, raw_pitch);
 }
