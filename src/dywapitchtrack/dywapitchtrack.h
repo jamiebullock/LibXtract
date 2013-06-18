@@ -100,7 +100,7 @@ void dywapitch_inittracking(dywapitchtracker *pitchtracker);
 // startsample : the index of teh first sample to use in teh sample buffer
 // samplecount : the number of samples to use to compte the pitch
 // return 0.0 if no pitch was found (sound too low, noise, etc..)
-double dywapitch_computepitch(dywapitchtracker *pitchtracker, double * samples, int startsample, int samplecount);
+double dywapitch_computepitch(dywapitchtracker *pitchtracker, const double * samples, int startsample, int samplecount);
 
 #ifdef __cplusplus
 } // extern "C"
