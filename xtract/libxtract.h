@@ -71,7 +71,7 @@ extern "C" {
   * @{
   */
 
-#define XTRACT_FEATURES 59
+#define XTRACT_FEATURES 60
     
 /** \brief Enumeration of features, elements are used as indixes to an array of pointers to feature extracton functions */
 enum xtract_features_ {
