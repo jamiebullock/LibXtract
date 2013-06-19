@@ -86,7 +86,7 @@ AC_ARG_ENABLE(simpletest,
 # age to 0.
 XTRACT_SO_VERSION=0:0:0
 
-CFLAGS="$CFLAGS -pedantic -ansi -fno-strict-aliasing -Wall -std=c99 -I/usr/local/include"
+CFLAGS="-pedantic -ansi -fno-strict-aliasing -Wall -std=c99 -I/usr/local/include"
 LDFLAGS="$LDFLAGS -lm"
 
 AC_ARG_WITH(ooura,
@@ -109,7 +109,7 @@ AC_SUBST(BUILD_OOURA)
 AC_ARG_WITH(pd_dir,
     [  --with-pd-dir=path   pd header path (default=/usr/local/include) ],
     [
-    CFLAGS="$CFLAGS -I$withval"
+    CFLAGS+=" -I$withval"
     echo
     echo "pd dir is $withval"
     echo
@@ -168,7 +168,9 @@ AC_ARG_ENABLE(debug,
 if test "$with_debug" = "yes"
 then
   AC_DEFINE(DEBUG,1,[Define to enable debug])
-  CFLAGS="$CFLAGS -O0 -ggdb -g -Werror"
+  CFLAGS+="  -O0 -ggdb -g -Werror"
+else
+  CFLAGS+="  -O3"
 fi
 
 AC_ARG_ENABLE(swig,
@@ -192,7 +194,7 @@ if [[ "$with_java" = "true" ]] ; then
     
 	for JNI_INCLUDE_DIR in $JNI_INCLUDE_DIRS
 	do
-	    CFLAGS="$CFLAGS -I$JNI_INCLUDE_DIR"
+	    CFLAGS+=" -I$JNI_INCLUDE_DIR"
 	done
     fi
    dnl AC_PROG_JAVAH
@@ -251,19 +253,19 @@ else
 
         case $host in
         *86-*-linux*)
-            PD_CFLAGS="$PD_CFLAGS -DUNIX -Wall -Wimplicit -Wunused"
-            PD_LDFLAGS="$PD_LDFLAGS -shared"
+            PD_CFLAGS+=" -DUNIX -Wall -Wimplicit -Wunused"
+            PD_LDFLAGS+=" -shared"
             dnl we could test for bad glibc here, but don't
             PD_SUFFIX=pd_linux
         ;;
         powerpc-*-linux*)
-            PD_CFLAGS="$PD_CFLAGS -DUNIX -Wall -Wimplicit -Wunused -Wmissing-prototypes"
-            PD_LDFLAGS="$PD_LDFLAGS -shared"
+            PD_CFLAGS+=" -DUNIX -Wall -Wimplicit -Wunused -Wmissing-prototypes"
+            PD_LDFLAGS+=" -shared"
             PD_SUFFIX=pd_linux
         ;;
         *-*-linux*)
-            PD_CFLAGS="$PD_CFLAGS -DUNIX -Wall -Wimplicit -Wunused -Wmissing-prototypes -fPIC"
-            PD_LDFLAGS="$PD_LDFLAGS -shared -export_dynamic"
+            PD_CFLAGS+=" -DUNIX -Wall -Wimplicit -Wunused -Wmissing-prototypes -fPIC"
+            PD_LDFLAGS+=" -shared -export_dynamic"
             PD_SUFFIX=pd_linux
         ;;
         sparc-sun-*)
@@ -275,21 +277,21 @@ else
         dnl    PD_SUFFIX=pd_darwin
 	dnl ;;
 	*-*-darwin*)
-            PD_CFLAGS="$PD_CFLAGS -DUNIX -Wall -Wimplicit -Wunused -Wmissing-prototypes"
-            PD_LDFLAGS="$PD_LDFLAGS -bundle -undefined dynamic_lookup -flat_namespace"
+            PD_CFLAGS+=" -DUNIX -Wall -Wimplicit -Wunused -Wmissing-prototypes"
+            PD_LDFLAGS+=" -bundle -undefined dynamic_lookup -flat_namespace"
             PD_SUFFIX=pd_darwin
 	;;
 
         *)
         dnl assume unix
-            PD_CFLAGS="$PD_CFLAGS -DUNIX -Wall -Wimplicit -Wunused -Wmissing-prototypes -O1"
-            PD_LDFLAGS="$PD_LDFLAGS -shared"
+            PD_CFLAGS+=" -DUNIX -Wall -Wimplicit -Wunused -Wmissing-prototypes -O1"
+            PD_LDFLAGS+=" -shared"
             PD_SUFFIX=pd_linux
         ;;
         esac
 fi
 
-PD_CFLAGS="$PD_CFLAGS -DPD"
+PD_CFLAGS+=" -DPD"
 
 AC_SUBST(PD_CFLAGS)
 AC_SUBST(PD_LDFLAGS)
