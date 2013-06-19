@@ -538,7 +538,7 @@ int xtract_peak_spectrum(const double *data, const int N, const void *argv, doub
         }
     }
 
-   // free(input);
+    free(input);
     return (rv ? rv : XTRACT_SUCCESS);
 }
 
