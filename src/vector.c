@@ -116,6 +116,11 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
             {
                 ++n;
             }
+            if(n == M)
+            {
+                XTRACT_SET_FREQUENCY;
+                break;
+            }
 
             real = fft[n*2];
             imag = fft[n*2+1];
@@ -161,6 +166,11 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
             {
                 ++n;
             }
+            if(n == M)
+            {
+                XTRACT_SET_FREQUENCY;
+                break;
+            }
 
             real = fft[n*2];
             imag = fft[n*2+1];
@@ -191,6 +201,11 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
             if(n==1 && withDC) /* discard Nyquist */
             {
                 ++n;
+            }
+            if(n == M)
+            {
+                XTRACT_SET_FREQUENCY;
+                break;
             }
 
             real = fft[n*2];
@@ -231,6 +246,12 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
             {
                 ++n;
             }
+            if(n == M)
+            {
+                XTRACT_SET_FREQUENCY;
+                break;
+            }
+
             real = fft[n*2];
             imag = fft[n*2+1];
 #else
