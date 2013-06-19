@@ -92,12 +92,12 @@ int main(void)
     double mean = 0.0; 
     double f0 = 0.0;
     double centroid = 0.0;
-    double *spectrum = calloc(BLOCKSIZE, sizeof(double));
-    double *windowed = calloc(BLOCKSIZE, sizeof(double));
-    double *peaks = calloc(BLOCKSIZE, sizeof(double));
-    double *harmonics = calloc(BLOCKSIZE, sizeof(double));
+    double spectrum[BLOCKSIZE] = {0};
+    double windowed[BLOCKSIZE] = {0};
+    double peaks[BLOCKSIZE] = {0};
+    double harmonics[BLOCKSIZE] = {0};
     double *window = NULL;
-    double *mfccs = calloc(MFCC_FREQ_BANDS, sizeof(double));
+    double mfccs[MFCC_FREQ_BANDS] = {0};
     double argd[4] = {0};
     double samplerate = 44100.0;
     int n;
@@ -117,14 +117,16 @@ int main(void)
     /* create the window function */
     window = xtract_init_window(BLOCKSIZE, XTRACT_HANN);
     xtract_windowed(wavetable, BLOCKSIZE, window, windowed);
+    xtract_free_window(window);
 
     /* get the spectrum */
     argd[0] = SAMPLERATE / (double)BLOCKSIZE;
     argd[1] = XTRACT_MAGNITUDE_SPECTRUM;
-    argd[2] = 0.f; /* DC component - we expect this to zero for square wave */
+    argd[2] = 1.f; /* DC component - we expect this to zero for square wave */
     argd[3] = 0.f; /* No Normalisation */
 
     xtract_init_fft(BLOCKSIZE, XTRACT_SPECTRUM);
+    printf("windowed: %p, spectrum: %p\n", (void *)windowed, (void *)spectrum);
     xtract[XTRACT_SPECTRUM](windowed, BLOCKSIZE, &argd[0], spectrum);
 
     xtract[XTRACT_SPECTRAL_CENTROID](spectrum, BLOCKSIZE, NULL, &centroid);
@@ -181,12 +183,6 @@ int main(void)
         free(mel_filters.filters[n]);
     }
     free(mel_filters.filters);
-
-    free(spectrum);
-    free(windowed);
-    free(peaks);
-    free(harmonics); 
-    free(mfccs);
 
     return 0;
 
