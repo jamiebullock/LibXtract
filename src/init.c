@@ -418,10 +418,12 @@ void _init()·
     ooura_data_spectrum.initialised = false;
     ooura_data_autocorrelation_fft.initialised = false;
     ooura_data_mfcc.initialised = false;
+    printf("LibXtract compiled with ooura FFT\n");
 #else
     vdsp_data_dct.initialised = false;
     vdsp_data_spectrum.initialised = false;
     vdsp_data_autocorrelation_fft.initialised = false;
     vdsp_data_mfcc.initialised = false;
+    printf("LibXtract compiled with Accelerate FFT\n");
 #endif
 }
