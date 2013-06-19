@@ -43,8 +43,8 @@
 #ifdef USE_OOURA
 void xtract_init_ooura_data(xtract_ooura_data *ooura_data, unsigned int N)
 {
-    ooura_data->ooura_ip  = (int *)calloc((2 + sqrt(N)), sizeof(int));
-    ooura_data->ooura_w   = (double *)calloc((N - 1), sizeof(double));
+    ooura_data->ooura_ip  = (int *)calloc(2 + sqrt(N), sizeof(int));
+    ooura_data->ooura_w   = (double *)calloc(N * 5 / 4, sizeof(double));
     ooura_data->initialised = true;
 }
 
