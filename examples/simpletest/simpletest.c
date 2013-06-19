@@ -104,7 +104,7 @@ int main(void)
     xtract_mel_filter mel_filters;
 
     fill_wavetable(344.53125f, SINE); // 344.53125f = 128 samples @ 44100 Hz
-    print_wavetable();
+//    print_wavetable();
 
     /* get the F0 */
     xtract[XTRACT_WAVELET_F0](wavetable, BLOCKSIZE, &samplerate, &f0);
@@ -122,11 +122,10 @@ int main(void)
     /* get the spectrum */
     argd[0] = SAMPLERATE / (double)BLOCKSIZE;
     argd[1] = XTRACT_MAGNITUDE_SPECTRUM;
-    argd[2] = 1.f; /* DC component - we expect this to zero for square wave */
+    argd[2] = 0.f; /* DC component - we expect this to zero for square wave */
     argd[3] = 0.f; /* No Normalisation */
 
     xtract_init_fft(BLOCKSIZE, XTRACT_SPECTRUM);
-    printf("windowed: %p, spectrum: %p\n", (void *)windowed, (void *)spectrum);
     xtract[XTRACT_SPECTRUM](windowed, BLOCKSIZE, &argd[0], spectrum);
 
     xtract[XTRACT_SPECTRAL_CENTROID](spectrum, BLOCKSIZE, NULL, &centroid);
