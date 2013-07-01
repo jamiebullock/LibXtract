@@ -524,7 +524,6 @@ int xtract_peak_spectrum(const double *data, const int N, const void *argv, doub
                                                     (y3 = input[n+1])) / (input[n - 1] - 2 *
                                                             (y2 = input[n]) + input[n + 1])));
                 result[n] = y2 - .25 * (y - y3) * p;
-                printf("result[%d] = %f\tresult[N+n] = %f\n", n, result[n], result[n+N]);
             }
             else
             {
