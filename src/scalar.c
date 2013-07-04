@@ -543,7 +543,7 @@ int xtract_flatness_db(const double *data, const int N, const void *argv, double
     if (flatness <= 0)
         flatness = XTRACT_LOG_LIMIT;
 
-    *result = 10 * log10f(flatness);
+    *result = 10 * log10(flatness);
 
     return XTRACT_SUCCESS;
 
