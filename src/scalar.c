@@ -397,29 +397,35 @@ int xtract_tristimulus_3(const double *data, const int N, const void *argv, doub
 int xtract_smoothness(const double *data, const int N, const void *argv, double *result)
 {
 
-    int n, M;
+    int n; 
+    int M = N - 1;
+    double prev = 0.0;
+    double current = 0.0;
+    double next = 0.0;
+    double temp = 0.0;
 
-    double *input;
-
-    input = (double *)malloc(N * sizeof(double));
-    memcpy(input, data, N * sizeof(double));
-
-    if (input[0] <= 0)
-        input[0] = XTRACT_LOG_LIMIT;
-    if (input[1] <= 0)
-        input[1] = XTRACT_LOG_LIMIT;
-
-    M = N - 1;
+    
 
     for(n = 1; n < M; n++)
     {
-        if(input[n+1] <= 0)
-            input[n+1] = XTRACT_LOG_LIMIT;
-        *result += fabs(20.0 * log(input[n]) - (20.0 * log(input[n-1]) +
-                         20.0 * log(input[n]) + 20.0 * log(input[n+1])) / 3.0);
+        if(n == 1)
+        {
+            prev = data[n-1] <= 0 ? XTRACT_LOG_LIMIT : data[n-1];
+            current = data[n] <= 0 ? XTRACT_LOG_LIMIT : data[n];
+        }
+        else
+        {
+            prev = current;
+            current = next;
+        }
+        
+        next = data[n+1] <= 0 ? XTRACT_LOG_LIMIT : data[n+1];
+        
+        temp += fabs(20.0 * log(current) - (20.0 * log(prev) +
+                         20.0 * log(current) + 20.0 * log(next)) / 3.0);
     }
-
-    free(input);
+    
+    *result = temp;
 
     return XTRACT_SUCCESS;
 }
