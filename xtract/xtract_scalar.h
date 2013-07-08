@@ -198,7 +198,7 @@ int xtract_tristimulus_3(const double *data, const int N, const void *argv, doub
  * 
  * \param *data: a pointer to the first element in an array of doubles representing the magnitude coefficients from the spectrum of an audio vector, (e.g. the first half of the array pointed to by *result from xtract_spectrum().
  * \param N: the number of elements to be considered
- * \param *argv: a pointer to the first element of an array of integers containing the lower bound, upper bound, and pre-scaling factor, whereby array data in the range lower < n < upper will be pre-scaled by p before processing. 
+ * \param *argv: a pointer to NULL
  * \param *result: the smoothness of N values from the array pointed to by *data
  */
 int xtract_smoothness(const double *data, const int N, const void *argv, double *result);
