@@ -34,11 +34,13 @@ typedef enum waveform_type_
 {
     SINE,
     SAWTOOTH,
-    SQUARE
+    SQUARE,
+    NOISE
 } 
 waveform_type;
 
 #define BLOCKSIZE 1024
+#define HALF_BLOCKSIZE BLOCKSIZE >> 1
 #define SAMPLERATE 44100
 #define PERIOD 102
 #define MFCC_FREQ_BANDS 13
@@ -75,6 +77,9 @@ void fill_wavetable(const float frequency, waveform_type type)
             case SAWTOOTH:
                 wavetable[i] = ((phase / (double)PERIOD) * 2) - 1.;
                 break;
+            case NOISE:
+                wavetable[i] = (arc4random_uniform(1000) / 500.0) - 1;
+                break; 
         }
     }
 }
@@ -91,11 +96,14 @@ int main(void)
 {
     double mean = 0.0; 
     double f0 = 0.0;
+    double flux = 0.0;
     double centroid = 0.0;
     double spectrum[BLOCKSIZE] = {0};
     double windowed[BLOCKSIZE] = {0};
     double peaks[BLOCKSIZE] = {0};
     double harmonics[BLOCKSIZE] = {0};
+    double subframes[BLOCKSIZE] = {0};
+    double difference[HALF_BLOCKSIZE] = {0};
     double *window = NULL;
     double mfccs[MFCC_FREQ_BANDS] = {0};
     double argd[4] = {0};
@@ -103,8 +111,8 @@ int main(void)
     int n;
     xtract_mel_filter mel_filters;
 
-    fill_wavetable(344.53125f, SINE); // 344.53125f = 128 samples @ 44100 Hz
-//    print_wavetable();
+    fill_wavetable(344.53125f, NOISE); // 344.53125f = 128 samples @ 44100 Hz
+    print_wavetable();
 
     /* get the F0 */
     xtract[XTRACT_WAVELET_F0](wavetable, BLOCKSIZE, &samplerate, &f0);
@@ -127,6 +135,7 @@ int main(void)
 
     xtract_init_fft(BLOCKSIZE, XTRACT_SPECTRUM);
     xtract[XTRACT_SPECTRUM](windowed, BLOCKSIZE, &argd[0], spectrum);
+    xtract_free_fft();
 
     xtract[XTRACT_SPECTRAL_CENTROID](spectrum, BLOCKSIZE, NULL, &centroid);
     printf("\nSpectral Centroid: %f\n", centroid);
@@ -175,6 +184,23 @@ int main(void)
         }
         printf("coeff: %f\n", mfccs[n]);
     }
+
+    /* compute Spectral Flux */
+    argd[0] = SAMPLERATE / HALF_BLOCKSIZE;
+    argd[1] = XTRACT_MAGNITUDE_SPECTRUM;
+    argd[2] = 0.f; /* DC component */
+    argd[3] = 0.f; /* No Normalisation */
+    
+    xtract_init_fft(HALF_BLOCKSIZE, XTRACT_SPECTRUM);
+    xtract_features_from_subframes(wavetable, BLOCKSIZE, XTRACT_SPECTRUM, argd, subframes);
+    xtract_difference_vector(subframes, BLOCKSIZE, NULL, difference);
+    
+    argd[0] = 1.0; /* norm order */
+    argd[1] = XTRACT_POSITIVE_SLOPE; /* positive slope */
+    
+    xtract_flux(difference, HALF_BLOCKSIZE, argd, &flux);
+    
+    printf("Flux: %f\n", flux);
 
     /* cleanup */
     for(n = 0; n < MFCC_FREQ_BANDS; ++n)
