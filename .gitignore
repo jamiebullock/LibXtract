@@ -54,3 +54,7 @@ stamp-h1
 # sublime 
 
 *sublime*
+
+# Python byte code
+*.pyc
+
