@@ -1,5 +1,7 @@
 # LibXtract
 
+[![Build Status](https://travis-ci.org/jamiebullock/LibXtract.png?branch=master)](https://travis-ci.org/jamiebullock/LibXtract)
+
 LibXtract is a simple, portable, lightweight library of audio feature extraction functions. The purpose of the library is to provide a relatively exhaustive set of feature extraction primatives that are designed to be 'cascaded' to create a extraction hierarchies.
 
 For example, 'variance', 'average deviation', 'skewness' and 'kurtosis', all require the 'mean' of the input vector to be precomputed. However, rather than compute the 'mean' 'inside' each function, it is expected that the 'mean' will be passed in as an argument. This means that if the user wishes to use all of these features, the mean is calculated only once, and then passed to any functions that require it.
