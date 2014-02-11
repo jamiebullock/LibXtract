@@ -58,3 +58,9 @@ stamp-h1
 # Python byte code
 *.pyc
 
+# Doxygen
+doc/latex
+doc/html
+doc/doxygen-build.stamp
+doc/documentation.doxygen
+
