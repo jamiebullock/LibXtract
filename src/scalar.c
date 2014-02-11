@@ -27,6 +27,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <math.h>
+#include <limits.h>
 
 #include "dywapitchtrack/dywapitchtrack.h"
 
@@ -746,16 +747,18 @@ int xtract_lowest_value(const double *data, const int N, const void *argv, doubl
 {
 
     int n = N;
-    double temp;
 
-    *result = data[--n];
+    *result = DBL_MAX;
 
     while(n--)
     {
-        if((temp = data[n]) > *(double *)argv)
+        if(data[n] > *(double *)argv)
             *result = XTRACT_MIN(*result, data[n]);
     }
 
+    if (*result == DBL_MAX)
+        return XTRACT_NO_RESULT;
+        
     return XTRACT_SUCCESS;
 }
 

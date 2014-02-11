@@ -353,8 +353,13 @@ int xtract_spectral_slope(const double *data, const int N, const void *argv, dou
  * 
  * \param *data: a pointer to the first element in an array of doubles
  * \param N: the number of elements to be considered
- * \param *argv: a pointer to a double representing the lower limit for the search. i.e. (*result > *argv) returns 1.
+ * \param *argv: a pointer to a double representing the lower limit for the search. All values in the array pointed to by *data that are below or equal to this threshold will be ignored.
  * \param *result: a pointer to a value representing the lowest component in *data that falls above a given threshold. 
+ *
+ * \return XTRACT_SUCCESS is a lowest value was found or XTRACT_NO_VALUE if all values 
+ * in the array pointed to by *data are below or equal to the threshold set with *argv
+ *
+ * \note If XTRACT_NO_VALUE is returned, *result will be set to DBL_MAX
  * 
  */
 int xtract_lowest_value(const double *data, const int N, const void *argv, double *result);

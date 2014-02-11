@@ -98,6 +98,7 @@ int main(void)
     double f0 = 0.0;
     double flux = 0.0;
     double centroid = 0.0;
+    double lowest = 0.0;
     double spectrum[BLOCKSIZE] = {0};
     double windowed[BLOCKSIZE] = {0};
     double peaks[BLOCKSIZE] = {0};
@@ -109,6 +110,7 @@ int main(void)
     double argd[4] = {0};
     double samplerate = 44100.0;
     int n;
+    int rv = XTRACT_SUCCESS;
     xtract_mel_filter mel_filters;
 
     fill_wavetable(344.53125f, NOISE); // 344.53125f = 128 samples @ 44100 Hz
@@ -122,6 +124,19 @@ int main(void)
     xtract[XTRACT_MEAN](wavetable, BLOCKSIZE, NULL, &mean);
     printf("\nInput mean = %.2f\n\n", mean); /* We expect this to be zero for a square wave */  
 
+    /* get the lowest value in the input */
+    argd[0] = -.5;
+    rv = xtract[XTRACT_LOWEST_VALUE](wavetable, BLOCKSIZE, argd, &lowest);
+    
+    if (rv == XTRACT_SUCCESS)
+    {
+        printf("\nLowest value = %.6f\n\n", lowest);
+    }
+    else
+    {
+        printf("\nUnable to get lowest value, all values below threshold?\n\n");
+    }
+    exit(0);    
     /* create the window function */
     window = xtract_init_window(BLOCKSIZE, XTRACT_HANN);
     xtract_windowed(wavetable, BLOCKSIZE, window, windowed);
