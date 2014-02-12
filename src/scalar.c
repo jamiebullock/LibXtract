@@ -29,6 +29,10 @@
 #include <math.h>
 #include <limits.h>
 
+#ifndef DBL_MAX
+#include <float.h> /* on Linux DBL_MAX is in float.h */
+#endif
+
 #include "dywapitchtrack/dywapitchtrack.h"
 
 #include "../xtract/libxtract.h"
