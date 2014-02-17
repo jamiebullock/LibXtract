@@ -283,7 +283,7 @@ int xtract_irregularity_k(const double *data, const int N, const void *argv, dou
 int xtract_irregularity_j(const double *data, const int N, const void *argv, double *result)
 {
 
-    int n = N;
+    int n = N - 1;
 
     double num = 0.0, den = 0.0;
 
@@ -808,7 +808,7 @@ int xtract_nonzero_count(const double *data, const int N, const void *argv, doub
 
 }
 
-int xtract_hps(const double *data, const int N, const void *argv, double *result)
+/*int xtract_hps(const double *data, const int N, const void *argv, double *result)
 {
 
     int n = N, M, m, l, peak_index, position1_lwr;
@@ -876,8 +876,40 @@ int xtract_hps(const double *data, const int N, const void *argv, double *result
     free(product);
 
     return XTRACT_SUCCESS;
-}
+}*/
 
+int xtract_hps(const double *data, const int N, const void *argv, double *result)
+{
+    int numBins, numBinsToUse, i, maxIndex;
+    double tempProduct, currentMax;
+
+    numBins = N / 2;
+
+    numBinsToUse = ceil(numBins / 3.0);
+
+    if (numBinsToUse <= 1)
+    {
+        /* Input data is too short. */
+        *result = 0;
+        return XTRACT_NO_RESULT;
+    }
+
+    tempProduct = currentMax = 0;
+    for (i = 0; i < numBinsToUse; ++i)
+    {
+        tempProduct = data [i] * data [i * 2] * data [i * 3];
+
+        if (tempProduct > currentMax)
+        {
+            currentMax = tempProduct;
+            maxIndex = i;
+        }
+    }
+
+    *result = data [numBins + maxIndex];
+
+    return XTRACT_SUCCESS;
+}
 
 int xtract_f0(const double *data, const int N, const void *argv, double *result)
 {
