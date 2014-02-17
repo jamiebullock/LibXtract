@@ -386,10 +386,8 @@ int xtract_sum(const double *data, const int N, const void *argv, double *result
 
 /** \brief Extract the Pitch of an input vector using Harmonic Product Spectrum (HPS) analysis
  * 
- * \warning {This function doesn't work properly}
- * 
- * \param *data: a pointer to the first element in an array of doubles representing the magnitude coefficients from the spectrum of an audio vector, (e.g. the first half of the array pointed to by *result from xtract_spectrum().
- * \param N: the number of elements to be considered
+ * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector (e.g. *result from  xtract_spectrum). It is expected that the first half of the array pointed to by *data will contain amplitudes for each frequecy bin, and the second half will contain the respective frequencies
+ * \param N: The length of the vector pointed to by *data.
  * \param *argv: a pointer to NULL
  * \param *result: the pitch of N values from the array pointed to by *data
  */
