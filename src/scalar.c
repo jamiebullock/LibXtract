@@ -808,58 +808,42 @@ int xtract_nonzero_count(const double *data, const int N, const void *argv, doub
 
 }
 
-/*int xtract_hps(const double *data, const int N, const void *argv, double *result)
+int xtract_hps(const double *data, const int N, const void *argv, double *result)
 {
+    int n, M, i, peak_index, position1_lwr;
+    double tempProduct, peak, largest1_lwr, ratio1;
 
-    int n = N, M, m, l, peak_index, position1_lwr;
-    double *coeffs2, *coeffs3, *product, L,
-          largest1_lwr, peak, ratio1, sr;
+    n = N / 2;
 
-    sr = *(double*)argv;
-    if(sr == 0)
-        sr = 44100.0;
+    M = ceil(n / 3.0);
 
-    coeffs2 = (double *)malloc(N * sizeof(double));
-    coeffs3 = (double *)malloc(N * sizeof(double));
-    product = (double *)malloc(N * sizeof(double));
-
-    while(n--) coeffs2[n] = coeffs3[n] = 1;
-
-    M = N >> 1;
-    L = N / 3.0;
-
-    while(M--)
+    if (M <= 1)
     {
-        m = M << 1;
-        coeffs2[M] = (data[m] + data[m+1]) * 0.5;
-
-        if(M < L)
-        {
-            l = M * 3;
-            coeffs3[M] = (data[l] + data[l+1] + data[l+2]) / 3.0;
-        }
+        /* Input data is too short. */
+        *result = 0;
+        return XTRACT_NO_RESULT;
     }
 
-    peak_index = peak = 0;
-
-    for(n = 1; n < N; n++)
+    tempProduct = peak = 0;
+    for (i = 0; i < M; ++i)
     {
-        product[n] = data[n] * coeffs2[n] * coeffs3[n];
-        if(product[n] > peak)
+        tempProduct = data [i] * data [i * 2] * data [i * 3];
+
+        if (tempProduct > peak)
         {
-            peak_index = n;
-            peak = product[n];
+            peak = tempProduct;
+            peak_index = i;
         }
     }
 
     largest1_lwr = position1_lwr = 0;
 
-    for(n = 0; n < N; n++)
+    for(i = 0; i < N; ++i)
     {
-        if(data[n] > largest1_lwr && n != peak_index)
+        if(data[i] > largest1_lwr && i != peak_index)
         {
-            largest1_lwr = data[n];
-            position1_lwr = n;
+            largest1_lwr = data[i];
+            position1_lwr = i;
         }
     }
 
@@ -869,44 +853,7 @@ int xtract_nonzero_count(const double *data, const int N, const void *argv, doub
             peak_index * 0.6 && ratio1 > 0.1)
         peak_index = position1_lwr;
 
-    *result = sr / (double)peak_index;
-
-    free(coeffs2);
-    free(coeffs3);
-    free(product);
-
-    return XTRACT_SUCCESS;
-}*/
-
-int xtract_hps(const double *data, const int N, const void *argv, double *result)
-{
-    int numBins, numBinsToUse, i, maxIndex;
-    double tempProduct, currentMax;
-
-    numBins = N / 2;
-
-    numBinsToUse = ceil(numBins / 3.0);
-
-    if (numBinsToUse <= 1)
-    {
-        /* Input data is too short. */
-        *result = 0;
-        return XTRACT_NO_RESULT;
-    }
-
-    tempProduct = currentMax = 0;
-    for (i = 0; i < numBinsToUse; ++i)
-    {
-        tempProduct = data [i] * data [i * 2] * data [i * 3];
-
-        if (tempProduct > currentMax)
-        {
-            currentMax = tempProduct;
-            maxIndex = i;
-        }
-    }
-
-    *result = data [numBins + maxIndex];
+    *result = data [n + peak_index];
 
     return XTRACT_SUCCESS;
 }
