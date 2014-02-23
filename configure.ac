@@ -265,7 +265,7 @@ else
         ;;
         *-*-linux*)
             PD_CFLAGS+=" -DUNIX -Wall -Wimplicit -Wunused -Wmissing-prototypes -fPIC"
-            PD_LDFLAGS+=" -shared -export_dynamic"
+            PD_LDFLAGS+=" -shared -export_dynamic -undefined dynamic_lookup"
             PD_SUFFIX=pd_linux
         ;;
         sparc-sun-*)
