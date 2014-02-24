@@ -623,7 +623,7 @@ int xtract_rms_amplitude(const double *data, const int N, const void *argv, doub
 int xtract_spectral_inharmonicity(const double *data, const int N, const void *argv, double *result)
 {
 
-    int n = N >> 1;
+    int n = N >> 1, h = 0;
     double num = 0.0, den = 0.0, fund;
     const double *freqs, *amps;
 
@@ -635,7 +635,8 @@ int xtract_spectral_inharmonicity(const double *data, const int N, const void *a
     {
         if(amps[n])
         {
-            num += fabs(freqs[n] - n * fund) * XTRACT_SQ(amps[n]);
+            h = round(freqs[n] / fund);
+            num += fabs(freqs[n] - h * fund) * XTRACT_SQ(amps[n]);
             den += XTRACT_SQ(amps[n]);
         }
     }
