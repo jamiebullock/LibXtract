@@ -622,7 +622,6 @@ int xtract_rms_amplitude(const double *data, const int N, const void *argv, doub
 
 int xtract_spectral_inharmonicity(const double *data, const int N, const void *argv, double *result)
 {
-
     int n = N >> 1, h = 0;
     double num = 0.0, den = 0.0, fund;
     const double *freqs, *amps;
@@ -656,16 +655,19 @@ int xtract_power(const double *data, const int N, const void *argv, double *resu
 
 int xtract_odd_even_ratio(const double *data, const int N, const void *argv, double *result)
 {
+    int n = N >> 1, h = 0;
+    double odd = 0.0, even = 0.0, fund, temp;
+    const double *freqs;
 
-    int M = (N >> 1), n;
+    fund = *(double *)argv;
+    freqs = data + n;
 
-    double odd = 0.0, even = 0.0,  temp;
-
-    for(n = 0; n < M; n++)
+    while(n--)
     {
         if((temp = data[n]))
         {
-            if(XTRACT_IS_ODD(n))
+            h = round(freqs[n] / fund);
+            if(XTRACT_IS_ODD(h))
             {
                 odd += temp;
             }

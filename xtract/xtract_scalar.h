@@ -324,9 +324,9 @@ int xtract_power(const double *data, const int N, const void *argv, double *resu
 /* Odd to even harmonic ratio */
 /** \brief Extract the Odd to even harmonic ratio of an input vector 
  * 
- * \param *data: a pointer to the first element in an array of doubles representing the amplitudes of the harmonic spectrum of an audio vector. It is sufficient to pass in a pointer to the first half of the array pointed to by *result from xtract_harmonic_spectrum().
+ * \param *data: a pointer to the first element in an array of doubles representing the amplitudes of the harmonic spectrum of an audio vector. It is sufficient to pass in a pointer to array pointed to by *result from xtract_harmonic_spectrum().
  * \param N: the number of elements to be considered. If using the array pointed to by *result from xtract_harmonics, N should equal half the total array size i.e., just the amplitudes of the peaks.
- * \param *argv: a pointer to NULL
+ * \param *argv: a pointer to a double representing the fundamental frequency of the input vector.
  * \param *result: the even/odd harmonic ratio of N values from the array pointed to by *data
  */
 int xtract_odd_even_ratio(const double *data, const int N, const void *argv, double *result);
