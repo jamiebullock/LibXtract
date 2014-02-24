@@ -78,7 +78,7 @@ void fill_wavetable(const float frequency, waveform_type type)
                 wavetable[i] = ((phase / (double)PERIOD) * 2) - 1.;
                 break;
             case NOISE:
-                wavetable[i] = (arc4random_uniform(1000) / 500.0) - 1;
+                wavetable[i] = ((random() % 1000) / 500.0) - 1;
                 break; 
         }
     }
@@ -114,7 +114,9 @@ int main(void)
     xtract_mel_filter mel_filters;
 
     fill_wavetable(344.53125f, NOISE); // 344.53125f = 128 samples @ 44100 Hz
+    /* 
     print_wavetable();
+    */
 
     /* get the F0 */
     xtract[XTRACT_WAVELET_F0](wavetable, BLOCKSIZE, &samplerate, &f0);
@@ -136,7 +138,7 @@ int main(void)
     {
         printf("\nUnable to get lowest value, all values below threshold?\n\n");
     }
-    exit(0);    
+
     /* create the window function */
     window = xtract_init_window(BLOCKSIZE, XTRACT_HANN);
     xtract_windowed(wavetable, BLOCKSIZE, window, windowed);
