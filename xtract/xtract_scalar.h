@@ -182,9 +182,9 @@ int xtract_irregularity_j(const double *data, const int N, const void *argv, dou
 
 /** \brief Calculate the Tristimulus of an input vector using a method described by Pollard and Jansson (1982)
  * 
- * \param *data: a pointer to the first element in an array of doubles representing the magnitude coefficients of the harmonic spectrum of an audio vector e.g. a pointer to the first half of the array pointed to by *result from xtract_harmonics(). The amplitudes of the peak spectrum (e.g. *result from xtract_peak_spectrum()) can be used if one wishes to consider all partials not just harmonics.
+ * \param *data: a pointer to the first element in an array of doubles representing a harmonic spectrum of size N/2, and a frequency spectrum of size N/2 (This is the output format of xtract_harmonic_spectrum())
  * \param N: the number of elements to be considered
- * \param *argv: a pointer to NULL
+ * \param *argv: a pointer to a double representing the fundamental frequency of the input vector.
  * \param *result: the tristimulus of N values from the array pointed to by *data
  *
  * These three functions provide the first, second and third order tristimulus formulae
