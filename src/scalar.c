@@ -486,21 +486,21 @@ int xtract_tristimulus_2(const double *data, const int N, const void *argv, doub
 
 int xtract_tristimulus_3(const double *data, const int N, const void *argv, double *result)
 {
+    int n = N >> 1, h = 0, i;
+    double den = 0.0, num = 0.0, fund = 0.0, temp = 0.0;
+    const double *freqs;
 
-    int n = N, count = 0;
+    fund = *(double *)argv;
+    freqs = data + n;
 
-    double den, num, temp;
-
-    den = num = temp = 0.0;
-
-    for(n = 0; n < N; n++)
+    for(i = 0; i < n; i++)
     {
-        if((temp = data[n]))
+        if((temp = data[i]))
         {
             den += temp;
-            if(count >= 5)
+            h = round(freqs[i] / fund);
+            if(h >= 5)
                 num += temp;
-            count++;
         }
     }
 
