@@ -251,6 +251,11 @@ int xtract_init_mfcc(int N, double nyquist, int style, double freq_min, double f
     fft_peak = NULL;
     norm = 1;
 
+    if (freq_bands <= 1)
+    {
+        return XTRACT_ARGUMENT_ERROR;
+    }
+    
     mel_freq_max = 1127 * log(1 + freq_max / 700);
     mel_freq_min = 1127 * log(1 + freq_min / 700);
     freq_bw_mel = (mel_freq_max - mel_freq_min) / freq_bands;
@@ -269,6 +274,7 @@ int xtract_init_mfcc(int N, double nyquist, int style, double freq_min, double f
     if (lin_peak == NULL)
     {
         perror("error");
+        free(mel_peak);
         return XTRACT_MALLOC_FAILED;
     }
     
@@ -277,6 +283,8 @@ int xtract_init_mfcc(int N, double nyquist, int style, double freq_min, double f
     if (fft_peak == NULL)
     {
         perror("error");
+        free(mel_peak);
+        free(lin_peak);
         return XTRACT_MALLOC_FAILED;
     }
     
@@ -285,6 +293,9 @@ int xtract_init_mfcc(int N, double nyquist, int style, double freq_min, double f
     if (height_norm == NULL)
     {
         perror("error");
+        free(mel_peak);
+        free(lin_peak);
+        free(fft_peak);
         return XTRACT_MALLOC_FAILED;
     }
 
@@ -295,7 +306,7 @@ int xtract_init_mfcc(int N, double nyquist, int style, double freq_min, double f
     fft_peak[0] = lin_peak[0] / nyquist * M;
 
 
-    for (n = 1; n < freq_bands + 2; n++)
+    for (n = 1; n < (freq_bands + 2); ++n)
     {
         //roll out peak locations - mel, linear and linear on fft window scale
         mel_peak[n] = mel_peak[n - 1] + freq_bw_mel;
