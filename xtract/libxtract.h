@@ -173,7 +173,8 @@ enum xtract_return_codes_ {
     XTRACT_BAD_VECTOR_SIZE,
     XTRACT_DENORMAL_FOUND,
     XTRACT_NO_RESULT, /* This usually occurs when the correct calculation cannot take place because required data is missing or would result in a NaN or infinity/-infinity. Under these curcumstances 0.f is usually given by *result */
-    XTRACT_FEATURE_NOT_IMPLEMENTED
+    XTRACT_FEATURE_NOT_IMPLEMENTED,
+    XTRACT_ARGUMENT_ERROR
 };
 
 /** \brief Enumeration of spectrum types */
