@@ -257,13 +257,36 @@ int xtract_init_mfcc(int N, double nyquist, int style, double freq_min, double f
 
     mel_peak = (double *)malloc((freq_bands + 2) * sizeof(double));
     /* +2 for zeros at start and end */
-    lin_peak = (double *)malloc((freq_bands + 2) * sizeof(double));
-    fft_peak = (int *)malloc((freq_bands + 2) * sizeof(int));
-    height_norm = (double *)malloc(freq_bands * sizeof(double));
-
-    if(mel_peak == NULL || height_norm == NULL ||
-            lin_peak == NULL || fft_peak == NULL)
+    
+    if (mel_peak == NULL)
+    {
+        perror("error");
         return XTRACT_MALLOC_FAILED;
+    }
+    
+    lin_peak = (double *)malloc((freq_bands + 2) * sizeof(double));
+    
+    if (lin_peak == NULL)
+    {
+        perror("error");
+        return XTRACT_MALLOC_FAILED;
+    }
+    
+    fft_peak = (int *)malloc((freq_bands + 2) * sizeof(int));
+    
+    if (fft_peak == NULL)
+    {
+        perror("error");
+        return XTRACT_MALLOC_FAILED;
+    }
+    
+    height_norm = (double *)malloc(freq_bands * sizeof(double));
+    
+    if (height_norm == NULL)
+    {
+        perror("error");
+        return XTRACT_MALLOC_FAILED;
+    }
 
     M = N >> 1;
 
