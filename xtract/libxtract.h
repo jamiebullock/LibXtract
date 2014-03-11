@@ -71,7 +71,7 @@ extern "C" {
   * @{
   */
 
-#define XTRACT_FEATURES 60
+#define XTRACT_FEATURES 61
     
 /** \brief Enumeration of features, elements are used as indixes to an array of pointers to feature extracton functions */
 enum xtract_features_ {
@@ -117,6 +117,7 @@ enum xtract_features_ {
     XTRACT_F0,
     XTRACT_FAILSAFE_F0,
     XTRACT_WAVELET_F0,
+    XTRACT_MIDICENT,
     XTRACT_LNORM,
     XTRACT_FLUX,
     XTRACT_ATTACK_TIME,
@@ -208,7 +209,8 @@ typedef enum unit_ {
     XTRACT_DBFS_HERTZ,
     XTRACT_PERCENT,
     XTRACT_BINS,
-    XTRACT_SONE
+    XTRACT_SONE,
+    XTRACT_MIDI_CENT
 } xtract_unit_t;
 
 /** \brief Boolean */

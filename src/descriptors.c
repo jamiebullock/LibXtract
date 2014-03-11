@@ -88,6 +88,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_F0:
         case XTRACT_FAILSAFE_F0:
         case XTRACT_WAVELET_F0:
+        case XTRACT_MIDICENT:
             *argv_min = XTRACT_SR_LOWER_LIMIT;
             *argv_max = XTRACT_SR_UPPER_LIMIT;
             *argv_def = XTRACT_SR_DEFAULT;
@@ -230,6 +231,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_F0:
         case XTRACT_FAILSAFE_F0:
         case XTRACT_WAVELET_F0:
+        case XTRACT_MIDICENT:
             *argv_donor = XTRACT_ANY;
             break;
         case XTRACT_MFCC:
@@ -380,6 +382,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             break;
         case XTRACT_ATTACK_TIME:
         case XTRACT_DECAY_TIME:
+        case XTRACT_MIDICENT:
         default:
             *data_format = XTRACT_NO_DATA;
             break;
@@ -620,6 +623,13 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
                    "Extract the fundamental frequency of an audio signal (wavelet method)");
             strcpy(author, "Antoine Schmitt");
             break;
+        case XTRACT_MIDICENT:
+                strcpy(name, "midicent");
+                strcpy(p_name, "Frequency to MIDI Cent conversion");
+                strcpy(desc, "Convert frequency in Hertz to Pitch in MIDI cents");
+                strcpy(p_desc, "Convert frequency in Hertz to Pitch in MIDI cents");
+                strcpy(author, "Jamie Bullock");
+                break;
         case XTRACT_TONALITY:
             strcpy(name, "tonality");
             strcpy(p_name, "Tonality");
@@ -993,6 +1003,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_F0:
         case XTRACT_FAILSAFE_F0:
         case XTRACT_WAVELET_F0:
+        case XTRACT_MIDICENT:
         case XTRACT_FLATNESS_DB:
         case XTRACT_TONALITY:
             *argc = 1;
@@ -1117,6 +1128,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_F0:
         case XTRACT_FAILSAFE_F0:
         case XTRACT_WAVELET_F0:
+        case XTRACT_MIDICENT:
         case XTRACT_FLUX:
         case XTRACT_LNORM:
         case XTRACT_NONZERO_COUNT:
@@ -1195,6 +1207,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_F0:
         case XTRACT_FAILSAFE_F0:
         case XTRACT_WAVELET_F0:
+        case XTRACT_MIDICENT:
         case XTRACT_NONZERO_COUNT:
         case XTRACT_AUTOCORRELATION:
         case XTRACT_AMDF:
@@ -1270,6 +1283,10 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
                 *result_min = 0.0;
                 *result_max = XTRACT_SR_UPPER_LIMIT / 2.0;
                 break;
+            case XTRACT_MIDICENT:
+                *result_unit = XTRACT_MIDI_CENT;
+                *result_min = 0.0;
+                *result_max = 12700;
             case XTRACT_ZCR:
                 *result_unit = XTRACT_HERTZ;
                 *result_min = 0.0;

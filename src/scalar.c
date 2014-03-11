@@ -983,4 +983,15 @@ int xtract_wavelet_f0(const double *data, const int N, const void *argv, double 
     return XTRACT_SUCCESS;
 }
 
+int xtract_midicent(const double *data, const int N, const void *argv, double *result)
+{
+    double f0 = *(double *)argv;
+    double note = 0.0;
+    
+    note = 69 + log(f0 / 440.f) * 17.31234;
+    note *= 100;
+    note = round(note);
+    
+    return XTRACT_SUCCESS;
+}
 
