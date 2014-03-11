@@ -987,7 +987,7 @@ int xtract_midicent(const double *data, const int N, const void *argv, double *r
 {
     double f0 = *(double *)argv;
     double note = 0.0;
-    
+      
     note = 69 + log(f0 / 440.f) * 17.31234;
     note *= 100;
     note = round(note);
@@ -996,6 +996,8 @@ int xtract_midicent(const double *data, const int N, const void *argv, double *r
     {
         return XTRACT_ARGUMENT_ERROR;
     }
+    
+    *result = note;
     
     return XTRACT_SUCCESS;
 }
