@@ -991,13 +991,13 @@ int xtract_midicent(const double *data, const int N, const void *argv, double *r
     note = 69 + log(f0 / 440.f) * 17.31234;
     note *= 100;
     note = round(note);
+
+    *result = note;
     
     if (note > 12700 || note < 0)
     {
         return XTRACT_ARGUMENT_ERROR;
     }
-    
-    *result = note;
     
     return XTRACT_SUCCESS;
 }
