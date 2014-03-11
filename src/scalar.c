@@ -992,6 +992,11 @@ int xtract_midicent(const double *data, const int N, const void *argv, double *r
     note *= 100;
     note = round(note);
     
+    if (note > 12700 || note < 0)
+    {
+        return XTRACT_ARGUMENT_ERROR;
+    }
+    
     return XTRACT_SUCCESS;
 }
 
