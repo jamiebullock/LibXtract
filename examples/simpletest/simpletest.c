@@ -96,6 +96,7 @@ int main(void)
 {
     double mean = 0.0; 
     double f0 = 0.0;
+    double midicents = 0.0;
     double flux = 0.0;
     double centroid = 0.0;
     double lowest = 0.0;
@@ -113,7 +114,9 @@ int main(void)
     int rv = XTRACT_SUCCESS;
     xtract_mel_filter mel_filters;
 
-    fill_wavetable(344.53125f, NOISE); // 344.53125f = 128 samples @ 44100 Hz
+    // fill_wavetable(344.53125f, NOISE); // 344.53125f = 128 samples @ 44100 Hz
+    fill_wavetable(344.53125f, SINE); // 344.53125f = 128 samples @ 44100 Hz
+
     /* 
     print_wavetable();
     */
@@ -121,6 +124,10 @@ int main(void)
     /* get the F0 */
     xtract[XTRACT_WAVELET_F0](wavetable, BLOCKSIZE, &samplerate, &f0);
     printf("\nF0: %f\n", f0);
+
+    /* get the F0 as a MIDI note */
+    xtract[XTRACT_MIDICENT](NULL, 0, &f0, &midicents);
+    printf("\nMIDI cents: %f\n", midicents);
 
     /* get the mean of the input */
     xtract[XTRACT_MEAN](wavetable, BLOCKSIZE, NULL, &mean);
