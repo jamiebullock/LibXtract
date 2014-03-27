@@ -1,0 +1,119 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Source Files\ooura">
+      <UniqueIdentifier>{4b080b90-2736-4aa7-ac76-6426243a4b71}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\dywapitchtrack">
+      <UniqueIdentifier>{ce27305e-5718-466e-be83-b45600d88a56}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\xtract">
+      <UniqueIdentifier>{a53ce415-7563-4e4c-8491-3582dcf43a3a}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\fft.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\xtract_globals_private.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\xtract_macros_private.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\xtract_window_private.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\dywapitchtrack\dywapitchtrack.h">
+      <Filter>Source Files\dywapitchtrack</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ooura\fftsg.h">
+      <Filter>Source Files\ooura</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\xtract\libxtract.h">
+      <Filter>Header Files\xtract</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\xtract\xtract_delta.h">
+      <Filter>Header Files\xtract</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\xtract\xtract_helper.h">
+      <Filter>Header Files\xtract</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\xtract\xtract_macros.h">
+      <Filter>Header Files\xtract</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\xtract\xtract_scalar.h">
+      <Filter>Header Files\xtract</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\xtract\xtract_types.h">
+      <Filter>Header Files\xtract</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\xtract\xtract_vector.h">
+      <Filter>Header Files\xtract</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\delta.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\descriptors.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\fini.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\helper.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\init.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\libxtract.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\scalar.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\vector.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\window.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\dywapitchtrack\dywapitchtrack.c">
+      <Filter>Source Files\dywapitchtrack</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ooura\fftsg.c">
+      <Filter>Source Files\ooura</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\src\Makefile.am">
+      <Filter>Source Files</Filter>
+    </None>
+  </ItemGroup>
+</Project>
