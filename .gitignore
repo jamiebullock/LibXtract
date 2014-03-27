@@ -18,8 +18,9 @@
 *.pd_*
 examples/simpletest/simpletest
 
-# VS db files
+# VS files
 *.sdf
+*.tlog
 
 # http://www.gnu.org/software/automake
 
