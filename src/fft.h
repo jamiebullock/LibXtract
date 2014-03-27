@@ -28,7 +28,16 @@
 #include <config.h>
 #endif
 
-#include <stdbool.h>
+#ifdef _MSC_VER
+	#define USE_OOURA
+	#ifndef __cplusplus
+		typedef int bool;
+		#define false 0
+		#define true 1
+	#endif
+#else
+	#include <stdbool.h>
+#endif
 
 #ifdef USE_OOURA
 #include "ooura/fftsg.h"

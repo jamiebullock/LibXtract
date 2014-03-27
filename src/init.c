@@ -43,7 +43,7 @@
 #ifdef USE_OOURA
 void xtract_init_ooura_data(xtract_ooura_data *ooura_data, unsigned int N)
 {
-    ooura_data->ooura_ip  = (int *)calloc(2 + sqrt(N), sizeof(int));
+    ooura_data->ooura_ip  = (int *)calloc(2 + sqrt((double)N), sizeof(int));
     ooura_data->ooura_w   = (double *)calloc(N * 5 / 4, sizeof(double));
     ooura_data->initialised = true;
 }
@@ -397,7 +397,7 @@ double *xtract_init_window(const int N, const int type)
 {
     double *window;
 
-    window = malloc(N * sizeof(double));
+    window = (double*)malloc(N * sizeof(double));
 
     switch (type)
     {
@@ -444,7 +444,7 @@ void xtract_free_window(double *window)
 #ifdef __GNUC__
 __attribute__((constructor)) void init()
 #else
-void _init()·
+void _init()
 #endif
 {
 #ifdef USE_OOURA

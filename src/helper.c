@@ -75,7 +75,8 @@ int xtract_features_from_subframes(const double *data, const int N, const int fe
 
 }
 
-inline int xtract_is_denormal(double const d)
+//inline int xtract_is_denormal(double const d)
+int xtract_is_denormal(double const d)
 {
     if(sizeof(d) != 2 * sizeof(int))
         fprintf(stderr, "libxtract: Error: xtract_is_denormal() detects inconsistent wordlength for type 'double'\n");
@@ -84,7 +85,8 @@ inline int xtract_is_denormal(double const d)
     return (l&0x7ff00000) == 0 && d!=0; //Check for 0 may not be necessary
 }
 
-inline bool xtract_is_poweroftwo(unsigned int x)
+//inline bool xtract_is_poweroftwo(unsigned int x)
+bool xtract_is_poweroftwo(unsigned int x)
 {
     return ((x != 0) && !(x & (x - 1)));
 }
