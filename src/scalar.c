@@ -889,8 +889,8 @@ int xtract_f0(const double *data, const int N, const void *argv, double *result)
     if(sr == 0)
         sr = 44100.0;
 
-    input = (double *)malloc(bytes = N * sizeof(double));
-    input = memcpy(input, data, bytes);
+    input = (double*)malloc(bytes = N * sizeof(double));
+    input = (double*)memcpy(input, data, bytes);
     /*  threshold_peak = *((double *)argv+1);
     threshold_centre = *((double *)argv+2);
     printf("peak: %.2\tcentre: %.2\n", threshold_peak, threshold_centre);*/
@@ -959,27 +959,23 @@ int xtract_f0(const double *data, const int N, const void *argv, double *result)
 int xtract_failsafe_f0(const double *data, const int N, const void *argv, double *result)
 {
 
-    double *spectrum = NULL, argf[4], *peaks = NULL, return_code, sr;
+    double *spectrum = NULL, argf[2], *peaks = NULL, return_code, sr;
 
     return_code = xtract_f0(data, N, argv, result);
 
-    if(return_code == XTRACT_NO_RESULT || *result == 0)
+    if(return_code == XTRACT_NO_RESULT)
     {
         sr = *(double *)argv;
         if(sr == 0)
             sr = 44100.0;
         spectrum = (double *)malloc(N * sizeof(double));
         peaks = (double *)malloc(N * sizeof(double));
-        argf[0] = sr / (double)N;
+        argf[0] = sr;
         argf[1] = XTRACT_MAGNITUDE_SPECTRUM;
-        argf[2] = 0.f; /* DC component not Nyquist */
-        argf[3] = 1.f; /* Normalize */
         xtract_spectrum(data, N, argf, spectrum);
-        argf[1] = 50.0; /* Peak threshold is 70% of maximum peak found */
+        argf[1] = 10.0;
         xtract_peak_spectrum(spectrum, N >> 1, argf, peaks);
         argf[0] = 0.0;
-        
-        /* Assume the peak with the lowest frequency is the fundamental */
         xtract_lowest_value(peaks+(N >> 1), N >> 1, argf, result);
 
         free(spectrum);
@@ -1011,7 +1007,7 @@ int xtract_midicent(const double *data, const int N, const void *argv, double *r
       
     note = 69 + log(f0 / 440.f) * 17.31234;
     note *= 100;
-    note = round(note);
+    note = floor( 0.5f + note ); // replace -> round(note);
 
     *result = note;
     

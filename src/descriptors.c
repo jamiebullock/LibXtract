@@ -42,7 +42,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
 
     f = F = XTRACT_FEATURES;
 
-    fd = malloc(XTRACT_FEATURES * sizeof(xtract_function_descriptor_t));
+    fd = (xtract_function_descriptor_t*)malloc(XTRACT_FEATURES * sizeof(xtract_function_descriptor_t));
 
     /* FIX - this file probably needs a rewrite for readability */
 
@@ -129,7 +129,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *(argv_min + 1) = 0.0;
             *(argv_max + 1) = 1.0 ;
             *(argv_def + 1) = .1 ;
-            *(argv_unit + 1) = XTRACT_NONE;
+            *(argv_unit + 1) = (xtract_unit_t)XTRACT_NONE;
             break;
         case XTRACT_NOISINESS:
         case XTRACT_SKEWNESS:
@@ -140,11 +140,11 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *argv_min = XTRACT_NONE;
             *argv_max = XTRACT_NONE;
             *argv_def = XTRACT_NONE;
-            *argv_unit = XTRACT_NONE;
+            *argv_unit = (xtract_unit_t)XTRACT_NONE;
             *(argv_min + 1) = XTRACT_NONE;
             *(argv_max + 1) = XTRACT_NONE;
             *(argv_def + 1) = XTRACT_NONE;
-            *(argv_unit + 1) = XTRACT_NONE;
+            *(argv_unit + 1) = (xtract_unit_t)XTRACT_NONE;
             break;
             /* argc = 4 */
         case XTRACT_SPECTRUM:
@@ -155,29 +155,29 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *(argv_min + 1) = 0;
             *(argv_max + 1) = 3 ;
             *(argv_def + 1) = 0;
-            *(argv_unit + 1) = XTRACT_NONE;
+            *(argv_unit + 1) = (xtract_unit_t)XTRACT_NONE;
             *(argv_min + 2) = 0;
             *(argv_max + 2) = 1;
             *(argv_def + 2) = 0;
-            *(argv_unit + 2) = XTRACT_NONE;
+            *(argv_unit + 2) = (xtract_unit_t)XTRACT_NONE;
             *(argv_min + 3) = 0;
             *(argv_max + 3) = 1;
             *(argv_def + 3) = 0;
-            *(argv_unit + 3) = XTRACT_NONE;
+            *(argv_unit + 3) = (xtract_unit_t)XTRACT_NONE;
             break;
         case XTRACT_SUBBANDS:
             *argv_min  = XTRACT_ANY;
             *argv_max = XTRACT_ANY;
             *argv_def = XTRACT_MEAN;
-            *argv_unit = XTRACT_NONE;
+            *argv_unit = (xtract_unit_t)XTRACT_NONE;
             *(argv_min + 1) = 1;
             *(argv_max + 1) = 16384;
             *(argv_def + 1) = 4;
-            *(argv_unit + 1) = XTRACT_NONE;
+            *(argv_unit + 1) = (xtract_unit_t)XTRACT_NONE;
             *(argv_min + 2) = 0;
             *(argv_max + 2) = 32;
             *(argv_def + 2) = 0;
-            *(argv_unit + 2) = XTRACT_NONE;
+            *(argv_unit + 2) = (xtract_unit_t)XTRACT_NONE;
             *(argv_min + 3) = 0;
             *(argv_max + 3) = XTRACT_ANY;
             *(argv_def + 3) = 0;
@@ -191,7 +191,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *argv_min = XTRACT_NONE;
             *argv_max = XTRACT_NONE;
             *argv_def = XTRACT_NONE;
-            *argv_unit = XTRACT_NONE;
+            *argv_unit = (xtract_unit_t)XTRACT_NONE;
             break;
         }
 
@@ -443,7 +443,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_LPCC:
         case XTRACT_WINDOWED:
         case XTRACT_SUBBANDS:
-            *data_unit = XTRACT_ANY;
+            *data_unit = (xtract_unit_t)XTRACT_ANY;
             break;
         case XTRACT_SPECTRAL_MEAN:
         case XTRACT_SPECTRAL_VARIANCE:
@@ -1251,7 +1251,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             case XTRACT_LNORM:
             case XTRACT_NONZERO_COUNT:
             case XTRACT_WINDOWED:
-                *result_unit = XTRACT_ANY;
+                *result_unit = (xtract_unit_t)XTRACT_ANY;
                 *result_min = XTRACT_ANY;
                 *result_max = XTRACT_ANY;
                 break;
@@ -1264,7 +1264,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             case XTRACT_TRISTIMULUS_3:
             case XTRACT_NOISINESS:
             case XTRACT_SMOOTHNESS:
-                *result_unit = XTRACT_NONE;
+                *result_unit = (xtract_unit_t)XTRACT_NONE;
                 *result_min = XTRACT_ANY; /* FIX: need to check these */
                 *result_max = XTRACT_ANY;
                 break;
@@ -1293,7 +1293,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
                 *result_max = XTRACT_ANY;
                 break;
             case XTRACT_ODD_EVEN_RATIO:
-                *result_unit = XTRACT_NONE;
+                *result_unit = (xtract_unit_t)XTRACT_NONE;
                 *result_min = 0.0;
                 *result_max = 1.0;
                 break;
@@ -1313,7 +1313,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             case XTRACT_LPC:
             case XTRACT_LPCC:
             default:
-                *result_unit = XTRACT_UNKNOWN;
+                *result_unit = (xtract_unit_t)XTRACT_UNKNOWN;
                 *result_min = XTRACT_UNKNOWN;
                 *result_max = XTRACT_UNKNOWN;
                 break;
@@ -1336,11 +1336,11 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             case XTRACT_SUBBANDS:
             case XTRACT_WINDOWED:
                 *result_format = XTRACT_ARBITRARY_SERIES;
-                *result_unit = XTRACT_ANY;
+                *result_unit = (xtract_unit_t)XTRACT_ANY;
                 break;
             case XTRACT_BARK_COEFFICIENTS:
                 *result_format = XTRACT_BARK_COEFFS;
-                *result_unit = XTRACT_UNKNOWN; /* FIX: check */
+                *result_unit = (xtract_unit_t)XTRACT_UNKNOWN; /* FIX: check */
                 break;
             case XTRACT_PEAK_SPECTRUM:
             case XTRACT_SPECTRUM:
@@ -1352,15 +1352,15 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
                 break;
             case XTRACT_MFCC:
                 *result_format = XTRACT_MEL_COEFFS;
-                *result_unit = XTRACT_UNKNOWN; /* FIX: check */
+                *result_unit = (xtract_unit_t)XTRACT_UNKNOWN; /* FIX: check */
                 break;
             case XTRACT_LPC:
                 *result_format = XTRACT_LPC_COEFFS;
-                *result_unit = XTRACT_UNKNOWN;
+                *result_unit = (xtract_unit_t)XTRACT_UNKNOWN;
                 break;
             case XTRACT_LPCC:
                 *result_format = XTRACT_LPCC_COEFFS;
-                *result_unit = XTRACT_UNKNOWN;
+                *result_unit = (xtract_unit_t)XTRACT_UNKNOWN;
                 break;
             default:
                 break;

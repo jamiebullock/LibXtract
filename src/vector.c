@@ -83,7 +83,7 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
      * the output format is
      * a[0] - DC, a[1] - nyquist, a[2...N-1] - remaining bins
      */
-    fft = malloc(N * sizeof(double));
+    fft = (double*)malloc(N * sizeof(double));
     assert(fft != NULL);
     memcpy(fft, data, N * sizeof(double));
 
@@ -375,7 +375,7 @@ int xtract_dct(const double *data, const int N, const void *argv, double *result
 
     int n;
     int m;
-    double *temp = calloc(N, sizeof(double));
+    double *temp = (double*)calloc(N, sizeof(double));
 
     for (n = 0; n < N; ++n)
     {
@@ -502,7 +502,7 @@ int xtract_peak_spectrum(const double *data, const int N, const void *argv, doub
     bytes = N * sizeof(double);
 
     if(input != NULL)
-        input = memcpy(input, data, bytes);
+        input = (double*)memcpy(input, data, bytes);
     else
         return XTRACT_MALLOC_FAILED;
 
@@ -562,8 +562,8 @@ int xtract_harmonic_spectrum(const double *data, const int N, const void *argv, 
         if(freqs[n])
         {
             ratio = freqs[n] / f0;
-            nearest = round(ratio);
-            distance = fabs(nearest - ratio);
+			nearest = floor( 0.5f + ratio);				// replace -> nearest = round(ratio);
+			distance = fabs(nearest - ratio);
             if(distance > threshold)
                 result[n] = result[M + n] = 0.0;
             else

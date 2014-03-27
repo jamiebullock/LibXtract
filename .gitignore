@@ -18,6 +18,10 @@
 *.pd_*
 examples/simpletest/simpletest
 
+# VS files
+*.sdf
+*.tlog
+
 # http://www.gnu.org/software/automake
 
 Makefile.in
