@@ -434,6 +434,19 @@ int xtract_failsafe_f0(const double *data, const int N, const void *argv, double
  */
 int xtract_wavelet_f0(const double *data, const int N, const void *argv, double *result);
 
+    
+/** \brief Convenience function to convert a frequency in Hertz to a "pitch" value in MIDI cents
+ *
+ * \param *data: not used
+ * \param N: not used
+ * \param *argv: a pointer to a double-precision floating point value representing a frequency in Hertz
+ * \param *result: a pointer to a double-precision floating point value representing a "pitch" in MIDI cents
+ * \return if *argv value causes a *result within the range 0..127, XTRACT_SUCCESS will be returned, otherwise XTRACT_ARGUMENT_ERROR
+ *
+ */
+int xtract_midicent(const double *data, const int N, const void *argv, double *result);
+
+    
 /** \brief Extract the number of non-zero elements in an input vector
  * 
  * \param *data: a pointer to the first element in an array of doubles

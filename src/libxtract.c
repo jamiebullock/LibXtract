@@ -36,7 +36,6 @@ int(*xtract[])(const double *, const int, const void *, double *) =
     xtract_spectral_mean,
     xtract_spectral_variance,
     xtract_spectral_standard_deviation,
-    /* xtract_spectral_average_deviation, */
     xtract_spectral_skewness,
     xtract_spectral_kurtosis,
     xtract_spectral_centroid,
@@ -69,6 +68,7 @@ int(*xtract[])(const double *, const int, const void *, double *) =
     xtract_f0,
     xtract_failsafe_f0,
     xtract_wavelet_f0,
+    xtract_midicent,
     /* xtract_delta.h */
     xtract_lnorm,
     xtract_flux,

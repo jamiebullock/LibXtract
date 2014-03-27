@@ -945,23 +945,27 @@ int xtract_f0(const double *data, const int N, const void *argv, double *result)
 int xtract_failsafe_f0(const double *data, const int N, const void *argv, double *result)
 {
 
-    double *spectrum = NULL, argf[2], *peaks = NULL, return_code, sr;
+    double *spectrum = NULL, argf[4], *peaks = NULL, return_code, sr;
 
     return_code = xtract_f0(data, N, argv, result);
 
-    if(return_code == XTRACT_NO_RESULT)
+    if(return_code == XTRACT_NO_RESULT || *result == 0)
     {
         sr = *(double *)argv;
         if(sr == 0)
             sr = 44100.0;
         spectrum = (double *)malloc(N * sizeof(double));
         peaks = (double *)malloc(N * sizeof(double));
-        argf[0] = sr;
+        argf[0] = sr / (double)N;
         argf[1] = XTRACT_MAGNITUDE_SPECTRUM;
+        argf[2] = 0.f; /* DC component not Nyquist */
+        argf[3] = 1.f; /* Normalize */
         xtract_spectrum(data, N, argf, spectrum);
-        argf[1] = 10.0;
+        argf[1] = 50.0; /* Peak threshold is 70% of maximum peak found */
         xtract_peak_spectrum(spectrum, N >> 1, argf, peaks);
         argf[0] = 0.0;
+        
+        /* Assume the peak with the lowest frequency is the fundamental */
         xtract_lowest_value(peaks+(N >> 1), N >> 1, argf, result);
 
         free(spectrum);
@@ -986,4 +990,22 @@ int xtract_wavelet_f0(const double *data, const int N, const void *argv, double 
     return XTRACT_SUCCESS;
 }
 
+int xtract_midicent(const double *data, const int N, const void *argv, double *result)
+{
+    double f0 = *(double *)argv;
+    double note = 0.0;
+      
+    note = 69 + log(f0 / 440.f) * 17.31234;
+    note *= 100;
+    note = round(note);
+
+    *result = note;
+    
+    if (note > 12700 || note < 0)
+    {
+        return XTRACT_ARGUMENT_ERROR;
+    }
+    
+    return XTRACT_SUCCESS;
+}
 

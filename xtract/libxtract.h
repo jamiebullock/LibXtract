@@ -71,7 +71,7 @@ extern "C" {
   * @{
   */
 
-#define XTRACT_FEATURES 60
+#define XTRACT_FEATURES 61
     
 /** \brief Enumeration of features, elements are used as indixes to an array of pointers to feature extracton functions */
 enum xtract_features_ {
@@ -117,6 +117,7 @@ enum xtract_features_ {
     XTRACT_F0,
     XTRACT_FAILSAFE_F0,
     XTRACT_WAVELET_F0,
+    XTRACT_MIDICENT,
     XTRACT_LNORM,
     XTRACT_FLUX,
     XTRACT_ATTACK_TIME,
@@ -173,7 +174,8 @@ enum xtract_return_codes_ {
     XTRACT_BAD_VECTOR_SIZE,
     XTRACT_DENORMAL_FOUND,
     XTRACT_NO_RESULT, /* This usually occurs when the correct calculation cannot take place because required data is missing or would result in a NaN or infinity/-infinity. Under these curcumstances 0.f is usually given by *result */
-    XTRACT_FEATURE_NOT_IMPLEMENTED
+    XTRACT_FEATURE_NOT_IMPLEMENTED,
+    XTRACT_ARGUMENT_ERROR
 };
 
 /** \brief Enumeration of spectrum types */
@@ -207,7 +209,8 @@ typedef enum unit_ {
     XTRACT_DBFS_HERTZ,
     XTRACT_PERCENT,
     XTRACT_BINS,
-    XTRACT_SONE
+    XTRACT_SONE,
+    XTRACT_MIDI_CENT
 } xtract_unit_t;
 
 /** \brief Boolean */
