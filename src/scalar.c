@@ -841,6 +841,8 @@ int xtract_hps(const double *data, const int N, const void *argv, double *result
         return XTRACT_NO_RESULT;
     }
 
+    peak_index = 0;
+
     tempProduct = peak = 0;
     for (i = 0; i < M; ++i)
     {
