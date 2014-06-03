@@ -457,6 +457,20 @@ int xtract_midicent(const double *data, const int N, const void *argv, double *r
  */
 int xtract_nonzero_count(const double *data, const int N, const void *argv, double *result);
 
+/**
+ *  \brief Return XTRACT_SUCCESS if the 'current' value is considered a peak
+ *
+ *  @param data   a pointer to an array containing time series as provided by *result from xtract_last_n() where the Nth value is considered the 'current' value
+ *  @param N      an integer representing the number of elements in the time series
+ *  @param argv   a pointer to a double representing the threshold, whereby the current value will be considered a peak if it is above the average of the last N values (*data) by the threshold
+ *  @param result a pointer to a copy of the current value if the current value is considered a peak
+ *
+ *
+ *  @return XTRACT_SUCCESS if a peak was found or XTRACT_NO_RESULT if not
+ */
+int xtract_peak(const double *data, const int N, const void *argv, double *result);
+
+    
 /** @} */
 
 #ifdef __cplusplus

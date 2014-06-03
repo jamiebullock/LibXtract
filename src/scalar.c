@@ -1002,3 +1002,36 @@ int xtract_midicent(const double *data, const int N, const void *argv, double *r
     return XTRACT_SUCCESS;
 }
 
+int xtract_peak_picker(const double *data, const int N, const void *argv, double *result)
+{
+    double threshold = *(double *)argv;
+    double current = data[N - 1];
+    double average = 0.0;
+    double maximum = -DBL_MAX;
+    
+    for (uint32_t n = 0; n < N; ++n)
+    {
+        average += data[n];
+        if (data[n] > maximum)
+        {
+            maximum = data[n];
+        }
+    }
+    
+    average /= (double)N;
+    
+    if (current != maximum)
+    {
+        return XTRACT_NO_RESULT;
+    }
+    
+    if (current < average + threshold)
+    {
+        return XTRACT_NO_RESULT;
+    }
+    
+    return XTRACT_SUCCESS;
+    
+}
+
+
