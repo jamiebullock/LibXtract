@@ -182,9 +182,9 @@ int xtract_irregularity_j(const double *data, const int N, const void *argv, dou
 
 /** \brief Calculate the Tristimulus of an input vector using a method described by Pollard and Jansson (1982)
  * 
- * \param *data: a pointer to the first element in an array of doubles representing the magnitude coefficients of the harmonic spectrum of an audio vector e.g. a pointer to the first half of the array pointed to by *result from xtract_harmonics(). The amplitudes of the peak spectrum (e.g. *result from xtract_peak_spectrum()) can be used if one wishes to consider all partials not just harmonics.
+ * \param *data: a pointer to the first element in an array of doubles representing a harmonic spectrum of size N/2, and a frequency spectrum of size N/2 (This is the output format of xtract_harmonic_spectrum())
  * \param N: the number of elements to be considered
- * \param *argv: a pointer to NULL
+ * \param *argv: a pointer to a double representing the fundamental frequency of the input vector.
  * \param *result: the tristimulus of N values from the array pointed to by *data
  *
  * These three functions provide the first, second and third order tristimulus formulae
@@ -324,9 +324,9 @@ int xtract_power(const double *data, const int N, const void *argv, double *resu
 /* Odd to even harmonic ratio */
 /** \brief Extract the Odd to even harmonic ratio of an input vector 
  * 
- * \param *data: a pointer to the first element in an array of doubles representing the amplitudes of the harmonic spectrum of an audio vector. It is sufficient to pass in a pointer to the first half of the array pointed to by *result from xtract_harmonic_spectrum().
- * \param N: the number of elements to be considered. If using the array pointed to by *result from xtract_harmonics, N should equal half the total array size i.e., just the amplitudes of the peaks.
- * \param *argv: a pointer to NULL
+ * \param *data: a pointer to the first element in an array of doubles representing a harmonic spectrum of size N/2, and a frequency spectrum of size N/2 (This is the output format of xtract_harmonic_spectrum())
+ * \param N: the number of elements to be considered. 
+ * \param *argv: a pointer to a double representing the fundamental frequency of the input vector.
  * \param *result: the even/odd harmonic ratio of N values from the array pointed to by *data
  */
 int xtract_odd_even_ratio(const double *data, const int N, const void *argv, double *result);
