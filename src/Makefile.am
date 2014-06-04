@@ -16,6 +16,8 @@ SOURCES = libxtract.c \
 	  window.c \
 	  fini.c \
 	  helper.c \
+	  stateful.c \
+	  c-ringbuf/ringbuf.c \
 	  dywapitchtrack/dywapitchtrack.c \
 	  $(OOURA)
 
