@@ -1002,7 +1002,7 @@ int xtract_midicent(const double *data, const int N, const void *argv, double *r
     return XTRACT_SUCCESS;
 }
 
-int xtract_peak_picker(const double *data, const int N, const void *argv, double *result)
+int xtract_peak(const double *data, const int N, const void *argv, double *result)
 {
     double threshold = *(double *)argv;
     double current = data[N - 1];
