@@ -64,11 +64,11 @@ javaclasses = \
 	xtract_vector_t.class \
 	xtract_window_types_.class 
 
-BUILT_SOURCES = $(srcdir)/xtract_wrap.c
+BUILT_SOURCES = xtract_wrap.c
 SWIG_SOURCES = jxtract.i
 
 lib_LTLIBRARIES = libjxtract.la
-libjxtract_la_SOURCES = $(srcdir)/xtract_wrap.c $(SWIG_SOURCES)
+libjxtract_la_SOURCES = $(BUILT_SOURCES) $(SWIG_SOURCES)
 libjxtract_la_CFLAGS = $(SWIG_PYTHON_CPPFLAGS) -I$(top_srcdir)/src
 libjxtract_la_LDFLAGS = -lxtract
 libjxtract_la_LIBADD = $(top_srcdir)/src/libxtract.la
