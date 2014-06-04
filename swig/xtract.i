@@ -3,6 +3,7 @@
 #ifndef SWIGJAVA
 %include carrays.i
 #endif
+%include stdint.i
 
 %{
 #include "xtract/xtract_scalar.h"
@@ -10,8 +11,10 @@
 #include "xtract/xtract_helper.h"
 #include "xtract/xtract_macros.h"
 #include "xtract/xtract_delta.h"
+#include "xtract/xtract_stateful.h"
 #include "xtract/libxtract.h"
 %}
+
 
 /* Helper functions */
 %inline %{
@@ -78,6 +81,12 @@
 
 %ignore xtract;
 
+/* For now ignore stateful functions */
+%ignore xtract_last_n;
+%ignore xtract_last_n_state_new;
+%ignore xtract_last_n_state_delete;
+
+
 %include "xtract/xtract_scalar.h"
 
 /* We have to put xtract_delta declarations inline because it contains a mixture of vector and scalar functions */
@@ -96,7 +105,9 @@
 
 %}
 
+
 %include "xtract/xtract_vector.h"
+%include "xtract/xtract_stateful.h"
 %include "xtract/xtract_helper.h"
 %include "xtract/xtract_macros.h"
 %include "xtract/libxtract.h"
