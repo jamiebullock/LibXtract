@@ -300,20 +300,21 @@ int xtract_irregularity_j(const double *data, const int N, const void *argv, dou
 
 int xtract_tristimulus_1(const double *data, const int N, const void *argv, double *result)
 {
+    int n = N >> 1, h = 0, i;
+    double den = 0.0, p1 = 0.0, fund = 0.0, temp = 0.0;
+    const double *freqs;
 
-    int n = N;
+    fund = *(double *)argv;
+    freqs = data + n;
 
-    double den, p1, temp;
-
-    den = p1 = temp = 0.0;
-
-    for(n = 0; n < N; n++)
+    for(i = 0; i < n; i++)
     {
-        if((temp = data[n]))
+        if((temp = data[i]))
         {
             den += temp;
-            if(!p1)
-                p1 = temp;
+            h = floor(freqs[i] / fund + 0.5);
+            if(h == 1)
+                p1 += temp;
         }
     }
 
@@ -332,23 +333,36 @@ int xtract_tristimulus_1(const double *data, const int N, const void *argv, doub
 int xtract_tristimulus_2(const double *data, const int N, const void *argv, double *result)
 {
 
-    int n = N;
+    int n = N >> 1, h = 0, i;
+    double den, p2, p3, p4, ps, fund, temp;
+    den = p2 = p3 = p4 = ps = fund = temp = 0.0;
+    const double *freqs;
 
-    double den, p2, p3, p4, ps, temp;
+    fund = *(double *)argv;
+    freqs = data + n;
 
-    den = p2 = p3 = p4 = ps = temp = 0.0;
-
-    for(n = 0; n < N; n++)
+    for(i = 0; i < n; i++)
     {
-        if((temp = data[n]))
+        if((temp = data[i]))
         {
             den += temp;
-            if(!p2)
-                p2 = temp;
-            else if(!p3)
-                p3 = temp;
-            else if(!p4)
-                p4 = temp;
+            h = floor(freqs[i] / fund + 0.5);
+            switch (h)
+            {
+                case 2:
+                    p2 += temp;
+                    break;
+
+                case 3:
+                    p3 += temp;
+                    break;
+
+                case 4:
+                    p4 += temp;
+
+                default:
+                    break;
+            }
         }
     }
 
@@ -369,21 +383,21 @@ int xtract_tristimulus_2(const double *data, const int N, const void *argv, doub
 
 int xtract_tristimulus_3(const double *data, const int N, const void *argv, double *result)
 {
+    int n = N >> 1, h = 0, i;
+    double den = 0.0, num = 0.0, fund = 0.0, temp = 0.0;
+    const double *freqs;
 
-    int n = N, count = 0;
+    fund = *(double *)argv;
+    freqs = data + n;
 
-    double den, num, temp;
-
-    den = num = temp = 0.0;
-
-    for(n = 0; n < N; n++)
+    for(i = 0; i < n; i++)
     {
-        if((temp = data[n]))
+        if((temp = data[i]))
         {
             den += temp;
-            if(count >= 5)
+            h = floor(freqs[i] / fund + 0.5);
+            if(h >= 5)
                 num += temp;
-            count++;
         }
     }
 
@@ -622,8 +636,7 @@ int xtract_rms_amplitude(const double *data, const int N, const void *argv, doub
 
 int xtract_spectral_inharmonicity(const double *data, const int N, const void *argv, double *result)
 {
-
-    int n = N >> 1;
+    int n = N >> 1, h = 0;
     double num = 0.0, den = 0.0, fund;
     const double *freqs, *amps;
 
@@ -635,7 +648,8 @@ int xtract_spectral_inharmonicity(const double *data, const int N, const void *a
     {
         if(amps[n])
         {
-            num += fabs(freqs[n] - n * fund) * XTRACT_SQ(amps[n]);
+            h = floor(freqs[n] / fund + 0.5);
+            num += fabs(freqs[n] - h * fund) * XTRACT_SQ(amps[n]);
             den += XTRACT_SQ(amps[n]);
         }
     }
@@ -655,16 +669,19 @@ int xtract_power(const double *data, const int N, const void *argv, double *resu
 
 int xtract_odd_even_ratio(const double *data, const int N, const void *argv, double *result)
 {
+    int n = N >> 1, h = 0;
+    double odd = 0.0, even = 0.0, fund, temp;
+    const double *freqs;
 
-    int M = (N >> 1), n;
+    fund = *(double *)argv;
+    freqs = data + n;
 
-    double odd = 0.0, even = 0.0,  temp;
-
-    for(n = 0; n < M; n++)
+    while(n--)
     {
         if((temp = data[n]))
         {
-            if(XTRACT_IS_ODD(n))
+            h = floor(freqs[n] / fund + 0.5);
+            if(XTRACT_IS_ODD(h))
             {
                 odd += temp;
             }
@@ -823,6 +840,8 @@ int xtract_hps(const double *data, const int N, const void *argv, double *result
         *result = 0;
         return XTRACT_NO_RESULT;
     }
+
+    peak_index = 0;
 
     tempProduct = peak = 0;
     for (i = 0; i < M; ++i)
