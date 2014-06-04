@@ -28,6 +28,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <limits.h>
+#include <stdint.h>
 
 #ifndef DBL_MAX
 #include <float.h> /* on Linux DBL_MAX is in float.h */
