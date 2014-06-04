@@ -15,9 +15,7 @@ xtract_@PD_SUFFIX@_SOURCES = xtract~.c
 
 pdincludedir = $(pddir)/src
 
-INCLUDES = -I$(top_srcdir)/src -I$(pdincludedir)
-
-AM_CFLAGS = @PD_CFLAGS@
+AM_CFLAGS = @PD_CFLAGS@ -I$(top_srcdir)/src -I$(pdincludedir)
 AM_LDFLAGS = @PD_LDFLAGS@ -lxtract -L$(top_builddir)/src/
 		
 ## Install the documentation.
