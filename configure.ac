@@ -14,7 +14,7 @@ PACKAGE=libxtract
 
 AC_INIT([libxtract], [libxtract_version], [libxtract-devel@lists.sourceforge.net])
 AC_DEFINE(LIBXTRACT_VERSION, libxtract_version, [LibXtract Version])
-AM_INIT_AUTOMAKE(1.6)
+AM_INIT_AUTOMAKE([subdir-objects])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIR([m4])
 AC_PROG_CC
@@ -126,8 +126,9 @@ AC_ARG_WITH(javac,
 
 dnl If --enable-swig, make with java bindings
 AC_ARG_WITH(java,
-    [ --with-java If --enable-swig - make with java bindings (default=no) ],
-    [with_java=true])
+    [ --with-java=no If --enable-swig - make with java bindings (default=no) ],
+    [with_java=true
+    ])
 
 AM_CONDITIONAL(BUILD_JAVA, test "x${with_java}" = 'xtrue')
 
