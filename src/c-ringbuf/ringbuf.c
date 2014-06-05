@@ -284,9 +284,12 @@ ringbuf_memcpy_from(void *dst, ringbuf_t src, size_t count, bool destroy)
     if (!destroy)
     {
         src->tail = tail;
+        assert(ringbuf_bytes_used(src) == bytes_used);
     }
-    
-    assert(count + ringbuf_bytes_used(src) == bytes_used);
+    else
+    {
+        assert(count + ringbuf_bytes_used(src) == bytes_used);
+    }
     return src->tail;
 }
 
