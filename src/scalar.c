@@ -1037,7 +1037,7 @@ int xtract_peak(const double *data, const int N, const void *argv, double *resul
     }
     
     average /= (double)N;
-    
+        
     if (current != maximum)
     {
         return XTRACT_NO_RESULT;
@@ -1047,6 +1047,8 @@ int xtract_peak(const double *data, const int N, const void *argv, double *resul
     {
         return XTRACT_NO_RESULT;
     }
+    
+    *result = current;
     
     return XTRACT_SUCCESS;
     
