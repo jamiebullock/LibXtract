@@ -24,7 +24,6 @@
 /* xtract_delta.c: defines functions that extract a feature as a single value from more than one input vector */
 
 #include <math.h>
-
 #include "../xtract/libxtract.h"
 
 int xtract_flux(const double *data, const int N, const void *argv , double *result)
@@ -39,17 +38,20 @@ int xtract_lnorm(const double *data, const int N, const void *argv , double *res
 {
 
     int n,
-        type;
+        type,
+        normalise,
+        k = 0;
 
     double order;
 
     order = *(double *)argv;
     type = *((double *)argv+1);
+    normalise = (int)*((double *)argv+2);
 
     order = order > 0 ? order : 2.0;
 
     *result = 0.0;
-
+    
     switch(type)
     {
 
@@ -57,17 +59,33 @@ int xtract_lnorm(const double *data, const int N, const void *argv , double *res
         for(n = 0; n < N; n++)
         {
             if(data[n] > 0)
+            {
                 *result += pow(data[n], order);
+                ++k;
+            }
         }
         break;
     default:
         for(n = 0; n < N; n++)
-            *result += pow(data[n], order);
+        {
+            *result += pow(fabs(data[n]), order);
+            ++k;
+        }
         break;
 
     }
 
     *result = pow(*result, 1.0 / order);
+    
+    if (k == 0)
+    {
+        return XTRACT_NO_RESULT;
+    }
+    
+    if (normalise == 1)
+    {
+        *result = log(1 + *result);
+    }
 
     return XTRACT_SUCCESS;
 
