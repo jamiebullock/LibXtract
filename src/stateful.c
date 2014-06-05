@@ -50,7 +50,7 @@ xtract_last_n_state *xtract_last_n_state_new(size_t N)
     
     last_n_state->ringbuf = ringbuf_new(N * sizeof(double));
     
-    if (last_n_state->ringbuf)
+    if (last_n_state->ringbuf == NULL)
     {
         perror("could not allocate memory for xtract_last_n_state->ringbuf");
     }
@@ -66,7 +66,6 @@ void xtract_last_n_state_delete(xtract_last_n_state *last_n_state)
 
 int xtract_last_n(const xtract_last_n_state *state, const double *data, const int N, const void *argv, double *result)
 {
-    double *current = (double *)argv;
     size_t N_bytes = N * sizeof(double);
     
     if (N_bytes != ringbuf_capacity(state->ringbuf))
@@ -75,7 +74,7 @@ int xtract_last_n(const xtract_last_n_state *state, const double *data, const in
         return XTRACT_BAD_STATE;
     }
     
-    ringbuf_memcpy_into(state->ringbuf, current, sizeof(double));
+    ringbuf_memcpy_into(state->ringbuf, data, sizeof(double));
     size_t used = ringbuf_bytes_used(state->ringbuf);
     ringbuf_memcpy_from(result, state->ringbuf, used, false);
     
