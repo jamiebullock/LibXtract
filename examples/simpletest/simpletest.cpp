@@ -31,6 +31,7 @@
 #include "xtract/libxtract.h"
 #include "xtract/xtract_stateful.h"
 #include "xtract/xtract_scalar.h"
+#include "xtract/xtract_helper.h"
 #include "WaveFile.h"
 
 #ifndef M_PI
@@ -50,7 +51,7 @@ waveform_type;
 
 #define BLOCKSIZE 512
 #define MAVG_COUNT 10
-#define HALF_BLOCKSIZE BLOCKSIZE >> 1
+#define HALF_BLOCKSIZE (BLOCKSIZE >> 1)
 #define SAMPLERATE 44100
 #define PERIOD 102
 #define MFCC_FREQ_BANDS 13
@@ -202,7 +203,6 @@ int main(void)
         xtract_free_fft();
 
         xtract[XTRACT_SPECTRAL_CENTROID](spectrum, BLOCKSIZE, NULL, &centroid);
-//        printf("\nSpectral Centroid: %f\t", centroid);
 
         argd[1] = 10.0; /* peak threshold as %  of maximum peak */
         xtract[XTRACT_PEAK_SPECTRUM](spectrum, BLOCKSIZE / 2, argd, peaks);
@@ -250,6 +250,13 @@ int main(void)
         xtract_features_from_subframes(subframes_windowed, BLOCKSIZE, XTRACT_SPECTRUM, argd, subframes_spectrum);
         xtract_free_fft();
         
+        argd[0] = 0.5; /* smoothing factor */
+        
+        /* smooth the amplitude components of the first and second spectra */
+        xtract_smoothed(subframes_spectrum, HALF_BLOCKSIZE >> 1, argd, subframes_spectrum);
+        xtract_smoothed(subframes_spectrum + HALF_BLOCKSIZE, HALF_BLOCKSIZE >> 1, argd, subframes_spectrum + HALF_BLOCKSIZE);
+        
+        /* difference between the two spectra */
         xtract_difference_vector(subframes_spectrum, BLOCKSIZE, NULL, difference);
         
         argd[0] = .25; /* norm order */

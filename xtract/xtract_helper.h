@@ -83,6 +83,20 @@ int xtract_is_denormal(double const d);
 /** \brief Test whether a number is a power of two */
 bool xtract_is_poweroftwo(unsigned int x);
 
+    
+/** \brief Smooth a vector
+ *
+ * \param *data a pointer to an array of doubles
+ * \param N the number of elements in the array pointed to by *data to be smoothed
+ * \param *argv a pointer to a double giving the smoothing gain
+ * \param *result a pointer to the first element an array containing the smoothed data
+ *
+ * \note if passing in a spectrum e.g. *result from xtract_spectrum(), then N for xtract_smoothed() should be N / 2 with respect to the N for xtract_spectrum() so only amplitude components are smoothed, not frequencies!
+ *
+ */
+    int xtract_smoothed(const double *data, const int N, const void *argv, double *result);
+    
+    
 /** @} */
 
 #ifdef __cplusplus

@@ -90,6 +90,7 @@ int(*xtract[])(const double *, const int, const void *, double *) =
     xtract_lpcc,
     xtract_subbands,
     /* xtract_helper.h */
-    xtract_windowed
+    xtract_windowed,
+    xtract_smoothed
 };
 

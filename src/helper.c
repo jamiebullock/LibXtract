@@ -75,6 +75,32 @@ int xtract_features_from_subframes(const double *data, const int N, const int fe
 
 }
 
+
+/*
+ * Implements y[n] = k * x[n] + (1-k) * y[n-1]
+ */
+int xtract_smoothed(const double *data, const int N, const void *argv, double *result)
+{
+    double gain = *(double *)argv;
+    double oneminusgain = 1.0 - gain;
+    int i;
+    
+    // reverse filtering first
+    for (i = N - 2; i >= 0; i--)
+    {
+        result[i] = gain * data[i] + oneminusgain * data[i+1];
+    }
+    
+    // then forward filtering
+    for (i = 1; i < N; i++)
+    {
+        result[i] = gain * result[i] + oneminusgain * result[i-1];
+    }
+
+    return XTRACT_SUCCESS;
+}
+
+
 //inline int xtract_is_denormal(double const d)
 int xtract_is_denormal(double const d)
 {
