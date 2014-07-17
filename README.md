@@ -111,6 +111,20 @@ To find out where your headers are:
 
     locate jni.h
 
+## Documentation
+
+LibXtract headers are documented using [doxygen](http://www.stack.nl/~dimitri/doxygen/) comments.
+
+If you have doxygen installed, the LibXtract build system should automatically detect this during `configure` and generate [LaTeX](http://www.latex-project.org) and HTML documentation in the `doc` directory when LibXtract is built with `make`.
+
+The generated HTML documentation can then be viewed in a web browser by opening the file `doc/html/index.html`.
+
+**Pre-generated documentation can be found on the [LibXtract website](http://jamiebullock.github.io/LibXtract/documentation)**
+
+
+
+
+
 ## License 
 
 Copyright (C) 2012 Jamie Bullock
