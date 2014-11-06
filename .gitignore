@@ -22,39 +22,6 @@ examples/simpletest/simpletest
 *.sdf
 *.tlog
 
-# http://www.gnu.org/software/automake
-
-Makefile.in
-Makefile
-
-# http://www.gnu.org/software/autoconf
-
-/autom4te.cache
-/aclocal.m4
-/compile
-/configure
-/depcomp
-/install-sh
-/missing
-
-*.lo
-*.la
-m4/*
-*.pc
-libtool
-ltmain.sh
-
-*.deps
-*.libs
-config.guess
-config.log
-config.status
-config.sub
-config.h
-config.h.in
-py-compile
-stamp-h1
-
 # sublime 
 
 *sublime*
