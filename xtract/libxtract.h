@@ -32,7 +32,7 @@
   *
   * All feature extraction functions follow the same prototype:
   *
-int xtract_function_name(const double *data, const int N, const void *argv, double *result){
+  * **int xtract_function_name(const double *data, const int N, const void *argv, double *result);**
   *
   * \param const double *data points to an array of doubles representing the input data
   * \param const int N represents the number of elementes from *data to be considered in the calculation
