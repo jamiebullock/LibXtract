@@ -1,28 +1,27 @@
 
+LIBRARY ?= static
 PREFIX ?= $(PWD)/dist
-HPATH = include/xtract
 
-static: LIBRARY = static
-shared: LIBRARY = shared
+HPATH = include/xtract
 
 export XTRACT_VERSION PREFIX LIBRARY
 
-.PHONY: examples clean static shared install doc
+.PHONY: examples clean install doc src
 
-all: static examples
+all: src examples
 
-static shared:
-	@$(MAKE) -C src
-
-examples:
+src:
 	@$(MAKE) -C $@
 
 doc:
 	@$(MAKE) -C $@
 
+examples:
+	@$(MAKE) -C $@
+
 install:
-	$(MAKE) -C src install
-	$(MAKE) -C examples install
+	@$(MAKE) -C src install
+	@$(MAKE) -C examples install
 	@mkdir -p $(PREFIX)/$(HPATH)
 	@cp $(HPATH)/* $(PREFIX)/$(HPATH)
 
