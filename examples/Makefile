@@ -1,8 +1,14 @@
 
-.PHONY: simpletest clean
+NAME = simpletest
 
-simpletest:
+.PHONY: $(NAME) clean
+
+$(NAME):
 	@$(MAKE) -C $@
 
+install:
+	@$(MAKE) -C $(NAME) install
+
+
 clean:
-	@$(MAKE) -C simpletest clean
+	@$(MAKE) -C $(NAME) clean
