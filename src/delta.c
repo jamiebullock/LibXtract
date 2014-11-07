@@ -24,7 +24,7 @@
 /* xtract_delta.c: defines functions that extract a feature as a single value from more than one input vector */
 
 #include <math.h>
-#include "../xtract/libxtract.h"
+#include "xtract/libxtract.h"
 
 int xtract_flux(const double *data, const int N, const void *argv , double *result)
 {

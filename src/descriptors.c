@@ -21,7 +21,7 @@
  *
  */
 
-#include "../xtract/libxtract.h"
+#include "xtract/libxtract.h"
 #include "xtract_macros_private.h"
 #include <stdlib.h>
 #include <string.h>

@@ -25,7 +25,7 @@
 
 #include <stdio.h>
 
-#include "../xtract/libxtract.h"
+#include "xtract/libxtract.h"
 
 #ifdef WORDS_BIGENDIAN
 #define INDEX 0

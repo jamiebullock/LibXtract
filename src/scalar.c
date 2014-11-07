@@ -36,8 +36,8 @@
 
 #include "dywapitchtrack/dywapitchtrack.h"
 
-#include "../xtract/libxtract.h"
-#include "../xtract/xtract_helper.h"
+#include "xtract/libxtract.h"
+#include "xtract/xtract_helper.h"
 #include "xtract_macros_private.h"
 #include "xtract_globals_private.h"
 

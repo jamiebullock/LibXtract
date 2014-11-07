@@ -21,7 +21,7 @@
  *
  */
 
-#include "../xtract/libxtract.h"
+#include "xtract/libxtract.h"
 #define XTRACT_H
 
 int(*xtract[])(const double *, const int, const void *, double *) =
