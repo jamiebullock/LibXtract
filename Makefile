@@ -1,25 +1,32 @@
 
-PREFIX = dist
+PREFIX ?= $(PWD)/dist
+HPATH = include/xtract
 
-static: LIBTYPE = static
-shared: LIBTYPE = shared
+static: LIBRARY = static
+shared: LIBRARY = shared
 
-.PHONY: examples clean static shared install
+export XTRACT_VERSION PREFIX LIBRARY
+
+.PHONY: examples clean static shared install doc
 
 all: static examples
 
 static shared:
-	@$(MAKE) -C src LIBRARY=$(LIBTYPE)
+	@$(MAKE) -C src
 
 examples:
-	@$(MAKE) -C examples
+	@$(MAKE) -C $@
+
+doc:
+	@$(MAKE) -C $@
 
 install:
-	$(MAKE) -C src install PREFIX=$(PWD)/$(PREFIX)
-	$(MAKE) -C examples install PREFIX=$(PWD)/$(PREFIX)
-	@mkdir -p $(PREFIX)/include/xtract
-	@cp include/xtract/* $(PREFIX)/include/xtract
+	$(MAKE) -C src install
+	$(MAKE) -C examples install
+	@mkdir -p $(PREFIX)/$(HPATH)
+	@cp $(HPATH)/* $(PREFIX)/$(HPATH)
 
 clean:
 	@$(MAKE) -C src clean
 	@$(MAKE) -C examples clean
+	@$(RM) -r dist
