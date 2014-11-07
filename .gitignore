@@ -8,15 +8,7 @@
 # Shared objects (inc. Windows DLLs)
 *.dll
 *.so
-*.so.*
 *.dylib
-
-# Executables
-*.exe
-*.out
-*.app
-*.pd_*
-examples/simpletest/simpletest
 
 # VS files
 *.sdf
@@ -32,6 +24,10 @@ examples/simpletest/simpletest
 # Doxygen
 doc/latex
 doc/html
-doc/doxygen-build.stamp
-doc/documentation.doxygen
 
+# Build files
+.build
+dist
+
+# Project-specific files
+examples/simpletest/simpletest
