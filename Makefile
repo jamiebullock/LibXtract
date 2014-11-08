@@ -6,7 +6,7 @@ HPATH = include/xtract
 
 export XTRACT_VERSION PREFIX LIBRARY
 
-.PHONY: examples clean install doc src
+.PHONY: examples clean install doc src swig
 
 all: src examples
 
@@ -19,6 +19,9 @@ doc:
 examples:
 	@$(MAKE) -C $@
 
+swig: src
+	@$(MAKE) -C $@
+
 install:
 	@$(MAKE) -C src install
 	@$(MAKE) -C examples install
@@ -28,4 +31,5 @@ install:
 clean:
 	@$(MAKE) -C src clean
 	@$(MAKE) -C examples clean
+	@$(MAKE) -C swig clean
 	@$(RM) -r dist
