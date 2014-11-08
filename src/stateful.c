@@ -23,8 +23,8 @@
 
 /* stateful.c: declares functions that extract features that require stateful data to be retained between frames */
 
-#include "../xtract/xtract_stateful.h"
-#include "../xtract/libxtract.h"
+#include "xtract/xtract_stateful.h"
+#include "xtract/libxtract.h"
 
 #include "c-ringbuf/ringbuf.h"
 

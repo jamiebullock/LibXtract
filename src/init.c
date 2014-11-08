@@ -33,7 +33,7 @@
 
 #include "fft.h"
 
-#include "../xtract/libxtract.h"
+#include "xtract/libxtract.h"
 #include "xtract_window_private.h"
 #define DEFINE_GLOBALS
 #include "xtract_globals_private.h"

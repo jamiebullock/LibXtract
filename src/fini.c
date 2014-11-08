@@ -23,7 +23,7 @@
 
 /* fini.c: Contains library destructor routine */
 
-#include "../xtract/libxtract.h"
+#include "xtract/libxtract.h"
 
 #ifdef __GNUC__
 __attribute__((destructor)) void fini()
