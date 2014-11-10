@@ -22,6 +22,11 @@ examples:
 swig: src
 	@$(MAKE) -C $@
 
+check: src
+	@$(MAKE) -C tests check
+
+test: check
+
 install:
 	@$(MAKE) -C src install
 	@$(MAKE) -C examples install
