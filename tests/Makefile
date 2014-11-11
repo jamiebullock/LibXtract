@@ -82,7 +82,7 @@ $(OUT): $(OBJ)
 ifeq "$(LIBRARY)" "static"
 	@$(AR) rcs $@ $^
 else
-	@$(COMPILER) $(LDFLAGS) $^ -o $@
+	@$(COMPILER) $^ $(LDFLAGS) -o $@
 endif
 
 debug: FLAGS = $(DEBUG_FLAGS)
