@@ -1,6 +1,7 @@
 
 
 #include "xttest_util.hpp"
+#include "xttest_tables.hpp"
 
 #include <random>
 
@@ -14,7 +15,7 @@ void xttest_gen_sine(double *table, uint32_t tablesize, double samplerate, doubl
 {
     int samples_per_period = samplerate / frequency;
 
-    for (int i = 0; i < tablesize; ++i)
+    for (uint32_t i = 0; i < tablesize; ++i)
     {
         int phase = i % samples_per_period;
         table[i] = sin((phase / (double)samples_per_period) * XTTEST_2PI) * amplitude;
@@ -23,15 +24,32 @@ void xttest_gen_sine(double *table, uint32_t tablesize, double samplerate, doubl
 
 void xttest_gen_noise(double *table, uint32_t tablesize, double amplitude)
 {
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_real_distribution<double> dist(-amplitude, amplitude);
-    
-    for (int i = 0; i < tablesize; ++i)
+    for (uint32_t i = 0; i < tablesize; ++i)
     {
-        table[i] = dist(gen);
-        printf("%f\n", table[i]);
+        table[i] = xttest_noise1024[i] * amplitude;
     }
-
 }
+
+
+uint16_t xttest_ftom(double frequency)
+{
+    return (int)roundf(6900.0 + 1200.0 * log2(frequency / 440.0));
+}
+
+void xttest_add(double *table1, double *table2, uint32_t tablesize)
+{
+    for (uint32_t i = 0; i < tablesize; ++i)
+    {
+        table1[i] += table2[i];
+    }
+}
+
+void xttest_mul(double *table, uint32_t tablesize, double constant)
+{
+    for (uint32_t i = 0; i < tablesize; ++i)
+    {
+        table[i] *= constant;
+    }
+}
+
 
