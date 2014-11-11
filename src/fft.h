@@ -24,12 +24,7 @@
 #ifndef FFT_H
 #define FFT_H
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
 #ifdef _MSC_VER
-	#define USE_OOURA
 	#ifndef __cplusplus
 		typedef int bool;
 		#define false 0

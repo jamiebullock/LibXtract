@@ -23,10 +23,6 @@
 
 /* init.c: defines initialisation and free functions. Also contains library constructor routine. */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -37,8 +33,6 @@
 #include "xtract_window_private.h"
 #define DEFINE_GLOBALS
 #include "xtract_globals_private.h"
-
-
 
 #ifdef USE_OOURA
 void xtract_init_ooura_data(xtract_ooura_data *ooura_data, unsigned int N)
