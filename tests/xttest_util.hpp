@@ -5,6 +5,9 @@
 // Fill table with sine wave at given frequency and amplitude
 void xttest_gen_sine(double *table, uint32_t tablesize, double samplerate, double frequency, double amplitude);
 
+// Fill table with sawtooth wave at given frequency and amplitude
+void xttest_gen_sawtooth(double *table, uint32_t tablesize, double samplerate, double frequency, double amplitude);
+
 // Fill table with noise at given frequency and amplitude
 // N.B. The implementation actually provides "fake" noise from a table for reproducible testing
 void xttest_gen_noise(double *table, uint32_t tablesize, double amplitude);

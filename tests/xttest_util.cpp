@@ -22,6 +22,17 @@ void xttest_gen_sine(double *table, uint32_t tablesize, double samplerate, doubl
     }
 }
 
+void xttest_gen_sawtooth(double *table, uint32_t tablesize, double samplerate, double frequency, double amplitude)
+{
+    int samples_per_period = samplerate / frequency;
+
+    for (uint32_t i = 0; i < tablesize; ++i)
+    {
+        int phase = i % samples_per_period;
+        table[i] = ((phase / (double)samples_per_period) * 2.0 - 1.0) * amplitude;
+    }
+}
+
 void xttest_gen_noise(double *table, uint32_t tablesize, double amplitude)
 {
     for (uint32_t i = 0; i < tablesize; ++i)
@@ -29,7 +40,6 @@ void xttest_gen_noise(double *table, uint32_t tablesize, double amplitude)
         table[i] = xttest_noise1024[i] * amplitude;
     }
 }
-
 
 uint16_t xttest_ftom(double frequency)
 {
