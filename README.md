@@ -36,7 +36,6 @@ The generated HTML documentation can then be viewed in a web browser by opening 
 **Pre-generated documentation can be found on the [LibXtract website](http://jamiebullock.github.io/LibXtract/documentation)**
 
 
-
 ## License 
 
 Copyright (C) 2012 Jamie Bullock

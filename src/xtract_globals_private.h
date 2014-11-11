@@ -29,10 +29,10 @@
 #include "fft.h"
 #include "dywapitchtrack/dywapitchtrack.h"
 
-#ifdef DEFINE_GLOBALS
-#define GLOBAL
+#ifdef __cplusplus
+#define GLOBAL extern "C"
 #else
-#define GLOBAL extern
+#define GLOBAL
 #endif
 
 #ifdef USE_OOURA
@@ -48,6 +48,7 @@ GLOBAL xtract_vdsp_data vdsp_data_autocorrelation_fft;
 #endif
 
 GLOBAL dywapitchtracker wavelet_f0_state;
+
 
 #endif /* Header guard */
 
