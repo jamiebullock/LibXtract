@@ -31,3 +31,4 @@ dist
 
 # Project-specific files
 examples/simpletest/simpletest
+tests/xttest
