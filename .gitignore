@@ -18,6 +18,9 @@
 
 *sublime*
 
+# vim 
+*.swp
+
 # Python byte code
 *.pyc
 
