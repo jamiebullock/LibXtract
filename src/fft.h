@@ -37,6 +37,9 @@
 #ifdef USE_OOURA
 #include "ooura/fftsg.h"
 #else
+        #ifndef __APPLE__
+                #error "The target platform is not an Apple one and USE_OOURA was not defined"
+        #endif
 #include <Accelerate/Accelerate.h>
 #endif
 
