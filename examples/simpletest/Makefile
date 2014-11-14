@@ -82,7 +82,7 @@ $(OUT): $(OBJ)
 ifeq "$(LIBRARY)" "static"
 	@$(AR) rcs $@ $^
 else
-	@$(COMPILER) $(LDFLAGS) $^ -o $@
+	@$(COMPILER) $^ $(LDFLAGS) -o $@
 endif
 
 debug: FLAGS = $(DEBUG_FLAGS)
@@ -91,6 +91,11 @@ debug: $(OUT)
 $(OUT_DIR)/%.o: %$(SUFFIX)
 	@mkdir -p $(dir $@)
 	@$(COMPILER) $(CXXFLAGS) $(FLAGS) -MMD -MP -fPIC -c $< -o $@
+
+check: $(OUT)
+	@./$(OUT)
+
+test: check
 
 install: $(OUT)
 	@install -d $(INSTALL_DIR)
