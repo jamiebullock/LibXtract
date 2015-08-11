@@ -962,7 +962,7 @@ int xtract_f0(const double *data, const int N, const void *argv, double *result)
 int xtract_failsafe_f0(const double *data, const int N, const void *argv, double *result)
 {
 
-    double *spectrum = NULL, argf[2], *peaks = NULL, return_code, sr;
+    double *spectrum = NULL, argf[4], *peaks = NULL, return_code, sr;
 
     return_code = xtract_f0(data, N, argv, result);
 
@@ -972,9 +972,12 @@ int xtract_failsafe_f0(const double *data, const int N, const void *argv, double
         if(sr == 0)
             sr = 44100.0;
         spectrum = (double *)malloc(N * sizeof(double));
+        memset(spectrum, 0, N * sizeof(double));
         peaks = (double *)malloc(N * sizeof(double));
-        argf[0] = sr;
+        argf[0] = sr / N;
         argf[1] = XTRACT_MAGNITUDE_SPECTRUM;
+        argf[2] = 0.0f;
+        argf[3] = 0.0f;
         xtract_spectrum(data, N, argf, spectrum);
         argf[1] = 10.0;
         xtract_peak_spectrum(spectrum, N >> 1, argf, peaks);
