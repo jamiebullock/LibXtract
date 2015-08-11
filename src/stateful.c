@@ -81,7 +81,7 @@ int xtract_last_n(const xtract_last_n_state *state, const double *data, const in
     if (used < N_bytes)
     {
         /* zero pad */
-        for (size_t n = used / sizeof(double); n < N; ++n)
+        for (size_t n = used / sizeof(double); n < (size_t)N; ++n)
         {
             result[n] = 0.0;
         }

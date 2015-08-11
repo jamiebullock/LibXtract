@@ -1029,7 +1029,7 @@ int xtract_peak(const double *data, const int N, const void *argv, double *resul
     double average = 0.0;
     double maximum = -DBL_MAX;
     
-    for (uint32_t n = 0; n < N; ++n)
+    for (uint32_t n = 0; n < (uint32_t)N; ++n)
     {
         average += data[n];
         if (data[n] > maximum)
