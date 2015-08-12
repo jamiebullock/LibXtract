@@ -101,6 +101,12 @@ int xtract_skewness(const double *data, const int N, const void *argv,  double *
 
     double temp = 0.0;
 
+    if (((double *)argv)[1] == 0)
+    {
+      *result = 0.0;
+      return XTRACT_NO_RESULT;
+    }
+
     *result = 0.0;
 
     while(n--)
@@ -188,6 +194,11 @@ int xtract_spectral_variance(const double *data, const int N, const void *argv, 
         *result += pow(freqs[m] - ((double *)argv)[0], 2) * amps[m];
     }
 
+    if (A == 0.0)
+    {
+        *result = 0.0;
+        return XTRACT_NO_RESULT;
+    }
     *result = *result / A;
 
     return XTRACT_SUCCESS;
@@ -230,6 +241,12 @@ int xtract_spectral_skewness(const double *data, const int N, const void *argv, 
     int m;
     const double *freqs, *amps;
 
+    if (((double *)argv)[1] == 0.0)
+    {
+        *result = 0.0;
+        return XTRACT_NO_RESULT;
+    }
+
     m = N >> 1;
 
     amps = data;
@@ -250,6 +267,12 @@ int xtract_spectral_kurtosis(const double *data, const int N, const void *argv, 
 
     int m;
     const double *freqs, *amps;
+
+    if (((double *)argv)[1] == 0.0)
+    {
+        *result = 0.0;
+        return XTRACT_NO_RESULT;
+    }
 
     m = N >> 1;
 
@@ -613,6 +636,12 @@ int xtract_noisiness(const double *data, const int N, const void *argv, double *
     h = *(double *)argv;
     p = *((double *)argv+1);
 
+    if (p == 0)
+    {
+      *result = 0;
+      return XTRACT_NO_RESULT;
+    }
+
     i = p - h;
 
     *result = i / p;
@@ -645,6 +674,12 @@ int xtract_spectral_inharmonicity(const double *data, const int N, const void *a
     amps = data;
     freqs = data + n;
 
+    if (fund == 0)
+    {
+      *result = 0;
+      return XTRACT_NO_RESULT;
+    }
+
     while(n--)
     {
         if(amps[n])
@@ -653,6 +688,12 @@ int xtract_spectral_inharmonicity(const double *data, const int N, const void *a
             num += fabs(freqs[n] - h * fund) * XTRACT_SQ(amps[n]);
             den += XTRACT_SQ(amps[n]);
         }
+    }
+
+    if (den == 0)
+    {
+      *result = 0;
+      return XTRACT_NO_RESULT;
     }
 
     *result = (2 * num) / (fund * den);
@@ -759,7 +800,15 @@ int xtract_spectral_slope(const double *data, const int N, const void *argv, dou
         FXTRACT_SQ += f * f;
     }
 
-    *result = (1.0 / A) * (M * FA - F * A) / (M * FXTRACT_SQ - F * F);
+    double temp = (double)M * FXTRACT_SQ - F * F;
+
+    if (A == 0 || temp == 0)
+    {
+        *result = 0.0;
+        return XTRACT_NO_RESULT;
+    }
+
+    *result = (1.0 / A) * ((double)M * FA - F * A) / temp;
 
     return XTRACT_SUCCESS;
 
