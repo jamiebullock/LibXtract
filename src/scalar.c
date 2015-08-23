@@ -336,7 +336,7 @@ int xtract_tristimulus_1(const double *data, const int N, const void *argv, doub
         if((temp = data[i]))
         {
             den += temp;
-            h = floor(freqs[i] / fund + 0.5);
+            h = (int)floor(freqs[i] / fund + 0.5);
             if(h == 1)
                 p1 += temp;
         }
@@ -370,7 +370,7 @@ int xtract_tristimulus_2(const double *data, const int N, const void *argv, doub
         if((temp = data[i]))
         {
             den += temp;
-            h = floor(freqs[i] / fund + 0.5);
+            h = (int)floor(freqs[i] / fund + 0.5);
             switch (h)
             {
                 case 2:
@@ -419,7 +419,7 @@ int xtract_tristimulus_3(const double *data, const int N, const void *argv, doub
         if((temp = data[i]))
         {
             den += temp;
-            h = floor(freqs[i] / fund + 0.5);
+            h = (int)floor(freqs[i] / fund + 0.5);
             if(h >= 5)
                 num += temp;
         }
@@ -684,7 +684,7 @@ int xtract_spectral_inharmonicity(const double *data, const int N, const void *a
     {
         if(amps[n])
         {
-            h = floor(freqs[n] / fund + 0.5);
+            h = (int)floor(freqs[n] / fund + 0.5);
             num += fabs(freqs[n] - h * fund) * XTRACT_SQ(amps[n]);
             den += XTRACT_SQ(amps[n]);
         }
@@ -722,7 +722,7 @@ int xtract_odd_even_ratio(const double *data, const int N, const void *argv, dou
     {
         if((temp = data[n]))
         {
-            h = floor(freqs[n] / fund + 0.5);
+            h = (int)floor(freqs[n] / fund + 0.5);
             if(XTRACT_IS_ODD(h))
             {
                 odd += temp;
@@ -882,7 +882,7 @@ int xtract_hps(const double *data, const int N, const void *argv, double *result
 
     n = N / 2;
 
-    M = ceil(n / 3.0);
+    M = (int)ceil(n / 3.0);
 
     if (M <= 1)
     {
