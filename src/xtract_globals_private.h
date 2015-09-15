@@ -32,22 +32,22 @@
 #ifdef __cplusplus
 #define GLOBAL extern "C"
 #else
-#define GLOBAL
+#define GLOBAL extern
 #endif
 
 #ifdef USE_OOURA
-GLOBAL struct xtract_ooura_data_ ooura_data_dct;
-GLOBAL struct xtract_ooura_data_ ooura_data_mfcc;
-GLOBAL struct xtract_ooura_data_ ooura_data_spectrum;
-GLOBAL struct xtract_ooura_data_ ooura_data_autocorrelation_fft;
+GLOBAL __thread struct xtract_ooura_data_ ooura_data_dct;
+GLOBAL __thread struct xtract_ooura_data_ ooura_data_mfcc;
+GLOBAL __thread struct xtract_ooura_data_ ooura_data_spectrum;
+GLOBAL __thread struct xtract_ooura_data_ ooura_data_autocorrelation_fft;
 #else
-GLOBAL xtract_vdsp_data vdsp_data_dct;
-GLOBAL xtract_vdsp_data vdsp_data_mfcc;
-GLOBAL xtract_vdsp_data vdsp_data_spectrum;
-GLOBAL xtract_vdsp_data vdsp_data_autocorrelation_fft;
+GLOBAL __thread xtract_vdsp_data vdsp_data_dct;
+GLOBAL __thread xtract_vdsp_data vdsp_data_mfcc;
+GLOBAL __thread xtract_vdsp_data vdsp_data_spectrum;
+GLOBAL __thread xtract_vdsp_data vdsp_data_autocorrelation_fft;
 #endif
 
-GLOBAL dywapitchtracker wavelet_f0_state;
+GLOBAL __thread dywapitchtracker wavelet_f0_state;
 
 
 #endif /* Header guard */

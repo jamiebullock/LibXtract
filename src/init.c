@@ -35,6 +35,20 @@
 #include "xtract_globals_private.h"
 
 #ifdef USE_OOURA
+__thread struct xtract_ooura_data_ ooura_data_dct;
+__thread struct xtract_ooura_data_ ooura_data_mfcc;
+__thread struct xtract_ooura_data_ ooura_data_spectrum;
+__thread struct xtract_ooura_data_ ooura_data_autocorrelation_fft;
+#else
+__thread xtract_vdsp_data vdsp_data_dct;
+__thread xtract_vdsp_data vdsp_data_mfcc;
+__thread xtract_vdsp_data vdsp_data_spectrum;
+__thread xtract_vdsp_data vdsp_data_autocorrelation_fft;
+#endif
+
+__thread dywapitchtracker wavelet_f0_state;
+
+#ifdef USE_OOURA
 void xtract_init_ooura_data(xtract_ooura_data *ooura_data, unsigned int N)
 {
     ooura_data->ooura_ip  = (int *)calloc(2 + sqrt((double)N), sizeof(int));
