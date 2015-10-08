@@ -284,7 +284,7 @@ double _dywapitch_computeWaveletPitch(const double * samples, int startsample, i
 				int nbDist = distances[bestDistance+j];
 				if (nbDist > 0) {
 					nbDists += nbDist;
-					distAvg += (bestDistance+j)*nbDist;
+					distAvg += (double)(bestDistance+j)*nbDist;
 				}
 			}
 		}
