@@ -228,6 +228,35 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
         }
         break;
 
+    case XTRACT_SPECTRUM_COEFFICIENTS:
+        for(n = 0, m = 0; m < M; ++n, ++m)
+        {
+            if(n==0 && !withDC) /* discard DC and keep Nyquist */
+            {
+                ++n;
+            }
+#ifdef USE_OOURA
+            if(n==1 && withDC) /* discard Nyquist */
+            {
+                ++n;
+            }
+            if(n == M)
+            {
+                break;
+            }
+
+            real = fft[n*2];
+            imag = fft[n*2+1];
+#else
+            real = fft->realp[n];
+            imag = fft->realp[n];
+#endif
+            result[m*2] = real;
+            result[m*2+1] = imag;
+            XTRACT_GET_MAX;
+            }
+        break;
+
     default:
         /* MAGNITUDE_SPECTRUM */
         for(n = 0, m = 0; m < M; ++n, ++m)
@@ -367,6 +396,76 @@ int xtract_mfcc(const double *data, const int N, const void *argv, double *resul
 
     xtract_dct(result, f->n_filters, NULL, result);
 
+    return XTRACT_SUCCESS;
+}
+
+int xtract_mmbses(const double *data, const int N, const void *argv, double *result)
+{
+    xtract_mel_filter *f;
+    int n, filter;
+    double* real = malloc(sizeof(double)*N);
+    double* imag = malloc(sizeof(double)*N);
+
+    f = (xtract_mel_filter *)argv;
+
+    for (filter = 0; filter < f->n_filters; filter++)
+    {
+        int count = 0;
+        double realMean = 0, realVariance = 0;
+        double imagMean = 0, imagVariance = 0;
+        double covariance = 0;
+        double energy = 0;
+
+        result[filter] = 0.0;
+        for(n = 0; n < N; n++)
+        {
+          double tempReal = data[n*2]*f->filters[filter][n];
+          double tempImag = data[n*2+1]*f->filters[filter][n];
+
+            if (f->filters[filter][n] != 0)
+            {
+                real[count] = tempReal;
+                imag[count] = tempImag;
+                count++;
+            }
+            energy += sqrt(XTRACT_SQ(tempReal) + XTRACT_SQ(tempImag)) / (double)N;
+        }
+        if (count == 0)
+          continue;
+        if (count == 1)
+        {
+          energy = (energy < XTRACT_LOG_LIMIT ? XTRACT_LOG_LIMIT : energy);
+          result[filter] = log((double)2*M_PI*energy);
+          continue;
+        }
+        // Calculate the arithmetic means of real and imaginary parts
+        for(n = 0; n < count; n++)
+        {
+            realMean += real[n] / count;
+            imagMean += imag[n] / count;
+        }
+        // Calculate the variances of real and imaginary parts
+        for(n = 0; n < count; n++)
+        {
+            realVariance += XTRACT_SQ(real[n]-realMean) / count;
+            imagVariance += XTRACT_SQ(imag[n]-imagMean) / count;
+        }
+        // Calculate the covariance between real and imaginary parts
+        for(n = 0; n < count; n++)
+        {
+            covariance += (real[n]-realMean)*(imag[n]-imagMean);
+        }
+        covariance /= (count-1);
+        // Calculate the final Mel based Multi-Band Spectral Entropy Signature coefficients
+        double temp = realVariance*imagVariance-XTRACT_SQ(covariance);
+
+        temp = (temp < XTRACT_LOG_LIMIT ? XTRACT_LOG_LIMIT : temp);
+        energy = (double)2*M_PI*energy;
+        energy = (energy < XTRACT_LOG_LIMIT ? XTRACT_LOG_LIMIT : energy);
+        result[filter] = log(energy)+log(temp) / 2;
+    }
+    free(real);
+    free(imag);
     return XTRACT_SUCCESS;
 }
 

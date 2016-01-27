@@ -72,6 +72,18 @@ int xtract_autocorrelation_fft(const double *data, const int N, const void *argv
  */
 int xtract_mfcc(const double *data, const int N, const void *argv, double *result);
 
+/** \brief Extract Mel based Multi-Band Spectral Entropy Signature coefficients
+ *
+ * \param *data: a pointer to an array of spectral coefficients, the result from xtract_spectrum() by XTRACT_SPECTRUM_COEFFICIENTS
+ * \param N: the number of array elements to be considered
+ * \param *argv: a pointer to a data structure of type xtract_mel_filter, containing n_filters coefficient tables to make up a mel-spaced filterbank
+ * \param *result: a pointer to an array containing the resultant MEL-MBSES
+ *
+ * The data structure pointed to by *argv must be obtained by first calling xtract_init_mfcc.
+ * The method is described by: Rincon et al: A Context-Aware Baby Monitor for the Automatic Selective Archiving of the Language of Infants (2013)
+ */
+int xtract_mmbses(const double *data, const int N, const void *argv, double *result);
+
 /** \brief Extract the Discrete Cosine transform of a time domain signal
  * \param *data: a pointer to the first element in an array of doubles representing an audio vector
  * \param N: the number of array elements to be considered
