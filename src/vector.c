@@ -434,8 +434,13 @@ int xtract_mmbses(const double *data, const int N, const void *argv, double *res
           continue;
         if (count == 1)
         {
-          energy = (energy < XTRACT_LOG_LIMIT ? XTRACT_LOG_LIMIT : energy);
-          result[filter] = log((double)2*M_PI*energy);
+          energy = (double)2*M_PI*energy;
+
+          if (energy < XTRACT_LOG_LIMIT)
+              result[filter] = XTRACT_LOG_LIMIT_DB;
+          else
+              result[filter] = log(energy);
+
           continue;
         }
         // Calculate the arithmetic means of real and imaginary parts
@@ -459,13 +464,47 @@ int xtract_mmbses(const double *data, const int N, const void *argv, double *res
         // Calculate the final Mel based Multi-Band Spectral Entropy Signature coefficients
         double temp = realVariance*imagVariance-XTRACT_SQ(covariance);
 
-        temp = (temp < XTRACT_LOG_LIMIT ? XTRACT_LOG_LIMIT : temp);
+        if (temp < XTRACT_LOG_LIMIT)
+            temp = XTRACT_LOG_LIMIT_DB;
+        else
+            temp = log(temp);
+
         energy = (double)2*M_PI*energy;
-        energy = (energy < XTRACT_LOG_LIMIT ? XTRACT_LOG_LIMIT : energy);
-        result[filter] = log(energy)+log(temp) / 2;
+        if (energy < XTRACT_LOG_LIMIT)
+            energy = XTRACT_LOG_LIMIT_DB;
+        else
+            energy = log(energy);
+
+        result[filter] = energy+temp / 2;
     }
     free(real);
     free(imag);
+    return XTRACT_SUCCESS;
+}
+
+int xtract_spectral_subband_centroids(const double *data, const int N, const void *argv, double *result)
+{
+    xtract_mel_filter *f = (xtract_mel_filter *)argv;
+    int n, filter;
+    const double *freqs = data;
+    const double *amps = data+N;
+
+    for (filter = 0; filter < f->n_filters; filter++)
+    {
+        double FA = 0.0, A = 0.0;
+
+        for(n = 0; n < N; n++)
+        {
+            double Multiplier = amps[n]*f->filters[filter][n];
+
+            FA += freqs[n]*f->filters[filter][n]*Multiplier;
+            A += Multiplier;
+        }
+        if (FA == 0.0 || A == 0.0)
+            result[filter] = 0;
+        else
+            result[filter] = FA / A;
+    }
     return XTRACT_SUCCESS;
 }
 
