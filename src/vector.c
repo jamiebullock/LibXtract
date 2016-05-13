@@ -134,7 +134,7 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
 			}
 #else
             real = fft->realp[n];
-            imag = fft->realp[n];
+            imag = fft->imagp[n];
 #endif
 
             temp = XTRACT_SQ(real) + XTRACT_SQ(imag);
@@ -192,7 +192,7 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
 			}
 #else
             real = fft->realp[n];
-            imag = fft->realp[n];
+            imag = fft->imagp[n];
 #endif
 
             result[m] = (XTRACT_SQ(real) + XTRACT_SQ(imag)) / NxN;
@@ -236,7 +236,7 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
 			}
 #else
             real = fft->realp[n];
-            imag = fft->realp[n];
+            imag = fft->imagp[n];
 #endif
 
             if ((temp = XTRACT_SQ(real) + XTRACT_SQ(imag)) >
@@ -282,7 +282,7 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
 			}
 #else
             real = fft->realp[n];
-            imag = fft->realp[n];
+            imag = fft->imagp[n];
 #endif
             result[m*2] = real;
             result[m*2+1] = imag;
@@ -325,8 +325,19 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
 				imag = fft[n * 2 + 1];
 			}
 #else
-            real = fft->realp[n];
-            imag = fft->realp[n];
+            if (n == M && !withDC)
+            {
+                real = fft->imagp[0];
+                imag = 0.0;
+            }
+            else if (n == 0 && withDC) {
+                real = fft->realp[0];
+                imag = 0.0;
+            }
+            else {
+                real = fft->realp[n];
+                imag = fft->imagp[n];
+            }
 #endif
             *marker = sqrt(XTRACT_SQ(real) + XTRACT_SQ(imag)) / (double)N;
 
