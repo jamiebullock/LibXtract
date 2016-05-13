@@ -108,22 +108,30 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
             {
                 ++n;
 #ifdef USE_OOURA
-                marker = &result[M-1];
+                //marker = &result[M-1];
 #endif
             }
 #ifdef USE_OOURA
-            if(n==1 && withDC) /* discard Nyquist */
+			/*
+            if(n==1 && withDC) // discard Nyquist
             {
                 ++n;
             }
-            if(n == M)
-            {
-                XTRACT_SET_FREQUENCY;
-                break;
-            }
-
-            real = fft[n*2];
-            imag = fft[n*2+1];
+			*/
+			// OOURA discards the always 0 imaginary of DC and Nyquists
+			if (n == M && !withDC)
+			{
+				real = fft[1];
+				imag = fft[0];
+			}
+			else if (n == 0 && withDC) {
+				real = fft[0];
+				imag = 0.0;
+			}
+			else {
+				real = fft[n * 2];
+				imag = fft[n * 2 + 1];
+			}
 #else
             real = fft->realp[n];
             imag = fft->realp[n];
@@ -158,22 +166,30 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
             {
                 ++n;
 #ifdef USE_OOURA
-                marker = &result[M-1];
+                //marker = &result[M-1];
 #endif
             }
 #ifdef USE_OOURA
-            if(n==1 && withDC) /* discard Nyquist */
-            {
-                ++n;
-            }
-            if(n == M)
-            {
-                XTRACT_SET_FREQUENCY;
-                break;
-            }
-
-            real = fft[n*2];
-            imag = fft[n*2+1];
+			/*
+			if(n==1 && withDC) // discard Nyquist
+			{
+				++n;
+			}
+			*/
+			// OOURA discards the always 0 imaginary of DC and Nyquists
+			if (n == M && !withDC)
+			{
+				real = fft[1];
+				imag = fft[0];
+			}
+			else if (n == 0 && withDC) {
+				real = fft[0];
+				imag = 0.0;
+			}
+			else {
+				real = fft[n * 2];
+				imag = fft[n * 2 + 1];
+			}
 #else
             real = fft->realp[n];
             imag = fft->realp[n];
@@ -194,22 +210,30 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
             {
                 ++n;
 #ifdef USE_OOURA
-                marker = &result[M-1];
+                //marker = &result[M-1];
 #endif
             }
 #ifdef USE_OOURA
-            if(n==1 && withDC) /* discard Nyquist */
-            {
-                ++n;
-            }
-            if(n == M)
-            {
-                XTRACT_SET_FREQUENCY;
-                break;
-            }
-
-            real = fft[n*2];
-            imag = fft[n*2+1];
+			/*
+			if(n==1 && withDC) // discard Nyquist
+			{
+				++n;
+			}
+			*/
+			// OOURA discards the always 0 imaginary of DC and Nyquists
+			if (n == M && !withDC)
+			{
+				real = fft[1];
+				imag = fft[0];
+			}
+			else if (n == 0 && withDC) {
+				real = fft[0];
+				imag = 0.0;
+			}
+			else {
+				real = fft[n * 2];
+				imag = fft[n * 2 + 1];
+			}
 #else
             real = fft->realp[n];
             imag = fft->realp[n];
@@ -236,17 +260,26 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
                 ++n;
             }
 #ifdef USE_OOURA
-            if(n==1 && withDC) /* discard Nyquist */
-            {
-                ++n;
-            }
-            if(n == M)
-            {
-                break;
-            }
-
-            real = fft[n*2];
-            imag = fft[n*2+1];
+			/*
+			if(n==1 && withDC) // discard Nyquist
+			{
+				++n;
+			}
+			*/
+			// OOURA discards the always 0 imaginary of DC and Nyquists
+			if (n == M && !withDC)
+			{
+				real = fft[1];
+				imag = fft[0];
+			}
+			else if (n == 0 && withDC) {
+				real = fft[0];
+				imag = 0.0;
+			}
+			else {
+				real = fft[n * 2];
+				imag = fft[n * 2 + 1];
+			}
 #else
             real = fft->realp[n];
             imag = fft->realp[n];
@@ -267,22 +300,30 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
             {
                 ++n;
 #ifdef USE_OOURA
-                marker = &result[M-1];
+               //marker = &result[M-1];
 #endif
             }
 #ifdef USE_OOURA
-            if(n==1 && withDC) /* discard Nyquist */
-            {
-                ++n;
-            }
-            if(n == M)
-            {
-                XTRACT_SET_FREQUENCY;
-                break;
-            }
-
-            real = fft[n*2];
-            imag = fft[n*2+1];
+			/*
+			if(n==1 && withDC) // discard Nyquist
+			{
+				++n;
+			}
+			*/
+			// OOURA discards the always 0 imaginary of DC and Nyquists
+			if (n == M && !withDC)
+			{
+				real = fft[1];
+				imag = fft[0];
+			}
+			else if (n == 0 && withDC) {
+				real = fft[0];
+				imag = 0.0;
+			}
+			else {
+				real = fft[n * 2];
+				imag = fft[n * 2 + 1];
+			}
 #else
             real = fft->realp[n];
             imag = fft->realp[n];
@@ -403,8 +444,8 @@ int xtract_mmbses(const double *data, const int N, const void *argv, double *res
 {
     xtract_mel_filter *f;
     int n, filter;
-    double* real = malloc(sizeof(double)*N);
-    double* imag = malloc(sizeof(double)*N);
+    double* real = (double*)malloc(sizeof(double)*N);
+	double* imag = (double*)malloc(sizeof(double)*N);
 
     f = (xtract_mel_filter *)argv;
 

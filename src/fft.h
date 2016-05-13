@@ -25,6 +25,7 @@
 #define FFT_H
 
 #ifdef _MSC_VER
+	#define USE_OOURA
 	#ifndef __cplusplus
 		typedef int bool;
 		#define false 0
