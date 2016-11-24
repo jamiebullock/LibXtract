@@ -773,6 +773,32 @@ int xtract_harmonic_spectrum(const double *data, const int N, const void *argv, 
     return XTRACT_SUCCESS;
 }
 
+int xtract_spectral_subband_centroids(const double *data, const int N, const void *argv, double *result)
+{
+    xtract_mel_filter *f = (xtract_mel_filter *)argv;
+    int n, filter;
+    const double *freqs = data;
+    const double *amps = data+N;
+
+    for (filter = 0; filter < f->n_filters; filter++)
+    {
+        double FA = 0.0, A = 0.0;
+
+        for(n = 0; n < N; n++)
+        {
+            double Multiplier = amps[n]*f->filters[filter][n];
+
+            FA += freqs[n]*f->filters[filter][n]*Multiplier;
+            A += Multiplier;
+        }
+        if (FA == 0.0 || A == 0.0)
+            result[filter] = 0;
+        else
+            result[filter] = FA / A;
+    }
+    return XTRACT_SUCCESS;
+}
+
 int xtract_lpc(const double *data, const int N, const void *argv, double *result)
 {
 
