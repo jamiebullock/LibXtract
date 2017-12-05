@@ -84,6 +84,17 @@ int xtract_mfcc(const double *data, const int N, const void *argv, double *resul
  */
 int xtract_mmbses(const double *data, const int N, const void *argv, double *result);
 
+/** \brief Extract centroids of the spectral mel subbands
+ *
+ * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector, (e.g. the array pointed to by *result from xtract_spectrum(), xtract_peak_spectrum() or xtract_harmonic_spectrum()).
+ * \param N: the number of array elements to be considered
+ * \param *argv: a pointer to a data structure of type xtract_mel_filter, containing n_filters coefficient tables to make up a mel-spaced filterbank
+ * \param *result: a pointer to an array containing the spectral band centroids
+ *
+ * Note: for a more 'accurate' result *result from xtract_peak_spectrum() can be passed in. This gives the interpolated peak frequency locations.
+ */
+int xtract_spectral_subband_centroids(const double *data, const int N, const void *argv, double *result);
+
 /** \brief Extract the Discrete Cosine transform of a time domain signal
  * \param *data: a pointer to the first element in an array of doubles representing an audio vector
  * \param N: the number of array elements to be considered

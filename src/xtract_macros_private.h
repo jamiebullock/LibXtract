@@ -29,6 +29,8 @@
 #include <stdio.h>
 
 #define XTRACT_SQ(a) ((a) * (a))
+#define XTRACT_POW3(a) ((a) * (a) * (a))
+#define XTRACT_POW4(a) ((a) * (a) * (a) * (a))
 #define XTRACT_MIN(a, b) ((a) < (b) ? (a) : (b))
 #define XTRACT_MAX(a, b) ((a) > (b) ? (a) : (b))
 #define XTRACT_VERY_SMALL_NUMBER 2e-42

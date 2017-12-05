@@ -38,6 +38,9 @@
 #define M_PI 3.14159265358979323846264338327
 #endif
 
+thread_local double** dct_cos_table = NULL;
+thread_local int dct_cos_table_dim = 0;
+
 int xtract_spectrum(const double *data, const int N, const void *argv, double *result)
 {
 
@@ -477,20 +480,25 @@ int xtract_mfcc(const double *data, const int N, const void *argv, double *resul
 
     xtract_mel_filter *f;
     int n, filter;
+    double* temp;
 
     f = (xtract_mel_filter *)argv;
-
+    temp = calloc(f->n_filters, sizeof(double));
     for(filter = 0; filter < f->n_filters; filter++)
     {
-        result[filter] = 0.0;
         for(n = 0; n < N; n++)
         {
-            result[filter] += data[n] * f->filters[filter][n];
+            if (f->filters[filter][n] != 0)
+                temp[filter] += data[n] * f->filters[filter][n];
         }
-        result[filter] = log(result[filter] < XTRACT_LOG_LIMIT ? XTRACT_LOG_LIMIT : result[filter]);
+        if (temp[filter] < XTRACT_LOG_LIMIT)
+            temp[filter] = XTRACT_LOG_LIMIT_DB;
+        else
+            temp[filter] = log(temp[filter]);
     }
 
-    xtract_dct(result, f->n_filters, NULL, result);
+    xtract_dct(temp, f->n_filters, NULL, result);
+    free(temp);
 
     return XTRACT_SUCCESS;
 }
@@ -530,8 +538,13 @@ int xtract_mmbses(const double *data, const int N, const void *argv, double *res
           continue;
         if (count == 1)
         {
-          energy = (energy < XTRACT_LOG_LIMIT ? XTRACT_LOG_LIMIT : energy);
-          result[filter] = log((double)2*M_PI*energy);
+          energy = (double)2*M_PI*energy;
+
+          if (energy < XTRACT_LOG_LIMIT)
+              result[filter] = XTRACT_LOG_LIMIT_DB;
+          else
+              result[filter] = log(energy);
+
           continue;
         }
         // Calculate the arithmetic means of real and imaginary parts
@@ -555,32 +568,89 @@ int xtract_mmbses(const double *data, const int N, const void *argv, double *res
         // Calculate the final Mel based Multi-Band Spectral Entropy Signature coefficients
         double temp = realVariance*imagVariance-XTRACT_SQ(covariance);
 
-        temp = (temp < XTRACT_LOG_LIMIT ? XTRACT_LOG_LIMIT : temp);
+        if (temp < XTRACT_LOG_LIMIT)
+            temp = XTRACT_LOG_LIMIT_DB;
+        else
+            temp = log(temp);
+
         energy = (double)2*M_PI*energy;
-        energy = (energy < XTRACT_LOG_LIMIT ? XTRACT_LOG_LIMIT : energy);
-        result[filter] = log(energy)+log(temp) / 2;
+        if (energy < XTRACT_LOG_LIMIT)
+            energy = XTRACT_LOG_LIMIT_DB;
+        else
+            energy = log(energy);
+
+        result[filter] = energy+temp / 2;
     }
     free(real);
     free(imag);
     return XTRACT_SUCCESS;
 }
 
+int xtract_spectral_subband_centroids(const double *data, const int N, const void *argv, double *result)
+{
+    xtract_mel_filter *f = (xtract_mel_filter *)argv;
+    int n, filter;
+    const double *freqs = data;
+    const double *amps = data+N;
+
+    for (filter = 0; filter < f->n_filters; filter++)
+    {
+        double FA = 0.0, A = 0.0;
+
+        for(n = 0; n < N; n++)
+        {
+            double Multiplier = amps[n]*f->filters[filter][n];
+
+            FA += freqs[n]*f->filters[filter][n]*Multiplier;
+            A += Multiplier;
+        }
+        if (FA == 0.0 || A == 0.0)
+            result[filter] = 0;
+        else
+            result[filter] = FA / A;
+    }
+    return XTRACT_SUCCESS;
+}
+
 int xtract_dct(const double *data, const int N, const void *argv, double *result)
 {
+    int n, m;
+    // Extra variable to hold a reference for the dct lookup table since
+    // accessing the thread local storage is expensive.
+    double** temp_dct_table;
 
-    int n;
-    int m;
-    double *temp = (double*)calloc(N, sizeof(double));
-
-    for (n = 0; n < N; ++n)
+    // Free the dct table if the cached dimension is different from the new dimension
+    if (dct_cos_table != NULL && dct_cos_table_dim != N)
     {
-        for(m = 1; m <= N; ++m) {
-            temp[n] += data[m - 1] * cos(M_PI * (n / (double)N) * (m - 0.5));
+        for (n = 0; n < N; ++n)
+        {
+          free(dct_cos_table[n]);
+        }
+        free(dct_cos_table);
+        dct_cos_table = NULL;
+    }
+    // Allocate the dct cache table
+    if (dct_cos_table == NULL)
+    {
+        dct_cos_table_dim = N;
+        dct_cos_table = calloc(N, sizeof(double*));
+        for (n = 0; n < N; ++n)
+        {
+            dct_cos_table[n] = calloc(N, sizeof(double));
+            for (m = 1; m <= N; ++m)
+            {
+                dct_cos_table[n][m-1] = cos(M_PI * (n / (double)N)*(m - 0.5));
+            }
         }
     }
-
-    memcpy(result, temp, N * sizeof(double));
-    free(temp);
+    // Calculate the dct transformation
+    temp_dct_table = dct_cos_table;
+    memset(result, 0, N * sizeof(double));
+    for (n = 0; n < N; ++n)
+    {
+        for (m = 0; m < N; ++m)
+            result[n] += data[m]*temp_dct_table[n][m];
+    }
 
     return XTRACT_SUCCESS;
 }
@@ -670,8 +740,7 @@ int xtract_bark_coefficients(const double *data, const int N, const void *argv, 
 int xtract_peak_spectrum(const double *data, const int N, const void *argv, double *result)
 {
 
-    double threshold, max, y, y2, y3, p, q, *input = NULL;
-    size_t bytes;
+    double threshold, max, y, y2, y3, p, q;
     int n = N, rv = XTRACT_SUCCESS;
 
     threshold = max = y = y2 = y3 = p = q = 0.0;
@@ -692,18 +761,6 @@ int xtract_peak_spectrum(const double *data, const int N, const void *argv, doub
 
     XTRACT_CHECK_q;
 
-    input = (double *)calloc(N,  sizeof(double));
-
-    bytes = N * sizeof(double);
-
-    if(input != NULL)
-        input = (double*)memcpy(input, data, bytes);
-    else
-        return XTRACT_MALLOC_FAILED;
-
-    while(n--)
-        max = XTRACT_MAX(max, input[n]);
-
     threshold *= .01 * max;
 
     result[0] = 0;
@@ -711,13 +768,13 @@ int xtract_peak_spectrum(const double *data, const int N, const void *argv, doub
 
     for(n = 1; n < N; n++)
     {
-        if(input[n] >= threshold)
+        if(data[n] >= threshold)
         {
-            if(input[n] > input[n - 1] && n + 1 < N && input[n] > input[n + 1])
+            if(data[n] > data[n - 1] && n + 1 < N && data[n] > data[n + 1])
             {
-                result[N + n] = q * (n + 1 + (p = .5 * ((y = input[n-1]) -
-                                                    (y3 = input[n+1])) / (input[n - 1] - 2 *
-                                                            (y2 = input[n]) + input[n + 1])));
+                result[N + n] = q * (n + 1 + (p = .5 * ((y = data[n-1]) -
+                                                    (y3 = data[n+1])) / (data[n - 1] - 2 *
+                                                            (y2 = data[n]) + data[n + 1])));
                 result[n] = y2 - .25 * (y - y3) * p;
             }
             else
@@ -733,7 +790,6 @@ int xtract_peak_spectrum(const double *data, const int N, const void *argv, doub
         }
     }
 
-    free(input);
     return (rv ? rv : XTRACT_SUCCESS);
 }
 
