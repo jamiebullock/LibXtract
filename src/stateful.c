@@ -76,15 +76,15 @@ int xtract_last_n(const xtract_last_n_state *state, const double *data, const in
     
     ringbuf_memcpy_into(state->ringbuf, data, sizeof(double));
     size_t used = ringbuf_bytes_used(state->ringbuf);
-    ringbuf_memcpy_from(result, state->ringbuf, used, false);
+    size_t result_offset = N - (used / sizeof(double));
     
-    if (used < N_bytes)
+    /* Copy at end of result so last value is most recent */
+    ringbuf_memcpy_from(result + result_offset, state->ringbuf, used, false);
+    
+    if (result_offset)
     {
-        /* zero pad */
-        for (size_t n = used / sizeof(double); n < (size_t)N; ++n)
-        {
-            result[n] = 0.0;
-        }
+        /* zero pre-pad */
+         memset(result, 0.0, result_offset - 1);
     }
     
     return XTRACT_SUCCESS;
