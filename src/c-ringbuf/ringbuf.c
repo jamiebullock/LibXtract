@@ -275,7 +275,7 @@ ringbuf_memcpy_from(void *dst, ringbuf_t src, size_t count, bool destroy)
     size_t nwritten = 0;
     while (nwritten != count) {
         assert(bufend > src->tail);
-        size_t n = MIN(bufend - src->tail, count - nwritten);
+        size_t n = MIN(bufend - src->tail, (count - nwritten));
         memcpy(u8dst + nwritten, src->tail, n);
         src->tail += n;
         nwritten += n;
