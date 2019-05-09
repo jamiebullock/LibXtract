@@ -364,6 +364,8 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
                 imag = fft->imagp[n];
             }
 #endif
+            result[m*2] = real;
+            result[m*2+1] = imag;
             XTRACT_SET_FREQUENCY;
             XTRACT_GET_MAX;
         }
