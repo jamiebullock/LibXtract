@@ -51,7 +51,6 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
     double temp     = 0.0;
     double max      = 0.0;
     double NxN      = XTRACT_SQ((double)N);
-    double *marker  = NULL;
     double real = 0.0;
     double imag = 0.0;
     unsigned int n = 0;
@@ -105,14 +104,9 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
         case XTRACT_LOG_MAGNITUDE_SPECTRUM:
         for(n = 0, m = 0; m < M; ++n, ++m)
         {
-            marker = &result[m];
-
             if(n==0 && !withDC) /* discard DC and keep Nyquist */
             {
                 ++n;
-#ifdef USE_OOURA
-                //marker = &result[M-1];
-#endif
             }
 #ifdef USE_OOURA
 			/*
@@ -173,15 +167,9 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
     case XTRACT_POWER_SPECTRUM:
         for(n = 0, m = 0; m < M; ++n, ++m)
         {
-
-            marker = &result[m];
-
             if(n==0 && !withDC) /* discard DC and keep Nyquist */
             {
                 ++n;
-#ifdef USE_OOURA
-                //marker = &result[M-1];
-#endif
             }
 #ifdef USE_OOURA
 			/*
@@ -229,14 +217,9 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
     case XTRACT_LOG_POWER_SPECTRUM:
         for(n = 0, m = 0; m < M; ++n, ++m)
         {
-            marker = &result[m];
-
             if(n==0 && !withDC) /* discard DC and keep Nyquist */
             {
                 ++n;
-#ifdef USE_OOURA
-                //marker = &result[M-1];
-#endif
             }
 #ifdef USE_OOURA
 			/*
@@ -321,7 +304,7 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
 			{
 				real = fft->imagp[0];
 				imag = 0.0;
-		}
+		    }
 			else if (n == 0 && withDC) {
 				real = fft->realp[0];
 				imag = 0.0;
@@ -341,14 +324,9 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
         /* MAGNITUDE_SPECTRUM */
         for(n = 0, m = 0; m < M; ++n, ++m)
         {
-            marker = &result[m];
-
             if(n==0 && !withDC) /* discard DC and keep Nyquist */
             {
                 ++n;
-#ifdef USE_OOURA
-               //marker = &result[M-1];
-#endif
             }
 #ifdef USE_OOURA
 			/*
@@ -386,8 +364,6 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
                 imag = fft->imagp[n];
             }
 #endif
-            *marker = sqrt(XTRACT_SQ(real) + XTRACT_SQ(imag)) / (double)N;
-
             XTRACT_SET_FREQUENCY;
             XTRACT_GET_MAX;
         }
