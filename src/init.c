@@ -145,8 +145,6 @@ void xtract_free_vdsp_data(xtract_vdsp_data *vdsp_data)
     free(vdsp_data->fft.realp);
     free(vdsp_data->fft.imagp);
     vDSP_destroy_fftsetupD(vdsp_data->setup);
-    vdsp_data->fft.realp   = NULL;
-    vdsp_data->fft.imagp   = NULL;
     vdsp_data->initialised = false;
 }
 
