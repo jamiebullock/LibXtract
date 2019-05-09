@@ -330,6 +330,7 @@ int xtract_init_mfcc(int N, double nyquist, int style, double freq_min, double f
         }
         else
         {
+            assert(n+2 < freq_bands + 2);
             height = 2 / (lin_peak[n + 2] - lin_peak[n]);
             norm_fact = norm / (2 / (lin_peak[2] - lin_peak[0]));
         }
