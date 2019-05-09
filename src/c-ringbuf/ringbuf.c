@@ -151,7 +151,11 @@ ringbuf_nextp(ringbuf_t rb, const uint8_t *p)
      * portable.
      */
     assert((p >= rb->buf) && (p < ringbuf_end(rb)));
-    return rb->buf + ((++p - rb->buf) % ringbuf_buffer_size(rb));
+    
+    const size_t buffer_size = ringbuf_buffer_size(rb);
+    assert(buffer_size > 0);
+    
+    return rb->buf + ((++p - rb->buf) % buffer_size);
 }
 
 size_t
