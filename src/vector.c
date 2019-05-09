@@ -388,21 +388,22 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
 int xtract_autocorrelation_fft(const double *data, const int N, const void *argv, double *result)
 {
 
-    double *rfft = NULL;
     int n        = 0;
-    int M        = 0;
-#ifndef USE_OOURA
+    int M        = N << 1;
+
+#ifdef USE_OOURA
+    double *rfft = NULL;
+#else
     DSPDoubleSplitComplex *fft = NULL;
     double M_double = 0.0;
 #endif
 
-    M = N << 1;
 
+#ifdef USE_OOURA
     /* Zero pad the input vector */
     rfft = (double *)calloc(M, sizeof(double));
     memcpy(rfft, data, N * sizeof(double));
-
-#ifdef USE_OOURA
+    
     rdft(M, 1, rfft, ooura_data_autocorrelation_fft.ooura_ip, 
             ooura_data_autocorrelation_fft.ooura_w);
 
