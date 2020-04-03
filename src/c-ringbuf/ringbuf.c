@@ -21,6 +21,12 @@
 #include <sys/types.h>
 #include <assert.h>
 
+#ifdef _MSC_VER
+#include <io.h>
+#else
+#include <unistd.h>
+#endif
+
 #ifndef MIN
 #define MIN(x,y) ((x)>(y)?(y):(x))
 #endif
