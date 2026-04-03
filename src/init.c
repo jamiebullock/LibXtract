@@ -223,6 +223,9 @@ int xtract_init_fft(int N, int feature_name)
 #endif
 }
 
+extern thread_local double** dct_cos_table;
+extern thread_local int dct_cos_table_dim;
+
 void xtract_free_fft(void)
 {
 #ifdef USE_OOURA
@@ -230,6 +233,17 @@ void xtract_free_fft(void)
 #else
     xtract_free_vdsp_();
 #endif
+
+    if (dct_cos_table != NULL)
+    {
+        for (int n = 0; n < dct_cos_table_dim; ++n)
+        {
+            free(dct_cos_table[n]);
+        }
+        free(dct_cos_table);
+        dct_cos_table = NULL;
+        dct_cos_table_dim = 0;
+    }
 }
 
 
