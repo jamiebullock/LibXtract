@@ -84,7 +84,7 @@ int xtract_last_n(const xtract_last_n_state *state, const double *data, const in
     if (result_offset)
     {
         /* zero pre-pad */
-         memset(result, 0.0, result_offset - 1);
+         memset(result, 0, result_offset * sizeof(double));
     }
     
     return XTRACT_SUCCESS;
