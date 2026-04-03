@@ -26,6 +26,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <assert.h>
 
 #include "fft.h"
 
@@ -33,6 +34,20 @@
 #include "xtract_window_private.h"
 #define DEFINE_GLOBALS
 #include "xtract_globals_private.h"
+
+#ifdef USE_OOURA
+thread_local struct xtract_ooura_data_ ooura_data_dct;
+thread_local struct xtract_ooura_data_ ooura_data_mfcc;
+thread_local struct xtract_ooura_data_ ooura_data_spectrum;
+thread_local struct xtract_ooura_data_ ooura_data_autocorrelation_fft;
+#else
+thread_local xtract_vdsp_data vdsp_data_dct;
+thread_local xtract_vdsp_data vdsp_data_mfcc;
+thread_local xtract_vdsp_data vdsp_data_spectrum;
+thread_local xtract_vdsp_data vdsp_data_autocorrelation_fft;
+#endif
+
+thread_local dywapitchtracker wavelet_f0_state;
 
 #ifdef USE_OOURA
 void xtract_init_ooura_data(xtract_ooura_data *ooura_data, unsigned int N)
@@ -131,8 +146,6 @@ void xtract_free_vdsp_data(xtract_vdsp_data *vdsp_data)
     free(vdsp_data->fft.realp);
     free(vdsp_data->fft.imagp);
     vDSP_destroy_fftsetupD(vdsp_data->setup);
-    vdsp_data->fft.realp   = NULL;
-    vdsp_data->fft.imagp   = NULL;
     vdsp_data->initialised = false;
 }
 
@@ -318,6 +331,7 @@ int xtract_init_mfcc(int N, double nyquist, int style, double freq_min, double f
         }
         else
         {
+            assert(n+2 < freq_bands + 2);
             height = 2 / (lin_peak[n + 2] - lin_peak[n]);
             norm_fact = norm / (2 / (lin_peak[2] - lin_peak[0]));
         }

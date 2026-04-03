@@ -1287,6 +1287,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
                 *result_unit = XTRACT_MIDI_CENT;
                 *result_min = 0.0;
                 *result_max = 12700;
+                break;
             case XTRACT_ZCR:
                 *result_unit = XTRACT_HERTZ;
                 *result_min = 0.0;

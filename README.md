@@ -24,6 +24,7 @@ To build the SWIG bindings [SWIG]() is required. For the Python bindings, a Pyth
 
 Type `make install` to build and install to `/usr/local`. Type `make install PREFIX=/somewhere/else` to install to `/somewhere/else`,
 
+To build the python bindings type `make swig`.
 
 ## Documentation
 

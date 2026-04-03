@@ -72,6 +72,29 @@ int xtract_autocorrelation_fft(const double *data, const int N, const void *argv
  */
 int xtract_mfcc(const double *data, const int N, const void *argv, double *result);
 
+/** \brief Extract Mel based Multi-Band Spectral Entropy Signature coefficients
+ *
+ * \param *data: a pointer to an array of spectral coefficients, the result from xtract_spectrum() by XTRACT_SPECTRUM_COEFFICIENTS
+ * \param N: the number of array elements to be considered
+ * \param *argv: a pointer to a data structure of type xtract_mel_filter, containing n_filters coefficient tables to make up a mel-spaced filterbank
+ * \param *result: a pointer to an array containing the resultant MEL-MBSES
+ *
+ * The data structure pointed to by *argv must be obtained by first calling xtract_init_mfcc.
+ * The method is described by: Rincon et al: A Context-Aware Baby Monitor for the Automatic Selective Archiving of the Language of Infants (2013)
+ */
+int xtract_mmbses(const double *data, const int N, const void *argv, double *result);
+
+/** \brief Extract centroids of the spectral mel subbands
+ *
+ * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector, (e.g. the array pointed to by *result from xtract_spectrum(), xtract_peak_spectrum() or xtract_harmonic_spectrum()).
+ * \param N: the number of array elements to be considered
+ * \param *argv: a pointer to a data structure of type xtract_mel_filter, containing n_filters coefficient tables to make up a mel-spaced filterbank
+ * \param *result: a pointer to an array containing the spectral band centroids
+ *
+ * Note: for a more 'accurate' result *result from xtract_peak_spectrum() can be passed in. This gives the interpolated peak frequency locations.
+ */
+int xtract_spectral_subband_centroids(const double *data, const int N, const void *argv, double *result);
+
 /** \brief Extract the Discrete Cosine transform of a time domain signal
  * \param *data: a pointer to the first element in an array of doubles representing an audio vector
  * \param N: the number of array elements to be considered
@@ -166,7 +189,7 @@ int xtract_lpcc(const double *data, const int N, const void *argv, double *resul
  *
  * \param *data: a pointer to an array of size N containing N magnitude/power/log magnitude/log power coefficients. (e.g. the first half of the array pointed to by *result from xtract_spectrum().
  * \param N: the number of elements from the array pointed to by *data to be considered
- * \param *argv: A pointer to an array containing four integers. The first represents the extraction function to applied to each subband e.g. XTRACT_SUM or XTRACT_MEAN, the second represents the number of subbands required, and the third represents the frequency scale to be used for the subband bounds as defined in the enumeration xtract_subband_scales_ (libxtract.h). The fourth integer represent the start point of the subbands as a location in the input array as pointed to by *data (e.g. a value of 5 would start the subband extraction at bin 5)
+ * \param *argv: A pointer to an array containing four integers. The first represents the \a scalar extraction function to applied to each subband e.g. XTRACT_SUM or XTRACT_MEAN, the second represents the number of subbands required, and the third represents the frequency scale to be used for the subband bounds as defined in the enumeration xtract_subband_scales_ (libxtract.h). The fourth integer represent the start point of the subbands as a location in the input array as pointed to by *data (e.g. a value of 5 would start the subband extraction at bin 5)
  * \param *result: A pointer to an array containing the resultant subband values. The calling function is responsible for allocating and freeing memory for *result. xtract_subbands() assumes that at least argv[1] * sizeof(double) bytes have been allocated. If the requested nbands extends the subband range beyond N, then the remaining bands will be set to 0. If the array pointed to by *result has more than argv[1] elements, the superfluous elements will be unchanged.
  *
  * xtract_subbands() divides a spectrum into subbands and applies the function given by argv[0] to the values in each subband to give a 'reduced' representation of the spectrum as *result

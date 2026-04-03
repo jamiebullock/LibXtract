@@ -185,7 +185,8 @@ enum xtract_spectrum_ {
     XTRACT_MAGNITUDE_SPECTRUM,
     XTRACT_LOG_MAGNITUDE_SPECTRUM,
     XTRACT_POWER_SPECTRUM,
-    XTRACT_LOG_POWER_SPECTRUM
+    XTRACT_LOG_POWER_SPECTRUM,
+    XTRACT_SPECTRUM_COEFFICIENTS
 };
 
 /** \brief Subband scales */
@@ -425,7 +426,7 @@ double *xtract_init_window(const int N, const int type);
 void xtract_free_window(double *window);
 
 /* \brief A function to build an array of function descriptors */
-xtract_function_descriptor_t *xtract_make_descriptors();
+xtract_function_descriptor_t *xtract_make_descriptors(void);
 
 /* \brief A function to free an array of function descriptors */
 int xtract_free_descriptors(xtract_function_descriptor_t *fd);

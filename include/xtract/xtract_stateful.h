@@ -50,7 +50,7 @@ void xtract_last_n_state_delete(xtract_last_n_state *last_n_state);
 /**
  *  Write a vector of the last N input values to `result`
  *
- *  @param state  a pointer to an xtract_peak_picker_state struct as allocated by xtract_peak_picker_state_new()
+ *  @param state  a pointer to an xtract_last_n_state struct as allocated by xtract_last_n_state_new()
  *  @param data   a pointer to a double representing the current input value
  *  @param N      an integer representing 'N' the number of values to be written to *result
  *  @param argv   a pointer to NULL
