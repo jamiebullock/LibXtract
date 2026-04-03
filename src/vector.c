@@ -558,7 +558,7 @@ int xtract_mmbses(const double *data, const int N, const void *argv, double *res
         else
             energy = log(energy);
 
-        result[filter] = energy+temp / 2;
+        result[filter] = (energy + temp) / 2;
     }
     free(real);
     free(imag);
