@@ -397,7 +397,7 @@ int xtract_tristimulus_2(const double *data, const int N, const void *argv, doub
         {
             den += temp;
             h = (int)floor(freqs[i] / fund + 0.5);
-            switch (h)
+            switch ((int)h)
             {
                 case 2:
                     p2 += temp;
