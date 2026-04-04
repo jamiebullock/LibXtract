@@ -1,12 +1,17 @@
 
+#define _USE_MATH_DEFINES
+#include <cmath>
+
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
 #include "catch.hpp"
 
 #include "xtract/xtract_scalar.h"
 #include "xtract/xtract_vector.h"
 #include "xtract/xtract_delta.h"
 #include "xtract/libxtract.h"
-
-#include <cmath>
 #include <cstring>
 #include <cstdlib>
 
