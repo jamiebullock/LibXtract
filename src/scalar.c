@@ -51,7 +51,7 @@ int xtract_mean(const double *data, const int N, const void *argv, double *resul
     while(n--)
         *result += data[n];
 
-    *result /= (N - 1);
+    *result /= N;
 
     return XTRACT_SUCCESS;
 }
