@@ -1449,7 +1449,7 @@ TEST_CASE("xtract_midicent", "[scalar]")
     {
         double freq = 261.6255653;
         xtract_midicent(NULL, 0, &freq, &result);
-        REQUIRE(result == Approx(6000.0).epsilon(0.5));
+        REQUIRE(result == Approx(6000.0).margin(1.0)); /* 1 midicent absolute */
     }
 }
 
