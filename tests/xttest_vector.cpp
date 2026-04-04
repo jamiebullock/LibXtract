@@ -1,11 +1,14 @@
 
 #include "catch.hpp"
 
+#include "xtract/xtract_scalar.h"
 #include "xtract/xtract_vector.h"
+#include "xtract/xtract_delta.h"
 #include "xtract/libxtract.h"
 
 #include <cmath>
 #include <cstring>
+#include <cstdlib>
 
 /*
  * Unit tests for LibXtract vector feature functions.
@@ -182,5 +185,274 @@ TEST_CASE("xtract_lnorm", "[vector]")
         double argv[] = {1.0, 0.0, 0.0};
         xtract_lnorm(data, 2, argv, &result);
         REQUIRE(result == Approx(7.0).epsilon(1e-6));
+    }
+}
+
+/* ===== FFT-Dependent Features ===== */
+
+TEST_CASE("xtract_spectrum of DC signal", "[vector][fft]")
+{
+    const int N = 8;
+    double data[8] = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
+    double result[8] = {0};
+
+    xtract_init_fft(N, XTRACT_SPECTRUM);
+
+    SECTION("without DC, all bins are zero for a constant signal")
+    {
+        /* DC signal has no energy above DC. With withDC=0 (default),
+         * the DC bin is discarded, so all output bins should be ~0. */
+        double sr = 8000.0;
+        double argv[] = {sr / N, (double)XTRACT_POWER_SPECTRUM, 0.0, 0.0};
+        xtract_spectrum(data, N, argv, result);
+
+        /* First 3 amplitude bins (Nyquist may have residual) */
+        REQUIRE(result[0] == Approx(0.0).margin(1e-4));
+        REQUIRE(result[1] == Approx(0.0).margin(1e-4));
+        REQUIRE(result[2] == Approx(0.0).margin(1e-4));
+    }
+}
+
+TEST_CASE("xtract_spectrum of single cosine", "[vector][fft]")
+{
+    const int N = 8;
+    double data[8];
+    double result[8] = {0};
+
+    /* Generate cos(2*pi*1*n/8) — energy at bin 1 */
+    for (int n = 0; n < N; n++)
+        data[n] = cos(2.0 * M_PI * 1.0 * n / N);
+
+    xtract_init_fft(N, XTRACT_SPECTRUM);
+
+    SECTION("power spectrum peaks at the cosine frequency")
+    {
+        double sr = 8000.0;
+        double argv[] = {sr / N, (double)XTRACT_POWER_SPECTRUM, 0.0, 0.0};
+        xtract_spectrum(data, N, argv, result);
+
+        /* Bin 0 (FFT bin 1) should have the most energy.
+         * Exact value is platform-dependent (Accelerate vs OOURA scaling),
+         * so just verify it dominates. */
+        REQUIRE(result[0] > 0.0);
+        REQUIRE(result[0] > result[1]);
+        REQUIRE(result[0] > result[2]);
+    }
+}
+
+TEST_CASE("xtract_hps", "[scalar][spectral]")
+{
+    SECTION("HPS finds fundamental of harmonic signal")
+    {
+        /* Create a synthetic spectrum with harmonics at bins 10, 20, 30.
+         * N must be large enough that N/2 > 30*3 = 90 => N >= 182.
+         * Use N = 256 (128 amplitude bins + 128 frequency bins). */
+        const int N = 256;
+        const int M = N / 2;
+        double data[256];
+        double result = 0.0;
+
+        memset(data, 0, sizeof(data));
+
+        /* Set amplitude peaks at bins 10, 20, 30 (harmonics of bin 10) */
+        data[10] = 1.0;
+        data[20] = 0.8;
+        data[30] = 0.5;
+
+        /* Set frequency values: bin i has frequency i * freq_resolution */
+        double freq_res = 100.0; /* e.g. 12800 Hz / 128 bins */
+        for (int i = 0; i < M; i++)
+            data[M + i] = i * freq_res;
+
+        xtract_hps(data, N, NULL, &result);
+
+        /* HPS should identify the fundamental at bin 10 = 1000 Hz */
+        REQUIRE(result == Approx(10.0 * freq_res).epsilon(1e-3));
+    }
+}
+
+TEST_CASE("xtract_peak_spectrum threshold bug", "[vector][known-bug]")
+{
+    SECTION("threshold is always zero because max is computed too late")
+    {
+        /* Create data with two peaks: a large one and a small one.
+         * Both must be local maxima (greater than neighbours). */
+        const int N = 8;
+        double data[] = {0.0, 0.0, 100.0, 0.0, 0.0, 1.0, 0.0, 0.0};
+        double result[16] = {0}; /* N amplitudes + N frequencies */
+        double argv[] = {100.0, 50.0}; /* freq_res, threshold=50% */
+
+        xtract_peak_spectrum(data, N, argv, result);
+
+        /* Bin 5 (amplitude 1.0) is a local peak but should be below
+         * 50% of max (100). Due to the threshold bug (max=0 when
+         * threshold is computed), all peaks pass regardless.
+         * This documents the bug: bin 5 should be 0 if threshold worked. */
+        /* When fixed: REQUIRE(result[5] == Approx(0.0)); */
+        REQUIRE(result[5] != Approx(0.0).margin(EPSILON));
+    }
+}
+
+TEST_CASE("xtract_lpc known values", "[vector]")
+{
+    SECTION("LPC of simple autocorrelation sequence")
+    {
+        /* For a first-order AR process with coefficient a = 0.5:
+         * Autocorrelation: r[0] = 1, r[1] = 0.5
+         * Levinson-Durbin: ref[0] = -r[1]/r[0] = -0.5
+         * lpc[0] = -0.5
+         * error = r[0] * (1 - ref[0]^2) = 1 * 0.75 = 0.75
+         *
+         * Input to xtract_lpc is the autocorrelation sequence.
+         * N = number of autocorrelation values
+         * Result = [N-1 reflection coefficients | N-1 LPC coefficients] */
+        double autocorr[] = {1.0, 0.5};
+        double result[2] = {0}; /* 1 ref coeff + 1 LPC coeff */
+
+        int rv = xtract_lpc(autocorr, 2, NULL, result);
+        REQUIRE(rv == XTRACT_SUCCESS);
+
+        /* ref[0] = -0.5 */
+        REQUIRE(result[0] == Approx(-0.5).epsilon(1e-10));
+        /* lpc[0] = -0.5 */
+        REQUIRE(result[1] == Approx(-0.5).epsilon(1e-10));
+    }
+
+    SECTION("LPC of 2nd order")
+    {
+        /* Autocorrelation: r[0]=1, r[1]=0.5, r[2]=0.3
+         * Iteration 0: ref[0] = -r[1]/r[0] = -0.5, lpc[0] = -0.5
+         *   error = 1 * (1 - 0.25) = 0.75
+         * Iteration 1: r = -r[2] - lpc[0]*r[1] = -0.3 + 0.25 = -0.05
+         *   ref[1] = -0.05 / 0.75 = -1/15, lpc[1] = -1/15
+         *   Inner loop: i/2=0, doesn't run
+         *   i%2=1: lpc[0] += lpc[0]*r = -0.5 + (-0.5)*(-1/15) = -7/15
+         * Note: the Levinson-Durbin bug (line 849) only manifests for order >= 3 */
+        double autocorr[] = {1.0, 0.5, 0.3};
+        double result[4] = {0}; /* 2 ref + 2 LPC */
+
+        int rv = xtract_lpc(autocorr, 3, NULL, result);
+        REQUIRE(rv == XTRACT_SUCCESS);
+
+        /* ref[0] = -0.5, ref[1] = -1/15 */
+        REQUIRE(result[0] == Approx(-0.5).epsilon(1e-10));
+        REQUIRE(result[1] == Approx(-1.0 / 15.0).epsilon(1e-10));
+
+        /* lpc[0] = -7/15, lpc[1] = -1/15 */
+        REQUIRE(result[2] == Approx(-7.0 / 15.0).epsilon(1e-10));
+        REQUIRE(result[3] == Approx(-1.0 / 15.0).epsilon(1e-10));
+    }
+
+    SECTION("LPC of 3rd order — exposes Levinson-Durbin bug")
+    {
+        /* Autocorrelation: r[0]=1, r[1]=0.9, r[2]=0.8, r[3]=0.7
+         * At iteration i=2, the inner loop runs for j=0 with i/2=1.
+         * Line 849: lpc[j] = r * lpc[i-1-j] (should be +=)
+         * This destroys the previous lpc[0] value. */
+        double autocorr[] = {1.0, 0.9, 0.8, 0.7};
+        double result[6] = {0}; /* 3 ref + 3 LPC */
+
+        int rv = xtract_lpc(autocorr, 4, NULL, result);
+        REQUIRE(rv == XTRACT_SUCCESS);
+
+        /* Just verify it runs without crashing and produces finite values.
+         * The actual coefficients are wrong due to the bug — we'll add
+         * exact value checks after the fix. */
+        REQUIRE(std::isfinite(result[3]));
+        REQUIRE(std::isfinite(result[4]));
+        REQUIRE(std::isfinite(result[5]));
+    }
+}
+
+TEST_CASE("xtract_bark_coefficients", "[vector]")
+{
+    SECTION("basic bark coefficient summation")
+    {
+        /* xtract_bark_coefficients sums amplitude bins within each bark band.
+         * We need to init bark band limits first. */
+        const int N = 1024;
+        double sr = 44100.0;
+        int band_limits[XTRACT_BARK_BANDS];
+
+        xtract_init_bark(N, sr, band_limits);
+
+        /* Create a flat spectrum — all bins have amplitude 1.0 */
+        double data[1024];
+        for (int i = 0; i < N; i++)
+            data[i] = 1.0;
+
+        double result[XTRACT_BARK_BANDS] = {0};
+        xtract_bark_coefficients(data, N, band_limits, result);
+
+        /* Each bark band should contain a positive sum (number of bins in that band) */
+        for (int i = 0; i < XTRACT_BARK_BANDS - 1; i++)
+        {
+            REQUIRE(result[i] >= 0.0);
+        }
+
+        /* Total across all bands should equal sum of amplitudes within the
+         * frequency range covered by the bark scale */
+        double total = 0.0;
+        for (int i = 0; i < XTRACT_BARK_BANDS - 1; i++)
+            total += result[i];
+        REQUIRE(total > 0.0);
+    }
+}
+
+TEST_CASE("xtract_loudness", "[scalar]")
+{
+    double result = 0.0;
+
+    SECTION("loudness of uniform bark coefficients")
+    {
+        /* loudness = sum(data[n]^0.23) for n=1..N-1 (skips n=0) */
+        double data[XTRACT_BARK_BANDS];
+        for (int i = 0; i < XTRACT_BARK_BANDS; i++)
+            data[i] = 1.0;
+
+        xtract_loudness(data, XTRACT_BARK_BANDS, NULL, &result);
+
+        /* N-1 terms of 1.0^0.23 = 1.0 each, so result = XTRACT_BARK_BANDS - 1 = 25 */
+        REQUIRE(result == Approx(25.0).epsilon(1e-6));
+    }
+
+    SECTION("loudness of silence is 0")
+    {
+        double data[XTRACT_BARK_BANDS] = {0};
+        xtract_loudness(data, XTRACT_BARK_BANDS, NULL, &result);
+        REQUIRE(result == Approx(0.0).margin(1e-10));
+    }
+}
+
+TEST_CASE("xtract_spectral_standard_deviation", "[scalar][spectral]")
+{
+    double result = 0.0;
+
+    SECTION("stddev = sqrt(variance)")
+    {
+        /* Reuse spectral_variance test: variance = 7500
+         * stddev = sqrt(7500) ≈ 86.6025 */
+        double data[] = {1.0, 3.0, 100.0, 300.0};
+        double argv[] = {7500.0}; /* spectral variance as input */
+        xtract_spectral_standard_deviation(data, 4, argv, &result);
+        REQUIRE(result == Approx(sqrt(7500.0)).epsilon(1e-6));
+    }
+}
+
+TEST_CASE("xtract_sharpness", "[scalar][spectral]")
+{
+    double result = 0.0;
+
+    SECTION("sharpness of uniform loudness coefficients")
+    {
+        /* sharpness is a weighted sum of specific loudness values.
+         * With all-equal input, the result should be deterministic. */
+        double data[XTRACT_BARK_BANDS];
+        for (int i = 0; i < XTRACT_BARK_BANDS; i++)
+            data[i] = 1.0;
+
+        xtract_sharpness(data, XTRACT_BARK_BANDS, NULL, &result);
+        REQUIRE(result > 0.0);
+        REQUIRE(std::isfinite(result));
     }
 }
