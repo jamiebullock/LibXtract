@@ -30,8 +30,9 @@ jobs:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           claude_args: '--allowedTools "Bash(gh pr comment:*)" "Bash(gh pr review:*)" "Bash(gh pr diff:*)" "Bash(gh pr view:*)" "mcp__github_inline_comment__create_inline_comment"'
           prompt: |
-            Review this PR for bugs, correctness issues, and code style.
+            Review ONLY the changes in this PR's diff. Do not review the wider codebase.
+            Run `gh pr diff` to see the diff and restrict your review strictly to those changes.
             Focus on: mathematical correctness, edge cases (division by zero, buffer overflows, off-by-one errors), and consistency with existing code style.
             Only flag issues that matter — no nitpicks.
-            If you find issues, use `gh pr review --request-changes` to block the merge.
-            If the code looks good, use `gh pr review --approve`.
+            If the diff is empty or contains no issues, use `gh pr review --approve`.
+            If you find issues in the diff, use `gh pr review --request-changes`.
