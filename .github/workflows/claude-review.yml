@@ -28,3 +28,8 @@ jobs:
       - uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            Review this PR for bugs, correctness issues, and code style.
+            Focus on: mathematical correctness, edge cases (division by zero, buffer overflows, off-by-one errors), and consistency with existing code style.
+            Only flag issues that matter — no nitpicks.
+            Use inline comments for specific issues and a summary comment for overall assessment.
