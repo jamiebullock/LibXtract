@@ -1664,3 +1664,176 @@ TEST_CASE("xtract_mean return value", "[scalar]")
     int rv = xtract_mean(data, 3, NULL, &result);
     REQUIRE(rv == XTRACT_SUCCESS);
 }
+
+/* ===== More Scalar Features ===== */
+
+TEST_CASE("xtract_irregularity_k", "[scalar][spectral]")
+{
+    double result = 0.0;
+
+    SECTION("constant spectrum has zero irregularity")
+    {
+        /* Each bin equals the average of its neighbours => 0 */
+        double data[] = {5.0, 5.0, 5.0, 5.0, 5.0};
+        xtract_irregularity_k(data, 5, NULL, &result);
+        REQUIRE(result == Approx(0.0).margin(EPSILON));
+    }
+
+    SECTION("known irregularity for [1, 3, 1, 3, 1]")
+    {
+        /* For n=1: |3 - (1+3+1)/3| = |3 - 5/3| = 4/3
+         * For n=2: |1 - (3+1+3)/3| = |1 - 7/3| = 4/3
+         * For n=3: |3 - (1+3+1)/3| = |3 - 5/3| = 4/3
+         * total = 4 */
+        double data[] = {1.0, 3.0, 1.0, 3.0, 1.0};
+        xtract_irregularity_k(data, 5, NULL, &result);
+        REQUIRE(result == Approx(4.0).epsilon(EPSILON));
+    }
+}
+
+TEST_CASE("xtract_irregularity_j", "[scalar][spectral]")
+{
+    double result = 0.0;
+
+    SECTION("constant spectrum has zero irregularity")
+    {
+        /* All differences are 0 => 0/den = 0 */
+        double data[] = {5.0, 5.0, 5.0, 5.0};
+        xtract_irregularity_j(data, 4, NULL, &result);
+        REQUIRE(result == Approx(0.0).margin(EPSILON));
+    }
+
+    SECTION("known irregularity for [1, 2]")
+    {
+        /* num = (1-2)^2 = 1, den = 1^2 = 1 => result = 1.0 */
+        double data[] = {1.0, 2.0};
+        xtract_irregularity_j(data, 2, NULL, &result);
+        REQUIRE(result == Approx(1.0).epsilon(EPSILON));
+    }
+}
+
+TEST_CASE("xtract_flatness_db", "[scalar]")
+{
+    double result = 0.0;
+
+    SECTION("flatness=1.0 => 0 dB")
+    {
+        /* 10 * log10(1.0) = 0 */
+        double flatness = 1.0;
+        xtract_flatness_db(NULL, 0, &flatness, &result);
+        REQUIRE(result == Approx(0.0).margin(EPSILON));
+    }
+
+    SECTION("flatness=0.1 => -10 dB")
+    {
+        /* 10 * log10(0.1) = -10 */
+        double flatness = 0.1;
+        xtract_flatness_db(NULL, 0, &flatness, &result);
+        REQUIRE(result == Approx(-10.0).epsilon(1e-6));
+    }
+}
+
+TEST_CASE("xtract_tonality", "[scalar]")
+{
+    double result = 0.0;
+
+    SECTION("SFM dB = 0 => tonality = 0 (noise-like)")
+    {
+        /* tonality = min(0 / -60, 1) = 0 */
+        double sfmdb = 0.0;
+        xtract_tonality(NULL, 0, &sfmdb, &result);
+        REQUIRE(result == Approx(0.0).margin(EPSILON));
+    }
+
+    SECTION("SFM dB = -60 => tonality = 1 (tonal)")
+    {
+        /* tonality = min(-60 / -60, 1) = 1 */
+        double sfmdb = -60.0;
+        xtract_tonality(NULL, 0, &sfmdb, &result);
+        REQUIRE(result == Approx(1.0).epsilon(EPSILON));
+    }
+
+    SECTION("SFM dB = -30 => tonality = 0.5")
+    {
+        double sfmdb = -30.0;
+        xtract_tonality(NULL, 0, &sfmdb, &result);
+        REQUIRE(result == Approx(0.5).epsilon(EPSILON));
+    }
+}
+
+TEST_CASE("xtract_noisiness", "[scalar]")
+{
+    double result = 0.0;
+
+    SECTION("all harmonic => noisiness = 0")
+    {
+        /* harmonics=10, partials=10 => inharmonics=0, noisiness=0/10=0 */
+        double argv[] = {10.0, 10.0};
+        xtract_noisiness(NULL, 0, argv, &result);
+        REQUIRE(result == Approx(0.0).margin(EPSILON));
+    }
+
+    SECTION("half harmonic => noisiness = 0.5")
+    {
+        /* harmonics=5, partials=10 => inharmonics=5, noisiness=5/10=0.5 */
+        double argv[] = {5.0, 10.0};
+        xtract_noisiness(NULL, 0, argv, &result);
+        REQUIRE(result == Approx(0.5).epsilon(EPSILON));
+    }
+
+    SECTION("zero partials returns XTRACT_NO_RESULT")
+    {
+        double argv[] = {0.0, 0.0};
+        int rv = xtract_noisiness(NULL, 0, argv, &result);
+        REQUIRE(rv == XTRACT_NO_RESULT);
+    }
+}
+
+TEST_CASE("xtract_spread", "[scalar][spectral]")
+{
+    double result = 0.0;
+
+    SECTION("spread delegates to spectral_variance")
+    {
+        /* Same test as spectral_variance: should give identical result */
+        double data[] = {1.0, 3.0, 100.0, 300.0};
+        double argv[] = {250.0};
+        xtract_spread(data, 4, argv, &result);
+        REQUIRE(result == Approx(7500.0).epsilon(EPSILON));
+    }
+}
+
+TEST_CASE("xtract_smoothness", "[scalar][spectral]")
+{
+    double result = 0.0;
+
+    SECTION("constant spectrum has zero smoothness deviation")
+    {
+        /* All log values are equal, so each bin matches its 3-point average
+         * => smoothness = 0 */
+        double data[] = {10.0, 10.0, 10.0, 10.0, 10.0};
+        xtract_smoothness(data, 5, NULL, &result);
+        REQUIRE(result == Approx(0.0).margin(1e-9));
+    }
+}
+
+TEST_CASE("xtract_spectral_slope known value", "[scalar][spectral]")
+{
+    double result = 0.0;
+
+    SECTION("slope of linearly increasing spectrum")
+    {
+        /* 4 bins: amps=[0,1,2,3] at freqs=[0,100,200,300]
+         * M=4, F=0+100+200+300=600, A=0+1+2+3=6
+         * FA=0+100+400+900=1400, F^2=0+10000+40000+90000=140000
+         * slope = (1/A) * (M*FA - F*A) / (M*F^2 - F^2_sum... wait)
+         * slope = (1/6) * (4*1400 - 600*6) / (4*140000 - 600*600)
+         *       = (1/6) * (5600 - 3600) / (560000 - 360000)
+         *       = (1/6) * 2000 / 200000
+         *       = (1/6) * 0.01 = 1/600 */
+        double data[] = {0.0, 1.0, 2.0, 3.0,
+                         0.0, 100.0, 200.0, 300.0};
+        xtract_spectral_slope(data, 8, NULL, &result);
+        REQUIRE(result == Approx(1.0 / 600.0).epsilon(1e-9));
+    }
+}
