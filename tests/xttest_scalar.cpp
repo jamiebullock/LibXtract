@@ -1677,13 +1677,24 @@ TEST_CASE("xtract_irregularity_j", "[scalar][spectral]")
         xtract_irregularity_j(data, 4, NULL, &result);
         REQUIRE(result == Approx(0.0).margin(EPSILON));
     }
+}
 
-    SECTION("known irregularity for [1, 2]")
+TEST_CASE("xtract_irregularity_j known value", "[scalar][spectral][known-bug][!mayfail]")
+{
+    double result = 0.0;
+
+    SECTION("Jensen irregularity of [1, 2]")
     {
-        /* num = (1-2)^2 = 1, den = 1^2 = 1 => result = 1.0 */
+        /* J = sum((x[n] - x[n+1])^2) / sum(x[n]^2)
+         * num = (1-2)^2 = 1
+         * den = 1^2 + 2^2 = 5
+         * J = 1/5 = 0.2
+         *
+         * BUG: code only sums data[0..N-2] in den, missing data[N-1].
+         * Produces 1/1 = 1.0 instead of 1/5 = 0.2. */
         double data[] = {1.0, 2.0};
         xtract_irregularity_j(data, 2, NULL, &result);
-        REQUIRE(result == Approx(1.0).epsilon(EPSILON));
+        REQUIRE(result == Approx(0.2).epsilon(EPSILON));
     }
 }
 
