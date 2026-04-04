@@ -29,11 +29,13 @@ jobs:
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           show_full_output: true
-          claude_args: '--allowedTools "Read" "Glob" "Grep" "Bash(gh pr comment:*)" "Bash(gh pr review:*)" "Bash(gh pr diff:*)" "Bash(gh pr view:*)" "mcp__github_inline_comment__create_inline_comment"'
+          claude_args: '--allowedTools "Bash(gh pr diff:*)" "Bash(gh pr view:*)" "Bash(gh pr comment:*)" "Bash(gh pr review:*)" "mcp__github_inline_comment__create_inline_comment"'
           prompt: |
-            Review ONLY the changes in this PR's diff. Do not review the wider codebase.
-            Run `gh pr diff` to see the diff and restrict your review strictly to those changes.
+            Review ONLY the changes in this PR's diff. Do not read files or explore the codebase.
+            Use `gh pr diff ${{ github.event.pull_request.number }}` to get the diff.
+            If the diff is empty, use `gh pr review ${{ github.event.pull_request.number }} --approve --body "No changes to review."`.
+            Otherwise, review the diff for bugs, correctness issues, and code style.
             Focus on: mathematical correctness, edge cases (division by zero, buffer overflows, off-by-one errors), and consistency with existing code style.
             Only flag issues that matter — no nitpicks.
-            If the diff is empty or contains no issues, use `gh pr review --approve`.
-            If you find issues in the diff, use `gh pr review --request-changes`.
+            If you find issues, use `gh pr review ${{ github.event.pull_request.number }} --request-changes --body "your review"`.
+            If the code looks good, use `gh pr review ${{ github.event.pull_request.number }} --approve --body "your review"`.
