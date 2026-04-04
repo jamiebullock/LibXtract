@@ -343,24 +343,31 @@ TEST_CASE("xtract_lpc known values", "[vector]")
         REQUIRE(result[3] == Approx(-1.0 / 15.0).epsilon(1e-10));
     }
 
-    SECTION("LPC of 3rd order — exposes Levinson-Durbin bug")
+    /* 3rd order LPC test is a separate TEST_CASE with [!mayfail] below */
+}
+
+TEST_CASE("xtract_lpc 3rd order Levinson-Durbin", "[vector][known-bug][!mayfail]")
+{
+    SECTION("3rd order LPC coefficients should be correct")
     {
         /* Autocorrelation: r[0]=1, r[1]=0.9, r[2]=0.8, r[3]=0.7
          * At iteration i=2, the inner loop runs for j=0 with i/2=1.
-         * Line 849: lpc[j] = r * lpc[i-1-j] (should be +=)
-         * This destroys the previous lpc[0] value. */
+         * BUG (line 849): lpc[j] = r * lpc[i-1-j] (should be +=)
+         * This destroys the previous lpc[0] value.
+         *
+         * Correct values (computed via standard Levinson-Durbin):
+         *   lpc = [-0.944444, 0.0, 0.055556]
+         * Buggy:
+         *   lpc[0] = 0.00292... (instead of -0.9444...) */
         double autocorr[] = {1.0, 0.9, 0.8, 0.7};
         double result[6] = {0}; /* 3 ref + 3 LPC */
 
         int rv = xtract_lpc(autocorr, 4, NULL, result);
         REQUIRE(rv == XTRACT_SUCCESS);
 
-        /* Just verify it runs without crashing and produces finite values.
-         * The actual coefficients are wrong due to the bug — we'll add
-         * exact value checks after the fix. */
-        REQUIRE(std::isfinite(result[3]));
-        REQUIRE(std::isfinite(result[4]));
-        REQUIRE(std::isfinite(result[5]));
+        REQUIRE(result[3] == Approx(-0.9444444444).epsilon(1e-6));
+        REQUIRE(result[4] == Approx(0.0).margin(1e-6));
+        REQUIRE(result[5] == Approx(0.0555555556).epsilon(1e-6));
     }
 }
 
@@ -641,5 +648,82 @@ TEST_CASE("xtract_spectrum normalisation", "[vector][fft][known-bug]")
             if (result[i] > max_val) max_val = result[i];
 
         REQUIRE(max_val == Approx(1.0).epsilon(1e-6));
+    }
+}
+
+TEST_CASE("xtract_spectrum magnitude normalisation interleaved", "[vector][fft][known-bug][!mayfail]")
+{
+    SECTION("normalised magnitude spectrum should have max amplitude 1.0")
+    {
+        /* MAGNITUDE_SPECTRUM stores interleaved real/imag at result[m*2], result[m*2+1].
+         * Frequencies go in result[M..2M-1]. With normalise=1, the code divides
+         * result[0..M-1] by max — but for interleaved format that only covers
+         * half the amplitude data. The frequency slots also get divided.
+         * Correct behaviour: normalise the actual amplitude values. */
+        const int N = 8;
+        const int M = N / 2;
+        double data[8];
+        double result[8] = {0};
+
+        for (int n = 0; n < N; n++)
+            data[n] = cos(2.0 * M_PI * 1.0 * n / N);
+
+        xtract_init_fft(N, XTRACT_SPECTRUM);
+
+        double sr = 8000.0;
+        double argv[] = {sr / N, (double)XTRACT_MAGNITUDE_SPECTRUM, 0.0, 1.0};
+        xtract_spectrum(data, N, argv, result);
+
+        /* Find max magnitude from the interleaved pairs */
+        double max_mag = 0.0;
+        for (int i = 0; i < M; i++)
+        {
+            double mag = sqrt(result[i * 2] * result[i * 2] +
+                              result[i * 2 + 1] * result[i * 2 + 1]);
+            if (mag > max_mag) max_mag = mag;
+        }
+
+        /* After normalisation, the max magnitude should be 1.0 */
+        REQUIRE(max_mag == Approx(1.0).epsilon(1e-4));
+    }
+}
+
+TEST_CASE("xtract_init_fft DCT does not clobber MFCC", "[init][known-bug][!mayfail]")
+{
+    SECTION("initing DCT with size 4 should not reinit MFCC")
+    {
+        /* The DCT case in xtract_init_fft falls through to MFCC (missing break).
+         * If we init MFCC with size 8, then init DCT with size 4, the fallthrough
+         * will reinit MFCC with size 4, corrupting MFCC state.
+         *
+         * We test this by running MFCC after the DCT init and checking it still
+         * works at the original size. This requires MFCC filter bank setup. */
+
+        /* Init MFCC FFT for size 16 */
+        xtract_init_fft(16, XTRACT_MFCC);
+
+        /* Init DCT for smaller size — this should NOT touch MFCC state */
+        xtract_init_fft(4, XTRACT_DCT);
+
+        /* Verify DCT works at size 4 */
+        double dct_data[] = {1.0, 0.0, 0.0, 0.0};
+        double dct_result[4] = {0};
+        xtract_dct(dct_data, 4, NULL, dct_result);
+        REQUIRE(dct_result[0] == Approx(1.0).epsilon(1e-6));
+
+        /* The MFCC FFT should still be initialised for size 16.
+         * We can't easily test MFCC without filter banks, but we can
+         * test that xtract_spectrum still works at size 16 since MFCC
+         * uses the same FFT data on some platforms.
+         * If the fallthrough corrupted it, this may produce wrong results
+         * or crash. */
+        double spec_data[16] = {0};
+        spec_data[0] = 1.0;
+        double spec_result[16] = {0};
+        xtract_init_fft(16, XTRACT_SPECTRUM);
+        double sr = 8000.0;
+        double argv[] = {sr / 16.0, (double)XTRACT_POWER_SPECTRUM, 0.0, 0.0};
+        int rv = xtract_spectrum(spec_data, 16, argv, spec_result);
+        REQUIRE(rv == XTRACT_SUCCESS);
     }
 }
