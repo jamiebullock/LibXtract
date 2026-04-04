@@ -1598,32 +1598,7 @@ TEST_CASE("xtract_spectral_slope", "[scalar][spectral]")
 
 /* ===== Edge Cases and Known Bugs ===== */
 
-TEST_CASE("xtract_irregularity_j divide-by-zero guard", "[scalar][edge-case]")
-{
-    double result = 0.0;
-
-    SECTION("all-zero input should not crash")
-    {
-        double data[] = {0.0, 0.0, 0.0, 0.0};
-        int rv = xtract_irregularity_j(data, 4, NULL, &result);
-        /* Should return without crashing. Result may be 0 or NaN
-         * but must not segfault. */
-        (void)rv;
-    }
-}
-
-TEST_CASE("xtract_crest divide-by-zero guard", "[scalar][edge-case]")
-{
-    double result = 0.0;
-
-    SECTION("zero mean should not crash")
-    {
-        double data[] = {0.0, 0.0, 0.0, 0.0};
-        double argv[] = {0.0, 0.0}; /* max=0, mean=0 */
-        int rv = xtract_crest(data, 4, argv, &result);
-        (void)rv;
-    }
-}
+/* Edge case tests for known bugs are in xttest_vector.cpp with [!mayfail] tags */
 
 TEST_CASE("xtract_rolloff", "[scalar]")
 {
