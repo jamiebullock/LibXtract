@@ -21,18 +21,13 @@
  *
  * The ring buffer's head pointer points to the starting location
  * where data should be written when copying data *into* the buffer
- * (e.g., with ringbuf_read). The ring buffer's tail pointer points to
- * the starting location where data should be read when copying data
- * *from* the buffer (e.g., with ringbuf_write).
+ * (e.g., with ringbuf_memcpy_into). The ring buffer's tail pointer
+ * points to the starting location where data should be read when
+ * copying data *from* the buffer (e.g., with ringbuf_memcpy_from).
  */
 
 #include <stddef.h>
-#include <sys/types.h>
 #include <stdbool.h>
-
-#ifdef _MSC_VER
-	typedef ptrdiff_t ssize_t;
-#endif
 
 typedef struct ringbuf_t *ringbuf_t;
 
@@ -161,24 +156,6 @@ void *
 ringbuf_memcpy_into(ringbuf_t dst, const void *src, size_t count);
 
 /*
- * This convenience function calls read(2) on the file descriptor fd,
- * using the ring buffer rb as the destination buffer for the read,
- * and returns the value returned by read(2). It will only call
- * read(2) once, and may return a short count.
- *
- * It is possible to read more data from the file descriptor than is
- * available in the buffer; i.e., it's possible to overflow the ring
- * buffer using this function. When an overflow occurs, the state of
- * the ring buffer is guaranteed to be consistent, including the head
- * and tail pointers: old data will simply be overwritten in FIFO
- * fashion, as needed. However, note that, if calling the function
- * results in an overflow, the value of the ring buffer's tail pointer
- * may be different than it was before the function was called.
- */
-ssize_t
-ringbuf_read(int fd, ringbuf_t rb, size_t count);
-
-/*
  * Copy n bytes from the ring buffer src, starting from its tail
  * pointer, into a contiguous memory area dst. Returns the value of
  * src's tail pointer after the copy is finished.
@@ -196,29 +173,6 @@ ringbuf_read(int fd, ringbuf_t rb, size_t count);
  */
 void *
 ringbuf_memcpy_from(void *dst, ringbuf_t src, size_t count, bool destroy);
-
-/*
- * This convenience function calls write(2) on the file descriptor fd,
- * using the ring buffer rb as the source buffer for writing (starting
- * at the ring buffer's tail pointer), and returns the value returned
- * by write(2). It will only call write(2) once, and may return a
- * short count.
- *
- * Note that this copy is destructive with respect to the ring buffer:
- * any bytes written from the ring buffer to the file descriptor are
- * no longer available in the ring buffer after the copy is complete,
- * and the ring buffer will have N more free bytes than it did before
- * the function was called, where N is the value returned by the
- * function (unless N is < 0, in which case an error occurred and no
- * bytes were written).
- *
- * This function will *not* allow the ring buffer to underflow. If
- * count is greater than the number of bytes used in the ring buffer,
- * no bytes are written to the file descriptor, and the function will
- * return 0.
- */
-ssize_t
-ringbuf_write(int fd, ringbuf_t rb, size_t count);
 
 /*
  * Copy count bytes from ring buffer src, starting from its tail
