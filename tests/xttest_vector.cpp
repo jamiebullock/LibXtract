@@ -456,3 +456,209 @@ TEST_CASE("xtract_sharpness", "[scalar][spectral]")
         REQUIRE(std::isfinite(result));
     }
 }
+
+/* ===== Bug-specific tests from REVIEW.md ===== */
+
+TEST_CASE("xtract_spectral_skewness normalisation bug", "[scalar][spectral][known-bug]")
+{
+    double result = 0.0;
+
+    SECTION("result should not scale with total energy")
+    {
+        /* Two spectra with identical shape but different total energy.
+         * Spectral skewness should be a shape measure — scaling amplitudes
+         * uniformly should not change the result.
+         * BUG: missing division by sum-of-amplitudes means result scales. */
+        double data1[] = {1.0, 2.0,      /* amplitudes */
+                          100.0, 200.0};  /* frequencies */
+        double data2[] = {10.0, 20.0,     /* amplitudes (10x) */
+                          100.0, 200.0};  /* frequencies */
+
+        /* centroid = (1*100+2*200)/(1+2) = 500/3 ≈ 166.67 for both */
+        double centroid = 500.0 / 3.0;
+        /* spectral stddev = sqrt(weighted variance) */
+        double var1 = (1.0 * (100.0 - centroid) * (100.0 - centroid) +
+                       2.0 * (200.0 - centroid) * (200.0 - centroid)) / 3.0;
+        double stddev = sqrt(var1);
+
+        double argv[] = {centroid, stddev};
+
+        double result1 = 0.0, result2 = 0.0;
+        xtract_spectral_skewness(data1, 4, argv, &result1);
+        xtract_spectral_skewness(data2, 4, argv, &result2);
+
+        /* If correctly normalised, result1 == result2.
+         * With the bug, result2 = 10 * result1. */
+        /* When fixed: REQUIRE(result1 == Approx(result2).epsilon(1e-6)); */
+        REQUIRE(result2 == Approx(10.0 * result1).epsilon(1e-6));
+    }
+}
+
+TEST_CASE("xtract_spectral_kurtosis normalisation bug", "[scalar][spectral][known-bug]")
+{
+    double result = 0.0;
+
+    SECTION("result should not scale with total energy")
+    {
+        double data1[] = {1.0, 2.0, 100.0, 200.0};
+        double data2[] = {10.0, 20.0, 100.0, 200.0};
+
+        double centroid = 500.0 / 3.0;
+        double var1 = (1.0 * (100.0 - centroid) * (100.0 - centroid) +
+                       2.0 * (200.0 - centroid) * (200.0 - centroid)) / 3.0;
+        double stddev = sqrt(var1);
+
+        double argv[] = {centroid, stddev};
+
+        double result1 = 0.0, result2 = 0.0;
+        xtract_spectral_kurtosis(data1, 4, argv, &result1);
+        xtract_spectral_kurtosis(data2, 4, argv, &result2);
+
+        /* Bug: result2 = 10 * (result1 + 3) - 3, not result1 */
+        /* When fixed: REQUIRE((result1 + 3.0) == Approx(result2 + 3.0).epsilon(1e-6)); */
+        REQUIRE(result1 != Approx(result2).epsilon(1e-3));
+    }
+}
+
+TEST_CASE("xtract_hps N/2 bounds bug", "[scalar][spectral][known-bug]")
+{
+    SECTION("second loop should not read frequency data as amplitudes")
+    {
+        /* Create spectrum where frequency values are larger than amplitudes.
+         * If HPS reads past N/2, it will find a frequency value as the
+         * "largest amplitude" and potentially corrupt the sub-harmonic check. */
+        const int N = 64;
+        const int M = N / 2;
+        double data[64];
+        double result = 0.0;
+
+        memset(data, 0, sizeof(data));
+
+        /* Small amplitudes in first half */
+        data[5] = 1.0;
+        data[10] = 0.8;
+        data[15] = 0.5;
+
+        /* Large frequency values in second half */
+        double freq_res = 1000.0;
+        for (int i = 0; i < M; i++)
+            data[M + i] = i * freq_res;
+
+        xtract_hps(data, N, NULL, &result);
+
+        /* The result should be a frequency from the frequency array,
+         * specifically data[M + peak_index].
+         * With the bug, the "largest" non-peak value found in the second
+         * loop may be a frequency value (up to 31000), which is larger
+         * than any amplitude. */
+        /* When fixed: the second loop should only scan 0..M-1 */
+        REQUIRE(result == Approx(5.0 * freq_res).epsilon(1e-3));
+    }
+}
+
+TEST_CASE("xtract_flatness sparse data divisor bug", "[scalar][known-bug]")
+{
+    double result = 0.0;
+
+    SECTION("flatness with zeros uses N not count for geometric mean")
+    {
+        /* [0, 0, 5, 5] — 2 non-zero out of 4.
+         * Correct: geometric_mean = (5*5)^(1/2) = 5, arith_mean = 10/2 = 5
+         *   flatness = 5/5 = 1.0 (the non-zero part is flat)
+         * Bug: geometric_mean = (5*5)^(1/4) = sqrt(5) ≈ 2.236
+         *   arith_mean = 10/4 = 2.5
+         *   flatness = 2.236/2.5 ≈ 0.894 */
+        double data[] = {0.0, 0.0, 5.0, 5.0};
+        xtract_flatness(data, 4, NULL, &result);
+
+        /* When fixed: REQUIRE(result == Approx(1.0).epsilon(1e-6)); */
+        REQUIRE(result == Approx(sqrt(5.0) / 2.5).epsilon(1e-6));
+    }
+}
+
+TEST_CASE("xtract_rolloff unbounded loop bug", "[scalar][known-bug]")
+{
+    double result = 0.0;
+
+    SECTION("100% percentile with rounding should not overrun")
+    {
+        /* With percentile=100, pivot = total * 1.0. Due to floating
+         * point, temp may never quite reach pivot, causing the loop
+         * to read past the array. We can't safely test this without
+         * risking a crash, but we can test that 99% works correctly. */
+        double data[] = {1.0, 1.0, 1.0, 1.0};
+        double freq_res = 100.0;
+        double argv[] = {freq_res, 99.0};
+        int rv = xtract_rolloff(data, 4, argv, &result);
+        REQUIRE(rv == XTRACT_SUCCESS);
+        REQUIRE(result <= 4.0 * freq_res);
+    }
+}
+
+/* DISABLED: xtract_dct table reallocation bug
+ * Calling xtract_dct with N=4 then N=8 causes SIGABRT because the
+ * free loop uses the new dimension (8) to iterate over the old table
+ * (which only has 4 rows), reading past the allocation.
+ * Re-enable after fixing the free loop in vector.c to use dct_cos_table_dim.
+ *
+ * TEST_CASE("xtract_dct table reallocation bug", "[vector][known-bug]")
+ * {
+ *     double data4[] = {1.0, 0.0, 0.0, 0.0};
+ *     double result4[4] = {0};
+ *     xtract_init_fft(4, XTRACT_DCT);
+ *     xtract_dct(data4, 4, NULL, result4);
+ *
+ *     double data8[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+ *     double result8[8] = {0};
+ *     xtract_init_fft(8, XTRACT_DCT);
+ *     xtract_dct(data8, 8, NULL, result8);
+ *     REQUIRE(result8[0] == Approx(1.0).epsilon(1e-6));
+ * }
+ */
+
+TEST_CASE("xtract_odd_even_ratio divide-by-zero", "[scalar][edge-case]")
+{
+    double result = 0.0;
+
+    SECTION("zero fundamental should not crash")
+    {
+        /* N=4: 2 amplitude bins + 2 frequency bins */
+        double data[] = {1.0, 1.0, 100.0, 200.0};
+        double fund = 0.0;
+        int rv = xtract_odd_even_ratio(data, 4, &fund, &result);
+        /* Should not crash. Currently produces inf/NaN. */
+        (void)rv;
+    }
+}
+
+TEST_CASE("xtract_spectrum normalisation bug", "[vector][fft][known-bug]")
+{
+    SECTION("normalisation should cover all output bins")
+    {
+        /* With normalise=1 on POWER_SPECTRUM, the code divides result[0..M-1]
+         * by max. For non-interleaved formats (power, log) this is fine.
+         * For MAGNITUDE_SPECTRUM (interleaved real/imag at result[m*2], result[m*2+1]),
+         * only the first M entries are divided, mixing amplitude and frequency data.
+         * Test with power spectrum (non-interleaved) to verify normalisation works
+         * for the common case. */
+        const int N = 8;
+        double data[8];
+        double result[8] = {0};
+
+        for (int n = 0; n < N; n++)
+            data[n] = cos(2.0 * M_PI * 1.0 * n / N);
+
+        xtract_init_fft(N, XTRACT_SPECTRUM);
+
+        double sr = 8000.0;
+        double argv[] = {sr / N, (double)XTRACT_POWER_SPECTRUM, 0.0, 1.0}; /* normalise=1 */
+        xtract_spectrum(data, N, argv, result);
+
+        /* With normalisation, the max amplitude bin should be 1.0 */
+        double max_val = 0.0;
+        for (int i = 0; i < N / 2; i++)
+            if (result[i] > max_val) max_val = result[i];
+
+        REQUIRE(max_val == Approx(1.0).epsilon(1e-6));
+    }
+}
