@@ -24,6 +24,8 @@
 /* helper.c: helper functions. */
 
 #include <stdio.h>
+#include <string.h>
+#include <stdint.h>
 
 #include "xtract/libxtract.h"
 
@@ -66,6 +68,11 @@ int xtract_features_from_subframes(const double *data, const int N, const int fe
     result1 = result;
     result2 = result + n;
 
+    if(feature < 0 || feature >= XTRACT_FEATURES)
+    {
+        return XTRACT_ARGUMENT_ERROR;
+    }
+
     rv = xtract[feature](frame1, n, argv, result1);
 
     if(rv == XTRACT_SUCCESS)
@@ -101,14 +108,12 @@ int xtract_smoothed(const double *data, const int N, const void *argv, double *r
 }
 
 
-//inline int xtract_is_denormal(double const d)
 int xtract_is_denormal(double const d)
 {
-    if(sizeof(d) != 2 * sizeof(int))
-        fprintf(stderr, "libxtract: Error: xtract_is_denormal() detects inconsistent wordlength for type 'double'\n");
-
-    int l = ((int *)&d)[INDEX];
-    return (l&0x7ff00000) == 0 && d!=0; //Check for 0 may not be necessary
+    uint64_t bits;
+    memcpy(&bits, &d, sizeof(bits));
+    int exponent = (int)((bits >> 52) & 0x7ff);
+    return exponent == 0 && d != 0.0;
 }
 
 //inline bool xtract_is_poweroftwo(unsigned int x)
