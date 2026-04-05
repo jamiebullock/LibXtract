@@ -1018,9 +1018,12 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_NOISINESS:
         case XTRACT_CREST:
         case XTRACT_ROLLOFF:
+            *argc = 2;
+            *argv_type = XTRACT_FLOAT;
+            break;
         case XTRACT_FLUX:
         case XTRACT_LNORM:
-            *argc = 2;
+            *argc = 3;
             *argv_type = XTRACT_FLOAT;
             break;
         case XTRACT_SPECTRUM:
