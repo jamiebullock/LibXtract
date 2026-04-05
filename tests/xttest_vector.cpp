@@ -639,7 +639,7 @@ TEST_CASE("xtract_spectrum normalisation", "[vector][fft][known-bug]")
     }
 }
 
-TEST_CASE("xtract_spectrum magnitude normalisation interleaved", "[vector][fft][known-bug][!mayfail]")
+TEST_CASE("xtract_spectrum magnitude normalisation interleaved", "[vector][fft]")
 {
     SECTION("normalised magnitude spectrum should have max amplitude 1.0")
     {

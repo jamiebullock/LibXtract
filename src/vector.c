@@ -372,10 +372,31 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
         break;
     }
 
-    if(normalise)
+    if(normalise && max != 0.0)
     {
-        for(n = 0; n < M; n++)
-            result[n] /= max;
+        if(vector == XTRACT_MAGNITUDE_SPECTRUM || vector == XTRACT_SPECTRUM_COEFFICIENTS)
+        {
+            /* Interleaved formats: find true max magnitude, then scale both components */
+            double true_max = 0.0;
+            for(n = 0; n < M; n++)
+            {
+                double mag = sqrt(XTRACT_SQ(result[n*2]) + XTRACT_SQ(result[n*2+1]));
+                if(mag > true_max) true_max = mag;
+            }
+            if(true_max != 0.0)
+            {
+                for(n = 0; n < M; n++)
+                {
+                    result[n*2] /= true_max;
+                    result[n*2+1] /= true_max;
+                }
+            }
+        }
+        else
+        {
+            for(n = 0; n < M; n++)
+                result[n] /= max;
+        }
     }
 
 #ifdef USE_OOURA
@@ -407,10 +428,10 @@ int xtract_autocorrelation_fft(const double *data, const int N, const void *argv
     rdft(M, 1, rfft, ooura_data_autocorrelation_fft.ooura_ip, 
             ooura_data_autocorrelation_fft.ooura_w);
 
-    for(n = 2; n < M; ++n)
+    for(n = 2; n < M; n += 2)
     {
-        rfft[n*2] = XTRACT_SQ(rfft[n*2]) + XTRACT_SQ(rfft[n*2+1]);
-        rfft[n*2+1] = 0.0;
+        rfft[n] = XTRACT_SQ(rfft[n]) + XTRACT_SQ(rfft[n+1]);
+        rfft[n+1] = 0.0;
     }
 
     rfft[0] = XTRACT_SQ(rfft[0]);
