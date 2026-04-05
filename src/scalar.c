@@ -628,8 +628,8 @@ int xtract_flatness(const double *data, const int N, const void *argv, double *r
         return XTRACT_NO_RESULT;
     }
 
-    num = pow(num, 1.0 / (double)N);
-    den /= (double)N;
+    num = pow(num, 1.0 / (double)count);
+    den /= (double)count;
 
 
     *result = (double) (num / den);
@@ -978,7 +978,7 @@ int xtract_hps(const double *data, const int N, const void *argv, double *result
 
     largest1_lwr = position1_lwr = 0;
 
-    for(i = 0; i < N; ++i)
+    for(i = 0; i < n; ++i)
     {
         if(data[i] > largest1_lwr && i != peak_index)
         {

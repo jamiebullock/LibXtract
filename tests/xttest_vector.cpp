@@ -521,7 +521,7 @@ TEST_CASE("xtract_spectral_kurtosis normalisation", "[scalar][spectral]")
     }
 }
 
-TEST_CASE("xtract_hps N/2 bounds", "[scalar][spectral][known-bug][!mayfail]")
+TEST_CASE("xtract_hps N/2 bounds", "[scalar][spectral]")
 {
     SECTION("second loop should not read frequency data as amplitudes")
     {
@@ -546,7 +546,7 @@ TEST_CASE("xtract_hps N/2 bounds", "[scalar][spectral][known-bug][!mayfail]")
     }
 }
 
-TEST_CASE("xtract_flatness sparse data divisor", "[scalar][known-bug][!mayfail]")
+TEST_CASE("xtract_flatness sparse data divisor", "[scalar]")
 {
     double result = 0.0;
 
