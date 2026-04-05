@@ -98,6 +98,7 @@ int xtract_init_ooura_(int N, int feature_name)
             xtract_free_ooura_data(&ooura_data_dct);
         }
         xtract_init_ooura_data(&ooura_data_dct, M);
+        break;
     case XTRACT_MFCC:
         if(ooura_data_mfcc.initialised)
         {
@@ -173,6 +174,7 @@ int xtract_init_vdsp_(int N, int feature_name)
             xtract_free_vdsp_data(&vdsp_data_dct);
         }
         xtract_init_vdsp_data(&vdsp_data_dct, N);
+        break;
     case XTRACT_MFCC:
         if(vdsp_data_mfcc.initialised)
         {

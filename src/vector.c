@@ -601,7 +601,7 @@ int xtract_dct(const double *data, const int N, const void *argv, double *result
     // Free the dct table if the cached dimension is different from the new dimension
     if (dct_cos_table != NULL && dct_cos_table_dim != N)
     {
-        for (n = 0; n < N; ++n)
+        for (n = 0; n < dct_cos_table_dim; ++n)
         {
           free(dct_cos_table[n]);
         }

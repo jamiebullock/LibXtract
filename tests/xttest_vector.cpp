@@ -578,20 +578,23 @@ TEST_CASE("xtract_peak_spectrum threshold", "[vector][known-bug][!mayfail]")
     }
 }
 
-/* DISABLED: xtract_dct table reallocation — crashes with SIGABRT.
- * The free loop uses the new dimension to iterate over the old table.
- * [!mayfail] cannot recover from a fatal signal.
- * Re-enable after fixing vector.c to use dct_cos_table_dim in the free loop.
- *
- * TEST_CASE("xtract_dct table reallocation", "[vector][known-bug]")
- * {
- *     xtract_init_fft(4, XTRACT_DCT);
- *     xtract_dct(data4, 4, NULL, result4);
- *     xtract_init_fft(8, XTRACT_DCT);  // triggers buggy realloc
- *     xtract_dct(data8, 8, NULL, result8);
- *     REQUIRE(result8[0] == Approx(1.0).epsilon(1e-6));
- * }
- */
+TEST_CASE("xtract_dct table reallocation", "[vector]")
+{
+    SECTION("changing DCT size should not crash")
+    {
+        double data4[] = {1.0, 0.0, 0.0, 0.0};
+        double result4[4] = {0};
+        xtract_init_fft(4, XTRACT_DCT);
+        xtract_dct(data4, 4, NULL, result4);
+        REQUIRE(result4[0] == Approx(1.0).epsilon(1e-6));
+
+        double data8[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+        double result8[8] = {0};
+        xtract_init_fft(8, XTRACT_DCT);
+        xtract_dct(data8, 8, NULL, result8);
+        REQUIRE(result8[0] == Approx(1.0).epsilon(1e-6));
+    }
+}
 
 TEST_CASE("xtract_odd_even_ratio divide-by-zero", "[scalar][edge-case]")
 {
@@ -693,7 +696,7 @@ TEST_CASE("xtract_spectrum magnitude normalisation interleaved", "[vector][fft][
     }
 }
 
-TEST_CASE("xtract_init_fft DCT does not clobber MFCC", "[init][known-bug][!mayfail]")
+TEST_CASE("xtract_init_fft DCT does not clobber MFCC", "[init]")
 {
     SECTION("initing DCT with size 4 should not reinit MFCC")
     {
