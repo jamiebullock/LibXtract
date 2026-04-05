@@ -30,7 +30,7 @@
 int xtract_flux(const double *data, const int N, const void *argv , double *result)
 {
 
-    int n, M;
+    int n, M, rv;
     double *diff;
 
     M = N >> 1;
@@ -43,7 +43,7 @@ int xtract_flux(const double *data, const int N, const void *argv , double *resu
     for(n = 0; n < M; n++)
         diff[n] = data[n] - data[M + n];
 
-    int rv = xtract_lnorm(diff, M, argv, result);
+    rv = xtract_lnorm(diff, M, argv, result);
 
     free(diff);
 
