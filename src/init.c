@@ -214,9 +214,7 @@ int xtract_init_fft(int N, int feature_name)
 {
     if(!xtract_is_poweroftwo(N))
     {
-        fprintf(stderr,
-                "libxtract: error: only power-of-two FFT sizes are supported by Ooura FFT.\n");
-        exit(EXIT_FAILURE);
+        return XTRACT_ARGUMENT_ERROR;
     }
 #ifdef USE_OOURA
     return xtract_init_ooura_(N, feature_name);
@@ -476,12 +474,10 @@ void _init()
     ooura_data_spectrum.initialised = false;
     ooura_data_autocorrelation_fft.initialised = false;
     ooura_data_mfcc.initialised = false;
-    printf("LibXtract compiled with ooura FFT\n");
 #else
     vdsp_data_dct.initialised = false;
     vdsp_data_spectrum.initialised = false;
     vdsp_data_autocorrelation_fft.initialised = false;
     vdsp_data_mfcc.initialised = false;
-    printf("LibXtract compiled with Accelerate FFT\n");
 #endif
 }
