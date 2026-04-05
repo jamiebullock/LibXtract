@@ -24,13 +24,30 @@
 /* xtract_delta.c: defines functions that extract a feature as a single value from more than one input vector */
 
 #include <math.h>
+#include <stdlib.h>
 #include "xtract/libxtract.h"
 
 int xtract_flux(const double *data, const int N, const void *argv , double *result)
 {
 
-    /* FIX: don't be lazy -- take the lnorm of the difference vector! */
-    return xtract_lnorm(data, N, argv, result);
+    int n, M, rv;
+    double *diff;
+
+    M = N >> 1;
+
+    diff = (double *)malloc(M * sizeof(double));
+
+    if(diff == NULL)
+        return XTRACT_MALLOC_FAILED;
+
+    for(n = 0; n < M; n++)
+        diff[n] = data[n] - data[M + n];
+
+    rv = xtract_lnorm(diff, M, argv, result);
+
+    free(diff);
+
+    return rv;
 
 }
 

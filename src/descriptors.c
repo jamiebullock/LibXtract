@@ -187,6 +187,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             /* BARK_COEFFICIENTS is special because argc = BARK_BANDS */
         case XTRACT_WINDOWED:
             /* WINDOWED is special because argc = window size = N */
+        case XTRACT_SMOOTHED:
         default:
             *argv_min = XTRACT_NONE;
             *argv_max = XTRACT_NONE;
@@ -287,6 +288,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_WINDOWED:
             *argv_donor = XTRACT_INIT_WINDOWED;
             break;
+        case XTRACT_SMOOTHED:
         default:
             *argv_donor = XTRACT_ANY;
             break;
@@ -307,6 +309,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_HIGHEST_VALUE:
         case XTRACT_SUM:
         case XTRACT_WINDOWED:
+        case XTRACT_SMOOTHED:
             *data_format = XTRACT_ARBITRARY_SERIES;
             break;
         case XTRACT_SPECTRAL_MEAN:
@@ -442,6 +445,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_LPC:
         case XTRACT_LPCC:
         case XTRACT_WINDOWED:
+        case XTRACT_SMOOTHED:
         case XTRACT_SUBBANDS:
             *data_unit = (xtract_unit_t)XTRACT_ANY;
             break;
@@ -980,6 +984,13 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             strcpy(p_desc, "Apply a window function to a frame of data");
             strcpy(author, "");
             break;
+        case XTRACT_SMOOTHED:
+            strcpy(name, "smoothed");
+            strcpy(p_name, "Smoothed frame");
+            strcpy(desc, "Apply a bidirectional smoothing filter to a frame of data");
+            strcpy(p_desc, "Apply a bidirectional smoothing filter to a frame of data");
+            strcpy(author, "");
+            break;
         default:
             strcpy(name, "");
             strcpy(p_name, "");
@@ -1018,9 +1029,12 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_NOISINESS:
         case XTRACT_CREST:
         case XTRACT_ROLLOFF:
+            *argc = 2;
+            *argv_type = XTRACT_FLOAT;
+            break;
         case XTRACT_FLUX:
         case XTRACT_LNORM:
-            *argc = 2;
+            *argc = 3;
             *argv_type = XTRACT_FLOAT;
             break;
         case XTRACT_SPECTRUM:
@@ -1045,6 +1059,10 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             break;
         case XTRACT_WINDOWED:
             *argc = XTRACT_WINDOW_SIZE;
+            *argv_type = XTRACT_FLOAT;
+            break;
+        case XTRACT_SMOOTHED:
+            *argc = 1;
             *argv_type = XTRACT_FLOAT;
             break;
         case XTRACT_MEAN:
@@ -1149,6 +1167,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_HARMONIC_SPECTRUM:
         case XTRACT_DIFFERENCE_VECTOR:
         case XTRACT_WINDOWED:
+        case XTRACT_SMOOTHED:
             *is_scalar = XTRACT_FALSE;
             break;
         default:
@@ -1223,6 +1242,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_DCT:
         case XTRACT_HARMONIC_SPECTRUM:
         case XTRACT_WINDOWED:
+        case XTRACT_SMOOTHED:
         default:
             *is_delta = XTRACT_FALSE;
             break;
@@ -1336,6 +1356,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             case XTRACT_DCT:
             case XTRACT_SUBBANDS:
             case XTRACT_WINDOWED:
+            case XTRACT_SMOOTHED:
                 *result_format = XTRACT_ARBITRARY_SERIES;
                 *result_unit = (xtract_unit_t)XTRACT_ANY;
                 break;

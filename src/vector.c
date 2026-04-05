@@ -505,10 +505,18 @@ int xtract_mfcc(const double *data, const int N, const void *argv, double *resul
 
 int xtract_mmbses(const double *data, const int N, const void *argv, double *result)
 {
+    /* NOTE: data must contain 2*N doubles (N complex pairs as real/imag interleaved) */
     xtract_mel_filter *f;
     int n, filter;
     double* real = (double*)malloc(sizeof(double)*N);
-	double* imag = (double*)malloc(sizeof(double)*N);
+    double* imag = (double*)malloc(sizeof(double)*N);
+
+    if(real == NULL || imag == NULL)
+    {
+        free(real);
+        free(imag);
+        return XTRACT_MALLOC_FAILED;
+    }
 
     f = (xtract_mel_filter *)argv;
 
@@ -564,7 +572,8 @@ int xtract_mmbses(const double *data, const int N, const void *argv, double *res
         {
             covariance += (real[n]-realMean)*(imag[n]-imagMean);
         }
-        covariance /= (count-1);
+        if(count > 1)
+            covariance /= (count - 1);
         // Calculate the final Mel based Multi-Band Spectral Entropy Signature coefficients
         double temp = realVariance*imagVariance-XTRACT_SQ(covariance);
 
