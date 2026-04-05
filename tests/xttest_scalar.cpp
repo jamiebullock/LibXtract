@@ -1679,7 +1679,7 @@ TEST_CASE("xtract_irregularity_j", "[scalar][spectral]")
     }
 }
 
-TEST_CASE("xtract_irregularity_j known value", "[scalar][spectral][known-bug][!mayfail]")
+TEST_CASE("xtract_irregularity_j known value", "[scalar][spectral]")
 {
     double result = 0.0;
 

@@ -593,7 +593,7 @@ TEST_CASE("xtract_peak_spectrum threshold", "[vector][known-bug][!mayfail]")
  * }
  */
 
-TEST_CASE("xtract_odd_even_ratio divide-by-zero", "[scalar][edge-case][!mayfail]")
+TEST_CASE("xtract_odd_even_ratio divide-by-zero", "[scalar][edge-case]")
 {
     double result = 0.0;
 
@@ -606,7 +606,7 @@ TEST_CASE("xtract_odd_even_ratio divide-by-zero", "[scalar][edge-case][!mayfail]
     }
 }
 
-TEST_CASE("xtract_irregularity_j divide-by-zero", "[scalar][edge-case][!mayfail]")
+TEST_CASE("xtract_irregularity_j divide-by-zero", "[scalar][edge-case]")
 {
     double result = 0.0;
 
@@ -618,7 +618,7 @@ TEST_CASE("xtract_irregularity_j divide-by-zero", "[scalar][edge-case][!mayfail]
     }
 }
 
-TEST_CASE("xtract_crest divide-by-zero", "[scalar][edge-case][!mayfail]")
+TEST_CASE("xtract_crest divide-by-zero", "[scalar][edge-case]")
 {
     double result = 0.0;
 

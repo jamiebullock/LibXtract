@@ -334,14 +334,20 @@ int xtract_irregularity_k(const double *data, const int N, const void *argv, dou
 int xtract_irregularity_j(const double *data, const int N, const void *argv, double *result)
 {
 
-    int n = N - 1;
+    int n;
 
     double num = 0.0, den = 0.0;
 
-    while(n--)
-    {
+    for(n = 0; n < N - 1; n++)
         num += XTRACT_SQ(data[n] - data[n+1]);
+
+    for(n = 0; n < N; n++)
         den += XTRACT_SQ(data[n]);
+
+    if(den == 0.0)
+    {
+        *result = 0.0;
+        return XTRACT_NO_RESULT;
     }
 
     *result = num / den;
@@ -652,6 +658,12 @@ int xtract_crest(const double *data, const int N, const void *argv, double *resu
     max = *(double *)argv;
     mean = *((double *)argv+1);
 
+    if(mean == 0.0)
+    {
+        *result = 0.0;
+        return XTRACT_NO_RESULT;
+    }
+
     *result = max / mean;
 
     return XTRACT_SUCCESS;
@@ -749,6 +761,12 @@ int xtract_odd_even_ratio(const double *data, const int N, const void *argv, dou
 
     fund = *(double *)argv;
     freqs = data + n;
+
+    if(fund == 0.0)
+    {
+        *result = 0.0;
+        return XTRACT_NO_RESULT;
+    }
 
     while(n--)
     {
