@@ -740,6 +740,13 @@ int xtract_peak_spectrum(const double *data, const int N, const void *argv, doub
 
     XTRACT_CHECK_q;
 
+    /* Find max amplitude for threshold calculation */
+    for(n = 1; n < N; n++)
+    {
+        if(data[n] > max)
+            max = data[n];
+    }
+
     threshold *= .01 * max;
 
     result[0] = 0;
@@ -846,7 +853,7 @@ int xtract_lpc(const double *data, const int N, const void *argv, double *result
         for (j = 0; j < i / 2; j++)
         {
             double tmp      = lpc[j];
-            lpc[j]          = r * lpc[i - 1 - j];
+            lpc[j]         += r * lpc[i - 1 - j];
             lpc[i - 1 - j] += r * tmp;
         }
         if (i % 2) lpc[j] += lpc[j] * r;

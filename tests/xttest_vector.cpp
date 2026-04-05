@@ -276,27 +276,7 @@ TEST_CASE("xtract_hps", "[scalar][spectral]")
     }
 }
 
-TEST_CASE("xtract_peak_spectrum threshold bug", "[vector][known-bug]")
-{
-    SECTION("threshold is always zero because max is computed too late")
-    {
-        /* Create data with two peaks: a large one and a small one.
-         * Both must be local maxima (greater than neighbours). */
-        const int N = 8;
-        double data[] = {0.0, 0.0, 100.0, 0.0, 0.0, 1.0, 0.0, 0.0};
-        double result[16] = {0}; /* N amplitudes + N frequencies */
-        double argv[] = {100.0, 50.0}; /* freq_res, threshold=50% */
-
-        xtract_peak_spectrum(data, N, argv, result);
-
-        /* Bin 5 (amplitude 1.0) is a local peak but should be below
-         * 50% of max (100). Due to the threshold bug (max=0 when
-         * threshold is computed), all peaks pass regardless.
-         * This documents the bug: bin 5 should be 0 if threshold worked. */
-        /* When fixed: REQUIRE(result[5] == Approx(0.0)); */
-        REQUIRE(result[5] != Approx(0.0).margin(EPSILON));
-    }
-}
+/* Old bug-documenting test removed — replaced by the proper threshold test below */
 
 TEST_CASE("xtract_lpc known values", "[vector]")
 {
@@ -351,7 +331,7 @@ TEST_CASE("xtract_lpc known values", "[vector]")
     /* 3rd order LPC test is a separate TEST_CASE with [!mayfail] below */
 }
 
-TEST_CASE("xtract_lpc 3rd order Levinson-Durbin", "[vector][known-bug][!mayfail]")
+TEST_CASE("xtract_lpc 3rd order Levinson-Durbin", "[vector]")
 {
     SECTION("3rd order LPC coefficients should be correct")
     {
@@ -561,7 +541,7 @@ TEST_CASE("xtract_flatness sparse data divisor", "[scalar]")
     }
 }
 
-TEST_CASE("xtract_peak_spectrum threshold", "[vector][known-bug][!mayfail]")
+TEST_CASE("xtract_peak_spectrum threshold", "[vector]")
 {
     SECTION("small peaks below threshold should be excluded")
     {

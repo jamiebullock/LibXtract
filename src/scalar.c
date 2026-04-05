@@ -558,7 +558,7 @@ int xtract_rolloff(const double *data, const int N, const void *argv, double *re
 
     pivot *= percentile / 100.0;
 
-    for(n = 0; temp < pivot; n++)
+    for(n = 0; n < N && temp < pivot; n++)
         temp += data[n];
 
     *result = n * ((double *)argv)[0];
