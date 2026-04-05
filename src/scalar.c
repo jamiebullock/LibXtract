@@ -279,10 +279,21 @@ int xtract_spectral_skewness(const double *data, const int N, const void *argv, 
     amps = data;
     freqs = data + m;
 
-    while(m--)
-        *result += XTRACT_POW3(freqs[m] - arg0) * amps[m];
+    double sum_amps = 0.0;
 
-    *result /= XTRACT_POW3(arg1);
+    while(m--)
+    {
+        *result += XTRACT_POW3(freqs[m] - arg0) * amps[m];
+        sum_amps += amps[m];
+    }
+
+    if(sum_amps == 0.0)
+    {
+        *result = 0.0;
+        return XTRACT_NO_RESULT;
+    }
+
+    *result /= (sum_amps * XTRACT_POW3(arg1));
 
     return XTRACT_SUCCESS;
 }
@@ -307,11 +318,21 @@ int xtract_spectral_kurtosis(const double *data, const int N, const void *argv, 
     freqs = data + m;
 
     *result = 0.0;
+    double sum_amps = 0.0;
 
     while(m--)
+    {
         *result += XTRACT_POW4(freqs[m] - arg0) * amps[m];
+        sum_amps += amps[m];
+    }
 
-    *result /= XTRACT_POW4(arg1);
+    if(sum_amps == 0.0)
+    {
+        *result = 0.0;
+        return XTRACT_NO_RESULT;
+    }
+
+    *result /= (sum_amps * XTRACT_POW4(arg1));
     *result -= 3.0;
 
     return XTRACT_SUCCESS;
@@ -334,14 +355,20 @@ int xtract_irregularity_k(const double *data, const int N, const void *argv, dou
 int xtract_irregularity_j(const double *data, const int N, const void *argv, double *result)
 {
 
-    int n = N - 1;
+    int n;
 
     double num = 0.0, den = 0.0;
 
-    while(n--)
-    {
+    for(n = 0; n < N - 1; n++)
         num += XTRACT_SQ(data[n] - data[n+1]);
+
+    for(n = 0; n < N; n++)
         den += XTRACT_SQ(data[n]);
+
+    if(den == 0.0)
+    {
+        *result = 0.0;
+        return XTRACT_NO_RESULT;
     }
 
     *result = num / den;
@@ -531,7 +558,7 @@ int xtract_rolloff(const double *data, const int N, const void *argv, double *re
 
     pivot *= percentile / 100.0;
 
-    for(n = 0; temp < pivot; n++)
+    for(n = 0; n < N && temp < pivot; n++)
         temp += data[n];
 
     *result = n * ((double *)argv)[0];
@@ -601,8 +628,8 @@ int xtract_flatness(const double *data, const int N, const void *argv, double *r
         return XTRACT_NO_RESULT;
     }
 
-    num = pow(num, 1.0 / (double)N);
-    den /= (double)N;
+    num = pow(num, 1.0 / (double)count);
+    den /= (double)count;
 
 
     *result = (double) (num / den);
@@ -651,6 +678,12 @@ int xtract_crest(const double *data, const int N, const void *argv, double *resu
 
     max = *(double *)argv;
     mean = *((double *)argv+1);
+
+    if(mean == 0.0)
+    {
+        *result = 0.0;
+        return XTRACT_NO_RESULT;
+    }
 
     *result = max / mean;
 
@@ -749,6 +782,12 @@ int xtract_odd_even_ratio(const double *data, const int N, const void *argv, dou
 
     fund = *(double *)argv;
     freqs = data + n;
+
+    if(fund == 0.0)
+    {
+        *result = 0.0;
+        return XTRACT_NO_RESULT;
+    }
 
     while(n--)
     {
@@ -939,7 +978,7 @@ int xtract_hps(const double *data, const int N, const void *argv, double *result
 
     largest1_lwr = position1_lwr = 0;
 
-    for(i = 0; i < N; ++i)
+    for(i = 0; i < n; ++i)
     {
         if(data[i] > largest1_lwr && i != peak_index)
         {

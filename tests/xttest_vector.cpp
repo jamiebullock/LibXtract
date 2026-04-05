@@ -276,27 +276,7 @@ TEST_CASE("xtract_hps", "[scalar][spectral]")
     }
 }
 
-TEST_CASE("xtract_peak_spectrum threshold bug", "[vector][known-bug]")
-{
-    SECTION("threshold is always zero because max is computed too late")
-    {
-        /* Create data with two peaks: a large one and a small one.
-         * Both must be local maxima (greater than neighbours). */
-        const int N = 8;
-        double data[] = {0.0, 0.0, 100.0, 0.0, 0.0, 1.0, 0.0, 0.0};
-        double result[16] = {0}; /* N amplitudes + N frequencies */
-        double argv[] = {100.0, 50.0}; /* freq_res, threshold=50% */
-
-        xtract_peak_spectrum(data, N, argv, result);
-
-        /* Bin 5 (amplitude 1.0) is a local peak but should be below
-         * 50% of max (100). Due to the threshold bug (max=0 when
-         * threshold is computed), all peaks pass regardless.
-         * This documents the bug: bin 5 should be 0 if threshold worked. */
-        /* When fixed: REQUIRE(result[5] == Approx(0.0)); */
-        REQUIRE(result[5] != Approx(0.0).margin(EPSILON));
-    }
-}
+/* Old bug-documenting test removed — replaced by the proper threshold test below */
 
 TEST_CASE("xtract_lpc known values", "[vector]")
 {
@@ -351,7 +331,7 @@ TEST_CASE("xtract_lpc known values", "[vector]")
     /* 3rd order LPC test is a separate TEST_CASE with [!mayfail] below */
 }
 
-TEST_CASE("xtract_lpc 3rd order Levinson-Durbin", "[vector][known-bug][!mayfail]")
+TEST_CASE("xtract_lpc 3rd order Levinson-Durbin", "[vector]")
 {
     SECTION("3rd order LPC coefficients should be correct")
     {
@@ -476,7 +456,7 @@ TEST_CASE("xtract_sharpness", "[scalar][spectral]")
  * When a bug is fixed, the test should start passing — remove [!mayfail] at that point.
  */
 
-TEST_CASE("xtract_spectral_skewness normalisation", "[scalar][spectral][known-bug][!mayfail]")
+TEST_CASE("xtract_spectral_skewness normalisation", "[scalar][spectral]")
 {
     SECTION("result should not scale with total energy")
     {
@@ -500,7 +480,7 @@ TEST_CASE("xtract_spectral_skewness normalisation", "[scalar][spectral][known-bu
     }
 }
 
-TEST_CASE("xtract_spectral_kurtosis normalisation", "[scalar][spectral][known-bug][!mayfail]")
+TEST_CASE("xtract_spectral_kurtosis normalisation", "[scalar][spectral]")
 {
     SECTION("result should not scale with total energy")
     {
@@ -521,7 +501,7 @@ TEST_CASE("xtract_spectral_kurtosis normalisation", "[scalar][spectral][known-bu
     }
 }
 
-TEST_CASE("xtract_hps N/2 bounds", "[scalar][spectral][known-bug][!mayfail]")
+TEST_CASE("xtract_hps N/2 bounds", "[scalar][spectral]")
 {
     SECTION("second loop should not read frequency data as amplitudes")
     {
@@ -546,7 +526,7 @@ TEST_CASE("xtract_hps N/2 bounds", "[scalar][spectral][known-bug][!mayfail]")
     }
 }
 
-TEST_CASE("xtract_flatness sparse data divisor", "[scalar][known-bug][!mayfail]")
+TEST_CASE("xtract_flatness sparse data divisor", "[scalar]")
 {
     double result = 0.0;
 
@@ -561,7 +541,7 @@ TEST_CASE("xtract_flatness sparse data divisor", "[scalar][known-bug][!mayfail]"
     }
 }
 
-TEST_CASE("xtract_peak_spectrum threshold", "[vector][known-bug][!mayfail]")
+TEST_CASE("xtract_peak_spectrum threshold", "[vector]")
 {
     SECTION("small peaks below threshold should be excluded")
     {
@@ -578,22 +558,25 @@ TEST_CASE("xtract_peak_spectrum threshold", "[vector][known-bug][!mayfail]")
     }
 }
 
-/* DISABLED: xtract_dct table reallocation — crashes with SIGABRT.
- * The free loop uses the new dimension to iterate over the old table.
- * [!mayfail] cannot recover from a fatal signal.
- * Re-enable after fixing vector.c to use dct_cos_table_dim in the free loop.
- *
- * TEST_CASE("xtract_dct table reallocation", "[vector][known-bug]")
- * {
- *     xtract_init_fft(4, XTRACT_DCT);
- *     xtract_dct(data4, 4, NULL, result4);
- *     xtract_init_fft(8, XTRACT_DCT);  // triggers buggy realloc
- *     xtract_dct(data8, 8, NULL, result8);
- *     REQUIRE(result8[0] == Approx(1.0).epsilon(1e-6));
- * }
- */
+TEST_CASE("xtract_dct table reallocation", "[vector]")
+{
+    SECTION("changing DCT size should not crash")
+    {
+        double data4[] = {1.0, 0.0, 0.0, 0.0};
+        double result4[4] = {0};
+        xtract_init_fft(4, XTRACT_DCT);
+        xtract_dct(data4, 4, NULL, result4);
+        REQUIRE(result4[0] == Approx(1.0).epsilon(1e-6));
 
-TEST_CASE("xtract_odd_even_ratio divide-by-zero", "[scalar][edge-case][!mayfail]")
+        double data8[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+        double result8[8] = {0};
+        xtract_init_fft(8, XTRACT_DCT);
+        xtract_dct(data8, 8, NULL, result8);
+        REQUIRE(result8[0] == Approx(1.0).epsilon(1e-6));
+    }
+}
+
+TEST_CASE("xtract_odd_even_ratio divide-by-zero", "[scalar][edge-case]")
 {
     double result = 0.0;
 
@@ -606,7 +589,7 @@ TEST_CASE("xtract_odd_even_ratio divide-by-zero", "[scalar][edge-case][!mayfail]
     }
 }
 
-TEST_CASE("xtract_irregularity_j divide-by-zero", "[scalar][edge-case][!mayfail]")
+TEST_CASE("xtract_irregularity_j divide-by-zero", "[scalar][edge-case]")
 {
     double result = 0.0;
 
@@ -618,7 +601,7 @@ TEST_CASE("xtract_irregularity_j divide-by-zero", "[scalar][edge-case][!mayfail]
     }
 }
 
-TEST_CASE("xtract_crest divide-by-zero", "[scalar][edge-case][!mayfail]")
+TEST_CASE("xtract_crest divide-by-zero", "[scalar][edge-case]")
 {
     double result = 0.0;
 
@@ -656,7 +639,7 @@ TEST_CASE("xtract_spectrum normalisation", "[vector][fft][known-bug]")
     }
 }
 
-TEST_CASE("xtract_spectrum magnitude normalisation interleaved", "[vector][fft][known-bug][!mayfail]")
+TEST_CASE("xtract_spectrum magnitude normalisation interleaved", "[vector][fft]")
 {
     SECTION("normalised magnitude spectrum should have max amplitude 1.0")
     {
@@ -693,7 +676,7 @@ TEST_CASE("xtract_spectrum magnitude normalisation interleaved", "[vector][fft][
     }
 }
 
-TEST_CASE("xtract_init_fft DCT does not clobber MFCC", "[init][known-bug][!mayfail]")
+TEST_CASE("xtract_init_fft DCT does not clobber MFCC", "[init]")
 {
     SECTION("initing DCT with size 4 should not reinit MFCC")
     {
