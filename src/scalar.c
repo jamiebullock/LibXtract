@@ -1046,13 +1046,15 @@ int xtract_f0(const double *data, const int N, const void *argv, double *result)
 
     threshold_centre *= array_max;
 
-    /* Centre clip */
+    /* Symmetric centre clip (Sondhi 1968, Rabiner 1977) */
     for(n = 0; n < N; n++)
     {
-        if (input[n] < threshold_centre)
-            input[n] = 0;
-        else
+        if(input[n] > threshold_centre)
             input[n] -= threshold_centre;
+        else if(input[n] < -threshold_centre)
+            input[n] += threshold_centre;
+        else
+            input[n] = 0;
     }
 
     /* Estimate fundamental freq */

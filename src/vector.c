@@ -572,7 +572,8 @@ int xtract_mmbses(const double *data, const int N, const void *argv, double *res
         {
             covariance += (real[n]-realMean)*(imag[n]-imagMean);
         }
-        covariance /= count;
+        if(count > 0)
+            covariance /= count;
         // Calculate the final Mel based Multi-Band Spectral Entropy Signature coefficients
         double temp = realVariance*imagVariance-XTRACT_SQ(covariance);
 
