@@ -279,10 +279,21 @@ int xtract_spectral_skewness(const double *data, const int N, const void *argv, 
     amps = data;
     freqs = data + m;
 
-    while(m--)
-        *result += XTRACT_POW3(freqs[m] - arg0) * amps[m];
+    double sum_amps = 0.0;
 
-    *result /= XTRACT_POW3(arg1);
+    while(m--)
+    {
+        *result += XTRACT_POW3(freqs[m] - arg0) * amps[m];
+        sum_amps += amps[m];
+    }
+
+    if(sum_amps == 0.0)
+    {
+        *result = 0.0;
+        return XTRACT_NO_RESULT;
+    }
+
+    *result /= (sum_amps * XTRACT_POW3(arg1));
 
     return XTRACT_SUCCESS;
 }
@@ -307,11 +318,21 @@ int xtract_spectral_kurtosis(const double *data, const int N, const void *argv, 
     freqs = data + m;
 
     *result = 0.0;
+    double sum_amps = 0.0;
 
     while(m--)
+    {
         *result += XTRACT_POW4(freqs[m] - arg0) * amps[m];
+        sum_amps += amps[m];
+    }
 
-    *result /= XTRACT_POW4(arg1);
+    if(sum_amps == 0.0)
+    {
+        *result = 0.0;
+        return XTRACT_NO_RESULT;
+    }
+
+    *result /= (sum_amps * XTRACT_POW4(arg1));
     *result -= 3.0;
 
     return XTRACT_SUCCESS;

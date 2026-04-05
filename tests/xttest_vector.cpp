@@ -476,7 +476,7 @@ TEST_CASE("xtract_sharpness", "[scalar][spectral]")
  * When a bug is fixed, the test should start passing — remove [!mayfail] at that point.
  */
 
-TEST_CASE("xtract_spectral_skewness normalisation", "[scalar][spectral][known-bug][!mayfail]")
+TEST_CASE("xtract_spectral_skewness normalisation", "[scalar][spectral]")
 {
     SECTION("result should not scale with total energy")
     {
@@ -500,7 +500,7 @@ TEST_CASE("xtract_spectral_skewness normalisation", "[scalar][spectral][known-bu
     }
 }
 
-TEST_CASE("xtract_spectral_kurtosis normalisation", "[scalar][spectral][known-bug][!mayfail]")
+TEST_CASE("xtract_spectral_kurtosis normalisation", "[scalar][spectral]")
 {
     SECTION("result should not scale with total energy")
     {
