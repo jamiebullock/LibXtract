@@ -1,43 +1,59 @@
 # LibXtract
 
-[![Build Status](https://travis-ci.org/jamiebullock/LibXtract.png?branch=master)](https://travis-ci.org/jamiebullock/LibXtract)
+[![CI](https://github.com/jamiebullock/LibXtract/actions/workflows/ci.yml/badge.svg)](https://github.com/jamiebullock/LibXtract/actions/workflows/ci.yml)
 
-LibXtract is a simple, portable, lightweight library of audio feature extraction functions. The purpose of the library is to provide a relatively exhaustive set of feature extraction primatives that are designed to be 'cascaded' to create a extraction hierarchies.
+LibXtract is a simple, portable, lightweight library of audio feature extraction functions. The purpose of the library is to provide a relatively exhaustive set of feature extraction primitives that are designed to be 'cascaded' to create extraction hierarchies.
 
 For example, 'variance', 'average deviation', 'skewness' and 'kurtosis', all require the 'mean' of the input vector to be precomputed. However, rather than compute the 'mean' 'inside' each function, it is expected that the 'mean' will be passed in as an argument. This means that if the user wishes to use all of these features, the mean is calculated only once, and then passed to any functions that require it.
 
 This philosophy of 'cascading' features is followed throughout the library, for example with features that operate on the magnitude spectrum of a signal vector (e.g. 'irregularity'), the magnitude spectrum is not calculated 'inside' the respective function, instead, a pointer to the first element in an array containing the magnitude spectrum is passed in as an argument.
 
-Hopefully this not only makes the library more efficient when computing large numbers of features, but also makes it more flexible because extraction functions can be combined arbitrarily (one can take the irregularility of the Mel Frequency Cepstral Coefficients for example).
+Hopefully this not only makes the library more efficient when computing large numbers of features, but also makes it more flexible because extraction functions can be combined arbitrarily (one can take the irregularity of the Mel Frequency Cepstral Coefficients for example).
 
-A complete list of features can be found by viewing the header files, or reading the doxygen documentation, available with this package.
+A complete list of features can be found by viewing the header files, or reading the doxygen documentation.
 
-## Downloading
+## Building
 
-The latest source code release for LibXtract can be downloaded from [https://github.com/jamiebullock/LibXtract/downloads](https://github.com/jamiebullock/LibXtract/downloads).
+### Prerequisites
 
-## Dependencies
+- A C99 compiler (gcc, clang, MinGW)
+- make
 
-To build the SWIG bindings [SWIG]() is required. For the Python bindings, a Python install is required. For the Java bindings a Java install is required.
+On macOS, the library uses Apple's Accelerate framework for FFT. On Linux and Windows, it uses the bundled Ooura FFT.
 
-## Installation
+### Build and test
 
-Type `make install` to build and install to `/usr/local`. Type `make install PREFIX=/somewhere/else` to install to `/somewhere/else`,
+```bash
+make        # build library and examples
+make check  # build and run tests
+```
 
-To build the python bindings type `make swig`.
+### Install
+
+```bash
+make install                        # install to /usr/local
+make install PREFIX=/somewhere/else # install elsewhere
+```
+
+## Python bindings
+
+To build the Python bindings, [SWIG](http://www.swig.org) and Python are required:
+
+```bash
+make swig
+```
 
 ## Documentation
 
-LibXtract headers are documented using [doxygen](http://www.stack.nl/~dimitri/doxygen/) comments.
+LibXtract headers are documented using [doxygen](https://www.doxygen.nl) comments. If you have doxygen installed:
 
-If you have doxygen installed, the LibXtract build system should automatically detect this during `configure` and generate [LaTeX](http://www.latex-project.org) and HTML documentation in the `doc` directory when LibXtract is built with `make`.
+```bash
+make doc
+```
 
-The generated HTML documentation can then be viewed in a web browser by opening the file `doc/html/index.html`.
+The generated HTML documentation can then be viewed by opening `doc/html/index.html`.
 
-**Pre-generated documentation can be found on the [LibXtract website](http://jamiebullock.github.io/LibXtract/documentation)**
-
-
-## License 
+## License
 
 Copyright (C) 2012 Jamie Bullock
 
@@ -58,5 +74,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 IN THE SOFTWARE.
-
-
