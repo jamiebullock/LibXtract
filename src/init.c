@@ -136,8 +136,8 @@ void xtract_free_ooura_(void)
 void xtract_init_vdsp_data(xtract_vdsp_data *vdsp_data, unsigned int N)
 {
     vdsp_data->setup = vDSP_create_fftsetupD(log2f(N), FFT_RADIX2);
-    vdsp_data->fft.realp = (double *) malloc((N >> 1) * sizeof(double) + 1);
-    vdsp_data->fft.imagp = (double *) malloc((N >> 1) * sizeof(double) + 1);
+    vdsp_data->fft.realp = (double *) calloc((N >> 1), sizeof(double));
+    vdsp_data->fft.imagp = (double *) calloc((N >> 1), sizeof(double));
     vdsp_data->log2N = log2f(N);
     vdsp_data->initialised = true;
 }

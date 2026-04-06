@@ -1116,7 +1116,12 @@ int xtract_failsafe_f0(const double *data, const int N, const void *argv, double
 
 int xtract_wavelet_f0(const double *data, const int N, const void *argv, double *result)
 {
-    /* double sr = *(double *)argv; */
+    double sr;
+
+    if(argv == NULL)
+        return XTRACT_BAD_ARGV;
+
+    sr = *(double *)argv;
 
     *result = dywapitch_computepitch(&wavelet_f0_state, data, 0, N);
 
@@ -1124,6 +1129,9 @@ int xtract_wavelet_f0(const double *data, const int N, const void *argv, double 
     {
         return XTRACT_NO_RESULT;
     }
+
+    /* dywapitchtrack assumes 44100 Hz internally; scale for actual samplerate */
+    *result *= sr / 44100.0;
 
     return XTRACT_SUCCESS;
 }
