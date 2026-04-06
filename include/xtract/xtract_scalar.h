@@ -227,8 +227,8 @@ int xtract_zcr(const double *data, const int N, const void *argv, double *result
  * 
  * \param *data: a pointer to the first element in an array of doubles representing the magnitude coefficients from the spectrum of an audio vector, (e.g. the first half of the array pointed to by *result from xtract_spectrum().
  * \param N: the number of elements to be considered
- * \param *argv: a pointer to an array containing a double representing (samplerate / N ) and  a double representing the threshold for rolloff, i.e. the percentile at which the rolloff is determined, expressed as a percentage, and  
- * \param *result: the spectral rolloff in Hz of N values from the array pointed to by *data. This is the point in the spectrum below which argv[0] of the energy is distributed.
+ * \param *argv: a pointer to an array of two doubles: argv[0] is the frequency resolution (samplerate / N), and argv[1] is the rolloff threshold as a percentage (e.g. 95.0 for the 95th percentile).
+ * \param *result: the spectral rolloff in Hz of N values from the array pointed to by *data. This is the point in the spectrum below which argv[1] percent of the energy is distributed.
  */
 int xtract_rolloff(const double *data, const int N, const void *argv, double *result);
 
