@@ -22,6 +22,12 @@ python:
 	@$(CC) $(CFLAGS) $(NAME)_wrap.c -o $(NAME)_wrap.o -I$(INCLUDEPY) -I../include
 	@$(CC) $(LDFLAGS) ../src/lib$(NAME).a $(NAME)_wrap.o -o _$(NAME).so -framework Accelerate
 
+install: python
+	@SITE_DIR=$$(python -c "import site; print(site.getsitepackages()[0])") && \
+	install -d "$$SITE_DIR" && \
+	install _$(NAME).so "$$SITE_DIR" && \
+	install -m 644 $(NAME).py "$$SITE_DIR"
+
 clean:
 	@$(RM) *.o
 	@$(RM) *.pyc
