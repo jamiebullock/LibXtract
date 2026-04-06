@@ -28,10 +28,10 @@ check: src
 test: check
 
 install:
-	@$(MAKE) -C src install
-	@$(MAKE) -C examples install
-	@mkdir -p $(PREFIX)/$(HPATH)
-	@cp $(HPATH)/* $(PREFIX)/$(HPATH)
+	$(MAKE) -C src install
+	$(MAKE) -C examples install
+	mkdir -p $(PREFIX)/$(HPATH)
+	cp $(HPATH)/* $(PREFIX)/$(HPATH)
 
 clean:
 	@$(MAKE) -C src clean
