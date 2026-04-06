@@ -7,12 +7,12 @@ INCLUDEPY = $(shell python -m sysconfig | grep -w INCLUDEPY | awk '{print $$3}')
 
 ifeq ($(OS), Darwin)
     CFLAGS=-g -c
-    LD=gcc
     LDFLAGS=-bundle -flat_namespace -undefined suppress
+    LIBS=-framework Accelerate
 else
     CFLAGS=-g -c -fPIC
-    LD=ld
     LDFLAGS=-shared
+    LIBS=
 endif
 
 .PHONY: python
@@ -20,7 +20,13 @@ endif
 python:
 	@swig -I../include -python $(NAME).i
 	@$(CC) $(CFLAGS) $(NAME)_wrap.c -o $(NAME)_wrap.o -I$(INCLUDEPY) -I../include
-	@$(CC) $(LDFLAGS) ../src/lib$(NAME).a $(NAME)_wrap.o -o _$(NAME).so -framework Accelerate
+	@$(CC) $(LDFLAGS) ../src/lib$(NAME).a $(NAME)_wrap.o -o _$(NAME).so $(LIBS)
+
+install: python
+	@SITE_DIR=$$(python -c "import site; print(site.getsitepackages()[0])") && \
+	install -d "$$SITE_DIR" && \
+	install _$(NAME).so "$$SITE_DIR" && \
+	install -m 644 $(NAME).py "$$SITE_DIR"
 
 clean:
 	@$(RM) *.o

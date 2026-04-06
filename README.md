@@ -21,6 +21,8 @@ A complete list of features can be found by viewing the header files, or reading
 
 On macOS, the library uses Apple's Accelerate framework for FFT. On Linux and Windows, it uses the bundled Ooura FFT.
 
+On Windows, an MSYS2/MinGW environment is required to provide `make` and a POSIX-compatible shell. Install [MSYS2](https://www.msys2.org), then from the MinGW 64-bit shell run `pacman -S mingw-w64-x86_64-gcc make`.
+
 ### Build and test
 
 ```bash

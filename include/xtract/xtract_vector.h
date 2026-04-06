@@ -177,7 +177,7 @@ int xtract_lpc(const double *data, const int N, const void *argv, double *result
  * 
  * \param *data: a pointer to the first element in an array of LPC coeffiecients e.g. a pointer to the second half of the array pointed to by *result from xtract_lpc()
  * \param N: the number of LPC coefficients to be considered
- * \param *argv: a pointer to a double representing the order of the result vector. This must be a whole number. According to Rabiner and Juang the ratio between the number (p) of LPC coefficients and the order (Q) of the LPC cepstrum is given by Q ~ (3/2)p where Q > p.
+ * \param *argv: a pointer to a double representing the order (Q) of the result vector. This must be a whole number. According to Rabiner and Juang the recommended ratio is Q ~ (3/2)N where N is the number of LPC coefficients and Q > N.
  * \param *result: a pointer to an array containing the resultant LPCC.
  * 
  * An array of size Q, where Q is given by argv[0] must be allocated, and *result must point to its first element.
