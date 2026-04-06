@@ -743,6 +743,11 @@ int xtract_bark_coefficients(const double *data, const int N, const void *argv, 
             result[band] += data[n];
     }
 
+    /* Last band: sum from limits[XTRACT_BARK_BANDS - 1] to N */
+    result[band] = 0.0;
+    for(n = limits[band]; n < N; n++)
+        result[band] += data[n];
+
     return XTRACT_SUCCESS;
 }
 
