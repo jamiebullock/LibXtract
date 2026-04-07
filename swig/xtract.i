@@ -82,11 +82,6 @@
 
 %ignore xtract;
 
-/* For now ignore stateful functions */
-%ignore xtract_last_n;
-%ignore xtract_last_n_state_new;
-%ignore xtract_last_n_state_delete;
-
 
 %include "xtract/xtract_scalar.h"
 

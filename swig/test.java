@@ -56,6 +56,27 @@ public class test {
             System.out.println(result.getitem(i));
         }
 
+        System.out.println("Testing stateful functions...");
+
+        int N = 4;
+        SWIGTYPE_p_xtract_last_n_state_ state = xtract.xtract_last_n_state_new(N);
+        doubleArray lastN = new doubleArray(N);
+        for (int i = 0; i < N; i++) lastN.setitem(i, 0.0);
+
+        doubleArray data = new doubleArray(1);
+        data.setitem(0, 42.0);
+        xtract.xtract_last_n(state, data.cast(), N, null, lastN.cast());
+        System.out.printf("last_n after one value: %.1f%n", lastN.getitem(N - 1));
+
+        data.setitem(0, 99.0);
+        xtract.xtract_last_n(state, data.cast(), N, null, lastN.cast());
+        System.out.printf("last_n after two values: %.1f, %.1f%n",
+                lastN.getitem(N - 2), lastN.getitem(N - 1));
+
+        xtract.xtract_last_n_state_delete(state);
+        data.delete();
+        lastN.delete();
+
         System.out.println("\nFinished!\n");
 
         a.delete();
