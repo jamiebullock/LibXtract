@@ -13,13 +13,23 @@ ifeq ($(OS), Darwin)
     LDFLAGS=-bundle -flat_namespace -undefined suppress
     LIBS=-framework Accelerate
     JAVA_LIB_SUFFIX=dylib
+    JAVA_LIB_PREFIX=libj
     LIBXTRACT=../src/lib$(NAME).a
     LINK_LIB=$(LIBXTRACT)
+else ifneq (,$(findstring MINGW,$(OS)))
+    CFLAGS=-g -c
+    LDFLAGS=-shared
+    LIBS=-lm
+    JAVA_LIB_SUFFIX=dll
+    JAVA_LIB_PREFIX=j
+    LIBXTRACT=$(wildcard ../src/lib$(NAME).a ../src/lib$(NAME).lib)
+    LINK_LIB=-Wl,--whole-archive $(LIBXTRACT) -Wl,--no-whole-archive
 else
     CFLAGS=-g -c -fPIC
     LDFLAGS=-shared
     LIBS=-lm
     JAVA_LIB_SUFFIX=so
+    JAVA_LIB_PREFIX=libj
     LIBXTRACT=$(wildcard ../src/lib$(NAME).a ../src/lib$(NAME).lib)
     LINK_LIB=-Wl,--whole-archive $(LIBXTRACT) -Wl,--no-whole-archive
 endif
@@ -40,7 +50,7 @@ endif
 	@mkdir -p java
 	@swig -I../include -java -package $(NAME) -outdir java $(NAME).i
 	@$(CC) $(CFLAGS) $(NAME)_wrap.c -o $(NAME)_wrap.o -I$(JAVA_HOME)/include -I$(wildcard $(JAVA_HOME)/include/darwin $(JAVA_HOME)/include/linux $(JAVA_HOME)/include/win32) -I../include
-	@$(CC) $(LDFLAGS) $(LINK_LIB) $(NAME)_wrap.o -o libj$(NAME).$(JAVA_LIB_SUFFIX) $(LIBS)
+	@$(CC) $(LDFLAGS) $(LINK_LIB) $(NAME)_wrap.o -o $(JAVA_LIB_PREFIX)$(NAME).$(JAVA_LIB_SUFFIX) $(LIBS)
 	@javac java/*.java
 
 node:
@@ -85,6 +95,7 @@ clean:
 	@$(RM) *.pyc
 	@$(RM) *.so
 	@$(RM) *.dylib
+	@$(RM) *.dll
 	@$(RM) *.node
 	@$(RM) $(NAME)_wrap.c
 	@$(RM) $(NAME).py
