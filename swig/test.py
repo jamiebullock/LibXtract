@@ -60,4 +60,27 @@ xtract.xtract_features_from_subframes(a, len, xtract.XTRACT_WINDOWED, window, re
 for i in range(len):
     print(result[i])
 
+print('Testing stateful functions...')
+
+N = 4
+state = xtract.xtract_last_n_state_new(N)
+result = xtract.doubleArray(N)
+
+for i in range(N):
+    result[i] = 0.0
+
+data = xtract.doubleArray(1)
+data[0] = 42.0
+# N.B. data is a single sample; N is the window size, not the size of data
+xtract.xtract_last_n(state, data, N, None, result)
+
+print('last_n after one value: %.1f' % result[N - 1])
+
+data[0] = 99.0
+xtract.xtract_last_n(state, data, N, None, result)
+
+print('last_n after two values: %.1f, %.1f' % (result[N - 2], result[N - 1]))
+
+xtract.xtract_last_n_state_delete(state)
+
 print('\nFinished!\n')
