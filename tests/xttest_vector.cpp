@@ -736,6 +736,61 @@ TEST_CASE("xtract_spectrum MAGNITUDE_SPECTRUM stores scalar magnitudes", "[vecto
     }
 }
 
+TEST_CASE("xtract_mel_spectrogram", "[vector]")
+{
+    SECTION("mel spectrogram produces log mel energies that MFCC applies DCT to")
+    {
+        /* Generate a simple spectrum: single peak at bin 10 */
+        const int N = 128;
+        const int n_filters = 13;
+        double data[128];
+        double mel_result[13] = {0};
+        double mfcc_result[13] = {0};
+
+        memset(data, 0, sizeof(data));
+        data[10] = 1.0;
+
+        /* Init mel filter bank */
+        xtract_mel_filter mel_filters;
+        mel_filters.n_filters = n_filters;
+        mel_filters.filters = (double **)malloc(n_filters * sizeof(double *));
+        for(int i = 0; i < n_filters; i++)
+            mel_filters.filters[i] = (double *)calloc(N, sizeof(double));
+
+        xtract_init_mfcc(N, 22050.0 / 2, XTRACT_EQUAL_GAIN, 20, 8000,
+                          n_filters, mel_filters.filters);
+
+        /* Compute mel spectrogram */
+        int rv = xtract_mel_spectrogram(data, N, &mel_filters, mel_result);
+        REQUIRE(rv == XTRACT_SUCCESS);
+
+        /* All values should be finite (log-scaled) */
+        for(int i = 0; i < n_filters; i++)
+            REQUIRE(std::isfinite(mel_result[i]));
+
+        /* At least one filter should have energy above the log limit floor */
+        double max_energy = mel_result[0];
+        for(int i = 1; i < n_filters; i++)
+            if(mel_result[i] > max_energy) max_energy = mel_result[i];
+        REQUIRE(max_energy > -96.0);
+
+        /* MFCC should equal DCT of mel spectrogram */
+        xtract_init_fft(n_filters, XTRACT_DCT);
+        double dct_of_mel[13] = {0};
+        xtract_dct(mel_result, n_filters, NULL, dct_of_mel);
+
+        xtract_mfcc(data, N, &mel_filters, mfcc_result);
+
+        for(int i = 0; i < n_filters; i++)
+            REQUIRE(mfcc_result[i] == Approx(dct_of_mel[i]).margin(1e-10));
+
+        /* Cleanup */
+        for(int i = 0; i < n_filters; i++)
+            free(mel_filters.filters[i]);
+        free(mel_filters.filters);
+    }
+}
+
 TEST_CASE("xtract_init_fft DCT does not clobber MFCC", "[init]")
 {
     SECTION("initing DCT with size 4 should not reinit MFCC")

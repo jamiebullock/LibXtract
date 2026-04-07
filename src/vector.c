@@ -474,28 +474,43 @@ int xtract_autocorrelation_fft(const double *data, const int N, const void *argv
     return XTRACT_SUCCESS;
 }
 
-int xtract_mfcc(const double *data, const int N, const void *argv, double *result)
+int xtract_mel_spectrogram(const double *data, const int N, const void *argv, double *result)
 {
 
     xtract_mel_filter *f;
     int n, filter;
-    double* temp;
 
     f = (xtract_mel_filter *)argv;
-    temp = calloc(f->n_filters, sizeof(double));
+
     for(filter = 0; filter < f->n_filters; filter++)
     {
+        result[filter] = 0.0;
         for(n = 0; n < N; n++)
         {
-            if (f->filters[filter][n] != 0)
-                temp[filter] += data[n] * f->filters[filter][n];
+            if(f->filters[filter][n] != 0)
+                result[filter] += data[n] * f->filters[filter][n];
         }
-        if (temp[filter] < XTRACT_LOG_LIMIT)
-            temp[filter] = XTRACT_LOG_LIMIT_DB;
+        if(result[filter] < XTRACT_LOG_LIMIT)
+            result[filter] = XTRACT_LOG_LIMIT_DB;
         else
-            temp[filter] = log(temp[filter]);
+            result[filter] = log(result[filter]);
     }
 
+    return XTRACT_SUCCESS;
+}
+
+int xtract_mfcc(const double *data, const int N, const void *argv, double *result)
+{
+
+    xtract_mel_filter *f;
+    double *temp;
+
+    f = (xtract_mel_filter *)argv;
+    temp = (double *)calloc(f->n_filters, sizeof(double));
+    if(temp == NULL)
+        return XTRACT_MALLOC_FAILED;
+
+    xtract_mel_spectrogram(data, N, argv, temp);
     xtract_dct(temp, f->n_filters, NULL, result);
     free(temp);
 

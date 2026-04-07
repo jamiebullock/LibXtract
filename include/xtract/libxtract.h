@@ -136,6 +136,7 @@ enum xtract_features_ {
     XTRACT_LPC,
     XTRACT_LPCC,
     XTRACT_SUBBANDS,
+    XTRACT_MEL_SPECTROGRAM,
     /* Helper functions */
     XTRACT_WINDOWED,
     XTRACT_SMOOTHED,

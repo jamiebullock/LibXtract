@@ -72,6 +72,20 @@ int xtract_autocorrelation_fft(const double *data, const int N, const void *argv
  */
 int xtract_mfcc(const double *data, const int N, const void *argv, double *result);
 
+/** \brief Extract a Mel spectrogram (log-scaled mel-filtered energies)
+ *
+ * This computes the intermediate step of MFCC extraction: the mel filter bank
+ * is applied to the magnitude spectrum and the result is log-scaled.
+ *
+ * \param *data: a pointer to the first element in an array of spectral magnitudes, e.g. the first half of the array pointed to by *result from xtract_spectrum()
+ * \param N: the number of array elements to be considered
+ * \param *argv: a pointer to a data structure of type xtract_mel_filter, containing n_filters coefficient tables to make up a mel-spaced filterbank
+ * \param *result: a pointer to an array containing the resultant log mel energies (one per filter)
+ *
+ * The data structure pointed to by *argv must be obtained by first calling xtract_init_mfcc
+ */
+int xtract_mel_spectrogram(const double *data, const int N, const void *argv, double *result);
+
 /** \brief Extract Mel based Multi-Band Spectral Entropy Signature coefficients
  *
  * \param *data: a pointer to an array of spectral coefficients, the result from xtract_spectrum() by XTRACT_SPECTRUM_COEFFICIENTS

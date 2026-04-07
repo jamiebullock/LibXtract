@@ -74,6 +74,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_LOWEST_VALUE:
         case XTRACT_TONALITY:
         case XTRACT_MFCC:
+        case XTRACT_MEL_SPECTROGRAM:
         case XTRACT_LPC:
         case XTRACT_LPCC:
             *argv_min = XTRACT_ANY;
@@ -238,6 +239,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *argv_donor = XTRACT_ANY;
             break;
         case XTRACT_MFCC:
+        case XTRACT_MEL_SPECTROGRAM:
             *argv_donor = XTRACT_INIT_MFCC;
             break;
             /* argc = 2 */;
@@ -338,6 +340,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_PEAK_SPECTRUM:
         case XTRACT_SUBBANDS:
         case XTRACT_MFCC:
+        case XTRACT_MEL_SPECTROGRAM:
             *data_format = XTRACT_SPECTRAL_MAGNITUDES;
             break;
         case XTRACT_LPC:
@@ -426,6 +429,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_FAILSAFE_F0:
         case XTRACT_WAVELET_F0:
         case XTRACT_MFCC:
+        case XTRACT_MEL_SPECTROGRAM:
         case XTRACT_AUTOCORRELATION:
         case XTRACT_AUTOCORRELATION_FFT:
         case XTRACT_ROLLOFF:
@@ -697,6 +701,13 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             strcpy(desc, "Extract MFCC from a spectrum");
             strcpy(p_desc, "Extract MFCC from an audio spectrum");
             strcpy(author, "Rabiner");
+            break;
+        case XTRACT_MEL_SPECTROGRAM:
+            strcpy(name, "mel_spectrogram");
+            strcpy(p_name, "Mel Spectrogram");
+            strcpy(desc, "Extract log mel energies from a spectrum");
+            strcpy(p_desc, "Extract log-scaled mel-filtered energies from an audio spectrum");
+            strcpy(author, "");
             break;
         case XTRACT_LPC:
             strcpy(name, "lpc");
@@ -1048,6 +1059,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *argv_type = XTRACT_INT;
             break;
         case XTRACT_MFCC:
+        case XTRACT_MEL_SPECTROGRAM:
             *argc = 1;
             *argv_type = XTRACT_MEL_FILTER;
             break;
@@ -1163,6 +1175,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_SUBBANDS:
         case XTRACT_AUTOCORRELATION_FFT:
         case XTRACT_MFCC:
+        case XTRACT_MEL_SPECTROGRAM:
         case XTRACT_LPC:
         case XTRACT_LPCC:
         case XTRACT_DCT:
@@ -1239,6 +1252,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_SUBBANDS:
         case XTRACT_AUTOCORRELATION_FFT:
         case XTRACT_MFCC:
+        case XTRACT_MEL_SPECTROGRAM:
         case XTRACT_LPC:
         case XTRACT_LPCC:
         case XTRACT_DCT:
@@ -1377,6 +1391,10 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             case XTRACT_MFCC:
                 *result_format = XTRACT_MEL_COEFFS;
                 *result_unit = (xtract_unit_t)XTRACT_UNKNOWN; /* FIX: check */
+                break;
+            case XTRACT_MEL_SPECTROGRAM:
+                *result_format = XTRACT_MEL_COEFFS;
+                *result_unit = XTRACT_DBFS;
                 break;
             case XTRACT_LPC:
                 *result_format = XTRACT_LPC_COEFFS;
