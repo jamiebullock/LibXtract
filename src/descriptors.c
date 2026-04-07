@@ -43,6 +43,8 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
     f = F = XTRACT_FEATURES;
 
     fd = (xtract_function_descriptor_t*)malloc(XTRACT_FEATURES * sizeof(xtract_function_descriptor_t));
+    if(fd == NULL)
+        return NULL;
 
     /* FIX - this file probably needs a rewrite for readability */
 

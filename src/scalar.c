@@ -1013,6 +1013,8 @@ int xtract_f0(const double *data, const int N, const void *argv, double *result)
         sr = 44100.0;
 
     input = (double*)malloc(bytes = N * sizeof(double));
+    if(input == NULL)
+        return XTRACT_MALLOC_FAILED;
     input = (double*)memcpy(input, data, bytes);
     /*  threshold_peak = *((double *)argv+1);
     threshold_centre = *((double *)argv+2);
