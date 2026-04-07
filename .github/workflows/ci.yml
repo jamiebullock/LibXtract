@@ -91,4 +91,4 @@ jobs:
         shell: msys2 {0}
         run: |
           npm install --prefix swig node-addon-api
-          PYTHON=python NODE_INCLUDE=/mingw64/include/node make -C swig check
+          PYTHON=python NODE_INCLUDE=/mingw64/include/node JAVA_HOME="$(cygpath -u "$JAVA_HOME")" make -C swig check
