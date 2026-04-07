@@ -57,6 +57,10 @@ jobs:
           make
           make check
 
+      - name: Install node-addon-api (Linux/macOS)
+        if: runner.os != 'Windows'
+        run: npm install --prefix swig node-addon-api
+
       - name: SWIG bindings (Linux)
         if: runner.os == 'Linux'
         run: make -C swig check

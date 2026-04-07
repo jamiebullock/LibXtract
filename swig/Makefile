@@ -24,7 +24,10 @@ else
     LINK_LIB=-Wl,--whole-archive $(LIBXTRACT) -Wl,--no-whole-archive
 endif
 
-.PHONY: python java check check-python check-java
+NODE_INCLUDE = $(shell node -e "console.log(process.config.variables.node_prefix + '/include/node')" 2>/dev/null)
+NAPI_INCLUDE = $(shell node -e "console.log(require('node-addon-api').include)" 2>/dev/null | tr -d '"')
+
+.PHONY: python java node check check-python check-java check-node
 
 python:
 	@swig -I../include -python $(NAME).i
@@ -41,7 +44,12 @@ endif
 	@$(CC) $(LDFLAGS) $(LINK_LIB) $(NAME)_wrap.o -o libj$(NAME).$(JAVA_LIB_SUFFIX) $(LIBS)
 	@javac java/*.java
 
-check: check-python check-java
+node:
+	@swig -I../include -javascript -napi $(NAME).i
+	@$(CXX) -std=c++17 $(CFLAGS) $(NAME)_wrap.c -o $(NAME)_wrap.o -I$(NODE_INCLUDE) -I$(NAPI_INCLUDE) -I../include
+	@$(CXX) $(LDFLAGS) $(LINK_LIB) $(NAME)_wrap.o -o $(NAME).node $(LIBS)
+
+check: check-python check-java check-node
 
 check-python: python
 	@echo "Running Python bindings test..."
@@ -55,6 +63,10 @@ check-java: java
 	@java -Djava.library.path=. -cp . test
 	@$(RM) -r $(NAME) test.class
 
+check-node: node
+	@echo "Running Node.js bindings test..."
+	@node test.js
+
 install: python
 	@SITE_DIR=$$($(PYTHON) -c "import site; print(site.getsitepackages()[0])") && \
 	install -d "$$SITE_DIR" && \
@@ -66,6 +78,7 @@ clean:
 	@$(RM) *.pyc
 	@$(RM) *.so
 	@$(RM) *.dylib
+	@$(RM) *.node
 	@$(RM) $(NAME)_wrap.c
 	@$(RM) $(NAME).py
 	@$(RM) -r java
