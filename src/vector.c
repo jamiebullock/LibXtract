@@ -26,7 +26,6 @@
 #include <math.h>
 #include <string.h>
 #include <stdlib.h>
-#include <assert.h>
 
 #include "fft.h"
 
@@ -86,7 +85,8 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
      * a[0] - DC, a[1] - nyquist, a[2...N-1] - remaining bins
      */
     fft = (double*)malloc(N * sizeof(double));
-    assert(fft != NULL);
+    if(fft == NULL)
+        return XTRACT_MALLOC_FAILED;
     memcpy(fft, data, N * sizeof(double));
 
     rdft(N, 1, fft, ooura_data_spectrum.ooura_ip, 
