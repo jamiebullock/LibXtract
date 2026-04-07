@@ -1,8 +1,6 @@
 %module xtract
 %include typemaps.i
-#ifndef SWIGJAVA
 %include carrays.i
-#endif
 %include stdint.i
 
 %{
@@ -77,10 +75,8 @@
 
 %}
 
-#ifndef SWIGJAVA
-%array_class(double, doubleArray); 
-%array_class(int, intArray); 
-#endif
+%array_class(double, doubleArray);
+%array_class(int, intArray);
 %apply double *OUTPUT { double *result };
 
 

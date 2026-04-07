@@ -89,7 +89,7 @@ void fill_wavetable(const float frequency, waveform_type type)
                 wavetable[i] = ((phase / (double)PERIOD) * 2) - 1.;
                 break;
             case NOISE:
-                wavetable[i] = ((random() % 1000) / 500.0) - 1;
+                wavetable[i] = ((rand() % 1000) / 500.0) - 1;
                 break; 
         }
     }

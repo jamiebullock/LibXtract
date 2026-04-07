@@ -1,9 +1,12 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
+
+import sys
 
 try:
     import xtract
-except ImportError:
-    print('Failed to load the library "xtract"')
+except ImportError as e:
+    print('Failed to load the library "xtract": ' + str(e))
+    sys.exit(1)
 
 print('\nRunning libxtract Python bindings test...\n')
 

@@ -9,34 +9,68 @@ on:
 jobs:
   build-and-test:
     strategy:
+      fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
 
       - name: Setup MSYS2 (Windows)
         if: runner.os == 'Windows'
         uses: msys2/setup-msys2@v2
         with:
           msystem: MINGW64
-          install: mingw-w64-x86_64-gcc make
+          install: mingw-w64-x86_64-gcc mingw-w64-x86_64-python mingw-w64-x86_64-swig make
 
-      - name: Build (Linux)
+      - name: Install SWIG (Linux)
         if: runner.os == 'Linux'
-        run: make -C src
+        run: sudo apt-get install -y swig
 
-      - name: Build (Windows)
+      - name: Install SWIG (macOS)
+        if: runner.os == 'macOS'
+        run: brew install swig
+
+      - name: Build and test (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          make
+          make check
+
+      - name: Build and test (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          make
+          make check
+
+      - name: Build and test (Windows)
         if: runner.os == 'Windows'
         shell: msys2 {0}
-        run: make -C src
+        run: |
+          make
+          make check
 
-      - name: Test (Linux)
+      - name: SWIG bindings (Linux)
         if: runner.os == 'Linux'
-        run: make check
+        run: make -C swig check
+        env:
+          JAVA_HOME: ${{ env.JAVA_HOME }}
+          PYTHON: python3
 
-      - name: Test (Windows)
+      - name: SWIG bindings (macOS)
+        if: runner.os == 'macOS'
+        run: make -C swig check
+        env:
+          JAVA_HOME: ${{ env.JAVA_HOME }}
+
+      - name: SWIG bindings (Windows)
         if: runner.os == 'Windows'
         shell: msys2 {0}
-        run: make check
+        run: PYTHON=python make -C swig check-python
