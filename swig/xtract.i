@@ -24,6 +24,11 @@
         return (void *)f;
     }
 
+    void *inta_to_voidp(int i[])
+    {
+        return (void *)i;
+    }
+
     xtract_function_descriptor_t 
             *get_descriptor(xtract_function_descriptor_t *fd, int i){
 
