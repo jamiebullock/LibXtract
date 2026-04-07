@@ -364,8 +364,7 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
                 imag = fft->imagp[n];
             }
 #endif
-            result[m*2] = real;
-            result[m*2+1] = imag;
+            result[m] = sqrt(XTRACT_SQ(real) + XTRACT_SQ(imag)) / (double)N;
             XTRACT_SET_FREQUENCY;
             XTRACT_GET_MAX;
         }
@@ -374,7 +373,7 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
 
     if(normalise && max != 0.0)
     {
-        if(vector == XTRACT_MAGNITUDE_SPECTRUM || vector == XTRACT_SPECTRUM_COEFFICIENTS)
+        if(vector == XTRACT_SPECTRUM_COEFFICIENTS)
         {
             /* Interleaved formats: find true max magnitude, then scale both components */
             double true_max = 0.0;

@@ -639,40 +639,100 @@ TEST_CASE("xtract_spectrum normalisation", "[vector][fft][known-bug]")
     }
 }
 
-TEST_CASE("xtract_spectrum magnitude normalisation interleaved", "[vector][fft]")
+TEST_CASE("xtract_spectrum MAGNITUDE_SPECTRUM stores scalar magnitudes", "[vector][fft]")
 {
-    SECTION("normalised magnitude spectrum should have max amplitude 1.0")
+    const int N = 64;
+    const int M = N / 2;
+    double data[64];
+    double result[64] = {0};
+    double sr = 8000.0;
+
+    /* Generate cos(2*pi*4*n/64) — energy at FFT bin 4 */
+    for(int n = 0; n < N; n++)
+        data[n] = cos(2.0 * M_PI * 4.0 * n / N);
+
+    xtract_init_fft(N, XTRACT_SPECTRUM);
+
+    SECTION("magnitudes in first half, frequencies in second half")
     {
-        /* MAGNITUDE_SPECTRUM stores interleaved real/imag at result[m*2], result[m*2+1].
-         * Frequencies go in result[M..2M-1]. With normalise=1, the code divides
-         * result[0..M-1] by max — but for interleaved format that only covers
-         * half the amplitude data. The frequency slots also get divided.
-         * Correct behaviour: normalise the actual amplitude values. */
-        const int N = 8;
-        const int M = N / 2;
-        double data[8];
-        double result[8] = {0};
+        double argv[] = {sr / N, (double)XTRACT_MAGNITUDE_SPECTRUM, 0.0, 0.0};
+        xtract_spectrum(data, N, argv, result);
 
-        for (int n = 0; n < N; n++)
-            data[n] = cos(2.0 * M_PI * 1.0 * n / N);
+        /* result[0..M-1] should be scalar magnitudes (non-negative).
+         * A cosine at bin 4 with withDC=0 means bin 4 maps to output
+         * index 3 (shifted down by 1 because DC is skipped). */
+        for(int i = 0; i < M; i++)
+            REQUIRE(result[i] >= 0.0);
 
-        xtract_init_fft(N, XTRACT_SPECTRUM);
+        /* The peak magnitude should be at index 3 (bin 4, DC skipped) */
+        double peak_val = 0.0;
+        int peak_idx = -1;
+        for(int i = 0; i < M; i++)
+        {
+            if(result[i] > peak_val)
+            {
+                peak_val = result[i];
+                peak_idx = i;
+            }
+        }
+        REQUIRE(peak_idx == 3);
+        REQUIRE(peak_val > 0.0);
 
-        double sr = 8000.0;
+        /* result[M..2M-1] should be frequencies in Hz */
+        for(int i = 0; i < M; i++)
+        {
+            double expected_freq = (i + 1) * (sr / N);
+            REQUIRE(result[M + i] == Approx(expected_freq).epsilon(1e-6));
+        }
+    }
+
+    SECTION("no collision between magnitudes and frequencies")
+    {
+        /* For larger N, the interleaved bug causes result[m*2] to
+         * overwrite result[M+m] when m >= M/2. Verify that frequency
+         * values in the second half are not corrupted. */
+        double argv[] = {sr / N, (double)XTRACT_MAGNITUDE_SPECTRUM, 0.0, 0.0};
+        xtract_spectrum(data, N, argv, result);
+
+        /* Check frequencies in the upper half of the second region
+         * (these are the ones corrupted by the interleaved bug) */
+        for(int i = M / 2; i < M; i++)
+        {
+            double expected_freq = (i + 1) * (sr / N);
+            REQUIRE(result[M + i] == Approx(expected_freq).epsilon(1e-6));
+        }
+    }
+
+    SECTION("magnitude equals sqrt(real^2 + imag^2) from SPECTRUM_COEFFICIENTS")
+    {
+        /* Compute SPECTRUM_COEFFICIENTS (interleaved real/imag) */
+        double coeffs[64] = {0};
+        double argv_coeffs[] = {sr / N, (double)XTRACT_SPECTRUM_COEFFICIENTS, 0.0, 0.0};
+        xtract_spectrum(data, N, argv_coeffs, coeffs);
+
+        /* Compute MAGNITUDE_SPECTRUM */
+        double argv_mag[] = {sr / N, (double)XTRACT_MAGNITUDE_SPECTRUM, 0.0, 0.0};
+        xtract_spectrum(data, N, argv_mag, result);
+
+        /* Each magnitude should equal sqrt(real^2 + imag^2) / N */
+        for(int i = 0; i < M; i++)
+        {
+            double expected = sqrt(coeffs[i * 2] * coeffs[i * 2] +
+                                   coeffs[i * 2 + 1] * coeffs[i * 2 + 1]) / (double)N;
+            REQUIRE(result[i] == Approx(expected).margin(1e-10));
+        }
+    }
+
+    SECTION("normalised magnitude spectrum has max of 1.0")
+    {
         double argv[] = {sr / N, (double)XTRACT_MAGNITUDE_SPECTRUM, 0.0, 1.0};
         xtract_spectrum(data, N, argv, result);
 
-        /* Find max magnitude from the interleaved pairs */
-        double max_mag = 0.0;
-        for (int i = 0; i < M; i++)
-        {
-            double mag = sqrt(result[i * 2] * result[i * 2] +
-                              result[i * 2 + 1] * result[i * 2 + 1]);
-            if (mag > max_mag) max_mag = mag;
-        }
+        double max_val = 0.0;
+        for(int i = 0; i < M; i++)
+            if(result[i] > max_val) max_val = result[i];
 
-        /* After normalisation, the max magnitude should be 1.0 */
-        REQUIRE(max_mag == Approx(1.0).epsilon(1e-4));
+        REQUIRE(max_val == Approx(1.0).epsilon(1e-6));
     }
 }
 
