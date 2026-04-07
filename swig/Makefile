@@ -13,7 +13,7 @@ ifeq ($(OS), Darwin)
 else
     CFLAGS=-g -c -fPIC
     LDFLAGS=-shared
-    LIBS=
+    LIBS=-lm
     JAVA_LIB_SUFFIX=so
 endif
 
