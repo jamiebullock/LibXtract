@@ -68,12 +68,14 @@ jobs:
         run: |
           npx node-gyp install
           npm install --prefix swig node-addon-api
+          echo "NODE_INCLUDE=$(HOME)/.node-gyp/$(node -v | tr -d v)/include/node" >> $GITHUB_ENV
 
       - name: SWIG bindings (Linux)
         if: runner.os == 'Linux'
         run: make -C swig check
         env:
           JAVA_HOME: ${{ env.JAVA_HOME }}
+          NODE_INCLUDE: ${{ env.NODE_INCLUDE }}
           PYTHON: python3
 
       - name: SWIG bindings (macOS)
@@ -81,6 +83,7 @@ jobs:
         run: make -C swig check
         env:
           JAVA_HOME: ${{ env.JAVA_HOME }}
+          NODE_INCLUDE: ${{ env.NODE_INCLUDE }}
 
       - name: SWIG bindings (Windows)
         if: runner.os == 'Windows'

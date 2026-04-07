@@ -24,12 +24,6 @@ else
     LINK_LIB=-Wl,--whole-archive $(LIBXTRACT) -Wl,--no-whole-archive
 endif
 
-NODE_INCLUDE = $(shell node -e "\
-  var fs = require('fs'), p = process.config.variables.node_prefix + '/include/node'; \
-  if (fs.existsSync(p)) { console.log(p); } \
-  else { var h = require('os').homedir() + '/.node-gyp/' + process.versions.node + '/include/node'; \
-  if (fs.existsSync(h)) { console.log(h); } \
-  else { console.log(p); } }" 2>/dev/null)
 NAPI_INCLUDE = $(shell node -e "console.log(require('node-addon-api').include)" 2>/dev/null | tr -d '"')
 
 .PHONY: python java node check check-python check-java check-node
@@ -50,6 +44,9 @@ endif
 	@javac java/*.java
 
 node:
+ifndef NODE_INCLUDE
+	$(error NODE_INCLUDE is not set. Set it to your Node.js include directory containing node_api.h)
+endif
 	@swig -I../include -javascript -napi $(NAME).i
 	@$(CXX) -std=c++17 $(CFLAGS) $(NAME)_wrap.c -o $(NAME)_wrap.o -I$(NODE_INCLUDE) -I$(NAPI_INCLUDE) -I../include
 	@$(CXX) $(LDFLAGS) $(LINK_LIB) $(NAME)_wrap.o -o $(NAME).node $(LIBS)
