@@ -1084,30 +1084,44 @@ int xtract_f0(const double *data, const int N, const void *argv, double *result)
 int xtract_failsafe_f0(const double *data, const int N, const void *argv, double *result)
 {
 
-    double *spectrum = NULL, argf[4], *peaks = NULL, return_code, sr;
+    double *spectrum, argf[4], *peaks, sr;
+    int rv;
 
-    return_code = xtract_f0(data, N, argv, result);
+    rv = xtract_f0(data, N, argv, result);
 
-    if(return_code == XTRACT_NO_RESULT)
+    if(rv == XTRACT_NO_RESULT)
     {
         sr = *(double *)argv;
         if(sr == 0)
             sr = 44100.0;
-        spectrum = (double *)malloc(N * sizeof(double));
-        memset(spectrum, 0, N * sizeof(double));
-        peaks = (double *)malloc(N * sizeof(double));
+        spectrum = (double *)calloc(N, sizeof(double));
+        peaks = (double *)calloc(N, sizeof(double));
+
+        if(spectrum == NULL || peaks == NULL)
+        {
+            free(spectrum);
+            free(peaks);
+            return XTRACT_MALLOC_FAILED;
+        }
+
         argf[0] = sr / N;
         argf[1] = XTRACT_MAGNITUDE_SPECTRUM;
-        argf[2] = 0.0f;
-        argf[3] = 0.0f;
+        argf[2] = 0.0;
+        argf[3] = 0.0;
         xtract_spectrum(data, N, argf, spectrum);
         argf[1] = 10.0;
         xtract_peak_spectrum(spectrum, N >> 1, argf, peaks);
         argf[0] = 0.0;
-        xtract_lowest_value(peaks+(N >> 1), N >> 1, argf, result);
+        rv = xtract_lowest_value(peaks + (N >> 1), N >> 1, argf, result);
 
         free(spectrum);
         free(peaks);
+
+        if(rv == XTRACT_NO_RESULT)
+        {
+            *result = 0.0;
+            return XTRACT_NO_RESULT;
+        }
     }
 
     return XTRACT_SUCCESS;
