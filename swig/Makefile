@@ -6,6 +6,8 @@ PYTHON ?= python3
 INCLUDEPY = $(shell $(PYTHON) -m sysconfig | grep -w INCLUDEPY | awk '{print $$3}')
 PYTHON_LDFLAGS = $(shell $(PYTHON)-config --ldflags --embed 2>/dev/null || echo "")
 
+PYTHON_EXT_SUFFIX = $(shell $(PYTHON) -c "import sysconfig; print(sysconfig.get_config_var('EXT_SUFFIX') or '.so')" 2>/dev/null)
+
 ifeq ($(OS), Darwin)
     CFLAGS=-g -c
     LDFLAGS=-bundle -flat_namespace -undefined suppress
@@ -27,7 +29,7 @@ endif
 python:
 	@swig -I../include -python $(NAME).i
 	@$(CC) $(CFLAGS) $(NAME)_wrap.c -o $(NAME)_wrap.o -I$(INCLUDEPY) -I../include
-	@$(CC) $(LDFLAGS) $(LINK_LIB) $(NAME)_wrap.o -o _$(NAME).so $(LIBS) $(PYTHON_LDFLAGS)
+	@$(CC) $(LDFLAGS) $(LINK_LIB) $(NAME)_wrap.o -o _$(NAME)$(PYTHON_EXT_SUFFIX) $(LIBS) $(PYTHON_LDFLAGS)
 
 java:
 ifndef JAVA_HOME
@@ -56,7 +58,7 @@ check-java: java
 install: python
 	@SITE_DIR=$$($(PYTHON) -c "import site; print(site.getsitepackages()[0])") && \
 	install -d "$$SITE_DIR" && \
-	install _$(NAME).so "$$SITE_DIR" && \
+	install _$(NAME)$(PYTHON_EXT_SUFFIX) "$$SITE_DIR" && \
 	install -m 644 $(NAME).py "$$SITE_DIR"
 
 clean:
