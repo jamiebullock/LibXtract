@@ -4,6 +4,7 @@ OS := $(shell uname)
 
 PYTHON ?= python3
 INCLUDEPY = $(shell $(PYTHON) -m sysconfig | grep -w INCLUDEPY | awk '{print $$3}')
+PYTHON_LDFLAGS = $(shell $(PYTHON)-config --ldflags --embed 2>/dev/null || echo "")
 
 ifeq ($(OS), Darwin)
     CFLAGS=-g -c
@@ -26,7 +27,7 @@ endif
 python:
 	@swig -I../include -python $(NAME).i
 	@$(CC) $(CFLAGS) $(NAME)_wrap.c -o $(NAME)_wrap.o -I$(INCLUDEPY) -I../include
-	@$(CC) $(LDFLAGS) $(LINK_LIB) $(NAME)_wrap.o -o _$(NAME).so $(LIBS)
+	@$(CC) $(LDFLAGS) $(LINK_LIB) $(NAME)_wrap.o -o _$(NAME).so $(LIBS) $(PYTHON_LDFLAGS)
 
 java:
 ifndef JAVA_HOME
