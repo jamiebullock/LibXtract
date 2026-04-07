@@ -2,8 +2,8 @@ NAME = xtract
 
 OS := $(shell uname)
 
-# Assume that since we're building the python bindings, we have a python installed!
-INCLUDEPY = $(shell python -m sysconfig | grep -w INCLUDEPY | awk '{print $$3}')
+PYTHON ?= python3
+INCLUDEPY = $(shell $(PYTHON) -m sysconfig | grep -w INCLUDEPY | awk '{print $$3}')
 
 ifeq ($(OS), Darwin)
     CFLAGS=-g -c
@@ -17,7 +17,7 @@ else
     JAVA_LIB_SUFFIX=so
 endif
 
-.PHONY: python java
+.PHONY: python java check check-python check-java
 
 python:
 	@swig -I../include -python $(NAME).i
@@ -34,8 +34,22 @@ endif
 	@$(CC) $(LDFLAGS) ../src/lib$(NAME).a $(NAME)_wrap.o -o libj$(NAME).$(JAVA_LIB_SUFFIX) $(LIBS)
 	@javac java/*.java
 
+check: check-python check-java
+
+check-python: python
+	@echo "Running Python bindings test..."
+	@PYTHONPATH=. $(PYTHON) test.py
+
+check-java: java
+	@echo "Running Java bindings test..."
+	@mkdir -p $(NAME)
+	@cp java/*.class $(NAME)/
+	@javac -cp . test.java
+	@java -Djava.library.path=. -cp . test
+	@$(RM) -r $(NAME) test.class
+
 install: python
-	@SITE_DIR=$$(python -c "import site; print(site.getsitepackages()[0])") && \
+	@SITE_DIR=$$($(PYTHON) -c "import site; print(site.getsitepackages()[0])") && \
 	install -d "$$SITE_DIR" && \
 	install _$(NAME).so "$$SITE_DIR" && \
 	install -m 644 $(NAME).py "$$SITE_DIR"
