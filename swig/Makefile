@@ -17,10 +17,6 @@ else
     JAVA_LIB_SUFFIX=so
 endif
 
-JAVA_HOME ?= $(shell java -XshowSettings:properties -version 2>&1 | grep 'java.home' | awk '{print $$3}')
-JAVA_INCLUDE = $(JAVA_HOME)/include
-JAVA_INCLUDE_OS = $(wildcard $(JAVA_INCLUDE)/darwin $(JAVA_INCLUDE)/linux $(JAVA_INCLUDE)/win32)
-
 .PHONY: python java
 
 python:
@@ -29,9 +25,12 @@ python:
 	@$(CC) $(LDFLAGS) ../src/lib$(NAME).a $(NAME)_wrap.o -o _$(NAME).so $(LIBS)
 
 java:
+ifndef JAVA_HOME
+	$(error JAVA_HOME is not set. Set it to your JDK installation directory)
+endif
 	@mkdir -p java
 	@swig -I../include -java -package libxtract -outdir java $(NAME).i
-	@$(CC) $(CFLAGS) $(NAME)_wrap.c -o $(NAME)_wrap.o -I$(JAVA_INCLUDE) -I$(JAVA_INCLUDE_OS) -I../include
+	@$(CC) $(CFLAGS) $(NAME)_wrap.c -o $(NAME)_wrap.o -I$(JAVA_HOME)/include -I$(wildcard $(JAVA_HOME)/include/darwin $(JAVA_HOME)/include/linux $(JAVA_HOME)/include/win32) -I../include
 	@$(CC) $(LDFLAGS) ../src/lib$(NAME).a $(NAME)_wrap.o -o lib$(NAME)_java.$(JAVA_LIB_SUFFIX) $(LIBS)
 	@javac java/*.java
 
