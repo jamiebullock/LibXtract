@@ -10,11 +10,15 @@ ifeq ($(OS), Darwin)
     LDFLAGS=-bundle -flat_namespace -undefined suppress
     LIBS=-framework Accelerate
     JAVA_LIB_SUFFIX=dylib
+    LIBXTRACT=../src/lib$(NAME).a
+    LINK_LIB=$(LIBXTRACT)
 else
     CFLAGS=-g -c -fPIC
     LDFLAGS=-shared
     LIBS=-lm
     JAVA_LIB_SUFFIX=so
+    LIBXTRACT=$(wildcard ../src/lib$(NAME).a ../src/lib$(NAME).lib)
+    LINK_LIB=-Wl,--whole-archive $(LIBXTRACT) -Wl,--no-whole-archive
 endif
 
 .PHONY: python java check check-python check-java
@@ -22,11 +26,7 @@ endif
 python:
 	@swig -I../include -python $(NAME).i
 	@$(CC) $(CFLAGS) $(NAME)_wrap.c -o $(NAME)_wrap.o -I$(INCLUDEPY) -I../include
-ifeq ($(OS), Darwin)
-	@$(CC) $(LDFLAGS) ../src/lib$(NAME).a $(NAME)_wrap.o -o _$(NAME).so $(LIBS)
-else
-	@$(CC) $(LDFLAGS) -Wl,--whole-archive ../src/lib$(NAME).a -Wl,--no-whole-archive $(NAME)_wrap.o -o _$(NAME).so $(LIBS)
-endif
+	@$(CC) $(LDFLAGS) $(LINK_LIB) $(NAME)_wrap.o -o _$(NAME).so $(LIBS)
 
 java:
 ifndef JAVA_HOME
@@ -35,11 +35,7 @@ endif
 	@mkdir -p java
 	@swig -I../include -java -package $(NAME) -outdir java $(NAME).i
 	@$(CC) $(CFLAGS) $(NAME)_wrap.c -o $(NAME)_wrap.o -I$(JAVA_HOME)/include -I$(wildcard $(JAVA_HOME)/include/darwin $(JAVA_HOME)/include/linux $(JAVA_HOME)/include/win32) -I../include
-ifeq ($(OS), Darwin)
-	@$(CC) $(LDFLAGS) ../src/lib$(NAME).a $(NAME)_wrap.o -o libj$(NAME).$(JAVA_LIB_SUFFIX) $(LIBS)
-else
-	@$(CC) $(LDFLAGS) -Wl,--whole-archive ../src/lib$(NAME).a -Wl,--no-whole-archive $(NAME)_wrap.o -o libj$(NAME).$(JAVA_LIB_SUFFIX) $(LIBS)
-endif
+	@$(CC) $(LDFLAGS) $(LINK_LIB) $(NAME)_wrap.o -o libj$(NAME).$(JAVA_LIB_SUFFIX) $(LIBS)
 	@javac java/*.java
 
 check: check-python check-java
