@@ -68,7 +68,8 @@ jobs:
         run: |
           npx node-gyp install
           npm install --prefix swig node-addon-api
-          echo "NODE_INCLUDE=${HOME}/.node-gyp/$(node -v | tr -d v)/include/node" >> $GITHUB_ENV
+          NODE_INC=$(find ${HOME} -path "*/node-gyp/$(node -v | tr -d v)/include/node" -type d 2>/dev/null | head -1)
+          echo "NODE_INCLUDE=${NODE_INC}" >> $GITHUB_ENV
 
       - name: SWIG bindings (Linux)
         if: runner.os == 'Linux'

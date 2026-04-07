@@ -65,9 +65,14 @@ check-java: java
 	@java -Djava.library.path=. -cp . test
 	@$(RM) -r $(NAME) test.class
 
-check-node: node
+check-node:
+ifdef NODE_INCLUDE
+	@$(MAKE) node
 	@echo "Running Node.js bindings test..."
 	@node test.js
+else
+	@echo "Skipping Node.js bindings test (NODE_INCLUDE not set)"
+endif
 
 install: python
 	@SITE_DIR=$$($(PYTHON) -c "import site; print(site.getsitepackages()[0])") && \
