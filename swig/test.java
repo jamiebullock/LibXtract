@@ -4,10 +4,10 @@ public class test {
     public static void main(String[] args) {
 
         try {
-            System.loadLibrary("xtract_java");
+            System.loadLibrary("jxtract");
         }
         catch (UnsatisfiedLinkError e) {
-            System.out.println("Failed to load the library \"xtract_java\"");
+            System.out.println("Failed to load the library \"jxtract\"");
             System.out.println(e.toString());
             System.exit(1);
         }
