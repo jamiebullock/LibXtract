@@ -29,7 +29,7 @@ ifndef JAVA_HOME
 	$(error JAVA_HOME is not set. Set it to your JDK installation directory)
 endif
 	@mkdir -p java
-	@swig -I../include -java -package libxtract -outdir java $(NAME).i
+	@swig -I../include -java -package $(NAME) -outdir java $(NAME).i
 	@$(CC) $(CFLAGS) $(NAME)_wrap.c -o $(NAME)_wrap.o -I$(JAVA_HOME)/include -I$(wildcard $(JAVA_HOME)/include/darwin $(JAVA_HOME)/include/linux $(JAVA_HOME)/include/win32) -I../include
 	@$(CC) $(LDFLAGS) ../src/lib$(NAME).a $(NAME)_wrap.o -o lib$(NAME)_java.$(JAVA_LIB_SUFFIX) $(LIBS)
 	@javac java/*.java
