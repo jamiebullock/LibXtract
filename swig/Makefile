@@ -24,7 +24,12 @@ else
     LINK_LIB=-Wl,--whole-archive $(LIBXTRACT) -Wl,--no-whole-archive
 endif
 
-NODE_INCLUDE = $(shell node -e "console.log(process.config.variables.node_prefix + '/include/node')" 2>/dev/null)
+NODE_INCLUDE = $(shell node -e "\
+  var fs = require('fs'), p = process.config.variables.node_prefix + '/include/node'; \
+  if (fs.existsSync(p)) { console.log(p); } \
+  else { var h = require('os').homedir() + '/.node-gyp/' + process.versions.node + '/include/node'; \
+  if (fs.existsSync(h)) { console.log(h); } \
+  else { console.log(p); } }" 2>/dev/null)
 NAPI_INCLUDE = $(shell node -e "console.log(require('node-addon-api').include)" 2>/dev/null | tr -d '"')
 
 .PHONY: python java node check check-python check-java check-node

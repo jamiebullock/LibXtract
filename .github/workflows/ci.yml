@@ -23,6 +23,12 @@ jobs:
           distribution: temurin
           java-version: 17
 
+      - name: Setup Node.js
+        if: runner.os != 'Windows'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
       - name: Setup MSYS2 (Windows)
         if: runner.os == 'Windows'
         uses: msys2/setup-msys2@v2
@@ -57,9 +63,11 @@ jobs:
           make
           make check
 
-      - name: Install node-addon-api (Linux/macOS)
+      - name: Install Node.js build dependencies (Linux/macOS)
         if: runner.os != 'Windows'
-        run: npm install --prefix swig node-addon-api
+        run: |
+          npx node-gyp install
+          npm install --prefix swig node-addon-api
 
       - name: SWIG bindings (Linux)
         if: runner.os == 'Linux'
