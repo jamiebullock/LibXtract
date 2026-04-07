@@ -23,7 +23,7 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - name: Setup Node.js
+      - name: Setup Node.js (Linux/macOS)
         if: runner.os != 'Windows'
         uses: actions/setup-node@v4
         with:
@@ -34,7 +34,7 @@ jobs:
         uses: msys2/setup-msys2@v2
         with:
           msystem: MINGW64
-          install: mingw-w64-x86_64-gcc mingw-w64-x86_64-python mingw-w64-x86_64-swig make
+          install: mingw-w64-x86_64-gcc mingw-w64-x86_64-python mingw-w64-x86_64-swig mingw-w64-x86_64-nodejs make
 
       - name: Install SWIG (Linux)
         if: runner.os == 'Linux'
@@ -63,13 +63,13 @@ jobs:
           make
           make check
 
-      - name: Install Node.js build dependencies (Linux/macOS)
+      - name: Install Node.js headers (Linux/macOS)
         if: runner.os != 'Windows'
         run: |
-          npx node-gyp install
+          NODE_VER=$(node -v | tr -d v)
+          curl -sL "https://nodejs.org/dist/v${NODE_VER}/node-v${NODE_VER}-headers.tar.gz" | tar xz
+          echo "NODE_INCLUDE=$(pwd)/node-v${NODE_VER}/include/node" >> $GITHUB_ENV
           npm install --prefix swig node-addon-api
-          NODE_INC=$(find ${HOME} -path "*/node-gyp/$(node -v | tr -d v)/include/node" -type d 2>/dev/null | head -1)
-          echo "NODE_INCLUDE=${NODE_INC}" >> $GITHUB_ENV
 
       - name: SWIG bindings (Linux)
         if: runner.os == 'Linux'
@@ -89,4 +89,6 @@ jobs:
       - name: SWIG bindings (Windows)
         if: runner.os == 'Windows'
         shell: msys2 {0}
-        run: PYTHON=python make -C swig check-python
+        run: |
+          npm install --prefix swig node-addon-api
+          PYTHON=python NODE_INCLUDE=/mingw64/include/node make -C swig check
