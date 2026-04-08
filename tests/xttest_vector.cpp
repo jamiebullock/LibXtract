@@ -791,6 +791,59 @@ TEST_CASE("xtract_mel_spectrogram", "[vector]")
     }
 }
 
+TEST_CASE("xtract_gfcc and xtract_gammatone_spectrogram", "[vector]")
+{
+    SECTION("GFCC equals DCT of gammatone spectrogram")
+    {
+        const int N = 128;
+        const int n_filters = 13;
+        double data[128];
+        double gt_result[13] = {0};
+        double gfcc_result[13] = {0};
+
+        memset(data, 0, sizeof(data));
+        data[10] = 1.0;
+
+        /* Init gammatone filter bank */
+        xtract_mel_filter gt_filters;
+        gt_filters.n_filters = n_filters;
+        gt_filters.filters = (double **)malloc(n_filters * sizeof(double *));
+        for(int i = 0; i < n_filters; i++)
+            gt_filters.filters[i] = (double *)calloc(N, sizeof(double));
+
+        xtract_init_gfcc(N, 22050.0 / 2, 20, 8000, n_filters, gt_filters.filters);
+
+        /* Compute gammatone spectrogram */
+        int rv = xtract_gammatone_spectrogram(data, N, &gt_filters, gt_result);
+        REQUIRE(rv == XTRACT_SUCCESS);
+
+        /* All values should be finite */
+        for(int i = 0; i < n_filters; i++)
+            REQUIRE(std::isfinite(gt_result[i]));
+
+        /* At least one filter should have energy above the log limit floor */
+        double max_energy = gt_result[0];
+        for(int i = 1; i < n_filters; i++)
+            if(gt_result[i] > max_energy) max_energy = gt_result[i];
+        REQUIRE(max_energy > -96.0);
+
+        /* GFCC should equal DCT of gammatone spectrogram */
+        xtract_init_fft(n_filters, XTRACT_DCT);
+        double dct_of_gt[13] = {0};
+        xtract_dct(gt_result, n_filters, NULL, dct_of_gt);
+
+        xtract_gfcc(data, N, &gt_filters, gfcc_result);
+
+        for(int i = 0; i < n_filters; i++)
+            REQUIRE(gfcc_result[i] == Approx(dct_of_gt[i]).margin(1e-10));
+
+        /* Cleanup */
+        for(int i = 0; i < n_filters; i++)
+            free(gt_filters.filters[i]);
+        free(gt_filters.filters);
+    }
+}
+
 TEST_CASE("xtract_init_fft DCT does not clobber MFCC", "[init]")
 {
     SECTION("initing DCT with size 4 should not reinit MFCC")

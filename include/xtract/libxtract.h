@@ -137,6 +137,8 @@ enum xtract_features_ {
     XTRACT_LPCC,
     XTRACT_SUBBANDS,
     XTRACT_MEL_SPECTROGRAM,
+    XTRACT_GFCC,
+    XTRACT_GAMMATONE_SPECTROGRAM,
     /* Helper functions */
     XTRACT_WINDOWED,
     XTRACT_SMOOTHED,
@@ -147,7 +149,8 @@ enum xtract_features_ {
 enum xtract_feature_init_ {
     XTRACT_INIT_MFCC = 100,
     XTRACT_INIT_BARK,
-    XTRACT_INIT_WINDOWED
+    XTRACT_INIT_WINDOWED,
+    XTRACT_INIT_GFCC
 };
 
 /** \brief Enumeration of feature types */
@@ -384,6 +387,19 @@ typedef struct xtract_mel_filter_ {
  * It is up to the caller to pass in a pointer to memory allocated for freq_bands arrays of length N. This function populates these arrays with magnitude coefficients representing the mel filterbank on a linear scale 
  */
 int xtract_init_mfcc(int N, double nyquist, int style, double freq_min, double freq_max, int freq_bands, double **fft_tables);
+
+/** \brief A function to initialise a gammatone filter bank for GFCC extraction
+ *
+ * It is up to the caller to pass in a pointer to memory allocated for freq_bands arrays of length N. This function populates these arrays with magnitude coefficients representing the gammatone filterbank on the ERB scale.
+ *
+ * \param N: the number of FFT bins
+ * \param nyquist: the Nyquist frequency
+ * \param freq_min: the minimum frequency for the filter bank
+ * \param freq_max: the maximum frequency for the filter bank
+ * \param freq_bands: the number of gammatone filters
+ * \param **fft_tables: an array of pointers to arrays of length N, to be populated with filter coefficients
+ */
+int xtract_init_gfcc(int N, double nyquist, double freq_min, double freq_max, int freq_bands, double **fft_tables);
 
 /** \brief A function to initialise bark filter bounds
  * 

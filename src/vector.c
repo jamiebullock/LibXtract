@@ -474,13 +474,10 @@ int xtract_autocorrelation_fft(const double *data, const int N, const void *argv
     return XTRACT_SUCCESS;
 }
 
-int xtract_mel_spectrogram(const double *data, const int N, const void *argv, double *result)
+static int filterbank_spectrogram(const double *data, const int N, const xtract_mel_filter *f, double *result)
 {
 
-    xtract_mel_filter *f;
     int n, filter;
-
-    f = (xtract_mel_filter *)argv;
 
     for(filter = 0; filter < f->n_filters; filter++)
     {
@@ -499,22 +496,40 @@ int xtract_mel_spectrogram(const double *data, const int N, const void *argv, do
     return XTRACT_SUCCESS;
 }
 
-int xtract_mfcc(const double *data, const int N, const void *argv, double *result)
+static int cepstral_coefficients(const double *data, const int N, const xtract_mel_filter *f, double *result)
 {
 
-    xtract_mel_filter *f;
     double *temp;
 
-    f = (xtract_mel_filter *)argv;
     temp = (double *)calloc(f->n_filters, sizeof(double));
     if(temp == NULL)
         return XTRACT_MALLOC_FAILED;
 
-    xtract_mel_spectrogram(data, N, argv, temp);
+    filterbank_spectrogram(data, N, f, temp);
     xtract_dct(temp, f->n_filters, NULL, result);
     free(temp);
 
     return XTRACT_SUCCESS;
+}
+
+int xtract_mel_spectrogram(const double *data, const int N, const void *argv, double *result)
+{
+    return filterbank_spectrogram(data, N, (const xtract_mel_filter *)argv, result);
+}
+
+int xtract_mfcc(const double *data, const int N, const void *argv, double *result)
+{
+    return cepstral_coefficients(data, N, (const xtract_mel_filter *)argv, result);
+}
+
+int xtract_gammatone_spectrogram(const double *data, const int N, const void *argv, double *result)
+{
+    return filterbank_spectrogram(data, N, (const xtract_mel_filter *)argv, result);
+}
+
+int xtract_gfcc(const double *data, const int N, const void *argv, double *result)
+{
+    return cepstral_coefficients(data, N, (const xtract_mel_filter *)argv, result);
 }
 
 int xtract_mmbses(const double *data, const int N, const void *argv, double *result)
