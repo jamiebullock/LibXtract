@@ -434,6 +434,19 @@ int xtract_failsafe_f0(const double *data, const int N, const void *argv, double
  */
 int xtract_wavelet_f0(const double *data, const int N, const void *argv, double *result);
 
+/** \brief Extract the fundamental frequency using the McLeod Pitch Method
+ *
+ * Uses the Normalised Square Difference Function (NSDF) with parabolic
+ * interpolation for sub-sample accuracy. Based on McLeod and Wyvill (2005)
+ * "A Smarter Way to Find Pitch".
+ *
+ * \param *data: a pointer to the first element in an array of doubles representing an audio vector
+ * \param N: the number of elements to be considered
+ * \param *argv: a pointer to a double representing the audio sample rate
+ * \param *result: the pitch of N values from the array pointed to by *data
+ */
+int xtract_mcleod_f0(const double *data, const int N, const void *argv, double *result);
+
     
 /** \brief Convenience function to convert a frequency in Hertz to a "pitch" value in MIDI cents
  *

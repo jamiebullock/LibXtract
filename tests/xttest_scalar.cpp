@@ -7,6 +7,7 @@
 #include "catch.hpp"
 
 #include <cmath>
+#include <cstring>
 
 
 SCENARIO( "F0 is correctly detected for a sine wave", "[xtract_f0]" )
@@ -1803,5 +1804,194 @@ TEST_CASE("xtract_spectral_slope known value", "[scalar][spectral]")
                          0.0, 100.0, 200.0, 300.0};
         xtract_spectral_slope(data, 8, NULL, &result);
         REQUIRE(result == Approx(1.0 / 600.0).epsilon(1e-9));
+    }
+}
+
+SCENARIO( "McLeod F0 is correctly detected for a sine wave", "[xtract_mcleod_f0]" )
+{
+    uint16_t expected = 0;
+    uint16_t actual = 0;
+
+    GIVEN( "a 1024 sample block with a sample rate of 44100" )
+    {
+        uint32_t blocksize = 1024;
+        double samplerate = 44100;
+        double result = -1.0;
+        double amplitude = 1.0;
+        double table[blocksize];
+
+        WHEN( "the frequency is 86.1328125 Hz (2 cycles in block)" )
+        {
+            double frequency = 86.1328125;
+
+            xttest_gen_sine(table, blocksize, samplerate, frequency, amplitude);
+            xtract_mcleod_f0(table, blocksize, &samplerate, &result);
+
+            THEN( "the detected F0 is accurate to the nearest MIDI cent" )
+            {
+                actual = xttest_ftom(result);
+                expected = xttest_ftom(frequency);
+                CAPTURE( actual );
+                CAPTURE( expected );
+                REQUIRE( actual == expected );
+            }
+        }
+
+        WHEN( "the frequency is 172.265625 Hz (4 cycles in block)" )
+        {
+            double frequency = 172.265625;
+
+            xttest_gen_sine(table, blocksize, samplerate, frequency, amplitude);
+            xtract_mcleod_f0(table, blocksize, &samplerate, &result);
+
+            THEN( "the detected F0 is accurate to the nearest MIDI cent" )
+            {
+                actual = xttest_ftom(result);
+                expected = xttest_ftom(frequency);
+                CAPTURE( actual );
+                CAPTURE( expected );
+                REQUIRE( actual == expected );
+            }
+        }
+
+        WHEN( "the frequency is 344.53125 Hz (8 cycles in block)" )
+        {
+            double frequency = 344.53125;
+
+            xttest_gen_sine(table, blocksize, samplerate, frequency, amplitude);
+            xtract_mcleod_f0(table, blocksize, &samplerate, &result);
+
+            THEN( "the detected F0 is accurate to the nearest MIDI cent" )
+            {
+                actual = xttest_ftom(result);
+                expected = xttest_ftom(frequency);
+                CAPTURE( actual );
+                CAPTURE( expected );
+                REQUIRE( actual == expected );
+            }
+        }
+
+        WHEN( "the frequency is 1000 Hz (non-integer period)" )
+        {
+            double frequency = 1000.0;
+
+            xttest_gen_sine(table, blocksize, samplerate, frequency, amplitude);
+            xtract_mcleod_f0(table, blocksize, &samplerate, &result);
+
+            THEN( "the detected F0 is within 10 MIDI cents" )
+            {
+                actual = xttest_ftom(result);
+                expected = xttest_ftom(frequency);
+                CAPTURE( actual );
+                CAPTURE( expected );
+                REQUIRE( abs((int)actual - (int)expected) <= 10 );
+            }
+        }
+
+        WHEN( "the input is a sawtooth at 172.265625 Hz" )
+        {
+            double frequency = 172.265625;
+
+            xttest_gen_sawtooth(table, blocksize, samplerate, frequency, amplitude);
+            xtract_mcleod_f0(table, blocksize, &samplerate, &result);
+
+            THEN( "the detected F0 is within 10 MIDI cents" )
+            {
+                actual = xttest_ftom(result);
+                expected = xttest_ftom(frequency);
+                CAPTURE( actual );
+                CAPTURE( expected );
+                REQUIRE( abs((int)actual - (int)expected) <= 10 );
+            }
+        }
+
+        WHEN( "the input is silence" )
+        {
+            memset(table, 0, blocksize * sizeof(double));
+            int rv = xtract_mcleod_f0(table, blocksize, &samplerate, &result);
+
+            THEN( "XTRACT_NO_RESULT is returned" )
+            {
+                REQUIRE( rv == XTRACT_NO_RESULT );
+                REQUIRE( result == 0.0 );
+            }
+        }
+    }
+}
+
+SCENARIO( "McLeod F0 detects pitch where xtract_f0 fails", "[xtract_mcleod_f0][xtract_f0]" )
+{
+    uint16_t expected = 0;
+    uint16_t actual = 0;
+
+    GIVEN( "a 1024 sample block with a sample rate of 44100" )
+    {
+        uint32_t blocksize = 1024;
+        double samplerate = 44100;
+        double amplitude = 1.0;
+        double table[blocksize];
+        double result_f0 = -1.0;
+        double result_mcleod = -1.0;
+        int rv_f0, rv_mcleod;
+
+        WHEN( "the frequency is 86 Hz (only 2 cycles in block)" )
+        {
+            double frequency = 86.1328125;
+
+            xttest_gen_sine(table, blocksize, samplerate, frequency, amplitude);
+            rv_f0 = xtract_f0(table, blocksize, &samplerate, &result_f0);
+            rv_mcleod = xtract_mcleod_f0(table, blocksize, &samplerate, &result_mcleod);
+
+            THEN( "xtract_f0 fails but McLeod succeeds" )
+            {
+                REQUIRE( rv_f0 == XTRACT_NO_RESULT );
+                REQUIRE( rv_mcleod == XTRACT_SUCCESS );
+                actual = xttest_ftom(result_mcleod);
+                expected = xttest_ftom(frequency);
+                REQUIRE( actual == expected );
+            }
+        }
+
+        WHEN( "the frequency is 172 Hz (4 cycles — both should detect)" )
+        {
+            double frequency = 172.265625;
+
+            xttest_gen_sine(table, blocksize, samplerate, frequency, amplitude);
+            rv_f0 = xtract_f0(table, blocksize, &samplerate, &result_f0);
+            rv_mcleod = xtract_mcleod_f0(table, blocksize, &samplerate, &result_mcleod);
+
+            THEN( "both detect pitch but McLeod is at least as accurate" )
+            {
+                REQUIRE( rv_f0 == XTRACT_SUCCESS );
+                REQUIRE( rv_mcleod == XTRACT_SUCCESS );
+
+                uint16_t err_f0 = abs((int)xttest_ftom(result_f0) - (int)xttest_ftom(frequency));
+                uint16_t err_mcleod = abs((int)xttest_ftom(result_mcleod) - (int)xttest_ftom(frequency));
+                CAPTURE( err_f0 );
+                CAPTURE( err_mcleod );
+                REQUIRE( err_mcleod <= err_f0 );
+            }
+        }
+
+        WHEN( "the frequency is 344 Hz with 25% noise" )
+        {
+            double frequency = 344.53125;
+            double noise[blocksize];
+
+            xttest_gen_sine(table, blocksize, samplerate, frequency, amplitude);
+            xttest_gen_noise(noise, blocksize, 0.25);
+            xttest_add(table, noise, blocksize);
+
+            rv_f0 = xtract_f0(table, blocksize, &samplerate, &result_f0);
+            rv_mcleod = xtract_mcleod_f0(table, blocksize, &samplerate, &result_mcleod);
+
+            THEN( "McLeod detects pitch correctly" )
+            {
+                REQUIRE( rv_mcleod == XTRACT_SUCCESS );
+                actual = xttest_ftom(result_mcleod);
+                expected = xttest_ftom(frequency);
+                REQUIRE( abs((int)actual - (int)expected) <= 10 );
+            }
+        }
     }
 }

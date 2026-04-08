@@ -93,6 +93,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_F0:
         case XTRACT_FAILSAFE_F0:
         case XTRACT_WAVELET_F0:
+        case XTRACT_MCLEOD_F0:
         case XTRACT_MIDICENT:
             *argv_min = XTRACT_SR_LOWER_LIMIT;
             *argv_max = XTRACT_SR_UPPER_LIMIT;
@@ -237,6 +238,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_F0:
         case XTRACT_FAILSAFE_F0:
         case XTRACT_WAVELET_F0:
+        case XTRACT_MCLEOD_F0:
         case XTRACT_MIDICENT:
             *argv_donor = XTRACT_ANY;
             break;
@@ -367,6 +369,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_F0:
         case XTRACT_FAILSAFE_F0:
         case XTRACT_WAVELET_F0:
+        case XTRACT_MCLEOD_F0:
         case XTRACT_SPECTRUM:
         case XTRACT_AUTOCORRELATION:
         case XTRACT_AUTOCORRELATION_FFT:
@@ -436,6 +439,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_F0:
         case XTRACT_FAILSAFE_F0:
         case XTRACT_WAVELET_F0:
+        case XTRACT_MCLEOD_F0:
         case XTRACT_MFCC:
         case XTRACT_MEL_SPECTROGRAM:
         case XTRACT_GFCC:
@@ -642,6 +646,15 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             strcpy(p_desc,
                    "Extract the fundamental frequency of an audio signal (wavelet method)");
             strcpy(author, "Antoine Schmitt");
+            break;
+        case XTRACT_MCLEOD_F0:
+            strcpy(name, "mcleod_f0");
+            strcpy(p_name, "Fundamental Frequency (McLeod Pitch Method)");
+            strcpy(desc, "Extract the fundamental frequency of a signal (McLeod method)");
+            strcpy(p_desc,
+                   "Extract the fundamental frequency of an audio signal using the Normalised Square Difference Function");
+            strcpy(author, "Philip McLeod");
+            *year = 2005;
             break;
         case XTRACT_MIDICENT:
                 strcpy(name, "midicent");
@@ -1051,6 +1064,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_F0:
         case XTRACT_FAILSAFE_F0:
         case XTRACT_WAVELET_F0:
+        case XTRACT_MCLEOD_F0:
         case XTRACT_MIDICENT:
         case XTRACT_FLATNESS_DB:
         case XTRACT_TONALITY:
@@ -1186,6 +1200,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_F0:
         case XTRACT_FAILSAFE_F0:
         case XTRACT_WAVELET_F0:
+        case XTRACT_MCLEOD_F0:
         case XTRACT_MIDICENT:
         case XTRACT_FLUX:
         case XTRACT_LNORM:
@@ -1269,6 +1284,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_F0:
         case XTRACT_FAILSAFE_F0:
         case XTRACT_WAVELET_F0:
+        case XTRACT_MCLEOD_F0:
         case XTRACT_MIDICENT:
         case XTRACT_NONZERO_COUNT:
         case XTRACT_AUTOCORRELATION:
@@ -1343,6 +1359,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             case XTRACT_F0:
             case XTRACT_FAILSAFE_F0:
             case XTRACT_WAVELET_F0:
+            case XTRACT_MCLEOD_F0:
             case XTRACT_HPS:
             case XTRACT_ROLLOFF:
                 *result_unit = XTRACT_HERTZ;
