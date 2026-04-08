@@ -1288,6 +1288,9 @@ int xtract_mcleod_f0(const double *data, const int N, const void *argv, double *
         if(nsdf[tau - 1] <= 0.0 && nsdf[tau] > 0.0)
             positive_crossing = 1;
 
+        if(nsdf[tau] <= 0.0)
+            positive_crossing = 0;
+
         if(positive_crossing && nsdf[tau] > nsdf[tau - 1] && nsdf[tau] >= nsdf[tau + 1])
         {
             /* Found a local maximum in a positive region */
@@ -1296,7 +1299,6 @@ int xtract_mcleod_f0(const double *data, const int N, const void *argv, double *
                 best_tau = tau;
                 break;
             }
-            positive_crossing = 0;
         }
     }
 
@@ -1311,10 +1313,13 @@ int xtract_mcleod_f0(const double *data, const int N, const void *argv, double *
     /* Parabolic interpolation around the peak for sub-sample accuracy */
     if(best_tau > 0 && best_tau < N - 1)
     {
+        double denom;
+
         a = nsdf[best_tau - 1];
         b = nsdf[best_tau];
         c = nsdf[best_tau + 1];
-        peak_tau = best_tau + 0.5 * (a - c) / (a - 2.0 * b + c);
+        denom = a - 2.0 * b + c;
+        peak_tau = (denom != 0.0) ? best_tau + 0.5 * (a - c) / denom : (double)best_tau;
     }
     else
     {
