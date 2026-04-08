@@ -79,9 +79,9 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_GAMMATONE_SPECTROGRAM:
         case XTRACT_LPC:
         case XTRACT_LPCC:
-            *argv_min = XTRACT_ANY;
-            *argv_max = XTRACT_ANY;
-            *argv_def = XTRACT_ANY;
+            *argv_min = XTRACT_UNBOUNDED_MIN;
+            *argv_max = XTRACT_UNBOUNDED_MAX;
+            *argv_def = XTRACT_NO_DEFAULT;
             *argv_unit = XTRACT_DBFS;
             break;
         case XTRACT_SPECTRAL_INHARMONICITY:
@@ -102,7 +102,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_FLATNESS_DB:
             *argv_min = 0;
             *argv_max = 1.0;
-            *argv_def = XTRACT_ANY;
+            *argv_def = XTRACT_NO_DEFAULT;
             *argv_unit = XTRACT_DBFS;
             break;
             /* argc = 2 */;
@@ -171,8 +171,8 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *(argv_unit + 3) = (xtract_unit_t)XTRACT_NONE;
             break;
         case XTRACT_SUBBANDS:
-            *argv_min  = XTRACT_ANY;
-            *argv_max = XTRACT_ANY;
+            *argv_min  = XTRACT_UNBOUNDED_MIN;
+            *argv_max = XTRACT_UNBOUNDED_MAX;
             *argv_def = XTRACT_MEAN;
             *argv_unit = (xtract_unit_t)XTRACT_NONE;
             *(argv_min + 1) = 1;
@@ -184,7 +184,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *(argv_def + 2) = 0;
             *(argv_unit + 2) = (xtract_unit_t)XTRACT_NONE;
             *(argv_min + 3) = 0;
-            *(argv_max + 3) = XTRACT_ANY;
+            *(argv_max + 3) = XTRACT_UNBOUNDED_MAX;
             *(argv_def + 3) = 0;
             *(argv_unit + 3) = XTRACT_BINS;
             break;
@@ -1318,8 +1318,8 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             case XTRACT_NONZERO_COUNT:
             case XTRACT_WINDOWED:
                 *result_unit = (xtract_unit_t)XTRACT_ANY;
-                *result_min = XTRACT_ANY;
-                *result_max = XTRACT_ANY;
+                *result_min = XTRACT_UNBOUNDED_MIN;
+                *result_max = XTRACT_UNBOUNDED_MAX;
                 break;
             case XTRACT_SPECTRAL_SKEWNESS:
             case XTRACT_SPECTRAL_KURTOSIS:
@@ -1331,8 +1331,8 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             case XTRACT_NOISINESS:
             case XTRACT_SMOOTHNESS:
                 *result_unit = (xtract_unit_t)XTRACT_NONE;
-                *result_min = XTRACT_ANY; /* FIX: need to check these */
-                *result_max = XTRACT_ANY;
+                *result_min = XTRACT_UNKNOWN_MIN; /* FIX: need to check these */
+                *result_max = XTRACT_UNKNOWN_MAX;
                 break;
             case XTRACT_SPECTRAL_MEAN:
             case XTRACT_SPECTRAL_VARIANCE:
@@ -1357,7 +1357,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             case XTRACT_ZCR:
                 *result_unit = XTRACT_HERTZ;
                 *result_min = 0.0;
-                *result_max = XTRACT_ANY;
+                *result_max = XTRACT_UNBOUNDED_MAX;
                 break;
             case XTRACT_ODD_EVEN_RATIO:
                 *result_unit = (xtract_unit_t)XTRACT_NONE;
@@ -1366,8 +1366,8 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
                 break;
             case XTRACT_FLATNESS_DB:
                 *result_unit = XTRACT_DBFS;
-                *result_min = XTRACT_ANY; /* FIX: check this */
-                *result_max = XTRACT_ANY;
+                *result_min = XTRACT_UNKNOWN_MIN; /* FIX: check this */
+                *result_max = XTRACT_UNKNOWN_MAX;
                 break;
             case XTRACT_LOUDNESS:
             case XTRACT_FLATNESS:
@@ -1381,8 +1381,8 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             case XTRACT_LPCC:
             default:
                 *result_unit = (xtract_unit_t)XTRACT_UNKNOWN;
-                *result_min = XTRACT_UNKNOWN;
-                *result_max = XTRACT_UNKNOWN;
+                *result_min = XTRACT_UNKNOWN_MIN;
+                *result_max = XTRACT_UNKNOWN_MAX;
                 break;
             }
         }
