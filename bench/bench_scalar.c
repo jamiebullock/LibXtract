@@ -20,6 +20,8 @@
 /* Shared test data filled once at startup */
 static double data_512[512];
 static double data_4096[4096];
+static double mean_512;
+static double mean_4096;
 
 static void fill_data(double *buf, int N)
 {
@@ -33,6 +35,8 @@ static void setup(void)
 {
     fill_data(data_512, 512);
     fill_data(data_4096, 4096);
+    xtract_mean(data_512, 512, NULL, &mean_512);
+    xtract_mean(data_4096, 4096, NULL, &mean_4096);
 }
 
 /* ===== mean ===== */
@@ -87,17 +91,15 @@ UBENCH(rms_amplitude, N4096)
 
 UBENCH(variance, N512)
 {
-    double result, mean = 0.0;
-    xtract_mean(data_512, 512, NULL, &mean);
-    xtract_variance(data_512, 512, &mean, &result);
+    double result;
+    xtract_variance(data_512, 512, &mean_512, &result);
     UBENCH_DO_NOTHING(&result);
 }
 
 UBENCH(variance, N4096)
 {
-    double result, mean = 0.0;
-    xtract_mean(data_4096, 4096, NULL, &mean);
-    xtract_variance(data_4096, 4096, &mean, &result);
+    double result;
+    xtract_variance(data_4096, 4096, &mean_4096, &result);
     UBENCH_DO_NOTHING(&result);
 }
 
@@ -105,17 +107,15 @@ UBENCH(variance, N4096)
 
 UBENCH(average_deviation, N512)
 {
-    double result, mean = 0.0;
-    xtract_mean(data_512, 512, NULL, &mean);
-    xtract_average_deviation(data_512, 512, &mean, &result);
+    double result;
+    xtract_average_deviation(data_512, 512, &mean_512, &result);
     UBENCH_DO_NOTHING(&result);
 }
 
 UBENCH(average_deviation, N4096)
 {
-    double result, mean = 0.0;
-    xtract_mean(data_4096, 4096, NULL, &mean);
-    xtract_average_deviation(data_4096, 4096, &mean, &result);
+    double result;
+    xtract_average_deviation(data_4096, 4096, &mean_4096, &result);
     UBENCH_DO_NOTHING(&result);
 }
 
