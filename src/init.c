@@ -445,10 +445,12 @@ int xtract_init_gfcc(int N, double nyquist, double freq_min, double freq_max, in
         bandwidths[n] = 24.7 * (4.37 * centre_freqs[n] / 1000.0 + 1.0);
     }
 
-    /* Populate filter coefficient tables with gammatone magnitude responses */
+    /* Populate filter coefficient tables with gammatone magnitude responses.
+     * Only bins 0..M-1 represent real frequencies (0 to nyquist).
+     * Bins M..N-1 are zeroed to match the mel filter bank convention. */
     for(n = 0; n < freq_bands; n++)
     {
-        for(k = 0; k < N; k++)
+        for(k = 0; k < M; k++)
         {
             freq = (double)k / (double)M * nyquist;
             f_ratio = (freq - centre_freqs[n]) / bandwidths[n];
@@ -457,6 +459,8 @@ int xtract_init_gfcc(int N, double nyquist, double freq_min, double freq_max, in
             gain = gain * gain; /* 4th order */
             fft_tables[n][k] = gain;
         }
+        for(k = M; k < N; k++)
+            fft_tables[n][k] = 0.0;
     }
 
     free(centre_freqs);
