@@ -149,7 +149,8 @@ enum xtract_features_ {
 enum xtract_feature_init_ {
     XTRACT_INIT_MFCC = 100,
     XTRACT_INIT_BARK,
-    XTRACT_INIT_WINDOWED
+    XTRACT_INIT_WINDOWED,
+    XTRACT_INIT_GFCC
 };
 
 /** \brief Enumeration of feature types */

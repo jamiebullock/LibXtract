@@ -246,7 +246,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             break;
         case XTRACT_GFCC:
         case XTRACT_GAMMATONE_SPECTROGRAM:
-            *argv_donor = XTRACT_INIT_MFCC; /* uses same filter struct */
+            *argv_donor = XTRACT_INIT_GFCC;
             break;
             /* argc = 2 */;
         case XTRACT_ROLLOFF:
