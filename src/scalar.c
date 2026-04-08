@@ -1211,7 +1211,7 @@ int xtract_wavelet_f0(const double *data, const int N, const void *argv, double 
 int xtract_mcleod_f0(const double *data, const int N, const void *argv, double *result)
 {
     double sr, threshold;
-    double *nsdf, *m;
+    double *nsdf;
     int tau, n, best_tau;
     double best_val, a, b, c, peak_tau;
     int positive_crossing;
@@ -1229,13 +1229,6 @@ int xtract_mcleod_f0(const double *data, const int N, const void *argv, double *
     if(nsdf == NULL)
         return XTRACT_MALLOC_FAILED;
 
-    m = (double *)calloc(N, sizeof(double));
-    if(m == NULL)
-    {
-        free(nsdf);
-        return XTRACT_MALLOC_FAILED;
-    }
-
     /* Compute the type II normalisation term m(tau) and
      * the unnormalised autocorrelation r(tau) simultaneously.
      * NSDF(tau) = 2 * r(tau) / m(tau)
@@ -1243,14 +1236,14 @@ int xtract_mcleod_f0(const double *data, const int N, const void *argv, double *
     for(tau = 0; tau < N; tau++)
     {
         double r_tau = 0.0;
+        double m_tau = 0.0;
 
-        m[tau] = 0.0;
         for(n = 0; n < N - tau; n++)
         {
             r_tau += data[n] * data[n + tau];
-            m[tau] += data[n] * data[n] + data[n + tau] * data[n + tau];
+            m_tau += data[n] * data[n] + data[n + tau] * data[n + tau];
         }
-        nsdf[tau] = (m[tau] > 0.0) ? 2.0 * r_tau / m[tau] : 0.0;
+        nsdf[tau] = (m_tau > 0.0) ? 2.0 * r_tau / m_tau : 0.0;
     }
 
     /* Find the highest NSDF peak using McLeod's key maximum selection:
@@ -1276,7 +1269,6 @@ int xtract_mcleod_f0(const double *data, const int N, const void *argv, double *
         /* No significant periodicity found */
         *result = 0.0;
         free(nsdf);
-        free(m);
         return XTRACT_NO_RESULT;
     }
 
@@ -1306,12 +1298,12 @@ int xtract_mcleod_f0(const double *data, const int N, const void *argv, double *
     {
         *result = 0.0;
         free(nsdf);
-        free(m);
         return XTRACT_NO_RESULT;
     }
 
-    /* Parabolic interpolation around the peak for sub-sample accuracy */
-    if(best_tau > 0 && best_tau < N - 1)
+    /* Parabolic interpolation around the peak for sub-sample accuracy.
+     * best_tau is always in [1, N-2] at this point (guaranteed by the
+     * second-pass loop bounds and the best_tau < 1 early return above). */
     {
         double denom;
 
@@ -1321,15 +1313,10 @@ int xtract_mcleod_f0(const double *data, const int N, const void *argv, double *
         denom = a - 2.0 * b + c;
         peak_tau = (denom != 0.0) ? best_tau + 0.5 * (a - c) / denom : (double)best_tau;
     }
-    else
-    {
-        peak_tau = (double)best_tau;
-    }
 
     *result = sr / peak_tau;
 
     free(nsdf);
-    free(m);
 
     return XTRACT_SUCCESS;
 }
