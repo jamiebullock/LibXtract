@@ -1,6 +1,7 @@
 
 LIBRARY ?= static
 PREFIX ?= $(PWD)/dist
+XTRACT_VERSION := $(shell cat VERSION)
 
 HPATH = include/xtract
 
