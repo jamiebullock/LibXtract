@@ -90,6 +90,8 @@ int(*xtract[])(const double *, const int, const void *, double *) =
     xtract_lpcc,
     xtract_subbands,
     xtract_mel_spectrogram,
+    xtract_gfcc,
+    xtract_gammatone_spectrogram,
     /* xtract_helper.h */
     xtract_windowed,
     xtract_smoothed

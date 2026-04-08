@@ -409,6 +409,62 @@ int xtract_init_mfcc(int N, double nyquist, int style, double freq_min, double f
 
 }
 
+int xtract_init_gfcc(int N, double nyquist, double freq_min, double freq_max, int freq_bands, double **fft_tables)
+{
+
+    int n, k, M;
+    double *centre_freqs, *bandwidths;
+    double erb_min, erb_max, erb_step, freq, gain, f_ratio;
+
+    if(freq_bands <= 1)
+        return XTRACT_ARGUMENT_ERROR;
+
+    M = N >> 1;
+
+    centre_freqs = (double *)malloc(freq_bands * sizeof(double));
+    if(centre_freqs == NULL)
+        return XTRACT_MALLOC_FAILED;
+
+    bandwidths = (double *)malloc(freq_bands * sizeof(double));
+    if(bandwidths == NULL)
+    {
+        free(centre_freqs);
+        return XTRACT_MALLOC_FAILED;
+    }
+
+    /* Compute centre frequencies on the ERB scale */
+    erb_min = 9.26449 * log(1.0 + freq_min / (24.7 * 9.26449));
+    erb_max = 9.26449 * log(1.0 + freq_max / (24.7 * 9.26449));
+    erb_step = (erb_max - erb_min) / (freq_bands - 1);
+
+    for(n = 0; n < freq_bands; n++)
+    {
+        double erb = erb_min + n * erb_step;
+        centre_freqs[n] = 24.7 * 9.26449 * (exp(erb / 9.26449) - 1.0);
+        /* ERB bandwidth: B = 24.7 * (4.37 * f / 1000 + 1) */
+        bandwidths[n] = 24.7 * (4.37 * centre_freqs[n] / 1000.0 + 1.0);
+    }
+
+    /* Populate filter coefficient tables with gammatone magnitude responses */
+    for(n = 0; n < freq_bands; n++)
+    {
+        for(k = 0; k < N; k++)
+        {
+            freq = (double)k / (double)M * nyquist;
+            f_ratio = (freq - centre_freqs[n]) / bandwidths[n];
+            /* Gammatone magnitude response approximation (order 4) */
+            gain = 1.0 / (1.0 + f_ratio * f_ratio);
+            gain = gain * gain; /* 4th order */
+            fft_tables[n][k] = gain;
+        }
+    }
+
+    free(centre_freqs);
+    free(bandwidths);
+
+    return XTRACT_SUCCESS;
+}
+
 int xtract_init_wavelet_f0_state(void)
 {
     dywapitch_inittracking(&wavelet_f0_state);

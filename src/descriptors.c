@@ -75,6 +75,8 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_TONALITY:
         case XTRACT_MFCC:
         case XTRACT_MEL_SPECTROGRAM:
+        case XTRACT_GFCC:
+        case XTRACT_GAMMATONE_SPECTROGRAM:
         case XTRACT_LPC:
         case XTRACT_LPCC:
             *argv_min = XTRACT_ANY;
@@ -242,6 +244,10 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_MEL_SPECTROGRAM:
             *argv_donor = XTRACT_INIT_MFCC;
             break;
+        case XTRACT_GFCC:
+        case XTRACT_GAMMATONE_SPECTROGRAM:
+            *argv_donor = XTRACT_INIT_MFCC; /* uses same filter struct */
+            break;
             /* argc = 2 */;
         case XTRACT_ROLLOFF:
         case XTRACT_PEAK_SPECTRUM:
@@ -341,6 +347,8 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_SUBBANDS:
         case XTRACT_MFCC:
         case XTRACT_MEL_SPECTROGRAM:
+        case XTRACT_GFCC:
+        case XTRACT_GAMMATONE_SPECTROGRAM:
             *data_format = XTRACT_SPECTRAL_MAGNITUDES;
             break;
         case XTRACT_LPC:
@@ -430,6 +438,8 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_WAVELET_F0:
         case XTRACT_MFCC:
         case XTRACT_MEL_SPECTROGRAM:
+        case XTRACT_GFCC:
+        case XTRACT_GAMMATONE_SPECTROGRAM:
         case XTRACT_AUTOCORRELATION:
         case XTRACT_AUTOCORRELATION_FFT:
         case XTRACT_ROLLOFF:
@@ -707,6 +717,20 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             strcpy(p_name, "Mel Spectrogram");
             strcpy(desc, "Extract log mel energies from a spectrum");
             strcpy(p_desc, "Extract log-scaled mel-filtered energies from an audio spectrum");
+            strcpy(author, "");
+            break;
+        case XTRACT_GFCC:
+            strcpy(name, "gfcc");
+            strcpy(p_name, "Gammatone Frequency Cepstral Coefficients");
+            strcpy(desc, "Extract GFCC from a spectrum");
+            strcpy(p_desc, "Extract GFCC from an audio spectrum using a gammatone filterbank");
+            strcpy(author, "");
+            break;
+        case XTRACT_GAMMATONE_SPECTROGRAM:
+            strcpy(name, "gammatone_spectrogram");
+            strcpy(p_name, "Gammatone Spectrogram");
+            strcpy(desc, "Extract log gammatone energies from a spectrum");
+            strcpy(p_desc, "Extract log-scaled gammatone-filtered energies from an audio spectrum");
             strcpy(author, "");
             break;
         case XTRACT_LPC:
@@ -1060,6 +1084,8 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             break;
         case XTRACT_MFCC:
         case XTRACT_MEL_SPECTROGRAM:
+        case XTRACT_GFCC:
+        case XTRACT_GAMMATONE_SPECTROGRAM:
             *argc = 1;
             *argv_type = XTRACT_MEL_FILTER;
             break;
@@ -1176,6 +1202,8 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_AUTOCORRELATION_FFT:
         case XTRACT_MFCC:
         case XTRACT_MEL_SPECTROGRAM:
+        case XTRACT_GFCC:
+        case XTRACT_GAMMATONE_SPECTROGRAM:
         case XTRACT_LPC:
         case XTRACT_LPCC:
         case XTRACT_DCT:
@@ -1253,6 +1281,8 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_AUTOCORRELATION_FFT:
         case XTRACT_MFCC:
         case XTRACT_MEL_SPECTROGRAM:
+        case XTRACT_GFCC:
+        case XTRACT_GAMMATONE_SPECTROGRAM:
         case XTRACT_LPC:
         case XTRACT_LPCC:
         case XTRACT_DCT:
@@ -1393,6 +1423,14 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
                 *result_unit = (xtract_unit_t)XTRACT_UNKNOWN; /* FIX: check */
                 break;
             case XTRACT_MEL_SPECTROGRAM:
+                *result_format = XTRACT_MEL_COEFFS;
+                *result_unit = XTRACT_DBFS;
+                break;
+            case XTRACT_GFCC:
+                *result_format = XTRACT_MEL_COEFFS;
+                *result_unit = (xtract_unit_t)XTRACT_UNKNOWN;
+                break;
+            case XTRACT_GAMMATONE_SPECTROGRAM:
                 *result_format = XTRACT_MEL_COEFFS;
                 *result_unit = XTRACT_DBFS;
                 break;
