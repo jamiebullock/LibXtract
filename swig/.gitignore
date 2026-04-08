@@ -1,0 +1,11 @@
+node_modules/
+package.json
+package-lock.json
+java/
+*.o
+*.so
+*.dylib
+*.node
+*.pyc
+xtract_wrap.c
+xtract.py

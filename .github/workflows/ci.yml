@@ -23,12 +23,18 @@ jobs:
           distribution: temurin
           java-version: 17
 
+      - name: Setup Node.js (Linux/macOS)
+        if: runner.os != 'Windows'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
       - name: Setup MSYS2 (Windows)
         if: runner.os == 'Windows'
         uses: msys2/setup-msys2@v2
         with:
           msystem: MINGW64
-          install: mingw-w64-x86_64-gcc mingw-w64-x86_64-python mingw-w64-x86_64-swig make
+          install: mingw-w64-x86_64-gcc mingw-w64-x86_64-python mingw-w64-x86_64-swig mingw-w64-x86_64-nodejs make
 
       - name: Install SWIG (Linux)
         if: runner.os == 'Linux'
@@ -57,11 +63,20 @@ jobs:
           make
           make check
 
+      - name: Install Node.js headers (Linux/macOS)
+        if: runner.os != 'Windows'
+        run: |
+          NODE_VER=$(node -v | tr -d v)
+          curl -sL "https://nodejs.org/dist/v${NODE_VER}/node-v${NODE_VER}-headers.tar.gz" | tar xz
+          echo "NODE_INCLUDE=$(pwd)/node-v${NODE_VER}/include/node" >> $GITHUB_ENV
+          npm install --prefix swig node-addon-api
+
       - name: SWIG bindings (Linux)
         if: runner.os == 'Linux'
         run: make -C swig check
         env:
           JAVA_HOME: ${{ env.JAVA_HOME }}
+          NODE_INCLUDE: ${{ env.NODE_INCLUDE }}
           PYTHON: python3
 
       - name: SWIG bindings (macOS)
@@ -69,8 +84,13 @@ jobs:
         run: make -C swig check
         env:
           JAVA_HOME: ${{ env.JAVA_HOME }}
+          NODE_INCLUDE: ${{ env.NODE_INCLUDE }}
 
       - name: SWIG bindings (Windows)
         if: runner.os == 'Windows'
         shell: msys2 {0}
-        run: PYTHON=python make -C swig check-python
+        run: |
+          npm install --prefix swig node-addon-api
+          export JAVA_HOME="$(cygpath -u "$JAVA_HOME")"
+          export PATH="${JAVA_HOME}/bin:${PATH}"
+          PYTHON=python NODE_INCLUDE=/mingw64/include/node make -C swig check

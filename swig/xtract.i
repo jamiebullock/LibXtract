@@ -42,7 +42,7 @@
 
         N = blocksize;
 
-        mf = malloc(sizeof(xtract_mel_filter));
+        mf = (xtract_mel_filter *)malloc(sizeof(xtract_mel_filter));
         mf->n_filters = n_filters;
 
         filters = (double **)malloc(n_filters * sizeof(double *));
