@@ -7,6 +7,7 @@
 #include "catch.hpp"
 
 #include <cmath>
+#include <cstring>
 
 
 SCENARIO( "F0 is correctly detected for a sine wave", "[xtract_f0]" )
