@@ -34,6 +34,10 @@
 #include <float.h> /* on Linux DBL_MAX is in float.h */
 #endif
 
+#ifdef __APPLE__
+#include <Accelerate/Accelerate.h>
+#endif
+
 #include "dywapitchtrack/dywapitchtrack.h"
 
 #include "xtract/libxtract.h"
@@ -44,6 +48,9 @@
 int xtract_mean(const double *data, const int N, const void *argv, double *result)
 {
 
+#ifdef __APPLE__
+    vDSP_meanvD(data, 1, result, N);
+#else
     int n = N;
 
     *result = 0.0;
@@ -52,6 +59,7 @@ int xtract_mean(const double *data, const int N, const void *argv, double *resul
         *result += data[n];
 
     *result /= N;
+#endif
 
     return XTRACT_SUCCESS;
 }
@@ -59,6 +67,20 @@ int xtract_mean(const double *data, const int N, const void *argv, double *resul
 int xtract_variance(const double *data, const int N, const void *argv, double *result)
 {
 
+#ifdef __APPLE__
+    double *shifted, neg_mean;
+    const double mean = *(double *)argv;
+
+    shifted = (double *)malloc(N * sizeof(double));
+    if(shifted == NULL)
+        return XTRACT_MALLOC_FAILED;
+
+    neg_mean = -mean;
+    vDSP_vsaddD(data, 1, &neg_mean, shifted, 1, N);
+    vDSP_measqvD(shifted, 1, result, N);
+    *result *= (double)N / (N - 1); /* Bessel correction */
+    free(shifted);
+#else
     int n = N;
     const double arg0 = *(double *)argv;
 
@@ -68,6 +90,7 @@ int xtract_variance(const double *data, const int N, const void *argv, double *r
         *result += XTRACT_SQ(data[n] - arg0);
 
     *result /= (N - 1);
+#endif
 
     return XTRACT_SUCCESS;
 }
@@ -83,6 +106,21 @@ int xtract_standard_deviation(const double *data, const int N, const void *argv,
 int xtract_average_deviation(const double *data, const int N, const void *argv, double *result)
 {
 
+#ifdef __APPLE__
+    double *temp;
+    double neg_mean;
+    const double mean = *(double *)argv;
+
+    temp = (double *)malloc(N * sizeof(double));
+    if(temp == NULL)
+        return XTRACT_MALLOC_FAILED;
+
+    neg_mean = -mean;
+    vDSP_vsaddD(data, 1, &neg_mean, temp, 1, N);
+    vDSP_vabsD(temp, 1, temp, 1, N);
+    vDSP_meanvD(temp, 1, result, N);
+    free(temp);
+#else
     int n = N;
     const double arg0 = *(double *)argv;
 
@@ -92,6 +130,7 @@ int xtract_average_deviation(const double *data, const int N, const void *argv, 
         *result += fabs(data[n] - arg0);
 
     *result /= N;
+#endif
 
     return XTRACT_SUCCESS;
 }
@@ -170,11 +209,16 @@ int xtract_spectral_centroid(const double *data, const int N, const void *argv, 
     amps = data;
     freqs = data + n;
 
+#ifdef __APPLE__
+    vDSP_dotprD(amps, 1, freqs, 1, &FA, n);
+    vDSP_sveD(amps, 1, &A, n);
+#else
     while(n--)
     {
         FA += freqs[n] * amps[n];
         A += amps[n];
     }
+#endif
 
     if(A == 0.0)
         *result = 0.0;
@@ -718,6 +762,9 @@ int xtract_noisiness(const double *data, const int N, const void *argv, double *
 int xtract_rms_amplitude(const double *data, const int N, const void *argv, double *result)
 {
 
+#ifdef __APPLE__
+    vDSP_rmsqvD(data, 1, result, N);
+#else
     int n = N;
 
     *result = 0.0;
@@ -725,6 +772,7 @@ int xtract_rms_amplitude(const double *data, const int N, const void *argv, doub
     while(n--) *result += XTRACT_SQ(data[n]);
 
     *result = sqrt(*result / (double)N);
+#endif
 
     return XTRACT_SUCCESS;
 }
@@ -907,12 +955,16 @@ int xtract_lowest_value(const double *data, const int N, const void *argv, doubl
 int xtract_highest_value(const double *data, const int N, const void *argv, double *result)
 {
 
+#ifdef __APPLE__
+    vDSP_maxvD(data, 1, result, N);
+#else
     int n = N;
 
     *result = data[--n];
 
     while(n--)
         *result = XTRACT_MAX(*result, data[n]);
+#endif
 
     return XTRACT_SUCCESS;
 }
@@ -921,12 +973,16 @@ int xtract_highest_value(const double *data, const int N, const void *argv, doub
 int xtract_sum(const double *data, const int N, const void *argv, double *result)
 {
 
+#ifdef __APPLE__
+    vDSP_sveD(data, 1, result, N);
+#else
     int n = N;
 
     *result = 0.0;
 
     while(n--)
         *result += *data++;
+#endif
 
     return XTRACT_SUCCESS;
 
