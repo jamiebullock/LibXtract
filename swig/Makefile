@@ -12,6 +12,7 @@ ifeq ($(OS), Darwin)
     CFLAGS=-g -c
     LDFLAGS=-bundle -flat_namespace -undefined suppress
     LIBS=-framework Accelerate
+    NODE_LIBS=
     JAVA_LIB_SUFFIX=dylib
     JAVA_LIB_PREFIX=libj
     LIBXTRACT=../src/lib$(NAME).a
@@ -20,6 +21,7 @@ else ifneq (,$(findstring MINGW,$(OS)))
     CFLAGS=-g -c
     LDFLAGS=-shared
     LIBS=-lm
+    NODE_LIBS=-lnode
     JAVA_LIB_SUFFIX=dll
     JAVA_LIB_PREFIX=j
     LIBXTRACT=$(wildcard ../src/lib$(NAME).a ../src/lib$(NAME).lib)
@@ -28,6 +30,7 @@ else
     CFLAGS=-g -c -fPIC
     LDFLAGS=-shared
     LIBS=-lm
+    NODE_LIBS=
     JAVA_LIB_SUFFIX=so
     JAVA_LIB_PREFIX=libj
     LIBXTRACT=$(wildcard ../src/lib$(NAME).a ../src/lib$(NAME).lib)
@@ -59,7 +62,7 @@ ifndef NODE_INCLUDE
 endif
 	@swig -I../include -javascript -napi $(NAME).i
 	@$(CXX) -std=c++17 $(CFLAGS) $(NAME)_wrap.c -o $(NAME)_wrap.o -I$(NODE_INCLUDE) -I$(NAPI_INCLUDE) -I../include
-	@$(CXX) $(LDFLAGS) $(LINK_LIB) $(NAME)_wrap.o -o $(NAME).node $(LIBS)
+	@$(CXX) $(LDFLAGS) $(LINK_LIB) $(NAME)_wrap.o -o $(NAME).node $(LIBS) $(NODE_LIBS)
 
 check: check-python check-java check-node
 
