@@ -1208,6 +1208,127 @@ int xtract_wavelet_f0(const double *data, const int N, const void *argv, double 
     return XTRACT_SUCCESS;
 }
 
+int xtract_mcleod_f0(const double *data, const int N, const void *argv, double *result)
+{
+    double sr, threshold;
+    double *nsdf, *m;
+    int tau, n, best_tau;
+    double best_val, a, b, c, peak_tau;
+    int positive_crossing;
+
+    if(argv == NULL)
+        return XTRACT_BAD_ARGV;
+
+    sr = *(double *)argv;
+    if(sr == 0)
+        sr = 44100.0;
+
+    threshold = 0.8;
+
+    nsdf = (double *)calloc(N, sizeof(double));
+    if(nsdf == NULL)
+        return XTRACT_MALLOC_FAILED;
+
+    m = (double *)calloc(N, sizeof(double));
+    if(m == NULL)
+    {
+        free(nsdf);
+        return XTRACT_MALLOC_FAILED;
+    }
+
+    /* Compute the type II normalisation term m(tau) and
+     * the unnormalised autocorrelation r(tau) simultaneously.
+     * NSDF(tau) = 2 * r(tau) / m(tau)
+     * where m(tau) = sum_{j=0}^{N-tau-1} (x[j]^2 + x[j+tau]^2) */
+    for(tau = 0; tau < N; tau++)
+    {
+        double r_tau = 0.0;
+
+        m[tau] = 0.0;
+        for(n = 0; n < N - tau; n++)
+        {
+            r_tau += data[n] * data[n + tau];
+            m[tau] += data[n] * data[n] + data[n + tau] * data[n + tau];
+        }
+        nsdf[tau] = (m[tau] > 0.0) ? 2.0 * r_tau / m[tau] : 0.0;
+    }
+
+    /* Find the highest NSDF peak using McLeod's key maximum selection:
+     * look for positive zero crossings, find the max in each positive
+     * region, and select the first peak above the threshold relative
+     * to the global maximum. */
+    best_tau = -1;
+    best_val = -1.0;
+    positive_crossing = 0;
+
+    /* First pass: find the global NSDF maximum (excluding tau=0) */
+    for(tau = 1; tau < N; tau++)
+    {
+        if(nsdf[tau] > best_val)
+        {
+            best_val = nsdf[tau];
+            best_tau = tau;
+        }
+    }
+
+    if(best_val < 0.01)
+    {
+        /* No significant periodicity found */
+        *result = 0.0;
+        free(nsdf);
+        free(m);
+        return XTRACT_NO_RESULT;
+    }
+
+    /* Second pass: find the first peak above threshold * max */
+    best_tau = -1;
+    positive_crossing = 0;
+    for(tau = 1; tau < N - 1; tau++)
+    {
+        if(nsdf[tau - 1] <= 0.0 && nsdf[tau] > 0.0)
+            positive_crossing = 1;
+
+        if(positive_crossing && nsdf[tau] > nsdf[tau - 1] && nsdf[tau] >= nsdf[tau + 1])
+        {
+            /* Found a local maximum in a positive region */
+            if(nsdf[tau] >= threshold * best_val)
+            {
+                best_tau = tau;
+                break;
+            }
+            positive_crossing = 0;
+        }
+    }
+
+    if(best_tau < 1)
+    {
+        *result = 0.0;
+        free(nsdf);
+        free(m);
+        return XTRACT_NO_RESULT;
+    }
+
+    /* Parabolic interpolation around the peak for sub-sample accuracy */
+    if(best_tau > 0 && best_tau < N - 1)
+    {
+        a = nsdf[best_tau - 1];
+        b = nsdf[best_tau];
+        c = nsdf[best_tau + 1];
+        peak_tau = best_tau + 0.5 * (a - c) / (a - 2.0 * b + c);
+    }
+    else
+    {
+        peak_tau = (double)best_tau;
+    }
+
+    *result = sr / peak_tau;
+
+    free(nsdf);
+    free(m);
+
+    return XTRACT_SUCCESS;
+}
+
 int xtract_midicent(const double *data, const int N, const void *argv, double *result)
 {
     double f0 = *(double *)argv;
