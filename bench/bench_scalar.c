@@ -40,7 +40,10 @@ static void setup(void)
     fill_data(data_4096, 4096);
     xtract_mean(data_512, 512, NULL, &mean_512);
     xtract_mean(data_4096, 4096, NULL, &mean_4096);
-    /* Magnitude spectrum approximation for spectral benchmarks */
+    /* Magnitude spectrum approximation for spectral benchmarks.
+     * Real spectrum data has [magnitudes..., frequencies...] layout,
+     * but for benchmarking we only need representative non-negative
+     * values — we are measuring loop throughput, not result correctness. */
     for(i = 0; i < 512; i++)
         spectrum_512[i] = fabs(data_512[i]);
     for(i = 0; i < 4096; i++)
