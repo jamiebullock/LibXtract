@@ -30,11 +30,19 @@
 extern "C" {
 #endif
 
+#include <math.h>
+#include <float.h>
+
 #define XTRACT_BARK_BANDS 26
 #define XTRACT_WINDOW_SIZE 1024/* dummy macro for descriptors where argc is window size */
 #define XTRACT_NONE 0
-#define XTRACT_ANY -1
-#define XTRACT_UNKNOWN -2
+#define XTRACT_ANY -1 /* sentinel for int/enum fields (donor, unit) */
+#define XTRACT_UNKNOWN -2 /* sentinel for int/enum fields (unknown unit) */
+#define XTRACT_UNBOUNDED_MIN (-DBL_MAX) /* result/argv has no lower bound */
+#define XTRACT_UNBOUNDED_MAX DBL_MAX /* result/argv has no upper bound */
+#define XTRACT_UNKNOWN_MIN (-DBL_MAX) /* lower bound has not been determined */
+#define XTRACT_UNKNOWN_MAX DBL_MAX /* upper bound has not been determined */
+#define XTRACT_NO_DEFAULT NAN /* no default value defined */
 #define XTRACT_MAXARGS 4
 #define XTRACT_MAX_NAME_LENGTH 64
 #define XTRACT_MAX_AUTHOR_LENGTH 128
