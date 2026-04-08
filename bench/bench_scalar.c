@@ -20,6 +20,8 @@
 /* Shared test data filled once at startup */
 static double data_512[512];
 static double data_4096[4096];
+static double spectrum_512[512];
+static double spectrum_4096[4096];
 static double mean_512;
 static double mean_4096;
 
@@ -33,10 +35,16 @@ static void fill_data(double *buf, int N)
 /* Called before any benchmarks run */
 static void setup(void)
 {
+    int i;
     fill_data(data_512, 512);
     fill_data(data_4096, 4096);
     xtract_mean(data_512, 512, NULL, &mean_512);
     xtract_mean(data_4096, 4096, NULL, &mean_4096);
+    /* Magnitude spectrum approximation for spectral benchmarks */
+    for(i = 0; i < 512; i++)
+        spectrum_512[i] = fabs(data_512[i]);
+    for(i = 0; i < 4096; i++)
+        spectrum_4096[i] = fabs(data_4096[i]);
 }
 
 /* ===== mean ===== */
@@ -156,14 +164,14 @@ UBENCH(lowest_value, N4096)
 UBENCH(spectral_centroid, N512)
 {
     double result;
-    xtract_spectral_centroid(data_512, 512, NULL, &result);
+    xtract_spectral_centroid(spectrum_512, 512, NULL, &result);
     UBENCH_DO_NOTHING(&result);
 }
 
 UBENCH(spectral_centroid, N4096)
 {
     double result;
-    xtract_spectral_centroid(data_4096, 4096, NULL, &result);
+    xtract_spectral_centroid(spectrum_4096, 4096, NULL, &result);
     UBENCH_DO_NOTHING(&result);
 }
 
