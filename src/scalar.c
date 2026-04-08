@@ -34,7 +34,7 @@
 #include <float.h> /* on Linux DBL_MAX is in float.h */
 #endif
 
-#ifndef USE_OOURA
+#ifdef __APPLE__
 #include <Accelerate/Accelerate.h>
 #endif
 
@@ -48,7 +48,7 @@
 int xtract_mean(const double *data, const int N, const void *argv, double *result)
 {
 
-#ifndef USE_OOURA
+#ifdef __APPLE__
     vDSP_meanvD(data, 1, result, N);
 #else
     int n = N;
@@ -67,14 +67,19 @@ int xtract_mean(const double *data, const int N, const void *argv, double *resul
 int xtract_variance(const double *data, const int N, const void *argv, double *result)
 {
 
-#ifndef USE_OOURA
-    double mean_sq, sq_mean;
+#ifdef __APPLE__
+    double *shifted, neg_mean;
     const double mean = *(double *)argv;
 
-    vDSP_measqvD(data, 1, &mean_sq, N);
-    sq_mean = mean * mean;
-    /* var = E[x^2] - E[x]^2, with Bessel correction N/(N-1) */
-    *result = (mean_sq - sq_mean) * N / (N - 1);
+    shifted = (double *)malloc(N * sizeof(double));
+    if(shifted == NULL)
+        return XTRACT_MALLOC_FAILED;
+
+    neg_mean = -mean;
+    vDSP_vsaddD(data, 1, &neg_mean, shifted, 1, N);
+    vDSP_measqvD(shifted, 1, result, N);
+    *result *= (double)N / (N - 1); /* Bessel correction */
+    free(shifted);
 #else
     int n = N;
     const double arg0 = *(double *)argv;
@@ -101,7 +106,7 @@ int xtract_standard_deviation(const double *data, const int N, const void *argv,
 int xtract_average_deviation(const double *data, const int N, const void *argv, double *result)
 {
 
-#ifndef USE_OOURA
+#ifdef __APPLE__
     double *temp;
     double neg_mean;
     const double mean = *(double *)argv;
@@ -204,7 +209,7 @@ int xtract_spectral_centroid(const double *data, const int N, const void *argv, 
     amps = data;
     freqs = data + n;
 
-#ifndef USE_OOURA
+#ifdef __APPLE__
     vDSP_dotprD(amps, 1, freqs, 1, &FA, n);
     vDSP_sveD(amps, 1, &A, n);
 #else
@@ -757,7 +762,7 @@ int xtract_noisiness(const double *data, const int N, const void *argv, double *
 int xtract_rms_amplitude(const double *data, const int N, const void *argv, double *result)
 {
 
-#ifndef USE_OOURA
+#ifdef __APPLE__
     vDSP_rmsqvD(data, 1, result, N);
 #else
     int n = N;
@@ -950,7 +955,7 @@ int xtract_lowest_value(const double *data, const int N, const void *argv, doubl
 int xtract_highest_value(const double *data, const int N, const void *argv, double *result)
 {
 
-#ifndef USE_OOURA
+#ifdef __APPLE__
     vDSP_maxvD(data, 1, result, N);
 #else
     int n = N;
@@ -968,7 +973,7 @@ int xtract_highest_value(const double *data, const int N, const void *argv, doub
 int xtract_sum(const double *data, const int N, const void *argv, double *result)
 {
 
-#ifndef USE_OOURA
+#ifdef __APPLE__
     vDSP_sveD(data, 1, result, N);
 #else
     int n = N;
