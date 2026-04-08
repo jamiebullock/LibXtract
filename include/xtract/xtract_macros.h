@@ -30,7 +30,6 @@
 extern "C" {
 #endif
 
-#include <math.h>
 #include <float.h>
 
 #define XTRACT_BARK_BANDS 26
@@ -42,7 +41,7 @@ extern "C" {
 #define XTRACT_UNBOUNDED_MAX DBL_MAX /* result/argv has no upper bound */
 #define XTRACT_UNKNOWN_MIN (-DBL_MAX) /* lower bound has not been determined */
 #define XTRACT_UNKNOWN_MAX DBL_MAX /* upper bound has not been determined */
-#define XTRACT_NO_DEFAULT NAN /* no default value defined */
+#define XTRACT_NO_DEFAULT 0 /* no default value defined */
 #define XTRACT_MAXARGS 4
 #define XTRACT_MAX_NAME_LENGTH 64
 #define XTRACT_MAX_AUTHOR_LENGTH 128
