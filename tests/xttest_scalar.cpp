@@ -2008,7 +2008,7 @@ TEST_CASE("xtract_flatness numerical stability", "[scalar]")
         REQUIRE(result == Approx(1.0).epsilon(1e-10));
     }
 
-    SECTION("flatness of impulsive spectrum < 1.0")
+    SECTION("flatness with single non-zero bin equals 1.0")
     {
         double data[] = {1.0, 0.0, 0.0, 0.0};
         int rv = xtract_flatness(data, 4, NULL, &result);
