@@ -1995,3 +1995,62 @@ SCENARIO( "McLeod F0 detects pitch where xtract_f0 fails", "[xtract_mcleod_f0][x
         }
     }
 }
+
+TEST_CASE("xtract_flatness numerical stability", "[scalar]")
+{
+    double result = 0.0;
+
+    SECTION("flatness of constant spectrum = 1.0")
+    {
+        double data[] = {1.0, 1.0, 1.0, 1.0};
+        int rv = xtract_flatness(data, 4, NULL, &result);
+        REQUIRE(rv == XTRACT_SUCCESS);
+        REQUIRE(result == Approx(1.0).epsilon(1e-10));
+    }
+
+    SECTION("flatness with single non-zero bin equals 1.0")
+    {
+        double data[] = {1.0, 0.0, 0.0, 0.0};
+        int rv = xtract_flatness(data, 4, NULL, &result);
+        REQUIRE(rv == XTRACT_SUCCESS);
+        REQUIRE(result == Approx(1.0).epsilon(1e-10));
+    }
+
+    SECTION("flatness with large N does not underflow")
+    {
+        /* The old direct multiplication approach would underflow to zero
+         * for 512 bins of typical spectral magnitudes (0.001-0.1).
+         * The log-domain approach must handle this correctly. */
+        const int N = 512;
+        double data[512];
+        for(int i = 0; i < N; i++)
+            data[i] = 0.01 + 0.09 * (double)i / N;  /* values in [0.01, 0.1] */
+
+        int rv = xtract_flatness(data, N, NULL, &result);
+        REQUIRE(rv == XTRACT_SUCCESS);
+        REQUIRE(result > 0.0);
+        REQUIRE(result <= 1.0);
+        REQUIRE(std::isfinite(result));
+    }
+
+    SECTION("flatness with N=4096 does not underflow")
+    {
+        const int N = 4096;
+        double data[4096];
+        for(int i = 0; i < N; i++)
+            data[i] = 0.001 + 0.009 * (double)i / N;  /* values in [0.001, 0.01] */
+
+        int rv = xtract_flatness(data, N, NULL, &result);
+        REQUIRE(rv == XTRACT_SUCCESS);
+        REQUIRE(result > 0.0);
+        REQUIRE(result <= 1.0);
+        REQUIRE(std::isfinite(result));
+    }
+
+    SECTION("flatness of all-zero data returns NO_RESULT")
+    {
+        double data[] = {0.0, 0.0, 0.0, 0.0};
+        int rv = xtract_flatness(data, 4, NULL, &result);
+        REQUIRE(rv == XTRACT_NO_RESULT);
+    }
+}
