@@ -641,27 +641,23 @@ int xtract_loudness(const double *data, const int N, const void *argv, double *r
 int xtract_flatness(const double *data, const int N, const void *argv, double *result)
 {
 
-    int n, count, denormal_found;
+    int n, count;
+    double log_sum, den;
 
-    double num, den, temp;
-
-    num = 1.0;
-    den = temp = 0.0;
-
-    denormal_found = 0;
+    log_sum = 0.0;
+    den = 0.0;
     count = 0;
 
+    /* Use log-domain computation to avoid underflow.
+     * Geometric mean = exp(sum(log(x)) / N) instead of (product(x))^(1/N).
+     * The direct multiplication approach underflows for any spectrum with
+     * more than ~50 bins of typical magnitude values. */
     for(n = 0; n < N; n++)
     {
-        if((temp = data[n]) != 0.0)
+        if(data[n] > 0.0)
         {
-            if (xtract_is_denormal(num))
-            {
-                denormal_found = 1;
-                break;
-            }
-            num *= temp;
-            den += temp;
+            log_sum += log(data[n]);
+            den += data[n];
             count++;
         }
     }
@@ -672,16 +668,9 @@ int xtract_flatness(const double *data, const int N, const void *argv, double *r
         return XTRACT_NO_RESULT;
     }
 
-    num = pow(num, 1.0 / (double)count);
-    den /= (double)count;
+    *result = exp(log_sum / (double)count) / (den / (double)count);
 
-
-    *result = (double) (num / den);
-
-    if(denormal_found)
-        return XTRACT_DENORMAL_FOUND;
-    else
-        return XTRACT_SUCCESS;
+    return XTRACT_SUCCESS;
 
 }
 
