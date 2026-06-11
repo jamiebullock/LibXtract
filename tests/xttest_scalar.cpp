@@ -1,4 +1,6 @@
 
+#define _USE_MATH_DEFINES
+
 #include "xttest_util.hpp"
 
 #include "xtract/xtract_scalar.h"
@@ -8,6 +10,10 @@
 
 #include <cmath>
 #include <cstring>
+
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
 
 
 SCENARIO( "F0 is correctly detected for a sine wave", "[xtract_f0]" )
