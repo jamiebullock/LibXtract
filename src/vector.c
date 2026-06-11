@@ -961,8 +961,11 @@ int xtract_lpcc(const double *data, const int N, const void *argv, double *resul
     if(argv == NULL)
         cep_length = N - 1; /* FIX: if we're going to have default values, they should come from the descriptor */
     else
+    {
         cep_length = *(int *)argv;
-    //cep_length = (int)((double *)argv)[0];
+        if(cep_length <= 0)
+            return XTRACT_ARGUMENT_ERROR;
+    }
 
     memset(result, 0, cep_length * sizeof(double));
 

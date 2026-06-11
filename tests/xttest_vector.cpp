@@ -185,6 +185,32 @@ TEST_CASE("xtract_spectral_subband_centroids", "[vector]")
     REQUIRE(result[1] == Approx(600.0).epsilon(EPSILON));
 }
 
+TEST_CASE("xtract_lpcc", "[vector]")
+{
+    SECTION("rejects a non-positive cepstrum length")
+    {
+        double lpc[3] = {0.0, 0.5, 0.25};
+        double result[4] = {0};
+        int cep_length = 0;
+
+        REQUIRE(xtract_lpcc(lpc, 3, &cep_length, result) == XTRACT_ARGUMENT_ERROR);
+    }
+
+    SECTION("computes the cepstral recursion for an int argv")
+    {
+        /* data[0] is unused (the recursion starts at data[1]):
+         * c[1] = a[1] = 0.5
+         * c[2] = a[2] + (1 * c[1] * a[1]) / 2 = 0.25 + 0.125 = 0.375 */
+        double lpc[3] = {0.0, 0.5, 0.25};
+        double result[2] = {0};
+        int cep_length = 2;
+
+        REQUIRE(xtract_lpcc(lpc, 3, &cep_length, result) == XTRACT_SUCCESS);
+        REQUIRE(result[0] == Approx(0.5).epsilon(EPSILON));
+        REQUIRE(result[1] == Approx(0.375).epsilon(EPSILON));
+    }
+}
+
 TEST_CASE("xtract_amdf", "[vector]")
 {
     double result[4] = {0};
