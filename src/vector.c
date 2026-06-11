@@ -1013,8 +1013,8 @@ int xtract_subbands(const double *data, const int N, const void *argv, double *r
     for(n = 0; n < nbands; n++)
     {
 
-        /* Bounds sanity check */
-        if(lower >= N || lower + bw >= N)
+        /* Bounds sanity check: a band may end exactly at N */
+        if(lower >= N || lower + bw > N)
         {
             //   printf("n: %d\n", n);
             result[n] = 0.0;

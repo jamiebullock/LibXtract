@@ -111,6 +111,47 @@ TEST_CASE("xtract_smoothed", "[helper]")
     }
 }
 
+TEST_CASE("xtract_subbands", "[vector]")
+{
+    const int N = 16;
+    double data[16];
+
+    for (int n = 0; n < N; n++)
+        data[n] = 1.0;
+
+    SECTION("last band is computed when linear bands tile the input exactly")
+    {
+        double result[4] = {0};
+        int argv[4];
+
+        argv[0] = XTRACT_MEAN;
+        argv[1] = 4; /* nbands: 4 bands of 4 samples tiling N exactly */
+        argv[2] = XTRACT_LINEAR_SUBBANDS;
+        argv[3] = 0; /* start */
+
+        xtract_subbands(data, N, argv, result);
+
+        for (int i = 0; i < 4; i++)
+            REQUIRE(result[i] == Approx(1.0).epsilon(EPSILON));
+    }
+
+    SECTION("final octave band is computed when it ends at N")
+    {
+        double result[3] = {0};
+        int argv[4];
+
+        argv[0] = XTRACT_MEAN;
+        argv[1] = 3; /* bands [2, 4), [4, 8), [8, 16) */
+        argv[2] = XTRACT_OCTAVE_SUBBANDS;
+        argv[3] = 2; /* start */
+
+        xtract_subbands(data, N, argv, result);
+
+        for (int i = 0; i < 3; i++)
+            REQUIRE(result[i] == Approx(1.0).epsilon(EPSILON));
+    }
+}
+
 TEST_CASE("xtract_amdf", "[vector]")
 {
     double result[4] = {0};
