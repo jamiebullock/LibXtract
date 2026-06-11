@@ -52,6 +52,43 @@ TEST_CASE("xtract_autocorrelation", "[vector]")
     }
 }
 
+TEST_CASE("xtract_autocorrelation_fft", "[vector][fft]")
+{
+    const int N = 16;
+
+    /* The input occupies the first half of a larger buffer with garbage in
+     * the adjacent half, so any read past the input corrupts the result.
+     * The result occupies the first half of a larger buffer with canary
+     * values in the adjacent half, so any write past the result is caught. */
+    double padded_input[2 * N];
+    double guarded_result[2 * N];
+    double reference[N];
+
+    for (int n = 0; n < N; n++)
+        padded_input[n] = sin(2.0 * M_PI * n / 8.0);
+    for (int n = N; n < 2 * N; n++)
+        padded_input[n] = 1.0e6;
+
+    for (int n = 0; n < 2 * N; n++)
+        guarded_result[n] = 12345.0;
+
+    xtract_init_fft(N, XTRACT_AUTOCORRELATION_FFT);
+    xtract_autocorrelation(padded_input, N, NULL, reference);
+    xtract_autocorrelation_fft(padded_input, N, NULL, guarded_result);
+
+    SECTION("does not write past the result buffer")
+    {
+        for (int n = N; n < 2 * N; n++)
+            REQUIRE(guarded_result[n] == 12345.0);
+    }
+
+    SECTION("matches time-domain autocorrelation regardless of adjacent input memory")
+    {
+        for (int n = 0; n < N; n++)
+            REQUIRE(guarded_result[n] == Approx(reference[n]).margin(1e-9));
+    }
+}
+
 TEST_CASE("xtract_amdf", "[vector]")
 {
     double result[4] = {0};
