@@ -390,7 +390,8 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_TRISTIMULUS_2:
         case XTRACT_TRISTIMULUS_3:
         case XTRACT_ODD_EVEN_RATIO:
-            *data_format = XTRACT_SPECTRAL_HARMONICS_MAGNITUDES;
+            /* These read N/2 amplitudes followed by N/2 frequencies */
+            *data_format = XTRACT_SPECTRAL_HARMONICS;
             break;
         case XTRACT_LOUDNESS:
         case XTRACT_SHARPNESS:
@@ -479,10 +480,8 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_SPECTRAL_SLOPE:
         case XTRACT_HARMONIC_SPECTRUM:
         case XTRACT_SPECTRAL_INHARMONICITY:
-            *data_unit = XTRACT_ANY_AMPLITUDE_HERTZ;
-            break;
         case XTRACT_ODD_EVEN_RATIO:
-            *data_unit = XTRACT_HERTZ;
+            *data_unit = XTRACT_ANY_AMPLITUDE_HERTZ;
             break;
         }
 

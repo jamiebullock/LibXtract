@@ -611,6 +611,35 @@ TEST_CASE("xtract_spectral_standard_deviation", "[scalar][spectral]")
     }
 }
 
+TEST_CASE("xtract_odd_even_ratio", "[scalar][spectral]")
+{
+    double result = 0.0;
+    double fund = 100.0;
+
+    SECTION("computes the ratio of odd to even harmonic magnitudes")
+    {
+        /* Harmonics 1 and 3 (odd): 3.0 + 2.0 = 5.0
+         * Harmonics 2 and 4 (even): 0.5 + 0.4 = 0.9 */
+        double data[8] = {3.0, 0.5, 2.0, 0.4,
+                          100.0, 200.0, 300.0, 400.0};
+
+        REQUIRE(xtract_odd_even_ratio(data, 8, &fund, &result) == XTRACT_SUCCESS);
+        REQUIRE(result == Approx(5.0 / 0.9).epsilon(1e-10));
+    }
+
+    SECTION("bins below the first harmonic are excluded")
+    {
+        /* The 20 Hz bin rounds to harmonic 0, which does not exist:
+         * harmonics are numbered from 1, so it must contribute to
+         * neither sum. Odd = 2.0 (h=1), even = 1.0 (h=2). */
+        double data[8] = {5.0, 2.0, 1.0, 0.0,
+                          20.0, 100.0, 200.0, 300.0};
+
+        REQUIRE(xtract_odd_even_ratio(data, 8, &fund, &result) == XTRACT_SUCCESS);
+        REQUIRE(result == Approx(2.0).epsilon(1e-10));
+    }
+}
+
 TEST_CASE("xtract_sharpness", "[scalar][spectral]")
 {
     double result = 0.0;

@@ -819,6 +819,12 @@ int xtract_odd_even_ratio(const double *data, const int N, const void *argv, dou
         if((temp = data[n]))
         {
             h = (int)floor(freqs[n] / fund + 0.5);
+
+            /* Harmonics are numbered from 1: a bin nearest to harmonic
+             * zero is below the first harmonic and belongs to neither sum */
+            if(h == 0)
+                continue;
+
             if(XTRACT_IS_ODD(h))
             {
                 odd += temp;

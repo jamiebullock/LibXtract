@@ -322,12 +322,19 @@ int xtract_crest(const double *data, const int N, const void *argv, double *resu
 int xtract_power(const double *data, const int N, const void *argv, double *result);
     
 /* Odd to even harmonic ratio */
-/** \brief Extract the Odd to even harmonic ratio of an input vector 
- * 
+/** \brief Extract the Odd to even harmonic ratio of an input vector
+ *
  * \param *data: a pointer to the first element in an array of doubles representing a harmonic spectrum of size N/2, and a frequency spectrum of size N/2 (This is the output format of xtract_harmonic_spectrum())
- * \param N: the number of elements to be considered. 
+ * \param N: the number of elements to be considered.
  * \param *argv: a pointer to a double representing the fundamental frequency of the input vector.
- * \param *result: the even/odd harmonic ratio of N values from the array pointed to by *data
+ * \param *result: the odd/even harmonic ratio of N values from the array pointed to by *data
+ *
+ * Harmonics are numbered from 1 (the fundamental); bins nearest to harmonic
+ * zero (below half the fundamental) contribute to neither sum. The ratio is
+ * computed in whatever unit the coefficients are given: magnitude
+ * coefficients give an amplitude ratio, while coefficients derived from
+ * XTRACT_POWER_SPECTRUM give the odd-to-even harmonic energy ratio of
+ * Peeters (2004).
  */
 int xtract_odd_even_ratio(const double *data, const int N, const void *argv, double *result);
 
