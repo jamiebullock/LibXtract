@@ -89,6 +89,28 @@ TEST_CASE("xtract_autocorrelation_fft", "[vector][fft]")
     }
 }
 
+TEST_CASE("xtract_smoothed", "[helper]")
+{
+    const int N = 8;
+    double data[8] = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
+    double gain = 0.5;
+
+    SECTION("output does not depend on prior result buffer contents")
+    {
+        double result[8];
+
+        /* Smoothing a constant signal must return the same constant in
+         * every element regardless of what the caller's buffer held. */
+        for (int n = 0; n < N; n++)
+            result[n] = 1.0e9;
+
+        xtract_smoothed(data, N, &gain, result);
+
+        for (int n = 0; n < N; n++)
+            REQUIRE(result[n] == Approx(1.0).epsilon(EPSILON));
+    }
+}
+
 TEST_CASE("xtract_amdf", "[vector]")
 {
     double result[4] = {0};
