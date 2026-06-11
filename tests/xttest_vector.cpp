@@ -826,7 +826,7 @@ TEST_CASE("xtract_crest divide-by-zero", "[scalar][edge-case]")
     }
 }
 
-TEST_CASE("xtract_spectrum normalisation", "[vector][fft][known-bug]")
+TEST_CASE("xtract_spectrum normalisation", "[vector][fft]")
 {
     SECTION("power spectrum normalisation max bin is 1.0")
     {
