@@ -409,13 +409,15 @@ int xtract_autocorrelation_fft(const double *data, const int N, const void *argv
 {
 
     int n        = 0;
-    int M        = N << 1;
 
 #ifdef USE_OOURA
+    int M        = N << 1;
     double *rfft = NULL;
 #else
     DSPDoubleSplitComplex *fft = NULL;
-    double M_double = 0.0;
+    double dc = 0.0;
+    double nyquist = 0.0;
+    double norm = 0.0;
 #endif
 
 
@@ -423,8 +425,8 @@ int xtract_autocorrelation_fft(const double *data, const int N, const void *argv
     /* Zero pad the input vector */
     rfft = (double *)calloc(M, sizeof(double));
     memcpy(rfft, data, N * sizeof(double));
-    
-    rdft(M, 1, rfft, ooura_data_autocorrelation_fft.ooura_ip, 
+
+    rdft(M, 1, rfft, ooura_data_autocorrelation_fft.ooura_ip,
             ooura_data_autocorrelation_fft.ooura_w);
 
     for(n = 2; n < M; n += 2)
@@ -439,36 +441,53 @@ int xtract_autocorrelation_fft(const double *data, const int N, const void *argv
     rdft(M, -1, rfft, ooura_data_autocorrelation_fft.ooura_ip,
             ooura_data_autocorrelation_fft.ooura_w);
 
+    /* rdft is unnormalised: a forward/inverse round trip scales by M / 2 = N,
+     * and the conventional autocorrelation scaling contributes a further 1 / N,
+     * giving a total divisor of N * N. This matches xtract_autocorrelation. */
+    for(n = 0; n < N; n++)
+        result[n] = rfft[n] / ((double)N * N);
+    free(rfft);
 #else
-    /* vDSP has its own autocorrelation function, but it doesn't fit the 
+    /* vDSP has its own autocorrelation function, but it doesn't fit the
      * LibXtract model, e.g. we can't guarantee it's going to use
      * an FFT for all values of N */
     fft = &vdsp_data_autocorrelation_fft.fft;
-    vDSP_ctozD((DSPDoubleComplex *)data, 2, fft, 1, N);
-    vDSP_fft_zripD(vdsp_data_autocorrelation_fft.setup, fft, 1, 
+
+    /* The setup is for a 2N-point FFT to allow for zero padding. The split
+     * buffers hold N elements each and are reused between calls, so they
+     * must be zeroed before packing the N input samples (N / 2 complex
+     * pairs) into the lower half; the upper half is the zero padding. */
+    memset(fft->realp, 0, N * sizeof(double));
+    memset(fft->imagp, 0, N * sizeof(double));
+    vDSP_ctozD((DSPDoubleComplex *)data, 2, fft, 1, N >> 1);
+    vDSP_fft_zripD(vdsp_data_autocorrelation_fft.setup, fft, 1,
             vdsp_data_autocorrelation_fft.log2N, FFT_FORWARD);
 
-    for(n = 0; n < N; ++n)
+    /* Power spectrum. In the packed real format DC and Nyquist are real
+     * values stored in realp[0] and imagp[0] and must be squared separately. */
+    dc = fft->realp[0];
+    nyquist = fft->imagp[0];
+
+    for(n = 1; n < N; ++n)
     {
         fft->realp[n] = XTRACT_SQ(fft->realp[n]) + XTRACT_SQ(fft->imagp[n]);
         fft->imagp[n] = 0.0;
     }
 
-    vDSP_fft_zripD(vdsp_data_autocorrelation_fft.setup, fft, 1, 
+    fft->realp[0] = XTRACT_SQ(dc);
+    fft->imagp[0] = XTRACT_SQ(nyquist);
+
+    vDSP_fft_zripD(vdsp_data_autocorrelation_fft.setup, fft, 1,
             vdsp_data_autocorrelation_fft.log2N, FFT_INVERSE);
-#endif
 
-    /* Normalisation factor */
-    M = M * N;
-
-#ifdef USE_OOURA
-    for(n = 0; n < N; n++)
-        result[n] = rfft[n] / (double)M;
-    free(rfft);
-#else
-    M_double = (double)M;
-    vDSP_ztocD(fft, 1, (DOUBLE_COMPLEX *)result, 2, N);
-    vDSP_vsdivD(result, 1, &M_double, result, 1, N);
+    /* Unpack the first N time-domain values (N / 2 complex pairs). The
+     * forward transform is scaled by 2 relative to the DFT (4 after
+     * squaring) and the unnormalised inverse contributes a further 2N;
+     * with the conventional 1 / N autocorrelation scaling the total
+     * divisor is 8 * N * N. This matches xtract_autocorrelation. */
+    norm = 8.0 * (double)N * N;
+    vDSP_ztocD(fft, 1, (DOUBLE_COMPLEX *)result, 2, N >> 1);
+    vDSP_vsdivD(result, 1, &norm, result, 1, N);
 #endif
 
     return XTRACT_SUCCESS;
@@ -994,8 +1013,8 @@ int xtract_subbands(const double *data, const int N, const void *argv, double *r
     for(n = 0; n < nbands; n++)
     {
 
-        /* Bounds sanity check */
-        if(lower >= N || lower + bw >= N)
+        /* Bounds sanity check: a band may end exactly at N */
+        if(lower >= N || lower + bw > N)
         {
             //   printf("n: %d\n", n);
             result[n] = 0.0;

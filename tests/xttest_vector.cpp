@@ -52,6 +52,106 @@ TEST_CASE("xtract_autocorrelation", "[vector]")
     }
 }
 
+TEST_CASE("xtract_autocorrelation_fft", "[vector][fft]")
+{
+    const int N = 16;
+
+    /* The input occupies the first half of a larger buffer with garbage in
+     * the adjacent half, so any read past the input corrupts the result.
+     * The result occupies the first half of a larger buffer with canary
+     * values in the adjacent half, so any write past the result is caught. */
+    double padded_input[2 * N];
+    double guarded_result[2 * N];
+    double reference[N];
+
+    for (int n = 0; n < N; n++)
+        padded_input[n] = sin(2.0 * M_PI * n / 8.0);
+    for (int n = N; n < 2 * N; n++)
+        padded_input[n] = 1.0e6;
+
+    for (int n = 0; n < 2 * N; n++)
+        guarded_result[n] = 12345.0;
+
+    xtract_init_fft(N, XTRACT_AUTOCORRELATION_FFT);
+    xtract_autocorrelation(padded_input, N, NULL, reference);
+    xtract_autocorrelation_fft(padded_input, N, NULL, guarded_result);
+
+    SECTION("does not write past the result buffer")
+    {
+        for (int n = N; n < 2 * N; n++)
+            REQUIRE(guarded_result[n] == 12345.0);
+    }
+
+    SECTION("matches time-domain autocorrelation regardless of adjacent input memory")
+    {
+        for (int n = 0; n < N; n++)
+            REQUIRE(guarded_result[n] == Approx(reference[n]).margin(1e-9));
+    }
+}
+
+TEST_CASE("xtract_smoothed", "[helper]")
+{
+    const int N = 8;
+    double data[8] = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
+    double gain = 0.5;
+
+    SECTION("output does not depend on prior result buffer contents")
+    {
+        double result[8];
+
+        /* Smoothing a constant signal must return the same constant in
+         * every element regardless of what the caller's buffer held. */
+        for (int n = 0; n < N; n++)
+            result[n] = 1.0e9;
+
+        xtract_smoothed(data, N, &gain, result);
+
+        for (int n = 0; n < N; n++)
+            REQUIRE(result[n] == Approx(1.0).epsilon(EPSILON));
+    }
+}
+
+TEST_CASE("xtract_subbands", "[vector]")
+{
+    const int N = 16;
+    double data[16];
+
+    for (int n = 0; n < N; n++)
+        data[n] = 1.0;
+
+    SECTION("last band is computed when linear bands tile the input exactly")
+    {
+        double result[4] = {0};
+        int argv[4];
+
+        argv[0] = XTRACT_MEAN;
+        argv[1] = 4; /* nbands: 4 bands of 4 samples tiling N exactly */
+        argv[2] = XTRACT_LINEAR_SUBBANDS;
+        argv[3] = 0; /* start */
+
+        xtract_subbands(data, N, argv, result);
+
+        for (int i = 0; i < 4; i++)
+            REQUIRE(result[i] == Approx(1.0).epsilon(EPSILON));
+    }
+
+    SECTION("final octave band is computed when it ends at N")
+    {
+        double result[3] = {0};
+        int argv[4];
+
+        argv[0] = XTRACT_MEAN;
+        argv[1] = 3; /* bands [2, 4), [4, 8), [8, 16) */
+        argv[2] = XTRACT_OCTAVE_SUBBANDS;
+        argv[3] = 2; /* start */
+
+        xtract_subbands(data, N, argv, result);
+
+        for (int i = 0; i < 3; i++)
+            REQUIRE(result[i] == Approx(1.0).epsilon(EPSILON));
+    }
+}
+
 TEST_CASE("xtract_amdf", "[vector]")
 {
     double result[4] = {0};

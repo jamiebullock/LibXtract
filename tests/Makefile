@@ -24,6 +24,9 @@ FLAGS ?= -O3
 DEBUG_FLAGS ?= -O0 -g
 # Flags to pass to the linker
 LDFLAGS ?=
+# Link-time prerequisites that are not objects (e.g. static libraries), so
+# the product is relinked when they change
+LDDEPS ?=
 # Type of product to build: "shared" for a shared library, "static" for a static library, empty for standalone
 LIBRARY ?= static
 # Prefix to the path that the "install" target will install into. libs to $(PREFIX)/lib, executables to $(PREFIX)/bin
@@ -78,11 +81,11 @@ endif
 .SUFFIXES:
 .PHONY: debug clean install uninstall
 
-$(OUT): $(OBJ)
+$(OUT): $(OBJ) $(LDDEPS)
 ifeq "$(LIBRARY)" "static"
-	@$(AR) rcs $@ $^
+	@$(AR) rcs $@ $(OBJ)
 else
-	@$(COMPILER) $^ $(LDFLAGS) -o $@
+	@$(COMPILER) $(OBJ) $(LDFLAGS) -o $@
 endif
 
 debug: FLAGS = $(DEBUG_FLAGS)
