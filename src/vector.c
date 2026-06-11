@@ -882,6 +882,12 @@ int xtract_harmonic_spectrum(const double *data, const int N, const void *argv, 
     f0 = *((double *)argv);
     threshold = *((double *)argv+1);
 
+    if(f0 == 0.0)
+    {
+        memset(result, 0, N * sizeof(double));
+        return XTRACT_NO_RESULT;
+    }
+
     ratio = nearest = distance = 0.0;
 
     while(n--)

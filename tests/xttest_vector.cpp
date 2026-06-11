@@ -211,6 +211,27 @@ TEST_CASE("xtract_lpcc", "[vector]")
     }
 }
 
+TEST_CASE("xtract_harmonic_spectrum", "[vector]")
+{
+    SECTION("zero fundamental yields no result and a zeroed output")
+    {
+        /* With f0 = 0 no harmonic classification is possible; every bin
+         * must be zeroed rather than passed through as "harmonic". */
+        const int N = 8;
+        double data[8] = {1.0, 2.0, 3.0, 4.0, 100.0, 200.0, 300.0, 400.0};
+        double result[8];
+        double argv[2] = {0.0, 0.2}; /* f0 = 0, threshold = 0.2 */
+
+        for (int n = 0; n < N; n++)
+            result[n] = 999.0;
+
+        REQUIRE(xtract_harmonic_spectrum(data, N, argv, result) == XTRACT_NO_RESULT);
+
+        for (int n = 0; n < N; n++)
+            REQUIRE(result[n] == 0.0);
+    }
+}
+
 TEST_CASE("xtract_amdf", "[vector]")
 {
     double result[4] = {0};
