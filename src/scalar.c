@@ -819,6 +819,12 @@ int xtract_odd_even_ratio(const double *data, const int N, const void *argv, dou
         if((temp = data[n]))
         {
             h = (int)floor(freqs[n] / fund + 0.5);
+
+            /* Harmonics are numbered from 1: a bin nearest to harmonic
+             * zero is below the first harmonic and belongs to neither sum */
+            if(h == 0)
+                continue;
+
             if(XTRACT_IS_ODD(h))
             {
                 odd += temp;
@@ -845,12 +851,13 @@ int xtract_odd_even_ratio(const double *data, const int N, const void *argv, dou
 int xtract_sharpness(const double *data, const int N, const void *argv, double *result)
 {
 
-    int n = N, rv;
+    int n = N, rv, z;
     double sl, g; /* sl = specific loudness */
-    double temp;
+    double temp, total_loudness;
 
     sl = g = 0.0;
     temp = 0.0;
+    total_loudness = 0.0;
 
     if(n > XTRACT_BARK_BANDS)
     {
@@ -863,13 +870,24 @@ int xtract_sharpness(const double *data, const int N, const void *argv, double *
 
     while(n--)
     {
-        sl = pow(data[n], 0.23);
-        g = (n < 15 ? 1.0 : 0.066 * exp(0.171 * n));
-        temp += n * g * sl;
+        /* Bark bands are numbered from z = 1 (von Bismarck 1974,
+         * Peeters 2004) */
+        z = n + 1;
+        sl = data[n] > 0.0 ? pow(data[n], 0.23) : 0.0;
+        g = (z < 15 ? 1.0 : 0.066 * exp(0.171 * z));
+        temp += z * g * sl;
+        total_loudness += sl;
     }
 
-    temp = 0.11 * temp / (double)N;
-    *result = (double)temp;
+    if(total_loudness == 0.0)
+    {
+        *result = 0.0;
+        return XTRACT_NO_RESULT;
+    }
+
+    /* Sharpness is the g-weighted centroid of specific loudness,
+     * normalised by the total loudness, in acums */
+    *result = 0.11 * temp / total_loudness;
 
     return rv;
 
