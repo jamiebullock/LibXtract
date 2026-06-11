@@ -144,12 +144,6 @@ int xtract_skewness(const double *data, const int N, const void *argv,  double *
     const double arg0 = ((double *)argv)[0];
     const double arg1 = ((double *)argv)[1];
 
-    if (((double *)argv)[1] == 0)
-    {
-      *result = 0.0;
-      return XTRACT_NO_RESULT;
-    }
-
     *result = 0.0;
 
     if (arg1 == 0)
@@ -309,12 +303,6 @@ int xtract_spectral_skewness(const double *data, const int N, const void *argv, 
 
     if (arg1 == 0.0)
     {
-        return XTRACT_NO_RESULT;
-    }
-
-    if (((double *)argv)[1] == 0.0)
-    {
-        *result = 0.0;
         return XTRACT_NO_RESULT;
     }
 
@@ -865,7 +853,10 @@ int xtract_sharpness(const double *data, const int N, const void *argv, double *
     temp = 0.0;
 
     if(n > XTRACT_BARK_BANDS)
+    {
+        n = XTRACT_BARK_BANDS;
         rv = XTRACT_BAD_VECTOR_SIZE;
+    }
     else
         rv = XTRACT_SUCCESS;
 
@@ -936,8 +927,11 @@ int xtract_lowest_value(const double *data, const int N, const void *argv, doubl
     }
 
     if (*result == DBL_MAX)
+    {
+        *result = 0.0;
         return XTRACT_NO_RESULT;
-        
+    }
+
     return XTRACT_SUCCESS;
 }
 
@@ -1019,6 +1013,14 @@ int xtract_hps(const double *data, const int N, const void *argv, double *result
             peak = tempProduct;
             peak_index = i;
         }
+    }
+
+    if (peak == 0.0)
+    {
+        /* Silent spectrum: no harmonic product peak exists, and
+         * data[peak_index] would divide by zero below. */
+        *result = 0;
+        return XTRACT_NO_RESULT;
     }
 
     largest1_lwr = position1_lwr = 0;
@@ -1314,7 +1316,13 @@ int xtract_midicent(const double *data, const int N, const void *argv, double *r
 {
     double f0 = *(double *)argv;
     double note = 0.0;
-      
+
+    if (f0 <= 0.0)
+    {
+        *result = 0.0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
+
     note = 69 + log(f0 / 440.f) * 17.31234;
     note *= 100;
     note = floor( 0.5f + note ); // replace -> round(note);

@@ -211,6 +211,27 @@ TEST_CASE("xtract_lpcc", "[vector]")
     }
 }
 
+TEST_CASE("xtract_harmonic_spectrum", "[vector]")
+{
+    SECTION("zero fundamental yields no result and a zeroed output")
+    {
+        /* With f0 = 0 no harmonic classification is possible; every bin
+         * must be zeroed rather than passed through as "harmonic". */
+        const int N = 8;
+        double data[8] = {1.0, 2.0, 3.0, 4.0, 100.0, 200.0, 300.0, 400.0};
+        double result[8];
+        double argv[2] = {0.0, 0.2}; /* f0 = 0, threshold = 0.2 */
+
+        for (int n = 0; n < N; n++)
+            result[n] = 999.0;
+
+        REQUIRE(xtract_harmonic_spectrum(data, N, argv, result) == XTRACT_NO_RESULT);
+
+        for (int n = 0; n < N; n++)
+            REQUIRE(result[n] == 0.0);
+    }
+}
+
 TEST_CASE("xtract_amdf", "[vector]")
 {
     double result[4] = {0};
@@ -606,6 +627,23 @@ TEST_CASE("xtract_sharpness", "[scalar][spectral]")
         REQUIRE(result > 0.0);
         REQUIRE(std::isfinite(result));
     }
+
+    SECTION("bands beyond XTRACT_BARK_BANDS are ignored")
+    {
+        /* The extra bands carry huge values that must not contribute:
+         * both calls then sum the same 26 bands, so the results differ
+         * only by the 1/N divisor. */
+        double data[30];
+        double result26 = 0.0;
+        double result30 = 0.0;
+
+        for (int i = 0; i < 30; i++)
+            data[i] = i < XTRACT_BARK_BANDS ? 1.0 : 1.0e12;
+
+        REQUIRE(xtract_sharpness(data, 30, NULL, &result30) == XTRACT_BAD_VECTOR_SIZE);
+        REQUIRE(xtract_sharpness(data, XTRACT_BARK_BANDS, NULL, &result26) == XTRACT_SUCCESS);
+        REQUIRE(result30 * 30.0 == Approx(result26 * XTRACT_BARK_BANDS).epsilon(1e-10));
+    }
 }
 
 /* ===== Bug-specific tests from REVIEW.md =====
@@ -657,6 +695,21 @@ TEST_CASE("xtract_spectral_kurtosis normalisation", "[scalar][spectral]")
         xtract_spectral_kurtosis(data2, 4, argv, &result2);
 
         REQUIRE(result1 == Approx(result2).epsilon(1e-6));
+    }
+}
+
+TEST_CASE("xtract_hps silent spectrum", "[scalar][spectral]")
+{
+    SECTION("all-zero spectrum yields no result rather than NaN")
+    {
+        const int N = 256;
+        double data[256] = {0};
+        double result = 999.0;
+
+        int rv = xtract_hps(data, N, NULL, &result);
+
+        REQUIRE(rv == XTRACT_NO_RESULT);
+        REQUIRE(result == 0.0);
     }
 }
 
