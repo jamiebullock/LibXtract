@@ -692,20 +692,32 @@ int xtract_dct(const double *data, const int N, const void *argv, double *result
         }
         free(dct_cos_table);
         dct_cos_table = NULL;
+        dct_cos_table_dim = 0;
     }
     // Allocate the dct cache table
     if (dct_cos_table == NULL)
     {
-        dct_cos_table_dim = N;
         dct_cos_table = calloc(N, sizeof(double*));
+        if (dct_cos_table == NULL)
+            return XTRACT_MALLOC_FAILED;
         for (n = 0; n < N; ++n)
         {
             dct_cos_table[n] = calloc(N, sizeof(double));
+            if (dct_cos_table[n] == NULL)
+            {
+                // Don't leave a half-built table cached as valid
+                for (m = 0; m < n; ++m)
+                    free(dct_cos_table[m]);
+                free(dct_cos_table);
+                dct_cos_table = NULL;
+                return XTRACT_MALLOC_FAILED;
+            }
             for (m = 1; m <= N; ++m)
             {
                 dct_cos_table[n][m-1] = cos(M_PI * (n / (double)N)*(m - 0.5));
             }
         }
+        dct_cos_table_dim = N;
     }
     // Calculate the dct transformation
     temp_dct_table = dct_cos_table;
