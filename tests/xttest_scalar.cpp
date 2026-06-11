@@ -1434,6 +1434,22 @@ TEST_CASE("xtract_midicent", "[scalar]")
         xtract_midicent(NULL, 0, &freq, &result);
         REQUIRE(result == Approx(6000.0).margin(1.0)); /* 1 midicent absolute */
     }
+
+    SECTION("zero frequency is rejected")
+    {
+        double freq = 0.0;
+        result = 999.0;
+        REQUIRE(xtract_midicent(NULL, 0, &freq, &result) == XTRACT_ARGUMENT_ERROR);
+        REQUIRE(result == 0.0);
+    }
+
+    SECTION("negative frequency is rejected rather than returning NaN")
+    {
+        double freq = -440.0;
+        result = 999.0;
+        REQUIRE(xtract_midicent(NULL, 0, &freq, &result) == XTRACT_ARGUMENT_ERROR);
+        REQUIRE(result == 0.0);
+    }
 }
 
 /* ===== Spectral Features (using synthetic spectral data) ===== */
