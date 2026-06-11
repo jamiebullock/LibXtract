@@ -1199,13 +1199,33 @@ int xtract_wavelet_f0(const double *data, const int N, const void *argv, double 
     return XTRACT_SUCCESS;
 }
 
+/* Height of the parabola through (tau-1, tau, tau+1) at its vertex, used to
+ * compare NSDF key maxima at sub-sample accuracy (McLeod and Wyvill 2005) */
+static double mcleod_peak_height(const double *nsdf, const int tau, const int N)
+{
+    double a, b, c, denom;
+
+    if(tau <= 0 || tau >= N - 1)
+        return nsdf[tau];
+
+    a = nsdf[tau - 1];
+    b = nsdf[tau];
+    c = nsdf[tau + 1];
+    denom = a - 2.0 * b + c;
+
+    if(denom == 0.0)
+        return b;
+
+    return b - 0.125 * (a - c) * (a - c) / denom;
+}
+
 int xtract_mcleod_f0(const double *data, const int N, const void *argv, double *result)
 {
     double sr, threshold;
     double *nsdf;
     int tau, n, best_tau;
     double best_val, a, b, c, peak_tau;
-    int positive_crossing;
+    int in_region, region_tau;
 
     if(argv == NULL)
         return XTRACT_BAD_ARGV;
@@ -1237,23 +1257,41 @@ int xtract_mcleod_f0(const double *data, const int N, const void *argv, double *
         nsdf[tau] = (m_tau > 0.0) ? 2.0 * r_tau / m_tau : 0.0;
     }
 
-    /* Find the highest NSDF peak using McLeod's key maximum selection:
-     * look for positive zero crossings, find the max in each positive
-     * region, and select the first peak above the threshold relative
-     * to the global maximum. */
-    best_tau = -1;
-    best_val = -1.0;
-    positive_crossing = 0;
+    /* Key maxima selection (McLeod and Wyvill 2005): each positive region
+     * of the NSDF — from a positively sloped zero crossing to the next
+     * negatively sloped one — contributes one key maximum, its highest
+     * local maximum. The lag at tau = 0 lies before the first crossing,
+     * so its lobe never forms a region. The pitch peak is the first key
+     * maximum whose interpolated height is within threshold of the
+     * highest key maximum. */
 
-    /* First pass: find the global NSDF maximum (excluding tau=0) */
+    /* First pass: the height of the highest key maximum */
+    best_val = 0.0;
+    in_region = 0;
+    region_tau = -1;
+
     for(tau = 1; tau < N; tau++)
     {
-        if(nsdf[tau] > best_val)
+        if(!in_region && nsdf[tau] > 0.0 && nsdf[tau - 1] <= 0.0)
         {
-            best_val = nsdf[tau];
-            best_tau = tau;
+            in_region = 1;
+            region_tau = tau;
+        }
+        else if(in_region)
+        {
+            if(nsdf[tau] <= 0.0)
+            {
+                best_val = XTRACT_MAX(best_val, mcleod_peak_height(nsdf, region_tau, N));
+                in_region = 0;
+            }
+            else if(nsdf[tau] > nsdf[region_tau])
+                region_tau = tau;
         }
     }
+
+    /* The final region may be cut off by the end of the buffer */
+    if(in_region)
+        best_val = XTRACT_MAX(best_val, mcleod_peak_height(nsdf, region_tau, N));
 
     if(best_val < 0.01)
     {
@@ -1263,27 +1301,37 @@ int xtract_mcleod_f0(const double *data, const int N, const void *argv, double *
         return XTRACT_NO_RESULT;
     }
 
-    /* Second pass: find the first peak above threshold * max */
+    /* Second pass: the first key maximum above threshold * best_val */
     best_tau = -1;
-    positive_crossing = 0;
-    for(tau = 1; tau < N - 1; tau++)
+    in_region = 0;
+    region_tau = -1;
+
+    for(tau = 1; tau < N; tau++)
     {
-        if(nsdf[tau - 1] <= 0.0 && nsdf[tau] > 0.0)
-            positive_crossing = 1;
-
-        if(nsdf[tau] <= 0.0)
-            positive_crossing = 0;
-
-        if(positive_crossing && nsdf[tau] > nsdf[tau - 1] && nsdf[tau] >= nsdf[tau + 1])
+        if(!in_region && nsdf[tau] > 0.0 && nsdf[tau - 1] <= 0.0)
         {
-            /* Found a local maximum in a positive region */
-            if(nsdf[tau] >= threshold * best_val)
+            in_region = 1;
+            region_tau = tau;
+        }
+        else if(in_region)
+        {
+            if(nsdf[tau] <= 0.0)
             {
-                best_tau = tau;
-                break;
+                if(mcleod_peak_height(nsdf, region_tau, N) >= threshold * best_val)
+                {
+                    best_tau = region_tau;
+                    break;
+                }
+                in_region = 0;
             }
+            else if(nsdf[tau] > nsdf[region_tau])
+                region_tau = tau;
         }
     }
+
+    if(best_tau < 0 && in_region &&
+            mcleod_peak_height(nsdf, region_tau, N) >= threshold * best_val)
+        best_tau = region_tau;
 
     if(best_tau < 1)
     {
@@ -1293,8 +1341,9 @@ int xtract_mcleod_f0(const double *data, const int N, const void *argv, double *
     }
 
     /* Parabolic interpolation around the peak for sub-sample accuracy.
-     * best_tau is always in [1, N-2] at this point (guaranteed by the
-     * second-pass loop bounds and the best_tau < 1 early return above). */
+     * A key maximum in the final region may sit on the last lag, where
+     * no upper neighbour exists for interpolation. */
+    if(best_tau < N - 1)
     {
         double denom;
 
@@ -1304,6 +1353,8 @@ int xtract_mcleod_f0(const double *data, const int N, const void *argv, double *
         denom = a - 2.0 * b + c;
         peak_tau = (denom != 0.0) ? best_tau + 0.5 * (a - c) / denom : (double)best_tau;
     }
+    else
+        peak_tau = (double)best_tau;
 
     *result = sr / peak_tau;
 
