@@ -939,8 +939,11 @@ int xtract_lowest_value(const double *data, const int N, const void *argv, doubl
     }
 
     if (*result == DBL_MAX)
+    {
+        *result = 0.0;
         return XTRACT_NO_RESULT;
-        
+    }
+
     return XTRACT_SUCCESS;
 }
 

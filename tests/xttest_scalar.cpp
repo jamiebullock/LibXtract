@@ -1394,6 +1394,17 @@ TEST_CASE("xtract_lowest_value", "[scalar]")
         xtract_lowest_value(data, 4, &threshold, &result);
         REQUIRE(result == Approx(3.0).epsilon(EPSILON));
     }
+
+    SECTION("no qualifying values gives 0, not DBL_MAX")
+    {
+        /* By library convention *result is 0 when XTRACT_NO_RESULT is
+         * returned. */
+        double data[] = {1.0, 2.0, 3.0};
+        double threshold = 10.0;
+        result = 999.0;
+        REQUIRE(xtract_lowest_value(data, 3, &threshold, &result) == XTRACT_NO_RESULT);
+        REQUIRE(result == 0.0);
+    }
 }
 
 TEST_CASE("xtract_power", "[scalar]")
