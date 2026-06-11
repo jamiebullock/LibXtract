@@ -26,9 +26,9 @@
 #include "xtract/libxtract.h"
 
 #ifdef __GNUC__
-__attribute__((destructor)) void fini()
+__attribute__((destructor)) void fini(void)
 #else
-void _fini()
+void _fini(void)
 #endif
 {
     xtract_free_fft();

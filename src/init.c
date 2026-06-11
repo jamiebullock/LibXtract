@@ -526,9 +526,9 @@ void xtract_free_window(double *window)
 }
 
 #ifdef __GNUC__
-__attribute__((constructor)) void init()
+__attribute__((constructor)) void init(void)
 #else
-void _init()
+void _init(void)
 #endif
 {
 #ifdef USE_OOURA
