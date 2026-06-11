@@ -647,8 +647,8 @@ int xtract_spectral_subband_centroids(const double *data, const int N, const voi
 {
     xtract_mel_filter *f = (xtract_mel_filter *)argv;
     int n, filter;
-    const double *freqs = data;
-    const double *amps = data+N;
+    const double *amps = data;
+    const double *freqs = data + N;
 
     for (filter = 0; filter < f->n_filters; filter++)
     {
@@ -656,12 +656,12 @@ int xtract_spectral_subband_centroids(const double *data, const int N, const voi
 
         for(n = 0; n < N; n++)
         {
-            double Multiplier = amps[n]*f->filters[filter][n];
+            double weighted_amp = amps[n] * f->filters[filter][n];
 
-            FA += freqs[n]*f->filters[filter][n]*Multiplier;
-            A += Multiplier;
+            FA += freqs[n] * weighted_amp;
+            A += weighted_amp;
         }
-        if (FA == 0.0 || A == 0.0)
+        if (A == 0.0)
             result[filter] = 0;
         else
             result[filter] = FA / A;

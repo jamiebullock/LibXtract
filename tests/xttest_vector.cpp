@@ -152,6 +152,39 @@ TEST_CASE("xtract_subbands", "[vector]")
     }
 }
 
+TEST_CASE("xtract_spectral_subband_centroids", "[vector]")
+{
+    /* Input follows the documented xtract_spectrum() layout:
+     * amplitudes in data[0..N), frequencies in data[N..2N). */
+    const int N = 8;
+    double data[16] = {0};
+    double filter_bank[2][8];
+    double *filter_ptrs[2] = {filter_bank[0], filter_bank[1]};
+    xtract_mel_filter mf;
+    double result[2] = {0};
+
+    /* One partial per band: a band containing a single partial has its
+     * centroid at that partial's frequency. */
+    data[2] = 3.0;
+    data[5] = 2.0;
+    for (int n = 0; n < N; n++)
+        data[N + n] = (n + 1) * 100.0;
+
+    /* Two rectangular filters covering bins [0, 4) and [4, 8) */
+    for (int n = 0; n < N; n++)
+    {
+        filter_bank[0][n] = n < 4 ? 1.0 : 0.0;
+        filter_bank[1][n] = n < 4 ? 0.0 : 1.0;
+    }
+    mf.n_filters = 2;
+    mf.filters = filter_ptrs;
+
+    xtract_spectral_subband_centroids(data, N, &mf, result);
+
+    REQUIRE(result[0] == Approx(300.0).epsilon(EPSILON));
+    REQUIRE(result[1] == Approx(600.0).epsilon(EPSILON));
+}
+
 TEST_CASE("xtract_amdf", "[vector]")
 {
     double result[4] = {0};
