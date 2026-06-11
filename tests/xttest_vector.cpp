@@ -681,6 +681,21 @@ TEST_CASE("xtract_spectral_kurtosis normalisation", "[scalar][spectral]")
     }
 }
 
+TEST_CASE("xtract_hps silent spectrum", "[scalar][spectral]")
+{
+    SECTION("all-zero spectrum yields no result rather than NaN")
+    {
+        const int N = 256;
+        double data[256] = {0};
+        double result = 999.0;
+
+        int rv = xtract_hps(data, N, NULL, &result);
+
+        REQUIRE(rv == XTRACT_NO_RESULT);
+        REQUIRE(result == 0.0);
+    }
+}
+
 TEST_CASE("xtract_hps N/2 bounds", "[scalar][spectral]")
 {
     SECTION("second loop should not read frequency data as amplitudes")

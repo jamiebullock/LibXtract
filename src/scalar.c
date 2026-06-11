@@ -1021,6 +1021,14 @@ int xtract_hps(const double *data, const int N, const void *argv, double *result
         }
     }
 
+    if (peak == 0.0)
+    {
+        /* Silent spectrum: no harmonic product peak exists, and
+         * data[peak_index] would divide by zero below. */
+        *result = 0;
+        return XTRACT_NO_RESULT;
+    }
+
     largest1_lwr = position1_lwr = 0;
 
     for(i = 0; i < n; ++i)
