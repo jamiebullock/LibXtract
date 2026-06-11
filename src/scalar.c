@@ -865,7 +865,10 @@ int xtract_sharpness(const double *data, const int N, const void *argv, double *
     temp = 0.0;
 
     if(n > XTRACT_BARK_BANDS)
+    {
+        n = XTRACT_BARK_BANDS;
         rv = XTRACT_BAD_VECTOR_SIZE;
+    }
     else
         rv = XTRACT_SUCCESS;
 

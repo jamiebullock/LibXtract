@@ -627,6 +627,23 @@ TEST_CASE("xtract_sharpness", "[scalar][spectral]")
         REQUIRE(result > 0.0);
         REQUIRE(std::isfinite(result));
     }
+
+    SECTION("bands beyond XTRACT_BARK_BANDS are ignored")
+    {
+        /* The extra bands carry huge values that must not contribute:
+         * both calls then sum the same 26 bands, so the results differ
+         * only by the 1/N divisor. */
+        double data[30];
+        double result26 = 0.0;
+        double result30 = 0.0;
+
+        for (int i = 0; i < 30; i++)
+            data[i] = i < XTRACT_BARK_BANDS ? 1.0 : 1.0e12;
+
+        REQUIRE(xtract_sharpness(data, 30, NULL, &result30) == XTRACT_BAD_VECTOR_SIZE);
+        REQUIRE(xtract_sharpness(data, XTRACT_BARK_BANDS, NULL, &result26) == XTRACT_SUCCESS);
+        REQUIRE(result30 * 30.0 == Approx(result26 * XTRACT_BARK_BANDS).epsilon(1e-10));
+    }
 }
 
 /* ===== Bug-specific tests from REVIEW.md =====
