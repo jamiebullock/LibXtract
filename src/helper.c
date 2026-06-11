@@ -113,8 +113,10 @@ int xtract_smoothed(const double *data, const int N, const void *argv, double *r
 int xtract_is_denormal(double const d)
 {
     uint64_t bits;
+    int exponent;
+
     memcpy(&bits, &d, sizeof(bits));
-    int exponent = (int)((bits >> 52) & 0x7ff);
+    exponent = (int)((bits >> 52) & 0x7ff);
     return exponent == 0 && d != 0.0;
 }
 
