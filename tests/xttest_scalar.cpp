@@ -1,4 +1,6 @@
 
+#define _USE_MATH_DEFINES
+
 #include "xttest_util.hpp"
 
 #include "xtract/xtract_scalar.h"
@@ -8,6 +10,10 @@
 
 #include <cmath>
 #include <cstring>
+
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
 
 
 SCENARIO( "F0 is correctly detected for a sine wave", "[xtract_f0]" )
@@ -1923,6 +1929,28 @@ SCENARIO( "McLeod F0 is correctly detected for a sine wave", "[xtract_mcleod_f0]
             xtract_mcleod_f0(table, blocksize, &samplerate, &result);
 
             THEN( "the detected F0 is within 10 MIDI cents" )
+            {
+                actual = xttest_ftom(result);
+                expected = xttest_ftom(frequency);
+                CAPTURE( actual );
+                CAPTURE( expected );
+                REQUIRE( abs((int)actual - (int)expected) <= 10 );
+            }
+        }
+
+        WHEN( "the input has a second harmonic stronger than the fundamental" )
+        {
+            /* The lobe at half the period is rejected by the key-maximum
+             * threshold even though the harmonic dominates in amplitude */
+            double frequency = 220.0;
+
+            for (uint32_t n = 0; n < blocksize; n++)
+                table[n] = 0.6 * sin(2.0 * M_PI * frequency * n / samplerate)
+                         + 0.9 * sin(2.0 * M_PI * 2.0 * frequency * n / samplerate);
+
+            xtract_mcleod_f0(table, blocksize, &samplerate, &result);
+
+            THEN( "the detected F0 is the fundamental, within 10 MIDI cents" )
             {
                 actual = xttest_ftom(result);
                 expected = xttest_ftom(frequency);
