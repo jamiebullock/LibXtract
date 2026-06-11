@@ -67,7 +67,9 @@ void xtract_last_n_state_delete(xtract_last_n_state *last_n_state)
 int xtract_last_n(const xtract_last_n_state *state, const double *data, const int N, const void *argv, double *result)
 {
     size_t N_bytes = N * sizeof(double);
-    
+    size_t used;
+    size_t result_offset;
+
     if (N_bytes != ringbuf_capacity(state->ringbuf))
     {
         fprintf(stderr, "libxtract: error: xtract_last_n(): inconsitent size");
@@ -75,8 +77,8 @@ int xtract_last_n(const xtract_last_n_state *state, const double *data, const in
     }
     
     ringbuf_memcpy_into(state->ringbuf, data, sizeof(double));
-    size_t used = ringbuf_bytes_used(state->ringbuf);
-    size_t result_offset = N - (used / sizeof(double));
+    used = ringbuf_bytes_used(state->ringbuf);
+    result_offset = N - (used / sizeof(double));
     
     /* Copy at end of result so last value is most recent */
     ringbuf_memcpy_from(result + result_offset, state->ringbuf, used, false);

@@ -55,6 +55,16 @@ make doc
 
 The generated HTML documentation can then be viewed by opening `doc/html/index.html`.
 
+## Code standard
+
+LibXtract is written in **C99**. Declarations are placed at the top of the
+block (C89 style) as a project convention; both the standard and the
+convention are enforced by the build flags (`-std=c99 -pedantic
+-Wdeclaration-after-statement -Wstrict-prototypes`). Thread-local storage
+uses a portability macro that resolves to C11 `_Thread_local`,
+`__declspec(thread)` (MSVC) or `__thread` (GCC/Clang). Bundled third-party
+code (`ooura`, `c-ringbuf`, `dywapitchtrack`) keeps its upstream style.
+
 ## License
 
 Copyright (C) 2012 Jamie Bullock

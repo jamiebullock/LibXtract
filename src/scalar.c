@@ -298,6 +298,7 @@ int xtract_spectral_skewness(const double *data, const int N, const void *argv, 
     const double *freqs, *amps;
     const double arg0 = ((double *)argv)[0];
     const double arg1 = ((double *)argv)[1];
+    double sum_amps = 0.0;
 
     *result = 0.0;
 
@@ -310,8 +311,6 @@ int xtract_spectral_skewness(const double *data, const int N, const void *argv, 
 
     amps = data;
     freqs = data + m;
-
-    double sum_amps = 0.0;
 
     while(m--)
     {
@@ -337,6 +336,7 @@ int xtract_spectral_kurtosis(const double *data, const int N, const void *argv, 
     const double *freqs, *amps;
     const double arg0 = ((double *)argv)[0];
     const double arg1 = ((double *)argv)[1];
+    double sum_amps = 0.0;
 
     if (((double *)argv)[1] == 0.0)
     {
@@ -350,7 +350,6 @@ int xtract_spectral_kurtosis(const double *data, const int N, const void *argv, 
     freqs = data + m;
 
     *result = 0.0;
-    double sum_amps = 0.0;
 
     while(m--)
     {
@@ -444,8 +443,9 @@ int xtract_tristimulus_2(const double *data, const int N, const void *argv, doub
 {
     int n = N >> 1, i;
     double den, p2, p3, p4, ps, fund, temp, h;
-    den = p2 = p3 = p4 = ps = fund = temp = h = 0.0;
     const double *freqs;
+
+    den = p2 = p3 = p4 = ps = fund = temp = h = 0.0;
 
     fund = *(double *)argv;
     freqs = data + n;
@@ -899,6 +899,7 @@ int xtract_spectral_slope(const double *data, const int N, const void *argv, dou
     const double *freqs, *amps;
     double f, a,
           F, A, FA, FXTRACT_SQ; /* sums of freqs, amps, freq * amps, freq squared */
+    double temp;
     int n, M;
 
     F = A = FA = FXTRACT_SQ = 0.0;
@@ -917,7 +918,7 @@ int xtract_spectral_slope(const double *data, const int N, const void *argv, dou
         FXTRACT_SQ += f * f;
     }
 
-    double temp = (double)M * FXTRACT_SQ - F * F;
+    temp = (double)M * FXTRACT_SQ - F * F;
 
     if (A == 0 || temp == 0)
     {
