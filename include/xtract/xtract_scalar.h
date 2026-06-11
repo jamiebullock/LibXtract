@@ -331,12 +331,17 @@ int xtract_power(const double *data, const int N, const void *argv, double *resu
  */
 int xtract_odd_even_ratio(const double *data, const int N, const void *argv, double *result);
 
-/** \brief Extract the Sharpness of an input vector 
- * 
- * \param *data: a pointer to the first element in an array of doubles representing the magnitude coefficients from the spectrum of an audio vector, (e.g. the first half of the array pointed to by *result from xtract_spectrum().
- * \param N: the number of elements to be considered
+/** \brief Extract the Sharpness of an input vector
+ *
+ * \param *data: a pointer to the first element in an array of doubles representing Bark band coefficients (e.g. the result of xtract_bark_coefficients())
+ * \param N: the number of Bark bands to be considered
  * \param *argv: a pointer to NULL
- * \param *result: the Sharpness of N values from the array pointed to by *data
+ * \param *result: the sharpness of the input, in acums
+ *
+ * Perceptual sharpness after von Bismarck (1974), in the formulation given
+ * by Peeters (2004) with band weighting g(z) per Fastl and Zwicker: the
+ * g-weighted centroid of specific loudness normalised by total loudness,
+ * where the specific loudness of Bark band z is N'(z) = E(z)^0.23.
  */
 int xtract_sharpness(const double *data, const int N, const void *argv, double *result);
 

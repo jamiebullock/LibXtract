@@ -927,7 +927,8 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             strcpy(desc, "Extract the spectral sharpness of a spectrum");
             strcpy(p_desc,
                    "Extract the spectral sharpness of an audio spectrum");
-            strcpy(author, "");
+            strcpy(author, "von Bismarck");
+            *year = 1974;
             break;
         case XTRACT_SPECTRAL_SLOPE:
             strcpy(name, "spectral_slope");

@@ -628,11 +628,52 @@ TEST_CASE("xtract_sharpness", "[scalar][spectral]")
         REQUIRE(std::isfinite(result));
     }
 
+    SECTION("energy in a single low band gives 0.11 * z")
+    {
+        /* One non-zero band at index 4, i.e. Bark band z = 5 (bands are
+         * numbered from 1). Specific loudness 1.0^0.23 = 1, total
+         * loudness 1, g(z) = 1 below band 15, so per von Bismarck /
+         * Peeters: sharpness = 0.11 * z * g(z) * N'(z) / N'_total
+         *        = 0.11 * 5 = 0.55 */
+        double data[XTRACT_BARK_BANDS] = {0};
+        data[4] = 1.0;
+
+        REQUIRE(xtract_sharpness(data, XTRACT_BARK_BANDS, NULL, &result) == XTRACT_SUCCESS);
+        REQUIRE(result == Approx(0.55).epsilon(1e-10));
+    }
+
+    SECTION("sharpness is invariant to overall loudness scaling")
+    {
+        /* Sharpness is normalised by total loudness, so scaling every
+         * band by the same factor must not change it. */
+        double data[XTRACT_BARK_BANDS];
+        double scaled[XTRACT_BARK_BANDS];
+        double result_scaled = 0.0;
+
+        for (int i = 0; i < XTRACT_BARK_BANDS; i++)
+        {
+            data[i] = 0.1 + 0.05 * i;
+            scaled[i] = 16.0 * data[i];
+        }
+
+        xtract_sharpness(data, XTRACT_BARK_BANDS, NULL, &result);
+        xtract_sharpness(scaled, XTRACT_BARK_BANDS, NULL, &result_scaled);
+        REQUIRE(result == Approx(result_scaled).epsilon(1e-10));
+    }
+
+    SECTION("silent input yields no result")
+    {
+        double data[XTRACT_BARK_BANDS] = {0};
+        result = 999.0;
+
+        REQUIRE(xtract_sharpness(data, XTRACT_BARK_BANDS, NULL, &result) == XTRACT_NO_RESULT);
+        REQUIRE(result == 0.0);
+    }
+
     SECTION("bands beyond XTRACT_BARK_BANDS are ignored")
     {
         /* The extra bands carry huge values that must not contribute:
-         * both calls then sum the same 26 bands, so the results differ
-         * only by the 1/N divisor. */
+         * both calls then sum the same 26 bands. */
         double data[30];
         double result26 = 0.0;
         double result30 = 0.0;
@@ -642,7 +683,7 @@ TEST_CASE("xtract_sharpness", "[scalar][spectral]")
 
         REQUIRE(xtract_sharpness(data, 30, NULL, &result30) == XTRACT_BAD_VECTOR_SIZE);
         REQUIRE(xtract_sharpness(data, XTRACT_BARK_BANDS, NULL, &result26) == XTRACT_SUCCESS);
-        REQUIRE(result30 * 30.0 == Approx(result26 * XTRACT_BARK_BANDS).epsilon(1e-10));
+        REQUIRE(result30 == Approx(result26).epsilon(1e-10));
     }
 }
 
