@@ -152,6 +152,65 @@ TEST_CASE("xtract_subbands", "[vector]")
     }
 }
 
+TEST_CASE("xtract_spectral_subband_centroids", "[vector]")
+{
+    /* Input follows the documented xtract_spectrum() layout:
+     * amplitudes in data[0..N), frequencies in data[N..2N). */
+    const int N = 8;
+    double data[16] = {0};
+    double filter_bank[2][8];
+    double *filter_ptrs[2] = {filter_bank[0], filter_bank[1]};
+    xtract_mel_filter mf;
+    double result[2] = {0};
+
+    /* One partial per band: a band containing a single partial has its
+     * centroid at that partial's frequency. */
+    data[2] = 3.0;
+    data[5] = 2.0;
+    for (int n = 0; n < N; n++)
+        data[N + n] = (n + 1) * 100.0;
+
+    /* Two rectangular filters covering bins [0, 4) and [4, 8) */
+    for (int n = 0; n < N; n++)
+    {
+        filter_bank[0][n] = n < 4 ? 1.0 : 0.0;
+        filter_bank[1][n] = n < 4 ? 0.0 : 1.0;
+    }
+    mf.n_filters = 2;
+    mf.filters = filter_ptrs;
+
+    xtract_spectral_subband_centroids(data, N, &mf, result);
+
+    REQUIRE(result[0] == Approx(300.0).epsilon(EPSILON));
+    REQUIRE(result[1] == Approx(600.0).epsilon(EPSILON));
+}
+
+TEST_CASE("xtract_lpcc", "[vector]")
+{
+    SECTION("rejects a non-positive cepstrum length")
+    {
+        double lpc[3] = {0.0, 0.5, 0.25};
+        double result[4] = {0};
+        int cep_length = 0;
+
+        REQUIRE(xtract_lpcc(lpc, 3, &cep_length, result) == XTRACT_ARGUMENT_ERROR);
+    }
+
+    SECTION("computes the cepstral recursion for an int argv")
+    {
+        /* data[0] is unused (the recursion starts at data[1]):
+         * c[1] = a[1] = 0.5
+         * c[2] = a[2] + (1 * c[1] * a[1]) / 2 = 0.25 + 0.125 = 0.375 */
+        double lpc[3] = {0.0, 0.5, 0.25};
+        double result[2] = {0};
+        int cep_length = 2;
+
+        REQUIRE(xtract_lpcc(lpc, 3, &cep_length, result) == XTRACT_SUCCESS);
+        REQUIRE(result[0] == Approx(0.5).epsilon(EPSILON));
+        REQUIRE(result[1] == Approx(0.375).epsilon(EPSILON));
+    }
+}
+
 TEST_CASE("xtract_amdf", "[vector]")
 {
     double result[4] = {0};
@@ -821,6 +880,16 @@ TEST_CASE("xtract_spectrum MAGNITUDE_SPECTRUM stores scalar magnitudes", "[vecto
                                    coeffs[i * 2 + 1] * coeffs[i * 2 + 1]) / (double)N;
             REQUIRE(result[i] == Approx(expected).margin(1e-10));
         }
+    }
+
+    SECTION("unit cosine has canonical magnitude 0.5 at its bin")
+    {
+        /* The DFT of cos(2*pi*k*n/N) has |X[k]| = N/2, so the canonical
+         * magnitude |X[k]| / N is 0.5 regardless of FFT backend. */
+        double argv[] = {sr / N, (double)XTRACT_MAGNITUDE_SPECTRUM, 0.0, 0.0};
+        xtract_spectrum(data, N, argv, result);
+
+        REQUIRE(result[3] == Approx(0.5).margin(1e-9));
     }
 
     SECTION("normalised magnitude spectrum has max of 1.0")

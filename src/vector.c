@@ -57,8 +57,9 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
     unsigned int M = N >> 1;
 #ifdef USE_OOURA
     double *fft = NULL;
-#else 
+#else
     DSPDoubleSplitComplex *fft = NULL;
+    double half = 0.5;
 #endif
 
     q = *(double *)argv;
@@ -94,8 +95,14 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
 #else
     fft = &vdsp_data_spectrum.fft;
     vDSP_ctozD((DSPDoubleComplex *)data, 2, fft, 1, N >> 1);
-    vDSP_fft_zripD(vdsp_data_spectrum.setup, fft, 1, 
+    vDSP_fft_zripD(vdsp_data_spectrum.setup, fft, 1,
             vdsp_data_spectrum.log2N, FFT_FORWARD);
+
+    /* The vDSP forward real FFT is scaled by 2 relative to the DFT; halve
+     * it to the canonical DFT convention shared with the OOURA backend so
+     * spectra are identical across platforms */
+    vDSP_vsmulD(fft->realp, 1, &half, fft->realp, 1, M);
+    vDSP_vsmulD(fft->imagp, 1, &half, fft->imagp, 1, M);
 #endif
 
     switch(vector)
@@ -647,8 +654,8 @@ int xtract_spectral_subband_centroids(const double *data, const int N, const voi
 {
     xtract_mel_filter *f = (xtract_mel_filter *)argv;
     int n, filter;
-    const double *freqs = data;
-    const double *amps = data+N;
+    const double *amps = data;
+    const double *freqs = data + N;
 
     for (filter = 0; filter < f->n_filters; filter++)
     {
@@ -656,12 +663,12 @@ int xtract_spectral_subband_centroids(const double *data, const int N, const voi
 
         for(n = 0; n < N; n++)
         {
-            double Multiplier = amps[n]*f->filters[filter][n];
+            double weighted_amp = amps[n] * f->filters[filter][n];
 
-            FA += freqs[n]*f->filters[filter][n]*Multiplier;
-            A += Multiplier;
+            FA += freqs[n] * weighted_amp;
+            A += weighted_amp;
         }
-        if (FA == 0.0 || A == 0.0)
+        if (A == 0.0)
             result[filter] = 0;
         else
             result[filter] = FA / A;
@@ -961,8 +968,11 @@ int xtract_lpcc(const double *data, const int N, const void *argv, double *resul
     if(argv == NULL)
         cep_length = N - 1; /* FIX: if we're going to have default values, they should come from the descriptor */
     else
+    {
         cep_length = *(int *)argv;
-    //cep_length = (int)((double *)argv)[0];
+        if(cep_length <= 0)
+            return XTRACT_ARGUMENT_ERROR;
+    }
 
     memset(result, 0, cep_length * sizeof(double));
 
