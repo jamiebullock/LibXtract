@@ -144,12 +144,6 @@ int xtract_skewness(const double *data, const int N, const void *argv,  double *
     const double arg0 = ((double *)argv)[0];
     const double arg1 = ((double *)argv)[1];
 
-    if (((double *)argv)[1] == 0)
-    {
-      *result = 0.0;
-      return XTRACT_NO_RESULT;
-    }
-
     *result = 0.0;
 
     if (arg1 == 0)
@@ -309,12 +303,6 @@ int xtract_spectral_skewness(const double *data, const int N, const void *argv, 
 
     if (arg1 == 0.0)
     {
-        return XTRACT_NO_RESULT;
-    }
-
-    if (((double *)argv)[1] == 0.0)
-    {
-        *result = 0.0;
         return XTRACT_NO_RESULT;
     }
 
