@@ -882,6 +882,16 @@ TEST_CASE("xtract_spectrum MAGNITUDE_SPECTRUM stores scalar magnitudes", "[vecto
         }
     }
 
+    SECTION("unit cosine has canonical magnitude 0.5 at its bin")
+    {
+        /* The DFT of cos(2*pi*k*n/N) has |X[k]| = N/2, so the canonical
+         * magnitude |X[k]| / N is 0.5 regardless of FFT backend. */
+        double argv[] = {sr / N, (double)XTRACT_MAGNITUDE_SPECTRUM, 0.0, 0.0};
+        xtract_spectrum(data, N, argv, result);
+
+        REQUIRE(result[3] == Approx(0.5).margin(1e-9));
+    }
+
     SECTION("normalised magnitude spectrum has max of 1.0")
     {
         double argv[] = {sr / N, (double)XTRACT_MAGNITUDE_SPECTRUM, 0.0, 1.0};

@@ -57,8 +57,9 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
     unsigned int M = N >> 1;
 #ifdef USE_OOURA
     double *fft = NULL;
-#else 
+#else
     DSPDoubleSplitComplex *fft = NULL;
+    double half = 0.5;
 #endif
 
     q = *(double *)argv;
@@ -94,8 +95,14 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
 #else
     fft = &vdsp_data_spectrum.fft;
     vDSP_ctozD((DSPDoubleComplex *)data, 2, fft, 1, N >> 1);
-    vDSP_fft_zripD(vdsp_data_spectrum.setup, fft, 1, 
+    vDSP_fft_zripD(vdsp_data_spectrum.setup, fft, 1,
             vdsp_data_spectrum.log2N, FFT_FORWARD);
+
+    /* The vDSP forward real FFT is scaled by 2 relative to the DFT; halve
+     * it to the canonical DFT convention shared with the OOURA backend so
+     * spectra are identical across platforms */
+    vDSP_vsmulD(fft->realp, 1, &half, fft->realp, 1, M);
+    vDSP_vsmulD(fft->imagp, 1, &half, fft->imagp, 1, M);
 #endif
 
     switch(vector)
