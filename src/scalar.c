@@ -268,29 +268,6 @@ int xtract_spectral_standard_deviation(const double *data, const int N, const vo
     return XTRACT_SUCCESS;
 }
 
-/*int xtract_spectral_average_deviation(const double *data, const int N, const void *argv, double *result){
-
-    int m;
-    double A = 0.0;
-    const double *freqs, *amps;
-
-    m = N >> 1;
-
-    amps = data;
-    freqs = data + m;
-
-    *result = 0.0;
-
-    while(m--){
-        A += amps[m];
-        *result += fabs((amps[m] * freqs[m]) - *(double *)argv);
-    }
-
-    *result /= A;
-
-    return XTRACT_SUCCESS;
-}*/
-
 int xtract_spectral_skewness(const double *data, const int N, const void *argv,  double *result)
 {
 
