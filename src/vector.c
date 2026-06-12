@@ -401,6 +401,8 @@ int xtract_autocorrelation_fft(const double *data, const int N, const void *argv
 #ifdef USE_OOURA
     /* Zero pad the input vector */
     rfft = (double *)calloc(M, sizeof(double));
+    if(rfft == NULL)
+        return XTRACT_MALLOC_FAILED;
     memcpy(rfft, data, N * sizeof(double));
 
     rdft(M, 1, rfft, ooura_data_autocorrelation_fft.ooura_ip,
