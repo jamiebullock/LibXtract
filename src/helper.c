@@ -29,12 +29,6 @@
 
 #include "xtract/libxtract.h"
 
-#ifdef WORDS_BIGENDIAN
-#define INDEX 0
-#else
-#define INDEX 1
-#endif
-
 int xtract_windowed(const double *data, const int N, const void *argv, double *result)
 {
 
