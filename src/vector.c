@@ -906,8 +906,8 @@ int xtract_harmonic_spectrum(const double *data, const int N, const void *argv, 
         if(freqs[n])
         {
             ratio = freqs[n] / f0;
-			nearest = floor( 0.5f + ratio);				// replace -> nearest = round(ratio);
-			distance = fabs(nearest - ratio);
+            nearest = round(ratio);
+            distance = fabs(nearest - ratio);
             if(distance > threshold)
                 result[n] = result[M + n] = 0.0;
             else

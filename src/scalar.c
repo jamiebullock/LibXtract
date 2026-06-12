@@ -1390,7 +1390,7 @@ int xtract_midicent(const double *data, const int N, const void *argv, double *r
 
     note = 69 + log(f0 / 440.f) * 17.31234;
     note *= 100;
-    note = floor( 0.5f + note ); // replace -> round(note);
+    note = round(note);
 
     *result = note;
     
