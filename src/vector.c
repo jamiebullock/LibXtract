@@ -1043,7 +1043,6 @@ int xtract_subbands(const double *data, const int N, const void *argv, double *r
         /* Bounds sanity check: a band may end exactly at N */
         if(lower >= N || lower + bw > N)
         {
-            //   printf("n: %d\n", n);
             result[n] = 0.0;
             continue;
         }
