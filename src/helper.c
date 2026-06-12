@@ -29,12 +29,6 @@
 
 #include "xtract/libxtract.h"
 
-#ifdef WORDS_BIGENDIAN
-#define INDEX 0
-#else
-#define INDEX 1
-#endif
-
 int xtract_windowed(const double *data, const int N, const void *argv, double *result)
 {
 
@@ -92,7 +86,7 @@ int xtract_smoothed(const double *data, const int N, const void *argv, double *r
     double oneminusgain = 1.0 - gain;
     int i;
     
-    // reverse filtering first; the final element seeds the recursion
+    /* reverse filtering first; the final element seeds the recursion */
     result[N - 1] = data[N - 1];
 
     for (i = N - 2; i >= 0; i--)
@@ -100,7 +94,7 @@ int xtract_smoothed(const double *data, const int N, const void *argv, double *r
         result[i] = gain * data[i] + oneminusgain * data[i+1];
     }
     
-    // then forward filtering
+    /* then forward filtering */
     for (i = 1; i < N; i++)
     {
         result[i] = gain * result[i] + oneminusgain * result[i-1];
@@ -120,7 +114,6 @@ int xtract_is_denormal(double const d)
     return exponent == 0 && d != 0.0;
 }
 
-//inline bool xtract_is_poweroftwo(unsigned int x)
 bool xtract_is_poweroftwo(unsigned int x)
 {
     return ((x != 0) && !(x & (x - 1)));

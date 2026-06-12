@@ -138,7 +138,7 @@ void blackman(double *window, const int N)
     }
 }
 
-#define BIZ_EPSILON 1E-21 // Max error acceptable 
+#define BIZ_EPSILON 1E-21 /* Max error acceptable */
 
 /* Based on code from mplayer window.c, and somewhat beyond me */
 double besselI0(double x)

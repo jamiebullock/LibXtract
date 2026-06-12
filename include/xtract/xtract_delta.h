@@ -40,10 +40,12 @@ extern "C" {
 
 #include "xtract_types.h"
 
-/** \brief Extract flux 
+/** \brief Extract flux
  *
- *  \note FIX: don't be lazy -- take the lnorm of the difference vector! 
- * An alias for xtract_lnorm()
+ * \param *data: a pointer to the first element in an array of doubles comprising two successive spectral frames: the current frame in the first N/2 elements, the previous frame in the second N/2 elements
+ * \param N: the total number of elements in the array pointed to by *data (twice the frame size)
+ * \param *argv: a pointer to an array of three doubles as for xtract_lnorm(): the norm order, the filter type (enumeration xtract_lnorm_filter_types_), and the normalise flag
+ * \param *result: a pointer to a double representing the spectral flux: the L-p norm of the difference between the two frames
  */
 int xtract_flux(const double *data, const int N, const void *argv , double *result);
 

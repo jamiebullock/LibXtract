@@ -268,29 +268,6 @@ int xtract_spectral_standard_deviation(const double *data, const int N, const vo
     return XTRACT_SUCCESS;
 }
 
-/*int xtract_spectral_average_deviation(const double *data, const int N, const void *argv, double *result){
-
-    int m;
-    double A = 0.0;
-    const double *freqs, *amps;
-
-    m = N >> 1;
-
-    amps = data;
-    freqs = data + m;
-
-    *result = 0.0;
-
-    while(m--){
-        A += amps[m];
-        *result += fabs((amps[m] * freqs[m]) - *(double *)argv);
-    }
-
-    *result /= A;
-
-    return XTRACT_SUCCESS;
-}*/
-
 int xtract_spectral_skewness(const double *data, const int N, const void *argv,  double *result)
 {
 
@@ -616,7 +593,7 @@ int xtract_loudness(const double *data, const int N, const void *argv, double *r
 
     while(n--)
     {
-        // The first bark coefficients is negative and makes the result N/A
+        /* The first bark coefficients is negative and makes the result N/A */
         if (n > 0)
         {
             *result += pow(data[n], 0.23);
@@ -1077,12 +1054,8 @@ int xtract_f0(const double *data, const int N, const void *argv, double *result)
     if(input == NULL)
         return XTRACT_MALLOC_FAILED;
     input = (double*)memcpy(input, data, bytes);
-    /*  threshold_peak = *((double *)argv+1);
-    threshold_centre = *((double *)argv+2);
-    printf("peak: %.2\tcentre: %.2\n", threshold_peak, threshold_centre);*/
-    /* add temporary dynamic control over thresholds to test clipping effects */
 
-    /* FIX: tweak and  make into macros */
+    /* hardcoded clipping thresholds: see issue #151 */
     threshold_peak = .8;
     threshold_centre = .3;
     M = N >> 1;
@@ -1390,7 +1363,7 @@ int xtract_midicent(const double *data, const int N, const void *argv, double *r
 
     note = 69 + log(f0 / 440.f) * 17.31234;
     note *= 100;
-    note = floor( 0.5f + note ); // replace -> round(note);
+    note = round(note);
 
     *result = note;
     
