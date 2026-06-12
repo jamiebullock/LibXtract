@@ -116,12 +116,6 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
                 ++n;
             }
 #ifdef USE_OOURA
-			/*
-            if(n==1 && withDC) // discard Nyquist
-            {
-                ++n;
-            }
-			*/
 			// OOURA discards the always 0 imaginary of DC and Nyquists
 			if (n == M && !withDC)
 			{
@@ -179,12 +173,6 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
                 ++n;
             }
 #ifdef USE_OOURA
-			/*
-			if(n==1 && withDC) // discard Nyquist
-			{
-				++n;
-			}
-			*/
 			// OOURA discards the always 0 imaginary of DC and Nyquists
 			if (n == M && !withDC)
 			{
@@ -229,12 +217,6 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
                 ++n;
             }
 #ifdef USE_OOURA
-			/*
-			if(n==1 && withDC) // discard Nyquist
-			{
-				++n;
-			}
-			*/
 			// OOURA discards the always 0 imaginary of DC and Nyquists
 			if (n == M && !withDC)
 			{
@@ -286,12 +268,6 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
                 ++n;
             }
 #ifdef USE_OOURA
-			/*
-			if(n==1 && withDC) // discard Nyquist
-			{
-				++n;
-			}
-			*/
 			// OOURA discards the always 0 imaginary of DC and Nyquists
 			if (n == M && !withDC)
 			{
@@ -336,12 +312,6 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
                 ++n;
             }
 #ifdef USE_OOURA
-			/*
-			if(n==1 && withDC) // discard Nyquist
-			{
-				++n;
-			}
-			*/
 			// OOURA discards the always 0 imaginary of DC and Nyquists
 			if (n == M && !withDC)
 			{
