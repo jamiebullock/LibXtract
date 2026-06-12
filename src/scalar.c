@@ -1054,10 +1054,6 @@ int xtract_f0(const double *data, const int N, const void *argv, double *result)
     if(input == NULL)
         return XTRACT_MALLOC_FAILED;
     input = (double*)memcpy(input, data, bytes);
-    /*  threshold_peak = *((double *)argv+1);
-    threshold_centre = *((double *)argv+2);
-    printf("peak: %.2\tcentre: %.2\n", threshold_peak, threshold_centre);*/
-    /* add temporary dynamic control over thresholds to test clipping effects */
 
     /* FIX: tweak and  make into macros */
     threshold_peak = .8;
