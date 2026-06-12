@@ -1347,7 +1347,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             case XTRACT_NOISINESS:
             case XTRACT_SMOOTHNESS:
                 *result_unit = (xtract_unit_t)XTRACT_NONE;
-                *result_min = XTRACT_UNKNOWN_MIN; /* FIX: need to check these */
+                *result_min = XTRACT_UNKNOWN_MIN; /* unverified result range: see issue #150 */
                 *result_max = XTRACT_UNKNOWN_MAX;
                 break;
             case XTRACT_SPECTRAL_MEAN:
@@ -1383,7 +1383,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
                 break;
             case XTRACT_FLATNESS_DB:
                 *result_unit = XTRACT_DBFS;
-                *result_min = XTRACT_UNKNOWN_MIN; /* FIX: check this */
+                *result_min = XTRACT_UNKNOWN_MIN; /* unverified result range: see issue #150 */
                 *result_max = XTRACT_UNKNOWN_MAX;
                 break;
             case XTRACT_LOUDNESS:
@@ -1425,7 +1425,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
                 break;
             case XTRACT_BARK_COEFFICIENTS:
                 *result_format = XTRACT_BARK_COEFFS;
-                *result_unit = (xtract_unit_t)XTRACT_UNKNOWN; /* FIX: check */
+                *result_unit = (xtract_unit_t)XTRACT_UNKNOWN; /* unverified result unit: see issue #150 */
                 break;
             case XTRACT_PEAK_SPECTRUM:
             case XTRACT_SPECTRUM:
@@ -1437,7 +1437,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
                 break;
             case XTRACT_MFCC:
                 *result_format = XTRACT_MEL_COEFFS;
-                *result_unit = (xtract_unit_t)XTRACT_UNKNOWN; /* FIX: check */
+                *result_unit = (xtract_unit_t)XTRACT_UNKNOWN; /* unverified result unit: see issue #150 */
                 break;
             case XTRACT_MEL_SPECTROGRAM:
                 *result_format = XTRACT_MEL_COEFFS;

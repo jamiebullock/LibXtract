@@ -1055,7 +1055,7 @@ int xtract_f0(const double *data, const int N, const void *argv, double *result)
         return XTRACT_MALLOC_FAILED;
     input = (double*)memcpy(input, data, bytes);
 
-    /* FIX: tweak and  make into macros */
+    /* hardcoded clipping thresholds: see issue #151 */
     threshold_peak = .8;
     threshold_centre = .3;
     M = N >> 1;

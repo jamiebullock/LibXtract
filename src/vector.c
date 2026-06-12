@@ -949,11 +949,11 @@ int xtract_lpcc(const double *data, const int N, const void *argv, double *resul
 
     int n, k;
     double sum;
-    int order = N - 1; /* Eventually change this to Q = 3/2 p as suggested in Rabiner */
+    int order = N - 1; /* cepstrum order: see issue #152 */
     int cep_length;
 
     if(argv == NULL)
-        cep_length = N - 1; /* FIX: if we're going to have default values, they should come from the descriptor */
+        cep_length = N - 1; /* default should come from the descriptor: see issue #152 */
     else
     {
         cep_length = *(int *)argv;

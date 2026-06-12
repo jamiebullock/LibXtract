@@ -256,7 +256,7 @@ int xtract_init_bark(int N, double sr, int *band_limits)
 
     while(bands--)
         band_limits[bands] = edges[bands] / sr * N;
-    /*FIX shohuld use rounding, but couldn't get it to work */
+    /* truncation instead of rounding: see issue #153 */
 
     return XTRACT_SUCCESS;
 }
