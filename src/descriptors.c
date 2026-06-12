@@ -30,7 +30,7 @@
 xtract_function_descriptor_t *xtract_make_descriptors(void)
 {
 
-    int f , F;
+    int f;
     char *name, *p_name, *desc, *p_desc, *author;
     double *argv_min, *argv_max, *argv_def, *result_min, *result_max;
     int *argc, *year, *argv_donor;
@@ -40,7 +40,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
     xtract_function_descriptor_t *fd, *d;
     xtract_type_t *argv_type;
 
-    f = F = XTRACT_FEATURES;
+    f = XTRACT_FEATURES;
 
     fd = (xtract_function_descriptor_t*)malloc(XTRACT_FEATURES * sizeof(xtract_function_descriptor_t));
     if(fd == NULL)

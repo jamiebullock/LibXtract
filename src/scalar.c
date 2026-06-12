@@ -445,7 +445,7 @@ int xtract_tristimulus_2(const double *data, const int N, const void *argv, doub
     double den, p2, p3, p4, ps, fund, temp, h;
     const double *freqs;
 
-    den = p2 = p3 = p4 = ps = fund = temp = h = 0.0;
+    den = p2 = p3 = p4 = 0.0;
 
     fund = *(double *)argv;
     freqs = data + n;
@@ -695,8 +695,6 @@ int xtract_crest(const double *data, const int N, const void *argv, double *resu
 
     double max, mean;
 
-    max = mean = 0.0;
-
     max = *(double *)argv;
     mean = *((double *)argv+1);
 
@@ -716,8 +714,6 @@ int xtract_noisiness(const double *data, const int N, const void *argv, double *
 {
 
     double h, i, p; /*harmonics, inharmonics, partials */
-
-    i = p = h = 0.0;
 
     h = *(double *)argv;
     p = *((double *)argv+1);
@@ -855,7 +851,6 @@ int xtract_sharpness(const double *data, const int N, const void *argv, double *
     double sl, g; /* sl = specific loudness */
     double temp, total_loudness;
 
-    sl = g = 0.0;
     temp = 0.0;
     total_loudness = 0.0;
 
@@ -1022,7 +1017,7 @@ int xtract_hps(const double *data, const int N, const void *argv, double *result
 
     peak_index = 0;
 
-    tempProduct = peak = 0;
+    peak = 0;
     for (i = 0; i < M; ++i)
     {
         tempProduct = data [i] * data [i * 2] * data [i * 3];
