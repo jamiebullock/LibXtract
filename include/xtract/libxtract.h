@@ -306,7 +306,7 @@ typedef struct _xtract_function_descriptor {
     xtract_bool_t is_scalar;
     xtract_bool_t is_delta; /* features in xtract_delta.h can be scalar or vector */ 
 
-    /* The result.<> entries in descritors.c need to be checked */
+    /* some result entries in descriptors.c are unverified: see issue #150 */
     union {
 
 	struct {
