@@ -67,6 +67,10 @@ jobs:
         if: runner.os != 'Windows'
         run: make analyze
 
+      - name: Sanitizer tests (Linux/macOS)
+        if: runner.os != 'Windows'
+        run: make check-asan
+
       - name: Install Node.js headers (Linux/macOS)
         if: runner.os != 'Windows'
         run: |

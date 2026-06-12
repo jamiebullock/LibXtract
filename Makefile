@@ -7,7 +7,7 @@ HPATH = include/xtract
 
 export XTRACT_VERSION PREFIX LIBRARY
 
-.PHONY: examples clean install doc src swig bench analyze
+.PHONY: examples clean install doc src swig bench analyze check-asan
 
 all: src examples
 
@@ -28,6 +28,20 @@ check: src
 
 analyze:
 	@$(MAKE) -C src analyze
+
+# Rebuild the library and tests with AddressSanitizer and UBSan and run the
+# suite; catches memory errors and undefined behaviour that static analysis
+# cannot see (e.g. out-of-bounds access through opaque library calls).
+# Cleans before and after so sanitised objects never mix with normal builds.
+SANITIZE_FLAGS = -fsanitize=address,undefined -fno-sanitize-recover=all -fno-omit-frame-pointer -g
+check-asan:
+	@$(MAKE) -C src clean
+	@$(MAKE) -C tests clean
+	@$(MAKE) -C src EXTRA_FLAGS="$(SANITIZE_FLAGS)"
+	@$(MAKE) -C tests check EXTRA_FLAGS="$(SANITIZE_FLAGS)"
+	@$(MAKE) -C src clean
+	@$(MAKE) -C tests clean
+	@$(MAKE) -C src
 
 bench: src
 	@$(MAKE) -C bench bench
