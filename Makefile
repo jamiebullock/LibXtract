@@ -7,7 +7,7 @@ HPATH = include/xtract
 
 export XTRACT_VERSION PREFIX LIBRARY
 
-.PHONY: examples clean install doc src swig bench
+.PHONY: examples clean install doc src swig bench analyze
 
 all: src examples
 
@@ -25,6 +25,9 @@ swig: src
 
 check: src
 	@$(MAKE) -C tests check
+
+analyze:
+	@$(MAKE) -C src analyze
 
 bench: src
 	@$(MAKE) -C bench bench
