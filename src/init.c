@@ -166,7 +166,7 @@ int xtract_init_vdsp_(int N, int feature_name)
         {
             xtract_free_vdsp_data(&vdsp_data_autocorrelation_fft);
         }
-        xtract_init_vdsp_data(&vdsp_data_autocorrelation_fft, N * 2); // allow for zero padding
+        xtract_init_vdsp_data(&vdsp_data_autocorrelation_fft, N * 2); /* allow for zero padding */
         break;
     case XTRACT_DCT:
         if(vdsp_data_dct.initialised)
@@ -323,13 +323,13 @@ int xtract_init_mfcc(int N, double nyquist, int style, double freq_min, double f
     M = N >> 1;
 
     mel_peak[0] = mel_freq_min;
-    lin_peak[0] = freq_min; // === 700 * (exp(mel_peak[0] / 1127) - 1);
+    lin_peak[0] = freq_min; /* === 700 * (exp(mel_peak[0] / 1127) - 1); */
     fft_peak[0] = lin_peak[0] / nyquist * M;
 
 
     for (n = 1; n < (freq_bands + 2); ++n)
     {
-        //roll out peak locations - mel, linear and linear on fft window scale
+        /* roll out peak locations - mel, linear and linear on fft window scale */
         mel_peak[n] = mel_peak[n - 1] + freq_bw_mel;
         lin_peak[n] = 700 * (exp(mel_peak[n] / 1127) -1);
         fft_peak[n] = lin_peak[n] / nyquist * M;
@@ -337,7 +337,7 @@ int xtract_init_mfcc(int N, double nyquist, int style, double freq_min, double f
 
     for (n = 0; n < freq_bands; n++)
     {
-        //roll out normalised gain of each peak
+        /* roll out normalised gain of each peak */
         if (style == XTRACT_EQUAL_GAIN)
         {
             height = 1;
@@ -357,38 +357,38 @@ int xtract_init_mfcc(int N, double nyquist, int style, double freq_min, double f
     for(n = 0; n < freq_bands; n++)
     {
 
-        // calculate the rise increment
+        /* calculate the rise increment */
         if(n==0)
             inc = height_norm[n] / fft_peak[n];
         else
             inc = height_norm[n] / (fft_peak[n] - fft_peak[n - 1]);
         val = 0;
 
-        // zero the start of the array
+        /* zero the start of the array */
         for(k = 0; k < i; k++)
             fft_tables[n][k] = 0.0;
 
-        // fill in the rise
+        /* fill in the rise */
         for(; i <= fft_peak[n]; i++)
         {
             fft_tables[n][i] = val;
             val += inc;
         }
 
-        // calculate the fall increment
+        /* calculate the fall increment */
         inc = height_norm[n] / (fft_peak[n + 1] - fft_peak[n]);
 
         val = 0;
         next_peak = fft_peak[n + 1];
 
-        // reverse fill the 'fall'
+        /* reverse fill the 'fall' */
         for(i = next_peak; i > fft_peak[n]; i--)
         {
             fft_tables[n][i] = val;
             val += inc;
         }
 
-        // zero the rest of the array
+        /* zero the rest of the array */
         for(k = next_peak + 1; k < N; k++)
             fft_tables[n][k] = 0.0;
     }

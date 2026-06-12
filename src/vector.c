@@ -116,7 +116,7 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
                 ++n;
             }
 #ifdef USE_OOURA
-			// OOURA discards the always 0 imaginary of DC and Nyquists
+			/* OOURA discards the always 0 imaginary of DC and Nyquists */
 			if (n == M && !withDC)
 			{
 				real = fft[1];
@@ -173,7 +173,7 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
                 ++n;
             }
 #ifdef USE_OOURA
-			// OOURA discards the always 0 imaginary of DC and Nyquists
+			/* OOURA discards the always 0 imaginary of DC and Nyquists */
 			if (n == M && !withDC)
 			{
 				real = fft[1];
@@ -217,7 +217,7 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
                 ++n;
             }
 #ifdef USE_OOURA
-			// OOURA discards the always 0 imaginary of DC and Nyquists
+			/* OOURA discards the always 0 imaginary of DC and Nyquists */
 			if (n == M && !withDC)
 			{
 				real = fft[1];
@@ -268,7 +268,7 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
                 ++n;
             }
 #ifdef USE_OOURA
-			// OOURA discards the always 0 imaginary of DC and Nyquists
+			/* OOURA discards the always 0 imaginary of DC and Nyquists */
 			if (n == M && !withDC)
 			{
 				real = fft[1];
@@ -312,7 +312,7 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
                 ++n;
             }
 #ifdef USE_OOURA
-			// OOURA discards the always 0 imaginary of DC and Nyquists
+			/* OOURA discards the always 0 imaginary of DC and Nyquists */
 			if (n == M && !withDC)
 			{
 				real = fft[1];
@@ -581,26 +581,26 @@ int xtract_mmbses(const double *data, const int N, const void *argv, double *res
 
           continue;
         }
-        // Calculate the arithmetic means of real and imaginary parts
+        /* Calculate the arithmetic means of real and imaginary parts */
         for(n = 0; n < count; n++)
         {
             realMean += real[n] / count;
             imagMean += imag[n] / count;
         }
-        // Calculate the variances of real and imaginary parts
+        /* Calculate the variances of real and imaginary parts */
         for(n = 0; n < count; n++)
         {
             realVariance += XTRACT_SQ(real[n]-realMean) / count;
             imagVariance += XTRACT_SQ(imag[n]-imagMean) / count;
         }
-        // Calculate the covariance between real and imaginary parts
+        /* Calculate the covariance between real and imaginary parts */
         for(n = 0; n < count; n++)
         {
             covariance += (real[n]-realMean)*(imag[n]-imagMean);
         }
         if(count > 1)
             covariance /= (count - 1);
-        // Calculate the final Mel based Multi-Band Spectral Entropy Signature coefficients
+        /* Calculate the final Mel based Multi-Band Spectral Entropy Signature coefficients */
         temp = realVariance*imagVariance-XTRACT_SQ(covariance);
 
         if (temp < XTRACT_LOG_LIMIT)
@@ -650,11 +650,11 @@ int xtract_spectral_subband_centroids(const double *data, const int N, const voi
 int xtract_dct(const double *data, const int N, const void *argv, double *result)
 {
     int n, m;
-    // Extra variable to hold a reference for the dct lookup table since
-    // accessing the thread local storage is expensive.
+    /* Extra variable to hold a reference for the dct lookup table since */
+    /* accessing the thread local storage is expensive. */
     double** temp_dct_table;
 
-    // Free the dct table if the cached dimension is different from the new dimension
+    /* Free the dct table if the cached dimension is different from the new dimension */
     if (dct_cos_table != NULL && dct_cos_table_dim != N)
     {
         for (n = 0; n < dct_cos_table_dim; ++n)
@@ -665,7 +665,7 @@ int xtract_dct(const double *data, const int N, const void *argv, double *result
         dct_cos_table = NULL;
         dct_cos_table_dim = 0;
     }
-    // Allocate the dct cache table
+    /* Allocate the dct cache table */
     if (dct_cos_table == NULL)
     {
         dct_cos_table = calloc(N, sizeof(double*));
@@ -676,7 +676,7 @@ int xtract_dct(const double *data, const int N, const void *argv, double *result
             dct_cos_table[n] = calloc(N, sizeof(double));
             if (dct_cos_table[n] == NULL)
             {
-                // Don't leave a half-built table cached as valid
+                /* Don't leave a half-built table cached as valid */
                 for (m = 0; m < n; ++m)
                     free(dct_cos_table[m]);
                 free(dct_cos_table);
@@ -690,7 +690,7 @@ int xtract_dct(const double *data, const int N, const void *argv, double *result
         }
         dct_cos_table_dim = N;
     }
-    // Calculate the dct transformation
+    /* Calculate the dct transformation */
     temp_dct_table = dct_cos_table;
     memset(result, 0, N * sizeof(double));
     for (n = 0; n < N; ++n)

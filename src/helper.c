@@ -86,7 +86,7 @@ int xtract_smoothed(const double *data, const int N, const void *argv, double *r
     double oneminusgain = 1.0 - gain;
     int i;
     
-    // reverse filtering first; the final element seeds the recursion
+    /* reverse filtering first; the final element seeds the recursion */
     result[N - 1] = data[N - 1];
 
     for (i = N - 2; i >= 0; i--)
@@ -94,7 +94,7 @@ int xtract_smoothed(const double *data, const int N, const void *argv, double *r
         result[i] = gain * data[i] + oneminusgain * data[i+1];
     }
     
-    // then forward filtering
+    /* then forward filtering */
     for (i = 1; i < N; i++)
     {
         result[i] = gain * result[i] + oneminusgain * result[i-1];

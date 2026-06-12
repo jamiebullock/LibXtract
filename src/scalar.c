@@ -593,7 +593,7 @@ int xtract_loudness(const double *data, const int N, const void *argv, double *r
 
     while(n--)
     {
-        // The first bark coefficients is negative and makes the result N/A
+        /* The first bark coefficients is negative and makes the result N/A */
         if (n > 0)
         {
             *result += pow(data[n], 0.23);
