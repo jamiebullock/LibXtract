@@ -211,7 +211,8 @@ typedef enum type_ {
 
 /** \brief Enumeration of units*/
 typedef enum unit_ {
-    /* NONE, ANY */
+    /* values 0 and 1 are reserved by the removed members NONE and ANY,
+     * so the enumeration starts at 2 */
     XTRACT_HERTZ = 2,
     XTRACT_ANY_AMPLITUDE_HERTZ,
     XTRACT_DBFS,
