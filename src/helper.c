@@ -120,7 +120,6 @@ int xtract_is_denormal(double const d)
     return exponent == 0 && d != 0.0;
 }
 
-//inline bool xtract_is_poweroftwo(unsigned int x)
 bool xtract_is_poweroftwo(unsigned int x)
 {
     return ((x != 0) && !(x & (x - 1)));
