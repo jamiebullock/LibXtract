@@ -1013,9 +1013,6 @@ int xtract_lpcc(const double *data, const int N, const void *argv, double *resul
     return XTRACT_SUCCESS;
 
 }
-//int xtract_lpcc_s(const double *data, const int N, const void *argv, double *result){
-//    return XTRACT_SUCCESS;
-//}
 
 int xtract_subbands(const double *data, const int N, const void *argv, double *result)
 {
