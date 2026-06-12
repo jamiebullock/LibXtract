@@ -65,6 +65,16 @@ uses a portability macro that resolves to C11 `_Thread_local`,
 `__declspec(thread)` (MSVC) or `__thread` (GCC/Clang). Bundled third-party
 code (`ooura`, `c-ringbuf`, `dywapitchtrack`) keeps its upstream style.
 
+Initialisation convention: initialise a variable at its declaration when
+the initial value is known and meaningful (accumulators to zero, copies of
+parameters); otherwise declare it uninitialised and assign on every path
+before use. Never defensively zero a variable that is unconditionally
+assigned later — dead stores hide missing-assignment bugs from the
+compiler. This is checked by `-Wconditional-uninitialized` (clang builds)
+and by `make analyze`, which runs the clang static analyzer over the
+first-party sources and fails on any finding; CI runs it on Linux and
+macOS.
+
 ## License
 
 Copyright (C) 2012 Jamie Bullock
