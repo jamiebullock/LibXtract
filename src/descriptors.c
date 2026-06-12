@@ -27,6 +27,31 @@
 #include <string.h>
 #define XTRACT
 
+
+/* Bounded copies for descriptor strings: strncpy alone does not terminate
+ * the destination when the source is longer than the buffer. One wrapper
+ * per field type so call sites need no size argument. */
+static void copy_string(char *dst, const char *src, size_t n)
+{
+    strncpy(dst, src, n - 1);
+    dst[n - 1] = '\0';
+}
+
+static void copy_name(char *dst, const char *src)
+{
+    copy_string(dst, src, XTRACT_MAX_NAME_LENGTH);
+}
+
+static void copy_desc(char *dst, const char *src)
+{
+    copy_string(dst, src, XTRACT_MAX_DESC_LENGTH);
+}
+
+static void copy_author(char *dst, const char *src)
+{
+    copy_string(dst, src, XTRACT_MAX_AUTHOR_LENGTH);
+}
+
 xtract_function_descriptor_t *xtract_make_descriptors(void)
 {
 
@@ -492,561 +517,561 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         author = d->algo.author;
         year = &d->algo.year;
 
-        strcpy(author, "");
+        copy_author(author, "");
         *year = 0;
 
         switch(f)
         {
         case XTRACT_MEAN:
-            strcpy(name, "mean");
-            strcpy(p_name, "Mean");
-            strcpy(desc, "Extract the mean of an input vector");
-            strcpy(p_desc, "Extract the mean of a range of values");
-            strcpy(author, "");
+            copy_name(name, "mean");
+            copy_name(p_name, "Mean");
+            copy_desc(desc, "Extract the mean of an input vector");
+            copy_desc(p_desc, "Extract the mean of a range of values");
+            copy_author(author, "");
             break;
         case XTRACT_VARIANCE:
-            strcpy(name, "variance");
-            strcpy(p_name, "Variance");
-            strcpy(desc, "Extract the variance of an input vector");
-            strcpy(p_desc, "Extract the variance of a range of values");
-            strcpy(author, "");
+            copy_name(name, "variance");
+            copy_name(p_name, "Variance");
+            copy_desc(desc, "Extract the variance of an input vector");
+            copy_desc(p_desc, "Extract the variance of a range of values");
+            copy_author(author, "");
             break;
         case XTRACT_STANDARD_DEVIATION:
-            strcpy(name, "standard_deviation");
-            strcpy(p_name, "Standard Deviation");
-            strcpy(desc,
+            copy_name(name, "standard_deviation");
+            copy_name(p_name, "Standard Deviation");
+            copy_desc(desc,
                    "Extract the standard deviation of an input vector");
-            strcpy(p_desc,
+            copy_desc(p_desc,
                    "Extract the standard deviation of a range of values");
-            strcpy(author, "");
+            copy_author(author, "");
             break;
         case XTRACT_AVERAGE_DEVIATION:
-            strcpy(name, "average_deviation");
-            strcpy(p_name, "Average Deviation");
-            strcpy(desc,
+            copy_name(name, "average_deviation");
+            copy_name(p_name, "Average Deviation");
+            copy_desc(desc,
                    "Extract the average deviation of an input vector");
-            strcpy(p_desc,
+            copy_desc(p_desc,
                    "Extract the average deviation of a range of values");
-            strcpy(author, "");
+            copy_author(author, "");
             break;
         case XTRACT_SKEWNESS:
-            strcpy(name, "skewness");
-            strcpy(p_name, "Skewness");
-            strcpy(desc,
+            copy_name(name, "skewness");
+            copy_name(p_name, "Skewness");
+            copy_desc(desc,
                    "Extract the skewness of an input vector");
-            strcpy(p_desc,
+            copy_desc(p_desc,
                    "Extract the skewness of a range of values");
-            strcpy(author, "");
+            copy_author(author, "");
             break;
         case XTRACT_KURTOSIS:
-            strcpy(name, "kurtosis");
-            strcpy(p_name, "Kurtosis");
-            strcpy(desc,
+            copy_name(name, "kurtosis");
+            copy_name(p_name, "Kurtosis");
+            copy_desc(desc,
                    "Extract the kurtosis of an input vector");
-            strcpy(p_desc,
+            copy_desc(p_desc,
                    "Extract the kurtosis of a range of values");
-            strcpy(author, "");
+            copy_author(author, "");
             break;
         case XTRACT_SPECTRAL_MEAN:
-            strcpy(name, "spectral_mean");
-            strcpy(p_name, "Spectral Mean");
-            strcpy(desc, "Extract the mean of an input spectrum");
-            strcpy(p_desc, "Extract the mean of an audio spectrum");
-            strcpy(author, "");
+            copy_name(name, "spectral_mean");
+            copy_name(p_name, "Spectral Mean");
+            copy_desc(desc, "Extract the mean of an input spectrum");
+            copy_desc(p_desc, "Extract the mean of an audio spectrum");
+            copy_author(author, "");
             break;
         case XTRACT_SPECTRAL_VARIANCE:
-            strcpy(name, "spectral_variance");
-            strcpy(p_name, "Spectral Variance");
-            strcpy(desc, "Extract the variance of an input spectrum");
-            strcpy(p_desc, "Extract the variance of an audio spectrum");
-            strcpy(author, "");
+            copy_name(name, "spectral_variance");
+            copy_name(p_name, "Spectral Variance");
+            copy_desc(desc, "Extract the variance of an input spectrum");
+            copy_desc(p_desc, "Extract the variance of an audio spectrum");
+            copy_author(author, "");
             break;
         case XTRACT_SPECTRAL_STANDARD_DEVIATION:
-            strcpy(name, "spectral_standard_deviation");
-            strcpy(p_name, "Spectral Standard Deviation");
-            strcpy(desc,
+            copy_name(name, "spectral_standard_deviation");
+            copy_name(p_name, "Spectral Standard Deviation");
+            copy_desc(desc,
                    "Extract the standard deviation of an input spectrum");
-            strcpy(p_desc,
+            copy_desc(p_desc,
                    "Extract the standard deviation of an audio spectrum");
-            strcpy(author, "");
+            copy_author(author, "");
             break;
             /* case XTRACT_SPECTRAL_AVERAGE_DEVIATION:
-                strcpy(name, "spectral_average_deviation");
-                strcpy(p_name, "Spectral Average Deviation");
-                strcpy(desc,
+                copy_name(name, "spectral_average_deviation");
+                copy_name(p_name, "Spectral Average Deviation");
+                copy_desc(desc,
                         "Extract the average deviation of an input spectrum");
-                strcpy(p_desc,
+                copy_desc(p_desc,
                         "Extract the average deviation of an audio spectrum");
-                strcpy(author, "");
+                copy_author(author, "");
                 break;
                 */
         case XTRACT_ROLLOFF:
-            strcpy(name, "rolloff");
-            strcpy(p_name, "Spectral Rolloff");
-            strcpy(desc,
+            copy_name(name, "rolloff");
+            copy_name(p_name, "Spectral Rolloff");
+            copy_desc(desc,
                    "Extract the rolloff point of a spectrum");
-            strcpy(p_desc,
+            copy_desc(p_desc,
                    "Extract the rolloff point of an audio spectrum");
-            strcpy(author, "Bee Suan Ong");
+            copy_author(author, "Bee Suan Ong");
             *year = 2005;
             break;
         case XTRACT_SPECTRAL_INHARMONICITY:
-            strcpy(name, "spectral_inharmonicity");
-            strcpy(p_name, "Inharmonicity");
-            strcpy(desc, "Extract the inharmonicity of a spectrum");
-            strcpy(p_desc,
+            copy_name(name, "spectral_inharmonicity");
+            copy_name(p_name, "Inharmonicity");
+            copy_desc(desc, "Extract the inharmonicity of a spectrum");
+            copy_desc(p_desc,
                    "Extract the inharmonicity of an audio spectrum");
             break;
         case XTRACT_SPECTRUM:
-            strcpy(name, "spectrum");
-            strcpy(p_name, "Spectrum");
-            strcpy(desc,
+            copy_name(name, "spectrum");
+            copy_name(p_name, "Spectrum");
+            copy_desc(desc,
                    "Extract the spectrum of an input vector");
-            strcpy(p_desc,
+            copy_desc(p_desc,
                    "Extract the spectrum of an audio signal");
-            strcpy(author, "");
+            copy_author(author, "");
             break;
         case XTRACT_ODD_EVEN_RATIO:
-            strcpy(name, "odd_even_ratio");
-            strcpy(p_name, "Odd/even Harmonic Ratio");
-            strcpy(desc,
+            copy_name(name, "odd_even_ratio");
+            copy_name(p_name, "Odd/even Harmonic Ratio");
+            copy_desc(desc,
                    "Extract the odd-to-even harmonic ratio of a spectrum");
-            strcpy(p_desc,
+            copy_desc(p_desc,
                    "Extract the odd-to-even harmonic ratio of an audio spectrum");
-            strcpy(author, "");
+            copy_author(author, "");
             break;
         case XTRACT_LOWEST_VALUE:
-            strcpy(name, "lowest_value");
-            strcpy(p_name, "Lowest Value");
-            strcpy(desc, "Extract the lowest value from an input vector");
-            strcpy(p_desc, "Extract the lowest value from a given range");
-            strcpy(author, "");
+            copy_name(name, "lowest_value");
+            copy_name(p_name, "Lowest Value");
+            copy_desc(desc, "Extract the lowest value from an input vector");
+            copy_desc(p_desc, "Extract the lowest value from a given range");
+            copy_author(author, "");
             break;
         case XTRACT_F0:
-            strcpy(name, "f0");
-            strcpy(p_name, "Fundamental Frequency");
-            strcpy(desc, "Extract the fundamental frequency	of a signal");
-            strcpy(p_desc,
+            copy_name(name, "f0");
+            copy_name(p_name, "Fundamental Frequency");
+            copy_desc(desc, "Extract the fundamental frequency	of a signal");
+            copy_desc(p_desc,
                    "Extract the fundamental frequency of an audio signal");
-            strcpy(author, "Jamie Bullock");
+            copy_author(author, "Jamie Bullock");
             break;
         case XTRACT_FAILSAFE_F0:
-            strcpy(name, "failsafe_f0");
-            strcpy(p_name, "Fundamental Frequency (failsafe)");
-            strcpy(desc, "Extract the fundamental frequency of a signal (failsafe)");
-            strcpy(p_desc,
+            copy_name(name, "failsafe_f0");
+            copy_name(p_name, "Fundamental Frequency (failsafe)");
+            copy_desc(desc, "Extract the fundamental frequency of a signal (failsafe)");
+            copy_desc(p_desc,
                    "Extract the fundamental frequency of an audio signal (failsafe)");
-            strcpy(author, "Jamie Bullock");
+            copy_author(author, "Jamie Bullock");
             break;
         case XTRACT_WAVELET_F0:
-            strcpy(name, "wavelet_f0");
-            strcpy(p_name, "Fundamental Frequency (wavelet method)");
-            strcpy(desc, "Extract the fundamental frequency of a signal (wavelet method)");
-            strcpy(p_desc,
+            copy_name(name, "wavelet_f0");
+            copy_name(p_name, "Fundamental Frequency (wavelet method)");
+            copy_desc(desc, "Extract the fundamental frequency of a signal (wavelet method)");
+            copy_desc(p_desc,
                    "Extract the fundamental frequency of an audio signal (wavelet method)");
-            strcpy(author, "Antoine Schmitt");
+            copy_author(author, "Antoine Schmitt");
             break;
         case XTRACT_MCLEOD_F0:
-            strcpy(name, "mcleod_f0");
-            strcpy(p_name, "Fundamental Frequency (McLeod Pitch Method)");
-            strcpy(desc, "Extract the fundamental frequency of a signal (McLeod method)");
-            strcpy(p_desc,
+            copy_name(name, "mcleod_f0");
+            copy_name(p_name, "Fundamental Frequency (McLeod Pitch Method)");
+            copy_desc(desc, "Extract the fundamental frequency of a signal (McLeod method)");
+            copy_desc(p_desc,
                    "Extract the fundamental frequency of an audio signal using the Normalised Square Difference Function");
-            strcpy(author, "Philip McLeod");
+            copy_author(author, "Philip McLeod");
             *year = 2005;
             break;
         case XTRACT_MIDICENT:
-                strcpy(name, "midicent");
-                strcpy(p_name, "Frequency to MIDI Cent conversion");
-                strcpy(desc, "Convert frequency in Hertz to Pitch in MIDI cents");
-                strcpy(p_desc, "Convert frequency in Hertz to Pitch in MIDI cents");
-                strcpy(author, "Jamie Bullock");
+                copy_name(name, "midicent");
+                copy_name(p_name, "Frequency to MIDI Cent conversion");
+                copy_desc(desc, "Convert frequency in Hertz to Pitch in MIDI cents");
+                copy_desc(p_desc, "Convert frequency in Hertz to Pitch in MIDI cents");
+                copy_author(author, "Jamie Bullock");
                 break;
         case XTRACT_TONALITY:
-            strcpy(name, "tonality");
-            strcpy(p_name, "Tonality");
-            strcpy(desc, "Extract the tonality of a spectrum");
-            strcpy(p_desc, "Extract the tonality an audio spectrum");
-            strcpy(author, "J. D. Johnston");
+            copy_name(name, "tonality");
+            copy_name(p_name, "Tonality");
+            copy_desc(desc, "Extract the tonality of a spectrum");
+            copy_desc(p_desc, "Extract the tonality an audio spectrum");
+            copy_author(author, "J. D. Johnston");
             *year = 1988;
             break;
         case XTRACT_SPECTRAL_SKEWNESS:
-            strcpy(name, "spectral_skewness");
-            strcpy(p_name, "Spectral Skewness");
-            strcpy(desc, "Extract the skewness of an input spectrum");
-            strcpy(p_desc, "Extract the skewness of an audio spectrum");
-            strcpy(author, "");
+            copy_name(name, "spectral_skewness");
+            copy_name(p_name, "Spectral Skewness");
+            copy_desc(desc, "Extract the skewness of an input spectrum");
+            copy_desc(p_desc, "Extract the skewness of an audio spectrum");
+            copy_author(author, "");
             break;
         case XTRACT_SPECTRAL_KURTOSIS:
-            strcpy(name, "spectral_kurtosis");
-            strcpy(p_name, "Spectral Kurtosis");
-            strcpy(desc, "Extract the kurtosis of an input spectrum");
-            strcpy(p_desc, "Extract the kurtosis of an audio spectrum");
-            strcpy(author, "");
+            copy_name(name, "spectral_kurtosis");
+            copy_name(p_name, "Spectral Kurtosis");
+            copy_desc(desc, "Extract the kurtosis of an input spectrum");
+            copy_desc(p_desc, "Extract the kurtosis of an audio spectrum");
+            copy_author(author, "");
             break;
         case XTRACT_PEAK_SPECTRUM:
-            strcpy(name, "peak_spectrum");
-            strcpy(p_name, "Peak Spectrum");
-            strcpy(desc, "Extract the spectral peaks from of a spectrum");
-            strcpy(p_desc,
+            copy_name(name, "peak_spectrum");
+            copy_name(p_name, "Peak Spectrum");
+            copy_desc(desc, "Extract the spectral peaks from of a spectrum");
+            copy_desc(p_desc,
                    "Extract the spectral peaks from an audio spectrum");
-            strcpy(author, "");
+            copy_author(author, "");
             break;
         case XTRACT_HARMONIC_SPECTRUM:
-            strcpy(name, "harmonic_spectrum");
-            strcpy(p_name, "Harmonic Spectrum");
-            strcpy(desc, "Extract the harmonics from a spectrum");
-            strcpy(p_desc, "Extract the harmonics from an audio spectrum");
-            strcpy(author, "");
+            copy_name(name, "harmonic_spectrum");
+            copy_name(p_name, "Harmonic Spectrum");
+            copy_desc(desc, "Extract the harmonics from a spectrum");
+            copy_desc(p_desc, "Extract the harmonics from an audio spectrum");
+            copy_author(author, "");
             break;
         case XTRACT_NOISINESS:
-            strcpy(name, "noisiness");
-            strcpy(p_name, "Noisiness");
-            strcpy(desc, "Extract the noisiness of a spectrum");
-            strcpy(p_desc, "Extract the noisiness of an audio  spectrum");
-            strcpy(author, "Tae Hong Park");
+            copy_name(name, "noisiness");
+            copy_name(p_name, "Noisiness");
+            copy_desc(desc, "Extract the noisiness of a spectrum");
+            copy_desc(p_desc, "Extract the noisiness of an audio  spectrum");
+            copy_author(author, "Tae Hong Park");
             *year = 2000;
             break;
         case XTRACT_CREST:
-            strcpy(name, "crest");
-            strcpy(p_name, "Spectral Crest Measure");
-            strcpy(desc,
+            copy_name(name, "crest");
+            copy_name(p_name, "Spectral Crest Measure");
+            copy_desc(desc,
                    "Extract the spectral crest measure of a spectrum");
-            strcpy(p_desc,
+            copy_desc(p_desc,
                    "Extract the spectral crest measure of an audio spectrum");
-            strcpy(author, "Peeters");
+            copy_author(author, "Peeters");
             *year = 2003;
             break;
         case XTRACT_MFCC:
-            strcpy(name, "mfcc");
-            strcpy(p_name, "Mel-Frequency Cepstral Coefficients");
-            strcpy(desc, "Extract MFCC from a spectrum");
-            strcpy(p_desc, "Extract MFCC from an audio spectrum");
-            strcpy(author, "Rabiner");
+            copy_name(name, "mfcc");
+            copy_name(p_name, "Mel-Frequency Cepstral Coefficients");
+            copy_desc(desc, "Extract MFCC from a spectrum");
+            copy_desc(p_desc, "Extract MFCC from an audio spectrum");
+            copy_author(author, "Rabiner");
             break;
         case XTRACT_MEL_SPECTROGRAM:
-            strcpy(name, "mel_spectrogram");
-            strcpy(p_name, "Mel Spectrogram");
-            strcpy(desc, "Extract log mel energies from a spectrum");
-            strcpy(p_desc, "Extract log-scaled mel-filtered energies from an audio spectrum");
-            strcpy(author, "");
+            copy_name(name, "mel_spectrogram");
+            copy_name(p_name, "Mel Spectrogram");
+            copy_desc(desc, "Extract log mel energies from a spectrum");
+            copy_desc(p_desc, "Extract log-scaled mel-filtered energies from an audio spectrum");
+            copy_author(author, "");
             break;
         case XTRACT_GFCC:
-            strcpy(name, "gfcc");
-            strcpy(p_name, "Gammatone Frequency Cepstral Coefficients");
-            strcpy(desc, "Extract GFCC from a spectrum");
-            strcpy(p_desc, "Extract GFCC from an audio spectrum using a gammatone filterbank");
-            strcpy(author, "");
+            copy_name(name, "gfcc");
+            copy_name(p_name, "Gammatone Frequency Cepstral Coefficients");
+            copy_desc(desc, "Extract GFCC from a spectrum");
+            copy_desc(p_desc, "Extract GFCC from an audio spectrum using a gammatone filterbank");
+            copy_author(author, "");
             break;
         case XTRACT_GAMMATONE_SPECTROGRAM:
-            strcpy(name, "gammatone_spectrogram");
-            strcpy(p_name, "Gammatone Spectrogram");
-            strcpy(desc, "Extract log gammatone energies from a spectrum");
-            strcpy(p_desc, "Extract log-scaled gammatone-filtered energies from an audio spectrum");
-            strcpy(author, "");
+            copy_name(name, "gammatone_spectrogram");
+            copy_name(p_name, "Gammatone Spectrogram");
+            copy_desc(desc, "Extract log gammatone energies from a spectrum");
+            copy_desc(p_desc, "Extract log-scaled gammatone-filtered energies from an audio spectrum");
+            copy_author(author, "");
             break;
         case XTRACT_LPC:
-            strcpy(name, "lpc");
-            strcpy(p_name, "Linear predictive coding coefficients");
-            strcpy(desc, "Extract LPC from autocorrelation coefficients");
-            strcpy(p_desc,
+            copy_name(name, "lpc");
+            copy_name(p_name, "Linear predictive coding coefficients");
+            copy_desc(desc, "Extract LPC from autocorrelation coefficients");
+            copy_desc(p_desc,
                    "Extract LPC from autocorrelation coefficients");
-            strcpy(author,
+            copy_author(author,
                    "Rabiner and Juang as implemented by Jutta Degener");
             *year = 1994;
             break;
         case XTRACT_LPCC:
-            strcpy(name, "lpcc");
-            strcpy(p_name, "Linear predictive coding cepstral coefficients");
-            strcpy(desc, "Extract LPC cepstrum from LPC coefficients");
-            strcpy(p_desc,
+            copy_name(name, "lpcc");
+            copy_name(p_name, "Linear predictive coding cepstral coefficients");
+            copy_desc(desc, "Extract LPC cepstrum from LPC coefficients");
+            copy_desc(p_desc,
                    "Extract LPC cepstrum from LPC coefficients");
-            strcpy(author, "Rabiner and Juang");
+            copy_author(author, "Rabiner and Juang");
             *year = 1993;
             break;
         case XTRACT_SUBBANDS:
-            strcpy(name, "subbands");
-            strcpy(p_name, "Sub band coefficients");
-            strcpy(desc, "Extract subband coefficients from spectral magnitudes");
-            strcpy(p_desc,
+            copy_name(name, "subbands");
+            copy_name(p_name, "Sub band coefficients");
+            copy_desc(desc, "Extract subband coefficients from spectral magnitudes");
+            copy_desc(p_desc,
                    "Extract subband coefficients from spectral magnitudes");
-            strcpy(author, "");
+            copy_author(author, "");
             break;
         case XTRACT_BARK_COEFFICIENTS:
-            strcpy(name, "bark_coefficients");
-            strcpy(p_name, "Bark Coefficients");
-            strcpy(desc, "Extract bark coefficients from a spectrum");
-            strcpy(p_desc,
+            copy_name(name, "bark_coefficients");
+            copy_name(p_name, "Bark Coefficients");
+            copy_desc(desc, "Extract bark coefficients from a spectrum");
+            copy_desc(p_desc,
                    "Extract bark coefficients from an audio spectrum");
-            strcpy(author, "");
+            copy_author(author, "");
             break;
         case XTRACT_SPECTRAL_CENTROID:
-            strcpy(name, "spectral_centroid");
-            strcpy(p_name, "Spectral Centroid");
-            strcpy(desc, "Extract the spectral centroid of a spectrum");
-            strcpy(p_desc,
+            copy_name(name, "spectral_centroid");
+            copy_name(p_name, "Spectral Centroid");
+            copy_desc(desc, "Extract the spectral centroid of a spectrum");
+            copy_desc(p_desc,
                    "Extract the spectral centroid of an audio spectrum");
-            strcpy(author, "");
+            copy_author(author, "");
             break;
         case XTRACT_IRREGULARITY_K:
-            strcpy(name, "irregularity_k");
-            strcpy(p_name, "Irregularity I");
-            strcpy(desc, "Extract the irregularity (type I) of a spectrum");
-            strcpy(p_desc,
+            copy_name(name, "irregularity_k");
+            copy_name(p_name, "Irregularity I");
+            copy_desc(desc, "Extract the irregularity (type I) of a spectrum");
+            copy_desc(p_desc,
                    "Extract the irregularity (type I) of an audio spectrum");
-            strcpy(author, "Krimphoff");
+            copy_author(author, "Krimphoff");
             *year = 1994;
             break;
         case XTRACT_IRREGULARITY_J:
-            strcpy(name, "irregularity_j");
-            strcpy(p_name, "Irregularity II");
-            strcpy(desc, "Extract the irregularity (type II) of a spectrum");
-            strcpy(p_desc,
+            copy_name(name, "irregularity_j");
+            copy_name(p_name, "Irregularity II");
+            copy_desc(desc, "Extract the irregularity (type II) of a spectrum");
+            copy_desc(p_desc,
                    "Extract the irregularity (type II) of an audio spectrum");
-            strcpy(author, "Jensen");
+            copy_author(author, "Jensen");
             *year = 1999;
             break;
         case XTRACT_TRISTIMULUS_1:
-            strcpy(name, "tristimulus_1");
-            strcpy(p_name, "Tristimulus I");
-            strcpy(desc, "Extract the tristimulus (type I) of a spectrum");
-            strcpy(p_desc,
+            copy_name(name, "tristimulus_1");
+            copy_name(p_name, "Tristimulus I");
+            copy_desc(desc, "Extract the tristimulus (type I) of a spectrum");
+            copy_desc(p_desc,
                    "Extract the tristimulus (type I) of an audio spectrum");
-            strcpy(author, "Pollard and Jansson");
+            copy_author(author, "Pollard and Jansson");
             *year = 1982;
             break;
         case XTRACT_TRISTIMULUS_2:
-            strcpy(name, "tristimulus_2");
-            strcpy(p_name, "Tristimulus II");
-            strcpy(desc, "Extract the tristimulus (type II) of a spectrum");
-            strcpy(p_desc,
+            copy_name(name, "tristimulus_2");
+            copy_name(p_name, "Tristimulus II");
+            copy_desc(desc, "Extract the tristimulus (type II) of a spectrum");
+            copy_desc(p_desc,
                    "Extract the tristimulus (type II) of an audio spectrum");
-            strcpy(author, "Pollard and Jansson");
+            copy_author(author, "Pollard and Jansson");
             *year = 1982;
             break;
         case XTRACT_TRISTIMULUS_3:
-            strcpy(name, "tristimulus_3");
-            strcpy(p_name, "Tristimulus III");
-            strcpy(desc,
+            copy_name(name, "tristimulus_3");
+            copy_name(p_name, "Tristimulus III");
+            copy_desc(desc,
                    "Extract the tristimulus (type III) of a spectrum");
-            strcpy(p_desc,
+            copy_desc(p_desc,
                    "Extract the tristimulus (type III) of an audio spectrum");
-            strcpy(author, "Pollard and Jansson");
+            copy_author(author, "Pollard and Jansson");
             *year = 1982;
             break;
         case XTRACT_SMOOTHNESS:
-            strcpy(name, "smoothness");
-            strcpy(p_name, "Spectral Smoothness");
-            strcpy(desc, "Extract the spectral smoothness of a spectrum");
-            strcpy(p_desc,
+            copy_name(name, "smoothness");
+            copy_name(p_name, "Spectral Smoothness");
+            copy_desc(desc, "Extract the spectral smoothness of a spectrum");
+            copy_desc(p_desc,
                    "Extract the spectral smoothness of an audio spectrum");
-            strcpy(author, "McAdams");
+            copy_author(author, "McAdams");
             *year = 1999;
             break;
         case XTRACT_FLATNESS:
-            strcpy(name, "flatness");
-            strcpy(p_name, "Spectral Flatness");
-            strcpy(desc, "Extract the spectral flatness of a spectrum");
-            strcpy(p_desc,
+            copy_name(name, "flatness");
+            copy_name(p_name, "Spectral Flatness");
+            copy_desc(desc, "Extract the spectral flatness of a spectrum");
+            copy_desc(p_desc,
                    "Extract the spectral flatness of an audio spectrum");
-            strcpy(author, "Tristan Jehan");
+            copy_author(author, "Tristan Jehan");
             *year = 2005;
             break;
         case XTRACT_FLATNESS_DB:
-            strcpy(name, "flatness_db");
-            strcpy(p_name, "Log Spectral Flatness");
-            strcpy(desc, "Extract the log spectral flatness of a spectrum");
-            strcpy(p_desc,
+            copy_name(name, "flatness_db");
+            copy_name(p_name, "Log Spectral Flatness");
+            copy_desc(desc, "Extract the log spectral flatness of a spectrum");
+            copy_desc(p_desc,
                    "Extract the log spectral flatness of an audio spectrum");
-            strcpy(author, "Peeters");
+            copy_author(author, "Peeters");
             *year = 2003;
             break;
         case XTRACT_SPREAD:
-            strcpy(name, "spread");
-            strcpy(p_name, "Spectral Spread");
-            strcpy(desc, "Extract the spectral spread of a spectrum");
-            strcpy(p_desc,
+            copy_name(name, "spread");
+            copy_name(p_name, "Spectral Spread");
+            copy_desc(desc, "Extract the spectral spread of a spectrum");
+            copy_desc(p_desc,
                    "Extract the spectral spread of an audio spectrum");
-            strcpy(author, "Norman Casagrande");
+            copy_author(author, "Norman Casagrande");
             *year = 2005;
             break;
         case XTRACT_ZCR:
-            strcpy(name, "zcr");
-            strcpy(p_name, "Zero Crossing Rate");
-            strcpy(desc, "Extract the zero crossing rate of a vector");
-            strcpy(p_desc,
+            copy_name(name, "zcr");
+            copy_name(p_name, "Zero Crossing Rate");
+            copy_desc(desc, "Extract the zero crossing rate of a vector");
+            copy_desc(p_desc,
                    "Extract the zero crossing rate of an audio signal");
-            strcpy(author, "");
+            copy_author(author, "");
             break;
         case XTRACT_LOUDNESS:
-            strcpy(name, "loudness");
-            strcpy(p_name, "Loudness");
-            strcpy(desc,
+            copy_name(name, "loudness");
+            copy_name(p_name, "Loudness");
+            copy_desc(desc,
                    "Extract the loudness of a signal from its spectrum");
-            strcpy(p_desc,
+            copy_desc(p_desc,
                    "Extract the loudness of an audio signal from its spectrum");
-            strcpy(author, "Moore, Glasberg et al");
+            copy_author(author, "Moore, Glasberg et al");
             *year = 2005;
             break;
         case XTRACT_HIGHEST_VALUE:
-            strcpy(name, "highest_value");
-            strcpy(p_name, "Highest Value");
-            strcpy(desc, "Extract the highest value from an input vector");
-            strcpy(p_desc, "Extract the highest value from a given range");
-            strcpy(author, "");
+            copy_name(name, "highest_value");
+            copy_name(p_name, "Highest Value");
+            copy_desc(desc, "Extract the highest value from an input vector");
+            copy_desc(p_desc, "Extract the highest value from a given range");
+            copy_author(author, "");
             break;
         case XTRACT_SUM:
-            strcpy(name, "sum");
-            strcpy(p_name, "Sum of Values");
-            strcpy(desc,
+            copy_name(name, "sum");
+            copy_name(p_name, "Sum of Values");
+            copy_desc(desc,
                    "Extract the sum of the values in an input vector");
-            strcpy(p_desc,
+            copy_desc(p_desc,
                    "Extract the sum of the values in a given range");
-            strcpy(author, "");
+            copy_author(author, "");
             break;
         case XTRACT_RMS_AMPLITUDE:
-            strcpy(name, "rms_amplitude");
-            strcpy(p_name, "RMS Amplitude");
-            strcpy(desc, "Extract the RMS amplitude of a signal");
-            strcpy(p_desc, "Extract the RMS amplitude of an audio signal");
-            strcpy(author, "");
+            copy_name(name, "rms_amplitude");
+            copy_name(p_name, "RMS Amplitude");
+            copy_desc(desc, "Extract the RMS amplitude of a signal");
+            copy_desc(p_desc, "Extract the RMS amplitude of an audio signal");
+            copy_author(author, "");
             break;
         case XTRACT_POWER:
-            strcpy(name, "power");
-            strcpy(p_name, "Spectral Power");
-            strcpy(desc, "Extract the spectral power of a spectrum");
-            strcpy(p_desc,
+            copy_name(name, "power");
+            copy_name(p_name, "Spectral Power");
+            copy_desc(desc, "Extract the spectral power of a spectrum");
+            copy_desc(p_desc,
                    "Extract the spectral power of an audio spectrum");
-            strcpy(author, "Bee Suan Ong");
+            copy_author(author, "Bee Suan Ong");
             *year = 2005;
             break;
         case XTRACT_SHARPNESS:
-            strcpy(name, "sharpness");
-            strcpy(p_name, "Spectral Sharpness");
-            strcpy(desc, "Extract the spectral sharpness of a spectrum");
-            strcpy(p_desc,
+            copy_name(name, "sharpness");
+            copy_name(p_name, "Spectral Sharpness");
+            copy_desc(desc, "Extract the spectral sharpness of a spectrum");
+            copy_desc(p_desc,
                    "Extract the spectral sharpness of an audio spectrum");
-            strcpy(author, "von Bismarck");
+            copy_author(author, "von Bismarck");
             *year = 1974;
             break;
         case XTRACT_SPECTRAL_SLOPE:
-            strcpy(name, "spectral_slope");
-            strcpy(p_name, "Spectral Slope");
-            strcpy(desc, "Extract the spectral slope of a spectrum");
-            strcpy(p_desc,
+            copy_name(name, "spectral_slope");
+            copy_name(p_name, "Spectral Slope");
+            copy_desc(desc, "Extract the spectral slope of a spectrum");
+            copy_desc(p_desc,
                    "Extract the spectral slope of an audio spectrum");
-            strcpy(author, "");
+            copy_author(author, "");
             break;
         case XTRACT_HPS:
-            strcpy(name, "hps");
-            strcpy(p_name, "Harmonic Product Spectrum");
-            strcpy(desc,
+            copy_name(name, "hps");
+            copy_name(p_name, "Harmonic Product Spectrum");
+            copy_desc(desc,
                    "Extract the harmonic product spectrum of a spectrum");
-            strcpy(p_desc,
+            copy_desc(p_desc,
                    "Extract the harmonic product spectrum of an audio spectrum");
-            strcpy(author, "");
+            copy_author(author, "");
             break;
         case XTRACT_FLUX:
-            strcpy(name, "flux");
-            strcpy(p_name, "Spectral Flux");
-            strcpy(desc, "Extract the spectral flux of a spectrum");
-            strcpy(p_desc,
+            copy_name(name, "flux");
+            copy_name(p_name, "Spectral Flux");
+            copy_desc(desc, "Extract the spectral flux of a spectrum");
+            copy_desc(p_desc,
                    "Extract the spectral flux of an audio spectrum");
-            strcpy(author, "");
+            copy_author(author, "");
             break;
         case XTRACT_LNORM:
-            strcpy(name, "lnorm");
-            strcpy(p_name, "L-norm");
-            strcpy(desc, "Extract the L-norm of a vector");
-            strcpy(p_desc, "Extract the L-norm of a vector");
-            strcpy(author, "");
+            copy_name(name, "lnorm");
+            copy_name(p_name, "L-norm");
+            copy_desc(desc, "Extract the L-norm of a vector");
+            copy_desc(p_desc, "Extract the L-norm of a vector");
+            copy_author(author, "");
             break;
         case XTRACT_ATTACK_TIME:
-            strcpy(name, "attack_time");
-            strcpy(p_name, "Attack Time");
-            strcpy(desc, "Extract the attack time of a signal");
-            strcpy(p_desc, "Extract the attack time of an audio signal");
-            strcpy(author, "");
+            copy_name(name, "attack_time");
+            copy_name(p_name, "Attack Time");
+            copy_desc(desc, "Extract the attack time of a signal");
+            copy_desc(p_desc, "Extract the attack time of an audio signal");
+            copy_author(author, "");
             break;
         case XTRACT_DECAY_TIME:
-            strcpy(name, "decay_time");
-            strcpy(p_name, "Decay Time");
-            strcpy(desc, "Extract the decay time of a signal");
-            strcpy(p_desc, "Extract the decay time of an audio signal");
-            strcpy(author, "");
+            copy_name(name, "decay_time");
+            copy_name(p_name, "Decay Time");
+            copy_desc(desc, "Extract the decay time of a signal");
+            copy_desc(p_desc, "Extract the decay time of an audio signal");
+            copy_author(author, "");
             break;
         case XTRACT_DIFFERENCE_VECTOR:
-            strcpy(name, "difference_vector");
-            strcpy(p_name, "Difference vector");
-            strcpy(desc, "Extract the difference between two vectors");
-            strcpy(p_desc, "Extract the difference between two vectors");
-            strcpy(author, "");
+            copy_name(name, "difference_vector");
+            copy_name(p_name, "Difference vector");
+            copy_desc(desc, "Extract the difference between two vectors");
+            copy_desc(p_desc, "Extract the difference between two vectors");
+            copy_author(author, "");
             break;
         case XTRACT_AUTOCORRELATION_FFT:
-            strcpy(name, "autocorrelation_fft");
-            strcpy(p_name, "Autocorrelation (FFT method)");
-            strcpy(desc, "Extract the autocorrelation of a signal (fft method)");
-            strcpy(p_desc, "Extract the autocorrelation of an audio signal (fft method)");
-            strcpy(author, "");
+            copy_name(name, "autocorrelation_fft");
+            copy_name(p_name, "Autocorrelation (FFT method)");
+            copy_desc(desc, "Extract the autocorrelation of a signal (fft method)");
+            copy_desc(p_desc, "Extract the autocorrelation of an audio signal (fft method)");
+            copy_author(author, "");
             break;
         case XTRACT_DCT:
-            strcpy(name, "dct");
-            strcpy(p_name, "Discrete Cosine Transform");
-            strcpy(desc, "Extract the DCT of a signal");
-            strcpy(p_desc, "Extract the DCT of an audio signal");
-            strcpy(author, "");
+            copy_name(name, "dct");
+            copy_name(p_name, "Discrete Cosine Transform");
+            copy_desc(desc, "Extract the DCT of a signal");
+            copy_desc(p_desc, "Extract the DCT of an audio signal");
+            copy_author(author, "");
             break;
         case XTRACT_AUTOCORRELATION:
-            strcpy(name, "autocorrelation");
-            strcpy(p_name, "Autocorrelation");
-            strcpy(desc, "Extract the autocorrelation of a signal");
-            strcpy(p_desc,
+            copy_name(name, "autocorrelation");
+            copy_name(p_name, "Autocorrelation");
+            copy_desc(desc, "Extract the autocorrelation of a signal");
+            copy_desc(p_desc,
                    "Extract the autocorrelation of an audio signal");
-            strcpy(author, "");
+            copy_author(author, "");
             break;
         case XTRACT_AMDF:
-            strcpy(name, "amdf");
-            strcpy(p_name, "Average Magnitude Difference Function");
-            strcpy(desc, "Extract the AMDF of a signal");
-            strcpy(p_desc, "Extract the AMDF of an audio signal");
-            strcpy(author, "");
+            copy_name(name, "amdf");
+            copy_name(p_name, "Average Magnitude Difference Function");
+            copy_desc(desc, "Extract the AMDF of a signal");
+            copy_desc(p_desc, "Extract the AMDF of an audio signal");
+            copy_author(author, "");
             break;
         case XTRACT_ASDF:
-            strcpy(name, "asdf");
-            strcpy(p_name, "Average Squared Difference Function");
-            strcpy(desc, "Extract the ASDF of a signal");
-            strcpy(p_desc, "Extract the ASDF of an audio signal");
-            strcpy(author, "");
+            copy_name(name, "asdf");
+            copy_name(p_name, "Average Squared Difference Function");
+            copy_desc(desc, "Extract the ASDF of a signal");
+            copy_desc(p_desc, "Extract the ASDF of an audio signal");
+            copy_author(author, "");
             break;
         case XTRACT_NONZERO_COUNT:
-            strcpy(name, "nonzero_count");
-            strcpy(p_name, "Non-zero count");
-            strcpy(desc,
+            copy_name(name, "nonzero_count");
+            copy_name(p_name, "Non-zero count");
+            copy_desc(desc,
                    "Extract the number of non-zero elements in the input vector");
-            strcpy(p_desc,
+            copy_desc(p_desc,
                    "Extract the number of non-zero elements in an input spectrum");
-            strcpy(author, "");
+            copy_author(author, "");
             break;
         case XTRACT_WINDOWED:
-            strcpy(name, "windowed");
-            strcpy(p_name, "Windowed frame");
-            strcpy(desc, "Apply a window function to a frame of data");
-            strcpy(p_desc, "Apply a window function to a frame of data");
-            strcpy(author, "");
+            copy_name(name, "windowed");
+            copy_name(p_name, "Windowed frame");
+            copy_desc(desc, "Apply a window function to a frame of data");
+            copy_desc(p_desc, "Apply a window function to a frame of data");
+            copy_author(author, "");
             break;
         case XTRACT_SMOOTHED:
-            strcpy(name, "smoothed");
-            strcpy(p_name, "Smoothed frame");
-            strcpy(desc, "Apply a bidirectional smoothing filter to a frame of data");
-            strcpy(p_desc, "Apply a bidirectional smoothing filter to a frame of data");
-            strcpy(author, "");
+            copy_name(name, "smoothed");
+            copy_name(p_name, "Smoothed frame");
+            copy_desc(desc, "Apply a bidirectional smoothing filter to a frame of data");
+            copy_desc(p_desc, "Apply a bidirectional smoothing filter to a frame of data");
+            copy_author(author, "");
             break;
         default:
-            strcpy(name, "");
-            strcpy(p_name, "");
-            strcpy(desc, "");
-            strcpy(p_desc, "");
-            strcpy(author, "");
+            copy_name(name, "");
+            copy_name(p_name, "");
+            copy_desc(desc, "");
+            copy_desc(p_desc, "");
+            copy_author(author, "");
             break;
         }
 
