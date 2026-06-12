@@ -825,7 +825,7 @@ int xtract_peak_spectrum(const double *data, const int N, const void *argv, doub
     double threshold, max, y, y2, y3, p, q;
     int n = N, rv = XTRACT_SUCCESS;
 
-    threshold = max = y = y2 = y3 = p = q = 0.0;
+    threshold = max = q = 0.0;
 
     if(argv != NULL)
     {
@@ -900,8 +900,6 @@ int xtract_harmonic_spectrum(const double *data, const int N, const void *argv, 
         memset(result, 0, N * sizeof(double));
         return XTRACT_NO_RESULT;
     }
-
-    ratio = nearest = distance = 0.0;
 
     while(n--)
     {

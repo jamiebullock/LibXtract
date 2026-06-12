@@ -63,6 +63,10 @@ jobs:
           make
           make check
 
+      - name: Static analysis (Linux/macOS)
+        if: runner.os != 'Windows'
+        run: make analyze
+
       - name: Install Node.js headers (Linux/macOS)
         if: runner.os != 'Windows'
         run: |
