@@ -488,6 +488,7 @@ static int filterbank_spectrogram(const double *data, const int N, const xtract_
         if(result[filter] < XTRACT_LOG_LIMIT)
             result[filter] = XTRACT_LOG_LIMIT_DB;
         else
+            /* cppcheck-suppress invalidFunctionArg */
             result[filter] = log(result[filter]);
     }
 
