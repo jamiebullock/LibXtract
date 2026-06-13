@@ -7,7 +7,7 @@ HPATH = include/xtract
 
 export XTRACT_VERSION PREFIX LIBRARY
 
-.PHONY: examples clean install doc src swig bench analyze check-asan
+.PHONY: examples clean install doc src swig bench analyze check-asan cppcheck
 
 all: src examples
 
@@ -28,6 +28,14 @@ check: src
 
 analyze:
 	@$(MAKE) -C src analyze
+
+# Requires cppcheck; checks all preprocessor configurations of the
+# first-party sources (vDSP and OOURA branches alike)
+cppcheck:
+	@cppcheck --enable=warning,performance,portability --std=c99 \
+		--inline-suppr --error-exitcode=1 --quiet \
+		-I include -I src src/*.c
+	@echo "cppcheck clean"
 
 # Rebuild the library and tests with AddressSanitizer and UBSan and run the
 # suite; catches memory errors and undefined behaviour that static analysis

@@ -71,6 +71,12 @@ jobs:
         if: runner.os != 'Windows'
         run: make check-asan
 
+      - name: cppcheck (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get install -y cppcheck
+          make cppcheck
+
       - name: Install Node.js headers (Linux/macOS)
         if: runner.os != 'Windows'
         run: |
