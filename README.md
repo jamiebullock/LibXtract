@@ -75,6 +75,41 @@ and by `make analyze`, which runs the clang static analyzer over the
 first-party sources and fails on any finding; CI runs it on Linux and
 macOS.
 
+## API stability
+
+LibXtract follows [Semantic Versioning](https://semver.org). The public API
+is the set of headers installed under `include/xtract/` — `libxtract.h` and
+the headers it includes. Symbols declared in `src/`, and the bundled
+third-party code (`ooura`, `c-ringbuf`, `dywapitchtrack`), are internal and
+not part of the public API.
+
+Within the 1.x series the library guarantees **source compatibility**: code
+that compiles against one 1.x release continues to compile against every
+later 1.x release. Concretely, across 1.x:
+
+- existing public functions are never removed and their signatures never
+  change;
+- existing `XTRACT_*` enum and macro values are never renumbered or removed;
+- changes are additive — new functions, new enum values appended to the end,
+  and new features may be added in a minor release.
+
+The following are explicitly **not** guaranteed within 1.x:
+
+- **Binary (ABI) compatibility.** There is no library-versioning (soname)
+  mechanism yet, and struct layouts may change, so a new minor release may
+  require recompiling and relinking dependent code rather than dropping in a
+  replacement shared library. A formal ABI policy will be revisited once the
+  context/handle API stabilises the layouts (planned for 2.0).
+- **Numerical output.** A feature function may return different values in a
+  later release when a correctness fix changes a computation; buggy output is
+  not frozen for compatibility. Such changes are called out in the release
+  notes.
+
+Breaking changes — removing or renaming a public function, changing a
+signature, or renumbering an enum — are batched into the next major release
+(2.0) so that dependent code has a single migration. Where practical, a
+function to be removed in 2.0 is deprecated in a preceding 1.x release first.
+
 ## License
 
 Copyright (C) 2012 Jamie Bullock
