@@ -32,6 +32,12 @@ doc/html
 .build
 dist
 
+# Coverage (make coverage)
+*.gcno
+*.gcda
+coverage.info
+coverage-html
+
 # Project-specific files
 examples/simpletest/simpletest
 tests/xttest
