@@ -2109,3 +2109,156 @@ TEST_CASE("xtract_flatness numerical stability", "[scalar]")
         REQUIRE(rv == XTRACT_NO_RESULT);
     }
 }
+
+/* The tristimulus features partition harmonic energy into three bands by
+ * harmonic number h = round(freq / fundamental): band 1 is h == 1, band 2 is
+ * h in {2,3,4}, band 3 is h >= 5. Each is the band energy over the total
+ * energy. Input follows the xtract_spectrum() layout: amplitudes in
+ * data[0..N/2), frequencies in data[N/2..N). The shared spectrum below has six
+ * harmonics of a 100 Hz fundamental with amplitudes {4,3,2,1,5,2}, so the total
+ * is 17 and the three bands hold 4, (3+2+1)=6 and (5+2)=7 respectively. */
+
+TEST_CASE("xtract_tristimulus_1", "[scalar]")
+{
+    double fund = 100.0;
+    double result = -1.0;
+
+    SECTION("ratio of the fundamental's energy to the total")
+    {
+        double data[] = {4, 3, 2, 1, 5, 2, 100, 200, 300, 400, 500, 600};
+        int rv = xtract_tristimulus_1(data, 12, &fund, &result);
+        REQUIRE(rv == XTRACT_SUCCESS);
+        REQUIRE(result == Approx(4.0 / 17.0).epsilon(EPSILON));
+    }
+
+    SECTION("no fundamental partial yields no result")
+    {
+        /* amplitude at 100 Hz (h == 1) is zero, so band 1 is empty */
+        double data[] = {0, 3, 2, 1, 5, 2, 100, 200, 300, 400, 500, 600};
+        int rv = xtract_tristimulus_1(data, 12, &fund, &result);
+        REQUIRE(rv == XTRACT_NO_RESULT);
+        REQUIRE(result == 0.0);
+    }
+}
+
+TEST_CASE("xtract_tristimulus_2", "[scalar]")
+{
+    double fund = 100.0;
+    double result = -1.0;
+
+    SECTION("ratio of the 2nd-4th harmonics' energy to the total")
+    {
+        double data[] = {4, 3, 2, 1, 5, 2, 100, 200, 300, 400, 500, 600};
+        int rv = xtract_tristimulus_2(data, 12, &fund, &result);
+        REQUIRE(rv == XTRACT_SUCCESS);
+        REQUIRE(result == Approx(6.0 / 17.0).epsilon(EPSILON));
+    }
+
+    SECTION("no 2nd-4th harmonics yields no result")
+    {
+        double data[] = {4, 0, 0, 0, 5, 2, 100, 200, 300, 400, 500, 600};
+        int rv = xtract_tristimulus_2(data, 12, &fund, &result);
+        REQUIRE(rv == XTRACT_NO_RESULT);
+        REQUIRE(result == 0.0);
+    }
+}
+
+TEST_CASE("xtract_tristimulus_3", "[scalar]")
+{
+    double fund = 100.0;
+    double result = -1.0;
+
+    SECTION("ratio of the 5th-and-higher harmonics' energy to the total")
+    {
+        double data[] = {4, 3, 2, 1, 5, 2, 100, 200, 300, 400, 500, 600};
+        int rv = xtract_tristimulus_3(data, 12, &fund, &result);
+        REQUIRE(rv == XTRACT_SUCCESS);
+        REQUIRE(result == Approx(7.0 / 17.0).epsilon(EPSILON));
+    }
+
+    SECTION("no high harmonics yields no result")
+    {
+        double data[] = {4, 3, 2, 1, 0, 0, 100, 200, 300, 400, 500, 600};
+        int rv = xtract_tristimulus_3(data, 12, &fund, &result);
+        REQUIRE(rv == XTRACT_NO_RESULT);
+        REQUIRE(result == 0.0);
+    }
+}
+
+TEST_CASE("xtract_spectral_inharmonicity", "[scalar]")
+{
+    double fund = 100.0;
+    double result = -1.0;
+
+    SECTION("a perfectly harmonic spectrum has zero inharmonicity")
+    {
+        /* Every partial sits exactly on a multiple of the fundamental, so
+         * |freq - h*fund| is zero for all bins. */
+        double data[] = {1.0, 1.0, 100.0, 200.0};
+        int rv = xtract_spectral_inharmonicity(data, 4, &fund, &result);
+        REQUIRE(rv == XTRACT_SUCCESS);
+        REQUIRE(result == Approx(0.0).margin(EPSILON));
+    }
+
+    SECTION("a detuned partial gives the amplitude-weighted deviation")
+    {
+        /* result = 2 * sum(|f - h*fund| * a^2) / (fund * sum(a^2)).
+         * Bin 0 (100 Hz) is on pitch; bin 1 (205 Hz, h=2) is 5 Hz sharp.
+         * = 2 * (5 * 1) / (100 * 2) = 10 / 200 = 0.05 */
+        double data[] = {1.0, 1.0, 100.0, 205.0};
+        int rv = xtract_spectral_inharmonicity(data, 4, &fund, &result);
+        REQUIRE(rv == XTRACT_SUCCESS);
+        REQUIRE(result == Approx(0.05).epsilon(EPSILON));
+    }
+
+    SECTION("a zero fundamental yields no result")
+    {
+        double data[] = {1.0, 1.0, 100.0, 205.0};
+        double zero = 0.0;
+        int rv = xtract_spectral_inharmonicity(data, 4, &zero, &result);
+        REQUIRE(rv == XTRACT_NO_RESULT);
+        REQUIRE(result == 0.0);
+    }
+
+    SECTION("an all-zero amplitude spectrum yields no result")
+    {
+        double data[] = {0.0, 0.0, 100.0, 205.0};
+        int rv = xtract_spectral_inharmonicity(data, 4, &fund, &result);
+        REQUIRE(rv == XTRACT_NO_RESULT);
+        REQUIRE(result == 0.0);
+    }
+}
+
+TEST_CASE("xtract_peak", "[scalar]")
+{
+    double result = -1.0;
+
+    SECTION("the last sample is the maximum and clears the threshold")
+    {
+        /* current = data[N-1] = 10, maximum = 10, average = 16/4 = 4,
+         * threshold = 0, so current >= average + threshold. */
+        double data[] = {1.0, 2.0, 3.0, 10.0};
+        double threshold = 0.0;
+        int rv = xtract_peak(data, 4, &threshold, &result);
+        REQUIRE(rv == XTRACT_SUCCESS);
+        REQUIRE(result == Approx(10.0).epsilon(EPSILON));
+    }
+
+    SECTION("the last sample is not the maximum yields no result")
+    {
+        double data[] = {1.0, 10.0, 3.0, 2.0};
+        double threshold = 0.0;
+        int rv = xtract_peak(data, 4, &threshold, &result);
+        REQUIRE(rv == XTRACT_NO_RESULT);
+    }
+
+    SECTION("the last sample is the maximum but below threshold yields no result")
+    {
+        /* current = maximum = 4, average = 2.5, threshold = 5, so
+         * current < average + threshold (4 < 7.5). */
+        double data[] = {1.0, 2.0, 3.0, 4.0};
+        double threshold = 5.0;
+        int rv = xtract_peak(data, 4, &threshold, &result);
+        REQUIRE(rv == XTRACT_NO_RESULT);
+    }
+}
