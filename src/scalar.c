@@ -232,23 +232,34 @@ int xtract_spectral_mean(const double *data, const int N, const void *argv, doub
 int xtract_spectral_variance(const double *data, const int N, const void *argv, double *result)
 {
 
-    int m;
+    const int m = N >> 1;
     double A = 0.0;
-    const double *freqs, *amps;
+    const double *amps = data;
+    const double *freqs = data + m;
     const double arg0 = *(double *)argv;
 
-    m = N >> 1;
+#ifdef __APPLE__
+    double neg_c = -arg0;
+    double *d = (double *)malloc(m * sizeof(double));
+    if(d == NULL)
+        return XTRACT_MALLOC_FAILED;
 
-    amps = data;
-    freqs = data + m;
+    vDSP_vsaddD(freqs, 1, &neg_c, d, 1, m);  /* d = freqs - centroid */
+    vDSP_vsqD(d, 1, d, 1, m);                 /* d = (freqs - centroid)^2 */
+    vDSP_dotprD(d, 1, amps, 1, result, m);    /* sum(d * amps) */
+    vDSP_sveD(amps, 1, &A, m);                /* sum(amps) */
+    free(d);
+#else
+    int mm = m;
 
     *result = 0.0;
 
-    while(m--)
+    while(mm--)
     {
-        A += amps[m];
-        *result += XTRACT_SQ(freqs[m] - arg0) * amps[m];
+        A += amps[mm];
+        *result += XTRACT_SQ(freqs[mm] - arg0) * amps[mm];
     }
+#endif
 
     if (A == 0.0)
     {
@@ -271,11 +282,18 @@ int xtract_spectral_standard_deviation(const double *data, const int N, const vo
 int xtract_spectral_skewness(const double *data, const int N, const void *argv,  double *result)
 {
 
-    int m;
-    const double *freqs, *amps;
+    const int m = N >> 1;
+    const double *amps = data;
+    const double *freqs = data + m;
     const double arg0 = ((double *)argv)[0];
     const double arg1 = ((double *)argv)[1];
     double sum_amps = 0.0;
+#ifdef __APPLE__
+    double neg_c = -arg0;
+    double *d, *t;
+#else
+    int mm = m;
+#endif
 
     *result = 0.0;
 
@@ -284,16 +302,24 @@ int xtract_spectral_skewness(const double *data, const int N, const void *argv, 
         return XTRACT_NO_RESULT;
     }
 
-    m = N >> 1;
-
-    amps = data;
-    freqs = data + m;
-
-    while(m--)
+#ifdef __APPLE__
+    d = (double *)malloc(2 * (size_t)m * sizeof(double));
+    if(d == NULL)
+        return XTRACT_MALLOC_FAILED;
+    t = d + m;
+    vDSP_vsaddD(freqs, 1, &neg_c, d, 1, m);  /* d = freqs - centroid */
+    vDSP_vmulD(d, 1, d, 1, t, 1, m);          /* t = d^2 */
+    vDSP_vmulD(t, 1, d, 1, t, 1, m);          /* t = d^3 */
+    vDSP_dotprD(t, 1, amps, 1, result, m);    /* sum(d^3 * amps) */
+    vDSP_sveD(amps, 1, &sum_amps, m);
+    free(d);
+#else
+    while(mm--)
     {
-        *result += XTRACT_POW3(freqs[m] - arg0) * amps[m];
-        sum_amps += amps[m];
+        *result += XTRACT_POW3(freqs[mm] - arg0) * amps[mm];
+        sum_amps += amps[mm];
     }
+#endif
 
     if(sum_amps == 0.0)
     {
@@ -309,30 +335,44 @@ int xtract_spectral_skewness(const double *data, const int N, const void *argv, 
 int xtract_spectral_kurtosis(const double *data, const int N, const void *argv,  double *result)
 {
 
-    int m;
-    const double *freqs, *amps;
+    const int m = N >> 1;
+    const double *amps = data;
+    const double *freqs = data + m;
     const double arg0 = ((double *)argv)[0];
     const double arg1 = ((double *)argv)[1];
     double sum_amps = 0.0;
+#ifdef __APPLE__
+    double neg_c = -arg0;
+    double *d;
+#else
+    int mm = m;
+#endif
 
-    if (((double *)argv)[1] == 0.0)
+    if (arg1 == 0.0)
     {
         *result = 0.0;
         return XTRACT_NO_RESULT;
     }
 
-    m = N >> 1;
-
-    amps = data;
-    freqs = data + m;
-
     *result = 0.0;
 
-    while(m--)
+#ifdef __APPLE__
+    d = (double *)malloc((size_t)m * sizeof(double));
+    if(d == NULL)
+        return XTRACT_MALLOC_FAILED;
+    vDSP_vsaddD(freqs, 1, &neg_c, d, 1, m);  /* d = freqs - centroid */
+    vDSP_vsqD(d, 1, d, 1, m);                 /* d = d^2 */
+    vDSP_vsqD(d, 1, d, 1, m);                 /* d = d^4 */
+    vDSP_dotprD(d, 1, amps, 1, result, m);    /* sum(d^4 * amps) */
+    vDSP_sveD(amps, 1, &sum_amps, m);
+    free(d);
+#else
+    while(mm--)
     {
-        *result += XTRACT_POW4(freqs[m] - arg0) * amps[m];
-        sum_amps += amps[m];
+        *result += XTRACT_POW4(freqs[mm] - arg0) * amps[mm];
+        sum_amps += amps[mm];
     }
+#endif
 
     if(sum_amps == 0.0)
     {
