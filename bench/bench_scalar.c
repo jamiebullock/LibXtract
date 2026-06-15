@@ -24,6 +24,12 @@ static double spectrum_512[512];
 static double spectrum_4096[4096];
 static double mean_512;
 static double mean_4096;
+static double centroid_512;
+static double centroid_4096;
+static double variance_512;
+static double variance_4096;
+static double moment_argv_512[2]; /* {centroid, standard deviation} */
+static double moment_argv_4096[2];
 
 static void fill_data(double *buf, int N)
 {
@@ -48,6 +54,14 @@ static void setup(void)
         spectrum_512[i] = fabs(data_512[i]);
     for(i = 0; i < 4096; i++)
         spectrum_4096[i] = fabs(data_4096[i]);
+    xtract_spectral_centroid(spectrum_512, 512, NULL, &centroid_512);
+    xtract_spectral_centroid(spectrum_4096, 4096, NULL, &centroid_4096);
+    xtract_spectral_variance(spectrum_512, 512, &centroid_512, &variance_512);
+    xtract_spectral_variance(spectrum_4096, 4096, &centroid_4096, &variance_4096);
+    moment_argv_512[0] = centroid_512;
+    moment_argv_512[1] = sqrt(variance_512);
+    moment_argv_4096[0] = centroid_4096;
+    moment_argv_4096[1] = sqrt(variance_4096);
 }
 
 /* ===== mean ===== */
@@ -175,6 +189,72 @@ UBENCH(spectral_centroid, N4096)
 {
     double result;
     xtract_spectral_centroid(spectrum_4096, 4096, NULL, &result);
+    UBENCH_DO_NOTHING(&result);
+}
+
+/* ===== spectral_variance ===== */
+
+UBENCH(spectral_variance, N512)
+{
+    double result;
+    xtract_spectral_variance(spectrum_512, 512, &centroid_512, &result);
+    UBENCH_DO_NOTHING(&result);
+}
+
+UBENCH(spectral_variance, N4096)
+{
+    double result;
+    xtract_spectral_variance(spectrum_4096, 4096, &centroid_4096, &result);
+    UBENCH_DO_NOTHING(&result);
+}
+
+/* ===== spectral_skewness ===== */
+
+UBENCH(spectral_skewness, N512)
+{
+    double result;
+    xtract_spectral_skewness(spectrum_512, 512, moment_argv_512, &result);
+    UBENCH_DO_NOTHING(&result);
+}
+
+UBENCH(spectral_skewness, N4096)
+{
+    double result;
+    xtract_spectral_skewness(spectrum_4096, 4096, moment_argv_4096, &result);
+    UBENCH_DO_NOTHING(&result);
+}
+
+/* ===== spectral_kurtosis ===== */
+
+UBENCH(spectral_kurtosis, N512)
+{
+    double result;
+    xtract_spectral_kurtosis(spectrum_512, 512, moment_argv_512, &result);
+    UBENCH_DO_NOTHING(&result);
+}
+
+UBENCH(spectral_kurtosis, N4096)
+{
+    double result;
+    xtract_spectral_kurtosis(spectrum_4096, 4096, moment_argv_4096, &result);
+    UBENCH_DO_NOTHING(&result);
+}
+
+/* ===== lnorm ===== */
+
+UBENCH(lnorm, N512)
+{
+    double result;
+    double argv[3] = {2.0, (double)XTRACT_NO_LNORM_FILTER, 0.0};
+    xtract_lnorm(data_512, 512, argv, &result);
+    UBENCH_DO_NOTHING(&result);
+}
+
+UBENCH(lnorm, N4096)
+{
+    double result;
+    double argv[3] = {2.0, (double)XTRACT_NO_LNORM_FILTER, 0.0};
+    xtract_lnorm(data_4096, 4096, argv, &result);
     UBENCH_DO_NOTHING(&result);
 }
 
