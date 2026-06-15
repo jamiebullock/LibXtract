@@ -1,9 +1,7 @@
 
 
-#include "xttest_util.hpp"
-#include "xttest_tables.hpp"
-
-#include <random>
+#include "xttest_util.h"
+#include "xttest_tables.h"
 
 #include <math.h>
 #include <stdio.h>
