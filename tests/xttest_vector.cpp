@@ -1175,3 +1175,104 @@ TEST_CASE("xtract_init_fft DCT does not clobber MFCC", "[init]")
         REQUIRE(rv == XTRACT_SUCCESS);
     }
 }
+
+TEST_CASE("xtract_mmbses", "[vector]")
+{
+    /* Mel-based Multi-Band Spectral Entropy Signature. The input is N complex
+     * bins as interleaved real/imag pairs (2*N doubles); argv is an
+     * xtract_mel_filter. For each filter the energy is the mean magnitude of
+     * the filtered bins scaled by 2*pi. -96.0 is the library's log floor
+     * (XTRACT_LOG_LIMIT_DB), used when a log argument is below ~0. */
+    const double LOG_LIMIT_DB = -96.0;
+
+    SECTION("an all-zero filter produces a zero coefficient")
+    {
+        /* No bin passes the filter (count == 0), so the band is left at 0. */
+        const int N = 2;
+        double data[4] = {1.0, 1.0, 1.0, 1.0};
+        double filt[2] = {0.0, 0.0};
+        double *filt_ptr[1] = {filt};
+        xtract_mel_filter mf;
+        double result[1] = {-1.0};
+
+        mf.n_filters = 1;
+        mf.filters = filt_ptr;
+        REQUIRE(xtract_mmbses(data, N, &mf, result) == XTRACT_SUCCESS);
+        REQUIRE(result[0] == Approx(0.0).margin(EPSILON));
+    }
+
+    SECTION("a single passed bin reduces to log of its scaled magnitude")
+    {
+        /* Only bin 0 passes (count == 1). Its magnitude is |3 + 4i| = 5, the
+         * energy is 5/N = 2.5, and the coefficient is log(2*pi*2.5). */
+        const int N = 2;
+        double data[4] = {3.0, 4.0, 9.0, 9.0};
+        double filt[2] = {1.0, 0.0};
+        double *filt_ptr[1] = {filt};
+        xtract_mel_filter mf;
+        double result[1] = {-1.0};
+
+        mf.n_filters = 1;
+        mf.filters = filt_ptr;
+        REQUIRE(xtract_mmbses(data, N, &mf, result) == XTRACT_SUCCESS);
+        REQUIRE(result[0] == Approx(log(2.0 * M_PI * 2.5)).epsilon(EPSILON));
+    }
+
+    SECTION("a single passed bin with zero magnitude hits the log floor")
+    {
+        /* count == 1 but the bin is silent, so the scaled energy is below the
+         * log limit and the floored value is returned. */
+        const int N = 2;
+        double data[4] = {0.0, 0.0, 5.0, 5.0};
+        double filt[2] = {1.0, 0.0};
+        double *filt_ptr[1] = {filt};
+        xtract_mel_filter mf;
+        double result[1] = {-1.0};
+
+        mf.n_filters = 1;
+        mf.filters = filt_ptr;
+        REQUIRE(xtract_mmbses(data, N, &mf, result) == XTRACT_SUCCESS);
+        REQUIRE(result[0] == Approx(LOG_LIMIT_DB).epsilon(EPSILON));
+    }
+
+    SECTION("two passed bins with no imaginary spread floor the covariance term")
+    {
+        /* count == 2, real parts {1, -1}, imaginary parts {0, 0}. The imaginary
+         * variance is 0 so the determinant term is 0 (floored to -96), while the
+         * energy term is log(2*pi*1.0). Result is the mean of the two. */
+        const int N = 2;
+        double data[4] = {1.0, 0.0, -1.0, 0.0};
+        double filt[2] = {1.0, 1.0};
+        double *filt_ptr[1] = {filt};
+        xtract_mel_filter mf;
+        double result[1] = {-1.0};
+
+        mf.n_filters = 1;
+        mf.filters = filt_ptr;
+        REQUIRE(xtract_mmbses(data, N, &mf, result) == XTRACT_SUCCESS);
+        REQUIRE(result[0] == Approx((log(2.0 * M_PI * 1.0) + LOG_LIMIT_DB) / 2.0).epsilon(EPSILON));
+    }
+
+    SECTION("three passed bins exercise the full covariance path")
+    {
+        /* count == 3. real = {1, 0, -1}, imag = {0, 1, -1}; both means are 0.
+         * realVar = imagVar = 2/3 (divided by count), covariance = 1/(count-1)
+         * = 0.5, so the determinant term is (2/3)(2/3) - 0.5^2 = 7/36.
+         * energy = (1 + 1 + sqrt(2)) / 3 mean magnitude, scaled by 2*pi.
+         * Result is the mean of log(energy) and log(7/36). */
+        const int N = 3;
+        double data[6] = {1.0, 0.0, 0.0, 1.0, -1.0, -1.0};
+        double filt[3] = {1.0, 1.0, 1.0};
+        double *filt_ptr[1] = {filt};
+        xtract_mel_filter mf;
+        double result[1] = {-1.0};
+        double energy = 2.0 * M_PI * (2.0 + sqrt(2.0)) / 3.0;
+        double determinant = 7.0 / 36.0;
+        double expected = (log(energy) + log(determinant)) / 2.0;
+
+        mf.n_filters = 1;
+        mf.filters = filt_ptr;
+        REQUIRE(xtract_mmbses(data, N, &mf, result) == XTRACT_SUCCESS);
+        REQUIRE(result[0] == Approx(expected).epsilon(EPSILON));
+    }
+}
