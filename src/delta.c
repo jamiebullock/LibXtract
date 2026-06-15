@@ -27,6 +27,24 @@
 #include <stdlib.h>
 #include "xtract/libxtract.h"
 
+/* Direct multiplication for the common small integer orders, avoiding pow()'s
+ * exp(order * log(base)) dispatch in the inner loop. base is non-negative. */
+static double xtract_pow_order(const double base, const double order)
+{
+    if(order == 2.0)
+        return base * base;
+    if(order == 1.0)
+        return base;
+    if(order == 3.0)
+        return base * base * base;
+    if(order == 4.0)
+    {
+        const double b2 = base * base;
+        return b2 * b2;
+    }
+    return pow(base, order);
+}
+
 int xtract_flux(const double *data, const int N, const void *argv , double *result)
 {
 
@@ -77,7 +95,7 @@ int xtract_lnorm(const double *data, const int N, const void *argv , double *res
         {
             if(data[n] > 0)
             {
-                *result += pow(data[n], order);
+                *result += xtract_pow_order(data[n], order);
                 ++k;
             }
         }
@@ -85,14 +103,23 @@ int xtract_lnorm(const double *data, const int N, const void *argv , double *res
     default:
         for(n = 0; n < N; n++)
         {
-            *result += pow(fabs(data[n]), order);
+            *result += xtract_pow_order(fabs(data[n]), order);
             ++k;
         }
         break;
 
     }
 
-    *result = pow(*result, 1.0 / order);
+    /* integer-order roots without pow(): sqrt for 2, cbrt for 3, sqrt(sqrt)
+     * for 4; order 1 needs no root (the sum is already the 1-norm) */
+    if(order == 2.0)
+        *result = sqrt(*result);
+    else if(order == 3.0)
+        *result = cbrt(*result);
+    else if(order == 4.0)
+        *result = sqrt(sqrt(*result));
+    else if(order != 1.0)
+        *result = pow(*result, 1.0 / order);
     
     if (k == 0)
     {
