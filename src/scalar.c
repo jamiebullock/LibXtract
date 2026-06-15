@@ -250,15 +250,17 @@ int xtract_spectral_variance(const double *data, const int N, const void *argv, 
     vDSP_sveD(amps, 1, &A, m);                /* sum(amps) */
     free(d);
 #else
-    int mm = m;
+    int mm;
+    double sum = 0.0;
 
-    *result = 0.0;
-
-    while(mm--)
+    #pragma omp simd reduction(+:A,sum)
+    for(mm = 0; mm < m; mm++)
     {
         A += amps[mm];
-        *result += XTRACT_SQ(freqs[mm] - arg0) * amps[mm];
+        sum += XTRACT_SQ(freqs[mm] - arg0) * amps[mm];
     }
+
+    *result = sum;
 #endif
 
     if (A == 0.0)
@@ -292,7 +294,8 @@ int xtract_spectral_skewness(const double *data, const int N, const void *argv, 
     double neg_c = -arg0;
     double *d, *t;
 #else
-    int mm = m;
+    int mm;
+    double sum = 0.0;
 #endif
 
     *result = 0.0;
@@ -314,11 +317,14 @@ int xtract_spectral_skewness(const double *data, const int N, const void *argv, 
     vDSP_sveD(amps, 1, &sum_amps, m);
     free(d);
 #else
-    while(mm--)
+    #pragma omp simd reduction(+:sum,sum_amps)
+    for(mm = 0; mm < m; mm++)
     {
-        *result += XTRACT_POW3(freqs[mm] - arg0) * amps[mm];
+        sum += XTRACT_POW3(freqs[mm] - arg0) * amps[mm];
         sum_amps += amps[mm];
     }
+
+    *result = sum;
 #endif
 
     if(sum_amps == 0.0)
@@ -345,7 +351,8 @@ int xtract_spectral_kurtosis(const double *data, const int N, const void *argv, 
     double neg_c = -arg0;
     double *d;
 #else
-    int mm = m;
+    int mm;
+    double sum = 0.0;
 #endif
 
     if (arg1 == 0.0)
@@ -367,11 +374,14 @@ int xtract_spectral_kurtosis(const double *data, const int N, const void *argv, 
     vDSP_sveD(amps, 1, &sum_amps, m);
     free(d);
 #else
-    while(mm--)
+    #pragma omp simd reduction(+:sum,sum_amps)
+    for(mm = 0; mm < m; mm++)
     {
-        *result += XTRACT_POW4(freqs[mm] - arg0) * amps[mm];
+        sum += XTRACT_POW4(freqs[mm] - arg0) * amps[mm];
         sum_amps += amps[mm];
     }
+
+    *result = sum;
 #endif
 
     if(sum_amps == 0.0)
