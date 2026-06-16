@@ -117,7 +117,7 @@ jobs:
       - name: Install clang (provides libFuzzer)
         run: sudo apt-get update && sudo apt-get install -y clang
 
-      - name: Fuzz scalar features (libFuzzer, ASan + UBSan)
+      - name: Fuzz feature functions (libFuzzer, ASan + UBSan)
         run: make fuzz FUZZ_TIME=60
 
       - name: Upload crash reproducer on failure

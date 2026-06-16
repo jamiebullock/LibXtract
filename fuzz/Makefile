@@ -1,5 +1,4 @@
-TARGET = xtfuzz
-SRC = fuzz_scalar.c
+TARGETS = xtfuzz_scalar xtfuzz_delta xtfuzz_vector
 
 # A clang with libFuzzer. Apple clang lacks the runtime; on macOS install LLVM
 # via Homebrew and pass FUZZ_CC=/opt/homebrew/opt/llvm/bin/clang.
@@ -15,11 +14,13 @@ ifeq ($(OS), Darwin)
 endif
 LIBS += -lm
 
-$(TARGET): $(SRC) ../src/libxtract.a
-	$(FUZZ_CC) $(CFLAGS) -o $@ $(SRC) ../src/libxtract.a $(LIBS)
+all: $(TARGETS)
+
+xtfuzz_%: fuzz_%.c ../src/libxtract.a
+	$(FUZZ_CC) $(CFLAGS) -o $@ $< ../src/libxtract.a $(LIBS)
 
 clean:
-	@$(RM) $(TARGET)
-	@$(RM) -r $(TARGET).dSYM
+	@$(RM) $(TARGETS)
+	@$(RM) -r $(addsuffix .dSYM,$(TARGETS))
 
-.PHONY: clean
+.PHONY: all clean

@@ -39,7 +39,7 @@ coverage.info
 coverage-html
 
 # Fuzzing (make fuzz)
-fuzz/xtfuzz
+fuzz/xtfuzz_*
 fuzz/crash-*
 fuzz/*.dSYM
 

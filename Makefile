@@ -74,9 +74,10 @@ coverage:
 	@$(MAKE) -C tests clean
 	@$(MAKE) -C src
 
-# Build the library and a libFuzzer harness with fuzzer coverage + ASan/UBSan
-# and run it for FUZZ_TIME seconds. Requires a clang with libFuzzer: Apple clang
-# lacks the runtime, so on macOS install LLVM via Homebrew and pass
+# Build the library and the libFuzzer harnesses (one per feature header:
+# scalar, delta, vector) with fuzzer coverage + ASan/UBSan and run each for
+# FUZZ_TIME seconds. Requires a clang with libFuzzer: Apple clang lacks the
+# runtime, so on macOS install LLVM via Homebrew and pass
 # FUZZ_CC=/opt/homebrew/opt/llvm/bin/clang. Cleans before and restores the
 # normal build after a clean run.
 FUZZ_CC ?= clang
@@ -90,7 +91,10 @@ fuzz:
 	@$(MAKE) -C src clean
 	@$(MAKE) -C src CC=$(FUZZ_CC) EXTRA_FLAGS="$(FUZZ_LIB_FLAGS)"
 	@$(MAKE) -C fuzz FUZZ_CC=$(FUZZ_CC) FUZZ_SAN=$(FUZZ_SAN)
-	@./fuzz/xtfuzz -max_total_time=$(FUZZ_TIME) -rss_limit_mb=4096 -artifact_prefix=fuzz/
+	@for h in scalar delta vector; do \
+		echo "=== fuzzing $$h features ($(FUZZ_TIME)s) ==="; \
+		./fuzz/xtfuzz_$$h -max_total_time=$(FUZZ_TIME) -rss_limit_mb=4096 -artifact_prefix=fuzz/ || exit $$?; \
+	done
 	@$(MAKE) -C fuzz clean
 	@$(MAKE) -C src clean
 	@$(MAKE) -C src
