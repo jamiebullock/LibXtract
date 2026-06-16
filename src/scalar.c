@@ -448,7 +448,7 @@ int xtract_tristimulus_1(const double *data, const int N, const void *argv, doub
         if((temp = data[i]))
         {
             den += temp;
-            h = (int)floor(freqs[i] / fund + 0.5);
+            h = xtract_argv_int(floor(freqs[i] / fund + 0.5));
             if(h == 1)
                 p1 += temp;
         }
@@ -482,7 +482,7 @@ int xtract_tristimulus_2(const double *data, const int N, const void *argv, doub
         if((temp = data[i]))
         {
             den += temp;
-            h = (int)floor(freqs[i] / fund + 0.5);
+            h = xtract_argv_int(floor(freqs[i] / fund + 0.5));
             switch ((int)h)
             {
                 case 2:
@@ -532,7 +532,7 @@ int xtract_tristimulus_3(const double *data, const int N, const void *argv, doub
         if((temp = data[i]))
         {
             den += temp;
-            h = (int)floor(freqs[i] / fund + 0.5);
+            h = xtract_argv_int(floor(freqs[i] / fund + 0.5));
             if(h >= 5)
                 num += temp;
         }
@@ -798,7 +798,7 @@ int xtract_spectral_inharmonicity(const double *data, const int N, const void *a
     {
         if(amps[n])
         {
-            h = (int)floor(freqs[n] / fund + 0.5);
+            h = xtract_argv_int(floor(freqs[n] / fund + 0.5));
             num += fabs(freqs[n] - h * fund) * XTRACT_SQ(amps[n]);
             den += XTRACT_SQ(amps[n]);
         }
@@ -842,7 +842,7 @@ int xtract_odd_even_ratio(const double *data, const int N, const void *argv, dou
     {
         if((temp = data[n]))
         {
-            h = (int)floor(freqs[n] / fund + 0.5);
+            h = xtract_argv_int(floor(freqs[n] / fund + 0.5));
 
             /* Harmonics are numbered from 1: a bin nearest to harmonic
              * zero is below the first harmonic and belongs to neither sum */

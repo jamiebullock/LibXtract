@@ -91,3 +91,20 @@ UTEST(delta, decay_time_not_implemented)
     double result = -1.0;
     ASSERT_EQ(xtract_decay_time(data, 4, NULL, &result), XTRACT_FEATURE_NOT_IMPLEMENTED);
 }
+
+UTEST(delta, lnorm_out_of_range_argv)
+{
+    /* type/normalise are decoded from doubles; out-of-range or NaN values must
+     * not invoke undefined double->int conversion (regression for a fuzzer
+     * find). They fall back to the default filter / no normalisation, so the
+     * L2 norm of {1,-2,3,-4} = sqrt(30) is computed regardless. */
+    double data[] = {1.0, -2.0, 3.0, -4.0};
+    double argv_nan[3]  = {2.0, NAN, NAN};
+    double argv_huge[3] = {2.0, 1e308, -1e308};
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_lnorm(data, 4, argv_nan, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, sqrt(30.0), 1e-10);
+    ASSERT_EQ(xtract_lnorm(data, 4, argv_huge, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, sqrt(30.0), 1e-10);
+}

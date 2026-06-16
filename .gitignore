@@ -38,6 +38,11 @@ dist
 coverage.info
 coverage-html
 
+# Fuzzing (make fuzz)
+fuzz/xtfuzz_*
+fuzz/crash-*
+fuzz/*.dSYM
+
 # Project-specific files
 examples/simpletest/simpletest
 tests/xttest

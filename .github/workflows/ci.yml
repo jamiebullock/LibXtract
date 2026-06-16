@@ -108,3 +108,22 @@ jobs:
           export JAVA_HOME="$(cygpath -u "$JAVA_HOME")"
           export PATH="${JAVA_HOME}/bin:${PATH}"
           PYTHON=python NODE_INCLUDE=/mingw64/include/node make -C swig check
+
+  fuzz:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install clang (provides libFuzzer)
+        run: sudo apt-get update && sudo apt-get install -y clang
+
+      - name: Fuzz feature functions (libFuzzer, ASan + UBSan)
+        run: make fuzz FUZZ_TIME=60
+
+      - name: Upload crash reproducer on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fuzz-crash
+          path: fuzz/crash-*
+          if-no-files-found: ignore

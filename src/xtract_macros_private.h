@@ -57,4 +57,13 @@
 #define XTRACT_SPEC_BW_DEF 43.066 /* SR_DEFAULT / FFT_BANDS_DEF */
 #define XTRACT_ARRAY_ELEMENTS(_array) (sizeof(_array)/sizeof(_array[0]))
 
+/* Safe double->int conversion: out-of-range and NaN inputs yield 0 rather than
+ * the undefined behaviour of a direct cast (the >= / < comparisons are both
+ * false for NaN). Used for argv fields and computed harmonic numbers that an
+ * adversarial input could push outside int's range. */
+static inline int xtract_argv_int(double v)
+{
+    return (v >= -2147483648.0 && v < 2147483648.0) ? (int)v : 0;
+}
+
 #endif

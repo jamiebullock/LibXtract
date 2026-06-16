@@ -7,7 +7,7 @@ HPATH = include/xtract
 
 export XTRACT_VERSION PREFIX LIBRARY
 
-.PHONY: examples clean install doc src swig bench analyze check-asan cppcheck coverage
+.PHONY: examples clean install doc src swig bench analyze check-asan cppcheck coverage fuzz
 
 all: src examples
 
@@ -72,6 +72,31 @@ coverage:
 	@echo "Coverage report written to coverage-html/index.html"
 	@$(MAKE) -C src clean
 	@$(MAKE) -C tests clean
+	@$(MAKE) -C src
+
+# Build the library and the libFuzzer harnesses (one per feature header:
+# scalar, delta, vector) with fuzzer coverage + ASan/UBSan and run each for
+# FUZZ_TIME seconds. Requires a clang with libFuzzer: Apple clang lacks the
+# runtime, so on macOS install LLVM via Homebrew and pass
+# FUZZ_CC=/opt/homebrew/opt/llvm/bin/clang. Cleans before and restores the
+# normal build after a clean run.
+FUZZ_CC ?= clang
+FUZZ_TIME ?= 60
+# Sanitizer set for the fuzz build. AddressSanitizer's runtime deadlocks during
+# init on some macOS toolchains; pass FUZZ_SAN=undefined to fuzz with UBSan only
+# there. CI runs the full set on Linux.
+FUZZ_SAN ?= address,undefined
+FUZZ_LIB_FLAGS = -fsanitize=fuzzer-no-link,$(FUZZ_SAN) -fno-sanitize-recover=all -g -O1
+fuzz:
+	@$(MAKE) -C src clean
+	@$(MAKE) -C src CC=$(FUZZ_CC) EXTRA_FLAGS="$(FUZZ_LIB_FLAGS)"
+	@$(MAKE) -C fuzz FUZZ_CC=$(FUZZ_CC) FUZZ_SAN=$(FUZZ_SAN)
+	@for h in scalar delta vector; do \
+		echo "=== fuzzing $$h features ($(FUZZ_TIME)s) ==="; \
+		./fuzz/xtfuzz_$$h -max_total_time=$(FUZZ_TIME) -rss_limit_mb=4096 -artifact_prefix=fuzz/ || exit $$?; \
+	done
+	@$(MAKE) -C fuzz clean
+	@$(MAKE) -C src clean
 	@$(MAKE) -C src
 
 bench: src
