@@ -524,7 +524,7 @@ int xtract_mmbses(const double *data, const int N, const void *argv, double *res
      * coefficients are modelled as a zero-mean bivariate (real, imaginary)
      * Gaussian, and the band's coefficient is that distribution's differential
      * entropy
-     *     H = (1/2) ln(2*pi*e) + (1/2) ln(sigma_xx * sigma_yy - sigma_xy^2),
+     *     H = ln(2*pi*e) + (1/2) ln(sigma_xx * sigma_yy - sigma_xy^2),
      * i.e. the Gaussian constant plus half the log-determinant of the 2x2
      * covariance (Rincon et al. 2013, "A Context-Aware Baby Monitor for the
      * Automatic Selective Archiving of the Language of Infants", Eq. 5; after
@@ -574,9 +574,9 @@ int xtract_mmbses(const double *data, const int N, const void *argv, double *res
         det = sxx * syy - XTRACT_SQ(sxy);
 
         if (det < XTRACT_LOG_LIMIT)
-            result[filter] = (gaussian_term + XTRACT_LOG_LIMIT_DB) / 2.0;
+            result[filter] = gaussian_term + 0.5 * XTRACT_LOG_LIMIT_DB;
         else
-            result[filter] = (gaussian_term + log(det)) / 2.0;
+            result[filter] = gaussian_term + 0.5 * log(det);
     }
 
     return XTRACT_SUCCESS;

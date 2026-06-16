@@ -121,7 +121,7 @@ int xtract_gammatone_spectrogram(const double *data, const int N, const void *ar
  * \param *argv: a pointer to a data structure of type xtract_mel_filter, containing n_filters coefficient tables to make up a mel-spaced filterbank
  * \param *result: a pointer to an array of n_filters elements containing the resultant MEL-MBSES
  *
- * Each filter band's complex coefficients are modelled as a zero-mean bivariate (real, imaginary) Gaussian and the band's value is that distribution's differential entropy, H = (1/2)ln(2*pi*e) + (1/2)ln(det of the 2x2 covariance).
+ * Each filter band's complex coefficients are modelled as a zero-mean bivariate (real, imaginary) Gaussian and the band's value is that distribution's differential entropy, H = ln(2*pi*e) + (1/2)ln(det of the 2x2 covariance).
  *
  * The data structure pointed to by *argv must be obtained by first calling xtract_init_mfcc.
  * The method is described by: Rincon et al: A Context-Aware Baby Monitor for the Automatic Selective Archiving of the Language of Infants (2013)

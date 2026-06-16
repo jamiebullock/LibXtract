@@ -1210,21 +1210,14 @@ UTEST(init, fft_dct_does_not_clobber_mfcc)
 
 /* ===== xtract_mmbses =====
  *
- * Mel-based Multi-Band Spectral Entropy Signature. The input is N complex
- * bins as interleaved real/imag pairs (2*N doubles); argv is an
- * xtract_mel_filter. For each filter the energy is the mean magnitude of
- * the filtered bins scaled by 2*pi. -96.0 is the library's log floor
- * (XTRACT_LOG_LIMIT_DB), used when a log argument is below ~0.
- */
-
-/*
- * mmbses takes a magnitude/phase spectrum: data is {magnitudes (M), phases (M)}
- * with N = 2*M. Per band, the filter-weighted complex coefficients
- * (real = mag*cos(phase), imag = mag*sin(phase)) are modelled as a zero-mean
- * bivariate Gaussian and the result is its differential entropy
- *     H = (1/2)(ln(2*pi*e) + ln(sigma_xx*sigma_yy - sigma_xy^2)),
- * with ln(2*pi*e) = ln(2*pi) + 1, and a -96 dB floor when the determinant is
- * non-positive.
+ * Mel-based Multi-Band Spectral Entropy Signature. The input is a
+ * magnitude/phase spectrum: data is {magnitudes (M), phases (M)} with N = 2*M;
+ * argv is an xtract_mel_filter. Per band, the filter-weighted complex
+ * coefficients (real = mag*cos(phase), imag = mag*sin(phase)) are modelled as a
+ * zero-mean bivariate Gaussian and the result is its differential entropy
+ *     H = ln(2*pi*e) + (1/2)ln(sigma_xx*sigma_yy - sigma_xy^2),
+ * with ln(2*pi*e) = ln(2*pi) + 1 (Rincon et al. 2013, Eq. 5). -96.0
+ * (XTRACT_LOG_LIMIT_DB) is the determinant-term floor when it is non-positive.
  */
 
 UTEST(vector, mmbses_all_zero_filter_produces_zero_coefficient)
@@ -1258,7 +1251,7 @@ UTEST(vector, mmbses_single_passed_bin_floors_determinant)
     mf.n_filters = 1;
     mf.filters = filt_ptr;
     ASSERT_EQ(xtract_mmbses(data, N, &mf, result), XTRACT_SUCCESS);
-    CHECK_REL(result[0], (log(2.0 * M_PI) + 1.0 + LOG_LIMIT_DB) / 2.0, EPSILON);
+    CHECK_REL(result[0], (log(2.0 * M_PI) + 1.0) + 0.5 * LOG_LIMIT_DB, EPSILON);
 }
 
 UTEST(vector, mmbses_two_collinear_bins_floor_determinant)
@@ -1277,7 +1270,7 @@ UTEST(vector, mmbses_two_collinear_bins_floor_determinant)
     mf.n_filters = 1;
     mf.filters = filt_ptr;
     ASSERT_EQ(xtract_mmbses(data, N, &mf, result), XTRACT_SUCCESS);
-    CHECK_REL(result[0], (log(2.0 * M_PI) + 1.0 + LOG_LIMIT_DB) / 2.0, EPSILON);
+    CHECK_REL(result[0], (log(2.0 * M_PI) + 1.0) + 0.5 * LOG_LIMIT_DB, EPSILON);
 }
 
 UTEST(vector, mmbses_two_orthogonal_bins_positive_determinant)
@@ -1295,7 +1288,7 @@ UTEST(vector, mmbses_two_orthogonal_bins_positive_determinant)
     mf.n_filters = 1;
     mf.filters = filt_ptr;
     ASSERT_EQ(xtract_mmbses(data, N, &mf, result), XTRACT_SUCCESS);
-    CHECK_REL(result[0], (log(2.0 * M_PI) + 1.0 + log(0.25)) / 2.0, EPSILON);
+    CHECK_REL(result[0], (log(2.0 * M_PI) + 1.0) + 0.5 * log(0.25), EPSILON);
 }
 
 UTEST(vector, mmbses_three_bins_exercise_full_covariance_path)
@@ -1310,7 +1303,7 @@ UTEST(vector, mmbses_three_bins_exercise_full_covariance_path)
     double *filt_ptr[1] = {filt};
     xtract_mel_filter mf;
     double result[1] = {-1.0};
-    double expected = (log(2.0 * M_PI) + 1.0 + log(1.0 / 3.0)) / 2.0;
+    double expected = (log(2.0 * M_PI) + 1.0) + 0.5 * log(1.0 / 3.0);
 
     mf.n_filters = 1;
     mf.filters = filt_ptr;
