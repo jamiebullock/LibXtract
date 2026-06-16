@@ -32,6 +32,9 @@
 #include "xtract/xtract_vector.h"
 
 enum { VEC_N = 512, N_FILTERS = 13, RESULT_CAP = 2 * VEC_N + 64 };
+/* mmbses reads data as N interleaved complex pairs (data[n*2], data[n*2+1]),
+ * so it touches 2*N doubles; give every feature an input of that width. */
+enum { IN_CAP = 2 * VEC_N };
 
 enum {
     FZ_SPECTRUM, FZ_AUTOCORRELATION_FFT, FZ_MFCC, FZ_MEL_SPECTROGRAM,
@@ -115,7 +118,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     data += fz_bytes;
     size -= fz_bytes;
 
-    in = (double *)calloc(VEC_N, sizeof(double));
+    in = (double *)calloc(IN_CAP, sizeof(double));
     result = (double *)calloc(RESULT_CAP, sizeof(double));
     if (in == NULL || result == NULL)
     {
@@ -124,8 +127,8 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
         return 0;
     }
     avail = size / sizeof(double);
-    if (avail > VEC_N)
-        avail = VEC_N;
+    if (avail > IN_CAP)
+        avail = IN_CAP;
     memcpy(in, data, avail * sizeof(double));
 
     switch (feature)
