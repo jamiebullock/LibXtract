@@ -32,6 +32,12 @@
 #include "xtract/xtract_vector.h"
 
 enum { VEC_N = 512, N_FILTERS = 13, RESULT_CAP = 2 * VEC_N + 64 };
+/* Some features consume a paired spectrum: a coefficient half plus a second
+ * half of per-bin frequencies (e.g. spectral_subband_centroids reads data + N)
+ * or phases, i.e. 2*N doubles for N bins. Size every input to that width so
+ * those reads stay in bounds. */
+enum { IN_CAP = 2 * VEC_N };
+
 enum {
     FZ_SPECTRUM, FZ_AUTOCORRELATION_FFT, FZ_MFCC, FZ_MEL_SPECTROGRAM,
     FZ_GFCC, FZ_GAMMATONE_SPECTROGRAM, FZ_MMBSES,
@@ -114,7 +120,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     data += fz_bytes;
     size -= fz_bytes;
 
-    in = (double *)calloc(VEC_N, sizeof(double));
+    in = (double *)calloc(IN_CAP, sizeof(double));
     result = (double *)calloc(RESULT_CAP, sizeof(double));
     if (in == NULL || result == NULL)
     {
@@ -123,8 +129,8 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
         return 0;
     }
     avail = size / sizeof(double);
-    if (avail > VEC_N)
-        avail = VEC_N;
+    if (avail > IN_CAP)
+        avail = IN_CAP;
     memcpy(in, data, avail * sizeof(double));
 
     switch (feature)
