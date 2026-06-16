@@ -116,10 +116,12 @@ int xtract_gammatone_spectrogram(const double *data, const int N, const void *ar
 
 /** \brief Extract Mel based Multi-Band Spectral Entropy Signature coefficients
  *
- * \param *data: a pointer to an array of spectral coefficients, the result from xtract_spectrum() by XTRACT_SPECTRUM_COEFFICIENTS
- * \param N: the number of array elements to be considered
+ * \param *data: a magnitude/phase spectrum, the result from xtract_spectrum() by XTRACT_MAGNITUDE_PHASE_SPECTRUM. The first N/2 elements are bin magnitudes and the next N/2 the corresponding phases.
+ * \param N: the number of array elements to be considered (the full magnitude+phase array length; N/2 frequency bins are processed)
  * \param *argv: a pointer to a data structure of type xtract_mel_filter, containing n_filters coefficient tables to make up a mel-spaced filterbank
- * \param *result: a pointer to an array containing the resultant MEL-MBSES
+ * \param *result: a pointer to an array of n_filters elements containing the resultant MEL-MBSES
+ *
+ * Each filter band's complex coefficients are modelled as a zero-mean bivariate (real, imaginary) Gaussian and the band's value is that distribution's differential entropy, H = (1/2)ln(2*pi*e) + (1/2)ln(det of the 2x2 covariance).
  *
  * The data structure pointed to by *argv must be obtained by first calling xtract_init_mfcc.
  * The method is described by: Rincon et al: A Context-Aware Baby Monitor for the Automatic Selective Archiving of the Language of Infants (2013)

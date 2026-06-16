@@ -260,7 +260,7 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
         }
         break;
 
-    case XTRACT_SPECTRUM_COEFFICIENTS:
+    case XTRACT_MAGNITUDE_PHASE_SPECTRUM:
         for(n = 0, m = 0; m < M; ++n, ++m)
         {
             if(n==0 && !withDC) /* discard DC and keep Nyquist */
@@ -297,10 +297,14 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
 				imag = fft->imagp[n];
 			}
 #endif
-            result[m*2] = real;
-            result[m*2+1] = imag;
+            /* Magnitudes in the first half, phases in the second -- replacing
+             * the bin frequencies, which are a deterministic n * q the caller
+             * can recompute. result[m] reconstructs to real/imag via
+             * magnitude * cos/sin(phase). */
+            result[m] = sqrt(XTRACT_SQ(real) + XTRACT_SQ(imag)) / (double)N;
+            result[M + m] = atan2(imag, real);
             XTRACT_GET_MAX;
-            }
+        }
         break;
 
     default:
@@ -350,29 +354,10 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
 
     if(normalise && max != 0.0)
     {
-        if(vector == XTRACT_SPECTRUM_COEFFICIENTS)
-        {
-            /* Interleaved formats: find true max magnitude, then scale both components */
-            double true_max = 0.0;
-            for(n = 0; n < M; n++)
-            {
-                double mag = sqrt(XTRACT_SQ(result[n*2]) + XTRACT_SQ(result[n*2+1]));
-                if(mag > true_max) true_max = mag;
-            }
-            if(true_max != 0.0)
-            {
-                for(n = 0; n < M; n++)
-                {
-                    result[n*2] /= true_max;
-                    result[n*2+1] /= true_max;
-                }
-            }
-        }
-        else
-        {
-            for(n = 0; n < M; n++)
-                result[n] /= max;
-        }
+        /* Scale the magnitude/power coefficients in the first half; the second
+         * half (bin frequencies, or phases for MAGNITUDE_PHASE) is left as-is. */
+        for(n = 0; n < M; n++)
+            result[n] /= max;
     }
 
 #ifdef USE_OOURA
@@ -533,94 +518,67 @@ int xtract_gfcc(const double *data, const int N, const void *argv, double *resul
 
 int xtract_mmbses(const double *data, const int N, const void *argv, double *result)
 {
-    /* NOTE: data must contain 2*N doubles (N complex pairs as real/imag interleaved) */
-    xtract_mel_filter *f;
+    /* data is a magnitude/phase spectrum as produced by xtract_spectrum() with
+     * XTRACT_MAGNITUDE_PHASE_SPECTRUM: the first M = N/2 elements are bin
+     * magnitudes, the next M their phases. Each filter band's complex
+     * coefficients are modelled as a zero-mean bivariate (real, imaginary)
+     * Gaussian, and the band's coefficient is that distribution's differential
+     * entropy
+     *     H = (1/2) ln(2*pi*e) + (1/2) ln(sigma_xx * sigma_yy - sigma_xy^2),
+     * i.e. the Gaussian constant plus half the log-determinant of the 2x2
+     * covariance (Rincon et al. 2013, "A Context-Aware Baby Monitor for the
+     * Automatic Selective Archiving of the Language of Infants", Eq. 5; after
+     * Camarena-Ibarrola & Chavez). */
+    const xtract_mel_filter *f = (const xtract_mel_filter *)argv;
+    const int M = N >> 1;
+    /* ln(2*pi*e) = ln(2*pi) + 1, avoiding the non-portable M_E. */
+    const double gaussian_term = log(2.0 * M_PI) + 1.0;
     int n, filter;
-    double* real = (double*)malloc(sizeof(double)*N);
-    double* imag = (double*)malloc(sizeof(double)*N);
-
-    if(real == NULL || imag == NULL)
-    {
-        free(real);
-        free(imag);
-        return XTRACT_MALLOC_FAILED;
-    }
-
-    f = (xtract_mel_filter *)argv;
 
     for (filter = 0; filter < f->n_filters; filter++)
     {
         int count = 0;
-        double realMean = 0, realVariance = 0;
-        double imagMean = 0, imagVariance = 0;
-        double covariance = 0;
-        double energy = 0;
-        double temp;
+        double sxx = 0.0, syy = 0.0, sxy = 0.0;
+        double det;
 
-        result[filter] = 0.0;
-        for(n = 0; n < N; n++)
+        /* Accumulate the zero-mean second moments of the filter-weighted
+         * complex coefficients (real = mag*cos(phase), imag = mag*sin(phase)). */
+        for (n = 0; n < M; n++)
         {
-          double tempReal = data[n*2]*f->filters[filter][n];
-          double tempImag = data[n*2+1]*f->filters[filter][n];
+            double weight = f->filters[filter][n];
+            double re, im;
 
-            if (f->filters[filter][n] != 0)
-            {
-                real[count] = tempReal;
-                imag[count] = tempImag;
-                count++;
-            }
-            energy += sqrt(XTRACT_SQ(tempReal) + XTRACT_SQ(tempImag)) / (double)N;
+            if (weight == 0.0)
+                continue;
+
+            re = data[n] * cos(data[M + n]) * weight;
+            im = data[n] * sin(data[M + n]) * weight;
+            sxx += XTRACT_SQ(re);
+            syy += XTRACT_SQ(im);
+            sxy += re * im;
+            count++;
         }
+
         if (count == 0)
-          continue;
-        if (count == 1)
         {
-          energy = (double)2*M_PI*energy;
+            /* No bin passes the filter: the band carries no information. */
+            result[filter] = 0.0;
+            continue;
+        }
 
-          if (energy < XTRACT_LOG_LIMIT)
-              result[filter] = XTRACT_LOG_LIMIT_DB;
-          else
-              result[filter] = log(energy);
+        sxx /= count;
+        syy /= count;
+        sxy /= count;
+        /* A single passed bin leaves the covariance rank-deficient (det == 0),
+         * so the entropy floors without a dedicated case. */
+        det = sxx * syy - XTRACT_SQ(sxy);
 
-          continue;
-        }
-        /* Calculate the arithmetic means of real and imaginary parts */
-        for(n = 0; n < count; n++)
-        {
-            realMean += real[n] / count;
-            imagMean += imag[n] / count;
-        }
-        /* Calculate the variances of real and imaginary parts */
-        for(n = 0; n < count; n++)
-        {
-            realVariance += XTRACT_SQ(real[n]-realMean) / count;
-            imagVariance += XTRACT_SQ(imag[n]-imagMean) / count;
-        }
-        /* Calculate the covariance between real and imaginary parts */
-        for(n = 0; n < count; n++)
-        {
-            covariance += (real[n]-realMean)*(imag[n]-imagMean);
-        }
-        if(count > 1)
-            covariance /= (count - 1);
-        /* Calculate the final Mel based Multi-Band Spectral Entropy Signature coefficients */
-        temp = realVariance*imagVariance-XTRACT_SQ(covariance);
-
-        if (temp < XTRACT_LOG_LIMIT)
-            temp = XTRACT_LOG_LIMIT_DB;
+        if (det < XTRACT_LOG_LIMIT)
+            result[filter] = (gaussian_term + XTRACT_LOG_LIMIT_DB) / 2.0;
         else
-            temp = log(temp);
-
-        energy = (double)2*M_PI*energy;
-        if (energy < XTRACT_LOG_LIMIT)
-            energy = XTRACT_LOG_LIMIT_DB;
-        else
-            energy = log(energy);
-
-        result[filter] = (energy + temp) / 2;
+            result[filter] = (gaussian_term + log(det)) / 2.0;
     }
-    free(real);
-    free(imag);
+
     return XTRACT_SUCCESS;
 }
 
