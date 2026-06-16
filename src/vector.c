@@ -63,9 +63,9 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
 #endif
 
     q = *(double *)argv;
-    vector = (int)*((double *)argv+1);
-    withDC = (int)*((double *)argv+2);
-    normalise = (int)*((double *)argv+3);
+    vector = xtract_argv_int(*((double *)argv+1));
+    withDC = xtract_argv_int(*((double *)argv+2));
+    normalise = xtract_argv_int(*((double *)argv+3));
 
     XTRACT_CHECK_q;
 #ifdef USE_OOURA

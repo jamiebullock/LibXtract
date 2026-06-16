@@ -2089,3 +2089,15 @@ UTEST(scalar, peak_below_threshold)
     int rv = xtract_peak(data, 4, &threshold, &result);
     ASSERT_EQ(rv, XTRACT_NO_RESULT);
 }
+
+UTEST(scalar, harmonic_number_no_ub_on_zero_fundamental)
+{
+    /* The harmonic number round(freq/fund) must not invoke undefined
+     * double->int conversion when fund is 0 (the ratio is infinite); the bin
+     * maps to no finite harmonic, so no fundamental energy is found.
+     * Regression for a fuzzer-found UB in the tristimulus/harmonic features. */
+    double data[] = {1.0, 2.0, 100.0, 200.0}; /* amplitudes, frequencies */
+    double fund0 = 0.0;
+    double result = -1.0;
+    ASSERT_EQ(xtract_tristimulus_1(data, 4, &fund0, &result), XTRACT_NO_RESULT);
+}

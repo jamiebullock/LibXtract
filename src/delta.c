@@ -26,6 +26,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include "xtract/libxtract.h"
+#include "xtract_macros_private.h"
 
 /* Direct multiplication for the common small integer orders, avoiding pow()'s
  * exp(order * log(base)) dispatch in the inner loop. base is non-negative. */
@@ -80,8 +81,8 @@ int xtract_lnorm(const double *data, const int N, const void *argv , double *res
     double order;
 
     order = *(double *)argv;
-    type = *((double *)argv+1);
-    normalise = (int)*((double *)argv+2);
+    type = xtract_argv_int(*((double *)argv+1));
+    normalise = xtract_argv_int(*((double *)argv+2));
 
     order = order > 0 ? order : 2.0;
 
