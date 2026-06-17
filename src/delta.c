@@ -78,9 +78,8 @@ int xtract_lnorm(const double *data, const int N, const void *argv , double *res
         normalise,
         k = 0;
 
-    double order;
+    double order = *(double *)argv;
 
-    order = *(double *)argv;
     type = xtract_argv_int(*((double *)argv+1));
     normalise = xtract_argv_int(*((double *)argv+2));
 
@@ -156,9 +155,7 @@ int xtract_difference_vector(const double *data, const int N, const void *argv, 
     const double *frame1,
           *frame2;
 
-    int n;
-
-    n = N >> 1;
+    int n = N >> 1;
 
     frame1 = data;
     frame2 = data + n;

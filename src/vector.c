@@ -483,9 +483,7 @@ static int filterbank_spectrogram(const double *data, const int N, const xtract_
 static int cepstral_coefficients(const double *data, const int N, const xtract_mel_filter *f, double *result)
 {
 
-    double *temp;
-
-    temp = (double *)calloc(f->n_filters, sizeof(double));
+    double *temp = (double *)calloc(f->n_filters, sizeof(double));
     if(temp == NULL)
         return XTRACT_MALLOC_FAILED;
 
