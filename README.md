@@ -75,6 +75,15 @@ and by `make analyze`, which runs the clang static analyzer over the
 first-party sources and fails on any finding; CI runs it on Linux and
 macOS.
 
+Formatting follows Allman brace style (the opening brace on its own line
+for functions and control flow, but same-line braces for `struct`, `enum`
+and `extern "C"`), four-space indentation with no tabs, the pointer
+asterisk bound to the variable (`const double *data`), and no space between
+a keyword and its parenthesis (`if(x)`, `for(i = 0; ...)`). These rules are
+captured as executable configuration in `.clang-format`; run `clang-format
+--dry-run <file>` to check a file against them, or `clang-format -i <file>`
+to apply them.
+
 ## API stability
 
 LibXtract follows [Semantic Versioning](https://semver.org). The public API
