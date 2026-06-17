@@ -32,8 +32,10 @@
 #include "xtract/xtract_vector.h"
 
 enum { VEC_N = 512, N_FILTERS = 13, RESULT_CAP = 2 * VEC_N + 64 };
-/* mmbses reads data as N interleaved complex pairs (data[n*2], data[n*2+1]),
- * so it touches 2*N doubles; give every feature an input of that width. */
+/* Some features consume a paired spectrum: a coefficient half plus a second
+ * half of per-bin frequencies (e.g. spectral_subband_centroids reads data + N)
+ * or phases, i.e. 2*N doubles for N bins. Size every input to that width so
+ * those reads stay in bounds. */
 enum { IN_CAP = 2 * VEC_N };
 
 enum {

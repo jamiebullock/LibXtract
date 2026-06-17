@@ -976,37 +976,38 @@ UTEST(vector, spectrum_magnitude_no_collision_between_magnitudes_and_frequencies
     }
 }
 
-UTEST(vector, spectrum_magnitude_equals_sqrt_real2_imag2_from_coefficients)
+UTEST(vector, spectrum_magnitude_phase_first_half_matches_magnitude_phase_zero_at_cosine_peak)
 {
     const int N = 64;
     const int M = N / 2;
     double data[64];
-    double result[64] = {0};
+    double mp[64] = {0};
+    double mag[64] = {0};
     double sr = 8000.0;
-    double coeffs[64] = {0};
-    double argv_coeffs[] = {sr / 64, (double)XTRACT_SPECTRUM_COEFFICIENTS, 0.0, 0.0};
+    double argv_mp[]  = {sr / 64, (double)XTRACT_MAGNITUDE_PHASE_SPECTRUM, 0.0, 0.0};
     double argv_mag[] = {sr / 64, (double)XTRACT_MAGNITUDE_SPECTRUM, 0.0, 0.0};
     int n;
     int i;
+    int peak = 0;
 
     for (n = 0; n < N; n++)
         data[n] = cos(2.0 * M_PI * 4.0 * n / N);
 
     xtract_init_fft(N, XTRACT_SPECTRUM);
 
-    /* Compute SPECTRUM_COEFFICIENTS (interleaved real/imag) */
-    xtract_spectrum(data, N, argv_coeffs, coeffs);
+    xtract_spectrum(data, N, argv_mp, mp);
+    xtract_spectrum(data, N, argv_mag, mag);
 
-    /* Compute MAGNITUDE_SPECTRUM */
-    xtract_spectrum(data, N, argv_mag, result);
-
-    /* Each magnitude should equal sqrt(real^2 + imag^2) / N */
+    /* The first half of a magnitude/phase spectrum is the magnitude spectrum. */
     for (i = 0; i < M; i++)
-    {
-        double expected = sqrt(coeffs[i * 2] * coeffs[i * 2] +
-                               coeffs[i * 2 + 1] * coeffs[i * 2 + 1]) / (double)N;
-        CHECK_NEAR(result[i], expected, 1e-10);
-    }
+        CHECK_NEAR(mp[i], mag[i], 1e-10);
+
+    /* A pure cosine at an exact bin is real and positive there, so the phase
+     * (second half) is zero at the magnitude peak. */
+    for (i = 1; i < M; i++)
+        if (mp[i] > mp[peak])
+            peak = i;
+    CHECK_NEAR(mp[M + peak], 0.0, 1e-6);
 }
 
 UTEST(vector, spectrum_magnitude_unit_cosine_canonical_magnitude_0_5)
@@ -1209,18 +1210,21 @@ UTEST(init, fft_dct_does_not_clobber_mfcc)
 
 /* ===== xtract_mmbses =====
  *
- * Mel-based Multi-Band Spectral Entropy Signature. The input is N complex
- * bins as interleaved real/imag pairs (2*N doubles); argv is an
- * xtract_mel_filter. For each filter the energy is the mean magnitude of
- * the filtered bins scaled by 2*pi. -96.0 is the library's log floor
- * (XTRACT_LOG_LIMIT_DB), used when a log argument is below ~0.
+ * Mel-based Multi-Band Spectral Entropy Signature. The input is a
+ * magnitude/phase spectrum: data is {magnitudes (M), phases (M)} with N = 2*M;
+ * argv is an xtract_mel_filter. Per band, the filter-weighted complex
+ * coefficients (real = mag*cos(phase), imag = mag*sin(phase)) are modelled as a
+ * zero-mean bivariate Gaussian and the result is its differential entropy
+ *     H = ln(2*pi*e) + (1/2)ln(sigma_xx*sigma_yy - sigma_xy^2),
+ * with ln(2*pi*e) = ln(2*pi) + 1 (Rincon et al. 2013, Eq. 5). -96.0
+ * (XTRACT_LOG_LIMIT_DB) is the determinant-term floor when it is non-positive.
  */
 
 UTEST(vector, mmbses_all_zero_filter_produces_zero_coefficient)
 {
     /* No bin passes the filter (count == 0), so the band is left at 0. */
-    const int N = 2;
-    double data[4] = {1.0, 1.0, 1.0, 1.0};
+    const int N = 4;
+    double data[4] = {1.0, 1.0, 0.0, 0.0};
     double filt[2] = {0.0, 0.0};
     double *filt_ptr[1] = {filt};
     xtract_mel_filter mf;
@@ -1232,12 +1236,13 @@ UTEST(vector, mmbses_all_zero_filter_produces_zero_coefficient)
     CHECK_NEAR(result[0], 0.0, EPSILON);
 }
 
-UTEST(vector, mmbses_single_passed_bin_reduces_to_log_of_scaled_magnitude)
+UTEST(vector, mmbses_single_passed_bin_floors_determinant)
 {
-    /* Only bin 0 passes (count == 1). Its magnitude is |3 + 4i| = 5, the
-     * energy is 5/N = 2.5, and the coefficient is log(2*pi*2.5). */
-    const int N = 2;
-    double data[4] = {3.0, 4.0, 9.0, 9.0};
+    const double LOG_LIMIT_DB = -96.0;
+    /* One passed bin (mag 5, phase 0 -> (5, 0)) gives a rank-deficient
+     * covariance, so the determinant term floors to -96 dB. */
+    const int N = 4;
+    double data[4] = {5.0, 0.0, 0.0, 0.0};
     double filt[2] = {1.0, 0.0};
     double *filt_ptr[1] = {filt};
     xtract_mel_filter mf;
@@ -1246,35 +1251,17 @@ UTEST(vector, mmbses_single_passed_bin_reduces_to_log_of_scaled_magnitude)
     mf.n_filters = 1;
     mf.filters = filt_ptr;
     ASSERT_EQ(xtract_mmbses(data, N, &mf, result), XTRACT_SUCCESS);
-    CHECK_REL(result[0], log(2.0 * M_PI * 2.5), EPSILON);
+    CHECK_REL(result[0], (log(2.0 * M_PI) + 1.0) + 0.5 * LOG_LIMIT_DB, EPSILON);
 }
 
-UTEST(vector, mmbses_single_passed_bin_with_zero_magnitude_hits_log_floor)
+UTEST(vector, mmbses_two_collinear_bins_floor_determinant)
 {
     const double LOG_LIMIT_DB = -96.0;
-    /* count == 1 but the bin is silent, so the scaled energy is below the
-     * log limit and the floored value is returned. */
-    const int N = 2;
-    double data[4] = {0.0, 0.0, 5.0, 5.0};
-    double filt[2] = {1.0, 0.0};
-    double *filt_ptr[1] = {filt};
-    xtract_mel_filter mf;
-    double result[1] = {-1.0};
-
-    mf.n_filters = 1;
-    mf.filters = filt_ptr;
-    ASSERT_EQ(xtract_mmbses(data, N, &mf, result), XTRACT_SUCCESS);
-    CHECK_REL(result[0], LOG_LIMIT_DB, EPSILON);
-}
-
-UTEST(vector, mmbses_two_passed_bins_no_imaginary_spread_floor_covariance)
-{
-    const double LOG_LIMIT_DB = -96.0;
-    /* count == 2, real parts {1, -1}, imaginary parts {0, 0}. The imaginary
-     * variance is 0 so the determinant term is 0 (floored to -96), while the
-     * energy term is log(2*pi*1.0). Result is the mean of the two. */
-    const int N = 2;
-    double data[4] = {1.0, 0.0, -1.0, 0.0};
+    /* Two passed bins both at phase 0 -> (1, 0) and (2, 0). All imaginary
+     * parts are exactly 0, so sigma_yy = 0 and the determinant is 0 (floored).
+     * (phase 0 rather than pi avoids sin(pi) != 0 rounding.) */
+    const int N = 4;
+    double data[4] = {1.0, 2.0, 0.0, 0.0};
     double filt[2] = {1.0, 1.0};
     double *filt_ptr[1] = {filt};
     xtract_mel_filter mf;
@@ -1283,25 +1270,40 @@ UTEST(vector, mmbses_two_passed_bins_no_imaginary_spread_floor_covariance)
     mf.n_filters = 1;
     mf.filters = filt_ptr;
     ASSERT_EQ(xtract_mmbses(data, N, &mf, result), XTRACT_SUCCESS);
-    CHECK_REL(result[0], (log(2.0 * M_PI * 1.0) + LOG_LIMIT_DB) / 2.0, EPSILON);
+    CHECK_REL(result[0], (log(2.0 * M_PI) + 1.0) + 0.5 * LOG_LIMIT_DB, EPSILON);
 }
 
-UTEST(vector, mmbses_three_passed_bins_exercise_full_covariance_path)
+UTEST(vector, mmbses_two_orthogonal_bins_positive_determinant)
 {
-    /* count == 3. real = {1, 0, -1}, imag = {0, 1, -1}; both means are 0.
-     * realVar = imagVar = 2/3 (divided by count), covariance = 1/(count-1)
-     * = 0.5, so the determinant term is (2/3)(2/3) - 0.5^2 = 7/36.
-     * energy = (1 + 1 + sqrt(2)) / 3 mean magnitude, scaled by 2*pi.
-     * Result is the mean of log(energy) and log(7/36). */
-    const int N = 3;
-    double data[6] = {1.0, 0.0, 0.0, 1.0, -1.0, -1.0};
+    /* Two passed bins at phases 0 and pi/2 -> (1, 0) and (0, 1). Zero-mean
+     * second moments: sigma_xx = sigma_yy = 0.5, sigma_xy = 0, so the
+     * determinant is 0.25. */
+    const int N = 4;
+    double data[4] = {1.0, 1.0, 0.0, M_PI / 2.0};
+    double filt[2] = {1.0, 1.0};
+    double *filt_ptr[1] = {filt};
+    xtract_mel_filter mf;
+    double result[1] = {-1.0};
+
+    mf.n_filters = 1;
+    mf.filters = filt_ptr;
+    ASSERT_EQ(xtract_mmbses(data, N, &mf, result), XTRACT_SUCCESS);
+    CHECK_REL(result[0], (log(2.0 * M_PI) + 1.0) + 0.5 * log(0.25), EPSILON);
+}
+
+UTEST(vector, mmbses_three_bins_exercise_full_covariance_path)
+{
+    /* Three passed bins -> (1, 0), (0, 1), (1, 1) via phases 0, pi/2, pi/4
+     * (the last with magnitude sqrt(2)). Zero-mean second moments:
+     * sigma_xx = sigma_yy = 2/3, sigma_xy = 1/3, so the determinant is
+     * (2/3)(2/3) - (1/3)^2 = 1/3. */
+    const int N = 6;
+    double data[6] = {1.0, 1.0, sqrt(2.0), 0.0, M_PI / 2.0, M_PI / 4.0};
     double filt[3] = {1.0, 1.0, 1.0};
     double *filt_ptr[1] = {filt};
     xtract_mel_filter mf;
     double result[1] = {-1.0};
-    double energy = 2.0 * M_PI * (2.0 + sqrt(2.0)) / 3.0;
-    double determinant = 7.0 / 36.0;
-    double expected = (log(energy) + log(determinant)) / 2.0;
+    double expected = (log(2.0 * M_PI) + 1.0) + 0.5 * log(1.0 / 3.0);
 
     mf.n_filters = 1;
     mf.filters = filt_ptr;
