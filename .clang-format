@@ -1,0 +1,37 @@
+# LibXtract house style (see README "Code standard" and CONTRIBUTING).
+# Allman braces, 4-space indent, pointer binds to the variable, no space
+# between a keyword and its parenthesis. ColumnLimit is 0: clang-format
+# normalises indentation/braces/spacing but never reflows long lines.
+---
+Language: Cpp
+BasedOnStyle: LLVM
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+ColumnLimit: 0
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterFunction: true
+  AfterControlStatement: Always
+  AfterEnum: false
+  AfterStruct: false
+  AfterUnion: false
+  AfterExternBlock: false
+  BeforeElse: true
+  BeforeWhile: false
+  AfterCaseLabel: false
+  SplitEmptyFunction: true
+  IndentBraces: false
+PointerAlignment: Right
+SpaceBeforeParens: Never
+SpaceAfterCStyleCast: false
+SpacesInParentheses: false
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: None
+AllowShortBlocksOnASingleLine: Never
+AllowShortCaseLabelsOnASingleLine: false
+IndentCaseLabels: false
+KeepEmptyLinesAtTheStartOfBlocks: false
+SortIncludes: false
+AlignTrailingComments: true
