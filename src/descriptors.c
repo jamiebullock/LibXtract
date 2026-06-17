@@ -100,11 +100,19 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_GFCC:
         case XTRACT_GAMMATONE_SPECTROGRAM:
         case XTRACT_LPC:
-        case XTRACT_LPCC:
             *argv_min = XTRACT_UNBOUNDED_MIN;
             *argv_max = XTRACT_UNBOUNDED_MAX;
             *argv_def = XTRACT_NO_DEFAULT;
             *argv_unit = XTRACT_DBFS;
+            break;
+        case XTRACT_LPCC:
+            /* argv[0] is the cepstrum length (Q); when omitted xtract_lpcc
+             * defaults it to the LPC order p, so no static default applies.
+             * XTRACT_LPCC_CEPSTRUM_ORDER(p) gives the recommended Q. */
+            *argv_min = 1;
+            *argv_max = XTRACT_UNBOUNDED_MAX;
+            *argv_def = XTRACT_NO_DEFAULT;
+            *argv_unit = (xtract_unit_t)XTRACT_NONE;
             break;
         case XTRACT_SPECTRAL_INHARMONICITY:
             *argv_min = 0.0;
