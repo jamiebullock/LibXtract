@@ -916,7 +916,7 @@ int xtract_lpcc(const double *data, const int N, const void *argv, double *resul
     int cep_length;
 
     if (argv == NULL)
-        cep_length = XTRACT_LPCC_CEPSTRUM_ORDER(order); /* Rabiner Q ~ (3/2)p */
+        cep_length = order; /* default keeps the output no longer than the input */
     else
     {
         cep_length = *(int *)argv;
