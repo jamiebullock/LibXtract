@@ -235,6 +235,23 @@ UTEST(vector, lpcc_computes_cepstral_recursion_for_int_argv)
     CHECK_REL(result[1], 0.375, EPSILON);
 }
 
+UTEST(vector, lpcc_null_argv_defaults_to_rabiner_cepstrum_order)
+{
+    /* With argv == NULL the cepstrum length defaults to Rabiner's
+     * Q = round((3/2)p). Here p = N - 1 = 2, so Q = 3, and the recursion
+     * extends one coefficient past the LPC order:
+     * c[1] = a[1] = 0.5
+     * c[2] = a[2] + (1 * c[1] * a[1]) / 2 = 0.375
+     * c[3] = (2 * c[2] * a[1]) / 3 = 0.125 */
+    double lpc[3] = {0.0, 0.5, 0.25};
+    double result[3] = {0};
+
+    ASSERT_EQ(xtract_lpcc(lpc, 3, NULL, result), XTRACT_SUCCESS);
+    CHECK_REL(result[0], 0.5, EPSILON);
+    CHECK_REL(result[1], 0.375, EPSILON);
+    CHECK_REL(result[2], 0.125, EPSILON);
+}
+
 /* ===== xtract_harmonic_spectrum ===== */
 
 UTEST(vector, harmonic_spectrum_zero_fundamental_yields_no_result_and_zeroed_output)
