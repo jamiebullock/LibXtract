@@ -32,13 +32,13 @@
  * exp(order * log(base)) dispatch in the inner loop. base is non-negative. */
 static double xtract_pow_order(const double base, const double order)
 {
-    if(order == 2.0)
+    if (order == 2.0)
         return base * base;
-    if(order == 1.0)
+    if (order == 1.0)
         return base;
-    if(order == 3.0)
+    if (order == 3.0)
         return base * base * base;
-    if(order == 4.0)
+    if (order == 4.0)
     {
         const double b2 = base * base;
         return b2 * b2;
@@ -46,9 +46,8 @@ static double xtract_pow_order(const double base, const double order)
     return pow(base, order);
 }
 
-int xtract_flux(const double *data, const int N, const void *argv , double *result)
+int xtract_flux(const double *data, const int N, const void *argv, double *result)
 {
-
     int n, M, rv;
     double *diff;
 
@@ -56,10 +55,10 @@ int xtract_flux(const double *data, const int N, const void *argv , double *resu
 
     diff = (double *)malloc(M * sizeof(double));
 
-    if(diff == NULL)
+    if (diff == NULL)
         return XTRACT_MALLOC_FAILED;
 
-    for(n = 0; n < M; n++)
+    for (n = 0; n < M; n++)
         diff[n] = data[n] - data[M + n];
 
     rv = xtract_lnorm(diff, M, argv, result);
@@ -67,12 +66,10 @@ int xtract_flux(const double *data, const int N, const void *argv , double *resu
     free(diff);
 
     return rv;
-
 }
 
-int xtract_lnorm(const double *data, const int N, const void *argv , double *result)
+int xtract_lnorm(const double *data, const int N, const void *argv, double *result)
 {
-
     int n,
         type,
         normalise,
@@ -80,20 +77,19 @@ int xtract_lnorm(const double *data, const int N, const void *argv , double *res
 
     double order = *(double *)argv;
 
-    type = xtract_argv_int(*((double *)argv+1));
-    normalise = xtract_argv_int(*((double *)argv+2));
+    type = xtract_argv_int(*((double *)argv + 1));
+    normalise = xtract_argv_int(*((double *)argv + 2));
 
     order = order > 0 ? order : 2.0;
 
     *result = 0.0;
-    
-    switch(type)
-    {
 
+    switch (type)
+    {
     case XTRACT_POSITIVE_SLOPE:
-        for(n = 0; n < N; n++)
+        for (n = 0; n < N; n++)
         {
-            if(data[n] > 0)
+            if (data[n] > 0)
             {
                 *result += xtract_pow_order(data[n], order);
                 ++k;
@@ -101,68 +97,60 @@ int xtract_lnorm(const double *data, const int N, const void *argv , double *res
         }
         break;
     default:
-        for(n = 0; n < N; n++)
+        for (n = 0; n < N; n++)
         {
             *result += xtract_pow_order(fabs(data[n]), order);
             ++k;
         }
         break;
-
     }
 
     /* integer-order roots without pow(): sqrt for 2, cbrt for 3, sqrt(sqrt)
      * for 4; order 1 needs no root (the sum is already the 1-norm) */
-    if(order == 2.0)
+    if (order == 2.0)
         *result = sqrt(*result);
-    else if(order == 3.0)
+    else if (order == 3.0)
         *result = cbrt(*result);
-    else if(order == 4.0)
+    else if (order == 4.0)
         *result = sqrt(sqrt(*result));
-    else if(order != 1.0)
+    else if (order != 1.0)
         *result = pow(*result, 1.0 / order);
-    
+
     if (k == 0)
     {
         return XTRACT_NO_RESULT;
     }
-    
+
     if (normalise == 1)
     {
         *result = log(1 + *result);
     }
 
     return XTRACT_SUCCESS;
-
 }
 
-int xtract_attack_time(const double *data, const int N, const void *argv , double *result)
+int xtract_attack_time(const double *data, const int N, const void *argv, double *result)
 {
-
     return XTRACT_FEATURE_NOT_IMPLEMENTED;
-
 }
 
 int xtract_decay_time(const double *data, const int N, const void *argv, double *result)
 {
-
     return XTRACT_FEATURE_NOT_IMPLEMENTED;
-
 }
 
 int xtract_difference_vector(const double *data, const int N, const void *argv, double *result)
 {
-
     const double *frame1,
-          *frame2;
+        *frame2;
 
     int n = N >> 1;
 
     frame1 = data;
     frame2 = data + n;
 
-    while(n--)
+    while (n--)
         result[n] = frame1[n] - frame2[n];
 
     return XTRACT_SUCCESS;
-
 }

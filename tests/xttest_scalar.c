@@ -1379,7 +1379,7 @@ UTEST(scalar, spectral_centroid_single_bin)
 {
     /* 2 bins: only the second has energy */
     double result = 0.0;
-    double data[] = {0.0, 1.0,   /* amplitudes */
+    double data[] = {0.0, 1.0,       /* amplitudes */
                      500.0, 1000.0}; /* frequencies */
     xtract_spectral_centroid(data, 4, NULL, &result);
     /* centroid = (0*500 + 1*1000) / (0 + 1) = 1000 */
@@ -1389,7 +1389,7 @@ UTEST(scalar, spectral_centroid_single_bin)
 UTEST(scalar, spectral_centroid_equal_energy)
 {
     double result = 0.0;
-    double data[] = {1.0, 1.0,   /* amplitudes */
+    double data[] = {1.0, 1.0,      /* amplitudes */
                      200.0, 800.0}; /* frequencies */
     xtract_spectral_centroid(data, 4, NULL, &result);
     /* centroid = (1*200 + 1*800) / (1 + 1) = 500 */
@@ -1399,7 +1399,7 @@ UTEST(scalar, spectral_centroid_equal_energy)
 UTEST(scalar, spectral_centroid_weighted)
 {
     double result = 0.0;
-    double data[] = {3.0, 1.0,     /* amplitudes */
+    double data[] = {3.0, 1.0,      /* amplitudes */
                      100.0, 500.0}; /* frequencies */
     xtract_spectral_centroid(data, 4, NULL, &result);
     /* centroid = (3*100 + 1*500) / (3 + 1) = 800/4 = 200 */
@@ -1411,7 +1411,7 @@ UTEST(scalar, spectral_mean_is_centroid)
     /* spectral_mean delegates to spectral_centroid
      * centroid = (1*200 + 1*800) / (1+1) = 500 */
     double result = 0.0;
-    double data[] = {1.0, 1.0,     /* amplitudes */
+    double data[] = {1.0, 1.0,      /* amplitudes */
                      200.0, 800.0}; /* frequencies */
     xtract_spectral_mean(data, 4, NULL, &result);
     CHECK_REL(result, 500.0, EPSILON);
@@ -1426,8 +1426,8 @@ UTEST(scalar, spectral_variance_2_bin)
      *                   = (22500 + 7500) / 4 = 7500 */
     double result = 0.0;
     double data[] = {1.0, 3.0,      /* amplitudes */
-                     100.0, 300.0};  /* frequencies */
-    double argv[] = {250.0}; /* spectral centroid */
+                     100.0, 300.0}; /* frequencies */
+    double argv[] = {250.0};        /* spectral centroid */
     xtract_spectral_variance(data, 4, argv, &result);
     CHECK_REL(result, 7500.0, EPSILON);
 }
@@ -1474,7 +1474,7 @@ UTEST(scalar, spectral_slope_flat)
 {
     /* All amplitudes equal => slope = 0 */
     double result = 0.0;
-    double data[] = {5.0, 5.0, 5.0, 5.0,       /* amplitudes */
+    double data[] = {5.0, 5.0, 5.0, 5.0,          /* amplitudes */
                      100.0, 200.0, 300.0, 400.0}; /* frequencies */
     xtract_spectral_slope(data, 8, NULL, &result);
     CHECK_NEAR(result, 0.0, 1e-9);
@@ -1483,7 +1483,7 @@ UTEST(scalar, spectral_slope_flat)
 UTEST(scalar, spectral_slope_increasing)
 {
     double result = 0.0;
-    double data[] = {1.0, 2.0, 3.0, 4.0,       /* amplitudes */
+    double data[] = {1.0, 2.0, 3.0, 4.0,          /* amplitudes */
                      100.0, 200.0, 300.0, 400.0}; /* frequencies */
     xtract_spectral_slope(data, 8, NULL, &result);
     ASSERT_GT(result, 0.0);
@@ -1777,8 +1777,7 @@ UTEST(mcleod_f0, sine_1024_44100_strong_second_harmonic)
     uint32_t n;
 
     for (n = 0; n < blocksize; n++)
-        table[n] = 0.6 * sin(2.0 * M_PI * frequency * n / samplerate)
-                 + 0.9 * sin(2.0 * M_PI * 2.0 * frequency * n / samplerate);
+        table[n] = 0.6 * sin(2.0 * M_PI * frequency * n / samplerate) + 0.9 * sin(2.0 * M_PI * 2.0 * frequency * n / samplerate);
 
     xtract_mcleod_f0(table, blocksize, &samplerate, &result);
 
@@ -1908,8 +1907,8 @@ UTEST(scalar, flatness_stability_large_n)
     int i;
     int rv;
 
-    for(i = 0; i < N; i++)
-        data[i] = 0.01 + 0.09 * (double)i / N;  /* values in [0.01, 0.1] */
+    for (i = 0; i < N; i++)
+        data[i] = 0.01 + 0.09 * (double)i / N; /* values in [0.01, 0.1] */
 
     rv = xtract_flatness(data, N, NULL, &result);
     ASSERT_EQ(rv, XTRACT_SUCCESS);
@@ -1926,8 +1925,8 @@ UTEST(scalar, flatness_stability_n4096)
     int i;
     int rv;
 
-    for(i = 0; i < N; i++)
-        data[i] = 0.001 + 0.009 * (double)i / N;  /* values in [0.001, 0.01] */
+    for (i = 0; i < N; i++)
+        data[i] = 0.001 + 0.009 * (double)i / N; /* values in [0.001, 0.01] */
 
     rv = xtract_flatness(data, N, NULL, &result);
     ASSERT_EQ(rv, XTRACT_SUCCESS);

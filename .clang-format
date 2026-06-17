@@ -1,37 +1,17 @@
-# LibXtract house style (see README "Code standard" and CONTRIBUTING).
-# Allman braces, 4-space indent, pointer binds to the variable, no space
-# between a keyword and its parenthesis. ColumnLimit is 0: clang-format
-# normalises indentation/braces/spacing but never reflows long lines.
+# LibXtract house style. Standard Allman via the Microsoft preset (Allman
+# braces, 4-space indent, no tabs, pointer binds to the variable). Only two
+# overrides, both substantive rather than cosmetic:
+#   - SortIncludes: false keeps the manual include grouping (standard library,
+#     then local/third-party, then project public, then project private).
+#   - ColumnLimit: 0 normalises braces/indent/spacing but never reflows long
+#     lines, preserving the Doxygen blocks and hand-laid-out data tables.
 ---
 Language: Cpp
-BasedOnStyle: LLVM
-IndentWidth: 4
-TabWidth: 4
-UseTab: Never
-ColumnLimit: 0
-BreakBeforeBraces: Custom
-BraceWrapping:
-  AfterFunction: true
-  AfterControlStatement: Always
-  AfterEnum: false
-  AfterStruct: false
-  AfterUnion: false
-  AfterExternBlock: false
-  BeforeElse: true
-  BeforeWhile: false
-  AfterCaseLabel: false
-  SplitEmptyFunction: true
-  IndentBraces: false
-PointerAlignment: Right
-SpaceBeforeParens: Never
-SpaceAfterCStyleCast: false
-SpacesInParentheses: false
-AllowShortIfStatementsOnASingleLine: false
-AllowShortLoopsOnASingleLine: false
-AllowShortFunctionsOnASingleLine: None
-AllowShortBlocksOnASingleLine: Never
-AllowShortCaseLabelsOnASingleLine: false
-IndentCaseLabels: false
-KeepEmptyLinesAtTheStartOfBlocks: false
+BasedOnStyle: Microsoft
 SortIncludes: false
-AlignTrailingComments: true
+ColumnLimit: 0
+# Full Allman with no exception for case labels (Microsoft keeps the brace on
+# the case line). Braces are never inserted, only positioned -- a case body
+# only carries braces when it needs a scope (e.g. a local declaration).
+BraceWrapping:
+  AfterCaseLabel: true

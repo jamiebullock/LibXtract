@@ -42,20 +42,24 @@
 #define XTRACT_SR_LOWER_LIMIT 22050.0
 #define XTRACT_SR_DEFAULT 44100.0
 #define XTRACT_FUNDAMENTAL_DEFAULT 440.0
-#define XTRACT_CHECK_nyquist if(!nyquist) nyquist = XTRACT_SR_DEFAULT / 2
-#define XTRACT_CHECK_q if(!q) q = XTRACT_SR_DEFAULT / N
+#define XTRACT_CHECK_nyquist \
+    if (!nyquist)            \
+    nyquist = XTRACT_SR_DEFAULT / 2
+#define XTRACT_CHECK_q \
+    if (!q)            \
+    q = XTRACT_SR_DEFAULT / N
 #define XTRACT_GET_MAX max = result[m] > max ? result[m] : max
 #define XTRACT_SET_FREQUENCY result[M + m] = n * q
-#define XTRACT_IS_ODD(x) (x % 2 != 0 ? 1 : 0) 
+#define XTRACT_IS_ODD(x) (x % 2 != 0 ? 1 : 0)
 #define XTRACT_SR_LIMIT SR_UPPER_LIMIT
 #define XTRACT_FFT_BANDS_MIN 16
 #define XTRACT_FFT_BANDS_MAX 65536
 #define XTRACT_FFT_BANDS_DEF 1024
-#define XTRACT_SPEC_BW_MIN 0.168 /* Minimum spectral bandwidth \
-				    (= SR_LOWER_LIMIT / FFT_BANDS_MAX*/ 
+#define XTRACT_SPEC_BW_MIN 0.168   /* Minimum spectral bandwidth \
+                      (= SR_LOWER_LIMIT / FFT_BANDS_MAX*/
 #define XTRACT_SPEC_BW_MAX 12000.0 /* SR_UPPER_LIMIT / FFT_BANDS_MIN */
-#define XTRACT_SPEC_BW_DEF 43.066 /* SR_DEFAULT / FFT_BANDS_DEF */
-#define XTRACT_ARRAY_ELEMENTS(_array) (sizeof(_array)/sizeof(_array[0]))
+#define XTRACT_SPEC_BW_DEF 43.066  /* SR_DEFAULT / FFT_BANDS_DEF */
+#define XTRACT_ARRAY_ELEMENTS(_array) (sizeof(_array) / sizeof(_array[0]))
 
 /* Safe double->int conversion: out-of-range and NaN inputs yield 0 rather than
  * the undefined behaviour of a direct cast (the >= / < comparisons are both

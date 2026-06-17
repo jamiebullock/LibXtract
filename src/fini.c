@@ -33,6 +33,3 @@ void _fini(void)
 {
     xtract_free_fft();
 }
-
-
-

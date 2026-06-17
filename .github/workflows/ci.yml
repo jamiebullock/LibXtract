@@ -127,3 +127,17 @@ jobs:
           name: fuzz-crash
           path: fuzz/crash-*
           if-no-files-found: ignore
+
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      # Pinned to match the version the tree was formatted with; clang-format
+      # output drifts between releases, so the check and a local `make format`
+      # must use the same version.
+      - name: Install clang-format 20.1.8
+        run: pipx install clang-format==20.1.8
+
+      - name: Check formatting
+        run: make format-check CLANG_FORMAT=clang-format

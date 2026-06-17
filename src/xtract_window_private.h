@@ -98,4 +98,3 @@ void kaiser(double *window, const int N, const double alpha);
  *
  */
 void blackman_harris(double *window, const int N);
-

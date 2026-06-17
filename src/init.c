@@ -52,8 +52,8 @@ thread_local dywapitchtracker wavelet_f0_state;
 #ifdef USE_OOURA
 void xtract_init_ooura_data(xtract_ooura_data *ooura_data, unsigned int N)
 {
-    ooura_data->ooura_ip  = (int *)calloc(2 + sqrt((double)N), sizeof(int));
-    ooura_data->ooura_w   = (double *)calloc(N * 5 / 4, sizeof(double));
+    ooura_data->ooura_ip = (int *)calloc(2 + sqrt((double)N), sizeof(int));
+    ooura_data->ooura_w = (double *)calloc(N * 5 / 4, sizeof(double));
     ooura_data->initialised = true;
 }
 
@@ -68,39 +68,38 @@ void xtract_free_ooura_data(xtract_ooura_data *ooura_data)
 
 int xtract_init_ooura_(int N, int feature_name)
 {
-
     int M = N >> 1;
 
-    if(feature_name == XTRACT_AUTOCORRELATION_FFT)
+    if (feature_name == XTRACT_AUTOCORRELATION_FFT)
     {
         M = N; /* allow for zero padding */
     }
 
-    switch(feature_name)
+    switch (feature_name)
     {
     case XTRACT_SPECTRUM:
-        if(ooura_data_spectrum.initialised)
+        if (ooura_data_spectrum.initialised)
         {
             xtract_free_ooura_data(&ooura_data_spectrum);
         }
         xtract_init_ooura_data(&ooura_data_spectrum, M);
         break;
     case XTRACT_AUTOCORRELATION_FFT:
-        if(ooura_data_autocorrelation_fft.initialised)
+        if (ooura_data_autocorrelation_fft.initialised)
         {
             xtract_free_ooura_data(&ooura_data_autocorrelation_fft);
         }
         xtract_init_ooura_data(&ooura_data_autocorrelation_fft, M);
         break;
     case XTRACT_DCT:
-        if(ooura_data_dct.initialised)
+        if (ooura_data_dct.initialised)
         {
             xtract_free_ooura_data(&ooura_data_dct);
         }
         xtract_init_ooura_data(&ooura_data_dct, M);
         break;
     case XTRACT_MFCC:
-        if(ooura_data_mfcc.initialised)
+        if (ooura_data_mfcc.initialised)
         {
             xtract_free_ooura_data(&ooura_data_mfcc);
         }
@@ -113,19 +112,19 @@ int xtract_init_ooura_(int N, int feature_name)
 
 void xtract_free_ooura_(void)
 {
-    if(ooura_data_spectrum.initialised)
+    if (ooura_data_spectrum.initialised)
     {
         xtract_free_ooura_data(&ooura_data_spectrum);
     }
-    if(ooura_data_autocorrelation_fft.initialised)
+    if (ooura_data_autocorrelation_fft.initialised)
     {
         xtract_free_ooura_data(&ooura_data_autocorrelation_fft);
     }
-    if(ooura_data_dct.initialised)
+    if (ooura_data_dct.initialised)
     {
         xtract_free_ooura_data(&ooura_data_dct);
     }
-    if(ooura_data_mfcc.initialised)
+    if (ooura_data_mfcc.initialised)
     {
         xtract_free_ooura_data(&ooura_data_mfcc);
     }
@@ -136,8 +135,8 @@ void xtract_free_ooura_(void)
 void xtract_init_vdsp_data(xtract_vdsp_data *vdsp_data, unsigned int N)
 {
     vdsp_data->setup = vDSP_create_fftsetupD(log2f(N), FFT_RADIX2);
-    vdsp_data->fft.realp = (double *) calloc((N >> 1), sizeof(double));
-    vdsp_data->fft.imagp = (double *) calloc((N >> 1), sizeof(double));
+    vdsp_data->fft.realp = (double *)calloc((N >> 1), sizeof(double));
+    vdsp_data->fft.imagp = (double *)calloc((N >> 1), sizeof(double));
     vdsp_data->log2N = log2f(N);
     vdsp_data->initialised = true;
 }
@@ -152,31 +151,31 @@ void xtract_free_vdsp_data(xtract_vdsp_data *vdsp_data)
 
 int xtract_init_vdsp_(int N, int feature_name)
 {
-    switch(feature_name)
+    switch (feature_name)
     {
     case XTRACT_SPECTRUM:
-        if(vdsp_data_spectrum.initialised)
+        if (vdsp_data_spectrum.initialised)
         {
             xtract_free_vdsp_data(&vdsp_data_spectrum);
         }
         xtract_init_vdsp_data(&vdsp_data_spectrum, N);
         break;
     case XTRACT_AUTOCORRELATION_FFT:
-        if(vdsp_data_autocorrelation_fft.initialised)
+        if (vdsp_data_autocorrelation_fft.initialised)
         {
             xtract_free_vdsp_data(&vdsp_data_autocorrelation_fft);
         }
         xtract_init_vdsp_data(&vdsp_data_autocorrelation_fft, N * 2); /* allow for zero padding */
         break;
     case XTRACT_DCT:
-        if(vdsp_data_dct.initialised)
+        if (vdsp_data_dct.initialised)
         {
             xtract_free_vdsp_data(&vdsp_data_dct);
         }
         xtract_init_vdsp_data(&vdsp_data_dct, N);
         break;
     case XTRACT_MFCC:
-        if(vdsp_data_mfcc.initialised)
+        if (vdsp_data_mfcc.initialised)
         {
             xtract_free_vdsp_data(&vdsp_data_mfcc);
         }
@@ -189,30 +188,29 @@ int xtract_init_vdsp_(int N, int feature_name)
 
 void xtract_free_vdsp_(void)
 {
-    if(vdsp_data_spectrum.initialised)
+    if (vdsp_data_spectrum.initialised)
     {
         xtract_free_vdsp_data(&vdsp_data_spectrum);
     }
-    if(vdsp_data_autocorrelation_fft.initialised)
+    if (vdsp_data_autocorrelation_fft.initialised)
     {
         xtract_free_vdsp_data(&vdsp_data_autocorrelation_fft);
     }
-    if(vdsp_data_dct.initialised)
+    if (vdsp_data_dct.initialised)
     {
         xtract_free_vdsp_data(&vdsp_data_dct);
     }
-    if(vdsp_data_mfcc.initialised)
+    if (vdsp_data_mfcc.initialised)
     {
         xtract_free_vdsp_data(&vdsp_data_mfcc);
     }
 }
 
-
 #endif
 
 int xtract_init_fft(int N, int feature_name)
 {
-    if(!xtract_is_poweroftwo(N))
+    if (!xtract_is_poweroftwo(N))
     {
         return XTRACT_ARGUMENT_ERROR;
     }
@@ -223,7 +221,7 @@ int xtract_init_fft(int N, int feature_name)
 #endif
 }
 
-extern thread_local double** dct_cos_table;
+extern thread_local double **dct_cos_table;
 extern thread_local int dct_cos_table_dim;
 
 void xtract_free_fft(void)
@@ -246,15 +244,13 @@ void xtract_free_fft(void)
     }
 }
 
-
 int xtract_init_bark(int N, double sr, int *band_limits)
 {
-
-    double  edges[] = {0, 100, 200, 300, 400, 510, 630, 770, 920, 1080, 1270, 1480, 1720, 2000, 2320, 2700, 3150, 3700, 4400, 5300, 6400, 7700, 9500, 12000, 15500, 20500, 27000}; /* Takes us up to sr = 54kHz (CCRMA: JOS)*/
+    double edges[] = {0, 100, 200, 300, 400, 510, 630, 770, 920, 1080, 1270, 1480, 1720, 2000, 2320, 2700, 3150, 3700, 4400, 5300, 6400, 7700, 9500, 12000, 15500, 20500, 27000}; /* Takes us up to sr = 54kHz (CCRMA: JOS)*/
 
     int bands = XTRACT_BARK_BANDS;
 
-    while(bands--)
+    while (bands--)
         band_limits[bands] = edges[bands] / sr * N;
     /* truncation instead of rounding: see issue #153 */
 
@@ -263,10 +259,9 @@ int xtract_init_bark(int N, double sr, int *band_limits)
 
 int xtract_init_mfcc(int N, double nyquist, int style, double freq_min, double freq_max, int freq_bands, double **fft_tables)
 {
-
     int n, i, k, *fft_peak, M, next_peak;
     double norm, mel_freq_max, mel_freq_min, norm_fact, height, inc, val,
-          freq_bw_mel, *mel_peak, *height_norm, *lin_peak;
+        freq_bw_mel, *mel_peak, *height_norm, *lin_peak;
 
     mel_peak = height_norm = lin_peak = NULL;
     fft_peak = NULL;
@@ -276,31 +271,31 @@ int xtract_init_mfcc(int N, double nyquist, int style, double freq_min, double f
     {
         return XTRACT_ARGUMENT_ERROR;
     }
-    
+
     mel_freq_max = 1127 * log(1 + freq_max / 700);
     mel_freq_min = 1127 * log(1 + freq_min / 700);
     freq_bw_mel = (mel_freq_max - mel_freq_min) / freq_bands;
 
     mel_peak = (double *)malloc((freq_bands + 2) * sizeof(double));
     /* +2 for zeros at start and end */
-    
+
     if (mel_peak == NULL)
     {
         perror("error");
         return XTRACT_MALLOC_FAILED;
     }
-    
+
     lin_peak = (double *)malloc((freq_bands + 2) * sizeof(double));
-    
+
     if (lin_peak == NULL)
     {
         perror("error");
         free(mel_peak);
         return XTRACT_MALLOC_FAILED;
     }
-    
+
     fft_peak = (int *)malloc((freq_bands + 2) * sizeof(int));
-    
+
     if (fft_peak == NULL)
     {
         perror("error");
@@ -308,9 +303,9 @@ int xtract_init_mfcc(int N, double nyquist, int style, double freq_min, double f
         free(lin_peak);
         return XTRACT_MALLOC_FAILED;
     }
-    
+
     height_norm = (double *)malloc(freq_bands * sizeof(double));
-    
+
     if (height_norm == NULL)
     {
         perror("error");
@@ -326,12 +321,11 @@ int xtract_init_mfcc(int N, double nyquist, int style, double freq_min, double f
     lin_peak[0] = freq_min; /* === 700 * (exp(mel_peak[0] / 1127) - 1); */
     fft_peak[0] = lin_peak[0] / nyquist * M;
 
-
     for (n = 1; n < (freq_bands + 2); ++n)
     {
         /* roll out peak locations - mel, linear and linear on fft window scale */
         mel_peak[n] = mel_peak[n - 1] + freq_bw_mel;
-        lin_peak[n] = 700 * (exp(mel_peak[n] / 1127) -1);
+        lin_peak[n] = 700 * (exp(mel_peak[n] / 1127) - 1);
         fft_peak[n] = lin_peak[n] / nyquist * M;
     }
 
@@ -345,7 +339,7 @@ int xtract_init_mfcc(int N, double nyquist, int style, double freq_min, double f
         }
         else
         {
-            assert(n+2 < freq_bands + 2);
+            assert(n + 2 < freq_bands + 2);
             height = 2 / (lin_peak[n + 2] - lin_peak[n]);
             norm_fact = norm / (2 / (lin_peak[2] - lin_peak[0]));
         }
@@ -354,22 +348,21 @@ int xtract_init_mfcc(int N, double nyquist, int style, double freq_min, double f
 
     i = 0;
 
-    for(n = 0; n < freq_bands; n++)
+    for (n = 0; n < freq_bands; n++)
     {
-
         /* calculate the rise increment */
-        if(n==0)
+        if (n == 0)
             inc = height_norm[n] / fft_peak[n];
         else
             inc = height_norm[n] / (fft_peak[n] - fft_peak[n - 1]);
         val = 0;
 
         /* zero the start of the array */
-        for(k = 0; k < i; k++)
+        for (k = 0; k < i; k++)
             fft_tables[n][k] = 0.0;
 
         /* fill in the rise */
-        for(; i <= fft_peak[n]; i++)
+        for (; i <= fft_peak[n]; i++)
         {
             fft_tables[n][i] = val;
             val += inc;
@@ -382,17 +375,16 @@ int xtract_init_mfcc(int N, double nyquist, int style, double freq_min, double f
         next_peak = fft_peak[n + 1];
 
         /* reverse fill the 'fall' */
-        for(i = next_peak; i > fft_peak[n]; i--)
+        for (i = next_peak; i > fft_peak[n]; i--)
         {
             fft_tables[n][i] = val;
             val += inc;
         }
 
         /* zero the rest of the array */
-        for(k = next_peak + 1; k < N; k++)
+        for (k = next_peak + 1; k < N; k++)
             fft_tables[n][k] = 0.0;
     }
-
 
     /* Initialise the fft_plan for the DCT */
     /*
@@ -406,27 +398,25 @@ int xtract_init_mfcc(int N, double nyquist, int style, double freq_min, double f
     free(fft_peak);
 
     return XTRACT_SUCCESS;
-
 }
 
 int xtract_init_gfcc(int N, double nyquist, double freq_min, double freq_max, int freq_bands, double **fft_tables)
 {
-
     int n, k, M;
     double *centre_freqs, *bandwidths;
     double erb_min, erb_max, erb_step, freq, gain, f_ratio;
 
-    if(freq_bands <= 1)
+    if (freq_bands <= 1)
         return XTRACT_ARGUMENT_ERROR;
 
     M = N >> 1;
 
     centre_freqs = (double *)malloc(freq_bands * sizeof(double));
-    if(centre_freqs == NULL)
+    if (centre_freqs == NULL)
         return XTRACT_MALLOC_FAILED;
 
     bandwidths = (double *)malloc(freq_bands * sizeof(double));
-    if(bandwidths == NULL)
+    if (bandwidths == NULL)
     {
         free(centre_freqs);
         return XTRACT_MALLOC_FAILED;
@@ -437,7 +427,7 @@ int xtract_init_gfcc(int N, double nyquist, double freq_min, double freq_max, in
     erb_max = 9.26449 * log(1.0 + freq_max / (24.7 * 9.26449));
     erb_step = (erb_max - erb_min) / (freq_bands - 1);
 
-    for(n = 0; n < freq_bands; n++)
+    for (n = 0; n < freq_bands; n++)
     {
         double erb = erb_min + n * erb_step;
         centre_freqs[n] = 24.7 * 9.26449 * (exp(erb / 9.26449) - 1.0);
@@ -448,9 +438,9 @@ int xtract_init_gfcc(int N, double nyquist, double freq_min, double freq_max, in
     /* Populate filter coefficient tables with gammatone magnitude responses.
      * Only bins 0..M-1 represent real frequencies (0 to nyquist).
      * Bins M..N-1 are zeroed to match the mel filter bank convention. */
-    for(n = 0; n < freq_bands; n++)
+    for (n = 0; n < freq_bands; n++)
     {
-        for(k = 0; k < M; k++)
+        for (k = 0; k < M; k++)
         {
             freq = (double)k / (double)M * nyquist;
             f_ratio = (freq - centre_freqs[n]) / bandwidths[n];
@@ -459,7 +449,7 @@ int xtract_init_gfcc(int N, double nyquist, double freq_min, double freq_max, in
             gain = gain * gain; /* 4th order */
             fft_tables[n][k] = gain;
         }
-        for(k = M; k < N; k++)
+        for (k = M; k < N; k++)
             fft_tables[n][k] = 0.0;
     }
 
@@ -478,7 +468,7 @@ int xtract_init_wavelet_f0_state(void)
 double *xtract_init_window(const int N, const int type)
 {
     double *window = (double *)malloc(N * sizeof(double));
-    if(window == NULL)
+    if (window == NULL)
         return NULL;
 
     switch (type)

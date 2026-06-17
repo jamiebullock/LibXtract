@@ -6,7 +6,6 @@
 #include <math.h>
 #include <stdio.h>
 
-
 #define XTTEST_2PI 6.28318530717958647693
 
 void xttest_gen_sine(double *table, uint32_t tablesize, double samplerate, double frequency, double amplitude)
@@ -59,5 +58,3 @@ void xttest_mul(double *table, uint32_t tablesize, double constant)
         table[i] *= constant;
     }
 }
-
-

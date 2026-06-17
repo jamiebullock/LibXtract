@@ -354,8 +354,8 @@ UTEST(vector, difference_of_two_frames)
 {
     /* data = [frame1 | frame2], N = total length (must be even)
      * result[n] = frame1[n] - frame2[n] */
-    double data[] = {5.0, 3.0, 1.0,    /* frame 1 */
-                     2.0, 3.0, 4.0};    /* frame 2 */
+    double data[] = {5.0, 3.0, 1.0,  /* frame 1 */
+                     2.0, 3.0, 4.0}; /* frame 2 */
     double result[3] = {0};
     xtract_difference_vector(data, 6, NULL, result);
     CHECK_REL(result[0], 3.0, EPSILON);
@@ -742,7 +742,8 @@ UTEST(scalar, spectral_skewness_result_should_not_scale_with_total_energy)
     double data2[] = {10.0, 20.0, 100.0, 200.0};
     double centroid = 500.0 / 3.0;
     double var1 = (1.0 * (100.0 - centroid) * (100.0 - centroid) +
-                   2.0 * (200.0 - centroid) * (200.0 - centroid)) / 3.0;
+                   2.0 * (200.0 - centroid) * (200.0 - centroid)) /
+                  3.0;
     double stddev = sqrt(var1);
     double argv[] = {centroid, stddev};
     double result1 = 0.0, result2 = 0.0;
@@ -759,7 +760,8 @@ UTEST(scalar, spectral_kurtosis_result_should_not_scale_with_total_energy)
     double data2[] = {10.0, 20.0, 100.0, 200.0};
     double centroid = 500.0 / 3.0;
     double var1 = (1.0 * (100.0 - centroid) * (100.0 - centroid) +
-                   2.0 * (200.0 - centroid) * (200.0 - centroid)) / 3.0;
+                   2.0 * (200.0 - centroid) * (200.0 - centroid)) /
+                  3.0;
     double stddev = sqrt(var1);
     double argv[] = {centroid, stddev};
     double result1 = 0.0, result2 = 0.0;
@@ -892,7 +894,8 @@ UTEST(vector, spectrum_power_normalisation_max_bin_is_1)
     xtract_spectrum(data, N, argv, result);
 
     for (i = 0; i < N / 2; i++)
-        if (result[i] > max_val) max_val = result[i];
+        if (result[i] > max_val)
+            max_val = result[i];
 
     CHECK_REL(max_val, 1.0, 1e-6);
 }
@@ -984,7 +987,7 @@ UTEST(vector, spectrum_magnitude_phase_first_half_matches_magnitude_phase_zero_a
     double mp[64] = {0};
     double mag[64] = {0};
     double sr = 8000.0;
-    double argv_mp[]  = {sr / 64, (double)XTRACT_MAGNITUDE_PHASE_SPECTRUM, 0.0, 0.0};
+    double argv_mp[] = {sr / 64, (double)XTRACT_MAGNITUDE_PHASE_SPECTRUM, 0.0, 0.0};
     double argv_mag[] = {sr / 64, (double)XTRACT_MAGNITUDE_SPECTRUM, 0.0, 0.0};
     int n;
     int i;
@@ -1051,7 +1054,8 @@ UTEST(vector, spectrum_magnitude_normalised_has_max_of_1)
     xtract_spectrum(data, N, argv, result);
 
     for (i = 0; i < M; i++)
-        if (result[i] > max_val) max_val = result[i];
+        if (result[i] > max_val)
+            max_val = result[i];
 
     CHECK_REL(max_val, 1.0, 1e-6);
 }
@@ -1082,7 +1086,7 @@ UTEST(vector, mel_spectrogram_produces_log_mel_energies_mfcc_applies_dct_to)
         mel_filters.filters[i] = (double *)calloc(N, sizeof(double));
 
     xtract_init_mfcc(N, 22050.0 / 2, XTRACT_EQUAL_GAIN, 20, 8000,
-                      n_filters, mel_filters.filters);
+                     n_filters, mel_filters.filters);
 
     /* Compute mel spectrogram */
     rv = xtract_mel_spectrogram(data, N, &mel_filters, mel_result);
@@ -1095,7 +1099,8 @@ UTEST(vector, mel_spectrogram_produces_log_mel_energies_mfcc_applies_dct_to)
     /* At least one filter should have energy above the log limit floor */
     max_energy = mel_result[0];
     for (i = 1; i < n_filters; i++)
-        if (mel_result[i] > max_energy) max_energy = mel_result[i];
+        if (mel_result[i] > max_energy)
+            max_energy = mel_result[i];
     ASSERT_GT(max_energy, -96.0);
 
     /* MFCC should equal DCT of mel spectrogram */
@@ -1150,7 +1155,8 @@ UTEST(vector, gfcc_equals_dct_of_gammatone_spectrogram)
     /* At least one filter should have energy above the log limit floor */
     max_energy = gt_result[0];
     for (i = 1; i < n_filters; i++)
-        if (gt_result[i] > max_energy) max_energy = gt_result[i];
+        if (gt_result[i] > max_energy)
+            max_energy = gt_result[i];
     ASSERT_GT(max_energy, -96.0);
 
     /* GFCC should equal DCT of gammatone spectrogram */

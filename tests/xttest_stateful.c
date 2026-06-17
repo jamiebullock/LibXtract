@@ -15,18 +15,22 @@
 
 static const double EPSILON = 1e-10;
 
-enum { WAVELET_N = 2048, FAILSAFE_N = 512 };
+enum
+{
+    WAVELET_N = 2048,
+    FAILSAFE_N = 512
+};
 
 UTEST(helper, is_denormal)
 {
     /* A double is denormal when its biased exponent field is zero but the
      * value is non-zero. 0x1p-1074 is the smallest positive subnormal. */
     ASSERT_EQ(xtract_is_denormal(1.0), 0);
-    ASSERT_EQ(xtract_is_denormal(0.0), 0);            /* zero is not denormal */
+    ASSERT_EQ(xtract_is_denormal(0.0), 0); /* zero is not denormal */
     ASSERT_EQ(xtract_is_denormal(-1.0), 0);
-    ASSERT_EQ(xtract_is_denormal(DBL_MIN), 0);        /* smallest *normal* */
-    ASSERT_NE(xtract_is_denormal(0x1p-1074), 0);      /* smallest subnormal */
-    ASSERT_NE(xtract_is_denormal(DBL_MIN / 2.0), 0);  /* a subnormal */
+    ASSERT_EQ(xtract_is_denormal(DBL_MIN), 0);       /* smallest *normal* */
+    ASSERT_NE(xtract_is_denormal(0x1p-1074), 0);     /* smallest subnormal */
+    ASSERT_NE(xtract_is_denormal(DBL_MIN / 2.0), 0); /* a subnormal */
 }
 
 UTEST(helper, features_from_subframes_computes_each_half)

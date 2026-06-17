@@ -34,7 +34,7 @@ static double moment_argv_4096[2];
 static void fill_data(double *buf, int N)
 {
     int i;
-    for(i = 0; i < N; i++)
+    for (i = 0; i < N; i++)
         buf[i] = sin(2.0 * M_PI * 440.0 * i / 44100.0);
 }
 
@@ -50,9 +50,9 @@ static void setup(void)
      * Real spectrum data has [magnitudes..., frequencies...] layout,
      * but for benchmarking we only need representative non-negative
      * values — we are measuring loop throughput, not result correctness. */
-    for(i = 0; i < 512; i++)
+    for (i = 0; i < 512; i++)
         spectrum_512[i] = fabs(data_512[i]);
-    for(i = 0; i < 4096; i++)
+    for (i = 0; i < 4096; i++)
         spectrum_4096[i] = fabs(data_4096[i]);
     xtract_spectral_centroid(spectrum_512, 512, NULL, &centroid_512);
     xtract_spectral_centroid(spectrum_4096, 4096, NULL, &centroid_4096);

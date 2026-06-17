@@ -31,27 +31,24 @@
 
 int xtract_windowed(const double *data, const int N, const void *argv, double *result)
 {
-
     int n;
     const double *window;
 
     n = N;
     window = (const double *)argv;
 
-    while(n--)
+    while (n--)
         result[n] = data[n] * window[n];
 
     return XTRACT_SUCCESS;
-
 }
 
 int xtract_features_from_subframes(const double *data, const int N, const int feature, const void *argv, double *result)
 {
-
     const double *frame1,
-          *frame2;
+        *frame2;
     double *result1,
-          *result2;
+        *result2;
 
     int n, rv;
 
@@ -62,20 +59,18 @@ int xtract_features_from_subframes(const double *data, const int N, const int fe
     result1 = result;
     result2 = result + n;
 
-    if(feature < 0 || feature >= XTRACT_FEATURES)
+    if (feature < 0 || feature >= XTRACT_FEATURES)
     {
         return XTRACT_ARGUMENT_ERROR;
     }
 
     rv = xtract[feature](frame1, n, argv, result1);
 
-    if(rv == XTRACT_SUCCESS)
+    if (rv == XTRACT_SUCCESS)
         rv = xtract[feature](frame2, n, argv, result2);
 
     return rv;
-
 }
-
 
 /*
  * Implements y[n] = k * x[n] + (1-k) * y[n-1]
@@ -85,24 +80,23 @@ int xtract_smoothed(const double *data, const int N, const void *argv, double *r
     double gain = *(double *)argv;
     double oneminusgain = 1.0 - gain;
     int i;
-    
+
     /* reverse filtering first; the final element seeds the recursion */
     result[N - 1] = data[N - 1];
 
     for (i = N - 2; i >= 0; i--)
     {
-        result[i] = gain * data[i] + oneminusgain * data[i+1];
+        result[i] = gain * data[i] + oneminusgain * data[i + 1];
     }
-    
+
     /* then forward filtering */
     for (i = 1; i < N; i++)
     {
-        result[i] = gain * result[i] + oneminusgain * result[i-1];
+        result[i] = gain * result[i] + oneminusgain * result[i - 1];
     }
 
     return XTRACT_SUCCESS;
 }
-
 
 int xtract_is_denormal(double const d)
 {
@@ -118,4 +112,3 @@ bool xtract_is_poweroftwo(unsigned int x)
 {
     return ((x != 0) && !(x & (x - 1)));
 }
-
