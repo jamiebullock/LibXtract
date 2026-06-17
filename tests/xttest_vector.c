@@ -549,6 +549,32 @@ UTEST(vector, lpc_3rd_order_coefficients_should_be_correct)
     CHECK_REL(result[5], 0.0555555556, 1e-6);
 }
 
+/* ===== xtract_init_bark ===== */
+
+UTEST(vector, init_bark_band_limits_are_rounded)
+{
+    /* Band edge frequencies are converted to bin indices by rounding to the
+     * nearest bin (round-half-up), not truncation. These expected limits are
+     * pinned for two representative sr/N pairs so the conversion can't silently
+     * regress to truncation, which would shift energy between adjacent bands. */
+    static const int expected_1024_44100[XTRACT_BARK_BANDS] = {
+        0, 2, 5, 7, 9, 12, 15, 18, 21, 25, 29, 34, 40, 46, 54,
+        63, 73, 86, 102, 123, 149, 179, 221, 279, 360, 476};
+    static const int expected_2048_48000[XTRACT_BARK_BANDS] = {
+        0, 4, 9, 13, 17, 22, 27, 33, 39, 46, 54, 63, 73, 85, 99,
+        115, 134, 158, 188, 226, 273, 329, 405, 512, 661, 875};
+    int band_limits[XTRACT_BARK_BANDS];
+    int i;
+
+    xtract_init_bark(1024, 44100.0, band_limits);
+    for (i = 0; i < XTRACT_BARK_BANDS; i++)
+        ASSERT_EQ(band_limits[i], expected_1024_44100[i]);
+
+    xtract_init_bark(2048, 48000.0, band_limits);
+    for (i = 0; i < XTRACT_BARK_BANDS; i++)
+        ASSERT_EQ(band_limits[i], expected_2048_48000[i]);
+}
+
 /* ===== xtract_bark_coefficients ===== */
 
 UTEST(vector, bark_coefficients_basic_summation)
