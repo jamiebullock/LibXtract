@@ -692,9 +692,7 @@ int xtract_flatness(const double *data, const int N, const void *argv, double *r
 int xtract_flatness_db(const double *data, const int N, const void *argv, double *result)
 {
 
-    double flatness;
-
-    flatness = *(double *)argv;
+    double flatness = *(double *)argv;
 
     if (flatness <= 0)
         flatness = XTRACT_LOG_LIMIT;
@@ -708,9 +706,7 @@ int xtract_flatness_db(const double *data, const int N, const void *argv, double
 int xtract_tonality(const double *data, const int N, const void *argv, double *result)
 {
 
-    double sfmdb;
-
-    sfmdb = *(double *)argv;
+    double sfmdb = *(double *)argv;
 
     *result = XTRACT_MIN(sfmdb / -60.0, 1);
 
@@ -1174,9 +1170,7 @@ int xtract_failsafe_f0(const double *data, const int N, const void *argv, double
 {
 
     double *spectrum, argf[4], *peaks, sr;
-    int rv;
-
-    rv = xtract_f0(data, N, argv, result);
+    int rv = xtract_f0(data, N, argv, result);
 
     if(rv == XTRACT_NO_RESULT)
     {

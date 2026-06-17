@@ -477,9 +477,7 @@ int xtract_init_wavelet_f0_state(void)
 
 double *xtract_init_window(const int N, const int type)
 {
-    double *window;
-
-    window = (double*)malloc(N * sizeof(double));
+    double *window = (double *)malloc(N * sizeof(double));
     if(window == NULL)
         return NULL;
 
