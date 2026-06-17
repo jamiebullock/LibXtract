@@ -31,19 +31,42 @@
 #include "xtract/libxtract.h"
 #include "xtract/xtract_vector.h"
 
-enum { VEC_N = 512, N_FILTERS = 13, RESULT_CAP = 2 * VEC_N + 64 };
+enum
+{
+    VEC_N = 512,
+    N_FILTERS = 13,
+    RESULT_CAP = 2 * VEC_N + 64
+};
 /* Some features consume a paired spectrum: a coefficient half plus a second
  * half of per-bin frequencies (e.g. spectral_subband_centroids reads data + N)
  * or phases, i.e. 2*N doubles for N bins. Size every input to that width so
  * those reads stay in bounds. */
-enum { IN_CAP = 2 * VEC_N };
+enum
+{
+    IN_CAP = 2 * VEC_N
+};
 
-enum {
-    FZ_SPECTRUM, FZ_AUTOCORRELATION_FFT, FZ_MFCC, FZ_MEL_SPECTROGRAM,
-    FZ_GFCC, FZ_GAMMATONE_SPECTROGRAM, FZ_MMBSES,
-    FZ_SPECTRAL_SUBBAND_CENTROIDS, FZ_DCT, FZ_AUTOCORRELATION, FZ_AMDF,
-    FZ_ASDF, FZ_BARK_COEFFICIENTS, FZ_PEAK_SPECTRUM, FZ_HARMONIC_SPECTRUM,
-    FZ_LPC, FZ_LPCC, FZ_SUBBANDS, FZ_N_FEATURES
+enum
+{
+    FZ_SPECTRUM,
+    FZ_AUTOCORRELATION_FFT,
+    FZ_MFCC,
+    FZ_MEL_SPECTROGRAM,
+    FZ_GFCC,
+    FZ_GAMMATONE_SPECTROGRAM,
+    FZ_MMBSES,
+    FZ_SPECTRAL_SUBBAND_CENTROIDS,
+    FZ_DCT,
+    FZ_AUTOCORRELATION,
+    FZ_AMDF,
+    FZ_ASDF,
+    FZ_BARK_COEFFICIENTS,
+    FZ_PEAK_SPECTRUM,
+    FZ_HARMONIC_SPECTRUM,
+    FZ_LPC,
+    FZ_LPCC,
+    FZ_SUBBANDS,
+    FZ_N_FEATURES
 };
 
 static const double SR = 44100.0;
@@ -137,19 +160,19 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     {
     case FZ_SPECTRUM:
     {
-        double a[4] = { fz[0], fz[1], fz[2], fz[3] };
+        double a[4] = {fz[0], fz[1], fz[2], fz[3]};
         xtract_spectrum(in, VEC_N, a, result);
         break;
     }
     case FZ_PEAK_SPECTRUM:
     {
-        double a[2] = { fz[0], fz[1] };
+        double a[2] = {fz[0], fz[1]};
         xtract_peak_spectrum(in, VEC_N, a, result);
         break;
     }
     case FZ_HARMONIC_SPECTRUM:
     {
-        double a[2] = { fz[0], fz[1] };
+        double a[2] = {fz[0], fz[1]};
         xtract_harmonic_spectrum(in, VEC_N, a, result);
         break;
     }

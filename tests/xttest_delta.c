@@ -99,7 +99,7 @@ UTEST(delta, lnorm_out_of_range_argv)
      * find). They fall back to the default filter / no normalisation, so the
      * L2 norm of {1,-2,3,-4} = sqrt(30) is computed regardless. */
     double data[] = {1.0, -2.0, 3.0, -4.0};
-    double argv_nan[3]  = {2.0, NAN, NAN};
+    double argv_nan[3] = {2.0, NAN, NAN};
     double argv_huge[3] = {2.0, 1e308, -1e308};
     double result = -1.0;
 

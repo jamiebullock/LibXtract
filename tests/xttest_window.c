@@ -24,10 +24,10 @@ UTEST(window, gauss)
      * so the denominator is sd * M/2 = 0.8 and w[2] = exp(0) = 1.0 */
     double *w = xtract_init_window(5, XTRACT_GAUSS);
     ASSERT_TRUE(w != NULL);
-    CHECK_REL(w[0], exp(-3.125), EPSILON);      /* (-2/0.8)^2 = 6.25 */
-    CHECK_REL(w[1], exp(-0.78125), EPSILON);    /* (-1/0.8)^2 = 1.5625 */
+    CHECK_REL(w[0], exp(-3.125), EPSILON);   /* (-2/0.8)^2 = 6.25 */
+    CHECK_REL(w[1], exp(-0.78125), EPSILON); /* (-1/0.8)^2 = 1.5625 */
     CHECK_REL(w[2], 1.0, EPSILON);
-    CHECK_REL(w[3], w[1], EPSILON);             /* symmetric */
+    CHECK_REL(w[3], w[1], EPSILON); /* symmetric */
     CHECK_REL(w[4], w[0], EPSILON);
     xtract_free_window(w);
 }
@@ -37,9 +37,9 @@ UTEST(window, hamming)
     /* w[n] = 0.53836 - 0.46164 * cos(2*pi*n/M) */
     double *w = xtract_init_window(5, XTRACT_HAMMING);
     ASSERT_TRUE(w != NULL);
-    CHECK_REL(w[0], 0.07672, EPSILON);   /* 0.53836 - 0.46164 */
-    CHECK_REL(w[1], 0.53836, EPSILON);   /* cos(pi/2) = 0 */
-    CHECK_REL(w[2], 1.0, EPSILON);       /* cos(pi) = -1 */
+    CHECK_REL(w[0], 0.07672, EPSILON); /* 0.53836 - 0.46164 */
+    CHECK_REL(w[1], 0.53836, EPSILON); /* cos(pi/2) = 0 */
+    CHECK_REL(w[2], 1.0, EPSILON);     /* cos(pi) = -1 */
     CHECK_REL(w[3], 0.53836, EPSILON);
     CHECK_REL(w[4], 0.07672, EPSILON);
     xtract_free_window(w);
@@ -50,9 +50,9 @@ UTEST(window, hann)
     /* w[n] = 0.5 * (1 - cos(2*pi*n/M)) */
     double *w = xtract_init_window(5, XTRACT_HANN);
     ASSERT_TRUE(w != NULL);
-    CHECK_NEAR(w[0], 0.0, EPSILON);      /* cos(0) = 1 */
-    CHECK_REL(w[1], 0.5, EPSILON);       /* cos(pi/2) = 0 */
-    CHECK_REL(w[2], 1.0, EPSILON);       /* cos(pi) = -1 */
+    CHECK_NEAR(w[0], 0.0, EPSILON); /* cos(0) = 1 */
+    CHECK_REL(w[1], 0.5, EPSILON);  /* cos(pi/2) = 0 */
+    CHECK_REL(w[2], 1.0, EPSILON);  /* cos(pi) = -1 */
     CHECK_REL(w[3], 0.5, EPSILON);
     CHECK_NEAR(w[4], 0.0, EPSILON);
     xtract_free_window(w);
@@ -90,9 +90,9 @@ UTEST(window, bartlett_hann)
     /* w[n] = 0.62 - 0.5*|n/M - 0.5| - 0.38*cos(2*pi*n/M) */
     double *w = xtract_init_window(5, XTRACT_BARTLETT_HANN);
     ASSERT_TRUE(w != NULL);
-    CHECK_REL(w[0], -0.01, EPSILON);   /* 0.62 - 0.25 - 0.38 */
-    CHECK_REL(w[1], 0.495, EPSILON);   /* 0.62 - 0.125 - 0 */
-    CHECK_REL(w[2], 1.0, EPSILON);     /* 0.62 - 0 + 0.38 */
+    CHECK_REL(w[0], -0.01, EPSILON); /* 0.62 - 0.25 - 0.38 */
+    CHECK_REL(w[1], 0.495, EPSILON); /* 0.62 - 0.125 - 0 */
+    CHECK_REL(w[2], 1.0, EPSILON);   /* 0.62 - 0 + 0.38 */
     CHECK_REL(w[3], 0.495, EPSILON);
     CHECK_REL(w[4], -0.01, EPSILON);
     xtract_free_window(w);
@@ -103,9 +103,9 @@ UTEST(window, blackman)
     /* w[n] = 0.42 - 0.5*cos(2*pi*n/M) + 0.08*cos(4*pi*n/M) */
     double *w = xtract_init_window(5, XTRACT_BLACKMAN);
     ASSERT_TRUE(w != NULL);
-    CHECK_NEAR(w[0], 0.0, EPSILON);    /* 0.42 - 0.5 + 0.08 */
-    CHECK_REL(w[1], 0.34, EPSILON);    /* 0.42 - 0 - 0.08 */
-    CHECK_REL(w[2], 1.0, EPSILON);     /* 0.42 + 0.5 + 0.08 */
+    CHECK_NEAR(w[0], 0.0, EPSILON); /* 0.42 - 0.5 + 0.08 */
+    CHECK_REL(w[1], 0.34, EPSILON); /* 0.42 - 0 - 0.08 */
+    CHECK_REL(w[2], 1.0, EPSILON);  /* 0.42 + 0.5 + 0.08 */
     CHECK_REL(w[3], 0.34, EPSILON);
     CHECK_NEAR(w[4], 0.0, EPSILON);
     xtract_free_window(w);
@@ -138,11 +138,11 @@ UTEST(window, kaiser)
     double *w = xtract_init_window(5, XTRACT_KAISER);
     ASSERT_TRUE(w != NULL);
     CHECK_REL(w[2], 1.0, EPSILON);
-    CHECK_REL(w[0], w[4], EPSILON);    /* symmetric endpoints */
-    CHECK_REL(w[1], w[3], EPSILON);    /* symmetric */
+    CHECK_REL(w[0], w[4], EPSILON); /* symmetric endpoints */
+    CHECK_REL(w[1], w[3], EPSILON); /* symmetric */
     ASSERT_TRUE(w[0] > 0.0);
-    ASSERT_TRUE(w[0] < 0.01);          /* 1 / I0(3*pi) is tiny */
-    ASSERT_GT(w[1], w[0]);             /* rises to centre */
+    ASSERT_TRUE(w[0] < 0.01); /* 1 / I0(3*pi) is tiny */
+    ASSERT_GT(w[1], w[0]);    /* rises to centre */
     ASSERT_GT(w[2], w[1]);
     xtract_free_window(w);
 }
@@ -164,7 +164,7 @@ UTEST(window, unknown_type_falls_back_to_hann)
 UTEST(window, windowed_applies_element_wise)
 {
     /* result[n] = data[n] * window[n] */
-    const double data[]   = {1.0, 2.0, 3.0, 4.0};
+    const double data[] = {1.0, 2.0, 3.0, 4.0};
     const double window[] = {0.5, 1.0, 1.0, 0.5};
     double result[4] = {0};
 

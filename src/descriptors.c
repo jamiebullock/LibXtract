@@ -27,7 +27,6 @@
 #include <string.h>
 #define XTRACT
 
-
 /* Bounded copies for descriptor strings: strncpy alone does not terminate
  * the destination when the source is longer than the buffer. One wrapper
  * per field type so call sites need no size argument. */
@@ -54,7 +53,6 @@ static void copy_author(char *dst, const char *src)
 
 xtract_function_descriptor_t *xtract_make_descriptors(void)
 {
-
     int f;
     char *name, *p_name, *desc, *p_desc, *author;
     double *argv_min, *argv_max, *argv_def, *result_min, *result_max;
@@ -67,15 +65,14 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
 
     f = XTRACT_FEATURES;
 
-    fd = (xtract_function_descriptor_t*)malloc(XTRACT_FEATURES * sizeof(xtract_function_descriptor_t));
-    if(fd == NULL)
+    fd = (xtract_function_descriptor_t *)malloc(XTRACT_FEATURES * sizeof(xtract_function_descriptor_t));
+    if (fd == NULL)
         return NULL;
 
     /* FIX - this file probably needs a rewrite for readability */
 
-    while(f--)
+    while (f--)
     {
-
         d = &fd[f];
         d->id = f;
         argc = &d->argc;
@@ -133,9 +130,9 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             break;
             /* argc = 2 */;
         case XTRACT_ROLLOFF:
-            *argv_min  = XTRACT_FFT_BANDS_MIN;
+            *argv_min = XTRACT_FFT_BANDS_MIN;
             *argv_max = XTRACT_FFT_BANDS_MAX;
-            *argv_def = XTRACT_SPEC_BW_DEF ;
+            *argv_def = XTRACT_SPEC_BW_DEF;
             *argv_unit = XTRACT_HERTZ;
             *(argv_min + 1) = 0.0;
             *(argv_max + 1) = 100.0;
@@ -143,13 +140,13 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *(argv_unit + 1) = XTRACT_PERCENT;
             break;
         case XTRACT_PEAK_SPECTRUM:
-            *argv_min  = XTRACT_SR_LOWER_LIMIT / 2.0;
+            *argv_min = XTRACT_SR_LOWER_LIMIT / 2.0;
             *argv_max = XTRACT_SR_UPPER_LIMIT / 2.0;
             *argv_def = XTRACT_SR_DEFAULT / 2.0;
             *argv_unit = XTRACT_HERTZ;
             *(argv_min + 1) = 0.0;
-            *(argv_max + 1) = 100.0 ;
-            *(argv_def + 1) = 10.0 ;
+            *(argv_max + 1) = 100.0;
+            *(argv_def + 1) = 10.0;
             *(argv_unit + 1) = XTRACT_PERCENT;
             break;
         case XTRACT_HARMONIC_SPECTRUM:
@@ -158,8 +155,8 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *argv_def = XTRACT_FUNDAMENTAL_DEFAULT;
             *argv_unit = XTRACT_HERTZ;
             *(argv_min + 1) = 0.0;
-            *(argv_max + 1) = 1.0 ;
-            *(argv_def + 1) = .1 ;
+            *(argv_max + 1) = 1.0;
+            *(argv_def + 1) = .1;
             *(argv_unit + 1) = (xtract_unit_t)XTRACT_NONE;
             break;
         case XTRACT_NOISINESS:
@@ -179,12 +176,12 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             break;
             /* argc = 4 */
         case XTRACT_SPECTRUM:
-            *argv_min  = XTRACT_SR_LOWER_LIMIT / XTRACT_FFT_BANDS_MIN;
+            *argv_min = XTRACT_SR_LOWER_LIMIT / XTRACT_FFT_BANDS_MIN;
             *argv_max = XTRACT_SR_UPPER_LIMIT / XTRACT_FFT_BANDS_MAX;
             *argv_def = XTRACT_SR_DEFAULT / XTRACT_FFT_BANDS_DEF;
             *argv_unit = XTRACT_HERTZ;
             *(argv_min + 1) = 0;
-            *(argv_max + 1) = 3 ;
+            *(argv_max + 1) = 3;
             *(argv_def + 1) = 0;
             *(argv_unit + 1) = (xtract_unit_t)XTRACT_NONE;
             *(argv_min + 2) = 0;
@@ -197,7 +194,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *(argv_unit + 3) = (xtract_unit_t)XTRACT_NONE;
             break;
         case XTRACT_SUBBANDS:
-            *argv_min  = XTRACT_UNBOUNDED_MIN;
+            *argv_min = XTRACT_UNBOUNDED_MIN;
             *argv_max = XTRACT_UNBOUNDED_MAX;
             *argv_def = XTRACT_MEAN;
             *argv_unit = (xtract_unit_t)XTRACT_NONE;
@@ -333,9 +330,8 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
 
         data_format = &d->data.format;
 
-        switch(f)
+        switch (f)
         {
-
         case XTRACT_MEAN:
         case XTRACT_VARIANCE:
         case XTRACT_STANDARD_DEVIATION:
@@ -435,9 +431,8 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
 
         data_unit = &d->data.unit;
 
-        switch(f)
+        switch (f)
         {
-
         case XTRACT_MEAN:
         case XTRACT_VARIANCE:
         case XTRACT_STANDARD_DEVIATION:
@@ -520,7 +515,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         copy_author(author, "");
         *year = 0;
 
-        switch(f)
+        switch (f)
         {
         case XTRACT_MEAN:
             copy_name(name, "mean");
@@ -540,36 +535,36 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             copy_name(name, "standard_deviation");
             copy_name(p_name, "Standard Deviation");
             copy_desc(desc,
-                   "Extract the standard deviation of an input vector");
+                      "Extract the standard deviation of an input vector");
             copy_desc(p_desc,
-                   "Extract the standard deviation of a range of values");
+                      "Extract the standard deviation of a range of values");
             copy_author(author, "");
             break;
         case XTRACT_AVERAGE_DEVIATION:
             copy_name(name, "average_deviation");
             copy_name(p_name, "Average Deviation");
             copy_desc(desc,
-                   "Extract the average deviation of an input vector");
+                      "Extract the average deviation of an input vector");
             copy_desc(p_desc,
-                   "Extract the average deviation of a range of values");
+                      "Extract the average deviation of a range of values");
             copy_author(author, "");
             break;
         case XTRACT_SKEWNESS:
             copy_name(name, "skewness");
             copy_name(p_name, "Skewness");
             copy_desc(desc,
-                   "Extract the skewness of an input vector");
+                      "Extract the skewness of an input vector");
             copy_desc(p_desc,
-                   "Extract the skewness of a range of values");
+                      "Extract the skewness of a range of values");
             copy_author(author, "");
             break;
         case XTRACT_KURTOSIS:
             copy_name(name, "kurtosis");
             copy_name(p_name, "Kurtosis");
             copy_desc(desc,
-                   "Extract the kurtosis of an input vector");
+                      "Extract the kurtosis of an input vector");
             copy_desc(p_desc,
-                   "Extract the kurtosis of a range of values");
+                      "Extract the kurtosis of a range of values");
             copy_author(author, "");
             break;
         case XTRACT_SPECTRAL_MEAN:
@@ -590,9 +585,9 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             copy_name(name, "spectral_standard_deviation");
             copy_name(p_name, "Spectral Standard Deviation");
             copy_desc(desc,
-                   "Extract the standard deviation of an input spectrum");
+                      "Extract the standard deviation of an input spectrum");
             copy_desc(p_desc,
-                   "Extract the standard deviation of an audio spectrum");
+                      "Extract the standard deviation of an audio spectrum");
             copy_author(author, "");
             break;
             /* case XTRACT_SPECTRAL_AVERAGE_DEVIATION:
@@ -609,9 +604,9 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             copy_name(name, "rolloff");
             copy_name(p_name, "Spectral Rolloff");
             copy_desc(desc,
-                   "Extract the rolloff point of a spectrum");
+                      "Extract the rolloff point of a spectrum");
             copy_desc(p_desc,
-                   "Extract the rolloff point of an audio spectrum");
+                      "Extract the rolloff point of an audio spectrum");
             copy_author(author, "Bee Suan Ong");
             *year = 2005;
             break;
@@ -620,24 +615,24 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             copy_name(p_name, "Inharmonicity");
             copy_desc(desc, "Extract the inharmonicity of a spectrum");
             copy_desc(p_desc,
-                   "Extract the inharmonicity of an audio spectrum");
+                      "Extract the inharmonicity of an audio spectrum");
             break;
         case XTRACT_SPECTRUM:
             copy_name(name, "spectrum");
             copy_name(p_name, "Spectrum");
             copy_desc(desc,
-                   "Extract the spectrum of an input vector");
+                      "Extract the spectrum of an input vector");
             copy_desc(p_desc,
-                   "Extract the spectrum of an audio signal");
+                      "Extract the spectrum of an audio signal");
             copy_author(author, "");
             break;
         case XTRACT_ODD_EVEN_RATIO:
             copy_name(name, "odd_even_ratio");
             copy_name(p_name, "Odd/even Harmonic Ratio");
             copy_desc(desc,
-                   "Extract the odd-to-even harmonic ratio of a spectrum");
+                      "Extract the odd-to-even harmonic ratio of a spectrum");
             copy_desc(p_desc,
-                   "Extract the odd-to-even harmonic ratio of an audio spectrum");
+                      "Extract the odd-to-even harmonic ratio of an audio spectrum");
             copy_author(author, "");
             break;
         case XTRACT_LOWEST_VALUE:
@@ -652,7 +647,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             copy_name(p_name, "Fundamental Frequency");
             copy_desc(desc, "Extract the fundamental frequency	of a signal");
             copy_desc(p_desc,
-                   "Extract the fundamental frequency of an audio signal");
+                      "Extract the fundamental frequency of an audio signal");
             copy_author(author, "Jamie Bullock");
             break;
         case XTRACT_FAILSAFE_F0:
@@ -660,7 +655,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             copy_name(p_name, "Fundamental Frequency (failsafe)");
             copy_desc(desc, "Extract the fundamental frequency of a signal (failsafe)");
             copy_desc(p_desc,
-                   "Extract the fundamental frequency of an audio signal (failsafe)");
+                      "Extract the fundamental frequency of an audio signal (failsafe)");
             copy_author(author, "Jamie Bullock");
             break;
         case XTRACT_WAVELET_F0:
@@ -668,7 +663,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             copy_name(p_name, "Fundamental Frequency (wavelet method)");
             copy_desc(desc, "Extract the fundamental frequency of a signal (wavelet method)");
             copy_desc(p_desc,
-                   "Extract the fundamental frequency of an audio signal (wavelet method)");
+                      "Extract the fundamental frequency of an audio signal (wavelet method)");
             copy_author(author, "Antoine Schmitt");
             break;
         case XTRACT_MCLEOD_F0:
@@ -676,17 +671,17 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             copy_name(p_name, "Fundamental Frequency (McLeod Pitch Method)");
             copy_desc(desc, "Extract the fundamental frequency of a signal (McLeod method)");
             copy_desc(p_desc,
-                   "Extract the fundamental frequency of an audio signal using the Normalised Square Difference Function");
+                      "Extract the fundamental frequency of an audio signal using the Normalised Square Difference Function");
             copy_author(author, "Philip McLeod");
             *year = 2005;
             break;
         case XTRACT_MIDICENT:
-                copy_name(name, "midicent");
-                copy_name(p_name, "Frequency to MIDI Cent conversion");
-                copy_desc(desc, "Convert frequency in Hertz to Pitch in MIDI cents");
-                copy_desc(p_desc, "Convert frequency in Hertz to Pitch in MIDI cents");
-                copy_author(author, "Jamie Bullock");
-                break;
+            copy_name(name, "midicent");
+            copy_name(p_name, "Frequency to MIDI Cent conversion");
+            copy_desc(desc, "Convert frequency in Hertz to Pitch in MIDI cents");
+            copy_desc(p_desc, "Convert frequency in Hertz to Pitch in MIDI cents");
+            copy_author(author, "Jamie Bullock");
+            break;
         case XTRACT_TONALITY:
             copy_name(name, "tonality");
             copy_name(p_name, "Tonality");
@@ -714,7 +709,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             copy_name(p_name, "Peak Spectrum");
             copy_desc(desc, "Extract the spectral peaks from of a spectrum");
             copy_desc(p_desc,
-                   "Extract the spectral peaks from an audio spectrum");
+                      "Extract the spectral peaks from an audio spectrum");
             copy_author(author, "");
             break;
         case XTRACT_HARMONIC_SPECTRUM:
@@ -736,9 +731,9 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             copy_name(name, "crest");
             copy_name(p_name, "Spectral Crest Measure");
             copy_desc(desc,
-                   "Extract the spectral crest measure of a spectrum");
+                      "Extract the spectral crest measure of a spectrum");
             copy_desc(p_desc,
-                   "Extract the spectral crest measure of an audio spectrum");
+                      "Extract the spectral crest measure of an audio spectrum");
             copy_author(author, "Peeters");
             *year = 2003;
             break;
@@ -775,9 +770,9 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             copy_name(p_name, "Linear predictive coding coefficients");
             copy_desc(desc, "Extract LPC from autocorrelation coefficients");
             copy_desc(p_desc,
-                   "Extract LPC from autocorrelation coefficients");
+                      "Extract LPC from autocorrelation coefficients");
             copy_author(author,
-                   "Rabiner and Juang as implemented by Jutta Degener");
+                        "Rabiner and Juang as implemented by Jutta Degener");
             *year = 1994;
             break;
         case XTRACT_LPCC:
@@ -785,7 +780,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             copy_name(p_name, "Linear predictive coding cepstral coefficients");
             copy_desc(desc, "Extract LPC cepstrum from LPC coefficients");
             copy_desc(p_desc,
-                   "Extract LPC cepstrum from LPC coefficients");
+                      "Extract LPC cepstrum from LPC coefficients");
             copy_author(author, "Rabiner and Juang");
             *year = 1993;
             break;
@@ -794,7 +789,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             copy_name(p_name, "Sub band coefficients");
             copy_desc(desc, "Extract subband coefficients from spectral magnitudes");
             copy_desc(p_desc,
-                   "Extract subband coefficients from spectral magnitudes");
+                      "Extract subband coefficients from spectral magnitudes");
             copy_author(author, "");
             break;
         case XTRACT_BARK_COEFFICIENTS:
@@ -802,7 +797,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             copy_name(p_name, "Bark Coefficients");
             copy_desc(desc, "Extract bark coefficients from a spectrum");
             copy_desc(p_desc,
-                   "Extract bark coefficients from an audio spectrum");
+                      "Extract bark coefficients from an audio spectrum");
             copy_author(author, "");
             break;
         case XTRACT_SPECTRAL_CENTROID:
@@ -810,7 +805,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             copy_name(p_name, "Spectral Centroid");
             copy_desc(desc, "Extract the spectral centroid of a spectrum");
             copy_desc(p_desc,
-                   "Extract the spectral centroid of an audio spectrum");
+                      "Extract the spectral centroid of an audio spectrum");
             copy_author(author, "");
             break;
         case XTRACT_IRREGULARITY_K:
@@ -818,7 +813,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             copy_name(p_name, "Irregularity I");
             copy_desc(desc, "Extract the irregularity (type I) of a spectrum");
             copy_desc(p_desc,
-                   "Extract the irregularity (type I) of an audio spectrum");
+                      "Extract the irregularity (type I) of an audio spectrum");
             copy_author(author, "Krimphoff");
             *year = 1994;
             break;
@@ -827,7 +822,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             copy_name(p_name, "Irregularity II");
             copy_desc(desc, "Extract the irregularity (type II) of a spectrum");
             copy_desc(p_desc,
-                   "Extract the irregularity (type II) of an audio spectrum");
+                      "Extract the irregularity (type II) of an audio spectrum");
             copy_author(author, "Jensen");
             *year = 1999;
             break;
@@ -836,7 +831,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             copy_name(p_name, "Tristimulus I");
             copy_desc(desc, "Extract the tristimulus (type I) of a spectrum");
             copy_desc(p_desc,
-                   "Extract the tristimulus (type I) of an audio spectrum");
+                      "Extract the tristimulus (type I) of an audio spectrum");
             copy_author(author, "Pollard and Jansson");
             *year = 1982;
             break;
@@ -845,7 +840,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             copy_name(p_name, "Tristimulus II");
             copy_desc(desc, "Extract the tristimulus (type II) of a spectrum");
             copy_desc(p_desc,
-                   "Extract the tristimulus (type II) of an audio spectrum");
+                      "Extract the tristimulus (type II) of an audio spectrum");
             copy_author(author, "Pollard and Jansson");
             *year = 1982;
             break;
@@ -853,9 +848,9 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             copy_name(name, "tristimulus_3");
             copy_name(p_name, "Tristimulus III");
             copy_desc(desc,
-                   "Extract the tristimulus (type III) of a spectrum");
+                      "Extract the tristimulus (type III) of a spectrum");
             copy_desc(p_desc,
-                   "Extract the tristimulus (type III) of an audio spectrum");
+                      "Extract the tristimulus (type III) of an audio spectrum");
             copy_author(author, "Pollard and Jansson");
             *year = 1982;
             break;
@@ -864,7 +859,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             copy_name(p_name, "Spectral Smoothness");
             copy_desc(desc, "Extract the spectral smoothness of a spectrum");
             copy_desc(p_desc,
-                   "Extract the spectral smoothness of an audio spectrum");
+                      "Extract the spectral smoothness of an audio spectrum");
             copy_author(author, "McAdams");
             *year = 1999;
             break;
@@ -873,7 +868,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             copy_name(p_name, "Spectral Flatness");
             copy_desc(desc, "Extract the spectral flatness of a spectrum");
             copy_desc(p_desc,
-                   "Extract the spectral flatness of an audio spectrum");
+                      "Extract the spectral flatness of an audio spectrum");
             copy_author(author, "Tristan Jehan");
             *year = 2005;
             break;
@@ -882,7 +877,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             copy_name(p_name, "Log Spectral Flatness");
             copy_desc(desc, "Extract the log spectral flatness of a spectrum");
             copy_desc(p_desc,
-                   "Extract the log spectral flatness of an audio spectrum");
+                      "Extract the log spectral flatness of an audio spectrum");
             copy_author(author, "Peeters");
             *year = 2003;
             break;
@@ -891,7 +886,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             copy_name(p_name, "Spectral Spread");
             copy_desc(desc, "Extract the spectral spread of a spectrum");
             copy_desc(p_desc,
-                   "Extract the spectral spread of an audio spectrum");
+                      "Extract the spectral spread of an audio spectrum");
             copy_author(author, "Norman Casagrande");
             *year = 2005;
             break;
@@ -900,16 +895,16 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             copy_name(p_name, "Zero Crossing Rate");
             copy_desc(desc, "Extract the zero crossing rate of a vector");
             copy_desc(p_desc,
-                   "Extract the zero crossing rate of an audio signal");
+                      "Extract the zero crossing rate of an audio signal");
             copy_author(author, "");
             break;
         case XTRACT_LOUDNESS:
             copy_name(name, "loudness");
             copy_name(p_name, "Loudness");
             copy_desc(desc,
-                   "Extract the loudness of a signal from its spectrum");
+                      "Extract the loudness of a signal from its spectrum");
             copy_desc(p_desc,
-                   "Extract the loudness of an audio signal from its spectrum");
+                      "Extract the loudness of an audio signal from its spectrum");
             copy_author(author, "Moore, Glasberg et al");
             *year = 2005;
             break;
@@ -924,9 +919,9 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             copy_name(name, "sum");
             copy_name(p_name, "Sum of Values");
             copy_desc(desc,
-                   "Extract the sum of the values in an input vector");
+                      "Extract the sum of the values in an input vector");
             copy_desc(p_desc,
-                   "Extract the sum of the values in a given range");
+                      "Extract the sum of the values in a given range");
             copy_author(author, "");
             break;
         case XTRACT_RMS_AMPLITUDE:
@@ -941,7 +936,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             copy_name(p_name, "Spectral Power");
             copy_desc(desc, "Extract the spectral power of a spectrum");
             copy_desc(p_desc,
-                   "Extract the spectral power of an audio spectrum");
+                      "Extract the spectral power of an audio spectrum");
             copy_author(author, "Bee Suan Ong");
             *year = 2005;
             break;
@@ -950,7 +945,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             copy_name(p_name, "Spectral Sharpness");
             copy_desc(desc, "Extract the spectral sharpness of a spectrum");
             copy_desc(p_desc,
-                   "Extract the spectral sharpness of an audio spectrum");
+                      "Extract the spectral sharpness of an audio spectrum");
             copy_author(author, "von Bismarck");
             *year = 1974;
             break;
@@ -959,16 +954,16 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             copy_name(p_name, "Spectral Slope");
             copy_desc(desc, "Extract the spectral slope of a spectrum");
             copy_desc(p_desc,
-                   "Extract the spectral slope of an audio spectrum");
+                      "Extract the spectral slope of an audio spectrum");
             copy_author(author, "");
             break;
         case XTRACT_HPS:
             copy_name(name, "hps");
             copy_name(p_name, "Harmonic Product Spectrum");
             copy_desc(desc,
-                   "Extract the harmonic product spectrum of a spectrum");
+                      "Extract the harmonic product spectrum of a spectrum");
             copy_desc(p_desc,
-                   "Extract the harmonic product spectrum of an audio spectrum");
+                      "Extract the harmonic product spectrum of an audio spectrum");
             copy_author(author, "");
             break;
         case XTRACT_FLUX:
@@ -976,7 +971,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             copy_name(p_name, "Spectral Flux");
             copy_desc(desc, "Extract the spectral flux of a spectrum");
             copy_desc(p_desc,
-                   "Extract the spectral flux of an audio spectrum");
+                      "Extract the spectral flux of an audio spectrum");
             copy_author(author, "");
             break;
         case XTRACT_LNORM:
@@ -1026,7 +1021,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             copy_name(p_name, "Autocorrelation");
             copy_desc(desc, "Extract the autocorrelation of a signal");
             copy_desc(p_desc,
-                   "Extract the autocorrelation of an audio signal");
+                      "Extract the autocorrelation of an audio signal");
             copy_author(author, "");
             break;
         case XTRACT_AMDF:
@@ -1047,9 +1042,9 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             copy_name(name, "nonzero_count");
             copy_name(p_name, "Non-zero count");
             copy_desc(desc,
-                   "Extract the number of non-zero elements in the input vector");
+                      "Extract the number of non-zero elements in the input vector");
             copy_desc(p_desc,
-                   "Extract the number of non-zero elements in an input spectrum");
+                      "Extract the number of non-zero elements in an input spectrum");
             copy_author(author, "");
             break;
         case XTRACT_WINDOWED:
@@ -1075,9 +1070,8 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             break;
         }
 
-        switch(f)
+        switch (f)
         {
-
         case XTRACT_VARIANCE:
         case XTRACT_STANDARD_DEVIATION:
         case XTRACT_AVERAGE_DEVIATION:
@@ -1182,7 +1176,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
 
         is_scalar = &d->is_scalar;
 
-        switch(f)
+        switch (f)
         {
         case XTRACT_MEAN:
         case XTRACT_VARIANCE:
@@ -1256,12 +1250,11 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         default:
             *is_scalar = XTRACT_TRUE;
             break;
-
         }
 
         is_delta = &d->is_delta;
 
-        switch(f)
+        switch (f)
         {
         case XTRACT_FLUX:
         case XTRACT_LNORM:
@@ -1335,14 +1328,13 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             break;
         }
 
-        if(*is_scalar)
+        if (*is_scalar)
         {
-
             result_unit = &d->result.scalar.unit;
             result_min = &d->result.scalar.min;
             result_max = &d->result.scalar.max;
 
-            switch(f)
+            switch (f)
             {
             case XTRACT_MEAN:
             case XTRACT_VARIANCE:
@@ -1430,13 +1422,12 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         }
         else
         {
-
             result_min = NULL;
             result_max = NULL;
             result_unit = &d->result.vector.unit;
             result_format = &d->result.vector.format;
 
-            switch(f)
+            switch (f)
             {
             case XTRACT_AUTOCORRELATION:
             case XTRACT_AMDF:
@@ -1495,7 +1486,6 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
 
 int xtract_free_descriptors(xtract_function_descriptor_t *fd)
 {
-
     if (fd != NULL)
     {
         free(fd);
@@ -1503,8 +1493,3 @@ int xtract_free_descriptors(xtract_function_descriptor_t *fd)
 
     return XTRACT_SUCCESS;
 }
-
-
-
-
-

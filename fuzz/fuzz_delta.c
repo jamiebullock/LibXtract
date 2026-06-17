@@ -19,8 +19,7 @@
 
 static const int eligible[] = {
     XTRACT_FLUX, XTRACT_LNORM, XTRACT_ATTACK_TIME,
-    XTRACT_DECAY_TIME, XTRACT_DIFFERENCE_VECTOR
-};
+    XTRACT_DECAY_TIME, XTRACT_DIFFERENCE_VECTOR};
 
 #define N_ELIGIBLE ((int)(sizeof(eligible) / sizeof(eligible[0])))
 #define MAX_N 4096

@@ -37,24 +37,23 @@ struct xtract_last_n_state_
     ringbuf_t ringbuf;
 };
 
-
 xtract_last_n_state *xtract_last_n_state_new(size_t N)
 {
     xtract_last_n_state *last_n_state = malloc(sizeof(xtract_last_n_state));
-    
+
     if (last_n_state == NULL)
     {
         perror("could not allocate memory for xtract_last_n_state");
         return NULL;
     }
-    
+
     last_n_state->ringbuf = ringbuf_new(N * sizeof(double));
-    
+
     if (last_n_state->ringbuf == NULL)
     {
         perror("could not allocate memory for xtract_last_n_state->ringbuf");
     }
-        
+
     return last_n_state;
 }
 
@@ -75,20 +74,19 @@ int xtract_last_n(const xtract_last_n_state *state, const double *data, const in
         fprintf(stderr, "libxtract: error: xtract_last_n(): inconsitent size");
         return XTRACT_BAD_STATE;
     }
-    
+
     ringbuf_memcpy_into(state->ringbuf, data, sizeof(double));
     used = ringbuf_bytes_used(state->ringbuf);
     result_offset = N - (used / sizeof(double));
-    
+
     /* Copy at end of result so last value is most recent */
     ringbuf_memcpy_from(result + result_offset, state->ringbuf, used, false);
-    
+
     if (result_offset)
     {
         /* zero pre-pad */
-         memset(result, 0, result_offset * sizeof(double));
+        memset(result, 0, result_offset * sizeof(double));
     }
-    
+
     return XTRACT_SUCCESS;
 }
-

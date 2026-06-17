@@ -27,7 +27,12 @@
 #include "xtract/libxtract.h"
 #include "xtract/xtract_scalar.h"
 
-enum { FFT_N = 1024, WAVELET_N = 2048, MAX_N = 2048 };
+enum
+{
+    FFT_N = 1024,
+    WAVELET_N = 2048,
+    MAX_N = 2048
+};
 
 static const int enum_features[] = {
     XTRACT_MEAN, XTRACT_VARIANCE, XTRACT_STANDARD_DEVIATION,
@@ -44,8 +49,7 @@ static const int enum_features[] = {
     XTRACT_SHARPNESS, XTRACT_SPECTRAL_SLOPE, XTRACT_LOWEST_VALUE,
     XTRACT_HIGHEST_VALUE, XTRACT_SUM, XTRACT_NONZERO_COUNT, XTRACT_HPS,
     XTRACT_F0, XTRACT_FAILSAFE_F0, XTRACT_WAVELET_F0, XTRACT_MCLEOD_F0,
-    XTRACT_MIDICENT
-};
+    XTRACT_MIDICENT};
 
 #define N_ENUM ((int)(sizeof(enum_features) / sizeof(enum_features[0])))
 /* peak has no enum / dispatch slot, so it is one extra feature called directly. */
