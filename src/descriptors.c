@@ -157,7 +157,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *(argv_min + 1) = 0.0;
             *(argv_max + 1) = 1.0;
             *(argv_def + 1) = .1;
-            *(argv_unit + 1) = (xtract_unit_t)XTRACT_NONE;
+            *(argv_unit + 1) = XTRACT_UNIT_NONE;
             break;
         case XTRACT_NOISINESS:
         case XTRACT_SKEWNESS:
@@ -168,11 +168,11 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *argv_min = XTRACT_NONE;
             *argv_max = XTRACT_NONE;
             *argv_def = XTRACT_NONE;
-            *argv_unit = (xtract_unit_t)XTRACT_NONE;
+            *argv_unit = XTRACT_UNIT_NONE;
             *(argv_min + 1) = XTRACT_NONE;
             *(argv_max + 1) = XTRACT_NONE;
             *(argv_def + 1) = XTRACT_NONE;
-            *(argv_unit + 1) = (xtract_unit_t)XTRACT_NONE;
+            *(argv_unit + 1) = XTRACT_UNIT_NONE;
             break;
             /* argc = 4 */
         case XTRACT_SPECTRUM:
@@ -183,29 +183,29 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *(argv_min + 1) = 0;
             *(argv_max + 1) = 3;
             *(argv_def + 1) = 0;
-            *(argv_unit + 1) = (xtract_unit_t)XTRACT_NONE;
+            *(argv_unit + 1) = XTRACT_UNIT_NONE;
             *(argv_min + 2) = 0;
             *(argv_max + 2) = 1;
             *(argv_def + 2) = 0;
-            *(argv_unit + 2) = (xtract_unit_t)XTRACT_NONE;
+            *(argv_unit + 2) = XTRACT_UNIT_NONE;
             *(argv_min + 3) = 0;
             *(argv_max + 3) = 1;
             *(argv_def + 3) = 0;
-            *(argv_unit + 3) = (xtract_unit_t)XTRACT_NONE;
+            *(argv_unit + 3) = XTRACT_UNIT_NONE;
             break;
         case XTRACT_SUBBANDS:
             *argv_min = XTRACT_UNBOUNDED_MIN;
             *argv_max = XTRACT_UNBOUNDED_MAX;
             *argv_def = XTRACT_MEAN;
-            *argv_unit = (xtract_unit_t)XTRACT_NONE;
+            *argv_unit = XTRACT_UNIT_NONE;
             *(argv_min + 1) = 1;
             *(argv_max + 1) = 16384;
             *(argv_def + 1) = 4;
-            *(argv_unit + 1) = (xtract_unit_t)XTRACT_NONE;
+            *(argv_unit + 1) = XTRACT_UNIT_NONE;
             *(argv_min + 2) = 0;
             *(argv_max + 2) = 32;
             *(argv_def + 2) = 0;
-            *(argv_unit + 2) = (xtract_unit_t)XTRACT_NONE;
+            *(argv_unit + 2) = XTRACT_UNIT_NONE;
             *(argv_min + 3) = 0;
             *(argv_max + 3) = XTRACT_UNBOUNDED_MAX;
             *(argv_def + 3) = 0;
@@ -220,7 +220,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *argv_min = XTRACT_NONE;
             *argv_max = XTRACT_NONE;
             *argv_def = XTRACT_NONE;
-            *argv_unit = (xtract_unit_t)XTRACT_NONE;
+            *argv_unit = XTRACT_UNIT_NONE;
             break;
         }
 
@@ -488,7 +488,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_WINDOWED:
         case XTRACT_SMOOTHED:
         case XTRACT_SUBBANDS:
-            *data_unit = (xtract_unit_t)XTRACT_ANY;
+            *data_unit = XTRACT_UNIT_ANY;
             break;
         case XTRACT_SPECTRAL_MEAN:
         case XTRACT_SPECTRAL_VARIANCE:
@@ -1350,22 +1350,38 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             case XTRACT_LNORM:
             case XTRACT_NONZERO_COUNT:
             case XTRACT_WINDOWED:
-                *result_unit = (xtract_unit_t)XTRACT_ANY;
+                *result_unit = XTRACT_UNIT_ANY;
                 *result_min = XTRACT_UNBOUNDED_MIN;
                 *result_max = XTRACT_UNBOUNDED_MAX;
                 break;
             case XTRACT_SPECTRAL_SKEWNESS:
+                /* standardised 3rd moment: any real sign and magnitude */
+                *result_unit = XTRACT_UNIT_NONE;
+                *result_min = XTRACT_UNBOUNDED_MIN;
+                *result_max = XTRACT_UNBOUNDED_MAX;
+                break;
             case XTRACT_SPECTRAL_KURTOSIS:
-            case XTRACT_IRREGULARITY_K:
-            case XTRACT_IRREGULARITY_J:
+                /* excess kurtosis (4th moment - 3): floor -2, no upper bound */
+                *result_unit = XTRACT_UNIT_NONE;
+                *result_min = -2.0;
+                *result_max = XTRACT_UNBOUNDED_MAX;
+                break;
             case XTRACT_TRISTIMULUS_1:
             case XTRACT_TRISTIMULUS_2:
             case XTRACT_TRISTIMULUS_3:
             case XTRACT_NOISINESS:
+                /* energy ratios of a partition of the total: bounded [0, 1] */
+                *result_unit = XTRACT_UNIT_NONE;
+                *result_min = 0.0;
+                *result_max = 1.0;
+                break;
+            case XTRACT_IRREGULARITY_K:
+            case XTRACT_IRREGULARITY_J:
             case XTRACT_SMOOTHNESS:
-                *result_unit = (xtract_unit_t)XTRACT_NONE;
-                *result_min = XTRACT_UNKNOWN_MIN; /* unverified result range: see issue #150 */
-                *result_max = XTRACT_UNKNOWN_MAX;
+                /* sums/ratios of non-negative deviations: >= 0, no upper bound */
+                *result_unit = XTRACT_UNIT_NONE;
+                *result_min = 0.0;
+                *result_max = XTRACT_UNBOUNDED_MAX;
                 break;
             case XTRACT_SPECTRAL_MEAN:
             case XTRACT_SPECTRAL_VARIANCE:
@@ -1394,27 +1410,54 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
                 *result_max = XTRACT_UNBOUNDED_MAX;
                 break;
             case XTRACT_ODD_EVEN_RATIO:
-                *result_unit = (xtract_unit_t)XTRACT_NONE;
+                *result_unit = XTRACT_UNIT_NONE;
                 *result_min = 0.0;
                 *result_max = 1.0;
                 break;
             case XTRACT_FLATNESS_DB:
+                /* 10*log10(flatness), flatness in (0, 1]: <= 0 dB, no true floor */
                 *result_unit = XTRACT_DBFS;
-                *result_min = XTRACT_UNKNOWN_MIN; /* unverified result range: see issue #150 */
-                *result_max = XTRACT_UNKNOWN_MAX;
+                *result_min = XTRACT_UNBOUNDED_MIN;
+                *result_max = 0.0;
                 break;
             case XTRACT_LOUDNESS:
+                /* sum of specific loudnesses (band energy^0.23): >= 0, in sones */
+                *result_unit = XTRACT_SONE;
+                *result_min = 0.0;
+                *result_max = XTRACT_UNBOUNDED_MAX;
+                break;
             case XTRACT_FLATNESS:
+                /* geometric mean / arithmetic mean (Wiener entropy): [0, 1] */
             case XTRACT_TONALITY:
-            case XTRACT_CREST:
+                /* min(flatness_db / -60, 1): [0, 1] */
             case XTRACT_SPECTRAL_INHARMONICITY:
-            case XTRACT_POWER:
+                /* amplitude-weighted mean of normalised detunings: [0, 1] */
+                *result_unit = XTRACT_UNIT_NONE;
+                *result_min = 0.0;
+                *result_max = 1.0;
+                break;
+            case XTRACT_CREST:
+                /* max / mean of non-negative data: >= 1, no upper bound */
+                *result_unit = XTRACT_UNIT_NONE;
+                *result_min = 1.0;
+                *result_max = XTRACT_UNBOUNDED_MAX;
+                break;
             case XTRACT_SHARPNESS:
+                /* loudness-weighted Bark centroid: >= 0, in acums */
+                *result_unit = XTRACT_ACUM;
+                *result_min = 0.0;
+                *result_max = XTRACT_UNBOUNDED_MAX;
+                break;
             case XTRACT_SPECTRAL_SLOPE:
-            case XTRACT_LPC:
-            case XTRACT_LPCC:
+                /* least-squares regression slope: any real sign and magnitude */
+                *result_unit = XTRACT_UNIT_NONE;
+                *result_min = XTRACT_UNBOUNDED_MIN;
+                *result_max = XTRACT_UNBOUNDED_MAX;
+                break;
+            case XTRACT_POWER:
+                /* unimplemented (returns XTRACT_FEATURE_NOT_IMPLEMENTED) */
             default:
-                *result_unit = (xtract_unit_t)XTRACT_UNKNOWN;
+                *result_unit = XTRACT_UNIT_UNKNOWN;
                 *result_min = XTRACT_UNKNOWN_MIN;
                 *result_max = XTRACT_UNKNOWN_MAX;
                 break;
@@ -1437,11 +1480,12 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             case XTRACT_WINDOWED:
             case XTRACT_SMOOTHED:
                 *result_format = XTRACT_ARBITRARY_SERIES;
-                *result_unit = (xtract_unit_t)XTRACT_ANY;
+                *result_unit = XTRACT_UNIT_ANY;
                 break;
             case XTRACT_BARK_COEFFICIENTS:
+                /* per-band sums on a Bark-band (not Hz) axis: dimensionless */
                 *result_format = XTRACT_BARK_COEFFS;
-                *result_unit = (xtract_unit_t)XTRACT_UNKNOWN; /* unverified result unit: see issue #150 */
+                *result_unit = XTRACT_UNIT_NONE;
                 break;
             case XTRACT_PEAK_SPECTRUM:
             case XTRACT_SPECTRUM:
@@ -1452,28 +1496,32 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             case XTRACT_AUTOCORRELATION_FFT:
                 break;
             case XTRACT_MFCC:
+                /* DCT of log filterbank energies: dimensionless cepstral coeffs */
                 *result_format = XTRACT_MEL_COEFFS;
-                *result_unit = (xtract_unit_t)XTRACT_UNKNOWN; /* unverified result unit: see issue #150 */
+                *result_unit = XTRACT_UNIT_NONE;
                 break;
             case XTRACT_MEL_SPECTROGRAM:
                 *result_format = XTRACT_MEL_COEFFS;
                 *result_unit = XTRACT_DBFS;
                 break;
             case XTRACT_GFCC:
+                /* DCT of log gammatone energies: dimensionless cepstral coeffs */
                 *result_format = XTRACT_MEL_COEFFS;
-                *result_unit = (xtract_unit_t)XTRACT_UNKNOWN;
+                *result_unit = XTRACT_UNIT_NONE;
                 break;
             case XTRACT_GAMMATONE_SPECTROGRAM:
                 *result_format = XTRACT_MEL_COEFFS;
                 *result_unit = XTRACT_DBFS;
                 break;
             case XTRACT_LPC:
+                /* predictor/reflection coefficients: dimensionless */
                 *result_format = XTRACT_LPC_COEFFS;
-                *result_unit = (xtract_unit_t)XTRACT_UNKNOWN;
+                *result_unit = XTRACT_UNIT_NONE;
                 break;
             case XTRACT_LPCC:
+                /* cepstral coefficients: dimensionless */
                 *result_format = XTRACT_LPCC_COEFFS;
-                *result_unit = (xtract_unit_t)XTRACT_UNKNOWN;
+                *result_unit = XTRACT_UNIT_NONE;
                 break;
             default:
                 break;
