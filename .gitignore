@@ -10,10 +10,6 @@
 *.so
 *.dylib
 
-# VS files
-*.sdf
-*.tlog
-
 # sublime 
 
 *sublime*

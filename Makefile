@@ -99,14 +99,14 @@ fuzz:
 	@$(MAKE) -C src clean
 	@$(MAKE) -C src
 
-# clang-format over the first-party C sources (third-party, generated MSVC
-# boilerplate, SWIG bindings and the C++ examples are excluded). The pinned
-# CLANG_FORMAT version must match the one CI installs so a local `make format`
-# and the enforced `make format-check` agree byte-for-byte.
+# clang-format over the first-party C sources (third-party, SWIG bindings and
+# the C++ examples are excluded). The pinned CLANG_FORMAT version must match
+# the one CI installs so a local `make format` and the enforced
+# `make format-check` agree byte-for-byte.
 CLANG_FORMAT ?= clang-format
 FORMAT_FILES := $(shell git ls-files '*.c' '*.h' \
 	':!:src/ooura/**' ':!:src/c-ringbuf/**' ':!:src/dywapitchtrack/**' \
-	':!:swig/**' ':!:vc2012/**' ':!:examples/**' \
+	':!:swig/**' ':!:examples/**' \
 	':!:tests/utest.h' ':!:bench/ubench.h')
 
 format:
