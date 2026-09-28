@@ -94,11 +94,13 @@ int LLVMFuzzerInitialize(int *argc, char ***argv)
 
     mel.n_filters = N_FILTERS;
     mel.filters = alloc_filterbank();
+    mel.dct_table = xtract_init_dct(N_FILTERS);
     xtract_init_mfcc(VEC_N, NYQUIST, XTRACT_EQUAL_GAIN, 20.0, 8000.0,
                      N_FILTERS, mel.filters);
 
     gammatone.n_filters = N_FILTERS;
     gammatone.filters = alloc_filterbank();
+    gammatone.dct_table = NULL;
     xtract_init_gfcc(VEC_N, NYQUIST, 20.0, 8000.0, N_FILTERS,
                      gammatone.filters);
 

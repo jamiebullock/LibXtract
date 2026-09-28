@@ -158,6 +158,7 @@ int main(void)
     }
     
     xtract_init_mfcc(BLOCKSIZE >> 1, SAMPLERATE >> 1, XTRACT_EQUAL_GAIN, MFCC_FREQ_MIN, MFCC_FREQ_MAX, mel_filters.n_filters, mel_filters.filters);
+    mel_filters.dct_table = xtract_init_dct(MFCC_FREQ_BANDS);
     
     /* create the window functions */
     window = xtract_init_window(BLOCKSIZE, XTRACT_HANN);
@@ -290,6 +291,7 @@ int main(void)
         free(mel_filters.filters[n]);
     }
     free(mel_filters.filters);
+    xtract_free_dct(mel_filters.dct_table);
 
     xtract_free_window(window);
     xtract_free_window(window_subframe);

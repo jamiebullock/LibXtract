@@ -202,6 +202,7 @@ UTEST(vector, spectral_subband_centroids_single_partial_per_band)
         filter_bank[1][n] = n < 4 ? 0.0 : 1.0;
     }
     mf.n_filters = 2;
+    mf.dct_table = NULL;
     mf.filters = filter_ptrs;
 
     xtract_spectral_subband_centroids(data, N, &mf, result);
@@ -1219,6 +1220,7 @@ UTEST(vector, mel_spectrogram_produces_log_mel_energies_mfcc_applies_dct_to)
 
     /* Init mel filter bank */
     mel_filters.n_filters = n_filters;
+    mel_filters.dct_table = NULL;
     mel_filters.filters = (double **)malloc(n_filters * sizeof(double *));
     for (i = 0; i < n_filters; i++)
         mel_filters.filters[i] = (double *)calloc(N, sizeof(double));
@@ -1276,6 +1278,7 @@ UTEST(vector, gfcc_equals_dct_of_gammatone_spectrogram)
 
     /* Init gammatone filter bank */
     gt_filters.n_filters = n_filters;
+    gt_filters.dct_table = NULL;
     gt_filters.filters = (double **)malloc(n_filters * sizeof(double *));
     for (i = 0; i < n_filters; i++)
         gt_filters.filters[i] = (double *)calloc(N, sizeof(double));
@@ -1375,6 +1378,8 @@ UTEST(vector, mmbses_all_zero_filter_produces_zero_coefficient)
     double result[1] = {-1.0};
 
     mf.n_filters = 1;
+
+    mf.dct_table = NULL;
     mf.filters = filt_ptr;
     ASSERT_EQ(xtract_mmbses(data, N, &mf, result), XTRACT_SUCCESS);
     CHECK_NEAR(result[0], 0.0, EPSILON);
@@ -1393,6 +1398,8 @@ UTEST(vector, mmbses_single_passed_bin_floors_determinant)
     double result[1] = {-1.0};
 
     mf.n_filters = 1;
+
+    mf.dct_table = NULL;
     mf.filters = filt_ptr;
     ASSERT_EQ(xtract_mmbses(data, N, &mf, result), XTRACT_SUCCESS);
     CHECK_REL(result[0], (log(2.0 * M_PI) + 1.0) + 0.5 * LOG_LIMIT_DB, EPSILON);
@@ -1412,6 +1419,8 @@ UTEST(vector, mmbses_two_collinear_bins_floor_determinant)
     double result[1] = {-1.0};
 
     mf.n_filters = 1;
+
+    mf.dct_table = NULL;
     mf.filters = filt_ptr;
     ASSERT_EQ(xtract_mmbses(data, N, &mf, result), XTRACT_SUCCESS);
     CHECK_REL(result[0], (log(2.0 * M_PI) + 1.0) + 0.5 * LOG_LIMIT_DB, EPSILON);
@@ -1430,6 +1439,8 @@ UTEST(vector, mmbses_two_orthogonal_bins_positive_determinant)
     double result[1] = {-1.0};
 
     mf.n_filters = 1;
+
+    mf.dct_table = NULL;
     mf.filters = filt_ptr;
     ASSERT_EQ(xtract_mmbses(data, N, &mf, result), XTRACT_SUCCESS);
     CHECK_REL(result[0], (log(2.0 * M_PI) + 1.0) + 0.5 * log(0.25), EPSILON);
@@ -1450,7 +1461,52 @@ UTEST(vector, mmbses_three_bins_exercise_full_covariance_path)
     double expected = (log(2.0 * M_PI) + 1.0) + 0.5 * log(1.0 / 3.0);
 
     mf.n_filters = 1;
+
+    mf.dct_table = NULL;
     mf.filters = filt_ptr;
     ASSERT_EQ(xtract_mmbses(data, N, &mf, result), XTRACT_SUCCESS);
     CHECK_REL(result[0], expected, EPSILON);
+}
+
+UTEST(vector, mfcc_and_gfcc_with_dct_table_match_table_less_path)
+{
+    const int N = 64;
+    const int n_filters = 13;
+    double data[64];
+    double table_less[13], with_table[13];
+    xtract_mel_filter mf;
+    int i;
+
+    for (i = 0; i < N; i++)
+        data[i] = 1.0 + sin(0.3 * i);
+
+    mf.n_filters = n_filters;
+    mf.filters = (double **)malloc(n_filters * sizeof(double *));
+    for (i = 0; i < n_filters; i++)
+        mf.filters[i] = (double *)calloc(N, sizeof(double));
+    xtract_init_mfcc(N, 22050.0 / 2, XTRACT_EQUAL_GAIN, 20, 8000, n_filters, mf.filters);
+
+    mf.dct_table = NULL;
+    ASSERT_EQ(xtract_mfcc(data, N, &mf, table_less), XTRACT_SUCCESS);
+    mf.dct_table = xtract_init_dct(n_filters);
+    ASSERT_TRUE(mf.dct_table != NULL);
+    ASSERT_EQ(xtract_mfcc(data, N, &mf, with_table), XTRACT_SUCCESS);
+    for (i = 0; i < n_filters; i++)
+        CHECK_NEAR(with_table[i], table_less[i], 1e-12);
+    xtract_free_dct(mf.dct_table);
+
+    xtract_init_gfcc(N, 22050.0 / 2, 20, 8000, n_filters, mf.filters);
+
+    mf.dct_table = NULL;
+    ASSERT_EQ(xtract_gfcc(data, N, &mf, table_less), XTRACT_SUCCESS);
+    mf.dct_table = xtract_init_dct(n_filters);
+    ASSERT_TRUE(mf.dct_table != NULL);
+    ASSERT_EQ(xtract_gfcc(data, N, &mf, with_table), XTRACT_SUCCESS);
+    for (i = 0; i < n_filters; i++)
+        CHECK_NEAR(with_table[i], table_less[i], 1e-12);
+    xtract_free_dct(mf.dct_table);
+
+    for (i = 0; i < n_filters; i++)
+        free(mf.filters[i]);
+    free(mf.filters);
 }

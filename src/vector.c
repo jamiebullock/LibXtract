@@ -499,7 +499,7 @@ static int cepstral_coefficients(const double *data, const int N, const xtract_m
         return XTRACT_MALLOC_FAILED;
 
     filterbank_spectrogram(data, N, f, temp);
-    xtract_dct(temp, f->n_filters, NULL, result);
+    xtract_dct(temp, f->n_filters, f->dct_table, result);
     free(temp);
 
     return XTRACT_SUCCESS;
