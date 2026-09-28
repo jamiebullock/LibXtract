@@ -467,6 +467,21 @@ printf("Mean = %.2f\n", mean);
      */
     void xtract_free_window(double *window);
 
+    /** \brief Allocate the cosine table used by xtract_dct() for a transform of size N
+     *
+     * The table holds N * N doubles, row-major by output coefficient: entry [n * N + m] is cos(pi * n * (m + 0.5) / N). Pass it as the argv argument of xtract_dct() for every call with the same N. A table built for one N must not be used with another.
+     *
+     * \param N: the transform size
+     * \return a pointer to the table, or NULL if N <= 0 or allocation fails
+     */
+    double *xtract_init_dct(const int N);
+
+    /** \brief Free a table as allocated by xtract_init_dct()
+     *
+     * \param *table: a pointer to a table as allocated by xtract_init_dct(), or NULL
+     */
+    void xtract_free_dct(double *table);
+
     /* \brief A function to build an array of function descriptors */
     xtract_function_descriptor_t *xtract_make_descriptors(void);
 

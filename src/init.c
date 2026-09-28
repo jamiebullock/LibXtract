@@ -34,6 +34,7 @@
 #include "xtract_window_private.h"
 #define DEFINE_GLOBALS
 #include "xtract_globals_private.h"
+#include "xtract_macros_private.h"
 
 #ifdef USE_OOURA
 thread_local struct xtract_ooura_data_ ooura_data_dct;
@@ -221,9 +222,6 @@ int xtract_init_fft(int N, int feature_name)
 #endif
 }
 
-extern thread_local double **dct_cos_table;
-extern thread_local int dct_cos_table_dim;
-
 void xtract_free_fft(void)
 {
 #ifdef USE_OOURA
@@ -231,17 +229,6 @@ void xtract_free_fft(void)
 #else
     xtract_free_vdsp_();
 #endif
-
-    if (dct_cos_table != NULL)
-    {
-        for (int n = 0; n < dct_cos_table_dim; ++n)
-        {
-            free(dct_cos_table[n]);
-        }
-        free(dct_cos_table);
-        dct_cos_table = NULL;
-        dct_cos_table_dim = 0;
-    }
 }
 
 int xtract_init_bark(int N, double sr, int *band_limits)
@@ -510,6 +497,32 @@ double *xtract_init_window(const int N, const int type)
 void xtract_free_window(double *window)
 {
     free(window);
+}
+
+double *xtract_init_dct(const int N)
+{
+    double *table;
+    int n, m;
+
+    if (N <= 0)
+        return NULL;
+
+    table = (double *)malloc((size_t)N * (size_t)N * sizeof(double));
+    if (table == NULL)
+        return NULL;
+
+    for (n = 0; n < N; ++n)
+    {
+        for (m = 0; m < N; ++m)
+            table[n * N + m] = xtract_dct_cosine(n, m, N);
+    }
+
+    return table;
+}
+
+void xtract_free_dct(double *table)
+{
+    free(table);
 }
 
 #ifdef __GNUC__
