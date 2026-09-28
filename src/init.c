@@ -24,6 +24,7 @@
 /* init.c: defines initialisation and free functions. Also contains library constructor routine. */
 
 #include <math.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
@@ -504,7 +505,7 @@ double *xtract_init_dct(const int N)
     double *table;
     int n, m;
 
-    if (N <= 0)
+    if (N <= 0 || (size_t)N > SIZE_MAX / sizeof(double) / (size_t)N)
         return NULL;
 
     table = (double *)malloc((size_t)N * (size_t)N * sizeof(double));
@@ -514,7 +515,7 @@ double *xtract_init_dct(const int N)
     for (n = 0; n < N; ++n)
     {
         for (m = 0; m < N; ++m)
-            table[n * N + m] = xtract_dct_cosine(n, m, N);
+            table[(size_t)n * (size_t)N + (size_t)m] = xtract_dct_cosine(n, m, N);
     }
 
     return table;

@@ -628,7 +628,7 @@ int xtract_dct(const double *data, const int N, const void *argv, double *result
 
         if (table != NULL)
         {
-            const double *row = table + n * N;
+            const double *row = table + (size_t)n * (size_t)N;
 
             for (m = 0; m < N; ++m)
                 acc += data[m] * row[m];
