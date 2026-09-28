@@ -1,18 +1,11 @@
-# CodeRabbit review settings. See https://docs.coderabbit.ai/guides/configure-coderabbit
 language: en-GB
 
 reviews:
-  # Substantive findings over style notes: bugs, unclean design and real
-  # convention violations. No nitpicks.
   profile: chill
   high_level_summary: true
   poem: false
-  # CodeRabbit requests changes when it finds something and approves once
-  # that is resolved, so the review state says whether anything is open.
   request_changes_workflow: true
-  # Nothing to say on a pull request with no reviewable change.
   review_status: false
-  # Bundled third-party code keeps its upstream style and is not reviewed.
   path_filters:
     - '!src/ooura/**'
     - '!src/c-ringbuf/**'
@@ -53,8 +46,6 @@ reviews:
         the documented formulae. Flag a test that only pins the current
         output, or a test-only hook added to production code to make a test
         pass.
-  # Doxygen lives on the header declarations; .c files carry none, so a
-  # docstring coverage threshold would fail every pull request.
   pre_merge_checks:
     docstrings:
       mode: off
