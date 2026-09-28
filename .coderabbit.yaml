@@ -1,0 +1,57 @@
+language: en-GB
+
+reviews:
+  profile: chill
+  high_level_summary: true
+  poem: false
+  request_changes_workflow: true
+  review_status: false
+  path_filters:
+    - '!src/ooura/**'
+    - '!src/c-ringbuf/**'
+    - '!src/dywapitchtrack/**'
+  path_instructions:
+    - path: 'src/**/*.c'
+      instructions: |
+        Formatting (Allman braces, indentation, pointer placement) is
+        enforced by clang-format in CI. Do not comment on it.
+
+        C99 with every declaration at the top of its block, before any
+        statement; the build enforces this with -Wdeclaration-after-statement.
+        Initialise a variable at its declaration only when the value is known
+        and meaningful; otherwise leave it uninitialised and assign it on
+        every path before use. Flag a defensive zero of a variable that is
+        unconditionally assigned later: the dead store hides a missing
+        assignment from the compiler.
+
+        Production code uses block comments only. A comment must be
+        self-contained and say something the code does not; flag one that
+        restates the code or refers to change history.
+
+        Feature functions share the signature
+        int xtract_foo(const double *data, const int N, const void *argv, double *result)
+        and return an XTRACT_ status code. Check mathematical correctness
+        and edge cases: division by zero, off-by-one, buffer bounds, N <= 0,
+        the layout of argv. Look for copy-paste errors between sibling
+        functions and for unused code.
+    - path: 'include/**/*.h'
+      instructions: |
+        Public API. Every declaration carries a Doxygen block (\brief,
+        \param, \return) stating the contract, including the argv layout and
+        the expected size and format of data. Flag a change that alters a
+        contract without updating its Doxygen.
+    - path: 'tests/**'
+      instructions: |
+        Tests exercise the production code path against values derived from
+        the documented formulae. Flag a test that only pins the current
+        output, or a test-only hook added to production code to make a test
+        pass.
+  pre_merge_checks:
+    docstrings:
+      mode: off
+  auto_review:
+    enabled: true
+    drafts: false
+
+chat:
+  auto_reply: true

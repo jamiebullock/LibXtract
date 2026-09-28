@@ -44,6 +44,12 @@ extern "C"
 #define XTRACT_UNKNOWN_MAX DBL_MAX      /* upper bound has not been determined */
 #define XTRACT_NO_DEFAULT 0             /* no default value defined */
 #define XTRACT_MAXARGS 4
+
+/* Recommended LPC cepstrum order Q for a given LPC order p. Rabiner & Juang
+ * recommend Q ~ (3/2)p with Q > p; this rounds (3/2)p to the nearest integer
+ * (and keeps Q > p for all p >= 1). Pass the result as xtract_lpcc's argv[0]
+ * to request this many cepstral coefficients. */
+#define XTRACT_LPCC_CEPSTRUM_ORDER(p) ((3 * (p) + 1) / 2)
 #define XTRACT_MAX_NAME_LENGTH 64
 #define XTRACT_MAX_AUTHOR_LENGTH 128
 #define XTRACT_MAX_DESC_LENGTH 256

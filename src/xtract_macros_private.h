@@ -42,6 +42,14 @@
 #define XTRACT_SR_LOWER_LIMIT 22050.0
 #define XTRACT_SR_DEFAULT 44100.0
 #define XTRACT_FUNDAMENTAL_DEFAULT 440.0
+
+/* Clipping thresholds for the xtract_f0 time-domain tracker, as fractions of
+ * the block's peak amplitude. Centre clipping spectrally flattens the signal
+ * to suppress vocal-tract/formant structure (Sondhi 1968; Rabiner 1977, which
+ * uses the same 0.3 centre-clip level); peak clipping caps large excursions. */
+#define XTRACT_F0_PEAK_CLIP 0.8
+#define XTRACT_F0_CENTRE_CLIP 0.3
+
 #define XTRACT_CHECK_nyquist \
     if (!nyquist)            \
     nyquist = XTRACT_SR_DEFAULT / 2

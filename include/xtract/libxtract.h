@@ -222,8 +222,11 @@ extern "C"
     /** \brief Enumeration of units*/
     typedef enum unit_
     {
-        /* values 0 and 1 are reserved by the removed members NONE and ANY,
-         * so the enumeration starts at 2 */
+        XTRACT_UNIT_UNKNOWN = -2, /* unit has not been determined */
+        XTRACT_UNIT_ANY = -1,     /* result inherits the input's unit */
+        XTRACT_UNIT_NONE = 0,     /* dimensionless */
+        /* value 1 is reserved; the dimensioned units start at 2 so their
+         * values stay stable across releases */
         XTRACT_HERTZ = 2,
         XTRACT_ANY_AMPLITUDE_HERTZ,
         XTRACT_DBFS,
@@ -231,7 +234,8 @@ extern "C"
         XTRACT_PERCENT,
         XTRACT_BINS,
         XTRACT_SONE,
-        XTRACT_MIDI_CENT
+        XTRACT_MIDI_CENT,
+        XTRACT_ACUM
     } xtract_unit_t;
 
     /** \brief Boolean */
@@ -323,7 +327,9 @@ extern "C"
         xtract_bool_t is_scalar;
         xtract_bool_t is_delta; /* features in xtract_delta.h can be scalar or vector */
 
-        /* some result entries in descriptors.c are unverified: see issue #150 */
+        /* a result range/unit of XTRACT_UNKNOWN_MIN/MAX or XTRACT_UNIT_UNKNOWN
+         * means the feature is unimplemented or its range is genuinely
+         * undetermined, not merely unverified */
         union {
             struct
             {

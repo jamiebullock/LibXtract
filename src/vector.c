@@ -912,11 +912,11 @@ int xtract_lpcc(const double *data, const int N, const void *argv, double *resul
 
     int n, k;
     double sum;
-    int order = N - 1; /* cepstrum order: see issue #152 */
+    int order = N - 1; /* LPC order p (data[0] is the gain term) */
     int cep_length;
 
     if (argv == NULL)
-        cep_length = N - 1; /* default should come from the descriptor: see issue #152 */
+        cep_length = order; /* default keeps the output no longer than the input */
     else
     {
         cep_length = *(int *)argv;
