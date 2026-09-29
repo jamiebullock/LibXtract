@@ -26,8 +26,9 @@ On Windows, an MSYS2/MinGW environment is required to provide `make` and a POSIX
 ### Build and test
 
 ```bash
-make        # build library and examples
-make check  # build and run tests
+make           # build library and examples
+make check     # build and run tests
+make mutation  # mutation-test the suite with Mull (needs clang-18 and mull-18; CI runs it)
 ```
 
 ### Install

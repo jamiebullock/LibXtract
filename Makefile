@@ -11,7 +11,7 @@ HPATH = include/xtract
 
 export XTRACT_VERSION PREFIX LIBRARY
 
-.PHONY: examples clean install doc src swig bench analyze check-asan cppcheck coverage fuzz format format-check
+.PHONY: examples clean install doc src swig bench analyze check-asan cppcheck coverage fuzz mutation format format-check
 
 all: src examples
 
@@ -101,6 +101,31 @@ fuzz:
 	done
 	@$(MAKE) -C fuzz clean
 	@$(MAKE) -C src clean
+	@$(MAKE) -C src
+
+# Mutation testing with Mull (https://github.com/mull-project/mull). The
+# library is built with the Mull IR plugin on top of the sanitizer flags, so
+# a mutant that reads past an array is detected rather than surviving, and
+# the test binary is run once per mutant. mull.yml at the root scopes the
+# mutants to the first-party sources. MULL_THRESHOLD is the minimum score
+# out of 100 for the target to succeed.
+MULL_LLVM ?= 18
+MULL_CC ?= clang-$(MULL_LLVM)
+MULL_PLUGIN ?= /usr/lib/mull-ir-frontend-$(MULL_LLVM)
+MULL_RUNNER ?= mull-runner-$(MULL_LLVM)
+MULL_THRESHOLD ?= 60
+MULL_WORKERS ?= 4
+
+mutation:
+	@$(MAKE) -C src clean
+	@$(MAKE) -C tests clean
+	@$(MAKE) -C src CC=$(MULL_CC) EXTRA_FLAGS="$(SANITIZE_FLAGS) -fpass-plugin=$(MULL_PLUGIN) -grecord-command-line"
+	@$(MAKE) -C tests CC=$(MULL_CC) EXTRA_FLAGS="$(SANITIZE_FLAGS)"
+	@mkdir -p reports
+	@cd tests && $(MULL_RUNNER) --reporters IDE --reporters Elements --report-dir ../reports --report-name mutation \
+		--workers $(MULL_WORKERS) --timeout 10000 --mutation-score-threshold $(MULL_THRESHOLD) ./xttest
+	@$(MAKE) -C src clean
+	@$(MAKE) -C tests clean
 	@$(MAKE) -C src
 
 # clang-format over the first-party C sources (third-party, SWIG bindings and

@@ -128,6 +128,27 @@ jobs:
           path: fuzz/crash-*
           if-no-files-found: ignore
 
+  mutation:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install clang-18 and Mull
+        run: |
+          curl -sSL -o mull.deb https://github.com/mull-project/mull/releases/download/0.34.1/Mull-18-0.34.1-LLVM-18.1.3-ubuntu-amd64-24.04.deb
+          sudo apt-get update && sudo apt-get install -y clang-18 ./mull.deb
+
+      - name: Mutation tests (Mull, ASan + UBSan)
+        run: make mutation MULL_THRESHOLD=0
+
+      - name: Upload mutation report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mutation-report
+          path: reports/mutation.json
+          retention-days: 7
+
   format:
     runs-on: ubuntu-latest
     steps:
