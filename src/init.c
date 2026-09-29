@@ -195,7 +195,8 @@ void xtract_free_vdsp_(void)
 
 int xtract_init_fft(int N, int feature_name)
 {
-    if (!xtract_is_poweroftwo(N))
+    /* N == 1 is a power of two but has no bins: N / 2 is zero */
+    if (N < 2 || !xtract_is_poweroftwo(N))
     {
         return XTRACT_ARGUMENT_ERROR;
     }

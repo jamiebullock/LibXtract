@@ -37,10 +37,11 @@ reviews:
     - path: 'include/**/*.h'
       instructions: |
         Public API. Every declaration carries a Doxygen block (\brief and
-        \param, plus \return where the function returns a value) stating the
-        contract, including the argv layout and the expected size and format
-        of data. Flag a change that alters a contract without updating its
-        Doxygen.
+        \param) stating the contract, including the argv layout and the
+        expected size and format of data. Do not ask for a \return entry:
+        every feature function returns an XTRACT_ status code through the
+        same interface, and repeating that per declaration is not wanted.
+        Flag a change that alters a contract without updating its Doxygen.
     - path: 'tests/**'
       instructions: |
         Tests exercise the production code path against values derived from
