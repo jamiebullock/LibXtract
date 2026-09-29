@@ -991,11 +991,11 @@ int xtract_hps(const double *data, const int N, const void *argv, double *result
      * r * (i + off) - off, and a DC coefficient is never a candidate. */
     const int M = N / 2;
     const double *freqs = data + M;
-    const int R = argv == NULL ? 3 : xtract_argv_int(*(const double *)argv);
+    const int R = argv == NULL ? XTRACT_HPS_HARMONICS_DEF : xtract_argv_int(*(const double *)argv);
     int i, off, first, count, peak_index, position1_lwr;
     double q, score, peak, largest1_lwr, ratio1, below, above, denominator, delta;
 
-    if (R < 2)
+    if (R < XTRACT_HPS_HARMONICS_MIN || R > XTRACT_HPS_HARMONICS_MAX)
     {
         *result = 0;
         return XTRACT_ARGUMENT_ERROR;
@@ -1026,6 +1026,13 @@ int xtract_hps(const double *data, const int N, const void *argv, double *result
         return XTRACT_ARGUMENT_ERROR;
     }
     off = xtract_argv_int(floor(freqs[0] / q + 0.5));
+    if (off < 0 || off > 1)
+    {
+        /* Neither xtract_spectrum layout: the grid starts neither at 0 nor at
+         * one bin */
+        *result = 0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
     first = off ? 0 : 1;
 
     /* Candidates are the coefficients whose Rth harmonic is still in range */

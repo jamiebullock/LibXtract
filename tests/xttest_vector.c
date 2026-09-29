@@ -717,6 +717,8 @@ UTEST(scalar, hps_harmonic_count_recovers_a_tone_with_a_missing_second_harmonic)
 
     harmonics = 1.0;
     ASSERT_EQ(xtract_hps(data, N, &harmonics, &result), XTRACT_ARGUMENT_ERROR);
+    harmonics = 17.0;
+    ASSERT_EQ(xtract_hps(data, N, &harmonics, &result), XTRACT_ARGUMENT_ERROR);
 }
 
 UTEST(scalar, hps_rejects_a_non_uniform_frequency_grid)
@@ -731,6 +733,25 @@ UTEST(scalar, hps_rejects_a_non_uniform_frequency_grid)
 
     ASSERT_EQ(xtract_hps(data, 64, NULL, &result), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(result, 0.0);
+}
+
+UTEST(scalar, hps_rejects_a_grid_that_starts_at_neither_zero_nor_one_bin)
+{
+    double data[64] = {0};
+    double result = 999.0;
+    int i;
+
+    data[5] = 1.0;
+    /* A grid starting two bins up matches neither spectrum layout */
+    for (i = 0; i < 32; i++)
+        data[32 + i] = (i + 2) * 100.0;
+    ASSERT_EQ(xtract_hps(data, 64, NULL, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+
+    /* Nor does one that starts below zero */
+    for (i = 0; i < 32; i++)
+        data[32 + i] = (i - 1) * 100.0;
+    ASSERT_EQ(xtract_hps(data, 64, NULL, &result), XTRACT_ARGUMENT_ERROR);
 }
 
 /* ===== xtract_lpc known values ===== */

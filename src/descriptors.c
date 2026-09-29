@@ -202,17 +202,17 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *(argv_def + 3) = 0;
             *(argv_unit + 3) = XTRACT_BINS;
             break;
+        case XTRACT_HPS:
+            *argv_min = XTRACT_HPS_HARMONICS_MIN;
+            *argv_max = XTRACT_HPS_HARMONICS_MAX;
+            *argv_def = XTRACT_HPS_HARMONICS_DEF;
+            *argv_unit = XTRACT_UNIT_NONE;
+            break;
         case XTRACT_BARK_COEFFICIENTS:
             /* BARK_COEFFICIENTS is special because argc = BARK_BANDS */
         case XTRACT_WINDOWED:
             /* WINDOWED is special because argc = window size = N */
         case XTRACT_SMOOTHED:
-        case XTRACT_HPS:
-            *argv_min = 2;
-            *argv_max = 16;
-            *argv_def = 3;
-            *argv_unit = XTRACT_NONE;
-            break;
         default:
             *argv_min = XTRACT_NONE;
             *argv_max = XTRACT_NONE;
@@ -1125,7 +1125,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             break;
         case XTRACT_HPS:
             *argc = 1;
-            *argv_type = XTRACT_INT;
+            *argv_type = XTRACT_FLOAT;
             break;
         case XTRACT_BARK_COEFFICIENTS:
             *argc = XTRACT_BARK_BANDS;
