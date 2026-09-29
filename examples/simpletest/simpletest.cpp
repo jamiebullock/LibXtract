@@ -5,6 +5,7 @@
  */
 
 #include <iostream>
+#include <vector>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -15,7 +16,9 @@
 #include "xtract/xtract_stateful.h"
 #include "xtract/xtract_scalar.h"
 #include "xtract/xtract_helper.h"
-#include "WaveFile.h"
+
+#define DR_WAV_IMPLEMENTATION
+#include "dr_wav.h"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846264338327
@@ -111,27 +114,29 @@ int main(void)
     int n;
     int rv = XTRACT_SUCCESS;
     double last_found_peak_time = 0.0;
-    WaveFile wavFile("test.wav");
     xtract_mel_filter mel_filters;
     xtract_last_n_state *last_n_state = xtract_last_n_state_new(MAVG_COUNT);
 
-    if (!wavFile.IsLoaded())
+    unsigned int wavChannels = 0;
+    unsigned int wavSampleRate = 0;
+    drwav_uint64 wavSamples = 0;
+    float *wavData = drwav_open_file_and_read_pcm_frames_f32("test.wav", &wavChannels, &wavSampleRate, &wavSamples, NULL);
+
+    if (wavData == NULL)
     {
+        std::cerr << "Could not read test.wav" << std::endl;
+        return EXIT_FAILURE;
+    }
+    if (wavChannels != 1 || wavSampleRate != SAMPLERATE)
+    {
+        std::cerr << "test.wav must be mono at " << SAMPLERATE << " Hz" << std::endl;
+        drwav_free(wavData, NULL);
         return EXIT_FAILURE;
     }
 
-    float *wavData = (float *)wavFile.GetData(); // assume 32-bit float
-    std::size_t wavBytes = wavFile.GetDataSize();
-    uint64_t wavSamples = wavBytes / sizeof(float);
-    double data[wavSamples];
-    
-    for (n = 0; n < wavSamples; ++n)
-    {
-        data[n] = (double)wavData[n];
-    }
-    // Convert to double
-    
-    
+    std::vector<double> data(wavData, wavData + wavSamples);
+    drwav_free(wavData, NULL);
+
     /* Allocate Mel filters */
     mel_filters.n_filters = MFCC_FREQ_BANDS;
     mel_filters.filters   = (double **)malloc(MFCC_FREQ_BANDS * sizeof(double *));
