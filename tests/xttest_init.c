@@ -109,7 +109,8 @@ UTEST(init, mfcc_triangles_rise_and_fall_linearly_between_neighbouring_peaks)
     int n, j;
 
     mel_peaks(hz, bin);
-    xtract_init_mfcc(FB_N, FB_NYQUIST, XTRACT_EQUAL_GAIN, FB_MIN, FB_MAX, FB_BANDS, tables);
+    ASSERT_EQ(xtract_init_mfcc(FB_N, FB_NYQUIST, XTRACT_EQUAL_GAIN, FB_MIN, FB_MAX, FB_BANDS, tables),
+              XTRACT_SUCCESS);
 
     for (n = 0; n < FB_BANDS; n++)
     {
@@ -155,7 +156,8 @@ UTEST(init, mfcc_writes_zero_to_every_bin_outside_each_triangle)
     int n, k;
 
     mel_peaks(hz, bin);
-    xtract_init_mfcc(FB_N, FB_NYQUIST, XTRACT_EQUAL_GAIN, FB_MIN, FB_MAX, FB_BANDS, tables);
+    ASSERT_EQ(xtract_init_mfcc(FB_N, FB_NYQUIST, XTRACT_EQUAL_GAIN, FB_MIN, FB_MAX, FB_BANDS, tables),
+              XTRACT_SUCCESS);
 
     for (n = 0; n < FB_BANDS; n++)
     {
@@ -235,7 +237,7 @@ UTEST(init, gfcc_centres_span_min_to_max_and_peak_at_the_nearest_bin)
     CHECK_REL(hz_of_erb(erb_of(FB_MIN)), FB_MIN, 1e-12);
     CHECK_REL(hz_of_erb(erb_of(FB_MIN) + (FB_BANDS - 1) * step), FB_MAX, 1e-12);
 
-    xtract_init_gfcc(FB_N, FB_NYQUIST, FB_MIN, FB_MAX, FB_BANDS, tables);
+    ASSERT_EQ(xtract_init_gfcc(FB_N, FB_NYQUIST, FB_MIN, FB_MAX, FB_BANDS, tables), XTRACT_SUCCESS);
 
     for (n = 0; n < FB_BANDS; n++)
     {
@@ -258,7 +260,7 @@ UTEST(init, gfcc_writes_zero_to_every_bin_above_nyquist)
     double **tables = fb_alloc();
     int n, k;
 
-    xtract_init_gfcc(FB_N, FB_NYQUIST, FB_MIN, FB_MAX, FB_BANDS, tables);
+    ASSERT_EQ(xtract_init_gfcc(FB_N, FB_NYQUIST, FB_MIN, FB_MAX, FB_BANDS, tables), XTRACT_SUCCESS);
 
     for (n = 0; n < FB_BANDS; n++)
     {
