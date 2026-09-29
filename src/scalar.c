@@ -964,47 +964,124 @@ int xtract_nonzero_count(const double *data, const int N, const void *argv, doub
     return XTRACT_SUCCESS;
 }
 
+/* Sum of log magnitudes over the first R harmonics of coefficient i, each
+ * floored at XTRACT_LOG_LIMIT so that an empty bin lowers a candidate rather
+ * than removing it. */
+static double hps_score(const double *data, const int i, const int off, const int R)
+{
+    double score = 0.0;
+    int r;
+
+    for (r = 1; r <= R; ++r)
+    {
+        const double magnitude = data[r * (i + off) - off];
+
+        score += log(magnitude < XTRACT_LOG_LIMIT ? XTRACT_LOG_LIMIT : magnitude);
+    }
+
+    return score;
+}
+
 int xtract_hps(const double *data, const int N, const void *argv, double *result)
 {
-    int n, M, i, peak_index, position1_lwr;
-    double tempProduct, peak, largest1_lwr, ratio1;
+    /* The frequency array says which spectrum layout this is: with DC
+     * discarded (the xtract_spectrum default) coefficient m is bin m + 1 and
+     * freqs[0] == q, so off == 1; with DC included freqs[0] == 0 and
+     * off == 0. Harmonic r of coefficient i is then coefficient
+     * r * (i + off) - off, and a DC coefficient is never a candidate. */
+    const int M = N / 2;
+    const double *freqs = data + M;
+    const double harmonics = argv == NULL ? XTRACT_HPS_HARMONICS_DEF : *(const double *)argv;
+    int R, i, off, first, count, peak_index, position1_lwr;
+    double q, score, peak, largest1_lwr, ratio1, below, above, denominator, delta;
 
-    n = N / 2;
-
-    M = (int)ceil(n / 3.0);
-
-    if (M <= 1)
+    /* The comparisons are false for NaN, and a fractional count has no
+     * meaning, so both are rejected here rather than silently truncated */
+    if (!(harmonics >= XTRACT_HPS_HARMONICS_MIN && harmonics <= XTRACT_HPS_HARMONICS_MAX) ||
+        harmonics != floor(harmonics))
     {
-        /* Input data is too short. */
+        *result = 0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
+    R = (int)harmonics;
+
+    if (M < 2)
+    {
         *result = 0;
         return XTRACT_NO_RESULT;
     }
 
-    peak_index = 0;
-
-    peak = 0;
+    /* Silence has no product peak, whatever its frequency grid says */
     for (i = 0; i < M; ++i)
     {
-        tempProduct = data[i] * data[i * 2] * data[i * 3];
+        if (data[i] > 0.0)
+            break;
+    }
+    if (i == M)
+    {
+        *result = 0;
+        return XTRACT_NO_RESULT;
+    }
 
-        if (tempProduct > peak)
+    q = freqs[1] - freqs[0];
+    if (q <= 0.0)
+    {
+        *result = 0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
+    off = xtract_argv_int(floor(freqs[0] / q + 0.5));
+    if (off < 0 || off > 1)
+    {
+        /* Neither xtract_spectrum layout: the grid starts neither at 0 nor at
+         * one bin */
+        *result = 0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
+    first = off ? 0 : 1;
+
+    /* Harmonic indexing and interpolation both assume the whole grid keeps
+     * the spacing of its first two bins */
+    for (i = 2; i < M; ++i)
+    {
+        if (fabs(freqs[i] - (freqs[0] + i * q)) > 1e-9 * q)
         {
-            peak = tempProduct;
+            *result = 0;
+            return XTRACT_ARGUMENT_ERROR;
+        }
+    }
+
+    /* Candidates are the coefficients whose Rth harmonic is still in range */
+    count = (M + off) / R - off;
+    if (count - first <= 1)
+    {
+        *result = 0;
+        return XTRACT_NO_RESULT;
+    }
+
+    peak_index = first;
+    peak = hps_score(data, first, off, R);
+    for (i = first + 1; i < count; ++i)
+    {
+        score = hps_score(data, i, off, R);
+        if (score > peak)
+        {
+            peak = score;
             peak_index = i;
         }
     }
 
-    if (peak == 0.0)
+    if (data[peak_index] <= 0.0)
     {
-        /* Silent spectrum: no harmonic product peak exists, and
-         * data[peak_index] would divide by zero below. */
+        /* Every candidate's fundamental is empty: nothing to report, and
+         * the ratio below would divide by zero. */
         *result = 0;
         return XTRACT_NO_RESULT;
     }
 
-    largest1_lwr = position1_lwr = 0;
+    largest1_lwr = 0;
+    position1_lwr = first;
 
-    for (i = 0; i < n; ++i)
+    for (i = first; i < M; ++i)
     {
         if (data[i] > largest1_lwr && i != peak_index)
         {
@@ -1015,10 +1092,36 @@ int xtract_hps(const double *data, const int N, const void *argv, double *result
 
     ratio1 = data[position1_lwr] / data[peak_index];
 
-    if (position1_lwr > peak_index * 0.4 && position1_lwr < peak_index * 0.6 && ratio1 > 0.1)
+    if ((position1_lwr + off) > (peak_index + off) * 0.4 && (position1_lwr + off) < (peak_index + off) * 0.6 &&
+        ratio1 > 0.1)
         peak_index = position1_lwr;
 
-    *result = data[n + peak_index];
+    /* Parabolic interpolation over the log magnitude of the chosen
+     * coefficient and its neighbours. The fundamental's own peak is
+     * interpolated rather than the score, whose terms sit at different
+     * fractional offsets and do not share one vertex. */
+    *result = freqs[peak_index];
+    if (peak_index > first && peak_index + 1 < M)
+    {
+        below = data[peak_index - 1];
+        above = data[peak_index + 1];
+        if (data[peak_index] >= below && data[peak_index] >= above)
+        {
+            below = log(below < XTRACT_LOG_LIMIT ? XTRACT_LOG_LIMIT : below);
+            above = log(above < XTRACT_LOG_LIMIT ? XTRACT_LOG_LIMIT : above);
+            score = log(data[peak_index]);
+            denominator = below - 2.0 * score + above;
+            if (denominator != 0.0)
+            {
+                delta = 0.5 * (below - above) / denominator;
+                if (delta < -0.5)
+                    delta = -0.5;
+                if (delta > 0.5)
+                    delta = 0.5;
+                *result += delta * q;
+            }
+        }
+    }
 
     return XTRACT_SUCCESS;
 }
