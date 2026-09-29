@@ -6,9 +6,6 @@
 ####
 #### Generic Makefile for C or C++ projects
 ####
-#### This file is public domain.
-#### Jamie Bullock 2014 <jamie@jamiebullock.com>
-####
 
 ###################################
 ### User configurable variables ###
