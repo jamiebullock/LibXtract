@@ -11,6 +11,7 @@ keeps its upstream licence and style; none of it is covered by `LICENSE`.
 | c-ringbuf | `src/c-ringbuf/` | [Drew Hess, c-ringbuf](https://github.com/dhess/c-ringbuf) | CC0-1.0 | `xtract_last_n_state` |
 | utest.h | `tests/utest.h` | [Neil Henning, utest.h](https://github.com/sheredom/utest.h) | Unlicense | Tests only |
 | ubench.h | `bench/ubench.h` | [Neil Henning, ubench.h](https://github.com/sheredom/ubench.h) | Unlicense | Benchmarks only |
+| dr_wav | `examples/simpletest/dr_wav.h` | [David Reid, dr_libs](https://github.com/mackron/dr_libs), tag `wav-0.14.5` | Public domain (Unlicense) or MIT-0, at the user's choice | Example only |
 
 ## Obligations
 
@@ -25,5 +26,5 @@ keeps its upstream licence and style; none of it is covered by `LICENSE`.
   project's style and is otherwise unmodified; the upstream link above is
   that reference. The package carries no licence header in the source file;
   its terms are in the upstream `readme.txt`.
-- **c-ringbuf, utest.h, ubench.h.** Public-domain dedications; no
+- **c-ringbuf, utest.h, ubench.h, dr_wav.** Public-domain dedications; no
   obligations.
