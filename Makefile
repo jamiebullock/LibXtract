@@ -123,10 +123,10 @@ mutation:
 	@$(MAKE) -C tests CC=$(MULL_CC) EXTRA_FLAGS="$(SANITIZE_FLAGS)"
 	@mkdir -p reports
 	@cd tests && $(MULL_RUNNER) --reporters IDE --reporters Elements --report-dir ../reports --report-name mutation \
-		--workers $(MULL_WORKERS) --timeout 10000 --mutation-score-threshold $(MULL_THRESHOLD) ./xttest
-	@$(MAKE) -C src clean
-	@$(MAKE) -C tests clean
-	@$(MAKE) -C src
+		--workers $(MULL_WORKERS) --timeout 10000 --mutation-score-threshold $(MULL_THRESHOLD) ./xttest; \
+	status=$$?; cd ..; \
+	$(MAKE) -C src clean; $(MAKE) -C tests clean; $(MAKE) -C src; \
+	exit $$status
 
 # clang-format over the first-party C sources (third-party, SWIG bindings and
 # the C++ examples are excluded). The pinned CLANG_FORMAT version must match

@@ -147,6 +147,7 @@ jobs:
         with:
           name: mutation-report
           path: reports/mutation.json
+          if-no-files-found: error
           retention-days: 7
 
   format:
