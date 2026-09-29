@@ -46,14 +46,21 @@ cppcheck:
 # cannot see (e.g. out-of-bounds access through opaque library calls).
 # Cleans before and after so sanitised objects never mix with normal builds.
 SANITIZE_FLAGS = -fsanitize=address,undefined -fno-sanitize-recover=all -fno-omit-frame-pointer -g
+# The instrumented targets below (check-asan, coverage, fuzz, mutation) each
+# rebuild the library and tests with extra flags, run something against
+# them, and then put the normal build back. RESTORE runs whether or not the
+# instrumented step succeeded, and each target exits with that step's
+# status, so a failure never leaves instrumented objects for the next build
+# to pick up. A recipe ends with `status=$$?; $(RESTORE_EXIT)`: the exit
+# status is the instrumented step's if that failed, otherwise the restore's.
+RESTORE = $(MAKE) -C src clean && $(MAKE) -C tests clean && $(MAKE) -C src
+RESTORE_EXIT = if ! ( $(RESTORE) ) && [ $$status -eq 0 ]; then status=1; fi; exit $$status
+
 check-asan:
-	@$(MAKE) -C src clean
-	@$(MAKE) -C tests clean
-	@$(MAKE) -C src EXTRA_FLAGS="$(SANITIZE_FLAGS)"
-	@$(MAKE) -C tests check EXTRA_FLAGS="$(SANITIZE_FLAGS)"
-	@$(MAKE) -C src clean
-	@$(MAKE) -C tests clean
-	@$(MAKE) -C src
+	@$(MAKE) -C src clean && $(MAKE) -C tests clean \
+	&& $(MAKE) -C src EXTRA_FLAGS="$(SANITIZE_FLAGS)" \
+	&& $(MAKE) -C tests check EXTRA_FLAGS="$(SANITIZE_FLAGS)"; \
+	status=$$?; $(RESTORE_EXIT)
 
 # Rebuild the library and tests with gcov instrumentation, run the suite, and
 # produce a line/branch coverage report for the first-party sources. Requires
@@ -64,19 +71,16 @@ check-asan:
 COVERAGE_FLAGS = --coverage
 COVERAGE_IGNORE = --ignore-errors unused,inconsistent,format,empty,gcov,unsupported
 coverage:
-	@$(MAKE) -C src clean
-	@$(MAKE) -C tests clean
-	@$(MAKE) -C src EXTRA_FLAGS="$(COVERAGE_FLAGS)"
-	@$(MAKE) -C tests check EXTRA_FLAGS="$(COVERAGE_FLAGS)"
-	@lcov --capture --directory src/.build --output-file coverage.info $(COVERAGE_IGNORE)
-	@lcov --remove coverage.info '*/ooura/*' '*/c-ringbuf/*' '*/dywapitchtrack/*' \
-		--output-file coverage.info $(COVERAGE_IGNORE)
-	@lcov --list coverage.info $(COVERAGE_IGNORE)
-	@genhtml coverage.info --output-directory coverage-html $(COVERAGE_IGNORE) >/dev/null
-	@echo "Coverage report written to coverage-html/index.html"
-	@$(MAKE) -C src clean
-	@$(MAKE) -C tests clean
-	@$(MAKE) -C src
+	@$(MAKE) -C src clean && $(MAKE) -C tests clean \
+	&& $(MAKE) -C src EXTRA_FLAGS="$(COVERAGE_FLAGS)" \
+	&& $(MAKE) -C tests check EXTRA_FLAGS="$(COVERAGE_FLAGS)" \
+	&& lcov --capture --directory src/.build --output-file coverage.info $(COVERAGE_IGNORE) \
+	&& lcov --remove coverage.info '*/ooura/*' '*/c-ringbuf/*' '*/dywapitchtrack/*' \
+		--output-file coverage.info $(COVERAGE_IGNORE) \
+	&& lcov --list coverage.info $(COVERAGE_IGNORE) \
+	&& genhtml coverage.info --output-directory coverage-html $(COVERAGE_IGNORE) >/dev/null \
+	&& echo "Coverage report written to coverage-html/index.html"; \
+	status=$$?; $(RESTORE_EXIT)
 
 # Build the library and the libFuzzer harnesses (one per feature header:
 # scalar, delta, vector) with fuzzer coverage + ASan/UBSan and run each for
@@ -92,16 +96,14 @@ FUZZ_TIME ?= 60
 FUZZ_SAN ?= address,undefined
 FUZZ_LIB_FLAGS = -fsanitize=fuzzer-no-link,$(FUZZ_SAN) -fno-sanitize-recover=all -g -O1
 fuzz:
-	@$(MAKE) -C src clean
-	@$(MAKE) -C src CC=$(FUZZ_CC) EXTRA_FLAGS="$(FUZZ_LIB_FLAGS)"
-	@$(MAKE) -C fuzz FUZZ_CC=$(FUZZ_CC) FUZZ_SAN=$(FUZZ_SAN)
-	@for h in scalar delta vector; do \
+	@$(MAKE) -C src clean \
+	&& $(MAKE) -C src CC=$(FUZZ_CC) EXTRA_FLAGS="$(FUZZ_LIB_FLAGS)" \
+	&& $(MAKE) -C fuzz FUZZ_CC=$(FUZZ_CC) FUZZ_SAN=$(FUZZ_SAN) \
+	&& ( for h in scalar delta vector; do \
 		echo "=== fuzzing $$h features ($(FUZZ_TIME)s) ==="; \
 		./fuzz/xtfuzz_$$h -max_total_time=$(FUZZ_TIME) -rss_limit_mb=4096 -artifact_prefix=fuzz/ || exit $$?; \
-	done
-	@$(MAKE) -C fuzz clean
-	@$(MAKE) -C src clean
-	@$(MAKE) -C src
+	done ); \
+	status=$$?; $(MAKE) -C fuzz clean; $(RESTORE_EXIT)
 
 # Mutation testing with Mull (https://github.com/mull-project/mull). The
 # library is built with the Mull IR plugin on top of the sanitizer flags, so
@@ -117,16 +119,13 @@ MULL_THRESHOLD ?= 65
 MULL_WORKERS ?= 4
 
 mutation:
-	@$(MAKE) -C src clean
-	@$(MAKE) -C tests clean
-	@$(MAKE) -C src CC=$(MULL_CC) EXTRA_FLAGS="$(SANITIZE_FLAGS) -fpass-plugin=$(MULL_PLUGIN) -grecord-command-line"
-	@$(MAKE) -C tests CC=$(MULL_CC) EXTRA_FLAGS="$(SANITIZE_FLAGS)"
-	@mkdir -p reports
-	@cd tests && $(MULL_RUNNER) --reporters IDE --reporters Elements --report-dir ../reports --report-name mutation \
-		--workers $(MULL_WORKERS) --timeout 10000 --mutation-score-threshold $(MULL_THRESHOLD) ./xttest; \
-	status=$$?; cd ..; \
-	$(MAKE) -C src clean; $(MAKE) -C tests clean; $(MAKE) -C src; \
-	exit $$status
+	@$(MAKE) -C src clean && $(MAKE) -C tests clean \
+	&& $(MAKE) -C src CC=$(MULL_CC) EXTRA_FLAGS="$(SANITIZE_FLAGS) -fpass-plugin=$(MULL_PLUGIN) -grecord-command-line" \
+	&& $(MAKE) -C tests CC=$(MULL_CC) EXTRA_FLAGS="$(SANITIZE_FLAGS)" \
+	&& mkdir -p reports \
+	&& ( cd tests && $(MULL_RUNNER) --reporters IDE --reporters Elements --report-dir ../reports --report-name mutation \
+		--workers $(MULL_WORKERS) --timeout 10000 --mutation-score-threshold $(MULL_THRESHOLD) ./xttest ); \
+	status=$$?; $(RESTORE_EXIT)
 
 # clang-format over the first-party C sources (third-party, SWIG bindings and
 # the C++ examples are excluded). The pinned CLANG_FORMAT version must match
