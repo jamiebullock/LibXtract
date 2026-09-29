@@ -115,7 +115,7 @@ MULL_LLVM ?= 18
 MULL_CC ?= clang-$(MULL_LLVM)
 MULL_PLUGIN ?= /usr/lib/mull-ir-frontend-$(MULL_LLVM)
 MULL_RUNNER ?= mull-runner-$(MULL_LLVM)
-MULL_THRESHOLD ?= 65
+MULL_THRESHOLD ?= 70
 MULL_WORKERS ?= 4
 
 mutation:
