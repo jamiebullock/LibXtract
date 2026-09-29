@@ -426,7 +426,7 @@ printf("Mean = %.2f\n", mean);
      *
      * This function initialises global data structures used by functions requiring FFT functionality. It can be called multiple times with different feature names. Calling it more than once with the same feature name is not a valid operation and will result in a memory leak.
      *
-     * \param N: the size of the FFT
+     * \param N: the size of the FFT, a power of two of at least 2
      * \param feature_name: the name of the feature the FFT is being used for,
      * e.g. XTRACT_DCT
      *

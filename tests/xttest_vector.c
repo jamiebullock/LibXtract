@@ -1545,3 +1545,11 @@ UTEST(vector, mfcc_and_gfcc_with_dct_table_match_table_less_path)
         free(mf.filters[i]);
     free(mf.filters);
 }
+
+UTEST(init, fft_rejects_sizes_with_no_bins)
+{
+    ASSERT_EQ(xtract_init_fft(1, XTRACT_SPECTRUM), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_init_fft(0, XTRACT_SPECTRUM), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_init_fft(3, XTRACT_SPECTRUM), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_init_fft(2, XTRACT_SPECTRUM), XTRACT_SUCCESS);
+}
