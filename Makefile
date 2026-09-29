@@ -51,14 +51,16 @@ SANITIZE_FLAGS = -fsanitize=address,undefined -fno-sanitize-recover=all -fno-omi
 # them, and then put the normal build back. RESTORE runs whether or not the
 # instrumented step succeeded, and each target exits with that step's
 # status, so a failure never leaves instrumented objects for the next build
-# to pick up.
-RESTORE = $(MAKE) -C src clean; $(MAKE) -C tests clean; $(MAKE) -C src
+# to pick up. A recipe ends with `status=$$?; $(RESTORE_EXIT)`: the exit
+# status is the instrumented step's if that failed, otherwise the restore's.
+RESTORE = $(MAKE) -C src clean && $(MAKE) -C tests clean && $(MAKE) -C src
+RESTORE_EXIT = if ! ( $(RESTORE) ) && [ $$status -eq 0 ]; then status=1; fi; exit $$status
 
 check-asan:
 	@$(MAKE) -C src clean && $(MAKE) -C tests clean \
 	&& $(MAKE) -C src EXTRA_FLAGS="$(SANITIZE_FLAGS)" \
 	&& $(MAKE) -C tests check EXTRA_FLAGS="$(SANITIZE_FLAGS)"; \
-	status=$$?; $(RESTORE); exit $$status
+	status=$$?; $(RESTORE_EXIT)
 
 # Rebuild the library and tests with gcov instrumentation, run the suite, and
 # produce a line/branch coverage report for the first-party sources. Requires
@@ -78,7 +80,7 @@ coverage:
 	&& lcov --list coverage.info $(COVERAGE_IGNORE) \
 	&& genhtml coverage.info --output-directory coverage-html $(COVERAGE_IGNORE) >/dev/null \
 	&& echo "Coverage report written to coverage-html/index.html"; \
-	status=$$?; $(RESTORE); exit $$status
+	status=$$?; $(RESTORE_EXIT)
 
 # Build the library and the libFuzzer harnesses (one per feature header:
 # scalar, delta, vector) with fuzzer coverage + ASan/UBSan and run each for
@@ -101,7 +103,7 @@ fuzz:
 		echo "=== fuzzing $$h features ($(FUZZ_TIME)s) ==="; \
 		./fuzz/xtfuzz_$$h -max_total_time=$(FUZZ_TIME) -rss_limit_mb=4096 -artifact_prefix=fuzz/ || exit $$?; \
 	done ); \
-	status=$$?; $(MAKE) -C fuzz clean; $(RESTORE); exit $$status
+	status=$$?; $(MAKE) -C fuzz clean; $(RESTORE_EXIT)
 
 # Mutation testing with Mull (https://github.com/mull-project/mull). The
 # library is built with the Mull IR plugin on top of the sanitizer flags, so
@@ -123,7 +125,7 @@ mutation:
 	&& mkdir -p reports \
 	&& ( cd tests && $(MULL_RUNNER) --reporters IDE --reporters Elements --report-dir ../reports --report-name mutation \
 		--workers $(MULL_WORKERS) --timeout 10000 --mutation-score-threshold $(MULL_THRESHOLD) ./xttest ); \
-	status=$$?; $(RESTORE); exit $$status
+	status=$$?; $(RESTORE_EXIT)
 
 # clang-format over the first-party C sources (third-party, SWIG bindings and
 # the C++ examples are excluded). The pinned CLANG_FORMAT version must match
