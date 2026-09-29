@@ -991,15 +991,19 @@ int xtract_hps(const double *data, const int N, const void *argv, double *result
      * r * (i + off) - off, and a DC coefficient is never a candidate. */
     const int M = N / 2;
     const double *freqs = data + M;
-    const int R = argv == NULL ? XTRACT_HPS_HARMONICS_DEF : xtract_argv_int(*(const double *)argv);
-    int i, off, first, count, peak_index, position1_lwr;
+    const double harmonics = argv == NULL ? XTRACT_HPS_HARMONICS_DEF : *(const double *)argv;
+    int R, i, off, first, count, peak_index, position1_lwr;
     double q, score, peak, largest1_lwr, ratio1, below, above, denominator, delta;
 
-    if (R < XTRACT_HPS_HARMONICS_MIN || R > XTRACT_HPS_HARMONICS_MAX)
+    /* The comparisons are false for NaN, and a fractional count has no
+     * meaning, so both are rejected here rather than silently truncated */
+    if (!(harmonics >= XTRACT_HPS_HARMONICS_MIN && harmonics <= XTRACT_HPS_HARMONICS_MAX) ||
+        harmonics != floor(harmonics))
     {
         *result = 0;
         return XTRACT_ARGUMENT_ERROR;
     }
+    R = (int)harmonics;
 
     if (M < 2)
     {
@@ -1034,6 +1038,17 @@ int xtract_hps(const double *data, const int N, const void *argv, double *result
         return XTRACT_ARGUMENT_ERROR;
     }
     first = off ? 0 : 1;
+
+    /* Harmonic indexing and interpolation both assume the whole grid keeps
+     * the spacing of its first two bins */
+    for (i = 2; i < M; ++i)
+    {
+        if (fabs(freqs[i] - (freqs[0] + i * q)) > 1e-9 * q)
+        {
+            *result = 0;
+            return XTRACT_ARGUMENT_ERROR;
+        }
+    }
 
     /* Candidates are the coefficients whose Rth harmonic is still in range */
     count = (M + off) / R - off;

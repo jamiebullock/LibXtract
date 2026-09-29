@@ -754,6 +754,46 @@ UTEST(scalar, hps_rejects_a_grid_that_starts_at_neither_zero_nor_one_bin)
     ASSERT_EQ(xtract_hps(data, 64, NULL, &result), XTRACT_ARGUMENT_ERROR);
 }
 
+UTEST(scalar, hps_rejects_a_grid_that_changes_spacing_after_the_first_two_bins)
+{
+    double data[64] = {0};
+    double result = 999.0;
+    int i;
+
+    data[5] = 1.0;
+    for (i = 0; i < 32; i++)
+        data[32 + i] = (i + 1) * 100.0;
+    /* Valid so far; break the spacing further along */
+    data[32 + 20] = 2150.0;
+
+    ASSERT_EQ(xtract_hps(data, 64, NULL, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+}
+
+UTEST(scalar, hps_rejects_a_fractional_or_non_finite_harmonic_count)
+{
+    double data[64] = {0};
+    double result = 999.0;
+    double harmonics;
+    int i;
+
+    data[4] = 1.0;
+    data[9] = 0.8;
+    data[14] = 0.5;
+    for (i = 0; i < 32; i++)
+        data[32 + i] = (i + 1) * 1000.0;
+
+    harmonics = 2.9;
+    ASSERT_EQ(xtract_hps(data, 64, &harmonics, &result), XTRACT_ARGUMENT_ERROR);
+    harmonics = NAN;
+    ASSERT_EQ(xtract_hps(data, 64, &harmonics, &result), XTRACT_ARGUMENT_ERROR);
+    harmonics = INFINITY;
+    ASSERT_EQ(xtract_hps(data, 64, &harmonics, &result), XTRACT_ARGUMENT_ERROR);
+    harmonics = 3.0;
+    ASSERT_EQ(xtract_hps(data, 64, &harmonics, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 5000.0, 1e-3);
+}
+
 /* ===== xtract_lpc known values ===== */
 
 UTEST(vector, lpc_of_simple_autocorrelation_sequence)
