@@ -143,7 +143,7 @@ extern "C"
     /** \brief Extract the Discrete Cosine transform of a time domain signal
      * \param *data: a pointer to the first element in an array of doubles representing an audio vector
      * \param N: the number of array elements to be considered
-     * \param *argv: a pointer to a cosine table as allocated by xtract_init_dct(N), or NULL to evaluate the cosines on each call. Both give the same result; the table avoids repeating that work on every call
+     * \param *argv: a pointer to a cosine table as allocated by xtract_init_dct(N), or NULL. Both give the same result but the table avoids the need to recompute the table on each call
      * \param *result: a pointer to an array of at least N doubles to receive the dct coefficients
      */
     int xtract_dct(const double *data, const int N, const void *argv, double *result);
