@@ -10,7 +10,8 @@ file covers how to get a change accepted and the terms it is accepted under.
   the problem.
 - For a new feature, open an issue first to discuss it. The library keeps a
   small, uniform API and not every feature belongs in it.
-- Security problems: email the maintainer rather than opening a public issue.
+- Security problems: report them privately through GitHub's vulnerability
+  reporting rather than opening a public issue. See `SECURITY.md`.
 
 ## Building and testing
 
@@ -32,8 +33,8 @@ CI rejects a pull request that `make format-check` fails on.
 
 The README's "Code standard" section is the reference. In short:
 
-- C99, with every declaration at the top of its block. The build flags
-  enforce this.
+- C99, with every declaration at the top of its block. This is a project
+  convention; the build warns on violations.
 - Feature functions share the signature
   `int xtract_foo(const double *data, const int N, const void *argv, double *result)`
   and return an `XTRACT_` status code.
