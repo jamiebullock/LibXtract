@@ -469,8 +469,6 @@ printf("Mean = %.2f\n", mean);
 
     /** \brief A function to initialise a cosine table for xtract_dct()
      *
-     * The table is passed as the argv argument of xtract_dct() for transforms of size N and must not be used for any other size. Free it with xtract_free_dct().
-     *
      * \param N: the transform size
      * \return a pointer to the table, or NULL if N <= 0 or allocation fails
      */

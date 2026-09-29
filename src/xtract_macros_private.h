@@ -74,8 +74,8 @@
 #define M_PI 3.14159265358979323846264338327
 #endif
 
-/* DCT-II basis, shared by xtract_init_dct() and the table-less path of
- * xtract_dct() so that both evaluate the identical expression. */
+/* DCT-II basis, sused by xtract_init_dct() and xtract_dct() when a precomputed 
+ * table is not passed as argv. */
 static inline double xtract_dct_cosine(int n, int m, int N)
 {
     return cos(M_PI * n * (m + 0.5) / N);
