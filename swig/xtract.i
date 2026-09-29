@@ -51,6 +51,7 @@
             filters[n] = (double *)malloc(N * sizeof(double));
 
         mf->filters = filters;
+        mf->dct_table = xtract_init_dct(n_filters);
         
         return mf;
 
@@ -68,6 +69,7 @@
             free(filters[i]);
 
         free(filters);
+        xtract_free_dct(filterbank->dct_table);
 
         free(filterbank);
 

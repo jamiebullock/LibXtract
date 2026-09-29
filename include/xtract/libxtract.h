@@ -399,11 +399,15 @@ printf("Mean = %.2f\n", mean);
     /** \brief A function to initialise wavelet f0 detector state */
     int xtract_init_wavelet_f0_state(void);
 
-    /** \brief A structure to store a set of n_filters Mel filters */
+    /** \brief A structure to store a set of n_filters Mel filters
+     *
+     * Zero-initialise the structure, or set every field, before passing it to a feature function. dct_table is the cosine table used by xtract_mfcc() and xtract_gfcc() for their final DCT: either the result of xtract_init_dct(n_filters), which the caller frees with xtract_free_dct(), or NULL to have the cosines evaluated on each call.
+     */
     typedef struct xtract_mel_filter_
     {
         int n_filters;
         double **filters;
+        double *dct_table;
     } xtract_mel_filter;
 
     /** \brief A function to initialise a mel filter bank

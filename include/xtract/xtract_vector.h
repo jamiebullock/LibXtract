@@ -69,7 +69,7 @@ extern "C"
      * \param *argv: a pointer to a data structure of type xtract_mel_filter, containing n_filters coefficient tables to make up a mel-spaced filterbank
      * \param *result: a pointer to an array containing the resultant MFCC
      *
-     * The data structure pointed to by *argv must be obtained by first calling xtract_init_mfcc
+     * The data structure pointed to by *argv must be obtained by first calling xtract_init_mfcc. Its dct_table field is passed to xtract_dct() as the table for the final transform; set it from xtract_init_dct(n_filters) or to NULL
      */
     int xtract_mfcc(const double *data, const int N, const void *argv, double *result);
 
@@ -97,7 +97,7 @@ extern "C"
      * \param *argv: a pointer to a data structure of type xtract_mel_filter, containing n_filters coefficient tables to make up a gammatone filterbank
      * \param *result: a pointer to an array containing the resultant GFCC
      *
-     * The data structure pointed to by *argv must be obtained by first calling xtract_init_gfcc
+     * The data structure pointed to by *argv must be obtained by first calling xtract_init_gfcc. Its dct_table field is passed to xtract_dct() as the table for the final transform; set it from xtract_init_dct(n_filters) or to NULL
      */
     int xtract_gfcc(const double *data, const int N, const void *argv, double *result);
 
