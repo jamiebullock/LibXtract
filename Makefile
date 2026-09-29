@@ -1,3 +1,7 @@
+# Part of LibXtract
+#
+# SPDX-FileCopyrightText: 2014 Jamie Bullock
+# SPDX-License-Identifier: Zlib
 
 LIBRARY ?= static
 PREFIX ?= $(PWD)/dist

@@ -1,4 +1,8 @@
-
+/* Part of LibXtract
+ *
+ * SPDX-FileCopyrightText: 2014 Jamie Bullock
+ * SPDX-License-Identifier: Zlib
+ */
 
 #include "xttest_util.h"
 #include "xttest_tables.h"

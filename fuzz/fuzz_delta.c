@@ -1,3 +1,9 @@
+/* Part of LibXtract
+ *
+ * SPDX-FileCopyrightText: 2026 Jamie Bullock
+ * SPDX-License-Identifier: Zlib
+ */
+
 /*
  * libFuzzer harness for the delta (time-derivative) feature functions
  * (xtract_delta.h): flux, lnorm, attack_time, decay_time, difference_vector.

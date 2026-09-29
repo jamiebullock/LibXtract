@@ -1,3 +1,9 @@
+/* Part of LibXtract
+ *
+ * SPDX-FileCopyrightText: 2007 Jamie Bullock
+ * SPDX-License-Identifier: Zlib
+ */
+
 %module xtract
 %include typemaps.i
 %include carrays.i

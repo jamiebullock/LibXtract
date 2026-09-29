@@ -1,3 +1,9 @@
+/* Part of LibXtract
+ *
+ * SPDX-FileCopyrightText: 2026 Jamie Bullock
+ * SPDX-License-Identifier: Zlib
+ */
+
 #ifndef XTTEST_APPROX_H
 #define XTTEST_APPROX_H
 

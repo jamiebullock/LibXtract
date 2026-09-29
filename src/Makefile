@@ -1,3 +1,8 @@
+# Part of LibXtract
+#
+# SPDX-FileCopyrightText: 2014 Jamie Bullock
+# SPDX-License-Identifier: Zlib
+
 ####
 #### Generic Makefile for C or C++ projects
 ####

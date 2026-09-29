@@ -1,3 +1,9 @@
+/* Part of LibXtract
+ *
+ * SPDX-FileCopyrightText: 2026 Jamie Bullock
+ * SPDX-License-Identifier: Zlib
+ */
+
 const xtract = require('./xtract');
 
 console.log('\nRunning libxtract Node.js bindings test...\n');

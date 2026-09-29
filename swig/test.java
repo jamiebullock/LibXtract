@@ -1,3 +1,9 @@
+/* Part of LibXtract
+ *
+ * SPDX-FileCopyrightText: 2026 Jamie Bullock
+ * SPDX-License-Identifier: Zlib
+ */
+
 import xtract.*;
 
 public class test {

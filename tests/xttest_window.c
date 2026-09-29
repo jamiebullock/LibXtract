@@ -1,3 +1,9 @@
+/* Part of LibXtract
+ *
+ * SPDX-FileCopyrightText: 2026 Jamie Bullock
+ * SPDX-License-Identifier: Zlib
+ */
+
 #include "xtract/libxtract.h"
 #include "xtract/xtract_helper.h"
 

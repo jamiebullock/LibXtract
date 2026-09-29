@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+# Part of LibXtract
+#
+# SPDX-FileCopyrightText: 2007 Jamie Bullock
+# SPDX-License-Identifier: Zlib
 
 import sys
 
