@@ -1181,6 +1181,118 @@ UTEST(vector, peak_spectrum_small_peaks_below_threshold_excluded)
     CHECK_NEAR(result[5], 0.0, EPSILON);
 }
 
+UTEST(vector, peak_spectrum_interpolates_each_parabolic_peak_to_its_vertex)
+{
+    /* Three points of a parabola y = h - k (x - d)^2 sampled at x = -1, 0, 1
+     * around a bin interpolate exactly to offset d and height h. Bin n is at
+     * frequency (n + 1) q, the layout xtract_spectrum produces with DC
+     * discarded. Everything that is not a peak must come back as zero. */
+    const int N = 16;
+    const double q = 100.0;
+    double data[16] = {0};
+    double result[32];
+    double argv[] = {100.0, 0.0};
+    const double d1 = 0.3, h1 = 2.0, k1 = 0.5;
+    const double d2 = -0.4, h2 = 1.5, k2 = 0.25;
+    int n;
+
+    for (n = 0; n < 2 * N; n++)
+        result[n] = 12345.0;
+
+    data[4] = h1 - k1 * (-1.0 - d1) * (-1.0 - d1);
+    data[5] = h1 - k1 * d1 * d1;
+    data[6] = h1 - k1 * (1.0 - d1) * (1.0 - d1);
+    data[9] = h2 - k2 * (-1.0 - d2) * (-1.0 - d2);
+    data[10] = h2 - k2 * d2 * d2;
+    data[11] = h2 - k2 * (1.0 - d2) * (1.0 - d2);
+
+    ASSERT_EQ(xtract_peak_spectrum(data, N, argv, result), XTRACT_SUCCESS);
+
+    CHECK_REL(result[5], h1, 1e-12);
+    CHECK_REL(result[N + 5], q * (5 + 1 + d1), 1e-12);
+    CHECK_REL(result[10], h2, 1e-12);
+    CHECK_REL(result[N + 10], q * (10 + 1 + d2), 1e-12);
+    for (n = 0; n < N; n++)
+    {
+        if (n == 5 || n == 10)
+            continue;
+        ASSERT_EQ(result[n], 0.0);
+        ASSERT_EQ(result[N + n], 0.0);
+    }
+}
+
+UTEST(vector, peak_spectrum_reports_only_strict_interior_local_maxima)
+{
+    /* A plateau of two equal values, a rising edge into the last bin, and a
+     * large first bin are not peaks: a peak must exceed both neighbours and
+     * have both. */
+    const int N = 8;
+    double data[] = {9.0, 1.0, 5.0, 5.0, 1.0, 0.0, 2.0, 3.0};
+    double result[16];
+    double argv[] = {100.0, 0.0};
+    int n;
+
+    for (n = 0; n < 2 * N; n++)
+        result[n] = 12345.0;
+
+    ASSERT_EQ(xtract_peak_spectrum(data, N, argv, result), XTRACT_SUCCESS);
+
+    for (n = 0; n < N; n++)
+    {
+        ASSERT_EQ(result[n], 0.0);
+        ASSERT_EQ(result[N + n], 0.0);
+    }
+}
+
+UTEST(vector, peak_spectrum_keeps_a_peak_exactly_at_the_threshold)
+{
+    /* The threshold is a percentage of the largest magnitude; a peak equal
+     * to it is kept, one just below is dropped. */
+    const int N = 12;
+    double data[12] = {0};
+    double result[24] = {0};
+    double argv[] = {100.0, 50.0};
+
+    data[3] = 100.0;
+    data[7] = 50.0;
+    data[10] = 49.999;
+
+    ASSERT_EQ(xtract_peak_spectrum(data, N, argv, result), XTRACT_SUCCESS);
+
+    CHECK_REL(result[3], 100.0, 1e-12);
+    CHECK_REL(result[7], 50.0, 1e-12);
+    ASSERT_EQ(result[10], 0.0);
+    ASSERT_EQ(result[N + 10], 0.0);
+}
+
+UTEST(vector, peak_spectrum_threshold_range_is_0_to_100_inclusive)
+{
+    const int N = 12;
+    double data[12] = {0};
+    double result[24] = {0};
+    double argv[] = {100.0, 0.0};
+
+    data[3] = 100.0;
+    data[7] = 50.0;
+
+    argv[1] = 100.0;
+    ASSERT_EQ(xtract_peak_spectrum(data, N, argv, result), XTRACT_SUCCESS);
+    CHECK_REL(result[3], 100.0, 1e-12);
+    ASSERT_EQ(result[7], 0.0);
+
+    argv[1] = 0.0;
+    ASSERT_EQ(xtract_peak_spectrum(data, N, argv, result), XTRACT_SUCCESS);
+    CHECK_REL(result[7], 50.0, 1e-12);
+
+    argv[1] = 100.0000001;
+    ASSERT_EQ(xtract_peak_spectrum(data, N, argv, result), XTRACT_BAD_ARGV);
+    /* An out-of-range threshold is treated as zero, so every peak is kept */
+    CHECK_REL(result[7], 50.0, 1e-12);
+
+    argv[1] = -0.0000001;
+    ASSERT_EQ(xtract_peak_spectrum(data, N, argv, result), XTRACT_BAD_ARGV);
+}
+
 UTEST(vector, dct_changing_size_should_not_crash)
 {
     double data4[] = {1.0, 0.0, 0.0, 0.0};
