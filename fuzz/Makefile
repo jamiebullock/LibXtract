@@ -1,3 +1,8 @@
+# Part of LibXtract
+#
+# SPDX-FileCopyrightText: 2026 Jamie Bullock
+# SPDX-License-Identifier: Zlib
+
 TARGETS = xtfuzz_scalar xtfuzz_delta xtfuzz_vector
 
 # A clang with libFuzzer. Apple clang lacks the runtime; on macOS install LLVM

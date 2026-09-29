@@ -1,4 +1,8 @@
-
+/* Part of LibXtract
+ *
+ * SPDX-FileCopyrightText: 2014 Jamie Bullock
+ * SPDX-License-Identifier: Zlib
+ */
 
 // We need a pre-computed uniform distribution because tests need to be reproducible
 // If we use "real" randomness then in certain cases tests will pass or fail depending on the RNG output for that specifc run

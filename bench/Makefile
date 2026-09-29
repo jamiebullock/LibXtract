@@ -1,3 +1,8 @@
+# Part of LibXtract
+#
+# SPDX-FileCopyrightText: 2026 Jamie Bullock
+# SPDX-License-Identifier: Zlib
+
 TARGET = xtbench
 SRC = bench_scalar.c
 OBJ = $(SRC:.c=.o)
