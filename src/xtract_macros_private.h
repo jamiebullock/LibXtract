@@ -26,6 +26,7 @@
 #ifndef XTRACT_MACROS_PRIVATE_H
 #define XTRACT_MACROS_PRIVATE_H
 
+#include <math.h>
 #include <stdio.h>
 
 #define XTRACT_SQ(a) ((a) * (a))
@@ -68,6 +69,17 @@
 #define XTRACT_SPEC_BW_MAX 12000.0 /* SR_UPPER_LIMIT / FFT_BANDS_MIN */
 #define XTRACT_SPEC_BW_DEF 43.066  /* SR_DEFAULT / FFT_BANDS_DEF */
 #define XTRACT_ARRAY_ELEMENTS(_array) (sizeof(_array) / sizeof(_array[0]))
+
+#ifndef M_PI
+#define M_PI 3.14159265358979323846264338327
+#endif
+
+/* DCT-II basis, sused by xtract_init_dct() and xtract_dct() when a precomputed
+ * table is not passed as argv. */
+static inline double xtract_dct_cosine(int n, int m, int N)
+{
+    return cos(M_PI * n * (m + 0.5) / N);
+}
 
 /* Safe double->int conversion: out-of-range and NaN inputs yield 0 rather than
  * the undefined behaviour of a direct cast (the >= / < comparisons are both

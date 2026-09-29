@@ -467,6 +467,19 @@ printf("Mean = %.2f\n", mean);
      */
     void xtract_free_window(double *window);
 
+    /** \brief A function to initialise a cosine table for xtract_dct()
+     *
+     * \param N: the transform size
+     * \return a pointer to the table, or NULL if N <= 0 or allocation fails
+     */
+    double *xtract_init_dct(const int N);
+
+    /** \brief Free a table as allocated by xtract_init_dct()
+     *
+     * \param *table: a pointer to a table as allocated by xtract_init_dct(), or NULL
+     */
+    void xtract_free_dct(double *table);
+
     /* \brief A function to build an array of function descriptors */
     xtract_function_descriptor_t *xtract_make_descriptors(void);
 

@@ -37,9 +37,6 @@
 #define M_PI 3.14159265358979323846264338327
 #endif
 
-thread_local double **dct_cos_table = NULL;
-thread_local int dct_cos_table_dim = 0;
-
 int xtract_spectrum(const double *data, const int N, const void *argv, double *result)
 {
     int vector = 0;
@@ -622,54 +619,26 @@ int xtract_spectral_subband_centroids(const double *data, const int N, const voi
 
 int xtract_dct(const double *data, const int N, const void *argv, double *result)
 {
+    const double *table = (const double *)argv;
     int n, m;
-    /* Extra variable to hold a reference for the dct lookup table since */
-    /* accessing the thread local storage is expensive. */
-    double **temp_dct_table;
 
-    /* Free the dct table if the cached dimension is different from the new dimension */
-    if (dct_cos_table != NULL && dct_cos_table_dim != N)
-    {
-        for (n = 0; n < dct_cos_table_dim; ++n)
-        {
-            free(dct_cos_table[n]);
-        }
-        free(dct_cos_table);
-        dct_cos_table = NULL;
-        dct_cos_table_dim = 0;
-    }
-    /* Allocate the dct cache table */
-    if (dct_cos_table == NULL)
-    {
-        dct_cos_table = calloc(N, sizeof(double *));
-        if (dct_cos_table == NULL)
-            return XTRACT_MALLOC_FAILED;
-        for (n = 0; n < N; ++n)
-        {
-            dct_cos_table[n] = calloc(N, sizeof(double));
-            if (dct_cos_table[n] == NULL)
-            {
-                /* Don't leave a half-built table cached as valid */
-                for (m = 0; m < n; ++m)
-                    free(dct_cos_table[m]);
-                free(dct_cos_table);
-                dct_cos_table = NULL;
-                return XTRACT_MALLOC_FAILED;
-            }
-            for (m = 1; m <= N; ++m)
-            {
-                dct_cos_table[n][m - 1] = cos(M_PI * (n / (double)N) * (m - 0.5));
-            }
-        }
-        dct_cos_table_dim = N;
-    }
-    /* Calculate the dct transformation */
-    temp_dct_table = dct_cos_table;
-    memset(result, 0, N * sizeof(double));
     for (n = 0; n < N; ++n)
     {
-        for (m = 0; m < N; ++m)
-            result[n] += data[m] * temp_dct_table[n][m];
+        double acc = 0.0;
+
+        if (table != NULL)
+        {
+            const double *row = table + (size_t)n * (size_t)N;
+
+            for (m = 0; m < N; ++m)
+                acc += data[m] * row[m];
+        }
+        else
+        {
+            for (m = 0; m < N; ++m)
+                acc += data[m] * xtract_dct_cosine(n, m, N);
+        }
+        result[n] = acc;
     }
 
     return XTRACT_SUCCESS;

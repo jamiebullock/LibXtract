@@ -334,6 +334,93 @@ UTEST(vector, asdf_of_1_neg1_1_neg1_at_lag_1)
 
 /* ===== xtract_dct ===== */
 
+UTEST(vector, init_dct_table_holds_dct_ii_basis)
+{
+    const int N = 4;
+    double *table = xtract_init_dct(N);
+    int n, m;
+
+    ASSERT_TRUE(table != NULL);
+    for (n = 0; n < N; ++n)
+    {
+        for (m = 0; m < N; ++m)
+            CHECK_NEAR(table[n * N + m], cos(M_PI * n * (m + 0.5) / N), 1e-12);
+    }
+    xtract_free_dct(table);
+}
+
+UTEST(vector, init_dct_rejects_non_positive_size)
+{
+    ASSERT_TRUE(xtract_init_dct(0) == NULL);
+    ASSERT_TRUE(xtract_init_dct(-4) == NULL);
+    xtract_free_dct(NULL);
+}
+
+UTEST(vector, dct_with_table_matches_dct_without_table)
+{
+    const int N = 8;
+    double data[8];
+    double with_table[8];
+    double without_table[8];
+    double *table = xtract_init_dct(N);
+    int n;
+
+    ASSERT_TRUE(table != NULL);
+    for (n = 0; n < N; ++n)
+        data[n] = sin(0.7 * n) + 0.25 * n;
+
+    xtract_dct(data, N, table, with_table);
+    xtract_dct(data, N, NULL, without_table);
+
+    for (n = 0; n < N; ++n)
+        CHECK_NEAR(with_table[n], without_table[n], 1e-12);
+
+    xtract_free_dct(table);
+}
+
+UTEST(vector, dct_alternates_between_two_table_sizes)
+{
+    double data4[] = {1.0, 0.0, 0.0, 0.0};
+    double data8[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+    double first4[4], result8[8], second4[4];
+    double *table4 = xtract_init_dct(4);
+    double *table8 = xtract_init_dct(8);
+    int n;
+
+    ASSERT_TRUE(table4 != NULL);
+    ASSERT_TRUE(table8 != NULL);
+
+    xtract_dct(data4, 4, table4, first4);
+    xtract_dct(data8, 8, table8, result8);
+    xtract_dct(data4, 4, table4, second4);
+
+    CHECK_REL(first4[1], cos(M_PI / 8.0), 1e-6);
+    CHECK_REL(result8[1], cos(M_PI / 16.0), 1e-6);
+    for (n = 0; n < 4; ++n)
+        ASSERT_EQ(first4[n], second4[n]);
+
+    xtract_free_dct(table4);
+    xtract_free_dct(table8);
+}
+
+UTEST(vector, free_fft_leaves_dct_table_usable)
+{
+    double data[] = {1.0, 2.0, 3.0, 4.0};
+    double before[4], after[4];
+    double *table = xtract_init_dct(4);
+    int n;
+
+    ASSERT_TRUE(table != NULL);
+    xtract_dct(data, 4, table, before);
+    xtract_free_fft();
+    xtract_dct(data, 4, table, after);
+
+    for (n = 0; n < 4; ++n)
+        ASSERT_EQ(before[n], after[n]);
+
+    xtract_free_dct(table);
+}
+
 UTEST(vector, dct_of_impulse)
 {
     /* DCT-II of impulse at index 0:
