@@ -74,7 +74,7 @@
 #define M_PI 3.14159265358979323846264338327
 #endif
 
-/* DCT-II basis, sused by xtract_init_dct() and xtract_dct() when a precomputed 
+/* DCT-II basis, sused by xtract_init_dct() and xtract_dct() when a precomputed
  * table is not passed as argv. */
 static inline double xtract_dct_cosine(int n, int m, int N)
 {
