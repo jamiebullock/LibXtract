@@ -39,6 +39,9 @@ fuzz/xtfuzz_*
 fuzz/crash-*
 fuzz/*.dSYM
 
+# Mutation testing (make mutation)
+reports/
+
 # Project-specific files
 examples/simpletest/simpletest
 tests/xttest
