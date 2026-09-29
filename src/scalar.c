@@ -966,30 +966,63 @@ int xtract_nonzero_count(const double *data, const int N, const void *argv, doub
 
 int xtract_hps(const double *data, const int N, const void *argv, double *result)
 {
-    int n, M, i, peak_index, position1_lwr;
-    double tempProduct, peak, largest1_lwr, ratio1;
+    /* The frequency array says which spectrum layout this is: with DC
+     * discarded (the xtract_spectrum default) coefficient m is bin m + 1 and
+     * freqs[0] == q, so off == 1; with DC included freqs[0] == 0 and
+     * off == 0. Harmonic r of coefficient i is then coefficient
+     * r * (i + off) - off, and a DC coefficient is never a candidate. */
+    const int M = N / 2;
+    const double *freqs = data + M;
+    const int R = 3;
+    int i, r, off, first, count, peak_index, position1_lwr;
+    double q, product, peak, largest1_lwr, ratio1;
 
-    n = N / 2;
-
-    M = (int)ceil(n / 3.0);
-
-    if (M <= 1)
+    if (M < 2)
     {
-        /* Input data is too short. */
         *result = 0;
         return XTRACT_NO_RESULT;
     }
 
-    peak_index = 0;
-
-    peak = 0;
+    /* Silence has no product peak, whatever its frequency grid says */
     for (i = 0; i < M; ++i)
     {
-        tempProduct = data[i] * data[i * 2] * data[i * 3];
+        if (data[i] > 0.0)
+            break;
+    }
+    if (i == M)
+    {
+        *result = 0;
+        return XTRACT_NO_RESULT;
+    }
 
-        if (tempProduct > peak)
+    q = freqs[1] - freqs[0];
+    if (q <= 0.0)
+    {
+        *result = 0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
+    off = xtract_argv_int(floor(freqs[0] / q + 0.5));
+    first = off ? 0 : 1;
+
+    /* Candidates are the coefficients whose Rth harmonic is still in range */
+    count = (M + off) / R - off;
+    if (count - first <= 1)
+    {
+        *result = 0;
+        return XTRACT_NO_RESULT;
+    }
+
+    peak_index = first;
+    peak = 0;
+    for (i = first; i < count; ++i)
+    {
+        product = 1.0;
+        for (r = 1; r <= R; ++r)
+            product *= data[r * (i + off) - off];
+
+        if (product > peak)
         {
-            peak = tempProduct;
+            peak = product;
             peak_index = i;
         }
     }
@@ -1002,9 +1035,10 @@ int xtract_hps(const double *data, const int N, const void *argv, double *result
         return XTRACT_NO_RESULT;
     }
 
-    largest1_lwr = position1_lwr = 0;
+    largest1_lwr = 0;
+    position1_lwr = first;
 
-    for (i = 0; i < n; ++i)
+    for (i = first; i < M; ++i)
     {
         if (data[i] > largest1_lwr && i != peak_index)
         {
@@ -1015,10 +1049,11 @@ int xtract_hps(const double *data, const int N, const void *argv, double *result
 
     ratio1 = data[position1_lwr] / data[peak_index];
 
-    if (position1_lwr > peak_index * 0.4 && position1_lwr < peak_index * 0.6 && ratio1 > 0.1)
+    if ((position1_lwr + off) > (peak_index + off) * 0.4 && (position1_lwr + off) < (peak_index + off) * 0.6 &&
+        ratio1 > 0.1)
         peak_index = position1_lwr;
 
-    *result = data[n + peak_index];
+    *result = freqs[peak_index];
 
     return XTRACT_SUCCESS;
 }

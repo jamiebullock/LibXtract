@@ -576,19 +576,92 @@ UTEST(scalar, hps_finds_fundamental_of_harmonic_signal)
 
     memset(data, 0, sizeof(data));
 
-    /* Set amplitude peaks at bins 10, 20, 30 (harmonics of bin 10) */
+    /* xtract_spectrum's default layout discards DC: coefficient m is bin
+     * m + 1 at frequency (m + 1) * freq_res. A fundamental at 1000 Hz is
+     * coefficient 9; its second and third harmonics are coefficients 19
+     * and 29. */
+    data[9] = 1.0;
+    data[19] = 0.8;
+    data[29] = 0.5;
+
+    for (i = 0; i < M; i++)
+        data[M + i] = (i + 1) * freq_res;
+
+    xtract_hps(data, N, NULL, &result);
+
+    CHECK_REL(result, 10.0 * freq_res, 1e-3);
+}
+
+UTEST(scalar, hps_finds_fundamental_in_dc_included_layout)
+{
+    /* With DC included, coefficient m is bin m at frequency m * freq_res,
+     * so the same 1000 Hz tone sits at coefficients 10, 20 and 30. */
+    const int N = 256;
+    const int M = N / 2;
+    double data[256];
+    double result = 0.0;
+    double freq_res = 100.0;
+    int i;
+
+    memset(data, 0, sizeof(data));
     data[10] = 1.0;
     data[20] = 0.8;
     data[30] = 0.5;
 
-    /* Set frequency values: bin i has frequency i * freq_resolution */
     for (i = 0; i < M; i++)
         data[M + i] = i * freq_res;
 
     xtract_hps(data, N, NULL, &result);
 
-    /* HPS should identify the fundamental at bin 10 = 1000 Hz */
     CHECK_REL(result, 10.0 * freq_res, 1e-3);
+}
+
+UTEST(scalar, hps_through_default_spectrum_finds_the_correct_bin)
+{
+    /* A harmonic tone through xtract_spectrum with default arguments. The
+     * fundamental is placed on a bin centre so the answer is exact. */
+    const int N = 512;
+    const int M = N / 2;
+    const double sr = 44100.0;
+    const double q = sr / N;
+    const double f0 = 20.0 * q;
+    double signal[512], windowed[512], spectrum[512];
+    double *window = xtract_init_window(N, XTRACT_HANN);
+    double argv[4] = {q, XTRACT_MAGNITUDE_SPECTRUM, 0, 0};
+    double result = 0.0;
+    int n, k, rv;
+
+    ASSERT_TRUE(window != NULL);
+    for (n = 0; n < N; n++)
+    {
+        signal[n] = 0.0;
+        for (k = 1; k <= 4; k++)
+            signal[n] += sin(2.0 * M_PI * k * f0 * n / sr + 0.3 * k) / k;
+    }
+    xtract_windowed(signal, N, window, windowed);
+    xtract_init_fft(N, XTRACT_SPECTRUM);
+    xtract_spectrum(windowed, N, argv, spectrum);
+
+    rv = xtract_hps(spectrum, N, NULL, &result);
+
+    ASSERT_EQ(rv, XTRACT_SUCCESS);
+    CHECK_REL(result, f0, 1e-9);
+    (void)M;
+    xtract_free_window(window);
+}
+
+UTEST(scalar, hps_rejects_a_non_uniform_frequency_grid)
+{
+    double data[64] = {0};
+    double result = 999.0;
+
+    data[5] = 1.0;
+    /* freqs[1] <= freqs[0] cannot be a bin grid */
+    data[32] = 100.0;
+    data[33] = 100.0;
+
+    ASSERT_EQ(xtract_hps(data, 64, NULL, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
 }
 
 /* ===== xtract_lpc known values ===== */
@@ -940,16 +1013,16 @@ UTEST(scalar, hps_second_loop_should_not_read_frequency_data_as_amplitudes)
     int i;
 
     memset(data, 0, sizeof(data));
-    data[5] = 1.0;
-    data[10] = 0.8;
-    data[15] = 0.5;
+    /* Default layout: 5000 Hz is coefficient 4, harmonics at 9 and 14 */
+    data[4] = 1.0;
+    data[9] = 0.8;
+    data[14] = 0.5;
 
     for (i = 0; i < M; i++)
-        data[M + i] = i * freq_res;
+        data[M + i] = (i + 1) * freq_res;
 
     xtract_hps(data, N, NULL, &result);
 
-    /* HPS should find fundamental at bin 5 = 5000 Hz */
     CHECK_REL(result, 5.0 * freq_res, 1e-3);
 }
 
