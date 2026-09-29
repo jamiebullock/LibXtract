@@ -139,7 +139,7 @@ jobs:
           sudo apt-get update && sudo apt-get install -y clang-18 ./mull.deb
 
       - name: Mutation tests (Mull, ASan + UBSan)
-        run: make mutation MULL_THRESHOLD=0
+        run: make mutation
 
       - name: Upload mutation report
         if: always()
