@@ -683,6 +683,42 @@ UTEST(scalar, hps_interpolates_a_fundamental_between_bins)
     xtract_free_window(window);
 }
 
+UTEST(scalar, hps_harmonic_count_recovers_a_tone_with_a_missing_second_harmonic)
+{
+    /* Default layout, q = 100 Hz. A weak fundamental at 1000 Hz (coefficient
+     * 9) whose second harmonic is only leakage, with the third to sixth
+     * harmonics present. With three terms the octave at 2000 Hz wins because
+     * its own harmonics (2000, 4000, 6000) are all strong; with five terms
+     * the octave's fourth and fifth harmonics are empty and the true
+     * fundamental wins. */
+    const int N = 512;
+    const int M = N / 2;
+    double data[512];
+    double result = 0.0;
+    double harmonics;
+    int i;
+
+    memset(data, 0, sizeof(data));
+    data[9] = 0.05;
+    data[19] = 1e-3;
+    data[29] = 1.0;
+    data[39] = 1.0;
+    data[49] = 1.0;
+    data[59] = 1.0;
+    for (i = 0; i < M; i++)
+        data[M + i] = (i + 1) * 100.0;
+
+    ASSERT_EQ(xtract_hps(data, N, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 2000.0, 1e-3);
+
+    harmonics = 5.0;
+    ASSERT_EQ(xtract_hps(data, N, &harmonics, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 1000.0, 1e-3);
+
+    harmonics = 1.0;
+    ASSERT_EQ(xtract_hps(data, N, &harmonics, &result), XTRACT_ARGUMENT_ERROR);
+}
+
 UTEST(scalar, hps_rejects_a_non_uniform_frequency_grid)
 {
     double data[64] = {0};

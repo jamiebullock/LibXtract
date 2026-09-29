@@ -991,9 +991,15 @@ int xtract_hps(const double *data, const int N, const void *argv, double *result
      * r * (i + off) - off, and a DC coefficient is never a candidate. */
     const int M = N / 2;
     const double *freqs = data + M;
-    const int R = 3;
+    const int R = argv == NULL ? 3 : xtract_argv_int(*(const double *)argv);
     int i, off, first, count, peak_index, position1_lwr;
     double q, score, peak, largest1_lwr, ratio1, below, above, denominator, delta;
+
+    if (R < 2)
+    {
+        *result = 0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
 
     if (M < 2)
     {

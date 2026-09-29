@@ -207,6 +207,12 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_WINDOWED:
             /* WINDOWED is special because argc = window size = N */
         case XTRACT_SMOOTHED:
+        case XTRACT_HPS:
+            *argv_min = 2;
+            *argv_max = 16;
+            *argv_def = 3;
+            *argv_unit = XTRACT_NONE;
+            break;
         default:
             *argv_min = XTRACT_NONE;
             *argv_max = XTRACT_NONE;
@@ -1117,6 +1123,10 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *argc = 1;
             *argv_type = XTRACT_INT;
             break;
+        case XTRACT_HPS:
+            *argc = 1;
+            *argv_type = XTRACT_INT;
+            break;
         case XTRACT_BARK_COEFFICIENTS:
             *argc = XTRACT_BARK_BANDS;
             *argv_type = XTRACT_INT;
@@ -1148,7 +1158,6 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_POWER:
         case XTRACT_SHARPNESS:
         case XTRACT_SPECTRAL_SLOPE:
-        case XTRACT_HPS:
         case XTRACT_ATTACK_TIME:
         case XTRACT_DECAY_TIME:
         case XTRACT_DIFFERENCE_VECTOR:
