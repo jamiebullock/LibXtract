@@ -645,8 +645,41 @@ UTEST(scalar, hps_through_default_spectrum_finds_the_correct_bin)
     rv = xtract_hps(spectrum, N, NULL, &result);
 
     ASSERT_EQ(rv, XTRACT_SUCCESS);
-    CHECK_REL(result, f0, 1e-9);
+    ASSERT_TRUE(fabs(result - f0) < 0.01 * q);
     (void)M;
+    xtract_free_window(window);
+}
+
+UTEST(scalar, hps_interpolates_a_fundamental_between_bins)
+{
+    /* The fundamental sits 0.3 of a bin above a bin centre. Without
+     * interpolation the answer is the bin centre, 0.3 q away; with it the
+     * error is a fraction of that. */
+    const int N = 512;
+    const double sr = 44100.0;
+    const double q = sr / N;
+    const double f0 = 20.3 * q;
+    double signal[512], windowed[512], spectrum[512];
+    double *window = xtract_init_window(N, XTRACT_HANN);
+    double argv[4] = {q, XTRACT_MAGNITUDE_SPECTRUM, 0, 0};
+    double result = 0.0;
+    int n, k, rv;
+
+    ASSERT_TRUE(window != NULL);
+    for (n = 0; n < N; n++)
+    {
+        signal[n] = 0.0;
+        for (k = 1; k <= 4; k++)
+            signal[n] += sin(2.0 * M_PI * k * f0 * n / sr + 0.7 * k) / k;
+    }
+    xtract_windowed(signal, N, window, windowed);
+    xtract_init_fft(N, XTRACT_SPECTRUM);
+    xtract_spectrum(windowed, N, argv, spectrum);
+
+    rv = xtract_hps(spectrum, N, NULL, &result);
+
+    ASSERT_EQ(rv, XTRACT_SUCCESS);
+    ASSERT_TRUE(fabs(result - f0) < 0.05 * q);
     xtract_free_window(window);
 }
 
