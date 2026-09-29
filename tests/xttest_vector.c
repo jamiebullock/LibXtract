@@ -1470,21 +1470,38 @@ UTEST(vector, mmbses_three_bins_exercise_full_covariance_path)
 
 UTEST(vector, mfcc_and_gfcc_with_dct_table_match_table_less_path)
 {
-    const int N = 64;
+    /* Two checks per feature: the table and table-less paths agree, and
+     * coefficient 0 equals the sum of the log filterbank energies, which is
+     * what a DCT-II basis of all ones at index 0 reduces to. The energies
+     * are accumulated here from the filter coefficients and the input, and
+     * every filter is required to pass energy so the log floor is never in
+     * play. */
+    const int N = 256;
     const int n_filters = 13;
-    double data[64];
+    double data[256];
     double table_less[13], with_table[13];
+    double expected_c0, energy;
     xtract_mel_filter mf;
-    int i;
+    int i, k;
 
     for (i = 0; i < N; i++)
-        data[i] = 1.0 + sin(0.3 * i);
+        data[i] = 1.0 + 0.5 * sin(0.3 * i);
 
     mf.n_filters = n_filters;
     mf.filters = (double **)malloc(n_filters * sizeof(double *));
     for (i = 0; i < n_filters; i++)
         mf.filters[i] = (double *)calloc(N, sizeof(double));
-    xtract_init_mfcc(N, 22050.0 / 2, XTRACT_EQUAL_GAIN, 20, 8000, n_filters, mf.filters);
+    xtract_init_mfcc(N, 22050.0 / 2, XTRACT_EQUAL_GAIN, 100, 8000, n_filters, mf.filters);
+
+    expected_c0 = 0.0;
+    for (k = 0; k < n_filters; k++)
+    {
+        energy = 0.0;
+        for (i = 0; i < N; i++)
+            energy += data[i] * mf.filters[k][i];
+        ASSERT_TRUE(energy > 0.0);
+        expected_c0 += log(energy);
+    }
 
     mf.dct_table = NULL;
     ASSERT_EQ(xtract_mfcc(data, N, &mf, table_less), XTRACT_SUCCESS);
@@ -1493,9 +1510,20 @@ UTEST(vector, mfcc_and_gfcc_with_dct_table_match_table_less_path)
     ASSERT_EQ(xtract_mfcc(data, N, &mf, with_table), XTRACT_SUCCESS);
     for (i = 0; i < n_filters; i++)
         CHECK_NEAR(with_table[i], table_less[i], 1e-12);
+    CHECK_REL(with_table[0], expected_c0, 1e-9);
     xtract_free_dct(mf.dct_table);
 
-    xtract_init_gfcc(N, 22050.0 / 2, 20, 8000, n_filters, mf.filters);
+    xtract_init_gfcc(N, 22050.0 / 2, 100, 8000, n_filters, mf.filters);
+
+    expected_c0 = 0.0;
+    for (k = 0; k < n_filters; k++)
+    {
+        energy = 0.0;
+        for (i = 0; i < N; i++)
+            energy += data[i] * mf.filters[k][i];
+        ASSERT_TRUE(energy > 0.0);
+        expected_c0 += log(energy);
+    }
 
     mf.dct_table = NULL;
     ASSERT_EQ(xtract_gfcc(data, N, &mf, table_less), XTRACT_SUCCESS);
@@ -1504,6 +1532,7 @@ UTEST(vector, mfcc_and_gfcc_with_dct_table_match_table_less_path)
     ASSERT_EQ(xtract_gfcc(data, N, &mf, with_table), XTRACT_SUCCESS);
     for (i = 0; i < n_filters; i++)
         CHECK_NEAR(with_table[i], table_less[i], 1e-12);
+    CHECK_REL(with_table[0], expected_c0, 1e-9);
     xtract_free_dct(mf.dct_table);
 
     for (i = 0; i < n_filters; i++)
