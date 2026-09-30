@@ -614,7 +614,7 @@ UTEST(vector, spectrum_log_magnitude_and_log_power_scale_the_occupied_bins_into_
             if (mag > 0.0)
                 CHECK_REL(result[m], (log(mag) + 96.0) / 96.0, 1e-9);
             else
-                ASSERT_TRUE(result[m] < (log(1e-10) + 96.0) / 96.0);
+                ASSERT_TRUE(result[m] >= 0.0 && result[m] < (log(1e-10) + 96.0) / 96.0);
             CHECK_NEAR(result[SPEC_M + m], bin * SPEC_Q, 1e-9);
         }
         ASSERT_EQ(spec_run(XTRACT_LOG_POWER_SPECTRUM, with_dc, 0, result), XTRACT_SUCCESS);
@@ -626,7 +626,7 @@ UTEST(vector, spectrum_log_magnitude_and_log_power_scale_the_occupied_bins_into_
             if (mag > 0.0)
                 CHECK_REL(result[m], (log(mag * mag) + 96.0) / 96.0, 1e-9);
             else
-                ASSERT_TRUE(result[m] < (log(1e-20) + 96.0) / 96.0);
+                ASSERT_TRUE(result[m] >= 0.0 && result[m] < (log(1e-20) + 96.0) / 96.0);
             CHECK_NEAR(result[SPEC_M + m], bin * SPEC_Q, 1e-9);
         }
     }
