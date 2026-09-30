@@ -156,7 +156,7 @@ UTEST(init, mfcc_equal_area_gives_every_filter_the_same_area)
             CHECK_NEAR(tables[n][k], height * triangle(lower, hz[n], hz[n + 1], (double)k / FB_M * FB_NYQUIST),
                        1e-12);
     }
-    CHECK_REL(hz[1] / (hz[1] - 0.0), 1.0, 1e-12);
+    CHECK_REL(tables[0][3], triangle(0.0, hz[0], hz[1], 3.0 / FB_M * FB_NYQUIST), 1e-12);
     fb_free(tables);
 }
 
