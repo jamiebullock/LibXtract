@@ -159,10 +159,10 @@ extern "C"
     int xtract_asdf(const double *data, const int N, const void *argv, double *result);
 
     /** \brief Extract Bark band coefficients based on a method
-     * \param *data: a pointer to the first element in an array of doubles representing the magnitude coefficients from the magnitude spectrum of an audio vector, (e.g. the first half of the array pointed to by *result from xtract_spectrum().
-     * \param N: the number of array elements to be considered
-     * \param *argv: a pointer to an array of ints representing the limits of each bark band. This can be obtained  by calling xtract_init_bark.
-     * \param *result: a pointer to an array containing resultant bark coefficients
+     * \param *data: a pointer to the first element in an array of spectral coefficients, the first half of the array pointed to by *result from xtract_spectrum() called with DC included (argv[2] == 1), so that element k is bin k as the band limits expect
+     * \param N: the number of coefficients, half the transform size the band limits were initialised with
+     * \param *argv: a pointer to an array of XTRACT_BARK_BANDS ints representing the limits of each bark band, obtained by calling xtract_init_bark() with the transform size
+     * \param *result: a pointer to an array of XTRACT_BARK_BANDS doubles containing the resultant bark coefficients, the sum of the coefficients in each band
      *
      * The limits array pointed to by *argv must be obtained by first calling xtract_init_bark
      *

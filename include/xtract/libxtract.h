@@ -419,11 +419,11 @@ extern "C"
 
     /** \brief A function to initialise bark filter bounds
      *
-     * A pointer to an array of BARK_BANDS ints most be passed in, and is populated with BARK_BANDS fft bin numbers representing the limits of each band
+     * A pointer to an array of XTRACT_BARK_BANDS ints must be passed in, and is populated with the bin number at which each band starts, on the bin grid of an N-point transform with DC at bin 0. The spectrum these limits are applied to by xtract_bark_coefficients() therefore has N / 2 elements, element k being bin k
      *
-     * \param N: the audio block size
-     * \param sr: The sample audio sample rate
-     * \param *band_limits: a pointer to an array of BARK_BANDS ints
+     * \param N: the size of the transform the band limits will be applied to
+     * \param sr: the sample rate
+     * \param *band_limits: a pointer to an array of XTRACT_BARK_BANDS ints
      */
     int xtract_init_bark(int N, double sr, int *band_limits);
 
