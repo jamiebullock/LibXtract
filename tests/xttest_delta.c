@@ -128,7 +128,8 @@ UTEST(delta, lnorm_order_zero_means_two)
     double result = 0.0;
 
     ASSERT_EQ(xtract_lnorm(data, 3, argv, &result), XTRACT_SUCCESS);
-    CHECK_REL(result, sqrt(29.0), 1e-12);
+    ASSERT_TRUE(isfinite(result));
+    CHECK_NEAR(result, sqrt(29.0), 1e-12);
 }
 
 UTEST(delta, lnorm_positive_slope_filter_with_nothing_positive_is_no_result)
