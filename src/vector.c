@@ -886,11 +886,12 @@ int xtract_lpcc(const double *data, const int N, const void *argv, double *resul
         result[n - 1] = data[n] + sum / n;
     }
 
-    /* be wary of these interpolated values */
+    /* Beyond the LPC order there is no a[n] term and the sum runs over the
+     * last p cepstral terms, k = n - p to n - 1 (Rabiner and Juang 1993). */
     for (n = order + 1; n <= cep_length; n++)
     {
         sum = 0.0;
-        for (k = n - (order - 1); k < n; k++)
+        for (k = n - order; k < n; k++)
             sum += k * result[k - 1] * data[n - k];
         result[n - 1] = sum / n;
     }

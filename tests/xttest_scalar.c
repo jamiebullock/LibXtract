@@ -1671,6 +1671,49 @@ UTEST(scalar, smoothness_constant_spectrum)
     CHECK_NEAR(result, 0.0, 1e-9);
 }
 
+UTEST(scalar, smoothness_of_a_log_linear_spectrum_is_zero)
+{
+    /* Logs 0, 1, 2, 3, 4: every interior bin equals the mean of itself and
+     * its neighbours, so every term of the sum is zero. */
+    double result = 1.0;
+    double data[5];
+    int n;
+
+    for (n = 0; n < 5; n++)
+        data[n] = exp((double)n);
+
+    ASSERT_EQ(xtract_smoothness(data, 5, NULL, &result), XTRACT_SUCCESS);
+    CHECK_NEAR(result, 0.0, 1e-9);
+}
+
+UTEST(scalar, smoothness_sums_the_deviation_from_the_three_bin_mean_in_decibel_units)
+{
+    /* Logs 0, 2, 0, 2, 0: each of the three interior bins deviates from
+     * the mean of its triple by 40/3 in the 20 log units the measure uses,
+     * so the sum is 3 * (40 - 40/3) = 80. */
+    double result = 0.0;
+    double data[5];
+
+    data[0] = 1.0;
+    data[1] = exp(2.0);
+    data[2] = 1.0;
+    data[3] = exp(2.0);
+    data[4] = 1.0;
+
+    ASSERT_EQ(xtract_smoothness(data, 5, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 80.0, 1e-9);
+}
+
+UTEST(scalar, smoothness_treats_an_empty_bin_as_minus_96)
+{
+    /* Logs 0, -96, 0 for one interior bin: |20 (-96) - 20 (-96) / 3| = 1280. */
+    double result = 0.0;
+    double data[3] = {1.0, 0.0, 1.0};
+
+    ASSERT_EQ(xtract_smoothness(data, 3, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 1280.0, 1e-9);
+}
+
 UTEST(scalar, spectral_slope_known_value)
 {
     /* 4 bins: amps=[0,1,2,3] at freqs=[0,100,200,300]
