@@ -1187,37 +1187,53 @@ UTEST(vector, init_bark_band_limits_are_rounded)
 
 /* ===== xtract_bark_coefficients ===== */
 
-UTEST(vector, bark_coefficients_basic_summation)
+/* A 1024-point block at 44.1 kHz carries a DC offset and five cosines placed
+ * on exact bins, so the magnitude spectrum with DC included is zero except at
+ * those bins, where it holds the offset and half of each amplitude. The bins
+ * are chosen against the band limits pinned above: 2 and 5 sit exactly on the
+ * lower edge of bands 1 and 2, 10 lies inside band 4, 400 inside band 24 and
+ * 500 in the last band, which runs to the end of the spectrum. */
+#define BARK_N 1024
+#define BARK_M (BARK_N / 2)
+static const double BARK_SR = 44100.0;
+static const double BARK_DC = 0.3;
+static const int BARK_BIN[5] = {2, 5, 10, 400, 500};
+static const double BARK_AMP[5] = {0.2, 0.4, 0.6, 0.8, 1.0};
+static const int BARK_BAND[5] = {1, 2, 4, 24, 25};
+
+UTEST(vector, bark_coefficients_sum_the_bins_of_a_dc_included_spectrum)
 {
-    /* xtract_bark_coefficients sums amplitude bins within each bark band.
-     * We need to init bark band limits first. */
-    const int N = 1024;
-    double sr = 44100.0;
+    double signal[BARK_N];
+    double spectrum[BARK_N];
+    double argv[4];
     int band_limits[XTRACT_BARK_BANDS];
-    double data[1024];
-    double result[XTRACT_BARK_BANDS] = {0};
-    double total = 0.0;
-    int i;
+    double result[XTRACT_BARK_BANDS];
+    double expected[XTRACT_BARK_BANDS] = {0.0};
+    int n, i;
 
-    xtract_init_bark(N, sr, band_limits);
-
-    /* Create a flat spectrum — all bins have amplitude 1.0 */
-    for (i = 0; i < N; i++)
-        data[i] = 1.0;
-
-    xtract_bark_coefficients(data, N, band_limits, result);
-
-    /* Each bark band should contain a positive sum (number of bins in that band) */
-    for (i = 0; i < XTRACT_BARK_BANDS - 1; i++)
+    for (n = 0; n < BARK_N; n++)
     {
-        ASSERT_GE(result[i], 0.0);
+        signal[n] = BARK_DC;
+        for (i = 0; i < 5; i++)
+            signal[n] += BARK_AMP[i] * cos(2.0 * M_PI * BARK_BIN[i] * n / BARK_N);
     }
+    expected[0] = BARK_DC;
+    for (i = 0; i < 5; i++)
+        expected[BARK_BAND[i]] = BARK_AMP[i] / 2.0;
 
-    /* Total across all bands should equal sum of amplitudes within the
-     * frequency range covered by the bark scale */
-    for (i = 0; i < XTRACT_BARK_BANDS - 1; i++)
-        total += result[i];
-    ASSERT_GT(total, 0.0);
+    argv[0] = BARK_SR / BARK_N;
+    argv[1] = XTRACT_MAGNITUDE_SPECTRUM;
+    argv[2] = 1;
+    argv[3] = 0;
+    xtract_init_fft(BARK_N, XTRACT_SPECTRUM);
+    ASSERT_EQ(xtract_spectrum(signal, BARK_N, argv, spectrum), XTRACT_SUCCESS);
+    xtract_free_fft();
+
+    ASSERT_EQ(xtract_init_bark(BARK_N, BARK_SR, band_limits), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_bark_coefficients(spectrum, BARK_M, band_limits, result), XTRACT_SUCCESS);
+
+    for (i = 0; i < XTRACT_BARK_BANDS; i++)
+        CHECK_NEAR(result[i], expected[i], 1e-9);
 }
 
 /* ===== xtract_loudness ===== */
