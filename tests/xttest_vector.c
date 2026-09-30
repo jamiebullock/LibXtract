@@ -515,6 +515,182 @@ UTEST(vector, lnorm_l1_of_3_neg4_is_7)
 
 /* ===== FFT-Dependent Features ===== */
 
+/* A 32-sample signal whose DFT is known in closed form: a DC offset, a
+ * cosine at bin 3, a sine at bin 6 and a Nyquist alternation. With the
+ * library's |X| / N scaling the bin magnitudes are 0.3, 0.5, 0.25 and 0.2
+ * and every other bin is zero. Coefficient m is bin m + 1 with DC discarded
+ * (Nyquist present) and bin m with DC included (Nyquist absent). */
+#define SPEC_N 32
+#define SPEC_M (SPEC_N / 2)
+static const double SPEC_Q = 1000.0;
+static const double SPEC_DC = 0.3, SPEC_COS = 1.0, SPEC_SIN = 0.5, SPEC_NYQ = 0.2;
+static const int SPEC_COS_BIN = 3, SPEC_SIN_BIN = 6;
+
+static void spec_signal(double *data)
+{
+    int n;
+
+    for (n = 0; n < SPEC_N; n++)
+        data[n] = SPEC_DC + SPEC_COS * cos(2.0 * M_PI * SPEC_COS_BIN * n / SPEC_N) +
+                  SPEC_SIN * sin(2.0 * M_PI * SPEC_SIN_BIN * n / SPEC_N) + SPEC_NYQ * cos(M_PI * n);
+}
+
+static double spec_bin_magnitude(const int bin)
+{
+    if (bin == 0)
+        return SPEC_DC;
+    if (bin == SPEC_COS_BIN)
+        return SPEC_COS / 2.0;
+    if (bin == SPEC_SIN_BIN)
+        return SPEC_SIN / 2.0;
+    if (bin == SPEC_M)
+        return SPEC_NYQ;
+    return 0.0;
+}
+
+/* Runs xtract_spectrum on the signal with a sentinel-filled result so an
+ * unwritten slot is detected, and returns its status. */
+static int spec_run(const int type, const int with_dc, const int normalise, double *result)
+{
+    double data[SPEC_N];
+    double argv[4];
+    int n;
+
+    argv[0] = SPEC_Q;
+    argv[1] = type;
+    argv[2] = with_dc;
+    argv[3] = normalise;
+    spec_signal(data);
+    for (n = 0; n < SPEC_N; n++)
+        result[n] = 12345.0;
+    xtract_init_fft(SPEC_N, XTRACT_SPECTRUM);
+    return xtract_spectrum(data, SPEC_N, argv, result);
+}
+
+UTEST(vector, spectrum_magnitude_and_power_match_the_dft_in_both_layouts)
+{
+    double result[SPEC_N];
+    int with_dc, m;
+
+    for (with_dc = 0; with_dc <= 1; with_dc++)
+    {
+        ASSERT_EQ(spec_run(XTRACT_MAGNITUDE_SPECTRUM, with_dc, 0, result), XTRACT_SUCCESS);
+        for (m = 0; m < SPEC_M; m++)
+        {
+            const int bin = with_dc ? m : m + 1;
+
+            CHECK_NEAR(result[m], spec_bin_magnitude(bin), 1e-12);
+            CHECK_NEAR(result[SPEC_M + m], bin * SPEC_Q, 1e-9);
+        }
+        ASSERT_EQ(spec_run(XTRACT_POWER_SPECTRUM, with_dc, 0, result), XTRACT_SUCCESS);
+        for (m = 0; m < SPEC_M; m++)
+        {
+            const int bin = with_dc ? m : m + 1;
+            const double mag = spec_bin_magnitude(bin);
+
+            CHECK_NEAR(result[m], mag * mag, 1e-12);
+            CHECK_NEAR(result[SPEC_M + m], bin * SPEC_Q, 1e-9);
+        }
+    }
+}
+
+UTEST(vector, spectrum_log_magnitude_and_log_power_scale_the_occupied_bins_into_0_to_1)
+{
+    /* A log coefficient is (log(x) + 96) / 96 for the magnitude or power x
+     * of the bin, so 1 corresponds to unity and 0 to -96 nepers. Empty bins
+     * hold only rounding noise, which is above the floor but far below the
+     * occupied bins. */
+    double result[SPEC_N];
+    int with_dc, m;
+
+    for (with_dc = 0; with_dc <= 1; with_dc++)
+    {
+        ASSERT_EQ(spec_run(XTRACT_LOG_MAGNITUDE_SPECTRUM, with_dc, 0, result), XTRACT_SUCCESS);
+        for (m = 0; m < SPEC_M; m++)
+        {
+            const int bin = with_dc ? m : m + 1;
+            const double mag = spec_bin_magnitude(bin);
+
+            if (mag > 0.0)
+                CHECK_REL(result[m], (log(mag) + 96.0) / 96.0, 1e-9);
+            else
+                ASSERT_TRUE(result[m] >= 0.0 && result[m] < (log(1e-10) + 96.0) / 96.0);
+            CHECK_NEAR(result[SPEC_M + m], bin * SPEC_Q, 1e-9);
+        }
+        ASSERT_EQ(spec_run(XTRACT_LOG_POWER_SPECTRUM, with_dc, 0, result), XTRACT_SUCCESS);
+        for (m = 0; m < SPEC_M; m++)
+        {
+            const int bin = with_dc ? m : m + 1;
+            const double mag = spec_bin_magnitude(bin);
+
+            if (mag > 0.0)
+                CHECK_REL(result[m], (log(mag * mag) + 96.0) / 96.0, 1e-9);
+            else
+                ASSERT_TRUE(result[m] >= 0.0 && result[m] < (log(1e-20) + 96.0) / 96.0);
+            CHECK_NEAR(result[SPEC_M + m], bin * SPEC_Q, 1e-9);
+        }
+    }
+}
+
+UTEST(vector, spectrum_log_types_floor_a_silent_signal_at_exactly_zero)
+{
+    /* Silence is the one input whose bins are exactly zero rather than
+     * rounding noise, so every log coefficient sits on the -96 floor,
+     * which scales to 0. */
+    double data[SPEC_N] = {0};
+    double result[SPEC_N];
+    double argv[4] = {1000.0, 0, 0, 0};
+    int type, m;
+
+    xtract_init_fft(SPEC_N, XTRACT_SPECTRUM);
+    for (type = 0; type < 2; type++)
+    {
+        argv[1] = type ? XTRACT_LOG_POWER_SPECTRUM : XTRACT_LOG_MAGNITUDE_SPECTRUM;
+        ASSERT_EQ(xtract_spectrum(data, SPEC_N, argv, result), XTRACT_SUCCESS);
+        for (m = 0; m < SPEC_M; m++)
+            ASSERT_EQ(result[m], 0.0);
+    }
+}
+
+UTEST(vector, spectrum_magnitude_phase_keeps_magnitudes_and_gives_quadrature_phases)
+{
+    /* The cosine bin is purely real, so its phase is 0; the sine bin is
+     * purely imaginary, so its phase is a quarter turn. The second half of
+     * the result holds phases, not frequencies. */
+    double result[SPEC_N];
+    int with_dc, m;
+
+    for (with_dc = 0; with_dc <= 1; with_dc++)
+    {
+        const int cos_m = with_dc ? SPEC_COS_BIN : SPEC_COS_BIN - 1;
+        const int sin_m = with_dc ? SPEC_SIN_BIN : SPEC_SIN_BIN - 1;
+
+        ASSERT_EQ(spec_run(XTRACT_MAGNITUDE_PHASE_SPECTRUM, with_dc, 0, result), XTRACT_SUCCESS);
+        for (m = 0; m < SPEC_M; m++)
+            CHECK_NEAR(result[m], spec_bin_magnitude(with_dc ? m : m + 1), 1e-12);
+        CHECK_NEAR(result[SPEC_M + cos_m], 0.0, 1e-9);
+        CHECK_NEAR(fabs(result[SPEC_M + sin_m]), M_PI / 2.0, 1e-9);
+    }
+}
+
+UTEST(vector, spectrum_normalisation_divides_coefficients_by_the_largest_and_leaves_frequencies)
+{
+    double result[SPEC_N];
+    int with_dc, m;
+
+    for (with_dc = 0; with_dc <= 1; with_dc++)
+    {
+        ASSERT_EQ(spec_run(XTRACT_MAGNITUDE_SPECTRUM, with_dc, 1, result), XTRACT_SUCCESS);
+        for (m = 0; m < SPEC_M; m++)
+        {
+            const int bin = with_dc ? m : m + 1;
+
+            CHECK_NEAR(result[m], spec_bin_magnitude(bin) / (SPEC_COS / 2.0), 1e-12);
+            CHECK_NEAR(result[SPEC_M + m], bin * SPEC_Q, 1e-9);
+        }
+    }
+}
+
 UTEST(vector, spectrum_of_dc_signal_without_dc_all_bins_zero)
 {
     const int N = 8;
