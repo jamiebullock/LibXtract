@@ -2,6 +2,8 @@ language: en-GB
 
 reviews:
   profile: chill
+  base_branches:
+    - main
   high_level_summary: true
   poem: false
   request_changes_workflow: true
