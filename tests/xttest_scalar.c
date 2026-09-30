@@ -1705,19 +1705,39 @@ UTEST(scalar, smoothness_sums_the_deviation_from_the_three_bin_mean_in_decibel_u
     CHECK_REL(result, 100.0, 1e-9);
 }
 
-UTEST(scalar, smoothness_treats_an_empty_bin_as_minus_96)
+UTEST(scalar, smoothness_treats_empty_bins_at_either_end_as_minus_96)
 {
-    /* Logs 0, -96, 1 for the one interior bin:
-     * |20 (-96) - 20 (0 - 96 + 1) / 3| = 3860 / 3. A finite result is
-     * required first, since a relative check would accept infinity. */
+    /* Zeros at both ends give logs -96, 1, 2, -96, so the two interior bins
+     * contribute |20 - 20 (-96 + 1 + 2) / 3| = 640 and
+     * |40 - 20 (1 + 2 - 96) / 3| = 660. A finite result is required first,
+     * since a relative check would accept the infinity that log(0) gives. */
     double result = 0.0;
-    double data[3] = {1.0, 0.0, 0.0};
+    double data[4] = {0.0, 0.0, 0.0, 0.0};
 
-    data[2] = exp(1.0);
+    data[1] = exp(1.0);
+    data[2] = exp(2.0);
 
-    ASSERT_EQ(xtract_smoothness(data, 3, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_smoothness(data, 4, NULL, &result), XTRACT_SUCCESS);
     ASSERT_TRUE(isfinite(result));
-    CHECK_NEAR(result, 3860.0 / 3.0, 1e-9);
+    CHECK_NEAR(result, 1300.0, 1e-9);
+}
+
+UTEST(scalar, smoothness_tests_each_neighbour_for_emptiness_on_its_own)
+{
+    /* Logs 0, 1, -96, 2, 3: the empty bin sits two away from an occupied one
+     * on each side, so testing the wrong neighbour for emptiness would swap
+     * a log for the floor. The interior bins contribute 653.33, 1300 and
+     * 646.67, which sum to 2600. */
+    double result = 0.0;
+    double data[5] = {1.0, 0.0, 0.0, 0.0, 0.0};
+
+    data[1] = exp(1.0);
+    data[3] = exp(2.0);
+    data[4] = exp(3.0);
+
+    ASSERT_EQ(xtract_smoothness(data, 5, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_TRUE(isfinite(result));
+    CHECK_NEAR(result, 2600.0, 1e-9);
 }
 
 UTEST(scalar, spectral_slope_known_value)
