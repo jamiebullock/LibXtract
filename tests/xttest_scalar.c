@@ -1688,30 +1688,36 @@ UTEST(scalar, smoothness_of_a_log_linear_spectrum_is_zero)
 
 UTEST(scalar, smoothness_sums_the_deviation_from_the_three_bin_mean_in_decibel_units)
 {
-    /* Logs 0, 2, 0, 2, 0: each of the three interior bins deviates from
-     * the mean of its triple by 40/3 in the 20 log units the measure uses,
-     * so the sum is 3 * (40 - 40/3) = 80. */
+    /* Logs 0, 2, 0, 3, 0. In the 20 log units the measure uses, the three
+     * interior bins deviate from the mean of their triples by 40 - 40/3,
+     * 0 - 100/3 and 60 - 60/3, which sum to 100. The asymmetry matters:
+     * with a symmetric spectrum a swapped neighbour goes unnoticed. */
     double result = 0.0;
     double data[5];
 
     data[0] = 1.0;
     data[1] = exp(2.0);
     data[2] = 1.0;
-    data[3] = exp(2.0);
+    data[3] = exp(3.0);
     data[4] = 1.0;
 
     ASSERT_EQ(xtract_smoothness(data, 5, NULL, &result), XTRACT_SUCCESS);
-    CHECK_REL(result, 80.0, 1e-9);
+    CHECK_REL(result, 100.0, 1e-9);
 }
 
 UTEST(scalar, smoothness_treats_an_empty_bin_as_minus_96)
 {
-    /* Logs 0, -96, 0 for one interior bin: |20 (-96) - 20 (-96) / 3| = 1280. */
+    /* Logs 0, -96, 1 for the one interior bin:
+     * |20 (-96) - 20 (0 - 96 + 1) / 3| = 3860 / 3. A finite result is
+     * required first, since a relative check would accept infinity. */
     double result = 0.0;
-    double data[3] = {1.0, 0.0, 1.0};
+    double data[3] = {1.0, 0.0, 0.0};
+
+    data[2] = exp(1.0);
 
     ASSERT_EQ(xtract_smoothness(data, 3, NULL, &result), XTRACT_SUCCESS);
-    CHECK_REL(result, 1280.0, 1e-9);
+    ASSERT_TRUE(isfinite(result));
+    CHECK_NEAR(result, 3860.0 / 3.0, 1e-9);
 }
 
 UTEST(scalar, spectral_slope_known_value)
