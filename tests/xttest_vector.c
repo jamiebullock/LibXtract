@@ -267,7 +267,75 @@ UTEST(vector, lpcc_cepstrum_order_macro_rounds_three_halves_p)
     ASSERT_EQ(XTRACT_LPCC_CEPSTRUM_ORDER(10), 15);
 }
 
+UTEST(vector, lpcc_extrapolates_past_the_lpc_order_by_the_rabiner_juang_recursion)
+{
+    /* Three LPC coefficients and a six-term cepstrum. The first three terms
+     * follow c[n] = a[n] + (1/n) sum_{k=1}^{n-1} k c[k] a[n-k]; the rest
+     * have no a[n] and sum only over the last p terms. Both are recomputed
+     * here from the coefficients rather than from the library. */
+    const int p = 3, q = 6;
+    double lpc[4] = {1.0, 0.5, -0.25, 0.125};
+    double expected[6];
+    double result[6];
+    int cep_length = q;
+    int n, k;
+
+    for (n = 1; n <= q; n++)
+    {
+        double sum = 0.0;
+
+        for (k = (n <= p) ? 1 : n - p; k < n; k++)
+            sum += k * expected[k - 1] * lpc[n - k];
+        expected[n - 1] = (n <= p ? lpc[n] : 0.0) + sum / n;
+    }
+
+    ASSERT_EQ(xtract_lpcc(lpc, p + 1, &cep_length, result), XTRACT_SUCCESS);
+    for (n = 0; n < q; n++)
+        CHECK_REL(result[n], expected[n], 1e-12);
+}
+
+UTEST(vector, lpcc_shorter_than_the_order_stops_at_the_requested_length)
+{
+    double lpc[4] = {1.0, 0.5, -0.25, 0.125};
+    double result[3] = {-1.0, -1.0, -1.0};
+    int cep_length = 2;
+
+    ASSERT_EQ(xtract_lpcc(lpc, 4, &cep_length, result), XTRACT_SUCCESS);
+    CHECK_REL(result[0], 0.5, 1e-12);
+    CHECK_REL(result[1], -0.25 + 0.5 * 0.5 / 2.0, 1e-12);
+    ASSERT_EQ(result[2], -1.0);
+}
+
 /* ===== xtract_harmonic_spectrum ===== */
+
+UTEST(vector, harmonic_spectrum_keeps_partials_within_the_threshold_of_a_harmonic_number)
+{
+    /* f0 = 100 with a threshold of 0.25: partials at 200 (ratio 2), 305
+     * (3.05) and 425 (4.25, exactly at the threshold) are harmonic; 340
+     * (3.4) is not, and a zero-frequency slot is empty. Kept partials copy
+     * both amplitude and frequency; the rest are zeroed in both halves. */
+    const int N = 10;
+    double data[10] = {1.0, 2.0, 3.0, 4.0, 5.0, 200.0, 305.0, 340.0, 425.0, 0.0};
+    double result[10];
+    double argv[2] = {100.0, 0.25};
+    int n;
+
+    for (n = 0; n < N; n++)
+        result[n] = 999.0;
+
+    ASSERT_EQ(xtract_harmonic_spectrum(data, N, argv, result), XTRACT_SUCCESS);
+
+    ASSERT_EQ(result[0], 1.0);
+    ASSERT_EQ(result[5], 200.0);
+    ASSERT_EQ(result[1], 2.0);
+    ASSERT_EQ(result[6], 305.0);
+    ASSERT_EQ(result[2], 0.0);
+    ASSERT_EQ(result[7], 0.0);
+    ASSERT_EQ(result[3], 4.0);
+    ASSERT_EQ(result[8], 425.0);
+    ASSERT_EQ(result[4], 0.0);
+    ASSERT_EQ(result[9], 0.0);
+}
 
 UTEST(vector, harmonic_spectrum_zero_fundamental_yields_no_result_and_zeroed_output)
 {

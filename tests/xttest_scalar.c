@@ -1671,6 +1671,75 @@ UTEST(scalar, smoothness_constant_spectrum)
     CHECK_NEAR(result, 0.0, 1e-9);
 }
 
+UTEST(scalar, smoothness_of_a_log_linear_spectrum_is_zero)
+{
+    /* Logs 0, 1, 2, 3, 4: every interior bin equals the mean of itself and
+     * its neighbours, so every term of the sum is zero. */
+    double result = 1.0;
+    double data[5];
+    int n;
+
+    for (n = 0; n < 5; n++)
+        data[n] = exp((double)n);
+
+    ASSERT_EQ(xtract_smoothness(data, 5, NULL, &result), XTRACT_SUCCESS);
+    CHECK_NEAR(result, 0.0, 1e-9);
+}
+
+UTEST(scalar, smoothness_sums_the_deviation_from_the_three_bin_mean_in_decibel_units)
+{
+    /* Logs 0, 2, 0, 3, 0. In the 20 log units the measure uses, the three
+     * interior bins deviate from the mean of their triples by 40 - 40/3,
+     * 0 - 100/3 and 60 - 60/3, which sum to 100. The asymmetry matters:
+     * with a symmetric spectrum a swapped neighbour goes unnoticed. */
+    double result = 0.0;
+    double data[5];
+
+    data[0] = 1.0;
+    data[1] = exp(2.0);
+    data[2] = 1.0;
+    data[3] = exp(3.0);
+    data[4] = 1.0;
+
+    ASSERT_EQ(xtract_smoothness(data, 5, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 100.0, 1e-9);
+}
+
+UTEST(scalar, smoothness_treats_empty_bins_at_either_end_as_minus_96)
+{
+    /* Zeros at both ends give logs -96, 1, 2, -96, so the two interior bins
+     * contribute |20 - 20 (-96 + 1 + 2) / 3| = 640 and
+     * |40 - 20 (1 + 2 - 96) / 3| = 660. A finite result is required first,
+     * since a relative check would accept the infinity that log(0) gives. */
+    double result = 0.0;
+    double data[4] = {0.0, 0.0, 0.0, 0.0};
+
+    data[1] = exp(1.0);
+    data[2] = exp(2.0);
+
+    ASSERT_EQ(xtract_smoothness(data, 4, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_TRUE(isfinite(result));
+    CHECK_NEAR(result, 1300.0, 1e-9);
+}
+
+UTEST(scalar, smoothness_tests_each_neighbour_for_emptiness_on_its_own)
+{
+    /* Logs 0, 1, -96, 2, 3: the empty bin sits two away from an occupied one
+     * on each side, so testing the wrong neighbour for emptiness would swap
+     * a log for the floor. The interior bins contribute 653.33, 1300 and
+     * 646.67, which sum to 2600. */
+    double result = 0.0;
+    double data[5] = {1.0, 0.0, 0.0, 0.0, 0.0};
+
+    data[1] = exp(1.0);
+    data[3] = exp(2.0);
+    data[4] = exp(3.0);
+
+    ASSERT_EQ(xtract_smoothness(data, 5, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_TRUE(isfinite(result));
+    CHECK_NEAR(result, 2600.0, 1e-9);
+}
+
 UTEST(scalar, spectral_slope_known_value)
 {
     /* 4 bins: amps=[0,1,2,3] at freqs=[0,100,200,300]
