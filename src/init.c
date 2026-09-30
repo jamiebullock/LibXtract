@@ -228,11 +228,52 @@ int xtract_init_bark(int N, double sr, int *band_limits)
     return XTRACT_SUCCESS;
 }
 
+/* Fill one filter's table by sampling its frequency response at every bin
+ * below Nyquist of an N-point transform, bin k at k * nyquist / (N / 2), and
+ * zeroing the bins from Nyquist up. shape is passed through to response. */
+static void sample_filter(double *table, const int N, const double nyquist,
+                          double (*response)(double hz, const double *shape), const double *shape)
+{
+    const int M = N >> 1;
+    int k;
+
+    for (k = 0; k < M; k++)
+        table[k] = response((double)k / M * nyquist, shape);
+    for (k = M; k < N; k++)
+        table[k] = 0.0;
+}
+
+/* shape: lower edge, peak and upper edge in Hz, then the peak height. */
+static double triangle_response(const double hz, const double *shape)
+{
+    const double lower = shape[0];
+    const double centre = shape[1];
+    const double upper = shape[2];
+    const double height = shape[3];
+
+    if (hz <= lower || hz >= upper)
+        return 0.0;
+    if (hz <= centre)
+        return height * ((hz - lower) / (centre - lower));
+    return height * ((upper - hz) / (upper - centre));
+}
+
+/* shape: centre frequency and bandwidth in Hz. The fourth-order gammatone
+ * magnitude response approximation. */
+static double gammatone_response(const double hz, const double *shape)
+{
+    const double ratio = (hz - shape[0]) / shape[1];
+    const double gain = 1.0 / (1.0 + ratio * ratio);
+
+    return gain * gain;
+}
+
 int xtract_init_mfcc(int N, double nyquist, int style, double freq_min, double freq_max, int freq_bands, double **fft_tables)
 {
-    int n, k, M;
+    int n;
     double norm, mel_freq_max, mel_freq_min, norm_fact, height,
         freq_bw_mel, *mel_peak, *height_norm, *lin_peak;
+    double shape[4];
 
     mel_peak = height_norm = lin_peak = NULL;
     norm = 1;
@@ -274,8 +315,6 @@ int xtract_init_mfcc(int N, double nyquist, int style, double freq_min, double f
         return XTRACT_MALLOC_FAILED;
     }
 
-    M = N >> 1;
-
     mel_peak[0] = mel_freq_min;
     lin_peak[0] = freq_min;
 
@@ -311,29 +350,14 @@ int xtract_init_mfcc(int N, double nyquist, int style, double freq_min, double f
 
     /* Each filter is the triangle through its lower peak, its own peak and
      * its upper peak on the linear frequency scale (Rabiner and Juang 1993,
-     * section 4.5.6), sampled at the frequency of every bin below Nyquist.
-     * Bins from Nyquist upward are zero. */
+     * section 4.5.6), sampled at the bin frequencies. */
     for (n = 0; n < freq_bands; n++)
     {
-        const double lower = n == 0 ? 0.0 : lin_peak[n - 1];
-        const double centre = lin_peak[n];
-        const double upper = lin_peak[n + 1];
-
-        for (k = 0; k < M; k++)
-        {
-            const double freq = (double)k / M * nyquist;
-            double weight;
-
-            if (freq <= lower || freq >= upper)
-                weight = 0.0;
-            else if (freq <= centre)
-                weight = (freq - lower) / (centre - lower);
-            else
-                weight = (upper - freq) / (upper - centre);
-            fft_tables[n][k] = height_norm[n] * weight;
-        }
-        for (k = M; k < N; k++)
-            fft_tables[n][k] = 0.0;
+        shape[0] = n == 0 ? 0.0 : lin_peak[n - 1];
+        shape[1] = lin_peak[n];
+        shape[2] = lin_peak[n + 1];
+        shape[3] = height_norm[n];
+        sample_filter(fft_tables[n], N, nyquist, triangle_response, shape);
     }
 
     /* Initialise the fft_plan for the DCT */
@@ -351,14 +375,13 @@ int xtract_init_mfcc(int N, double nyquist, int style, double freq_min, double f
 
 int xtract_init_gfcc(int N, double nyquist, double freq_min, double freq_max, int freq_bands, double **fft_tables)
 {
-    int n, k, M;
+    int n;
     double *centre_freqs, *bandwidths;
-    double erb_min, erb_max, erb_step, freq, gain, f_ratio;
+    double erb_min, erb_max, erb_step;
+    double shape[2];
 
     if (freq_bands <= 1)
         return XTRACT_ARGUMENT_ERROR;
-
-    M = N >> 1;
 
     centre_freqs = (double *)malloc(freq_bands * sizeof(double));
     if (centre_freqs == NULL)
@@ -384,22 +407,11 @@ int xtract_init_gfcc(int N, double nyquist, double freq_min, double freq_max, in
         bandwidths[n] = 24.7 * (4.37 * centre_freqs[n] / 1000.0 + 1.0);
     }
 
-    /* Populate filter coefficient tables with gammatone magnitude responses.
-     * Only bins 0..M-1 represent real frequencies (0 to nyquist).
-     * Bins M..N-1 are zeroed to match the mel filter bank convention. */
     for (n = 0; n < freq_bands; n++)
     {
-        for (k = 0; k < M; k++)
-        {
-            freq = (double)k / (double)M * nyquist;
-            f_ratio = (freq - centre_freqs[n]) / bandwidths[n];
-            /* Gammatone magnitude response approximation (order 4) */
-            gain = 1.0 / (1.0 + f_ratio * f_ratio);
-            gain = gain * gain; /* 4th order */
-            fft_tables[n][k] = gain;
-        }
-        for (k = M; k < N; k++)
-            fft_tables[n][k] = 0.0;
+        shape[0] = centre_freqs[n];
+        shape[1] = bandwidths[n];
+        sample_filter(fft_tables[n], N, nyquist, gammatone_response, shape);
     }
 
     free(centre_freqs);
