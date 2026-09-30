@@ -98,6 +98,7 @@ int main(void)
     double centroid = 0.0;
     double lowest = 0.0;
     double spectrum[BLOCKSIZE] = {0};
+    double power_spectrum[BLOCKSIZE] = {0};
     double windowed[BLOCKSIZE] = {0};
     double peaks[BLOCKSIZE] = {0};
     double harmonics[BLOCKSIZE] = {0};
@@ -145,7 +146,7 @@ int main(void)
         mel_filters.filters[k] = (double *)malloc(BLOCKSIZE * sizeof(double));
     }
     
-    xtract_init_mfcc(BLOCKSIZE >> 1, SAMPLERATE >> 1, XTRACT_EQUAL_GAIN, MFCC_FREQ_MIN, MFCC_FREQ_MAX, mel_filters.n_filters, mel_filters.filters);
+    xtract_init_mfcc(BLOCKSIZE, SAMPLERATE >> 1, XTRACT_EQUAL_GAIN, MFCC_FREQ_MIN, MFCC_FREQ_MAX, mel_filters.n_filters, mel_filters.filters);
     mel_filters.dct_table = xtract_init_dct(MFCC_FREQ_BANDS);
     
     /* create the window functions */
@@ -189,6 +190,12 @@ int main(void)
 
         xtract_init_fft(BLOCKSIZE, XTRACT_SPECTRUM);
         xtract[XTRACT_SPECTRUM](windowed, BLOCKSIZE, &argd[0], spectrum);
+
+        /* The mel filterbank is defined on the power spectrum with DC
+         * included, so that bin k of the spectrum meets coefficient k */
+        argd[1] = XTRACT_POWER_SPECTRUM;
+        argd[2] = 1.0;
+        xtract[XTRACT_SPECTRUM](windowed, BLOCKSIZE, &argd[0], power_spectrum);
         xtract_free_fft();
 
         xtract[XTRACT_SPECTRAL_CENTROID](spectrum, BLOCKSIZE, NULL, &centroid);
@@ -200,8 +207,8 @@ int main(void)
         argd[1] = .3; /* harmonic threshold */
         xtract[XTRACT_HARMONIC_SPECTRUM](peaks, BLOCKSIZE, argd, harmonics);
 
-        /* compute the MFCCs */
-        xtract_mfcc(spectrum, BLOCKSIZE >> 1, &mel_filters, mfccs);
+        /* compute the MFCCs from the power spectrum taken above */
+        xtract_mfcc(power_spectrum, BLOCKSIZE >> 1, &mel_filters, mfccs);
 
         double gated[BLOCKSIZE] = {0};
         double block_max = 0.0;
