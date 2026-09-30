@@ -230,12 +230,11 @@ int xtract_init_bark(int N, double sr, int *band_limits)
 
 int xtract_init_mfcc(int N, double nyquist, int style, double freq_min, double freq_max, int freq_bands, double **fft_tables)
 {
-    int n, i, k, *fft_peak, M, next_peak;
-    double norm, mel_freq_max, mel_freq_min, norm_fact, height, inc, val,
+    int n, k, M;
+    double norm, mel_freq_max, mel_freq_min, norm_fact, height,
         freq_bw_mel, *mel_peak, *height_norm, *lin_peak;
 
     mel_peak = height_norm = lin_peak = NULL;
-    fft_peak = NULL;
     norm = 1;
 
     if (freq_bands <= 1)
@@ -265,16 +264,6 @@ int xtract_init_mfcc(int N, double nyquist, int style, double freq_min, double f
         return XTRACT_MALLOC_FAILED;
     }
 
-    fft_peak = (int *)malloc((freq_bands + 2) * sizeof(int));
-
-    if (fft_peak == NULL)
-    {
-        perror("error");
-        free(mel_peak);
-        free(lin_peak);
-        return XTRACT_MALLOC_FAILED;
-    }
-
     height_norm = (double *)malloc(freq_bands * sizeof(double));
 
     if (height_norm == NULL)
@@ -282,22 +271,19 @@ int xtract_init_mfcc(int N, double nyquist, int style, double freq_min, double f
         perror("error");
         free(mel_peak);
         free(lin_peak);
-        free(fft_peak);
         return XTRACT_MALLOC_FAILED;
     }
 
     M = N >> 1;
 
     mel_peak[0] = mel_freq_min;
-    lin_peak[0] = freq_min; /* === 700 * (exp(mel_peak[0] / 1127) - 1); */
-    fft_peak[0] = lin_peak[0] / nyquist * M;
+    lin_peak[0] = freq_min;
 
     for (n = 1; n < (freq_bands + 2); ++n)
     {
-        /* roll out peak locations - mel, linear and linear on fft window scale */
+        /* roll out peak locations on the mel and linear scales */
         mel_peak[n] = mel_peak[n - 1] + freq_bw_mel;
         lin_peak[n] = 700 * (exp(mel_peak[n] / 1127) - 1);
-        fft_peak[n] = lin_peak[n] / nyquist * M;
     }
 
     for (n = 0; n < freq_bands; n++)
@@ -310,50 +296,43 @@ int xtract_init_mfcc(int N, double nyquist, int style, double freq_min, double f
         }
         else
         {
-            assert(n + 2 < freq_bands + 2);
-            height = 2 / (lin_peak[n + 2] - lin_peak[n]);
-            norm_fact = norm / (2 / (lin_peak[2] - lin_peak[0]));
+            /* Equal area: a triangle's height is inverse to its own base,
+             * peak n - 1 to peak n + 1, with the first filter's base
+             * starting at 0 Hz where its rise begins. Scaled so that the
+             * first filter keeps a gain of 1. */
+            const double lower = n == 0 ? 0.0 : lin_peak[n - 1];
+
+            assert(n + 1 < freq_bands + 2);
+            height = 2 / (lin_peak[n + 1] - lower);
+            norm_fact = norm / (2 / lin_peak[1]);
         }
         height_norm[n] = height * norm_fact;
     }
 
-    i = 0;
-
+    /* Each filter is the triangle through its lower peak, its own peak and
+     * its upper peak on the linear frequency scale (Rabiner and Juang 1993,
+     * section 4.5.6), sampled at the frequency of every bin below Nyquist.
+     * Bins from Nyquist upward are zero. */
     for (n = 0; n < freq_bands; n++)
     {
-        /* calculate the rise increment */
-        if (n == 0)
-            inc = height_norm[n] / fft_peak[n];
-        else
-            inc = height_norm[n] / (fft_peak[n] - fft_peak[n - 1]);
-        val = 0;
+        const double lower = n == 0 ? 0.0 : lin_peak[n - 1];
+        const double centre = lin_peak[n];
+        const double upper = lin_peak[n + 1];
 
-        /* zero the start of the array */
-        for (k = 0; k < i; k++)
-            fft_tables[n][k] = 0.0;
-
-        /* fill in the rise */
-        for (; i <= fft_peak[n]; i++)
+        for (k = 0; k < M; k++)
         {
-            fft_tables[n][i] = val;
-            val += inc;
+            const double freq = (double)k / M * nyquist;
+            double weight;
+
+            if (freq <= lower || freq >= upper)
+                weight = 0.0;
+            else if (freq <= centre)
+                weight = (freq - lower) / (centre - lower);
+            else
+                weight = (upper - freq) / (upper - centre);
+            fft_tables[n][k] = height_norm[n] * weight;
         }
-
-        /* calculate the fall increment */
-        inc = height_norm[n] / (fft_peak[n + 1] - fft_peak[n]);
-
-        val = 0;
-        next_peak = fft_peak[n + 1];
-
-        /* reverse fill the 'fall' */
-        for (i = next_peak; i > fft_peak[n]; i--)
-        {
-            fft_tables[n][i] = val;
-            val += inc;
-        }
-
-        /* zero the rest of the array */
-        for (k = next_peak + 1; k < N; k++)
+        for (k = M; k < N; k++)
             fft_tables[n][k] = 0.0;
     }
 
@@ -366,7 +345,6 @@ int xtract_init_mfcc(int N, double nyquist, int style, double freq_min, double f
     free(mel_peak);
     free(lin_peak);
     free(height_norm);
-    free(fft_peak);
 
     return XTRACT_SUCCESS;
 }

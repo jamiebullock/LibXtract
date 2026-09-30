@@ -47,8 +47,8 @@ extern "C"
 
     /** \brief Extract Mel Frequency Cepstral Coefficients based on a method described by Rabiner
      *
-     * \param *data: a pointer to the first element in an array of spectral magnitudes, e.g. the first half of the array pointed to by *resul from xtract_spectrum()
-     * \param N: the number of array elements to be considered
+     * \param *data: a pointer to the first element in an array of spectral coefficients, the first half of the array pointed to by *result from xtract_spectrum() called with DC included (argv[2] == 1), so that element k is bin k as the filterbank expects. Rabiner and Juang define the mel cepstrum on the power spectrum (XTRACT_POWER_SPECTRUM); a magnitude spectrum may be passed instead
+     * \param N: the number of coefficients, half the transform size the filterbank was initialised with
      * \param *argv: a pointer to a data structure of type xtract_mel_filter, containing n_filters coefficient tables to make up a mel-spaced filterbank
      * \param *result: a pointer to an array containing the resultant MFCC
      *
@@ -61,8 +61,8 @@ extern "C"
      * This computes the intermediate step of MFCC extraction: the mel filter bank
      * is applied to the magnitude spectrum and the result is log-scaled.
      *
-     * \param *data: a pointer to the first element in an array of spectral magnitudes, e.g. the first half of the array pointed to by *result from xtract_spectrum()
-     * \param N: the number of array elements to be considered
+     * \param *data: a pointer to the first element in an array of spectral coefficients, the first half of the array pointed to by *result from xtract_spectrum() called with DC included (argv[2] == 1), so that element k is bin k as the filterbank expects. Rabiner and Juang define the mel cepstrum on the power spectrum (XTRACT_POWER_SPECTRUM); a magnitude spectrum may be passed instead
+     * \param N: the number of coefficients, half the transform size the filterbank was initialised with
      * \param *argv: a pointer to a data structure of type xtract_mel_filter, containing n_filters coefficient tables to make up a mel-spaced filterbank
      * \param *result: a pointer to an array containing the resultant log mel energies (one per filter)
      *
@@ -75,8 +75,8 @@ extern "C"
      * GFCCs use a gammatone filter bank instead of a mel filter bank,
      * offering superior noise robustness compared to MFCCs.
      *
-     * \param *data: a pointer to the first element in an array of spectral magnitudes, e.g. the first half of the array pointed to by *result from xtract_spectrum()
-     * \param N: the number of array elements to be considered
+     * \param *data: a pointer to the first element in an array of spectral coefficients, the first half of the array pointed to by *result from xtract_spectrum() called with DC included (argv[2] == 1), so that element k is bin k as the filterbank expects. the gammatone filterbank is applied to the power spectrum (XTRACT_POWER_SPECTRUM) in the same way; a magnitude spectrum may be passed instead
+     * \param N: the number of coefficients, half the transform size the filterbank was initialised with
      * \param *argv: a pointer to a data structure of type xtract_mel_filter, containing n_filters coefficient tables to make up a gammatone filterbank
      * \param *result: a pointer to an array containing the resultant GFCC
      *
@@ -89,8 +89,8 @@ extern "C"
      * This computes the intermediate step of GFCC extraction: the gammatone filter bank
      * is applied to the magnitude spectrum and the result is log-scaled.
      *
-     * \param *data: a pointer to the first element in an array of spectral magnitudes, e.g. the first half of the array pointed to by *result from xtract_spectrum()
-     * \param N: the number of array elements to be considered
+     * \param *data: a pointer to the first element in an array of spectral coefficients, the first half of the array pointed to by *result from xtract_spectrum() called with DC included (argv[2] == 1), so that element k is bin k as the filterbank expects. the gammatone filterbank is applied to the power spectrum (XTRACT_POWER_SPECTRUM) in the same way; a magnitude spectrum may be passed instead
+     * \param N: the number of coefficients, half the transform size the filterbank was initialised with
      * \param *argv: a pointer to a data structure of type xtract_mel_filter, containing n_filters coefficient tables to make up a gammatone filterbank
      * \param *result: a pointer to an array containing the resultant log gammatone energies (one per filter)
      *
