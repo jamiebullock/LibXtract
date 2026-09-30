@@ -1081,6 +1081,89 @@ UTEST(scalar, sharpness_bands_beyond_bark_bands_are_ignored)
 
 /* ===== Bug-specific tests ===== */
 
+/* A four-bin spectrum and its moments computed the long way, so that the
+ * skewness and kurtosis tests below do not share the library's arithmetic. */
+static void four_bin_moments(double *data, double *centroid, double *spread, double *skew, double *kurt)
+{
+    const double amps[4] = {1.0, 3.0, 2.0, 0.5};
+    const double freqs[4] = {100.0, 200.0, 300.0, 400.0};
+    double sum = 0.0, m1 = 0.0, m2 = 0.0, m3 = 0.0, m4 = 0.0;
+    int n;
+
+    for (n = 0; n < 4; n++)
+    {
+        data[n] = amps[n];
+        data[4 + n] = freqs[n];
+        sum += amps[n];
+        m1 += freqs[n] * amps[n];
+    }
+    *centroid = m1 / sum;
+    for (n = 0; n < 4; n++)
+    {
+        const double d = freqs[n] - *centroid;
+
+        m2 += d * d * amps[n];
+        m3 += d * d * d * amps[n];
+        m4 += d * d * d * d * amps[n];
+    }
+    *spread = sqrt(m2 / sum);
+    *skew = m3 / (sum * *spread * *spread * *spread);
+    *kurt = m4 / (sum * *spread * *spread * *spread * *spread) - 3.0;
+}
+
+UTEST(scalar, spectral_skewness_and_kurtosis_match_the_standardised_moments)
+{
+    double data[8];
+    double argv[2];
+    double skew, kurt, result;
+
+    four_bin_moments(data, &argv[0], &argv[1], &skew, &kurt);
+
+    ASSERT_EQ(xtract_spectral_skewness(data, 8, argv, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, skew, 1e-12);
+    ASSERT_EQ(xtract_spectral_kurtosis(data, 8, argv, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, kurt, 1e-12);
+}
+
+UTEST(scalar, spectral_skewness_is_zero_for_a_symmetric_spectrum_and_signed_by_the_tail)
+{
+    double symmetric[8] = {1.0, 3.0, 3.0, 1.0, 100.0, 200.0, 300.0, 400.0};
+    double right_tail[8] = {3.0, 1.0, 0.5, 0.25, 100.0, 200.0, 300.0, 400.0};
+    double argv[2];
+    double result;
+
+    argv[0] = 250.0;
+    argv[1] = sqrt((1.0 * 150.0 * 150.0 * 2 + 3.0 * 50.0 * 50.0 * 2) / 8.0);
+    ASSERT_EQ(xtract_spectral_skewness(symmetric, 8, argv, &result), XTRACT_SUCCESS);
+    CHECK_NEAR(result, 0.0, 1e-12);
+
+    argv[0] = (3.0 * 100 + 1.0 * 200 + 0.5 * 300 + 0.25 * 400) / 4.75;
+    argv[1] = 80.0;
+    ASSERT_EQ(xtract_spectral_skewness(right_tail, 8, argv, &result), XTRACT_SUCCESS);
+    ASSERT_TRUE(result > 0.0);
+}
+
+UTEST(scalar, spectral_moments_need_a_nonzero_spread_and_nonzero_amplitudes)
+{
+    double data[8] = {1.0, 3.0, 2.0, 0.5, 100.0, 200.0, 300.0, 400.0};
+    double silent[8] = {0.0, 0.0, 0.0, 0.0, 100.0, 200.0, 300.0, 400.0};
+    double zero_spread[2] = {250.0, 0.0};
+    double argv[2] = {250.0, 80.0};
+    double result = 1.0;
+
+    ASSERT_EQ(xtract_spectral_skewness(data, 8, zero_spread, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
+    result = 1.0;
+    ASSERT_EQ(xtract_spectral_kurtosis(data, 8, zero_spread, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
+    result = 1.0;
+    ASSERT_EQ(xtract_spectral_skewness(silent, 8, argv, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
+    result = 1.0;
+    ASSERT_EQ(xtract_spectral_kurtosis(silent, 8, argv, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
+}
+
 UTEST(scalar, spectral_skewness_result_should_not_scale_with_total_energy)
 {
     /* Two spectra with identical shape but different total energy.

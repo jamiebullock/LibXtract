@@ -98,6 +98,49 @@ UTEST(delta, decay_time_not_implemented)
     ASSERT_EQ(xtract_decay_time(data, 4, NULL, &result), XTRACT_FEATURE_NOT_IMPLEMENTED);
 }
 
+UTEST(delta, lnorm_each_integer_order_and_a_fractional_one)
+{
+    /* {3, -4, 2}: L1 = 9, L3 = cbrt(99), L4 = 353^(1/4), L2.5 from pow. */
+    double data[] = {3.0, -4.0, 2.0};
+    double argv[3] = {1.0, 0.0, 0.0};
+    double result = 0.0;
+
+    ASSERT_EQ(xtract_lnorm(data, 3, argv, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 9.0, 1e-12);
+
+    argv[0] = 3.0;
+    ASSERT_EQ(xtract_lnorm(data, 3, argv, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, cbrt(99.0), 1e-12);
+
+    argv[0] = 4.0;
+    ASSERT_EQ(xtract_lnorm(data, 3, argv, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, sqrt(sqrt(353.0)), 1e-12);
+
+    argv[0] = 2.5;
+    ASSERT_EQ(xtract_lnorm(data, 3, argv, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, pow(pow(3.0, 2.5) + pow(4.0, 2.5) + pow(2.0, 2.5), 0.4), 1e-12);
+}
+
+UTEST(delta, lnorm_order_zero_means_two)
+{
+    double data[] = {3.0, -4.0, 2.0};
+    double argv[3] = {0.0, 0.0, 0.0};
+    double result = 0.0;
+
+    ASSERT_EQ(xtract_lnorm(data, 3, argv, &result), XTRACT_SUCCESS);
+    ASSERT_TRUE(isfinite(result));
+    CHECK_NEAR(result, sqrt(29.0), 1e-12);
+}
+
+UTEST(delta, lnorm_positive_slope_filter_with_nothing_positive_is_no_result)
+{
+    double data[] = {0.0, -1.0, -2.0};
+    double argv[3] = {2.0, XTRACT_POSITIVE_SLOPE, 0.0};
+    double result = 1.0;
+
+    ASSERT_EQ(xtract_lnorm(data, 3, argv, &result), XTRACT_NO_RESULT);
+}
+
 UTEST(delta, lnorm_out_of_range_argv)
 {
     /* type/normalise are decoded from doubles; out-of-range or NaN values must
