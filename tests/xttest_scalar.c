@@ -1997,6 +1997,62 @@ UTEST(mcleod_f0, zero_crossings_that_land_exactly_on_zero_bound_the_regions)
     CHECK_REL(result, sr / 4.0, 1e-9);
 }
 
+UTEST(mcleod_f0, key_maximum_height_is_the_interpolated_peak_not_the_sample)
+{
+    /* A period of 4.5 samples puts the first NSDF peak between lags 4 and 5,
+     * both 0.766, while lag 9 is exactly 1. The lag-4 region only clears the
+     * 0.8 threshold through its parabolic height (0.92); taken at face value
+     * it would lose to lag 9 and the pitch would be an octave low. */
+    const int N = 512;
+    const double sr = 44100.0;
+    const double period = 4.5;
+    double data[512];
+    double result = 0.0;
+    int n;
+
+    for (n = 0; n < N; n++)
+        data[n] = sin(2.0 * M_PI * n / period);
+
+    ASSERT_EQ(xtract_mcleod_f0(data, N, &sr, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, sr / period, 1e-3);
+}
+
+UTEST(mcleod_f0, a_region_cut_off_by_the_buffer_end_still_yields_its_maximum)
+{
+    /* Period 60 in 64 samples: the positive region around lag 60 is still
+     * open when the lags run out, so its maximum is taken without a closing
+     * zero crossing. */
+    const int N = 64;
+    const double sr = 44100.0;
+    double data[64];
+    double result = 0.0;
+    int n;
+
+    for (n = 0; n < N; n++)
+        data[n] = cos(2.0 * M_PI * n / 60.0);
+
+    ASSERT_EQ(xtract_mcleod_f0(data, N, &sr, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, sr / 60.0, 2e-2);
+}
+
+UTEST(mcleod_f0, a_peak_on_the_last_lag_is_reported_without_interpolation)
+{
+    /* cos with period N - 1 returns to its starting value on the final
+     * sample, so the NSDF at the last lag is exactly 1 with no lag beyond
+     * it to interpolate against. */
+    const int N = 64;
+    const double sr = 44100.0;
+    double data[64];
+    double result = 0.0;
+    int n;
+
+    for (n = 0; n < N; n++)
+        data[n] = cos(2.0 * M_PI * n / (N - 1));
+
+    ASSERT_EQ(xtract_mcleod_f0(data, N, &sr, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, sr / (N - 1), 1e-12);
+}
+
 /* ===== Flatness numerical stability ===== */
 
 UTEST(scalar, flatness_stability_constant)
