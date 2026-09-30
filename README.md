@@ -56,6 +56,10 @@ make doc
 
 The generated HTML documentation can then be viewed by opening `doc/html/index.html`.
 
+The documentation for the current release is published at
+<https://www.jamiebullock.com/LibXtract/>. It is rebuilt from `main` by the
+`Docs` workflow on every push.
+
 ## Code standard
 
 LibXtract is written in **C99**. Declarations are placed at the top of the
