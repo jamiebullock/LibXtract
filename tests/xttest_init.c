@@ -61,33 +61,64 @@ static double hz_of_mel(double mel)
 /* The FB_BANDS + 2 mel-spaced peak frequencies the filterbank is built on:
  * peak 0 is FB_MIN, the rest step up the mel scale in equal increments of
  * (mel(FB_MAX) - mel(FB_MIN)) / FB_BANDS. Filter n peaks at peak n and its
- * triangle spans peaks n - 1 and n + 1 (bin 0 for the first filter). The
- * bin of a peak is its frequency scaled to FB_M bins and truncated. */
-static void mel_peaks(double *hz, int *bin)
+ * triangle spans peaks n - 1 and n + 1, with 0 Hz below the first. */
+static void mel_peaks(double *hz)
 {
     const double step = (mel_of(FB_MAX) - mel_of(FB_MIN)) / FB_BANDS;
     int n;
 
     for (n = 0; n < FB_BANDS + 2; n++)
-    {
         hz[n] = n == 0 ? FB_MIN : hz_of_mel(mel_of(FB_MIN) + n * step);
-        bin[n] = (int)(hz[n] / FB_NYQUIST * FB_M);
-    }
 }
 
-UTEST(init, mfcc_peaks_sit_on_the_truncated_mel_scale_bins)
+/* The unit triangle through lower, centre and upper, evaluated at hz. */
+static double triangle(double lower, double centre, double upper, double hz)
 {
+    if (hz <= lower || hz >= upper)
+        return 0.0;
+    if (hz <= centre)
+        return (hz - lower) / (centre - lower);
+    return (upper - hz) / (upper - centre);
+}
+
+UTEST(init, mfcc_coefficients_sample_each_triangle_at_the_bin_frequencies)
+{
+    /* Rabiner and Juang's filterbank is a set of unit-height triangles on
+     * the linear frequency scale; the table for filter n holds that
+     * triangle evaluated at every bin frequency k * nyquist / (N / 2). */
     double **tables = fb_alloc();
     double hz[FB_BANDS + 2];
-    int bin[FB_BANDS + 2];
     int n, k;
 
-    mel_peaks(hz, bin);
+    mel_peaks(hz);
     ASSERT_EQ(xtract_init_mfcc(FB_N, FB_NYQUIST, XTRACT_EQUAL_GAIN, FB_MIN, FB_MAX, FB_BANDS, tables),
               XTRACT_SUCCESS);
 
     for (n = 0; n < FB_BANDS; n++)
     {
+        const double lower = n == 0 ? 0.0 : hz[n - 1];
+
+        for (k = 0; k < FB_M; k++)
+            CHECK_NEAR(tables[n][k], triangle(lower, hz[n], hz[n + 1], (double)k / FB_M * FB_NYQUIST), 1e-12);
+        for (k = FB_M; k < FB_N; k++)
+            ASSERT_EQ(tables[n][k], 0.0);
+    }
+    fb_free(tables);
+}
+
+UTEST(init, mfcc_peaks_fall_between_the_bins_that_bracket_each_centre)
+{
+    double **tables = fb_alloc();
+    double hz[FB_BANDS + 2];
+    int n, k;
+
+    mel_peaks(hz);
+    ASSERT_EQ(xtract_init_mfcc(FB_N, FB_NYQUIST, XTRACT_EQUAL_GAIN, FB_MIN, FB_MAX, FB_BANDS, tables),
+              XTRACT_SUCCESS);
+
+    for (n = 0; n < FB_BANDS; n++)
+    {
+        const int below = (int)floor(hz[n] / FB_NYQUIST * FB_M);
         int argmax = 0;
 
         for (k = 1; k < FB_N; k++)
@@ -95,88 +126,37 @@ UTEST(init, mfcc_peaks_sit_on_the_truncated_mel_scale_bins)
             if (tables[n][k] > tables[n][argmax])
                 argmax = k;
         }
-        ASSERT_EQ(argmax, bin[n]);
-        CHECK_REL(tables[n][bin[n]], 1.0, 1e-12);
-    }
-    fb_free(tables);
-}
-
-UTEST(init, mfcc_triangles_rise_and_fall_linearly_between_neighbouring_peaks)
-{
-    double **tables = fb_alloc();
-    double hz[FB_BANDS + 2];
-    int bin[FB_BANDS + 2];
-    int n, j;
-
-    mel_peaks(hz, bin);
-    ASSERT_EQ(xtract_init_mfcc(FB_N, FB_NYQUIST, XTRACT_EQUAL_GAIN, FB_MIN, FB_MAX, FB_BANDS, tables),
-              XTRACT_SUCCESS);
-
-    for (n = 0; n < FB_BANDS; n++)
-    {
-        const int lower = n == 0 ? 0 : bin[n - 1];
-        const int upper = bin[n + 1];
-        const int rise = bin[n] - lower;
-        const int fall = upper - bin[n];
-
-        for (j = 1; j <= rise; j++)
-            CHECK_REL(tables[n][lower + j], (double)j / rise, 1e-9);
-        for (j = 1; j < fall; j++)
-            CHECK_REL(tables[n][upper - j], (double)j / fall, 1e-9);
-        ASSERT_EQ(tables[n][upper], 0.0);
+        ASSERT_TRUE(argmax == below || argmax == below + 1);
+        ASSERT_TRUE(tables[n][argmax] > 0.0 && tables[n][argmax] <= 1.0);
     }
     fb_free(tables);
 }
 
 UTEST(init, mfcc_equal_area_gives_every_filter_the_same_area)
 {
-    /* Under XTRACT_EQUAL_AREA filter n's height is the ratio of the first
-     * filter's base to its own, peak n - 1 to peak n + 1 in Hz with the
-     * first base starting at 0 Hz, so base times height is the same for
-     * every filter and the first keeps a gain of 1. */
+    /* Under XTRACT_EQUAL_AREA filter n is the unit triangle scaled by the
+     * ratio of the first filter's base to its own, peak n - 1 to peak
+     * n + 1 in Hz with the first base starting at 0 Hz, so base times
+     * height is the same for every filter and the first keeps a gain of 1. */
     double **tables = fb_alloc();
     double hz[FB_BANDS + 2];
-    int bin[FB_BANDS + 2];
-    int n;
-
-    mel_peaks(hz, bin);
-    ASSERT_EQ(xtract_init_mfcc(FB_N, FB_NYQUIST, XTRACT_EQUAL_AREA, FB_MIN, FB_MAX, FB_BANDS, tables),
-              XTRACT_SUCCESS);
-
-    CHECK_REL(tables[0][bin[0]], 1.0, 1e-12);
-    for (n = 1; n < FB_BANDS; n++)
-    {
-        const double base = hz[n + 1] - hz[n - 1];
-
-        CHECK_REL(tables[n][bin[n]], hz[1] / base, 1e-12);
-        CHECK_REL(tables[n][bin[n]] * base, hz[1], 1e-12);
-    }
-    fb_free(tables);
-}
-
-UTEST(init, mfcc_writes_zero_to_every_bin_outside_each_triangle)
-{
-    double **tables = fb_alloc();
-    double hz[FB_BANDS + 2];
-    int bin[FB_BANDS + 2];
     int n, k;
 
-    mel_peaks(hz, bin);
-    ASSERT_EQ(xtract_init_mfcc(FB_N, FB_NYQUIST, XTRACT_EQUAL_GAIN, FB_MIN, FB_MAX, FB_BANDS, tables),
+    mel_peaks(hz);
+    ASSERT_EQ(xtract_init_mfcc(FB_N, FB_NYQUIST, XTRACT_EQUAL_AREA, FB_MIN, FB_MAX, FB_BANDS, tables),
               XTRACT_SUCCESS);
 
     for (n = 0; n < FB_BANDS; n++)
     {
-        const int lower = n == 0 ? 0 : bin[n - 1];
+        const double lower = n == 0 ? 0.0 : hz[n - 1];
+        const double height = hz[1] / (hz[n + 1] - lower);
 
-        for (k = 0; k < FB_N; k++)
-        {
-            if (k <= lower || k >= bin[n + 1])
-                ASSERT_EQ(tables[n][k], 0.0);
-            else
-                ASSERT_TRUE(tables[n][k] > 0.0 && tables[n][k] <= 1.0 + 1e-9);
-        }
+        CHECK_REL(height * (hz[n + 1] - lower), hz[1], 1e-12);
+        for (k = 0; k < FB_M; k++)
+            CHECK_NEAR(tables[n][k], height * triangle(lower, hz[n], hz[n + 1], (double)k / FB_M * FB_NYQUIST),
+                       1e-12);
     }
+    CHECK_REL(hz[1] / (hz[1] - 0.0), 1.0, 1e-12);
     fb_free(tables);
 }
 

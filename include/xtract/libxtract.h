@@ -396,7 +396,15 @@ printf("Mean = %.2f\n", mean);
 
     /** \brief A function to initialise a mel filter bank
      *
-     * It is up to the caller to pass in a pointer to memory allocated for freq_bands arrays of length N. This function populates these arrays with magnitude coefficients representing the mel filterbank on a linear scale
+     * It is up to the caller to pass in a pointer to memory allocated for freq_bands arrays of length N. This function populates these arrays with the coefficients of freq_bands triangular filters whose peaks are equally spaced on the mel scale from freq_min, each filter spanning the peaks either side of its own and the first rising from 0 Hz (Rabiner and Juang 1993, section 4.5.6). Coefficient k of each array is the filter's gain at bin k of an N-point transform with DC included, at frequency k * nyquist / (N / 2); coefficients from N / 2 upward are zero.
+     *
+     * \param N: the size of the transform the filters will be applied to
+     * \param nyquist: half the sample rate
+     * \param style: XTRACT_EQUAL_GAIN or XTRACT_EQUAL_AREA, as given in the enumeration xtract_mfcc_types_
+     * \param freq_min: the peak frequency of the first filter
+     * \param freq_max: the frequency the peaks step towards, reached one step beyond the last filter
+     * \param freq_bands: the number of filters
+     * \param **fft_tables: an array of pointers to arrays of length N, to be populated with filter coefficients
      */
     int xtract_init_mfcc(int N, double nyquist, int style, double freq_min, double freq_max, int freq_bands, double **fft_tables);
 
@@ -404,7 +412,7 @@ printf("Mean = %.2f\n", mean);
      *
      * It is up to the caller to pass in a pointer to memory allocated for freq_bands arrays of length N. This function populates these arrays with magnitude coefficients representing the gammatone filterbank on the ERB scale.
      *
-     * \param N: the number of FFT bins
+     * \param N: the size of the transform the filters will be applied to; coefficient k of each array is the filter's gain at bin k, at frequency k * nyquist / (N / 2), and coefficients from N / 2 upward are zero
      * \param nyquist: the Nyquist frequency
      * \param freq_min: the minimum frequency for the filter bank
      * \param freq_max: the maximum frequency for the filter bank
