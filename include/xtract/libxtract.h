@@ -6,26 +6,26 @@
 
 /** \mainpage
  *
- * LibXtract is a simple, portable, lightweight library of audio feature extraction functions. The purpose of the library is to provide a relatively exhaustive set of feature extraction primatives that are designed to be 'cascaded' to create a extraction hierarchies.
+ * LibXtract is a simple, portable, lightweight library of audio feature extraction functions. The purpose of the library is to provide a relatively exhaustive set of feature extraction primitives that are designed to be 'cascaded' to create extraction hierarchies.
  * For example, 'variance', 'average deviation', 'skewness' and 'kurtosis', all require the 'mean' of the input vector to be precomputed. However, rather than compute the 'mean' 'inside' each function, it is expected that the 'mean' will be passed in as an argument. This means that if the user wishes to use all of these features, the mean is calculated only once, and then passed to any functions that require it.
  *
  * This philosophy of 'cascading' features is followed throughout the library, for example with features that operate on the magnitude spectrum of a signal vector (e.g. 'irregularity'), the magnitude spectrum is not calculated 'inside' the respective function, instead, a pointer to the first element in an array containing the magnitude spectrum is passed in as an argument.
  *
- * Hopefully this not only makes the library more efficient when computing large numbers of features, but also makes it more flexible because extraction functions can be combined arbitrarily (one can take the irregularility of the Mel Frequency Cepstral Coefficients for example).
+ * Hopefully this not only makes the library more efficient when computing large numbers of features, but also makes it more flexible because extraction functions can be combined arbitrarily (one can take the irregularity of the Mel Frequency Cepstral Coefficients for example).
  *
  * All feature extraction functions follow the same prototype:
  *
  * **int xtract_function_name(const double *data, const int N, const void *argv, double *result);**
  *
  * \param const double *data points to an array of doubles representing the input data
- * \param const int N represents the number of elementes from *data to be considered in the calculation
+ * \param const int N represents the number of elements from *data to be considered in the calculation
  * \param const void *argv represents an arbitrary list of arguments. Used to pass in values required by the feature calculation
- * \param double *result points to an array of doubles, or a single double represnting the result of the calculation
+ * \param double *result points to an array of doubles, or a single double representing the result of the calculation
  *
  *
  * It is up to the calling function to allocate enough memory for the *data, *argv, and *result, and to free it when required. Some feature extraction functions may also require an _init() function to be called in order to perform some initialisation. The struct xtract_function_descriptor_t is used to give an indication of recommended default values, and argc for the *argv array.
  *
- * LibXtract can be downloaded from http://www.sf.net/projects/libxtract
+ * LibXtract is developed at https://github.com/jamiebullock/LibXtract
  *
  */
 
