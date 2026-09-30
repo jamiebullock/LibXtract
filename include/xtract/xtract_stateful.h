@@ -41,6 +41,8 @@ extern "C"
      */
     int xtract_last_n(const xtract_last_n_state *state, const double *data, const int N, const void *argv, double *result);
 
+    /** @} */
+
 #ifdef __cplusplus
 }
 #endif

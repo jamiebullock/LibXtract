@@ -15,7 +15,7 @@ extern "C"
 #endif
 
     /**
-     * \defgroup delta `delta' extraction functions
+     * \defgroup delta delta extraction functions
      *
      * Functions that extract a scalar or vector value from 2 or more input vectors
      *

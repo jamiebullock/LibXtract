@@ -88,7 +88,6 @@ extern "C"
     /** \brief Extract the variance of an input spectrum
      *
      * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector, (e.g. the array pointed to by *result from xtract_spectrum(), xtract_peak_spectrum() or xtract_harmonic_spectrum()).
-     * \param N: the number of elements to be considered
      * \param N: the size of the array pointed to by *data
      * \param *argv: a pointer to a double representing the spectral mean of the input spectrum
      * \param *result: the variance of the spectrum pointed to by *data
@@ -103,17 +102,6 @@ extern "C"
      * \param *result: the deviation of the spectrum pointed to by *data
      */
     int xtract_spectral_standard_deviation(const double *data, const int N, const void *argv, double *result);
-
-    /** \brief Extract the average deviation of an input spectrum
-     *
-     * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector, (e.g. the array pointed to by *result from xtract_spectrum(), xtract_peak_spectrum() or xtract_harmonic_spectrum()).
-     * \param N: the size of the array pointed to by *data
-     * \param *argv: a pointer to a double representing the spectral mean of the input spectrum
-     * \param *result: the  average deviation of the spectrum pointed to by *data
-     */
-    /*
-    int xtract_spectral_average_deviation(const double *data, const int N, const void *argv, double *result);
-    */
 
     /** \brief Extract the skewness of an input spectrum
      *
