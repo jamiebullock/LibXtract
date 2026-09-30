@@ -128,11 +128,12 @@ UTEST(init, mfcc_triangles_rise_and_fall_linearly_between_neighbouring_peaks)
     fb_free(tables);
 }
 
-UTEST(init, mfcc_equal_area_scales_each_height_by_the_next_band_width)
+UTEST(init, mfcc_equal_area_gives_every_filter_the_same_area)
 {
-    /* Under XTRACT_EQUAL_AREA the first filter keeps height 1 and filter n
-     * is scaled by the width of the span from peak n to peak n + 2 relative
-     * to the span from peak 0 to peak 2. */
+    /* Under XTRACT_EQUAL_AREA filter n's height is the ratio of the first
+     * filter's base to its own, peak n - 1 to peak n + 1 in Hz with the
+     * first base starting at 0 Hz, so base times height is the same for
+     * every filter and the first keeps a gain of 1. */
     double **tables = fb_alloc();
     double hz[FB_BANDS + 2];
     int bin[FB_BANDS + 2];
@@ -142,9 +143,14 @@ UTEST(init, mfcc_equal_area_scales_each_height_by_the_next_band_width)
     ASSERT_EQ(xtract_init_mfcc(FB_N, FB_NYQUIST, XTRACT_EQUAL_AREA, FB_MIN, FB_MAX, FB_BANDS, tables),
               XTRACT_SUCCESS);
 
-    for (n = 0; n < FB_BANDS; n++)
-        CHECK_REL(tables[n][bin[n]], (hz[2] - hz[0]) / (hz[n + 2] - hz[n]), 1e-12);
-    ASSERT_TRUE(tables[1][bin[1]] < tables[0][bin[0]]);
+    CHECK_REL(tables[0][bin[0]], 1.0, 1e-12);
+    for (n = 1; n < FB_BANDS; n++)
+    {
+        const double base = hz[n + 1] - hz[n - 1];
+
+        CHECK_REL(tables[n][bin[n]], hz[1] / base, 1e-12);
+        CHECK_REL(tables[n][bin[n]] * base, hz[1], 1e-12);
+    }
     fb_free(tables);
 }
 

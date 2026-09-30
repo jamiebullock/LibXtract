@@ -310,9 +310,15 @@ int xtract_init_mfcc(int N, double nyquist, int style, double freq_min, double f
         }
         else
         {
-            assert(n + 2 < freq_bands + 2);
-            height = 2 / (lin_peak[n + 2] - lin_peak[n]);
-            norm_fact = norm / (2 / (lin_peak[2] - lin_peak[0]));
+            /* Equal area: a triangle's height is inverse to its own base,
+             * peak n - 1 to peak n + 1, with the first filter's base
+             * starting at 0 Hz where its rise begins. Scaled so that the
+             * first filter keeps a gain of 1. */
+            const double lower = n == 0 ? 0.0 : lin_peak[n - 1];
+
+            assert(n + 1 < freq_bands + 2);
+            height = 2 / (lin_peak[n + 1] - lower);
+            norm_fact = norm / (2 / lin_peak[1]);
         }
         height_norm[n] = height * norm_fact;
     }

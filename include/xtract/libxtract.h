@@ -149,6 +149,7 @@ extern "C"
     };
 
     /** \brief Enumeration of mfcc types */
+    /** \brief Mel filterbank gain styles for xtract_init_mfcc(): XTRACT_EQUAL_GAIN gives every filter a peak gain of 1; XTRACT_EQUAL_AREA scales each filter's height inversely to its bandwidth so that every filter has the same area, with the first filter's peak gain 1 */
     enum xtract_mfcc_types_
     {
         XTRACT_EQUAL_GAIN,
