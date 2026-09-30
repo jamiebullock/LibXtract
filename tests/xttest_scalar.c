@@ -1882,6 +1882,177 @@ UTEST(mcleod_f0, detects_pitch_at_344hz_with_noise)
     ASSERT_LE(abs((int)actual - (int)expected), 10);
 }
 
+UTEST(mcleod_f0, interpolates_a_period_that_falls_between_lags)
+{
+    /* A period of 16.5 samples has no lag of its own; the parabola through
+     * the lags either side places it. Without interpolation the answer
+     * would be sr / 16 or sr / 17, three percent off. */
+    const int N = 512;
+    const double sr = 44100.0;
+    const double period = 16.5;
+    double data[512];
+    double result = 0.0;
+    int n;
+
+    for (n = 0; n < N; n++)
+        data[n] = sin(2.0 * M_PI * n / period);
+
+    ASSERT_EQ(xtract_mcleod_f0(data, N, &sr, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, sr / period, 2e-3);
+}
+
+UTEST(mcleod_f0, zero_sample_rate_means_44100)
+{
+    const int N = 512;
+    const double zero = 0.0;
+    double data[512];
+    double result = 0.0;
+    int n;
+
+    for (n = 0; n < N; n++)
+        data[n] = sin(2.0 * M_PI * n / 16.0);
+
+    ASSERT_EQ(xtract_mcleod_f0(data, N, &zero, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 44100.0 / 16.0, 1e-3);
+}
+
+UTEST(mcleod_f0, rejects_a_null_argv)
+{
+    double data[64] = {0};
+    double result = 1.0;
+
+    ASSERT_EQ(xtract_mcleod_f0(data, 64, NULL, &result), XTRACT_BAD_ARGV);
+}
+
+/* A sine of period P whose amplitude alternates between 1 and a on
+ * successive periods has an overall period of 2P. Its NSDF is 1 at lag 2P
+ * and 2a / (1 + a^2) at lag P, so the ratio a sets whether the lag-P key
+ * maximum clears the 0.8 threshold: a = 0.7 gives 0.94 and the reported
+ * pitch is sr / P; a = 0.4 gives 0.69 and it is sr / 2P. */
+static void alternating_sine(double *data, const int N, const int period, const double a)
+{
+    int n;
+
+    for (n = 0; n < N; n++)
+        data[n] = ((n / period) % 2 ? a : 1.0) * sin(2.0 * M_PI * n / period);
+}
+
+UTEST(mcleod_f0, first_key_maximum_within_threshold_of_the_highest_wins)
+{
+    const int N = 512;
+    const double sr = 44100.0;
+    double data[512];
+    double result = 0.0;
+
+    alternating_sine(data, N, 16, 0.7);
+    ASSERT_EQ(xtract_mcleod_f0(data, N, &sr, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, sr / 16.0, 2e-3);
+}
+
+UTEST(mcleod_f0, key_maximum_below_threshold_yields_to_the_next)
+{
+    const int N = 512;
+    const double sr = 44100.0;
+    double data[512];
+    double result = 0.0;
+
+    alternating_sine(data, N, 16, 0.4);
+    ASSERT_EQ(xtract_mcleod_f0(data, N, &sr, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, sr / 32.0, 2e-3);
+}
+
+UTEST(mcleod_f0, threshold_is_relative_to_the_highest_key_maximum)
+{
+    /* An exponential decay with time constant T scales the NSDF at lag P to
+     * sech(P / T). With T = P that is 0.65: the lag-P key maximum is itself
+     * the highest and must still be accepted, since the threshold is a
+     * fraction of the highest key maximum, not of 1. */
+    const int N = 512;
+    const double sr = 44100.0;
+    double data[512];
+    double result = 0.0;
+    int n;
+
+    for (n = 0; n < N; n++)
+        data[n] = exp(-n / 16.0) * sin(2.0 * M_PI * n / 16.0);
+
+    ASSERT_EQ(xtract_mcleod_f0(data, N, &sr, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, sr / 16.0, 1e-2);
+}
+
+UTEST(mcleod_f0, zero_crossings_that_land_exactly_on_zero_bound_the_regions)
+{
+    /* 1, 0, -1, 0 repeating has an NSDF of exactly 0, -1, 0, 1 at lags 1 to
+     * 4, so every region boundary sits on an exact zero. */
+    const int N = 64;
+    const double sr = 44100.0;
+    double data[64];
+    double result = 0.0;
+    int n;
+
+    for (n = 0; n < N; n++)
+        data[n] = (n % 2) ? 0.0 : (n % 4 ? -1.0 : 1.0);
+
+    ASSERT_EQ(xtract_mcleod_f0(data, N, &sr, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, sr / 4.0, 1e-9);
+}
+
+UTEST(mcleod_f0, key_maximum_height_is_the_interpolated_peak_not_the_sample)
+{
+    /* A period of 4.5 samples puts the first NSDF peak between lags 4 and 5,
+     * both 0.766, while lag 9 is exactly 1. The lag-4 region only clears the
+     * 0.8 threshold through its parabolic height (0.92); taken at face value
+     * it would lose to lag 9 and the pitch would be an octave low. */
+    const int N = 512;
+    const double sr = 44100.0;
+    const double period = 4.5;
+    double data[512];
+    double result = 0.0;
+    int n;
+
+    for (n = 0; n < N; n++)
+        data[n] = sin(2.0 * M_PI * n / period);
+
+    ASSERT_EQ(xtract_mcleod_f0(data, N, &sr, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, sr / period, 1e-3);
+}
+
+UTEST(mcleod_f0, a_region_cut_off_by_the_buffer_end_still_yields_its_maximum)
+{
+    /* Period 60 in 64 samples: the positive region around lag 60 is still
+     * open when the lags run out, so its maximum is taken without a closing
+     * zero crossing. */
+    const int N = 64;
+    const double sr = 44100.0;
+    double data[64];
+    double result = 0.0;
+    int n;
+
+    for (n = 0; n < N; n++)
+        data[n] = cos(2.0 * M_PI * n / 60.0);
+
+    ASSERT_EQ(xtract_mcleod_f0(data, N, &sr, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, sr / 60.0, 2e-2);
+}
+
+UTEST(mcleod_f0, a_peak_on_the_last_lag_is_reported_without_interpolation)
+{
+    /* cos with period N - 1 returns to its starting value on the final
+     * sample, so the NSDF at the last lag is exactly 1 with no lag beyond
+     * it to interpolate against. */
+    const int N = 64;
+    const double sr = 44100.0;
+    double data[64];
+    double result = 0.0;
+    int n;
+
+    for (n = 0; n < N; n++)
+        data[n] = cos(2.0 * M_PI * n / (N - 1));
+
+    ASSERT_EQ(xtract_mcleod_f0(data, N, &sr, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, sr / (N - 1), 1e-12);
+}
+
 /* ===== Flatness numerical stability ===== */
 
 UTEST(scalar, flatness_stability_constant)
