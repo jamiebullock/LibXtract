@@ -1115,6 +1115,50 @@ UTEST(vector, lpc_3rd_order_coefficients_should_be_correct)
     CHECK_REL(result[5], 0.0555555556, 1e-6);
 }
 
+UTEST(vector, lpc_5th_order_matches_a_textbook_levinson_durbin_recursion)
+{
+    /* Five reflection and five prediction coefficients from six
+     * autocorrelation lags, checked against the recursion written out in
+     * its textbook form: at each order the reflection coefficient is
+     * minus the prediction error of the previous coefficients on the new
+     * lag over the residual energy, and the earlier coefficients are
+     * updated pairwise. The pairwise update only involves two distinct
+     * indices from the fourth order on, which is why a fifth-order case
+     * is needed. */
+    const int p = 5;
+    double autocorr[6] = {1.0, 0.9, 0.7, 0.55, 0.4, 0.3};
+    double a[6] = {0};
+    double ref[5];
+    double energy = autocorr[0];
+    double result[10];
+    int i, j;
+
+    for (i = 1; i <= p; i++)
+    {
+        double acc = autocorr[i];
+        double k;
+        double updated[6];
+
+        for (j = 1; j < i; j++)
+            acc += a[j] * autocorr[i - j];
+        k = -acc / energy;
+        ref[i - 1] = k;
+        for (j = 1; j < i; j++)
+            updated[j] = a[j] + k * a[i - j];
+        for (j = 1; j < i; j++)
+            a[j] = updated[j];
+        a[i] = k;
+        energy *= 1.0 - k * k;
+    }
+
+    ASSERT_EQ(xtract_lpc(autocorr, p + 1, NULL, result), XTRACT_SUCCESS);
+    for (i = 0; i < p; i++)
+    {
+        CHECK_NEAR(result[i], ref[i], 1e-12);
+        CHECK_NEAR(result[p + i], a[i + 1], 1e-12);
+    }
+}
+
 /* ===== xtract_init_bark ===== */
 
 UTEST(vector, init_bark_band_limits_are_rounded)
