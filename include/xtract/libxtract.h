@@ -332,53 +332,49 @@ extern "C"
 
     } xtract_function_descriptor_t;
 
-/**
- *
- * \brief An array of pointers to functions that perform the extraction
- *
- * \param *data: a pointer to the start of the input data (usually the first element in an array)
- *
- * \param N: the number of elements to be processed
- *
- * \param *argv: an abitrary number of additional arguments, used to pass additional parameters to the function being called. All arguments are compulsary!
- *
- * \param *result: a pointer to the first element in the result
- *
- * Each function will iterate over N array elements, the first of which is
- * pointed to by *data. It is up to the calling function to ensure that the array is in the format expected by the function being called.
- *
- * For scalar and delta features, *result will point to a single value.
- *
- * For vector features it will point to the first element in an array.
- *
- * Memory for this array must be allocated and freed by the calling
- * function.
- *
- * All functions return an integer error code as descibed in the enumeration
- * return_codes_
- *
- * example:<br>
- * \verbatim
-#include <stdio.h>
-#include "libxtract.h"
+    /**
+     *
+     * \brief An array of pointers to functions that perform the extraction
+     *
+     * Every function takes the same four arguments:
+     *
+     * - *data: a pointer to the start of the input data (usually the first element in an array)
+     * - N: the number of elements to be processed
+     * - *argv: an arbitrary number of additional arguments, used to pass additional parameters to the function being called. All arguments are compulsory!
+     * - *result: a pointer to the first element in the result
+     *
+     * Each function will iterate over N array elements, the first of which is
+     * pointed to by *data. It is up to the calling function to ensure that the array is in the format expected by the function being called.
+     *
+     * For scalar and delta features, *result will point to a single value.
+     *
+     * For vector features it will point to the first element in an array.
+     *
+     * Memory for this array must be allocated and freed by the calling
+     * function.
+     *
+     * All functions return an integer error code as described in the enumeration
+     * return_codes_
+     *
+     * example:<br>
+     * \verbatim
+    #include <stdio.h>
+    #include "libxtract.h"
 
-int main(void) {
-double values[] = {1.0, 2.0, 3.0, 4.0, 5.0};
-int N = 5;
-double mean;
+    int main(void) {
+    double values[] = {1.0, 2.0, 3.0, 4.0, 5.0};
+    int N = 5;
+    double mean;
 
-xtract[XTRACT_MEAN](values, N, NULL, &mean);
+    xtract[XTRACT_MEAN](values, N, NULL, &mean);
 
-printf("Mean = %.2f\n", mean);
-}
-\endverbatim
- * The calling function may additionally make some tests against the value returned by xtract
- *
- */
-#ifdef XTRACT_H
+    printf("Mean = %.2f\n", mean);
+    }
+    \endverbatim
+     * The calling function may additionally make some tests against the value returned by xtract
+     *
+     */
     extern int (*xtract[XTRACT_FEATURES])(const double *data, const int N, const void *argv, double *result);
-
-#endif
 
     /** \brief A function to initialise wavelet f0 detector state */
     int xtract_init_wavelet_f0_state(void);
