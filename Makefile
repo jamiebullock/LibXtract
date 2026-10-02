@@ -110,7 +110,10 @@ fuzz:
 # a mutant that reads past an array is detected rather than surviving, and
 # the test binary is run once per mutant. mull.yml at the root scopes the
 # mutants to the first-party sources. MULL_THRESHOLD is the minimum score
-# out of 100 for the target to succeed.
+# out of 100 for the target to succeed. The runner starts with PATH as its
+# whole environment: the instrumented library calls getenv for each mutant
+# on every call of a mutated function, so the tests slow down with the
+# number of environment variables.
 MULL_LLVM ?= 18
 MULL_CC ?= clang-$(MULL_LLVM)
 MULL_PLUGIN ?= /usr/lib/mull-ir-frontend-$(MULL_LLVM)
@@ -123,7 +126,7 @@ mutation:
 	&& $(MAKE) -C src CC=$(MULL_CC) EXTRA_FLAGS="$(SANITIZE_FLAGS) -fpass-plugin=$(MULL_PLUGIN) -grecord-command-line" \
 	&& $(MAKE) -C tests CC=$(MULL_CC) EXTRA_FLAGS="$(SANITIZE_FLAGS)" \
 	&& mkdir -p reports \
-	&& ( cd tests && $(MULL_RUNNER) --reporters IDE --reporters Elements --report-dir ../reports --report-name mutation \
+	&& ( cd tests && env -i PATH="$$PATH" $(MULL_RUNNER) --reporters IDE --reporters Elements --report-dir ../reports --report-name mutation \
 		--workers $(MULL_WORKERS) --timeout 10000 --mutation-score-threshold $(MULL_THRESHOLD) ./xttest ); \
 	status=$$?; $(RESTORE_EXIT)
 
