@@ -78,6 +78,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     int (*fn)(const double *, const int, const void *, double *);
     double argv[XTRACT_MAXARGS];
     double *in;
+    const double *input;
     double *result;
     size_t argv_bytes;
     size_t avail;
@@ -119,8 +120,11 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
             n = MAX_N;
     }
 
-    /* One element more than N so that N = 0 still passes a valid pointer */
-    in = (double *)calloc((size_t)n + 1, sizeof(double));
+    /* Exactly N elements, so that any read past the input is out of bounds
+     * to the sanitizer. At N = 0 the allocation holds one element and the
+     * call receives the pointer one past it: non-NULL, with nothing that may
+     * be read. */
+    in = (double *)calloc(n > 0 ? (size_t)n : 1, sizeof(double));
     /* Over-allocate the result: covered features write a single value, but the
      * margin keeps a harness mis-sizing from masquerading as an overflow. */
     result = (double *)calloc((size_t)n + 64, sizeof(double));
@@ -132,8 +136,9 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     }
     avail = size / sizeof(double);
     memcpy(in, data, (avail < (size_t)n ? avail : (size_t)n) * sizeof(double));
+    input = n > 0 ? in : in + 1;
 
-    (void)fn(in, n, argv, result);
+    (void)fn(input, n, argv, result);
 
     free(in);
     free(result);

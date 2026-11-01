@@ -36,6 +36,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     int n;
     double argv[XTRACT_MAXARGS];
     double *in;
+    const double *input;
     double *result;
     size_t argv_bytes;
 
@@ -56,8 +57,11 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     if (n > MAX_N)
         n = MAX_N;
 
-    /* One element more than N so that N = 0 still passes a valid pointer */
-    in = (double *)malloc(((size_t)n + 1) * sizeof(double));
+    /* Exactly N elements, so that any read past the input is out of bounds
+     * to the sanitizer. At N = 0 the allocation holds one element and the
+     * call receives the pointer one past it: non-NULL, with nothing that may
+     * be read. */
+    in = (double *)malloc((n > 0 ? (size_t)n : 1) * sizeof(double));
     /* difference_vector writes N/2 values; the others write one. Over-allocate
      * so a harness mis-sizing can't masquerade as an overflow. */
     result = (double *)calloc((size_t)n + 64, sizeof(double));
@@ -68,8 +72,9 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
         return 0;
     }
     memcpy(in, data, (size_t)n * sizeof(double));
+    input = n > 0 ? in : in + 1;
 
-    (void)xtract[feature](in, n, argv, result);
+    (void)xtract[feature](input, n, argv, result);
 
     free(in);
     free(result);
