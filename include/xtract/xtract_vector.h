@@ -203,8 +203,8 @@ extern "C"
 
     /** \brief Extract Linear Predictive Coding Cepstral Coefficients
      *
-     * \param *data: a pointer to the first element in an array of LPC coeffiecients e.g. a pointer to the second half of the array pointed to by *result from xtract_lpc()
-     * \param N: the number of LPC coefficients to be considered, at least 2
+     * \param *data: a pointer to an array of N doubles: a gain term followed by the p LPC coefficients a[1] to a[p], e.g. one element followed by the second half of the array pointed to by *result from xtract_lpc(). The gain term is not read
+     * \param N: the size of the array pointed to by *data, one more than the number of LPC coefficients p, at least 2
      * \param *argv: a pointer to an int representing the order (Q) of the result vector. Must be greater than 0. According to Rabiner and Juang the recommended ratio is Q ~ (3/2)p where p is the number of LPC coefficients and Q > p; XTRACT_LPCC_CEPSTRUM_ORDER(p) computes this value. If argv is NULL, Q defaults to p (the result is then no longer than the input).
      * \param *result: a pointer to an array containing the resultant LPCC.
      *

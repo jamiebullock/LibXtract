@@ -868,11 +868,13 @@ int xtract_lpcc(const double *data, const int N, const void *argv, double *resul
 
     int n, k;
     double sum;
-    int order = N - 1; /* LPC order p (data[0] is the gain term) */
+    int order; /* LPC order p (data[0] is the gain term) */
     int cep_length;
 
     if (N < 2)
         return XTRACT_ARGUMENT_ERROR;
+
+    order = N - 1;
 
     if (argv == NULL)
         cep_length = order; /* default keeps the output no longer than the input */
