@@ -157,6 +157,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     int feature;
     int n;
     int in_len;
+    uint64_t n_raw;
     double fz[8];
     double *in;
     const double *input;
@@ -178,8 +179,12 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     data += fz_bytes;
     size -= fz_bytes;
 
-    /* N for the features that need no plan or filterbank sized to VEC_N */
-    n = clamp_int(fz[4], 0, VEC_N);
+    /* N for the features that need no plan or filterbank sized to VEC_N.
+     * The bytes are taken as an integer modulo VEC_N + 1 so every length is
+     * reached evenly; read as a double, most byte patterns are NaN or far out
+     * of range and would clamp to an endpoint. */
+    memcpy(&n_raw, &fz[4], sizeof(n_raw));
+    n = (int)(n_raw % (VEC_N + 1));
     in_len = input_length(feature, n);
 
     /* Exactly the declared length, so that any read past the input is out of
