@@ -1282,6 +1282,17 @@ UTEST(scalar, highest_value_positive)
     CHECK_REL(result, 5.0, EPSILON);
 }
 
+UTEST(scalar, highest_value_rejects_empty_input)
+{
+    double result = 1.0;
+    double data[1] = {7.0};
+
+    ASSERT_EQ(xtract_highest_value(data, 0, NULL, &result), XTRACT_ARGUMENT_ERROR);
+    CHECK_REL(result, 0.0, EPSILON);
+    ASSERT_EQ(xtract_highest_value(data, 1, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 7.0, EPSILON);
+}
+
 UTEST(scalar, highest_value_all_negative)
 {
     double result = 0.0;
@@ -2313,6 +2324,19 @@ UTEST(scalar, peak_last_sample_is_maximum)
     int rv = xtract_peak(data, 4, &threshold, &result);
     ASSERT_EQ(rv, XTRACT_SUCCESS);
     CHECK_REL(result, 10.0, EPSILON);
+}
+
+UTEST(scalar, peak_rejects_empty_input)
+{
+    double result = 1.0;
+    double data[1] = {5.0};
+    double threshold = 0.0;
+
+    ASSERT_EQ(xtract_peak(data, 0, &threshold, &result), XTRACT_ARGUMENT_ERROR);
+    CHECK_REL(result, 0.0, EPSILON);
+    /* A single sample is its own maximum and equals the average */
+    ASSERT_EQ(xtract_peak(data, 1, &threshold, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 5.0, EPSILON);
 }
 
 UTEST(scalar, peak_last_sample_not_maximum)

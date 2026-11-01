@@ -350,7 +350,7 @@ extern "C"
     /** \brief Extract the value of the highest value in an input vector
      *
      * \param *data: a pointer to the first element in an array of doubles
-     * \param N: the number of elements to be considered
+     * \param N: the number of elements to be considered, at least 1
      * \param *argv: a pointer to NULL.
      * \param *result: a pointer to a value representing the highest component in *data.
      *
@@ -452,15 +452,12 @@ extern "C"
     int xtract_nonzero_count(const double *data, const int N, const void *argv, double *result);
 
     /**
-     *  \brief Return XTRACT_SUCCESS if the 'current' value is considered a peak
+     * \brief Report whether the 'current' value is a peak
      *
-     *  @param data   a pointer to an array containing time series as provided by *result from xtract_last_n() where the Nth value is considered the 'current' value
-     *  @param N      an integer representing the number of elements in the time series
-     *  @param argv   a pointer to a double representing the threshold, whereby the current value will be considered a peak if it is above the average of the last N values (*data) by the threshold
-     *  @param result a pointer to a copy of the current value if the current value is considered a peak
-     *
-     *
-     *  @return XTRACT_SUCCESS if a peak was found or XTRACT_NO_RESULT if not
+     * \param *data: a pointer to an array containing a time series as provided by *result from xtract_last_n(), where the Nth value is the 'current' value
+     * \param N: the number of elements in the time series, at least 1
+     * \param *argv: a pointer to a double representing the threshold: the current value is a peak if it is the maximum of the series and exceeds the average of the N values by at least the threshold
+     * \param *result: a pointer to a copy of the current value if it is a peak; XTRACT_NO_RESULT is returned and *result is left unchanged if it is not
      */
     int xtract_peak(const double *data, const int N, const void *argv, double *result);
 
