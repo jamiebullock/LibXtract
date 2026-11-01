@@ -14,8 +14,8 @@
  * one feature with no table slot) by direct call.
  *
  * The fuzzer's bytes become a feature selector, an argv buffer, and the input
- * vector, so NaN, +/-Inf, denormals, N=1, all-zero, etc. are exercised. Run
- * under AddressSanitizer + UBSan.
+ * vector, so NaN, +/-Inf, denormals, N=0, N=1, all-zero, etc. are exercised.
+ * Run under AddressSanitizer + UBSan.
  *
  * failsafe_f0 computes a spectrum internally, so it runs at a fixed
  * power-of-two N with the FFT initialised once; wavelet_f0 runs its detector
@@ -115,13 +115,12 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     else
     {
         n = (int)(size / sizeof(double));
-        if (n < 1)
-            return 0;
         if (n > MAX_N)
             n = MAX_N;
     }
 
-    in = (double *)calloc((size_t)n, sizeof(double));
+    /* One element more than N so that N = 0 still passes a valid pointer */
+    in = (double *)calloc((size_t)n + 1, sizeof(double));
     /* Over-allocate the result: covered features write a single value, but the
      * margin keeps a harness mis-sizing from masquerading as an overflow. */
     result = (double *)calloc((size_t)n + 64, sizeof(double));

@@ -11,8 +11,10 @@
  * features, each needs specific setup: an FFT plan, a mel/gammatone filterbank,
  * or bark band limits, plus an argv whose shape differs per feature. The
  * filterbanks, bark limits, and FFT plans are built once at a fixed
- * power-of-two N in LLVMFuzzerInitialize; every call then runs at that N.
- * Features are called by name (two of them, mmbses and
+ * power-of-two N in LLVMFuzzerInitialize; every call that depends on them
+ * runs at that N. The six features with no such dependency (dct,
+ * autocorrelation, amdf, asdf, lpc, lpcc) take a fuzzer-chosen N from 0 up
+ * to it. Features are called by name (two of them, mmbses and
  * spectral_subband_centroids, have no xtract[] dispatch slot).
  *
  * What is fuzzed: the input vector (always) and the plain scalar argv fields
@@ -131,6 +133,7 @@ static int clamp_int(double v, int lo, int hi)
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     int feature;
+    int n;
     double fz[8];
     double *in;
     double *result;
@@ -163,6 +166,9 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     if (avail > IN_CAP)
         avail = IN_CAP;
     memcpy(in, data, avail * sizeof(double));
+
+    /* N for the features that need no plan or filterbank sized to VEC_N */
+    n = clamp_int(fz[4], 0, VEC_N);
 
     switch (feature)
     {
@@ -222,26 +228,26 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     {
         /* argv = order Q, which is also the result length. */
         int order = clamp_int(fz[0], 1, VEC_N);
-        xtract_lpcc(in, VEC_N, &order, result);
+        xtract_lpcc(in, n, &order, result);
         break;
     }
     case FZ_AUTOCORRELATION_FFT:
         xtract_autocorrelation_fft(in, VEC_N, NULL, result);
         break;
     case FZ_DCT:
-        xtract_dct(in, VEC_N, NULL, result);
+        xtract_dct(in, n, NULL, result);
         break;
     case FZ_AUTOCORRELATION:
-        xtract_autocorrelation(in, VEC_N, NULL, result);
+        xtract_autocorrelation(in, n, NULL, result);
         break;
     case FZ_AMDF:
-        xtract_amdf(in, VEC_N, NULL, result);
+        xtract_amdf(in, n, NULL, result);
         break;
     case FZ_ASDF:
-        xtract_asdf(in, VEC_N, NULL, result);
+        xtract_asdf(in, n, NULL, result);
         break;
     case FZ_LPC:
-        xtract_lpc(in, VEC_N, NULL, result);
+        xtract_lpc(in, n, NULL, result);
         break;
     default:
         break;

@@ -53,12 +53,11 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     size -= argv_bytes;
 
     n = (int)(size / sizeof(double));
-    if (n < 1)
-        return 0;
     if (n > MAX_N)
         n = MAX_N;
 
-    in = (double *)malloc((size_t)n * sizeof(double));
+    /* One element more than N so that N = 0 still passes a valid pointer */
+    in = (double *)malloc(((size_t)n + 1) * sizeof(double));
     /* difference_vector writes N/2 values; the others write one. Over-allocate
      * so a harness mis-sizing can't masquerade as an overflow. */
     result = (double *)calloc((size_t)n + 64, sizeof(double));
