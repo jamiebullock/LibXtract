@@ -114,6 +114,13 @@ UTEST(descriptors, argv_ranges_match_the_functions)
     ASSERT_EQ(fd[XTRACT_CREST].argv.min[1], XTRACT_UNBOUNDED_MIN);
     ASSERT_EQ(fd[XTRACT_NOISINESS].argv.max[0], XTRACT_UNBOUNDED_MAX);
 
+    CHECK_REL(fd[XTRACT_F0].argv.min[0], 0.0, EPSILON);
+    CHECK_REL(fd[XTRACT_MCLEOD_F0].argv.min[0], 0.0, EPSILON);
+    CHECK_REL(fd[XTRACT_WAVELET_F0].argv.min[0], 22050.0, EPSILON);
+    CHECK_REL(fd[XTRACT_MIDICENT].argv.min[0], 0.0, EPSILON);
+    CHECK_REL(fd[XTRACT_MIDICENT].argv.max[0], 96000.0, EPSILON);
+    ASSERT_EQ(fd[XTRACT_MIDICENT].argv.unit[0], XTRACT_HERTZ);
+
     ASSERT_EQ(fd[XTRACT_SPREAD].data.format, XTRACT_SPECTRAL);
     ASSERT_EQ(fd[XTRACT_HPS].data.format, XTRACT_SPECTRAL);
 

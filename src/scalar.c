@@ -1375,6 +1375,12 @@ int xtract_f0(const double *data, const int N, const void *argv, double *result)
         threshold_peak, threshold_centre,
         *input;
 
+    if (N < 1 || argv == NULL)
+    {
+        *result = 0.0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
+
     sr = *(double *)argv;
     if (sr == 0)
         sr = 44100.0;
@@ -1448,52 +1454,59 @@ int xtract_f0(const double *data, const int N, const void *argv, double *result)
 int xtract_failsafe_f0(const double *data, const int N, const void *argv, double *result)
 {
     double *spectrum, argf[4], *peaks, sr;
-    int rv = xtract_f0(data, N, argv, result);
+    int rv;
 
-    if (rv == XTRACT_NO_RESULT)
+    rv = xtract_f0(data, N, argv, result);
+    if (rv != XTRACT_NO_RESULT)
+        return rv;
+
+    sr = *(double *)argv;
+    if (sr == 0)
+        sr = 44100.0;
+    spectrum = (double *)calloc(N, sizeof(double));
+    peaks = (double *)calloc(N, sizeof(double));
+
+    if (spectrum == NULL || peaks == NULL)
     {
-        sr = *(double *)argv;
-        if (sr == 0)
-            sr = 44100.0;
-        spectrum = (double *)calloc(N, sizeof(double));
-        peaks = (double *)calloc(N, sizeof(double));
-
-        if (spectrum == NULL || peaks == NULL)
-        {
-            free(spectrum);
-            free(peaks);
-            return XTRACT_MALLOC_FAILED;
-        }
-
-        argf[0] = sr / N;
-        argf[1] = XTRACT_MAGNITUDE_SPECTRUM;
-        argf[2] = 0.0;
-        argf[3] = 0.0;
-        xtract_spectrum(data, N, argf, spectrum);
-        argf[1] = 10.0;
-        xtract_peak_spectrum(spectrum, N >> 1, argf, peaks);
-        argf[0] = 0.0;
-        rv = xtract_lowest_value(peaks + (N >> 1), N >> 1, argf, result);
-
         free(spectrum);
         free(peaks);
-
-        if (rv == XTRACT_NO_RESULT)
-        {
-            *result = 0.0;
-            return XTRACT_NO_RESULT;
-        }
+        return XTRACT_MALLOC_FAILED;
     }
 
-    return XTRACT_SUCCESS;
+    argf[0] = sr / N;
+    argf[1] = XTRACT_MAGNITUDE_SPECTRUM;
+    argf[2] = 0.0;
+    argf[3] = 0.0;
+    rv = xtract_spectrum(data, N, argf, spectrum);
+    if (rv == XTRACT_SUCCESS)
+    {
+        argf[1] = 10.0;
+        rv = xtract_peak_spectrum(spectrum, N >> 1, argf, peaks);
+    }
+    if (rv == XTRACT_SUCCESS)
+    {
+        argf[0] = 0.0;
+        rv = xtract_lowest_value(peaks + (N >> 1), N >> 1, argf, result);
+    }
+
+    free(spectrum);
+    free(peaks);
+
+    if (rv == XTRACT_NO_RESULT)
+        *result = 0.0;
+
+    return rv;
 }
 
 int xtract_wavelet_f0(const double *data, const int N, const void *argv, double *result)
 {
     double sr;
 
-    if (argv == NULL)
-        return XTRACT_BAD_ARGV;
+    if (N < 1 || argv == NULL)
+    {
+        *result = 0.0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
 
     sr = *(double *)argv;
 
@@ -1538,8 +1551,11 @@ int xtract_mcleod_f0(const double *data, const int N, const void *argv, double *
     double best_val, a, b, c, peak_tau;
     int in_region, region_tau;
 
-    if (argv == NULL)
-        return XTRACT_BAD_ARGV;
+    if (N < 1 || argv == NULL)
+    {
+        *result = 0.0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
 
     sr = *(double *)argv;
     if (sr == 0)
@@ -1676,25 +1692,34 @@ int xtract_mcleod_f0(const double *data, const int N, const void *argv, double *
 
 int xtract_midicent(const double *data, const int N, const void *argv, double *result)
 {
-    double f0 = *(double *)argv;
-    double note = 0.0;
+    double f0;
+    double note;
+
+    if (argv == NULL)
+    {
+        *result = 0.0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
+
+    f0 = *(double *)argv;
 
     if (f0 <= 0.0)
     {
         *result = 0.0;
-        return XTRACT_ARGUMENT_ERROR;
+        return XTRACT_NO_RESULT;
     }
 
     note = 69 + log(f0 / 440.f) * 17.31234;
     note *= 100;
     note = round(note);
 
-    *result = note;
-
     if (note > 12700 || note < 0)
     {
-        return XTRACT_ARGUMENT_ERROR;
+        *result = 0.0;
+        return XTRACT_NO_RESULT;
     }
+
+    *result = note;
 
     return XTRACT_SUCCESS;
 }

@@ -105,12 +105,22 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             break;
         case XTRACT_F0:
         case XTRACT_FAILSAFE_F0:
-        case XTRACT_WAVELET_F0:
         case XTRACT_MCLEOD_F0:
-        case XTRACT_MIDICENT:
+            *argv_min = 0.0;
+            *argv_max = XTRACT_SR_UPPER_LIMIT;
+            *argv_def = XTRACT_SR_DEFAULT;
+            *argv_unit = XTRACT_HERTZ;
+            break;
+        case XTRACT_WAVELET_F0:
             *argv_min = XTRACT_SR_LOWER_LIMIT;
             *argv_max = XTRACT_SR_UPPER_LIMIT;
             *argv_def = XTRACT_SR_DEFAULT;
+            *argv_unit = XTRACT_HERTZ;
+            break;
+        case XTRACT_MIDICENT:
+            *argv_min = 0.0;
+            *argv_max = XTRACT_SR_UPPER_LIMIT / 2.0;
+            *argv_def = XTRACT_NO_DEFAULT;
             *argv_unit = XTRACT_HERTZ;
             break;
         case XTRACT_FLATNESS_DB:

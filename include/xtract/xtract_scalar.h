@@ -374,8 +374,8 @@ extern "C"
     /** \brief Extract the fundamental frequency of an input vector
      *
      * \param *data: a pointer to the first element in an array of doubles representing an audio vector
-     * \param N: the number of elements to be considered
-     * \param *argv: a pointer to a double representing the audio sample rate
+     * \param N: the number of elements to be considered, at least 1
+     * \param *argv: a pointer to a double representing the audio sample rate; 0 selects 44100 Hz
      * \param *result: the pitch of N values from the array pointed to by *data
      *
      * This algorithm is based on the AMDF, with peak and centre clipping. It would benefit from further improvements to improve noise robustness and overall efficiency
@@ -388,8 +388,8 @@ extern "C"
     /** \brief Extract the fundamental frequency of an input vector
      *
      * \param *data: a pointer to the first element in an array of doubles representing an audio vector
-     * \param N: the number of elements to be considered
-     * \param *argv: a pointer to a double representing the audio sample rate
+     * \param N: the number of elements to be considered, at least 1
+     * \param *argv: a pointer to a double representing the audio sample rate; 0 selects 44100 Hz
      * \param *result: the pitch of N values from the array pointed to by *data
      *
      * This function wraps xtract_f0, but provides the frequency of the lowest partial in the peak spectrum if f0 can't be found.
@@ -400,7 +400,7 @@ extern "C"
     /** \brief Extract the fundamental frequency of an input vector using wavelet-based method
      *
      * \param *data: a pointer to the first element in an array of doubles representing an audio vector
-     * \param N: the number of elements to be considered
+     * \param N: the number of elements to be considered, at least 1
      * \param *argv: a pointer to a double representing the audio sample rate
      * \param *result: the pitch of N values from the array pointed to by *data
      *
@@ -419,8 +419,8 @@ extern "C"
      * "A Smarter Way to Find Pitch".
      *
      * \param *data: a pointer to the first element in an array of doubles representing an audio vector
-     * \param N: the number of elements to be considered
-     * \param *argv: a pointer to a double representing the audio sample rate
+     * \param N: the number of elements to be considered, at least 1
+     * \param *argv: a pointer to a double representing the audio sample rate; 0 selects 44100 Hz
      * \param *result: the pitch of N values from the array pointed to by *data
      */
     int xtract_mcleod_f0(const double *data, const int N, const void *argv, double *result);
@@ -429,9 +429,8 @@ extern "C"
      *
      * \param *data: not used
      * \param N: not used
-     * \param *argv: a pointer to a double-precision floating point value representing a frequency in Hertz
-     * \param *result: a pointer to a double-precision floating point value representing a "pitch" in MIDI cents
-     * \return if *argv value causes a *result within the range 0..127, XTRACT_SUCCESS will be returned, otherwise XTRACT_ARGUMENT_ERROR
+     * \param *argv: a pointer to a double-precision floating point value representing a frequency in Hertz; 0 or below gives no result
+     * \param *result: a pointer to a double-precision floating point value representing a "pitch" in MIDI cents, from 0 to 12700; a frequency whose pitch falls outside that range gives no result
      *
      */
     int xtract_midicent(const double *data, const int N, const void *argv, double *result);

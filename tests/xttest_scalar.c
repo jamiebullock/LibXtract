@@ -1366,21 +1366,31 @@ UTEST(scalar, midicent_c4)
     CHECK_NEAR(result, 6000.0, 1.0); /* 1 midicent absolute */
 }
 
-UTEST(scalar, midicent_zero_frequency_rejected)
+UTEST(scalar, midicent_zero_frequency_has_no_result)
 {
-    double result = 0.0;
+    double result = 999.0;
     double freq = 0.0;
-    result = 999.0;
-    ASSERT_EQ(xtract_midicent(NULL, 0, &freq, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_midicent(NULL, 0, &freq, &result), XTRACT_NO_RESULT);
     ASSERT_EQ(result, 0.0);
 }
 
-UTEST(scalar, midicent_negative_frequency_rejected)
+UTEST(scalar, midicent_negative_frequency_has_no_result)
 {
-    double result = 0.0;
+    double result = 999.0;
     double freq = -440.0;
+    ASSERT_EQ(xtract_midicent(NULL, 0, &freq, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
+}
+
+UTEST(scalar, midicent_pitch_outside_0_to_12700_has_no_result)
+{
+    double result = 999.0;
+    double freq = 1.0e9;
+    ASSERT_EQ(xtract_midicent(NULL, 0, &freq, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
     result = 999.0;
-    ASSERT_EQ(xtract_midicent(NULL, 0, &freq, &result), XTRACT_ARGUMENT_ERROR);
+    freq = 1.0e-6;
+    ASSERT_EQ(xtract_midicent(NULL, 0, &freq, &result), XTRACT_NO_RESULT);
     ASSERT_EQ(result, 0.0);
 }
 
@@ -2001,7 +2011,8 @@ UTEST(mcleod_f0, rejects_a_null_argv)
     double data[64] = {0};
     double result = 1.0;
 
-    ASSERT_EQ(xtract_mcleod_f0(data, 64, NULL, &result), XTRACT_BAD_ARGV);
+    ASSERT_EQ(xtract_mcleod_f0(data, 64, NULL, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
 }
 
 /* A sine of period P whose amplitude alternates between 1 and a on
@@ -2476,6 +2487,21 @@ UTEST(scalar, argv_only_features_reject_a_null_argv)
     ASSERT_REJECTED(xtract_tonality(NULL, 0, NULL, &result));
     ASSERT_REJECTED(xtract_crest(NULL, 0, NULL, &result));
     ASSERT_REJECTED(xtract_noisiness(NULL, 0, NULL, &result));
+    ASSERT_REJECTED(xtract_midicent(NULL, 0, NULL, &result));
+}
+
+UTEST(scalar, pitch_detectors_reject_an_empty_input_and_a_null_argv)
+{
+    double data[64] = {0};
+    double sr = 44100.0;
+    double result;
+
+    ASSERT_REJECTED(xtract_f0(data, 0, &sr, &result));
+    ASSERT_REJECTED(xtract_f0(data, 64, NULL, &result));
+    ASSERT_REJECTED(xtract_failsafe_f0(data, 0, &sr, &result));
+    ASSERT_REJECTED(xtract_failsafe_f0(data, 64, NULL, &result));
+    ASSERT_REJECTED(xtract_mcleod_f0(data, 0, &sr, &result));
+    ASSERT_REJECTED(xtract_mcleod_f0(data, 64, NULL, &result));
 }
 
 UTEST(scalar, spectral_features_reject_an_odd_or_too_short_input_and_a_null_argv)
