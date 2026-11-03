@@ -134,6 +134,52 @@ UTEST(helper, smoothed_output_does_not_depend_on_prior_result_buffer)
 
 /* ===== xtract_subbands ===== */
 
+UTEST(vector, subbands_rejects_invalid_arguments)
+{
+    double data[8] = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
+    double result[8] = {-1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0};
+    int argv[4];
+
+    argv[0] = XTRACT_MEAN;
+    argv[1] = 2;
+    argv[2] = XTRACT_LINEAR_SUBBANDS;
+    argv[3] = 0;
+
+    ASSERT_EQ(xtract_subbands(data, 8, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_subbands(data, 0, argv, result), XTRACT_ARGUMENT_ERROR);
+
+    argv[1] = 0; /* no bands */
+    ASSERT_EQ(xtract_subbands(data, 8, argv, result), XTRACT_ARGUMENT_ERROR);
+    argv[1] = 9; /* more linear bands than bins */
+    ASSERT_EQ(xtract_subbands(data, 8, argv, result), XTRACT_ARGUMENT_ERROR);
+    argv[1] = 2;
+
+    argv[0] = -1;
+    ASSERT_EQ(xtract_subbands(data, 8, argv, result), XTRACT_ARGUMENT_ERROR);
+    argv[0] = XTRACT_FEATURES;
+    ASSERT_EQ(xtract_subbands(data, 8, argv, result), XTRACT_ARGUMENT_ERROR);
+    argv[0] = XTRACT_MEAN;
+
+    argv[2] = 2; /* neither subband scale */
+    ASSERT_EQ(xtract_subbands(data, 8, argv, result), XTRACT_ARGUMENT_ERROR);
+    argv[2] = XTRACT_OCTAVE_SUBBANDS;
+    argv[3] = 0; /* octave bands double from the start bin, so 0 never grows */
+    ASSERT_EQ(xtract_subbands(data, 8, argv, result), XTRACT_ARGUMENT_ERROR);
+    argv[2] = XTRACT_LINEAR_SUBBANDS;
+
+    argv[3] = -1;
+    ASSERT_EQ(xtract_subbands(data, 8, argv, result), XTRACT_ARGUMENT_ERROR);
+    argv[3] = 8;
+    ASSERT_EQ(xtract_subbands(data, 8, argv, result), XTRACT_ARGUMENT_ERROR);
+
+    CHECK_REL(result[0], -1.0, EPSILON);
+
+    argv[3] = 0;
+    ASSERT_EQ(xtract_subbands(data, 8, argv, result), XTRACT_SUCCESS);
+    CHECK_REL(result[0], 1.0, EPSILON);
+    CHECK_REL(result[1], 1.0, EPSILON);
+}
+
 UTEST(vector, subbands_last_band_computed_when_linear_bands_tile_exactly)
 {
     const int N = 16;
@@ -218,6 +264,18 @@ UTEST(vector, spectral_subband_centroids_single_partial_per_band)
 }
 
 /* ===== xtract_lpcc ===== */
+
+UTEST(vector, lpcc_rejects_fewer_than_two_coefficients)
+{
+    double lpc[2] = {1.0, 0.5};
+    double result[4] = {-1.0, -1.0, -1.0, -1.0};
+    int cep_length = 3;
+
+    ASSERT_EQ(xtract_lpcc(lpc, 1, &cep_length, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_lpcc(lpc, 0, NULL, result), XTRACT_ARGUMENT_ERROR);
+    CHECK_REL(result[0], -1.0, EPSILON);
+    ASSERT_EQ(xtract_lpcc(lpc, 2, &cep_length, result), XTRACT_SUCCESS);
+}
 
 UTEST(vector, lpcc_rejects_non_positive_cepstrum_length)
 {
@@ -1039,6 +1097,19 @@ UTEST(scalar, hps_rejects_a_fractional_or_non_finite_harmonic_count)
 }
 
 /* ===== xtract_lpc known values ===== */
+
+UTEST(vector, lpc_rejects_fewer_than_two_autocorrelation_values)
+{
+    double data[2] = {1.0, 0.5};
+    double result[2] = {-1.0, -1.0};
+
+    ASSERT_EQ(xtract_lpc(data, 0, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_lpc(data, 1, NULL, result), XTRACT_ARGUMENT_ERROR);
+    CHECK_REL(result[0], -1.0, EPSILON);
+    /* N = 2: one reflection coefficient, -r[1] / r[0] = -0.5 */
+    ASSERT_EQ(xtract_lpc(data, 2, NULL, result), XTRACT_SUCCESS);
+    CHECK_REL(result[0], -0.5, EPSILON);
+}
 
 UTEST(vector, lpc_of_simple_autocorrelation_sequence)
 {

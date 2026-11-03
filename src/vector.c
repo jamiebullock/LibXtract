@@ -818,6 +818,10 @@ int xtract_lpc(const double *data, const int N, const void *argv, double *result
     double *ref = NULL,
            *lpc = NULL;
 
+    /* One coefficient needs the zero-lag term and one further lag */
+    if (N < 2)
+        return XTRACT_ARGUMENT_ERROR;
+
     error = data[0];
     L = N - 1; /* The number of LPC coefficients */
     M = L * 2; /* The length of *result */
@@ -864,8 +868,13 @@ int xtract_lpcc(const double *data, const int N, const void *argv, double *resul
 
     int n, k;
     double sum;
-    int order = N - 1; /* LPC order p (data[0] is the gain term) */
+    int order; /* LPC order p (data[0] is the gain term) */
     int cep_length;
+
+    if (N < 2)
+        return XTRACT_ARGUMENT_ERROR;
+
+    order = N - 1;
 
     if (argv == NULL)
         cep_length = order; /* default keeps the output no longer than the input */
@@ -903,6 +912,9 @@ int xtract_subbands(const double *data, const int N, const void *argv, double *r
 {
     int n, bw, xtract_func, nbands, scale, start, lower, *argi, rv;
 
+    if (argv == NULL || N < 1)
+        return XTRACT_ARGUMENT_ERROR;
+
     argi = (int *)argv;
 
     xtract_func = argi[0];
@@ -910,10 +922,20 @@ int xtract_subbands(const double *data, const int N, const void *argv, double *r
     scale = argi[2];
     start = argi[3];
 
+    if (xtract_func < 0 || xtract_func >= XTRACT_FEATURES || nbands < 1 ||
+        start < 0 || start >= N)
+        return XTRACT_ARGUMENT_ERROR;
+
     if (scale == XTRACT_LINEAR_SUBBANDS)
-        bw = floorf((N - start) / nbands);
-    else
+        bw = (N - start) / nbands;
+    else if (scale == XTRACT_OCTAVE_SUBBANDS)
         bw = start;
+    else
+        return XTRACT_ARGUMENT_ERROR;
+
+    /* Linear: more bands than remaining bins; octave: a start of 0 */
+    if (bw < 1)
+        return XTRACT_ARGUMENT_ERROR;
 
     lower = start;
     rv = XTRACT_SUCCESS;

@@ -193,7 +193,7 @@ extern "C"
      * Returns N-1 reflection (PARCOR) coefficients and N-1 LPC coefficients via *result
      *
      * \param *data: N autocorrelation values e.g the data pointed to by *result from xtract_autocorrelation()
-     * \param N: the number of autocorrelation values to be considered
+     * \param N: the number of autocorrelation values to be considered, at least 2
      * \param *argv: a pointer to NULL
      * \param *result: a pointer to an array containing N-1 reflection coefficients and N-1 LPC coefficients.
      *
@@ -203,8 +203,8 @@ extern "C"
 
     /** \brief Extract Linear Predictive Coding Cepstral Coefficients
      *
-     * \param *data: a pointer to the first element in an array of LPC coeffiecients e.g. a pointer to the second half of the array pointed to by *result from xtract_lpc()
-     * \param N: the number of LPC coefficients to be considered
+     * \param *data: a pointer to an array of N doubles: a gain term followed by the p LPC coefficients a[1] to a[p], e.g. one element followed by the second half of the array pointed to by *result from xtract_lpc(). The gain term is not read
+     * \param N: the size of the array pointed to by *data, one more than the number of LPC coefficients p, at least 2
      * \param *argv: a pointer to an int representing the order (Q) of the result vector. Must be greater than 0. According to Rabiner and Juang the recommended ratio is Q ~ (3/2)p where p is the number of LPC coefficients and Q > p; XTRACT_LPCC_CEPSTRUM_ORDER(p) computes this value. If argv is NULL, Q defaults to p (the result is then no longer than the input).
      * \param *result: a pointer to an array containing the resultant LPCC.
      *
@@ -216,8 +216,8 @@ extern "C"
     /** \brief Extract subbands from a spectrum
      *
      * \param *data: a pointer to an array of size N containing N magnitude/power/log magnitude/log power coefficients. (e.g. the first half of the array pointed to by *result from xtract_spectrum().
-     * \param N: the number of elements from the array pointed to by *data to be considered
-     * \param *argv: A pointer to an array containing four integers. The first represents the \a scalar extraction function to applied to each subband e.g. XTRACT_SUM or XTRACT_MEAN, the second represents the number of subbands required, and the third represents the frequency scale to be used for the subband bounds as defined in the enumeration xtract_subband_scales_ (libxtract.h). The fourth integer represent the start point of the subbands as a location in the input array as pointed to by *data (e.g. a value of 5 would start the subband extraction at bin 5)
+     * \param N: the number of elements from the array pointed to by *data to be considered, at least 1
+     * \param *argv: A pointer to an array containing four integers. The first represents the \a scalar extraction function to applied to each subband e.g. XTRACT_SUM or XTRACT_MEAN, and must be a value of the enumeration xtract_features_; the second represents the number of subbands required, at least 1; the third represents the frequency scale to be used for the subband bounds as defined in the enumeration xtract_subband_scales_ (libxtract.h). The fourth integer represent the start point of the subbands as a location in the input array as pointed to by *data (e.g. a value of 5 would start the subband extraction at bin 5), from 0 to N - 1. More linear bands than there are bins after the start, or an octave start of 0, gives a band of no bins and is an argument error
      * \param *result: A pointer to an array containing the resultant subband values. The calling function is responsible for allocating and freeing memory for *result. xtract_subbands() assumes that at least argv[1] * sizeof(double) bytes have been allocated. If the requested nbands extends the subband range beyond N, then the remaining bands will be set to 0. If the array pointed to by *result has more than argv[1] elements, the superfluous elements will be unchanged.
      *
      * xtract_subbands() divides a spectrum into subbands and applies the function given by argv[0] to the values in each subband to give a 'reduced' representation of the spectrum as *result

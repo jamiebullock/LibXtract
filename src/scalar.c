@@ -920,11 +920,19 @@ int xtract_lowest_value(const double *data, const int N, const void *argv, doubl
 
 int xtract_highest_value(const double *data, const int N, const void *argv, double *result)
 {
+#ifndef __APPLE__
+    int n = N;
+#endif
+
+    if (N < 1)
+    {
+        *result = 0.0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
+
 #ifdef __APPLE__
     vDSP_maxvD(data, 1, result, N);
 #else
-    int n = N;
-
     *result = data[--n];
 
     while (n--)
@@ -1462,9 +1470,17 @@ int xtract_midicent(const double *data, const int N, const void *argv, double *r
 int xtract_peak(const double *data, const int N, const void *argv, double *result)
 {
     double threshold = *(double *)argv;
-    double current = data[N - 1];
+    double current;
     double average = 0.0;
     double maximum = -DBL_MAX;
+
+    if (N < 1)
+    {
+        *result = 0.0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
+
+    current = data[N - 1];
 
     for (uint32_t n = 0; n < (uint32_t)N; ++n)
     {
