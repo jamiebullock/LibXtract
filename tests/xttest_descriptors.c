@@ -114,6 +114,9 @@ UTEST(descriptors, argv_ranges_match_the_functions)
     ASSERT_EQ(fd[XTRACT_CREST].argv.min[1], XTRACT_UNBOUNDED_MIN);
     ASSERT_EQ(fd[XTRACT_NOISINESS].argv.max[0], XTRACT_UNBOUNDED_MAX);
 
+    ASSERT_EQ(fd[XTRACT_SPREAD].data.format, XTRACT_SPECTRAL);
+    ASSERT_EQ(fd[XTRACT_HPS].data.format, XTRACT_SPECTRAL);
+
     ASSERT_EQ(xtract_free_descriptors(fd), XTRACT_SUCCESS);
 }
 

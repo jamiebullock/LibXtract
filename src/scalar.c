@@ -220,13 +220,20 @@ int xtract_spectral_centroid(const double *data, const int N, const void *argv, 
     const double *amps = data;
     const double *freqs = data + n;
     double FA = 0.0, A = 0.0;
+#ifndef __APPLE__
+    int m;
+#endif
+
+    if (N < 2 || (N & 1))
+    {
+        *result = 0.0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
 
 #ifdef __APPLE__
     vDSP_dotprD(amps, 1, freqs, 1, &FA, n);
     vDSP_sveD(amps, 1, &A, n);
 #else
-    int m;
-
 #pragma omp simd reduction(+ : FA, A)
     for (m = 0; m < n; m++)
     {
@@ -236,9 +243,12 @@ int xtract_spectral_centroid(const double *data, const int N, const void *argv, 
 #endif
 
     if (A == 0.0)
+    {
         *result = 0.0;
-    else
-        *result = FA / A;
+        return XTRACT_NO_RESULT;
+    }
+
+    *result = FA / A;
 
     return XTRACT_SUCCESS;
 }
@@ -254,11 +264,26 @@ int xtract_spectral_variance(const double *data, const int N, const void *argv, 
     double A = 0.0;
     const double *amps = data;
     const double *freqs = data + m;
-    const double arg0 = *(double *)argv;
+    double arg0;
+#ifdef __APPLE__
+    double neg_c;
+    double *d;
+#else
+    int mm;
+    double sum = 0.0;
+#endif
+
+    if (N < 2 || (N & 1) || argv == NULL)
+    {
+        *result = 0.0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
+
+    arg0 = *(double *)argv;
 
 #ifdef __APPLE__
-    double neg_c = -arg0;
-    double *d = (double *)malloc(m * sizeof(double));
+    neg_c = -arg0;
+    d = (double *)malloc(m * sizeof(double));
     if (d == NULL)
         return XTRACT_MALLOC_FAILED;
 
@@ -268,9 +293,6 @@ int xtract_spectral_variance(const double *data, const int N, const void *argv, 
     vDSP_sveD(amps, 1, &A, m);              /* sum(amps) */
     free(d);
 #else
-    int mm;
-    double sum = 0.0;
-
 #pragma omp simd reduction(+ : A, sum)
     for (mm = 0; mm < m; mm++)
     {
@@ -309,16 +331,24 @@ int xtract_spectral_skewness(const double *data, const int N, const void *argv, 
     const int m = N >> 1;
     const double *amps = data;
     const double *freqs = data + m;
-    const double arg0 = ((double *)argv)[0];
-    const double arg1 = ((double *)argv)[1];
+    double arg0, arg1;
     double sum_amps = 0.0;
 #ifdef __APPLE__
-    double neg_c = -arg0;
+    double neg_c;
     double *d, *t;
 #else
     int mm;
     double sum = 0.0;
 #endif
+
+    if (N < 2 || (N & 1) || argv == NULL)
+    {
+        *result = 0.0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
+
+    arg0 = ((double *)argv)[0];
+    arg1 = ((double *)argv)[1];
 
     *result = 0.0;
 
@@ -328,6 +358,7 @@ int xtract_spectral_skewness(const double *data, const int N, const void *argv, 
     }
 
 #ifdef __APPLE__
+    neg_c = -arg0;
     d = (double *)malloc(2 * (size_t)m * sizeof(double));
     if (d == NULL)
         return XTRACT_MALLOC_FAILED;
@@ -365,16 +396,24 @@ int xtract_spectral_kurtosis(const double *data, const int N, const void *argv, 
     const int m = N >> 1;
     const double *amps = data;
     const double *freqs = data + m;
-    const double arg0 = ((double *)argv)[0];
-    const double arg1 = ((double *)argv)[1];
+    double arg0, arg1;
     double sum_amps = 0.0;
 #ifdef __APPLE__
-    double neg_c = -arg0;
+    double neg_c;
     double *d;
 #else
     int mm;
     double sum = 0.0;
 #endif
+
+    if (N < 2 || (N & 1) || argv == NULL)
+    {
+        *result = 0.0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
+
+    arg0 = ((double *)argv)[0];
+    arg1 = ((double *)argv)[1];
 
     if (arg1 == 0.0)
     {
@@ -385,6 +424,7 @@ int xtract_spectral_kurtosis(const double *data, const int N, const void *argv, 
     *result = 0.0;
 
 #ifdef __APPLE__
+    neg_c = -arg0;
     d = (double *)malloc((size_t)m * sizeof(double));
     if (d == NULL)
         return XTRACT_MALLOC_FAILED;
@@ -471,8 +511,20 @@ int xtract_tristimulus_1(const double *data, const int N, const void *argv, doub
     double den = 0.0, p1 = 0.0, fund = 0.0, temp = 0.0, h = 0.0;
     const double *freqs;
 
+    if (N < 2 || (N & 1) || argv == NULL)
+    {
+        *result = 0.0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
+
     fund = *(double *)argv;
     freqs = data + n;
+
+    if (fund <= 0.0)
+    {
+        *result = 0.0;
+        return XTRACT_NO_RESULT;
+    }
 
     for (i = 0; i < n; i++)
     {
@@ -505,8 +557,20 @@ int xtract_tristimulus_2(const double *data, const int N, const void *argv, doub
 
     den = p2 = p3 = p4 = 0.0;
 
+    if (N < 2 || (N & 1) || argv == NULL)
+    {
+        *result = 0.0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
+
     fund = *(double *)argv;
     freqs = data + n;
+
+    if (fund <= 0.0)
+    {
+        *result = 0.0;
+        return XTRACT_NO_RESULT;
+    }
 
     for (i = 0; i < n; i++)
     {
@@ -554,8 +618,20 @@ int xtract_tristimulus_3(const double *data, const int N, const void *argv, doub
     double den = 0.0, num = 0.0, fund = 0.0, temp = 0.0, h = 0.0;
     const double *freqs;
 
+    if (N < 2 || (N & 1) || argv == NULL)
+    {
+        *result = 0.0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
+
     fund = *(double *)argv;
     freqs = data + n;
+
+    if (fund <= 0.0)
+    {
+        *result = 0.0;
+        return XTRACT_NO_RESULT;
+    }
 
     for (i = 0; i < n; i++)
     {
@@ -862,6 +938,12 @@ int xtract_spectral_inharmonicity(const double *data, const int N, const void *a
     double num = 0.0, den = 0.0, fund;
     const double *freqs, *amps;
 
+    if (N < 2 || (N & 1) || argv == NULL)
+    {
+        *result = 0.0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
+
     fund = *(double *)argv;
     amps = data;
     freqs = data + n;
@@ -903,6 +985,12 @@ int xtract_odd_even_ratio(const double *data, const int N, const void *argv, dou
     int n = N >> 1, h = 0;
     double odd = 0.0, even = 0.0, fund, temp;
     const double *freqs;
+
+    if (N < 2 || (N & 1) || argv == NULL)
+    {
+        *result = 0.0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
 
     fund = *(double *)argv;
     freqs = data + n;
@@ -998,6 +1086,12 @@ int xtract_spectral_slope(const double *data, const int N, const void *argv, dou
 
     F = A = FA = FXTRACT_SQ = 0.0;
     n = M = N >> 1;
+
+    if (N < 2 || (N & 1))
+    {
+        *result = 0.0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
 
     amps = data;
     freqs = data + n;
@@ -1151,6 +1245,12 @@ int xtract_hps(const double *data, const int N, const void *argv, double *result
     int R, i, off, first, count, peak_index, position1_lwr;
     double q, score, peak, largest1_lwr, ratio1, below, above, denominator, delta;
 
+    if (N < 4 || (N & 1))
+    {
+        *result = 0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
+
     /* The comparisons are false for NaN, and a fractional count has no
      * meaning, so both are rejected here rather than silently truncated */
     if (!(harmonics >= XTRACT_HPS_HARMONICS_MIN && harmonics <= XTRACT_HPS_HARMONICS_MAX) ||
@@ -1160,12 +1260,6 @@ int xtract_hps(const double *data, const int N, const void *argv, double *result
         return XTRACT_ARGUMENT_ERROR;
     }
     R = (int)harmonics;
-
-    if (M < 2)
-    {
-        *result = 0;
-        return XTRACT_NO_RESULT;
-    }
 
     /* Silence has no product peak, whatever its frequency grid says */
     for (i = 0; i < M; ++i)

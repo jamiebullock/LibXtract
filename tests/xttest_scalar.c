@@ -2477,3 +2477,68 @@ UTEST(scalar, argv_only_features_reject_a_null_argv)
     ASSERT_REJECTED(xtract_crest(NULL, 0, NULL, &result));
     ASSERT_REJECTED(xtract_noisiness(NULL, 0, NULL, &result));
 }
+
+UTEST(scalar, spectral_features_reject_an_odd_or_too_short_input_and_a_null_argv)
+{
+    double data[4] = {1.0, 2.0, 100.0, 200.0};
+    double moments[2] = {150.0, 50.0};
+    double f0 = 100.0;
+    double result;
+
+    ASSERT_REJECTED(xtract_spectral_centroid(data, 3, NULL, &result));
+    ASSERT_REJECTED(xtract_spectral_centroid(data, 0, NULL, &result));
+    ASSERT_REJECTED(xtract_spectral_mean(data, 1, NULL, &result));
+    ASSERT_REJECTED(xtract_spectral_variance(data, 3, moments, &result));
+    ASSERT_REJECTED(xtract_spectral_variance(data, 4, NULL, &result));
+    ASSERT_REJECTED(xtract_spread(data, 3, moments, &result));
+    ASSERT_REJECTED(xtract_spectral_skewness(data, 3, moments, &result));
+    ASSERT_REJECTED(xtract_spectral_skewness(data, 4, NULL, &result));
+    ASSERT_REJECTED(xtract_spectral_kurtosis(data, 3, moments, &result));
+    ASSERT_REJECTED(xtract_spectral_kurtosis(data, 4, NULL, &result));
+    ASSERT_REJECTED(xtract_spectral_slope(data, 3, NULL, &result));
+    ASSERT_REJECTED(xtract_tristimulus_1(data, 3, &f0, &result));
+    ASSERT_REJECTED(xtract_tristimulus_1(data, 4, NULL, &result));
+    ASSERT_REJECTED(xtract_tristimulus_2(data, 3, &f0, &result));
+    ASSERT_REJECTED(xtract_tristimulus_2(data, 4, NULL, &result));
+    ASSERT_REJECTED(xtract_tristimulus_3(data, 3, &f0, &result));
+    ASSERT_REJECTED(xtract_tristimulus_3(data, 4, NULL, &result));
+    ASSERT_REJECTED(xtract_spectral_inharmonicity(data, 3, &f0, &result));
+    ASSERT_REJECTED(xtract_spectral_inharmonicity(data, 4, NULL, &result));
+    ASSERT_REJECTED(xtract_odd_even_ratio(data, 3, &f0, &result));
+    ASSERT_REJECTED(xtract_odd_even_ratio(data, 4, NULL, &result));
+    ASSERT_REJECTED(xtract_hps(data, 3, NULL, &result));
+    ASSERT_REJECTED(xtract_hps(data, 2, NULL, &result));
+
+    ASSERT_EQ(xtract_spectral_centroid(data, 2, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 2.0, EPSILON);
+    ASSERT_EQ(xtract_spectral_variance(data, 2, moments, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_tristimulus_1(data, 2, &f0, &result), XTRACT_NO_RESULT);
+}
+
+UTEST(scalar, spectral_centroid_of_a_silent_spectrum_has_no_result)
+{
+    double data[4] = {0.0, 0.0, 100.0, 200.0};
+    double result = 1.0;
+
+    ASSERT_EQ(xtract_spectral_centroid(data, 4, NULL, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
+    result = 1.0;
+    ASSERT_EQ(xtract_spectral_mean(data, 4, NULL, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
+}
+
+UTEST(scalar, tristimulus_with_a_non_positive_fundamental_has_no_result)
+{
+    double data[4] = {1.0, 2.0, 100.0, 200.0};
+    double f0 = -100.0;
+    double result = 1.0;
+
+    ASSERT_EQ(xtract_tristimulus_1(data, 4, &f0, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
+    result = 1.0;
+    ASSERT_EQ(xtract_tristimulus_2(data, 4, &f0, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
+    result = 1.0;
+    ASSERT_EQ(xtract_tristimulus_3(data, 4, &f0, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
+}

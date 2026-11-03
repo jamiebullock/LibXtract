@@ -350,6 +350,8 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_SPECTRAL_KURTOSIS:
         case XTRACT_SPECTRAL_CENTROID:
         case XTRACT_SPECTRAL_SLOPE:
+        case XTRACT_SPREAD:
+        case XTRACT_HPS:
             *data_format = XTRACT_SPECTRAL;
             break;
         case XTRACT_ROLLOFF:
@@ -360,9 +362,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_IRREGULARITY_J:
         case XTRACT_SMOOTHNESS:
         case XTRACT_FLATNESS:
-        case XTRACT_SPREAD:
         case XTRACT_POWER:
-        case XTRACT_HPS:
         case XTRACT_PEAK_SPECTRUM:
         case XTRACT_SUBBANDS:
         case XTRACT_MFCC:
