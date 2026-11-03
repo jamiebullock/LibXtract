@@ -98,6 +98,25 @@ UTEST(descriptors, audited_result_ranges_and_units)
     ASSERT_EQ(xtract_free_descriptors(fd), XTRACT_SUCCESS);
 }
 
+UTEST(descriptors, argv_ranges_match_the_functions)
+{
+    xtract_function_descriptor_t *fd = xtract_make_descriptors();
+    ASSERT_TRUE(fd != NULL);
+
+    CHECK_REL(fd[XTRACT_ROLLOFF].argv.min[0], 22050.0 / 65536.0, EPSILON);
+    CHECK_REL(fd[XTRACT_ROLLOFF].argv.max[0], 192000.0 / 16.0, EPSILON);
+    ASSERT_EQ(fd[XTRACT_ROLLOFF].argv.unit[0], XTRACT_HERTZ);
+    CHECK_REL(fd[XTRACT_ROLLOFF].argv.min[1], 0.0, EPSILON);
+    CHECK_REL(fd[XTRACT_ROLLOFF].argv.max[1], 100.0, EPSILON);
+
+    ASSERT_EQ(fd[XTRACT_SKEWNESS].argv.min[0], XTRACT_UNBOUNDED_MIN);
+    ASSERT_EQ(fd[XTRACT_SKEWNESS].argv.max[1], XTRACT_UNBOUNDED_MAX);
+    ASSERT_EQ(fd[XTRACT_CREST].argv.min[1], XTRACT_UNBOUNDED_MIN);
+    ASSERT_EQ(fd[XTRACT_NOISINESS].argv.max[0], XTRACT_UNBOUNDED_MAX);
+
+    ASSERT_EQ(xtract_free_descriptors(fd), XTRACT_SUCCESS);
+}
+
 UTEST(dispatch, every_feature_slot_points_to_a_function)
 {
     int f;

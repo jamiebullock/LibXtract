@@ -2370,3 +2370,110 @@ UTEST(scalar, harmonic_number_no_ub_on_zero_fundamental)
     double result = -1.0;
     ASSERT_EQ(xtract_tristimulus_1(data, 4, &fund0, &result), XTRACT_NO_RESULT);
 }
+
+/* ===== Argument contract ===== */
+
+#define ASSERT_REJECTED(call)                     \
+    do                                            \
+    {                                             \
+        result = 1.0;                             \
+        ASSERT_EQ((call), XTRACT_ARGUMENT_ERROR); \
+        ASSERT_EQ(result, 0.0);                   \
+    } while (0)
+
+UTEST(scalar, statistics_reject_too_few_elements_and_a_null_argv)
+{
+    double data[2] = {1.0, 3.0};
+    double moments[2] = {2.0, 1.0};
+    double result;
+
+    ASSERT_REJECTED(xtract_mean(data, 0, NULL, &result));
+    ASSERT_REJECTED(xtract_variance(data, 1, moments, &result));
+    ASSERT_REJECTED(xtract_variance(data, 2, NULL, &result));
+    ASSERT_REJECTED(xtract_average_deviation(data, 0, moments, &result));
+    ASSERT_REJECTED(xtract_average_deviation(data, 2, NULL, &result));
+    ASSERT_REJECTED(xtract_skewness(data, 0, moments, &result));
+    ASSERT_REJECTED(xtract_skewness(data, 2, NULL, &result));
+    ASSERT_REJECTED(xtract_kurtosis(data, 0, moments, &result));
+    ASSERT_REJECTED(xtract_kurtosis(data, 2, NULL, &result));
+
+    ASSERT_EQ(xtract_mean(data, 1, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 1.0, EPSILON);
+    ASSERT_EQ(xtract_variance(data, 2, moments, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 2.0, EPSILON);
+    ASSERT_EQ(xtract_average_deviation(data, 1, moments, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 1.0, EPSILON);
+}
+
+UTEST(scalar, standard_deviation_rejects_a_negative_variance_and_a_null_argv)
+{
+    double variance = -1.0;
+    double result;
+
+    ASSERT_REJECTED(xtract_standard_deviation(NULL, 0, &variance, &result));
+    ASSERT_REJECTED(xtract_standard_deviation(NULL, 0, NULL, &result));
+    ASSERT_REJECTED(xtract_spectral_standard_deviation(NULL, 0, &variance, &result));
+    ASSERT_REJECTED(xtract_spectral_standard_deviation(NULL, 0, NULL, &result));
+
+    variance = 0.0;
+    ASSERT_EQ(xtract_standard_deviation(NULL, 0, &variance, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(result, 0.0);
+    ASSERT_EQ(xtract_spectral_standard_deviation(NULL, 0, &variance, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(result, 0.0);
+}
+
+UTEST(scalar, magnitude_features_reject_too_few_elements_and_a_null_argv)
+{
+    double data[3] = {1.0, 2.0, 3.0};
+    double threshold = 0.0;
+    double result;
+
+    ASSERT_REJECTED(xtract_irregularity_k(data, 2, NULL, &result));
+    ASSERT_REJECTED(xtract_irregularity_j(data, 1, NULL, &result));
+    ASSERT_REJECTED(xtract_smoothness(data, 2, NULL, &result));
+    ASSERT_REJECTED(xtract_zcr(data, 0, NULL, &result));
+    ASSERT_REJECTED(xtract_flatness(data, 0, NULL, &result));
+    ASSERT_REJECTED(xtract_rms_amplitude(data, 0, NULL, &result));
+    ASSERT_REJECTED(xtract_sum(data, 0, NULL, &result));
+    ASSERT_REJECTED(xtract_nonzero_count(data, 0, NULL, &result));
+    ASSERT_REJECTED(xtract_lowest_value(data, 0, &threshold, &result));
+    ASSERT_REJECTED(xtract_lowest_value(data, 3, NULL, &result));
+    ASSERT_REJECTED(xtract_peak(data, 3, NULL, &result));
+
+    ASSERT_EQ(xtract_irregularity_k(data, 3, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_irregularity_j(data, 2, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_smoothness(data, 3, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_zcr(data, 1, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_flatness(data, 1, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_rms_amplitude(data, 1, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_sum(data, 1, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_nonzero_count(data, 1, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_lowest_value(data, 1, &threshold, &result), XTRACT_SUCCESS);
+}
+
+UTEST(scalar, rolloff_rejects_a_percentile_outside_0_to_100_and_a_null_argv)
+{
+    double data[4] = {1.0, 1.0, 1.0, 1.0};
+    double argv[2] = {100.0, 101.0};
+    double result;
+
+    ASSERT_REJECTED(xtract_rolloff(data, 4, argv, &result));
+    argv[1] = -1.0;
+    ASSERT_REJECTED(xtract_rolloff(data, 4, argv, &result));
+    argv[1] = 50.0;
+    ASSERT_REJECTED(xtract_rolloff(data, 0, argv, &result));
+    ASSERT_REJECTED(xtract_rolloff(data, 4, NULL, &result));
+
+    ASSERT_EQ(xtract_rolloff(data, 4, argv, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 200.0, EPSILON);
+}
+
+UTEST(scalar, argv_only_features_reject_a_null_argv)
+{
+    double result;
+
+    ASSERT_REJECTED(xtract_flatness_db(NULL, 0, NULL, &result));
+    ASSERT_REJECTED(xtract_tonality(NULL, 0, NULL, &result));
+    ASSERT_REJECTED(xtract_crest(NULL, 0, NULL, &result));
+    ASSERT_REJECTED(xtract_noisiness(NULL, 0, NULL, &result));
+}

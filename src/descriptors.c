@@ -121,8 +121,8 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             break;
             /* argc = 2 */;
         case XTRACT_ROLLOFF:
-            *argv_min = XTRACT_FFT_BANDS_MIN;
-            *argv_max = XTRACT_FFT_BANDS_MAX;
+            *argv_min = XTRACT_SR_LOWER_LIMIT / XTRACT_FFT_BANDS_MAX;
+            *argv_max = XTRACT_SR_UPPER_LIMIT / XTRACT_FFT_BANDS_MIN;
             *argv_def = XTRACT_SPEC_BW_DEF;
             *argv_unit = XTRACT_HERTZ;
             *(argv_min + 1) = 0.0;
@@ -156,13 +156,13 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_SPECTRAL_SKEWNESS:
         case XTRACT_SPECTRAL_KURTOSIS:
         case XTRACT_CREST:
-            *argv_min = XTRACT_NONE;
-            *argv_max = XTRACT_NONE;
-            *argv_def = XTRACT_NONE;
+            *argv_min = XTRACT_UNBOUNDED_MIN;
+            *argv_max = XTRACT_UNBOUNDED_MAX;
+            *argv_def = XTRACT_NO_DEFAULT;
             *argv_unit = XTRACT_UNIT_NONE;
-            *(argv_min + 1) = XTRACT_NONE;
-            *(argv_max + 1) = XTRACT_NONE;
-            *(argv_def + 1) = XTRACT_NONE;
+            *(argv_min + 1) = XTRACT_UNBOUNDED_MIN;
+            *(argv_max + 1) = XTRACT_UNBOUNDED_MAX;
+            *(argv_def + 1) = XTRACT_NO_DEFAULT;
             *(argv_unit + 1) = XTRACT_UNIT_NONE;
             break;
             /* argc = 4 */
