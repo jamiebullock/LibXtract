@@ -121,9 +121,6 @@ int LLVMFuzzerInitialize(int *argc, char ***argv)
     return 0;
 }
 
-/* The number of input elements a call to this feature declares: the
- * fuzzer-chosen n for the six features with no fixed-size dependency, the
- * paired width for spectral_subband_centroids, and VEC_N otherwise. */
 static int input_length(int feature, int n)
 {
     switch (feature)
@@ -179,18 +176,12 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     data += fz_bytes;
     size -= fz_bytes;
 
-    /* N for the features that need no plan or filterbank sized to VEC_N.
-     * The bytes are taken as an integer modulo VEC_N + 1 so every length is
-     * reached evenly; read as a double, most byte patterns are NaN or far out
-     * of range and would clamp to an endpoint. */
     memcpy(&n_raw, &fz[4], sizeof(n_raw));
     n = (int)(n_raw % (VEC_N + 1));
     in_len = input_length(feature, n);
 
-    /* Exactly the declared length, so that any read past the input is out of
-     * bounds to the sanitizer. At a length of 0 the allocation holds one
-     * element and the call receives the pointer one past it: non-NULL, with
-     * nothing that may be read. */
+    /* At a length of 0 the allocation holds one element and the call receives
+     * the pointer one past it: non-NULL, with nothing that may be read */
     in = (double *)calloc(in_len > 0 ? (size_t)in_len : 1, sizeof(double));
     result = (double *)calloc(RESULT_CAP, sizeof(double));
     if (in == NULL || result == NULL)

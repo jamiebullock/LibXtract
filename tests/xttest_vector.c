@@ -148,7 +148,7 @@ UTEST(vector, subbands_rejects_invalid_arguments)
     ASSERT_EQ(xtract_subbands(data, 8, NULL, result), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(xtract_subbands(data, 0, argv, result), XTRACT_ARGUMENT_ERROR);
 
-    argv[1] = 0; /* no bands: was an integer division by zero */
+    argv[1] = 0; /* no bands */
     ASSERT_EQ(xtract_subbands(data, 8, argv, result), XTRACT_ARGUMENT_ERROR);
     argv[1] = 9; /* more linear bands than bins */
     ASSERT_EQ(xtract_subbands(data, 8, argv, result), XTRACT_ARGUMENT_ERROR);
@@ -172,7 +172,6 @@ UTEST(vector, subbands_rejects_invalid_arguments)
     argv[3] = 8;
     ASSERT_EQ(xtract_subbands(data, 8, argv, result), XTRACT_ARGUMENT_ERROR);
 
-    /* Nothing above wrote the result */
     CHECK_REL(result[0], -1.0, EPSILON);
 
     argv[3] = 0;

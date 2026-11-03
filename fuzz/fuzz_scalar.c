@@ -120,10 +120,8 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
             n = MAX_N;
     }
 
-    /* Exactly N elements, so that any read past the input is out of bounds
-     * to the sanitizer. At N = 0 the allocation holds one element and the
-     * call receives the pointer one past it: non-NULL, with nothing that may
-     * be read. */
+    /* At N = 0 the allocation holds one element and the call receives the
+     * pointer one past it: non-NULL, with nothing that may be read */
     in = (double *)calloc(n > 0 ? (size_t)n : 1, sizeof(double));
     /* Over-allocate the result: covered features write a single value, but the
      * margin keeps a harness mis-sizing from masquerading as an overflow. */
