@@ -9,9 +9,8 @@
  *
  * Every scalar feature has the uniform signature
  *     int xtract_f(const double *data, int N, const void *argv, double *result)
- * and writes a single scalar to result[0]. This harness drives all of them:
- * the enum-backed features through the xtract[] dispatch table, and peak (the
- * one feature with no table slot) by direct call.
+ * and writes a single scalar to result[0]. This harness drives all of them
+ * through the xtract[] dispatch table.
  *
  * The fuzzer's bytes become a feature selector, a flag that passes a NULL
  * argv, an argv buffer, and the input vector, so NaN, +/-Inf, denormals,
@@ -56,11 +55,9 @@ static const int enum_features[] = {
     XTRACT_SHARPNESS, XTRACT_SPECTRAL_SLOPE, XTRACT_LOWEST_VALUE,
     XTRACT_HIGHEST_VALUE, XTRACT_SUM, XTRACT_NONZERO_COUNT, XTRACT_HPS,
     XTRACT_F0, XTRACT_FAILSAFE_F0, XTRACT_WAVELET_F0, XTRACT_MCLEOD_F0,
-    XTRACT_MIDICENT};
+    XTRACT_MIDICENT, XTRACT_PEAK};
 
-#define N_ENUM ((int)(sizeof(enum_features) / sizeof(enum_features[0])))
-/* peak has no enum / dispatch slot, so it is one extra feature called directly. */
-#define N_FEATURES (N_ENUM + 1)
+#define N_FEATURES ((int)(sizeof(enum_features) / sizeof(enum_features[0])))
 
 int LLVMFuzzerInitialize(int *argc, char ***argv)
 {
@@ -99,16 +96,8 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     data += argv_bytes;
     size -= argv_bytes;
 
-    if (sel < N_ENUM)
-    {
-        feature = enum_features[sel];
-        fn = xtract[feature];
-    }
-    else
-    {
-        feature = -1;
-        fn = xtract_peak;
-    }
+    feature = enum_features[sel];
+    fn = xtract[feature];
 
     /* The two state-dependent features run at the size they were initialised
      * for, reading a full window padded with zeros when the fuzzer gave less. */

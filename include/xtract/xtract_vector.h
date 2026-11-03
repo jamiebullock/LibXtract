@@ -116,10 +116,10 @@ extern "C"
 
     /** \brief Extract centroids of the spectral mel subbands
      *
-     * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector, (e.g. the array pointed to by *result from xtract_spectrum(), xtract_peak_spectrum() or xtract_harmonic_spectrum()).
-     * \param N: the number of array elements to be considered, at least 1
-     * \param *argv: a pointer to a data structure of type xtract_mel_filter, containing n_filters coefficient tables to make up a mel-spaced filterbank; n_filters must be at least 1 and filters, and each of its rows, non-NULL, each row holding at least N coefficients
-     * \param *result: a pointer to an array containing the spectral band centroids
+     * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector, (e.g. the array pointed to by *result from xtract_spectrum(), xtract_peak_spectrum() or xtract_harmonic_spectrum()): N/2 amplitudes followed by N/2 frequencies
+     * \param N: the size of the array pointed to by *data, at least 2 and even
+     * \param *argv: a pointer to a data structure of type xtract_mel_filter, containing n_filters coefficient tables to make up a mel-spaced filterbank over the N/2 bins, the bank xtract_init_mfcc() builds for the transform that produced the spectrum; n_filters must be at least 1 and filters, and each of its rows, non-NULL, each row holding at least N / 2 coefficients
+     * \param *result: a pointer to an array of n_filters doubles containing the spectral band centroids, in the unit of the frequencies
      *
      * Note: for a more 'accurate' result *result from xtract_peak_spectrum() can be passed in. This gives the interpolated peak frequency locations.
      */

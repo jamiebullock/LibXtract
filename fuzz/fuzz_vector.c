@@ -16,8 +16,7 @@
  * autocorrelation, amdf, asdf, lpc, lpcc) take a fuzzer-chosen N from 0 up
  * to it. The input is allocated at exactly the length each call declares,
  * so a read past it is out of bounds to the sanitizer. Features are called
- * by name (two of them, mmbses and spectral_subband_centroids, have no
- * xtract[] dispatch slot).
+ * by name.
  *
  * What is fuzzed: the input vector (always), a flag that passes a NULL argv,
  * and the plain scalar argv fields (spectrum type, peak/harmonic thresholds,
@@ -49,14 +48,6 @@ enum
     N_FILTERS = 13,
     RESULT_CAP = 2 * VEC_N + 64
 };
-/* spectral_subband_centroids reads N coefficients followed by N per-bin
- * frequencies, i.e. 2*N doubles for N bins. Its input is sized to that
- * width so the read stays in bounds. */
-enum
-{
-    IN_CAP = 2 * VEC_N
-};
-
 enum
 {
     FZ_SPECTRUM,
@@ -134,8 +125,6 @@ static int input_length(int feature, int n)
     case FZ_LPC:
     case FZ_LPCC:
         return n;
-    case FZ_SPECTRAL_SUBBAND_CENTROIDS:
-        return IN_CAP;
     default:
         return VEC_N;
     }

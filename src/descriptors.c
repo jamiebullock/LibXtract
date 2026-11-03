@@ -83,11 +83,19 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_MEL_SPECTROGRAM:
         case XTRACT_GFCC:
         case XTRACT_GAMMATONE_SPECTROGRAM:
+        case XTRACT_MMBSES:
+        case XTRACT_SPECTRAL_SUBBAND_CENTROIDS:
         case XTRACT_LPC:
             *argv_min = XTRACT_UNBOUNDED_MIN;
             *argv_max = XTRACT_UNBOUNDED_MAX;
             *argv_def = XTRACT_NO_DEFAULT;
             *argv_unit = XTRACT_DBFS;
+            break;
+        case XTRACT_PEAK:
+            *argv_min = XTRACT_UNBOUNDED_MIN;
+            *argv_max = XTRACT_UNBOUNDED_MAX;
+            *argv_def = XTRACT_NO_DEFAULT;
+            *argv_unit = XTRACT_UNIT_ANY;
             break;
         case XTRACT_LPCC:
             /* argv[0] is the cepstrum length (Q); when omitted xtract_lpcc
@@ -279,10 +287,13 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_WAVELET_F0:
         case XTRACT_MCLEOD_F0:
         case XTRACT_MIDICENT:
+        case XTRACT_PEAK:
             *argv_donor = XTRACT_ANY;
             break;
         case XTRACT_MFCC:
         case XTRACT_MEL_SPECTROGRAM:
+        case XTRACT_MMBSES:
+        case XTRACT_SPECTRAL_SUBBAND_CENTROIDS:
             *argv_donor = XTRACT_INIT_MFCC;
             break;
         case XTRACT_GFCC:
@@ -360,6 +371,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_SUM:
         case XTRACT_WINDOWED:
         case XTRACT_SMOOTHED:
+        case XTRACT_PEAK:
             *data_format = XTRACT_ARBITRARY_SERIES;
             break;
         case XTRACT_SPECTRAL_MEAN:
@@ -372,7 +384,11 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_SPECTRAL_SLOPE:
         case XTRACT_SPREAD:
         case XTRACT_HPS:
+        case XTRACT_SPECTRAL_SUBBAND_CENTROIDS:
             *data_format = XTRACT_SPECTRAL;
+            break;
+        case XTRACT_MMBSES:
+            *data_format = XTRACT_SPECTRAL_MAGNITUDE_PHASE;
             break;
         case XTRACT_ROLLOFF:
         case XTRACT_NOISINESS:
@@ -505,6 +521,8 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_WINDOWED:
         case XTRACT_SMOOTHED:
         case XTRACT_SUBBANDS:
+        case XTRACT_PEAK:
+        case XTRACT_MMBSES:
             *data_unit = XTRACT_UNIT_ANY;
             break;
         case XTRACT_SPECTRAL_MEAN:
@@ -518,6 +536,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_HARMONIC_SPECTRUM:
         case XTRACT_SPECTRAL_INHARMONICITY:
         case XTRACT_ODD_EVEN_RATIO:
+        case XTRACT_SPECTRAL_SUBBAND_CENTROIDS:
             *data_unit = XTRACT_ANY_AMPLITUDE_HERTZ;
             break;
         }
@@ -753,6 +772,28 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
                       "Extract the spectral crest measure of an audio spectrum");
             copy_author(author, "Peeters");
             *year = 2003;
+            break;
+        case XTRACT_PEAK:
+            copy_name(name, "peak");
+            copy_name(p_name, "Peak");
+            copy_desc(desc, "Report whether the last value of a series is a peak");
+            copy_desc(p_desc, "Report whether the current value is a peak of the recent values");
+            copy_author(author, "");
+            break;
+        case XTRACT_MMBSES:
+            copy_name(name, "mmbses");
+            copy_name(p_name, "Mel Multi-Band Spectral Entropy Signature");
+            copy_desc(desc, "Extract mel band spectral entropies from a magnitude/phase spectrum");
+            copy_desc(p_desc, "Extract the spectral entropy of each mel band from an audio spectrum");
+            copy_author(author, "Rincon et al.");
+            *year = 2013;
+            break;
+        case XTRACT_SPECTRAL_SUBBAND_CENTROIDS:
+            copy_name(name, "spectral_subband_centroids");
+            copy_name(p_name, "Spectral Subband Centroids");
+            copy_desc(desc, "Extract the centroid of each mel band from a spectrum");
+            copy_desc(p_desc, "Extract the spectral centroid of each mel band from an audio spectrum");
+            copy_author(author, "");
             break;
         case XTRACT_MFCC:
             copy_name(name, "mfcc");
@@ -1109,6 +1150,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_MIDICENT:
         case XTRACT_FLATNESS_DB:
         case XTRACT_TONALITY:
+        case XTRACT_PEAK:
             *argc = 1;
             *argv_type = XTRACT_FLOAT;
             break;
@@ -1141,6 +1183,8 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_MEL_SPECTROGRAM:
         case XTRACT_GFCC:
         case XTRACT_GAMMATONE_SPECTROGRAM:
+        case XTRACT_MMBSES:
+        case XTRACT_SPECTRAL_SUBBAND_CENTROIDS:
             *argc = 1;
             *argv_type = XTRACT_MEL_FILTER;
             break;
@@ -1244,6 +1288,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_FLUX:
         case XTRACT_LNORM:
         case XTRACT_NONZERO_COUNT:
+        case XTRACT_PEAK:
             *is_scalar = XTRACT_TRUE;
             break;
         case XTRACT_AUTOCORRELATION:
@@ -1265,6 +1310,8 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_DIFFERENCE_VECTOR:
         case XTRACT_WINDOWED:
         case XTRACT_SMOOTHED:
+        case XTRACT_MMBSES:
+        case XTRACT_SPECTRAL_SUBBAND_CENTROIDS:
             *is_scalar = XTRACT_FALSE;
             break;
         default:
@@ -1343,6 +1390,9 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_HARMONIC_SPECTRUM:
         case XTRACT_WINDOWED:
         case XTRACT_SMOOTHED:
+        case XTRACT_PEAK:
+        case XTRACT_MMBSES:
+        case XTRACT_SPECTRAL_SUBBAND_CENTROIDS:
         default:
             *is_delta = XTRACT_FALSE;
             break;
@@ -1370,6 +1420,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             case XTRACT_LNORM:
             case XTRACT_NONZERO_COUNT:
             case XTRACT_WINDOWED:
+            case XTRACT_PEAK:
                 *result_unit = XTRACT_UNIT_ANY;
                 *result_min = XTRACT_UNBOUNDED_MIN;
                 *result_max = XTRACT_UNBOUNDED_MAX;
@@ -1532,6 +1583,15 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             case XTRACT_GAMMATONE_SPECTROGRAM:
                 *result_format = XTRACT_MEL_COEFFS;
                 *result_unit = XTRACT_DBFS;
+                break;
+            case XTRACT_MMBSES:
+                /* differential entropy per band, in nats: dimensionless */
+                *result_format = XTRACT_MEL_COEFFS;
+                *result_unit = XTRACT_UNIT_NONE;
+                break;
+            case XTRACT_SPECTRAL_SUBBAND_CENTROIDS:
+                *result_format = XTRACT_MEL_COEFFS;
+                *result_unit = XTRACT_HERTZ;
                 break;
             case XTRACT_LPC:
                 /* predictor/reflection coefficients: dimensionless */
