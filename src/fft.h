@@ -33,6 +33,7 @@ typedef struct xtract_ooura_data_
     int *ooura_ip;
     double *ooura_w;
     bool initialised;
+    int N;
 } xtract_ooura_data;
 #else
 typedef struct xtract_vdsp_data_
@@ -41,6 +42,7 @@ typedef struct xtract_vdsp_data_
     DSPDoubleSplitComplex fft;
     vDSP_Length log2N;
     bool initialised;
+    int N;
 } xtract_vdsp_data;
 #endif
 

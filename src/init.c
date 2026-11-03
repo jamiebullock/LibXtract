@@ -68,6 +68,7 @@ int xtract_init_ooura_(int N, int feature_name)
             xtract_free_ooura_data(&ooura_data_spectrum);
         }
         xtract_init_ooura_data(&ooura_data_spectrum, M);
+        ooura_data_spectrum.N = N;
         break;
     case XTRACT_AUTOCORRELATION_FFT:
         if (ooura_data_autocorrelation_fft.initialised)
@@ -75,6 +76,7 @@ int xtract_init_ooura_(int N, int feature_name)
             xtract_free_ooura_data(&ooura_data_autocorrelation_fft);
         }
         xtract_init_ooura_data(&ooura_data_autocorrelation_fft, M);
+        ooura_data_autocorrelation_fft.N = N;
         break;
     case XTRACT_DCT:
         if (ooura_data_dct.initialised)
@@ -82,6 +84,7 @@ int xtract_init_ooura_(int N, int feature_name)
             xtract_free_ooura_data(&ooura_data_dct);
         }
         xtract_init_ooura_data(&ooura_data_dct, M);
+        ooura_data_dct.N = N;
         break;
     case XTRACT_MFCC:
         if (ooura_data_mfcc.initialised)
@@ -89,6 +92,7 @@ int xtract_init_ooura_(int N, int feature_name)
             xtract_free_ooura_data(&ooura_data_mfcc);
         }
         xtract_init_ooura_data(&ooura_data_mfcc, M);
+        ooura_data_mfcc.N = N;
         break;
     }
 
@@ -144,6 +148,7 @@ int xtract_init_vdsp_(int N, int feature_name)
             xtract_free_vdsp_data(&vdsp_data_spectrum);
         }
         xtract_init_vdsp_data(&vdsp_data_spectrum, N);
+        vdsp_data_spectrum.N = N;
         break;
     case XTRACT_AUTOCORRELATION_FFT:
         if (vdsp_data_autocorrelation_fft.initialised)
@@ -151,6 +156,7 @@ int xtract_init_vdsp_(int N, int feature_name)
             xtract_free_vdsp_data(&vdsp_data_autocorrelation_fft);
         }
         xtract_init_vdsp_data(&vdsp_data_autocorrelation_fft, N * 2); /* allow for zero padding */
+        vdsp_data_autocorrelation_fft.N = N;
         break;
     case XTRACT_DCT:
         if (vdsp_data_dct.initialised)
@@ -158,6 +164,7 @@ int xtract_init_vdsp_(int N, int feature_name)
             xtract_free_vdsp_data(&vdsp_data_dct);
         }
         xtract_init_vdsp_data(&vdsp_data_dct, N);
+        vdsp_data_dct.N = N;
         break;
     case XTRACT_MFCC:
         if (vdsp_data_mfcc.initialised)
@@ -165,6 +172,7 @@ int xtract_init_vdsp_(int N, int feature_name)
             xtract_free_vdsp_data(&vdsp_data_mfcc);
         }
         xtract_init_vdsp_data(&vdsp_data_mfcc, N);
+        vdsp_data_mfcc.N = N;
         break;
     }
 

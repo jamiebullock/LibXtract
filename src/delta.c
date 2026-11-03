@@ -34,6 +34,12 @@ int xtract_flux(const double *data, const int N, const void *argv, double *resul
     int n, M, rv;
     double *diff;
 
+    if (N < 2 || (N & 1) || argv == NULL)
+    {
+        *result = 0.0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
+
     M = N >> 1;
 
     diff = (double *)malloc(M * sizeof(double));
@@ -58,8 +64,15 @@ int xtract_lnorm(const double *data, const int N, const void *argv, double *resu
         normalise,
         k = 0;
 
-    double order = *(double *)argv;
+    double order;
 
+    if (N < 1 || argv == NULL)
+    {
+        *result = 0.0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
+
+    order = *(double *)argv;
     type = xtract_argv_int(*((double *)argv + 1));
     normalise = xtract_argv_int(*((double *)argv + 2));
 
@@ -128,6 +141,9 @@ int xtract_difference_vector(const double *data, const int N, const void *argv, 
         *frame2;
 
     int n = N >> 1;
+
+    if (N < 2 || (N & 1))
+        return XTRACT_ARGUMENT_ERROR;
 
     frame1 = data;
     frame2 = data + n;

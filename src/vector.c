@@ -25,6 +25,7 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
     int vector = 0;
     int withDC = 0;
     int normalise = 0;
+    double type;
     double q = 0.0;
     double temp = 0.0;
     double max = 0.0;
@@ -41,23 +42,25 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
     double half = 0.5;
 #endif
 
+    if (argv == NULL)
+        return XTRACT_ARGUMENT_ERROR;
+
     q = *(double *)argv;
-    vector = xtract_argv_int(*((double *)argv + 1));
+    type = *((double *)argv + 1);
+    if (!(type >= XTRACT_MAGNITUDE_SPECTRUM && type <= XTRACT_MAGNITUDE_PHASE_SPECTRUM))
+        return XTRACT_ARGUMENT_ERROR;
+    vector = (int)type;
     withDC = xtract_argv_int(*((double *)argv + 2));
     normalise = xtract_argv_int(*((double *)argv + 3));
 
-    XTRACT_CHECK_q;
 #ifdef USE_OOURA
-    if (!ooura_data_spectrum.initialised)
+    if (!ooura_data_spectrum.initialised || ooura_data_spectrum.N != N)
 #else
-    if (!vdsp_data_spectrum.initialised)
+    if (!vdsp_data_spectrum.initialised || vdsp_data_spectrum.N != N)
 #endif
-    {
-        fprintf(stderr,
-                "libxtract: error: xtract_spectrum() failed, "
-                "fft data unitialised.\n");
-        return XTRACT_NO_RESULT;
-    }
+        return XTRACT_BAD_STATE;
+
+    XTRACT_CHECK_q;
 
 #ifdef USE_OOURA
     /* ooura is in-place
@@ -380,6 +383,13 @@ int xtract_autocorrelation_fft(const double *data, const int N, const void *argv
 #endif
 
 #ifdef USE_OOURA
+    if (!ooura_data_autocorrelation_fft.initialised || ooura_data_autocorrelation_fft.N != N)
+#else
+    if (!vdsp_data_autocorrelation_fft.initialised || vdsp_data_autocorrelation_fft.N != N)
+#endif
+        return XTRACT_BAD_STATE;
+
+#ifdef USE_OOURA
     /* Zero pad the input vector */
     rfft = (double *)calloc(M, sizeof(double));
     if (rfft == NULL)
@@ -453,9 +463,28 @@ int xtract_autocorrelation_fft(const double *data, const int N, const void *argv
     return XTRACT_SUCCESS;
 }
 
+/* A usable filterbank: at least one filter, each with a table to read */
+static int filterbank_is_valid(const xtract_mel_filter *f)
+{
+    int filter;
+
+    if (f == NULL || f->n_filters < 1 || f->filters == NULL)
+        return 0;
+    for (filter = 0; filter < f->n_filters; filter++)
+    {
+        if (f->filters[filter] == NULL)
+            return 0;
+    }
+
+    return 1;
+}
+
 static int filterbank_spectrogram(const double *data, const int N, const xtract_mel_filter *f, double *result)
 {
     int n, filter;
+
+    if (N < 1 || !filterbank_is_valid(f))
+        return XTRACT_ARGUMENT_ERROR;
 
     for (filter = 0; filter < f->n_filters; filter++)
     {
@@ -477,15 +506,22 @@ static int filterbank_spectrogram(const double *data, const int N, const xtract_
 
 static int cepstral_coefficients(const double *data, const int N, const xtract_mel_filter *f, double *result)
 {
-    double *temp = (double *)calloc(f->n_filters, sizeof(double));
+    double *temp;
+    int rv;
+
+    if (N < 1 || !filterbank_is_valid(f))
+        return XTRACT_ARGUMENT_ERROR;
+
+    temp = (double *)calloc(f->n_filters, sizeof(double));
     if (temp == NULL)
         return XTRACT_MALLOC_FAILED;
 
-    filterbank_spectrogram(data, N, f, temp);
-    xtract_dct(temp, f->n_filters, f->dct_table, result);
+    rv = filterbank_spectrogram(data, N, f, temp);
+    if (rv == XTRACT_SUCCESS)
+        rv = xtract_dct(temp, f->n_filters, f->dct_table, result);
     free(temp);
 
-    return XTRACT_SUCCESS;
+    return rv;
 }
 
 int xtract_mel_spectrogram(const double *data, const int N, const void *argv, double *result)
@@ -526,6 +562,9 @@ int xtract_mmbses(const double *data, const int N, const void *argv, double *res
     /* ln(2*pi*e) = ln(2*pi) + 1, avoiding the non-portable M_E. */
     const double gaussian_term = log(2.0 * M_PI) + 1.0;
     int n, filter;
+
+    if (N < 2 || (N & 1) || !filterbank_is_valid(f))
+        return XTRACT_ARGUMENT_ERROR;
 
     for (filter = 0; filter < f->n_filters; filter++)
     {
@@ -581,6 +620,9 @@ int xtract_spectral_subband_centroids(const double *data, const int N, const voi
     const double *amps = data;
     const double *freqs = data + N;
 
+    if (N < 1 || !filterbank_is_valid(f))
+        return XTRACT_ARGUMENT_ERROR;
+
     for (filter = 0; filter < f->n_filters; filter++)
     {
         double FA = 0.0, A = 0.0;
@@ -604,6 +646,9 @@ int xtract_dct(const double *data, const int N, const void *argv, double *result
 {
     const double *table = (const double *)argv;
     int n, m;
+
+    if (N < 1)
+        return XTRACT_ARGUMENT_ERROR;
 
     for (n = 0; n < N; ++n)
     {
@@ -635,6 +680,9 @@ int xtract_autocorrelation(const double *data, const int N, const void *argv, do
 
     double corr;
 
+    if (N < 1)
+        return XTRACT_ARGUMENT_ERROR;
+
     while (n--)
     {
         corr = 0;
@@ -653,6 +701,9 @@ int xtract_amdf(const double *data, const int N, const void *argv, double *resul
     int n = N, i;
 
     double md, temp;
+
+    if (N < 1)
+        return XTRACT_ARGUMENT_ERROR;
 
     while (n--)
     {
@@ -675,6 +726,9 @@ int xtract_asdf(const double *data, const int N, const void *argv, double *resul
 
     double sd;
 
+    if (N < 1)
+        return XTRACT_ARGUMENT_ERROR;
+
     while (n--)
     {
         sd = 0.0;
@@ -693,7 +747,18 @@ int xtract_bark_coefficients(const double *data, const int N, const void *argv, 
 {
     int *limits, band, n;
 
+    if (N < 1 || argv == NULL)
+        return XTRACT_ARGUMENT_ERROR;
+
     limits = (int *)argv;
+
+    if (limits[0] < 0)
+        return XTRACT_ARGUMENT_ERROR;
+    for (band = 1; band < XTRACT_BARK_BANDS; band++)
+    {
+        if (limits[band] < limits[band - 1])
+            return XTRACT_ARGUMENT_ERROR;
+    }
 
     for (band = 0; band < XTRACT_BARK_BANDS - 1; band++)
     {
@@ -713,23 +778,17 @@ int xtract_bark_coefficients(const double *data, const int N, const void *argv, 
 int xtract_peak_spectrum(const double *data, const int N, const void *argv, double *result)
 {
     double threshold, max, y, y2, y3, p, q;
-    int n = N, rv = XTRACT_SUCCESS;
+    int n;
 
-    threshold = max = q = 0.0;
+    if (N < 1 || argv == NULL)
+        return XTRACT_ARGUMENT_ERROR;
 
-    if (argv != NULL)
-    {
-        q = ((double *)argv)[0];
-        threshold = ((double *)argv)[1];
-    }
-    else
-        rv = XTRACT_BAD_ARGV;
+    q = ((double *)argv)[0];
+    threshold = ((double *)argv)[1];
+    if (!(threshold >= 0.0 && threshold <= 100.0))
+        return XTRACT_ARGUMENT_ERROR;
 
-    if (threshold < 0 || threshold > 100)
-    {
-        threshold = 0;
-        rv = XTRACT_BAD_ARGV;
-    }
+    max = 0.0;
 
     XTRACT_CHECK_q;
 
@@ -767,7 +826,7 @@ int xtract_peak_spectrum(const double *data, const int N, const void *argv, doub
         }
     }
 
-    return (rv ? rv : XTRACT_SUCCESS);
+    return XTRACT_SUCCESS;
 }
 
 int xtract_harmonic_spectrum(const double *data, const int N, const void *argv, double *result)
@@ -777,10 +836,16 @@ int xtract_harmonic_spectrum(const double *data, const int N, const void *argv, 
     const double *freqs, *amps;
     double f0, threshold, ratio, nearest, distance;
 
+    if (N < 2 || (N & 1) || argv == NULL)
+        return XTRACT_ARGUMENT_ERROR;
+
     amps = data;
     freqs = data + n;
     f0 = *((double *)argv);
     threshold = *((double *)argv + 1);
+
+    if (!isfinite(f0) || f0 < 0.0 || !(threshold >= 0.0 && threshold <= 1.0))
+        return XTRACT_ARGUMENT_ERROR;
 
     if (f0 == 0.0)
     {
@@ -908,6 +973,27 @@ int xtract_lpcc(const double *data, const int N, const void *argv, double *resul
     return XTRACT_SUCCESS;
 }
 
+/* The features a band may be reduced with: each reads a plain vector with a
+ * NULL argv and writes one scalar, so the dispatch below cannot overrun the
+ * result or dereference the NULL argv */
+static const int subband_features[] = {
+    XTRACT_MEAN, XTRACT_IRREGULARITY_K, XTRACT_IRREGULARITY_J, XTRACT_SMOOTHNESS,
+    XTRACT_ZCR, XTRACT_LOUDNESS, XTRACT_FLATNESS, XTRACT_RMS_AMPLITUDE,
+    XTRACT_SHARPNESS, XTRACT_HIGHEST_VALUE, XTRACT_SUM, XTRACT_NONZERO_COUNT};
+
+static int is_subband_feature(const int feature)
+{
+    size_t i;
+
+    for (i = 0; i < sizeof(subband_features) / sizeof(subband_features[0]); i++)
+    {
+        if (subband_features[i] == feature)
+            return 1;
+    }
+
+    return 0;
+}
+
 int xtract_subbands(const double *data, const int N, const void *argv, double *result)
 {
     int n, bw, xtract_func, nbands, scale, start, lower, *argi, rv;
@@ -922,8 +1008,7 @@ int xtract_subbands(const double *data, const int N, const void *argv, double *r
     scale = argi[2];
     start = argi[3];
 
-    if (xtract_func < 0 || xtract_func >= XTRACT_FEATURES || nbands < 1 ||
-        start < 0 || start >= N)
+    if (!is_subband_feature(xtract_func) || nbands < 1 || start < 0 || start >= N)
         return XTRACT_ARGUMENT_ERROR;
 
     if (scale == XTRACT_LINEAR_SUBBANDS)
