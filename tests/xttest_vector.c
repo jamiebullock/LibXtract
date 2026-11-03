@@ -2382,3 +2382,46 @@ UTEST(vector, fft_features_report_a_bad_state_without_a_matching_initialisation)
     ASSERT_EQ(xtract_spectrum(data, 16, argv, result), XTRACT_SUCCESS);
     ASSERT_EQ(xtract_autocorrelation_fft(data, 16, NULL, result), XTRACT_SUCCESS);
 }
+
+UTEST(vector, filterbank_features_reject_a_short_input_and_an_unusable_filterbank)
+{
+    double data[4] = {1.0, 1.0, 0.0, 0.0};
+    double row[4] = {1.0, 1.0, 1.0, 1.0};
+    double *rows[1] = {row};
+    xtract_mel_filter f;
+    double result[2] = {-1.0, -1.0};
+
+    f.n_filters = 1;
+    f.filters = rows;
+    f.dct_table = NULL;
+
+    ASSERT_EQ(xtract_mel_spectrogram(data, 0, &f, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_mfcc(data, 0, &f, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_gammatone_spectrogram(data, 0, &f, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_gfcc(data, 0, &f, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_mmbses(data, 1, &f, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_mmbses(data, 3, &f, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_spectral_subband_centroids(data, 0, &f, result), XTRACT_ARGUMENT_ERROR);
+
+    ASSERT_EQ(xtract_mel_spectrogram(data, 4, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_mfcc(data, 4, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_gammatone_spectrogram(data, 4, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_gfcc(data, 4, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_mmbses(data, 4, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_spectral_subband_centroids(data, 2, NULL, result), XTRACT_ARGUMENT_ERROR);
+
+    f.n_filters = 0;
+    ASSERT_EQ(xtract_mel_spectrogram(data, 4, &f, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_mfcc(data, 4, &f, result), XTRACT_ARGUMENT_ERROR);
+    f.n_filters = 1;
+    f.filters = NULL;
+    ASSERT_EQ(xtract_mel_spectrogram(data, 4, &f, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_mmbses(data, 4, &f, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result[0], -1.0);
+
+    f.filters = rows;
+    ASSERT_EQ(xtract_mel_spectrogram(data, 4, &f, result), XTRACT_SUCCESS);
+    CHECK_REL(result[0], log(2.0), EPSILON);
+    ASSERT_EQ(xtract_mfcc(data, 4, &f, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_mmbses(data, 4, &f, result), XTRACT_SUCCESS);
+}

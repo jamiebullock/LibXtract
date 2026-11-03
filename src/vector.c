@@ -463,9 +463,18 @@ int xtract_autocorrelation_fft(const double *data, const int N, const void *argv
     return XTRACT_SUCCESS;
 }
 
+/* A usable filterbank: at least one filter and a table to read them from */
+static int filterbank_is_valid(const xtract_mel_filter *f)
+{
+    return f != NULL && f->n_filters >= 1 && f->filters != NULL;
+}
+
 static int filterbank_spectrogram(const double *data, const int N, const xtract_mel_filter *f, double *result)
 {
     int n, filter;
+
+    if (N < 1 || !filterbank_is_valid(f))
+        return XTRACT_ARGUMENT_ERROR;
 
     for (filter = 0; filter < f->n_filters; filter++)
     {
@@ -487,15 +496,22 @@ static int filterbank_spectrogram(const double *data, const int N, const xtract_
 
 static int cepstral_coefficients(const double *data, const int N, const xtract_mel_filter *f, double *result)
 {
-    double *temp = (double *)calloc(f->n_filters, sizeof(double));
+    double *temp;
+    int rv;
+
+    if (N < 1 || !filterbank_is_valid(f))
+        return XTRACT_ARGUMENT_ERROR;
+
+    temp = (double *)calloc(f->n_filters, sizeof(double));
     if (temp == NULL)
         return XTRACT_MALLOC_FAILED;
 
-    filterbank_spectrogram(data, N, f, temp);
-    xtract_dct(temp, f->n_filters, f->dct_table, result);
+    rv = filterbank_spectrogram(data, N, f, temp);
+    if (rv == XTRACT_SUCCESS)
+        rv = xtract_dct(temp, f->n_filters, f->dct_table, result);
     free(temp);
 
-    return XTRACT_SUCCESS;
+    return rv;
 }
 
 int xtract_mel_spectrogram(const double *data, const int N, const void *argv, double *result)
@@ -536,6 +552,9 @@ int xtract_mmbses(const double *data, const int N, const void *argv, double *res
     /* ln(2*pi*e) = ln(2*pi) + 1, avoiding the non-portable M_E. */
     const double gaussian_term = log(2.0 * M_PI) + 1.0;
     int n, filter;
+
+    if (N < 2 || (N & 1) || !filterbank_is_valid(f))
+        return XTRACT_ARGUMENT_ERROR;
 
     for (filter = 0; filter < f->n_filters; filter++)
     {
@@ -590,6 +609,9 @@ int xtract_spectral_subband_centroids(const double *data, const int N, const voi
     int n, filter;
     const double *amps = data;
     const double *freqs = data + N;
+
+    if (N < 1 || !filterbank_is_valid(f))
+        return XTRACT_ARGUMENT_ERROR;
 
     for (filter = 0; filter < f->n_filters; filter++)
     {
