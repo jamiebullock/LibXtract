@@ -32,9 +32,9 @@ extern "C"
     /**
      *  Write a vector of the last N input values to `result`
      *
-     *  @param state  a pointer to an xtract_last_n_state struct as allocated by xtract_last_n_state_new()
+     *  @param state  a pointer to an xtract_last_n_state struct as allocated by xtract_last_n_state_new(); NULL is an argument error
      *  @param data   a pointer to a double representing the current input value
-     *  @param N      an integer representing 'N' the number of values to be written to *result
+     *  @param N      an integer representing 'N' the number of values to be written to *result, at least 1 and equal to the capacity the state was created with; any other size is a bad state
      *  @param argv   a pointer to NULL
      *  @param result a pointer to an array of doubles representing the last N values, where the nth value is the current one. The array must have been allocated to size N elements and initialised by the caller
      *

@@ -5,6 +5,7 @@
  */
 
 #include "xtract/xtract_scalar.h"
+#include "xtract/xtract_stateful.h"
 #include "xtract/xtract_helper.h"
 #include "xtract/libxtract.h"
 
@@ -150,4 +151,22 @@ UTEST(stateful, free_fft_releases_fft_state)
     ASSERT_EQ(xtract_init_fft(512, XTRACT_SPECTRUM), XTRACT_SUCCESS);
     xtract_free_fft();
     ASSERT_EQ(xtract_init_fft(512, XTRACT_SPECTRUM), XTRACT_SUCCESS);
+}
+
+UTEST(stateful, last_n_rejects_a_null_state_or_an_empty_input_and_reports_a_size_mismatch)
+{
+    xtract_last_n_state *state = xtract_last_n_state_new(4);
+    double sample = 1.0;
+    double result[4] = {-1.0, -1.0, -1.0, -1.0};
+
+    ASSERT_TRUE(state != NULL);
+    ASSERT_EQ(xtract_last_n(NULL, &sample, 4, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_last_n(state, &sample, 0, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_last_n(state, &sample, 3, NULL, result), XTRACT_BAD_STATE);
+    ASSERT_EQ(result[0], -1.0);
+
+    ASSERT_EQ(xtract_last_n(state, &sample, 4, NULL, result), XTRACT_SUCCESS);
+    ASSERT_EQ(result[0], 0.0);
+    CHECK_REL(result[3], 1.0, EPSILON);
+    xtract_last_n_state_delete(state);
 }
