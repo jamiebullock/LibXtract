@@ -36,6 +36,9 @@ UTEST(descriptors, make_descriptors_scalar_vector_classification)
     ASSERT_TRUE(fd != NULL);
     ASSERT_EQ(fd[XTRACT_MEAN].is_scalar, XTRACT_TRUE);
     ASSERT_EQ(fd[XTRACT_SPECTRUM].is_scalar, XTRACT_FALSE);
+    ASSERT_EQ(fd[XTRACT_PEAK].is_scalar, XTRACT_TRUE);
+    ASSERT_EQ(fd[XTRACT_MMBSES].is_scalar, XTRACT_FALSE);
+    ASSERT_EQ(fd[XTRACT_SPECTRAL_SUBBAND_CENTROIDS].is_scalar, XTRACT_FALSE);
     ASSERT_EQ(xtract_free_descriptors(fd), XTRACT_SUCCESS);
 }
 
@@ -142,6 +145,38 @@ UTEST(descriptors, argv_ranges_match_the_functions)
     ASSERT_EQ(xtract_free_descriptors(fd), XTRACT_SUCCESS);
 }
 
+UTEST(descriptors, appended_features_are_fully_described)
+{
+    xtract_function_descriptor_t *fd = xtract_make_descriptors();
+    ASSERT_TRUE(fd != NULL);
+
+    ASSERT_EQ(fd[XTRACT_PEAK].argc, 1);
+    ASSERT_EQ(fd[XTRACT_PEAK].argv.type, XTRACT_FLOAT);
+    ASSERT_EQ(fd[XTRACT_PEAK].argv.donor[0], XTRACT_ANY);
+    ASSERT_EQ(fd[XTRACT_PEAK].data.format, XTRACT_ARBITRARY_SERIES);
+    ASSERT_EQ(fd[XTRACT_PEAK].result.scalar.unit, XTRACT_UNIT_ANY);
+    ASSERT_EQ(fd[XTRACT_PEAK].is_delta, XTRACT_FALSE);
+    ASSERT_TRUE(fd[XTRACT_PEAK].algo.name[0] != 0);
+
+    ASSERT_EQ(fd[XTRACT_MMBSES].argc, 1);
+    ASSERT_EQ(fd[XTRACT_MMBSES].argv.type, XTRACT_MEL_FILTER);
+    ASSERT_EQ(fd[XTRACT_MMBSES].argv.donor[0], XTRACT_INIT_MFCC);
+    ASSERT_EQ(fd[XTRACT_MMBSES].data.format, XTRACT_SPECTRAL_MAGNITUDE_PHASE);
+    ASSERT_EQ(fd[XTRACT_MMBSES].result.vector.format, XTRACT_MEL_COEFFS);
+    ASSERT_EQ(fd[XTRACT_MMBSES].result.vector.unit, XTRACT_UNIT_NONE);
+    ASSERT_EQ(fd[XTRACT_MMBSES].algo.year, 2013);
+
+    ASSERT_EQ(fd[XTRACT_SPECTRAL_SUBBAND_CENTROIDS].argc, 1);
+    ASSERT_EQ(fd[XTRACT_SPECTRAL_SUBBAND_CENTROIDS].argv.type, XTRACT_MEL_FILTER);
+    ASSERT_EQ(fd[XTRACT_SPECTRAL_SUBBAND_CENTROIDS].argv.donor[0], XTRACT_INIT_MFCC);
+    ASSERT_EQ(fd[XTRACT_SPECTRAL_SUBBAND_CENTROIDS].data.format, XTRACT_SPECTRAL);
+    ASSERT_EQ(fd[XTRACT_SPECTRAL_SUBBAND_CENTROIDS].data.unit, XTRACT_ANY_AMPLITUDE_HERTZ);
+    ASSERT_EQ(fd[XTRACT_SPECTRAL_SUBBAND_CENTROIDS].result.vector.format, XTRACT_MEL_COEFFS);
+    ASSERT_EQ(fd[XTRACT_SPECTRAL_SUBBAND_CENTROIDS].result.vector.unit, XTRACT_HERTZ);
+
+    ASSERT_EQ(xtract_free_descriptors(fd), XTRACT_SUCCESS);
+}
+
 UTEST(dispatch, every_feature_slot_points_to_a_function)
 {
     int f;
@@ -162,4 +197,8 @@ UTEST(dispatch, slots_map_to_the_expected_function)
 
     ASSERT_EQ(xtract[XTRACT_SUM](data, 4, NULL, &result), XTRACT_SUCCESS);
     CHECK_REL(result, 20.0, EPSILON);
+
+    ASSERT_TRUE(xtract[XTRACT_PEAK] == xtract_peak);
+    ASSERT_TRUE(xtract[XTRACT_MMBSES] == xtract_mmbses);
+    ASSERT_TRUE(xtract[XTRACT_SPECTRAL_SUBBAND_CENTROIDS] == xtract_spectral_subband_centroids);
 }

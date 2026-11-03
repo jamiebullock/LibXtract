@@ -78,4 +78,8 @@ int (*xtract[])(const double *, const int, const void *, double *) =
         xtract_gammatone_spectrogram,
         /* xtract_helper.h */
         xtract_windowed,
-        xtract_smoothed};
+        xtract_smoothed,
+        /* appended */
+        xtract_peak,
+        xtract_mmbses,
+        xtract_spectral_subband_centroids};

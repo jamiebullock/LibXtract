@@ -128,6 +128,10 @@ extern "C"
         /* Helper functions */
         XTRACT_WINDOWED,
         XTRACT_SMOOTHED,
+        /* Appended after the helpers: a 1.x release never renumbers a value */
+        XTRACT_PEAK,
+        XTRACT_MMBSES,
+        XTRACT_SPECTRAL_SUBBAND_CENTROIDS,
         XTRACT_FEATURE_COUNT
     };
 
@@ -283,7 +287,10 @@ extern "C"
         XTRACT_LPCC_COEFFS,
         XTRACT_BARK_COEFFS,
         XTRACT_SUBFRAMES,
-        XTRACT_NO_DATA
+        XTRACT_NO_DATA,
+        /* N/2 magnitudes and N/2 phases, as xtract_spectrum() gives for
+         * XTRACT_MAGNITUDE_PHASE_SPECTRUM */
+        XTRACT_SPECTRAL_MAGNITUDE_PHASE
     } xtract_vector_t;
 
     /** \brief Data structure containing useful information about functions provided by LibXtract. */
