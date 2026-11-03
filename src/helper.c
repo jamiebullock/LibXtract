@@ -65,7 +65,7 @@ int xtract_features_from_subframes(const double *data, const int N, const int fe
     double *result1,
         *result2;
 
-    int n, rv;
+    int n, rv, rv2;
 
     if (N < 2 || (N & 1) || !is_subframe_feature(feature))
         return XTRACT_ARGUMENT_ERROR;
@@ -78,11 +78,12 @@ int xtract_features_from_subframes(const double *data, const int N, const int fe
     result2 = result + n;
 
     rv = xtract[feature](frame1, n, argv, result1);
+    if (rv != XTRACT_SUCCESS && rv != XTRACT_NO_RESULT)
+        return rv;
 
-    if (rv == XTRACT_SUCCESS)
-        rv = xtract[feature](frame2, n, argv, result2);
+    rv2 = xtract[feature](frame2, n, argv, result2);
 
-    return rv;
+    return rv2 != XTRACT_SUCCESS ? rv2 : rv;
 }
 
 /*

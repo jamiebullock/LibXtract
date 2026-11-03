@@ -86,6 +86,23 @@ UTEST(helper, features_from_subframes_rejects_an_odd_or_short_input_and_a_featur
     CHECK_REL(result[2], 4.0, EPSILON);
 }
 
+UTEST(helper, features_from_subframes_still_computes_the_second_subframe_when_the_first_has_no_result)
+{
+    double data[] = {2.0, 1.0, 1.0, 3.0};
+    double result[4] = {-1.0, -1.0, -1.0, -1.0};
+    double threshold = 0.0;
+
+    ASSERT_EQ(xtract_features_from_subframes(data, 4, XTRACT_PEAK, &threshold, result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result[0], 0.0);
+    CHECK_REL(result[2], 3.0, EPSILON);
+
+    data[1] = 3.0;
+    data[3] = 1.0;
+    ASSERT_EQ(xtract_features_from_subframes(data, 4, XTRACT_PEAK, &threshold, result), XTRACT_NO_RESULT);
+    CHECK_REL(result[0], 3.0, EPSILON);
+    ASSERT_EQ(result[2], 0.0);
+}
+
 UTEST(stateful, init_wavelet_f0_state)
 {
     ASSERT_EQ(xtract_init_wavelet_f0_state(), XTRACT_SUCCESS);
