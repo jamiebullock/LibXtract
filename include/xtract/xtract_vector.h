@@ -51,7 +51,7 @@ extern "C"
      *
      * \param *data: a pointer to the first element in an array of spectral coefficients, the first half of the array pointed to by *result from xtract_spectrum() called with DC included (argv[2] == 1), so that element k is bin k as the filterbank expects. Rabiner and Juang define the mel cepstrum on the power spectrum (XTRACT_POWER_SPECTRUM); a magnitude spectrum may be passed instead
      * \param N: the number of coefficients, half the transform size the filterbank was initialised with, at least 1
-     * \param *argv: a pointer to a data structure of type xtract_mel_filter, containing n_filters coefficient tables to make up a mel-spaced filterbank; n_filters must be at least 1 and filters non-NULL
+     * \param *argv: a pointer to a data structure of type xtract_mel_filter, containing n_filters coefficient tables to make up a mel-spaced filterbank; n_filters must be at least 1 and filters, and each of its rows, non-NULL
      * \param *result: a pointer to an array containing the resultant MFCC
      *
      * The data structure pointed to by *argv must be obtained by first calling xtract_init_mfcc. Its dct_table field is passed to xtract_dct() as the table for the final transform; set it from xtract_init_dct(n_filters) or to NULL
@@ -65,7 +65,7 @@ extern "C"
      *
      * \param *data: a pointer to the first element in an array of spectral coefficients, the first half of the array pointed to by *result from xtract_spectrum() called with DC included (argv[2] == 1), so that element k is bin k as the filterbank expects. Rabiner and Juang define the mel cepstrum on the power spectrum (XTRACT_POWER_SPECTRUM); a magnitude spectrum may be passed instead
      * \param N: the number of coefficients, half the transform size the filterbank was initialised with, at least 1
-     * \param *argv: a pointer to a data structure of type xtract_mel_filter, containing n_filters coefficient tables to make up a mel-spaced filterbank; n_filters must be at least 1 and filters non-NULL
+     * \param *argv: a pointer to a data structure of type xtract_mel_filter, containing n_filters coefficient tables to make up a mel-spaced filterbank; n_filters must be at least 1 and filters, and each of its rows, non-NULL
      * \param *result: a pointer to an array containing the resultant log mel energies (one per filter)
      *
      * The data structure pointed to by *argv must be obtained by first calling xtract_init_mfcc
@@ -79,7 +79,7 @@ extern "C"
      *
      * \param *data: a pointer to the first element in an array of spectral coefficients, the first half of the array pointed to by *result from xtract_spectrum() called with DC included (argv[2] == 1), so that element k is bin k as the filterbank expects. the gammatone filterbank is applied to the power spectrum (XTRACT_POWER_SPECTRUM) in the same way; a magnitude spectrum may be passed instead
      * \param N: the number of coefficients, half the transform size the filterbank was initialised with, at least 1
-     * \param *argv: a pointer to a data structure of type xtract_mel_filter, containing n_filters coefficient tables to make up a gammatone filterbank; n_filters must be at least 1 and filters non-NULL
+     * \param *argv: a pointer to a data structure of type xtract_mel_filter, containing n_filters coefficient tables to make up a gammatone filterbank; n_filters must be at least 1 and filters, and each of its rows, non-NULL
      * \param *result: a pointer to an array containing the resultant GFCC
      *
      * The data structure pointed to by *argv must be obtained by first calling xtract_init_gfcc. Its dct_table field is passed to xtract_dct() as the table for the final transform; set it from xtract_init_dct(n_filters) or to NULL
@@ -93,7 +93,7 @@ extern "C"
      *
      * \param *data: a pointer to the first element in an array of spectral coefficients, the first half of the array pointed to by *result from xtract_spectrum() called with DC included (argv[2] == 1), so that element k is bin k as the filterbank expects. the gammatone filterbank is applied to the power spectrum (XTRACT_POWER_SPECTRUM) in the same way; a magnitude spectrum may be passed instead
      * \param N: the number of coefficients, half the transform size the filterbank was initialised with, at least 1
-     * \param *argv: a pointer to a data structure of type xtract_mel_filter, containing n_filters coefficient tables to make up a gammatone filterbank; n_filters must be at least 1 and filters non-NULL
+     * \param *argv: a pointer to a data structure of type xtract_mel_filter, containing n_filters coefficient tables to make up a gammatone filterbank; n_filters must be at least 1 and filters, and each of its rows, non-NULL
      * \param *result: a pointer to an array containing the resultant log gammatone energies (one per filter)
      *
      * The data structure pointed to by *argv must be obtained by first calling xtract_init_gfcc
@@ -104,7 +104,7 @@ extern "C"
      *
      * \param *data: a magnitude/phase spectrum, the result from xtract_spectrum() by XTRACT_MAGNITUDE_PHASE_SPECTRUM. The first N/2 elements are bin magnitudes and the next N/2 the corresponding phases.
      * \param N: the number of array elements to be considered (the full magnitude+phase array length; N/2 frequency bins are processed), at least 2 and even
-     * \param *argv: a pointer to a data structure of type xtract_mel_filter, containing n_filters coefficient tables to make up a mel-spaced filterbank; n_filters must be at least 1 and filters non-NULL
+     * \param *argv: a pointer to a data structure of type xtract_mel_filter, containing n_filters coefficient tables to make up a mel-spaced filterbank; n_filters must be at least 1 and filters, and each of its rows, non-NULL
      * \param *result: a pointer to an array of n_filters elements containing the resultant MEL-MBSES
      *
      * Each filter band's complex coefficients are modelled as a zero-mean bivariate (real, imaginary) Gaussian and the band's value is that distribution's differential entropy, H = ln(2*pi*e) + (1/2)ln(det of the 2x2 covariance).
@@ -118,7 +118,7 @@ extern "C"
      *
      * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector, (e.g. the array pointed to by *result from xtract_spectrum(), xtract_peak_spectrum() or xtract_harmonic_spectrum()).
      * \param N: the number of array elements to be considered, at least 1
-     * \param *argv: a pointer to a data structure of type xtract_mel_filter, containing n_filters coefficient tables to make up a mel-spaced filterbank; n_filters must be at least 1 and filters non-NULL
+     * \param *argv: a pointer to a data structure of type xtract_mel_filter, containing n_filters coefficient tables to make up a mel-spaced filterbank; n_filters must be at least 1 and filters, and each of its rows, non-NULL
      * \param *result: a pointer to an array containing the spectral band centroids
      *
      * Note: for a more 'accurate' result *result from xtract_peak_spectrum() can be passed in. This gives the interpolated peak frequency locations.

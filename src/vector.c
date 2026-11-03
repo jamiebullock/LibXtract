@@ -25,7 +25,7 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
     int vector = 0;
     int withDC = 0;
     int normalise = 0;
-    double type = 0.0;
+    double type;
     double q = 0.0;
     double temp = 0.0;
     double max = 0.0;
@@ -463,10 +463,20 @@ int xtract_autocorrelation_fft(const double *data, const int N, const void *argv
     return XTRACT_SUCCESS;
 }
 
-/* A usable filterbank: at least one filter and a table to read them from */
+/* A usable filterbank: at least one filter, each with a table to read */
 static int filterbank_is_valid(const xtract_mel_filter *f)
 {
-    return f != NULL && f->n_filters >= 1 && f->filters != NULL;
+    int filter;
+
+    if (f == NULL || f->n_filters < 1 || f->filters == NULL)
+        return 0;
+    for (filter = 0; filter < f->n_filters; filter++)
+    {
+        if (f->filters[filter] == NULL)
+            return 0;
+    }
+
+    return 1;
 }
 
 static int filterbank_spectrogram(const double *data, const int N, const xtract_mel_filter *f, double *result)
@@ -768,7 +778,7 @@ int xtract_bark_coefficients(const double *data, const int N, const void *argv, 
 int xtract_peak_spectrum(const double *data, const int N, const void *argv, double *result)
 {
     double threshold, max, y, y2, y3, p, q;
-    int n = N;
+    int n;
 
     if (N < 1 || argv == NULL)
         return XTRACT_ARGUMENT_ERROR;

@@ -2422,9 +2422,15 @@ UTEST(vector, filterbank_features_reject_a_short_input_and_an_unusable_filterban
     f.filters = NULL;
     ASSERT_EQ(xtract_mel_spectrogram(data, 4, &f, result), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(xtract_mmbses(data, 4, &f, result), XTRACT_ARGUMENT_ERROR);
+    f.filters = rows;
+    rows[0] = NULL;
+    ASSERT_EQ(xtract_mel_spectrogram(data, 4, &f, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_gfcc(data, 4, &f, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_mmbses(data, 4, &f, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_spectral_subband_centroids(data, 2, &f, result), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(result[0], -1.0);
 
-    f.filters = rows;
+    rows[0] = row;
     ASSERT_EQ(xtract_mel_spectrogram(data, 4, &f, result), XTRACT_SUCCESS);
     CHECK_REL(result[0], log(2.0), EPSILON);
     ASSERT_EQ(xtract_mfcc(data, 4, &f, result), XTRACT_SUCCESS);
