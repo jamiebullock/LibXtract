@@ -13,14 +13,15 @@
  * the enum-backed features through the xtract[] dispatch table, and peak (the
  * one feature with no table slot) by direct call.
  *
- * The fuzzer's bytes become a feature selector, an argv buffer, and the input
- * vector, so NaN, +/-Inf, denormals, N=0, N=1, all-zero, etc. are exercised.
- * Run under AddressSanitizer + UBSan.
+ * The fuzzer's bytes become a feature selector, a flag that passes a NULL
+ * argv, an argv buffer, and the input vector, so NaN, +/-Inf, denormals,
+ * N=0, N=1, all-zero, a missing argv, etc. are exercised. Run under
+ * AddressSanitizer + UBSan.
  *
  * failsafe_f0 computes a spectrum internally, so it runs at a fixed
  * power-of-two N with the FFT initialised once; wavelet_f0 runs its detector
- * at the size its state was built for and needs a non-NULL sample-rate argv.
- * Every other feature takes a fuzzer-chosen N.
+ * at the size its state was built for. Every other feature takes a
+ * fuzzer-chosen N.
  *
  * Build/run: make fuzz   (see fuzz/Makefile)
  */
@@ -75,6 +76,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     int sel;
     int feature;
     int n;
+    int null_argv;
     int (*fn)(const double *, const int, const void *, double *);
     double argv[XTRACT_MAXARGS];
     double *in;
@@ -83,12 +85,13 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     size_t argv_bytes;
     size_t avail;
 
-    if (size < 1)
+    if (size < 2)
         return 0;
 
     sel = data[0] % N_FEATURES;
-    data++;
-    size--;
+    null_argv = data[1] & 1;
+    data += 2;
+    size -= 2;
 
     memset(argv, 0, sizeof(argv));
     argv_bytes = size < sizeof(argv) ? size : sizeof(argv);
@@ -136,7 +139,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     memcpy(in, data, (avail < (size_t)n ? avail : (size_t)n) * sizeof(double));
     input = n > 0 ? in : in + 1;
 
-    (void)fn(input, n, argv, result);
+    (void)fn(input, n, null_argv ? NULL : argv, result);
 
     free(in);
     free(result);

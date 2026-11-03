@@ -98,6 +98,10 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *argv_unit = (xtract_unit_t)XTRACT_NONE;
             break;
         case XTRACT_SPECTRAL_INHARMONICITY:
+        case XTRACT_TRISTIMULUS_1:
+        case XTRACT_TRISTIMULUS_2:
+        case XTRACT_TRISTIMULUS_3:
+        case XTRACT_ODD_EVEN_RATIO:
             *argv_min = 0.0;
             *argv_max = XTRACT_SR_UPPER_LIMIT / 2.0;
             *argv_def = XTRACT_FUNDAMENTAL_DEFAULT;
@@ -105,12 +109,22 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             break;
         case XTRACT_F0:
         case XTRACT_FAILSAFE_F0:
-        case XTRACT_WAVELET_F0:
         case XTRACT_MCLEOD_F0:
-        case XTRACT_MIDICENT:
+            *argv_min = 0.0;
+            *argv_max = XTRACT_SR_UPPER_LIMIT;
+            *argv_def = XTRACT_SR_DEFAULT;
+            *argv_unit = XTRACT_HERTZ;
+            break;
+        case XTRACT_WAVELET_F0:
             *argv_min = XTRACT_SR_LOWER_LIMIT;
             *argv_max = XTRACT_SR_UPPER_LIMIT;
             *argv_def = XTRACT_SR_DEFAULT;
+            *argv_unit = XTRACT_HERTZ;
+            break;
+        case XTRACT_MIDICENT:
+            *argv_min = 0.0;
+            *argv_max = XTRACT_SR_UPPER_LIMIT / 2.0;
+            *argv_def = XTRACT_NO_DEFAULT;
             *argv_unit = XTRACT_HERTZ;
             break;
         case XTRACT_FLATNESS_DB:
@@ -121,8 +135,8 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             break;
             /* argc = 2 */;
         case XTRACT_ROLLOFF:
-            *argv_min = XTRACT_FFT_BANDS_MIN;
-            *argv_max = XTRACT_FFT_BANDS_MAX;
+            *argv_min = XTRACT_SR_LOWER_LIMIT / XTRACT_FFT_BANDS_MAX;
+            *argv_max = XTRACT_SR_UPPER_LIMIT / XTRACT_FFT_BANDS_MIN;
             *argv_def = XTRACT_SPEC_BW_DEF;
             *argv_unit = XTRACT_HERTZ;
             *(argv_min + 1) = 0.0;
@@ -156,13 +170,13 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_SPECTRAL_SKEWNESS:
         case XTRACT_SPECTRAL_KURTOSIS:
         case XTRACT_CREST:
-            *argv_min = XTRACT_NONE;
-            *argv_max = XTRACT_NONE;
-            *argv_def = XTRACT_NONE;
+            *argv_min = XTRACT_UNBOUNDED_MIN;
+            *argv_max = XTRACT_UNBOUNDED_MAX;
+            *argv_def = XTRACT_NO_DEFAULT;
             *argv_unit = XTRACT_UNIT_NONE;
-            *(argv_min + 1) = XTRACT_NONE;
-            *(argv_max + 1) = XTRACT_NONE;
-            *(argv_def + 1) = XTRACT_NONE;
+            *(argv_min + 1) = XTRACT_UNBOUNDED_MIN;
+            *(argv_max + 1) = XTRACT_UNBOUNDED_MAX;
+            *(argv_def + 1) = XTRACT_NO_DEFAULT;
             *(argv_unit + 1) = XTRACT_UNIT_NONE;
             break;
             /* argc = 4 */
@@ -245,6 +259,10 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
                 *argv_donor = XTRACT_SPECTRAL_MEAN;
                 break; */
         case XTRACT_SPECTRAL_INHARMONICITY:
+        case XTRACT_TRISTIMULUS_1:
+        case XTRACT_TRISTIMULUS_2:
+        case XTRACT_TRISTIMULUS_3:
+        case XTRACT_ODD_EVEN_RATIO:
             *argv_donor = XTRACT_FAILSAFE_F0;
             break;
         case XTRACT_FLATNESS_DB:
@@ -350,6 +368,8 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_SPECTRAL_KURTOSIS:
         case XTRACT_SPECTRAL_CENTROID:
         case XTRACT_SPECTRAL_SLOPE:
+        case XTRACT_SPREAD:
+        case XTRACT_HPS:
             *data_format = XTRACT_SPECTRAL;
             break;
         case XTRACT_ROLLOFF:
@@ -360,9 +380,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_IRREGULARITY_J:
         case XTRACT_SMOOTHNESS:
         case XTRACT_FLATNESS:
-        case XTRACT_SPREAD:
         case XTRACT_POWER:
-        case XTRACT_HPS:
         case XTRACT_PEAK_SPECTRUM:
         case XTRACT_SUBBANDS:
         case XTRACT_MFCC:
@@ -1076,6 +1094,10 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_SPECTRAL_STANDARD_DEVIATION:
             /* case XTRACT_SPECTRAL_AVERAGE_DEVIATION: */
         case XTRACT_SPECTRAL_INHARMONICITY:
+        case XTRACT_TRISTIMULUS_1:
+        case XTRACT_TRISTIMULUS_2:
+        case XTRACT_TRISTIMULUS_3:
+        case XTRACT_ODD_EVEN_RATIO:
         case XTRACT_LOWEST_VALUE:
         case XTRACT_F0:
         case XTRACT_FAILSAFE_F0:
@@ -1144,9 +1166,6 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_SPECTRAL_CENTROID:
         case XTRACT_IRREGULARITY_K:
         case XTRACT_IRREGULARITY_J:
-        case XTRACT_TRISTIMULUS_1:
-        case XTRACT_TRISTIMULUS_2:
-        case XTRACT_TRISTIMULUS_3:
         case XTRACT_SMOOTHNESS:
         case XTRACT_FLATNESS:
         case XTRACT_SPREAD:
@@ -1167,7 +1186,6 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_AMDF:
         case XTRACT_ASDF:
         case XTRACT_NONZERO_COUNT:
-        case XTRACT_ODD_EVEN_RATIO:
         case XTRACT_LPC:
         default:
             *argc = 0;

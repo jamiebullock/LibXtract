@@ -1366,21 +1366,35 @@ UTEST(scalar, midicent_c4)
     CHECK_NEAR(result, 6000.0, 1.0); /* 1 midicent absolute */
 }
 
-UTEST(scalar, midicent_zero_frequency_rejected)
+UTEST(scalar, midicent_zero_frequency_has_no_result)
 {
-    double result = 0.0;
+    double result = 999.0;
     double freq = 0.0;
+    ASSERT_EQ(xtract_midicent(NULL, 0, &freq, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
+}
+
+UTEST(scalar, midicent_negative_or_nan_frequency_is_an_argument_error)
+{
+    double result = 999.0;
+    double freq = -440.0;
+    ASSERT_EQ(xtract_midicent(NULL, 0, &freq, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
     result = 999.0;
+    freq = NAN;
     ASSERT_EQ(xtract_midicent(NULL, 0, &freq, &result), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(result, 0.0);
 }
 
-UTEST(scalar, midicent_negative_frequency_rejected)
+UTEST(scalar, midicent_pitch_outside_0_to_12700_has_no_result)
 {
-    double result = 0.0;
-    double freq = -440.0;
+    double result = 999.0;
+    double freq = 1.0e9;
+    ASSERT_EQ(xtract_midicent(NULL, 0, &freq, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
     result = 999.0;
-    ASSERT_EQ(xtract_midicent(NULL, 0, &freq, &result), XTRACT_ARGUMENT_ERROR);
+    freq = 1.0e-6;
+    ASSERT_EQ(xtract_midicent(NULL, 0, &freq, &result), XTRACT_NO_RESULT);
     ASSERT_EQ(result, 0.0);
 }
 
@@ -2001,7 +2015,8 @@ UTEST(mcleod_f0, rejects_a_null_argv)
     double data[64] = {0};
     double result = 1.0;
 
-    ASSERT_EQ(xtract_mcleod_f0(data, 64, NULL, &result), XTRACT_BAD_ARGV);
+    ASSERT_EQ(xtract_mcleod_f0(data, 64, NULL, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
 }
 
 /* A sine of period P whose amplitude alternates between 1 and a on
@@ -2369,4 +2384,219 @@ UTEST(scalar, harmonic_number_no_ub_on_zero_fundamental)
     double fund0 = 0.0;
     double result = -1.0;
     ASSERT_EQ(xtract_tristimulus_1(data, 4, &fund0, &result), XTRACT_NO_RESULT);
+}
+
+/* ===== Argument contract ===== */
+
+#define ASSERT_REJECTED(call)                     \
+    do                                            \
+    {                                             \
+        result = 1.0;                             \
+        ASSERT_EQ((call), XTRACT_ARGUMENT_ERROR); \
+        ASSERT_EQ(result, 0.0);                   \
+    } while (0)
+
+UTEST(scalar, statistics_reject_too_few_elements_and_a_null_argv)
+{
+    double data[2] = {1.0, 3.0};
+    double moments[2] = {2.0, 1.0};
+    double result;
+
+    ASSERT_REJECTED(xtract_mean(data, 0, NULL, &result));
+    ASSERT_REJECTED(xtract_variance(data, 1, moments, &result));
+    ASSERT_REJECTED(xtract_variance(data, 2, NULL, &result));
+    ASSERT_REJECTED(xtract_average_deviation(data, 0, moments, &result));
+    ASSERT_REJECTED(xtract_average_deviation(data, 2, NULL, &result));
+    ASSERT_REJECTED(xtract_skewness(data, 0, moments, &result));
+    ASSERT_REJECTED(xtract_skewness(data, 2, NULL, &result));
+    ASSERT_REJECTED(xtract_kurtosis(data, 0, moments, &result));
+    ASSERT_REJECTED(xtract_kurtosis(data, 2, NULL, &result));
+
+    ASSERT_EQ(xtract_mean(data, 1, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 1.0, EPSILON);
+    ASSERT_EQ(xtract_variance(data, 2, moments, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 2.0, EPSILON);
+    ASSERT_EQ(xtract_average_deviation(data, 1, moments, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 1.0, EPSILON);
+}
+
+UTEST(scalar, standard_deviation_rejects_a_negative_variance_and_a_null_argv)
+{
+    double variance = -1.0;
+    double result;
+
+    ASSERT_REJECTED(xtract_standard_deviation(NULL, 0, &variance, &result));
+    ASSERT_REJECTED(xtract_standard_deviation(NULL, 0, NULL, &result));
+    ASSERT_REJECTED(xtract_spectral_standard_deviation(NULL, 0, &variance, &result));
+    ASSERT_REJECTED(xtract_spectral_standard_deviation(NULL, 0, NULL, &result));
+
+    variance = 0.0;
+    ASSERT_EQ(xtract_standard_deviation(NULL, 0, &variance, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(result, 0.0);
+    ASSERT_EQ(xtract_spectral_standard_deviation(NULL, 0, &variance, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(result, 0.0);
+}
+
+UTEST(scalar, magnitude_features_reject_too_few_elements_and_a_null_argv)
+{
+    double data[3] = {1.0, 2.0, 3.0};
+    double threshold = 0.0;
+    double result;
+
+    ASSERT_REJECTED(xtract_irregularity_k(data, 2, NULL, &result));
+    ASSERT_REJECTED(xtract_irregularity_j(data, 1, NULL, &result));
+    ASSERT_REJECTED(xtract_smoothness(data, 2, NULL, &result));
+    ASSERT_REJECTED(xtract_zcr(data, 0, NULL, &result));
+    ASSERT_REJECTED(xtract_flatness(data, 0, NULL, &result));
+    ASSERT_REJECTED(xtract_rms_amplitude(data, 0, NULL, &result));
+    ASSERT_REJECTED(xtract_sum(data, 0, NULL, &result));
+    ASSERT_REJECTED(xtract_nonzero_count(data, 0, NULL, &result));
+    ASSERT_REJECTED(xtract_lowest_value(data, 0, &threshold, &result));
+    ASSERT_REJECTED(xtract_lowest_value(data, 3, NULL, &result));
+    ASSERT_REJECTED(xtract_peak(data, 3, NULL, &result));
+
+    ASSERT_EQ(xtract_irregularity_k(data, 3, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_irregularity_j(data, 2, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_smoothness(data, 3, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_zcr(data, 1, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_flatness(data, 1, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_rms_amplitude(data, 1, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_sum(data, 1, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_nonzero_count(data, 1, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_lowest_value(data, 1, &threshold, &result), XTRACT_SUCCESS);
+}
+
+UTEST(scalar, rolloff_rejects_a_percentile_outside_0_to_100_and_a_null_argv)
+{
+    double data[4] = {1.0, 1.0, 1.0, 1.0};
+    double argv[2] = {100.0, 101.0};
+    double result;
+
+    ASSERT_REJECTED(xtract_rolloff(data, 4, argv, &result));
+    argv[1] = -1.0;
+    ASSERT_REJECTED(xtract_rolloff(data, 4, argv, &result));
+    argv[1] = 50.0;
+    ASSERT_REJECTED(xtract_rolloff(data, 0, argv, &result));
+    ASSERT_REJECTED(xtract_rolloff(data, 4, NULL, &result));
+
+    ASSERT_EQ(xtract_rolloff(data, 4, argv, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 200.0, EPSILON);
+}
+
+UTEST(scalar, argv_only_features_reject_a_null_argv)
+{
+    double result;
+
+    ASSERT_REJECTED(xtract_flatness_db(NULL, 0, NULL, &result));
+    ASSERT_REJECTED(xtract_tonality(NULL, 0, NULL, &result));
+    ASSERT_REJECTED(xtract_crest(NULL, 0, NULL, &result));
+    ASSERT_REJECTED(xtract_noisiness(NULL, 0, NULL, &result));
+    ASSERT_REJECTED(xtract_midicent(NULL, 0, NULL, &result));
+}
+
+UTEST(scalar, pitch_detectors_reject_an_empty_input_and_a_null_argv)
+{
+    double data[64] = {0};
+    double sr = 44100.0;
+    double result;
+
+    ASSERT_REJECTED(xtract_f0(data, 0, &sr, &result));
+    ASSERT_REJECTED(xtract_f0(data, 64, NULL, &result));
+    ASSERT_REJECTED(xtract_failsafe_f0(data, 0, &sr, &result));
+    ASSERT_REJECTED(xtract_failsafe_f0(data, 64, NULL, &result));
+    ASSERT_REJECTED(xtract_mcleod_f0(data, 0, &sr, &result));
+    ASSERT_REJECTED(xtract_mcleod_f0(data, 64, NULL, &result));
+}
+
+UTEST(scalar, spectral_features_reject_an_odd_or_too_short_input_and_a_null_argv)
+{
+    double data[4] = {1.0, 2.0, 100.0, 200.0};
+    double moments[2] = {150.0, 50.0};
+    double f0 = 100.0;
+    double result;
+
+    ASSERT_REJECTED(xtract_spectral_centroid(data, 3, NULL, &result));
+    ASSERT_REJECTED(xtract_spectral_centroid(data, 0, NULL, &result));
+    ASSERT_REJECTED(xtract_spectral_mean(data, 1, NULL, &result));
+    ASSERT_REJECTED(xtract_spectral_variance(data, 3, moments, &result));
+    ASSERT_REJECTED(xtract_spectral_variance(data, 4, NULL, &result));
+    ASSERT_REJECTED(xtract_spread(data, 3, moments, &result));
+    ASSERT_REJECTED(xtract_spectral_skewness(data, 3, moments, &result));
+    ASSERT_REJECTED(xtract_spectral_skewness(data, 4, NULL, &result));
+    ASSERT_REJECTED(xtract_spectral_kurtosis(data, 3, moments, &result));
+    ASSERT_REJECTED(xtract_spectral_kurtosis(data, 4, NULL, &result));
+    ASSERT_REJECTED(xtract_spectral_slope(data, 3, NULL, &result));
+    ASSERT_REJECTED(xtract_tristimulus_1(data, 3, &f0, &result));
+    ASSERT_REJECTED(xtract_tristimulus_1(data, 4, NULL, &result));
+    ASSERT_REJECTED(xtract_tristimulus_2(data, 3, &f0, &result));
+    ASSERT_REJECTED(xtract_tristimulus_2(data, 4, NULL, &result));
+    ASSERT_REJECTED(xtract_tristimulus_3(data, 3, &f0, &result));
+    ASSERT_REJECTED(xtract_tristimulus_3(data, 4, NULL, &result));
+    ASSERT_REJECTED(xtract_spectral_inharmonicity(data, 3, &f0, &result));
+    ASSERT_REJECTED(xtract_spectral_inharmonicity(data, 4, NULL, &result));
+    ASSERT_REJECTED(xtract_odd_even_ratio(data, 3, &f0, &result));
+    ASSERT_REJECTED(xtract_odd_even_ratio(data, 4, NULL, &result));
+    ASSERT_REJECTED(xtract_hps(data, 3, NULL, &result));
+    ASSERT_REJECTED(xtract_hps(data, 2, NULL, &result));
+
+    ASSERT_EQ(xtract_spectral_centroid(data, 2, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 2.0, EPSILON);
+    ASSERT_EQ(xtract_spectral_variance(data, 2, moments, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_tristimulus_1(data, 2, &f0, &result), XTRACT_NO_RESULT);
+}
+
+UTEST(scalar, spectral_centroid_of_a_silent_spectrum_has_no_result)
+{
+    double data[4] = {0.0, 0.0, 100.0, 200.0};
+    double result = 1.0;
+
+    ASSERT_EQ(xtract_spectral_centroid(data, 4, NULL, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
+    result = 1.0;
+    ASSERT_EQ(xtract_spectral_mean(data, 4, NULL, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
+}
+
+UTEST(scalar, harmonic_features_treat_a_zero_fundamental_as_no_result_and_a_negative_or_infinite_one_as_an_error)
+{
+    double data[4] = {1.0, 2.0, 100.0, 200.0};
+    double zero = 0.0;
+    double negative = -100.0;
+    double infinite = INFINITY;
+    double result;
+
+    result = 1.0;
+    ASSERT_EQ(xtract_tristimulus_1(data, 4, &zero, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
+    result = 1.0;
+    ASSERT_EQ(xtract_tristimulus_2(data, 4, &zero, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
+    result = 1.0;
+    ASSERT_EQ(xtract_tristimulus_3(data, 4, &zero, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
+    result = 1.0;
+    ASSERT_EQ(xtract_odd_even_ratio(data, 4, &zero, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
+
+    ASSERT_REJECTED(xtract_tristimulus_1(data, 4, &negative, &result));
+    ASSERT_REJECTED(xtract_tristimulus_2(data, 4, &negative, &result));
+    ASSERT_REJECTED(xtract_tristimulus_3(data, 4, &negative, &result));
+    ASSERT_REJECTED(xtract_spectral_inharmonicity(data, 4, &negative, &result));
+    ASSERT_REJECTED(xtract_odd_even_ratio(data, 4, &negative, &result));
+
+    ASSERT_REJECTED(xtract_tristimulus_1(data, 4, &infinite, &result));
+    ASSERT_REJECTED(xtract_tristimulus_2(data, 4, &infinite, &result));
+    ASSERT_REJECTED(xtract_tristimulus_3(data, 4, &infinite, &result));
+    ASSERT_REJECTED(xtract_spectral_inharmonicity(data, 4, &infinite, &result));
+    ASSERT_REJECTED(xtract_odd_even_ratio(data, 4, &infinite, &result));
+}
+
+UTEST(scalar, peak_sets_the_result_to_zero_when_there_is_no_peak)
+{
+    double data[4] = {1.0, 10.0, 3.0, 2.0};
+    double threshold = 0.0;
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_peak(data, 4, &threshold, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
 }

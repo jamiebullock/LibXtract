@@ -64,11 +64,16 @@ UTEST(stateful, init_wavelet_f0_state)
     ASSERT_EQ(xtract_init_wavelet_f0_state(), XTRACT_SUCCESS);
 }
 
-UTEST(stateful, wavelet_f0_rejects_null_argv)
+UTEST(stateful, wavelet_f0_rejects_null_argv_and_an_empty_input)
 {
     double table[WAVELET_N];
+    double samplerate = 44100.0;
     double result = -1.0;
-    ASSERT_EQ(xtract_wavelet_f0(table, WAVELET_N, NULL, &result), XTRACT_BAD_ARGV);
+    ASSERT_EQ(xtract_wavelet_f0(table, WAVELET_N, NULL, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    result = -1.0;
+    ASSERT_EQ(xtract_wavelet_f0(table, 0, &samplerate, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
 }
 
 UTEST(stateful, wavelet_f0_detects_sine_pitch)
