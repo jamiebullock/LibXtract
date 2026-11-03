@@ -230,9 +230,8 @@ UTEST(vector, subbands_final_octave_band_computed_when_it_ends_at_n)
 
 UTEST(vector, spectral_subband_centroids_single_partial_per_band)
 {
-    /* Input follows the documented xtract_spectrum() layout:
-     * amplitudes in data[0..N), frequencies in data[N..2N). */
-    const int N = 8;
+    const int N = 16;
+    const int M = N / 2;
     double data[16] = {0};
     double filter_bank[2][8];
     double *filter_ptrs[2] = {filter_bank[0], filter_bank[1]};
@@ -240,15 +239,12 @@ UTEST(vector, spectral_subband_centroids_single_partial_per_band)
     double result[2] = {0};
     int n;
 
-    /* One partial per band: a band containing a single partial has its
-     * centroid at that partial's frequency. */
     data[2] = 3.0;
     data[5] = 2.0;
-    for (n = 0; n < N; n++)
-        data[N + n] = (n + 1) * 100.0;
+    for (n = 0; n < M; n++)
+        data[M + n] = (n + 1) * 100.0;
 
-    /* Two rectangular filters covering bins [0, 4) and [4, 8) */
-    for (n = 0; n < N; n++)
+    for (n = 0; n < M; n++)
     {
         filter_bank[0][n] = n < 4 ? 1.0 : 0.0;
         filter_bank[1][n] = n < 4 ? 0.0 : 1.0;
@@ -257,10 +253,13 @@ UTEST(vector, spectral_subband_centroids_single_partial_per_band)
     mf.dct_table = NULL;
     mf.filters = filter_ptrs;
 
-    xtract_spectral_subband_centroids(data, N, &mf, result);
-
+    ASSERT_EQ(xtract_spectral_subband_centroids(data, N, &mf, result), XTRACT_SUCCESS);
     CHECK_REL(result[0], 300.0, EPSILON);
     CHECK_REL(result[1], 600.0, EPSILON);
+
+    result[0] = -1.0;
+    ASSERT_EQ(xtract_spectral_subband_centroids(data, N - 1, &mf, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result[0], -1.0);
 }
 
 /* ===== xtract_lpcc ===== */
