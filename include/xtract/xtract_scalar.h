@@ -206,9 +206,9 @@ extern "C"
     /** \brief Extract the 'total loudness' of an input vector using a method described by Moore, Glasberg et al (2005)
      *
      * \param *data: a pointer to the first element in an array of doubles representing a set of BARK_BANDS bark coefficients
-     * \param N: the number of coefficients to be considered
+     * \param N: the number of coefficients to be considered, from 1 to XTRACT_BARK_BANDS
      * \param *argv: a pointer to NULL
-     * \param *result: the total loudness of N values from the array pointed to by *data
+     * \param *result: the total loudness of N values from the array pointed to by *data; a coefficient of 0 or below contributes nothing
      *
      * Note: if N = 1, the 'specific loudness' of the bark band pointed to by *data will be given by *result
      *
@@ -312,7 +312,7 @@ extern "C"
     /** \brief Extract the Sharpness of an input vector
      *
      * \param *data: a pointer to the first element in an array of doubles representing Bark band coefficients (e.g. the result of xtract_bark_coefficients())
-     * \param N: the number of Bark bands to be considered
+     * \param N: the number of Bark bands to be considered, from 1 to XTRACT_BARK_BANDS
      * \param *argv: a pointer to NULL
      * \param *result: the sharpness of the input, in acums
      *

@@ -757,28 +757,20 @@ int xtract_rolloff(const double *data, const int N, const void *argv, double *re
 
 int xtract_loudness(const double *data, const int N, const void *argv, double *result)
 {
-    int n = N, rv;
+    int n = N;
 
     *result = 0.0;
 
-    if (n > XTRACT_BARK_BANDS)
-    {
-        n = XTRACT_BARK_BANDS;
-        rv = XTRACT_BAD_VECTOR_SIZE;
-    }
-    else
-        rv = XTRACT_SUCCESS;
+    if (N < 1 || N > XTRACT_BARK_BANDS)
+        return XTRACT_ARGUMENT_ERROR;
 
     while (n--)
     {
-        /* The first bark coefficients is negative and makes the result N/A */
-        if (n > 0)
-        {
+        if (data[n] > 0.0)
             *result += pow(data[n], 0.23);
-        }
     }
 
-    return rv;
+    return XTRACT_SUCCESS;
 }
 
 int xtract_flatness(const double *data, const int N, const void *argv, double *result)
@@ -1037,20 +1029,18 @@ int xtract_odd_even_ratio(const double *data, const int N, const void *argv, dou
 
 int xtract_sharpness(const double *data, const int N, const void *argv, double *result)
 {
-    int n = N, rv, z;
+    int n = N, z;
     double sl, g; /* sl = specific loudness */
     double temp, total_loudness;
 
     temp = 0.0;
     total_loudness = 0.0;
 
-    if (n > XTRACT_BARK_BANDS)
+    if (N < 1 || N > XTRACT_BARK_BANDS)
     {
-        n = XTRACT_BARK_BANDS;
-        rv = XTRACT_BAD_VECTOR_SIZE;
+        *result = 0.0;
+        return XTRACT_ARGUMENT_ERROR;
     }
-    else
-        rv = XTRACT_SUCCESS;
 
     while (n--)
     {
@@ -1073,7 +1063,7 @@ int xtract_sharpness(const double *data, const int N, const void *argv, double *
      * normalised by the total loudness, in acums */
     *result = 0.11 * temp / total_loudness;
 
-    return rv;
+    return XTRACT_SUCCESS;
 }
 
 int xtract_spectral_slope(const double *data, const int N, const void *argv, double *result)

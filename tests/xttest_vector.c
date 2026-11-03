@@ -1311,17 +1311,36 @@ UTEST(vector, bark_coefficients_sum_the_bins_of_a_dc_included_spectrum)
 
 UTEST(scalar, loudness_of_uniform_bark_coefficients)
 {
-    /* loudness = sum(data[n]^0.23) for n=1..N-1 (skips n=0) */
     double result = 0.0;
     double data[XTRACT_BARK_BANDS];
     int i;
     for (i = 0; i < XTRACT_BARK_BANDS; i++)
         data[i] = 1.0;
 
-    xtract_loudness(data, XTRACT_BARK_BANDS, NULL, &result);
+    ASSERT_EQ(xtract_loudness(data, XTRACT_BARK_BANDS, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, (double)XTRACT_BARK_BANDS, 1e-6);
+}
 
-    /* N-1 terms of 1.0^0.23 = 1.0 each, so result = XTRACT_BARK_BANDS - 1 = 25 */
-    CHECK_REL(result, 25.0, 1e-6);
+UTEST(scalar, loudness_rejects_more_than_bark_bands_or_none_and_skips_non_positive_coefficients)
+{
+    double data[XTRACT_BARK_BANDS + 1];
+    double result = 1.0;
+    int i;
+
+    for (i = 0; i <= XTRACT_BARK_BANDS; i++)
+        data[i] = 1.0;
+
+    ASSERT_EQ(xtract_loudness(data, XTRACT_BARK_BANDS + 1, NULL, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    result = 1.0;
+    ASSERT_EQ(xtract_loudness(data, 0, NULL, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+
+    data[0] = -1.0;
+    ASSERT_EQ(xtract_loudness(data, XTRACT_BARK_BANDS, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, XTRACT_BARK_BANDS - 1.0, 1e-6);
+    ASSERT_EQ(xtract_loudness(data + 1, 1, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 1.0, 1e-6);
 }
 
 UTEST(scalar, loudness_of_silence_is_0)
@@ -1437,21 +1456,21 @@ UTEST(scalar, sharpness_silent_input_yields_no_result)
     ASSERT_EQ(result, 0.0);
 }
 
-UTEST(scalar, sharpness_bands_beyond_bark_bands_are_ignored)
+UTEST(scalar, sharpness_rejects_more_than_bark_bands_or_none)
 {
-    /* The extra bands carry huge values that must not contribute:
-     * both calls then sum the same 26 bands. */
-    double data[30];
-    double result26 = 0.0;
-    double result30 = 0.0;
+    double data[XTRACT_BARK_BANDS + 1];
+    double result = 1.0;
     int i;
 
-    for (i = 0; i < 30; i++)
-        data[i] = i < XTRACT_BARK_BANDS ? 1.0 : 1.0e12;
+    for (i = 0; i <= XTRACT_BARK_BANDS; i++)
+        data[i] = 1.0;
 
-    ASSERT_EQ(xtract_sharpness(data, 30, NULL, &result30), XTRACT_BAD_VECTOR_SIZE);
-    ASSERT_EQ(xtract_sharpness(data, XTRACT_BARK_BANDS, NULL, &result26), XTRACT_SUCCESS);
-    CHECK_REL(result30, result26, 1e-10);
+    ASSERT_EQ(xtract_sharpness(data, XTRACT_BARK_BANDS + 1, NULL, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    result = 1.0;
+    ASSERT_EQ(xtract_sharpness(data, 0, NULL, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    ASSERT_EQ(xtract_sharpness(data, XTRACT_BARK_BANDS, NULL, &result), XTRACT_SUCCESS);
 }
 
 /* ===== Bug-specific tests ===== */
