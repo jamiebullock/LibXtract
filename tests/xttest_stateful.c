@@ -97,7 +97,7 @@ UTEST(helper, features_from_subframes_still_computes_the_second_subframe_when_th
     CHECK_REL(result[2], 3.0, EPSILON);
 
     data[1] = 3.0;
-    data[3] = 1.0;
+    data[3] = 0.5;
     ASSERT_EQ(xtract_features_from_subframes(data, 4, XTRACT_PEAK, &threshold, result), XTRACT_NO_RESULT);
     CHECK_REL(result[0], 3.0, EPSILON);
     ASSERT_EQ(result[2], 0.0);
