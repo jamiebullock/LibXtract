@@ -2498,3 +2498,38 @@ UTEST(vector, harmonic_spectrum_rejects_an_odd_or_short_input_a_null_argv_and_ou
     CHECK_REL(result[0], 1.0, EPSILON);
     CHECK_REL(result[2], 100.0, EPSILON);
 }
+
+UTEST(vector, subbands_accepts_only_features_that_reduce_a_plain_vector_to_one_scalar)
+{
+    static const int allowed[] = {
+        XTRACT_MEAN, XTRACT_IRREGULARITY_K, XTRACT_IRREGULARITY_J, XTRACT_SMOOTHNESS,
+        XTRACT_ZCR, XTRACT_LOUDNESS, XTRACT_FLATNESS, XTRACT_RMS_AMPLITUDE,
+        XTRACT_SHARPNESS, XTRACT_HIGHEST_VALUE, XTRACT_SUM, XTRACT_NONZERO_COUNT};
+    static const int rejected[] = {
+        XTRACT_VARIANCE, XTRACT_SPECTRAL_CENTROID, XTRACT_SPECTRAL_SLOPE, XTRACT_POWER,
+        XTRACT_SPECTRUM, XTRACT_DIFFERENCE_VECTOR, XTRACT_SUBBANDS};
+    xtract_function_descriptor_t *fd = xtract_make_descriptors();
+    double data[8] = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
+    double result[2] = {-1.0, -1.0};
+    int argv[4] = {XTRACT_MEAN, 2, XTRACT_LINEAR_SUBBANDS, 0};
+    size_t i;
+
+    ASSERT_TRUE(fd != NULL);
+    for (i = 0; i < sizeof(allowed) / sizeof(allowed[0]); i++)
+    {
+        argv[0] = allowed[i];
+        ASSERT_EQ(fd[allowed[i]].argc, 0);
+        ASSERT_EQ(fd[allowed[i]].is_scalar, XTRACT_TRUE);
+        ASSERT_NE(fd[allowed[i]].data.format, XTRACT_SPECTRAL);
+        ASSERT_NE(fd[allowed[i]].data.format, XTRACT_NO_DATA);
+        ASSERT_EQ(xtract_subbands(data, 8, argv, result), XTRACT_SUCCESS);
+    }
+    for (i = 0; i < sizeof(rejected) / sizeof(rejected[0]); i++)
+    {
+        argv[0] = rejected[i];
+        result[0] = -1.0;
+        ASSERT_EQ(xtract_subbands(data, 8, argv, result), XTRACT_ARGUMENT_ERROR);
+        ASSERT_EQ(result[0], -1.0);
+    }
+    ASSERT_EQ(xtract_free_descriptors(fd), XTRACT_SUCCESS);
+}

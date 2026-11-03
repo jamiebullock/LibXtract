@@ -963,6 +963,27 @@ int xtract_lpcc(const double *data, const int N, const void *argv, double *resul
     return XTRACT_SUCCESS;
 }
 
+/* The features a band may be reduced with: each reads a plain vector with a
+ * NULL argv and writes one scalar, so the dispatch below cannot overrun the
+ * result or dereference the NULL argv */
+static const int subband_features[] = {
+    XTRACT_MEAN, XTRACT_IRREGULARITY_K, XTRACT_IRREGULARITY_J, XTRACT_SMOOTHNESS,
+    XTRACT_ZCR, XTRACT_LOUDNESS, XTRACT_FLATNESS, XTRACT_RMS_AMPLITUDE,
+    XTRACT_SHARPNESS, XTRACT_HIGHEST_VALUE, XTRACT_SUM, XTRACT_NONZERO_COUNT};
+
+static int is_subband_feature(const int feature)
+{
+    size_t i;
+
+    for (i = 0; i < sizeof(subband_features) / sizeof(subband_features[0]); i++)
+    {
+        if (subband_features[i] == feature)
+            return 1;
+    }
+
+    return 0;
+}
+
 int xtract_subbands(const double *data, const int N, const void *argv, double *result)
 {
     int n, bw, xtract_func, nbands, scale, start, lower, *argi, rv;
@@ -977,8 +998,7 @@ int xtract_subbands(const double *data, const int N, const void *argv, double *r
     scale = argi[2];
     start = argi[3];
 
-    if (xtract_func < 0 || xtract_func >= XTRACT_FEATURES || nbands < 1 ||
-        start < 0 || start >= N)
+    if (!is_subband_feature(xtract_func) || nbands < 1 || start < 0 || start >= N)
         return XTRACT_ARGUMENT_ERROR;
 
     if (scale == XTRACT_LINEAR_SUBBANDS)

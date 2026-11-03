@@ -131,6 +131,11 @@ UTEST(descriptors, argv_ranges_match_the_functions)
     CHECK_REL(fd[XTRACT_SPECTRUM].argv.max[0], 192000.0 / 16.0, EPSILON);
     CHECK_REL(fd[XTRACT_SPECTRUM].argv.max[1], (double)XTRACT_MAGNITUDE_PHASE_SPECTRUM, EPSILON);
 
+    CHECK_REL(fd[XTRACT_SUBBANDS].argv.max[0], (double)(XTRACT_FEATURES - 1), EPSILON);
+    CHECK_REL(fd[XTRACT_SUBBANDS].argv.max[2], (double)XTRACT_LINEAR_SUBBANDS, EPSILON);
+    ASSERT_EQ(fd[XTRACT_SPREAD].argc, 1);
+    ASSERT_EQ(fd[XTRACT_SPREAD].argv.donor[0], XTRACT_SPECTRAL_MEAN);
+
     ASSERT_EQ(fd[XTRACT_SPREAD].data.format, XTRACT_SPECTRAL);
     ASSERT_EQ(fd[XTRACT_HPS].data.format, XTRACT_SPECTRAL);
 

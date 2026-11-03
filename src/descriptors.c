@@ -71,6 +71,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             /* argc = 1 */
         case XTRACT_VARIANCE:
         case XTRACT_SPECTRAL_VARIANCE:
+        case XTRACT_SPREAD:
         case XTRACT_STANDARD_DEVIATION:
         case XTRACT_DIFFERENCE_VECTOR:
         case XTRACT_AVERAGE_DEVIATION:
@@ -199,8 +200,8 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *(argv_unit + 3) = XTRACT_UNIT_NONE;
             break;
         case XTRACT_SUBBANDS:
-            *argv_min = XTRACT_UNBOUNDED_MIN;
-            *argv_max = XTRACT_UNBOUNDED_MAX;
+            *argv_min = 0;
+            *argv_max = XTRACT_FEATURES - 1;
             *argv_def = XTRACT_MEAN;
             *argv_unit = XTRACT_UNIT_NONE;
             *(argv_min + 1) = 1;
@@ -208,7 +209,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *(argv_def + 1) = 4;
             *(argv_unit + 1) = XTRACT_UNIT_NONE;
             *(argv_min + 2) = 0;
-            *(argv_max + 2) = 32;
+            *(argv_max + 2) = XTRACT_LINEAR_SUBBANDS;
             *(argv_def + 2) = 0;
             *(argv_unit + 2) = XTRACT_UNIT_NONE;
             *(argv_min + 3) = 0;
@@ -244,6 +245,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *argv_donor = XTRACT_MEAN;
             break;
         case XTRACT_SPECTRAL_VARIANCE:
+        case XTRACT_SPREAD:
             *argv_donor = XTRACT_SPECTRAL_MEAN;
             break;
         case XTRACT_STANDARD_DEVIATION:
@@ -1092,6 +1094,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_AVERAGE_DEVIATION:
         case XTRACT_SPECTRAL_VARIANCE:
         case XTRACT_SPECTRAL_STANDARD_DEVIATION:
+        case XTRACT_SPREAD:
             /* case XTRACT_SPECTRAL_AVERAGE_DEVIATION: */
         case XTRACT_SPECTRAL_INHARMONICITY:
         case XTRACT_TRISTIMULUS_1:
@@ -1168,7 +1171,6 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_IRREGULARITY_J:
         case XTRACT_SMOOTHNESS:
         case XTRACT_FLATNESS:
-        case XTRACT_SPREAD:
         case XTRACT_ZCR:
         case XTRACT_LOUDNESS:
         case XTRACT_HIGHEST_VALUE:
