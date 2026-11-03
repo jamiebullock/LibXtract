@@ -78,10 +78,14 @@ int xtract_features_from_subframes(const double *data, const int N, const int fe
     result2 = result + n;
 
     rv = xtract[feature](frame1, n, argv, result1);
-    if (rv != XTRACT_SUCCESS && rv != XTRACT_NO_RESULT)
+    if (rv == XTRACT_NO_RESULT)
+        memset(result1, 0, n * sizeof(double));
+    else if (rv != XTRACT_SUCCESS)
         return rv;
 
     rv2 = xtract[feature](frame2, n, argv, result2);
+    if (rv2 == XTRACT_NO_RESULT)
+        memset(result2, 0, n * sizeof(double));
 
     return rv2 != XTRACT_SUCCESS ? rv2 : rv;
 }
