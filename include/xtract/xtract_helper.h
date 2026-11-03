@@ -49,8 +49,8 @@ extern "C"
     /** \brief Divides the array pointed to by *data into two subframes, and applies a given feature to each subframe, returning them in a single array pointed to by result
      *
      * \param *data an array of doubles
-     * \param N the number of elements in the array pointed by *data
-     * \param feature an integer representing the feature to be applied to each subframe in data. This will be a value as given in the enumeration xtract_features_ (libxtract.h)
+     * \param N the number of elements in the array pointed by *data, at least 2 and even
+     * \param feature an integer representing the feature to be applied to each subframe in data, a value as given in the enumeration xtract_features_ (libxtract.h) whose result is no longer than its input: every scalar feature, and XTRACT_DCT, XTRACT_AUTOCORRELATION, XTRACT_AMDF, XTRACT_ASDF, XTRACT_AUTOCORRELATION_FFT, XTRACT_SPECTRUM, XTRACT_HARMONIC_SPECTRUM, XTRACT_DIFFERENCE_VECTOR, XTRACT_WINDOWED and XTRACT_SMOOTHED. Any other feature is an argument error, as the two results of N / 2 values could not both fit in *result
      * \param *argv a pointer to the argument vector to be passed to the feature extraction function as determined by feature
      * \param *result a pointer to the 'packed' results of the feature calculation. This may be passed in as *data to xtract_features_from_subframes() to calculate further features on the subframes, or xtract_difference_vector(), to get the difference between the subframes.
      *

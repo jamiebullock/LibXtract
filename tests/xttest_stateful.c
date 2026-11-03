@@ -60,6 +60,32 @@ UTEST(helper, features_from_subframes_rejects_out_of_range_feature)
     ASSERT_EQ(xtract_features_from_subframes(data, 4, XTRACT_FEATURES, NULL, result), XTRACT_ARGUMENT_ERROR);
 }
 
+UTEST(helper, features_from_subframes_rejects_an_odd_or_short_input_and_a_feature_that_outgrows_its_input)
+{
+    static const int outgrowing[] = {
+        XTRACT_PEAK_SPECTRUM, XTRACT_LPC, XTRACT_LPCC, XTRACT_MFCC, XTRACT_MEL_SPECTROGRAM,
+        XTRACT_GFCC, XTRACT_GAMMATONE_SPECTROGRAM, XTRACT_BARK_COEFFICIENTS,
+        XTRACT_SUBBANDS, XTRACT_MMBSES, XTRACT_SPECTRAL_SUBBAND_CENTROIDS};
+    double data[] = {1.0, 2.0, 3.0, 4.0};
+    double result[4] = {-1.0, -1.0, -1.0, -1.0};
+    double threshold = 0.0;
+    size_t i;
+
+    ASSERT_EQ(xtract_features_from_subframes(data, 3, XTRACT_MEAN, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_features_from_subframes(data, 0, XTRACT_MEAN, NULL, result), XTRACT_ARGUMENT_ERROR);
+    for (i = 0; i < sizeof(outgrowing) / sizeof(outgrowing[0]); i++)
+        ASSERT_EQ(xtract_features_from_subframes(data, 4, outgrowing[i], NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result[0], -1.0);
+
+    ASSERT_EQ(xtract_features_from_subframes(data, 4, XTRACT_DCT, NULL, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_features_from_subframes(data, 4, XTRACT_DIFFERENCE_VECTOR, NULL, result), XTRACT_SUCCESS);
+    CHECK_REL(result[0], -1.0, EPSILON);
+    CHECK_REL(result[2], -1.0, EPSILON);
+    ASSERT_EQ(xtract_features_from_subframes(data, 4, XTRACT_PEAK, &threshold, result), XTRACT_SUCCESS);
+    CHECK_REL(result[0], 2.0, EPSILON);
+    CHECK_REL(result[2], 4.0, EPSILON);
+}
+
 UTEST(stateful, init_wavelet_f0_state)
 {
     ASSERT_EQ(xtract_init_wavelet_f0_state(), XTRACT_SUCCESS);
