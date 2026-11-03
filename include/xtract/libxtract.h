@@ -392,7 +392,7 @@ extern "C"
 
     /** \brief A structure to store a set of n_filters Mel filters
      *
-     * Zero-initialise the structure, or set every field, before passing it to a feature function. dct_table is the cosine table used by xtract_mfcc() and xtract_gfcc() for their final DCT: either the result of xtract_init_dct(n_filters), which the caller frees with xtract_free_dct(), or NULL to have the cosines evaluated on each call.
+     * Zero-initialise the structure, or set every field, before passing it to a feature function. The feature functions accept any n_filters of at least 1, so a structure filled by hand may hold a single filter; xtract_init_mfcc() and xtract_init_gfcc() build at least 2. dct_table is the cosine table used by xtract_mfcc() and xtract_gfcc() for their final DCT: either the result of xtract_init_dct(n_filters), which the caller frees with xtract_free_dct(), or NULL to have the cosines evaluated on each call.
      */
     typedef struct xtract_mel_filter_
     {
@@ -410,7 +410,7 @@ extern "C"
      * \param style: XTRACT_EQUAL_GAIN or XTRACT_EQUAL_AREA, as given in the enumeration xtract_mfcc_types_
      * \param freq_min: the peak frequency of the first filter
      * \param freq_max: the frequency the peaks step towards, reached one step beyond the last filter
-     * \param freq_bands: the number of filters
+     * \param freq_bands: the number of filters, at least 2
      * \param **fft_tables: an array of pointers to arrays of length N, to be populated with filter coefficients
      */
     int xtract_init_mfcc(int N, double nyquist, int style, double freq_min, double freq_max, int freq_bands, double **fft_tables);
@@ -423,7 +423,7 @@ extern "C"
      * \param nyquist: the Nyquist frequency
      * \param freq_min: the minimum frequency for the filter bank
      * \param freq_max: the maximum frequency for the filter bank
-     * \param freq_bands: the number of gammatone filters
+     * \param freq_bands: the number of gammatone filters, at least 2
      * \param **fft_tables: an array of pointers to arrays of length N, to be populated with filter coefficients
      */
     int xtract_init_gfcc(int N, double nyquist, double freq_min, double freq_max, int freq_bands, double **fft_tables);
