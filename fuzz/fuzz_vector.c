@@ -19,13 +19,14 @@
  * by name (two of them, mmbses and spectral_subband_centroids, have no
  * xtract[] dispatch slot).
  *
- * What is fuzzed: the input vector (always) and the plain scalar argv fields
- * (spectrum type, peak/harmonic thresholds, f0). What is held valid: the
- * filterbank/bark pointers (we fuzz each feature's maths on adversarial input,
- * not the init routines), and the argv fields that select the result size or a
- * dispatch target (subbands' function and band count, lpcc's order) -- feeding
- * those garbage would overflow the harness's own buffer or call out of the
- * xtract[] table, which is out of contract rather than a library bug.
+ * What is fuzzed: the input vector (always), a flag that passes a NULL argv,
+ * and the plain scalar argv fields (spectrum type, peak/harmonic thresholds,
+ * f0), each folded into a range around its valid one so that both accepted
+ * and rejected values are reached. What is held valid: the filterbank/bark
+ * pointers (we fuzz each feature's maths on adversarial input, not the init
+ * routines), and the argv fields that select the result size (subbands'
+ * band count, lpcc's order) -- feeding those garbage would overflow the
+ * harness's own buffer, which is out of contract rather than a library bug.
  *
  * The result buffer is sized to the largest need across all features
  * (peak_spectrum's 2N) plus a margin. Run under AddressSanitizer + UBSan.
@@ -33,6 +34,7 @@
  * Build/run: make fuzz   (see fuzz/Makefile)
  */
 
+#include <math.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -139,6 +141,17 @@ static int input_length(int feature, int n)
     }
 }
 
+/* Fold a finite fuzzer double into [0, limit); NaN and infinities pass through */
+static double fold(double v, double limit)
+{
+    return isfinite(v) ? fmod(fabs(v), limit) : v;
+}
+
+static const void *maybe_null(int null_argv, const void *p)
+{
+    return null_argv ? NULL : p;
+}
+
 /* Map a fuzzer double to an int in [lo, hi], treating NaN/out-of-range as lo. */
 static int clamp_int(double v, int lo, int hi)
 {
@@ -152,6 +165,7 @@ static int clamp_int(double v, int lo, int hi)
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     int feature;
+    int null_argv;
     int n;
     int in_len;
     uint64_t n_raw;
@@ -162,12 +176,13 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     size_t fz_bytes;
     size_t avail;
 
-    if (size < 1)
+    if (size < 2)
         return 0;
 
     feature = data[0] % FZ_N_FEATURES;
-    data++;
-    size--;
+    null_argv = data[1] & 1;
+    data += 2;
+    size -= 2;
 
     /* Carve a small prefix for the scalar argv fields; the rest is the input. */
     memset(fz, 0, sizeof(fz));
@@ -200,42 +215,42 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     {
     case FZ_SPECTRUM:
     {
-        double a[4] = {fz[0], fz[1], fz[2], fz[3]};
-        xtract_spectrum(input, VEC_N, a, result);
+        double a[4] = {fz[0], fold(fz[1], XTRACT_MAGNITUDE_PHASE_SPECTRUM + 2.0), fz[2], fz[3]};
+        xtract_spectrum(input, VEC_N, maybe_null(null_argv, a), result);
         break;
     }
     case FZ_PEAK_SPECTRUM:
     {
-        double a[2] = {fz[0], fz[1]};
-        xtract_peak_spectrum(input, VEC_N, a, result);
+        double a[2] = {fz[0], fold(fz[1], 110.0)};
+        xtract_peak_spectrum(input, VEC_N, maybe_null(null_argv, a), result);
         break;
     }
     case FZ_HARMONIC_SPECTRUM:
     {
-        double a[2] = {fz[0], fz[1]};
-        xtract_harmonic_spectrum(input, VEC_N, a, result);
+        double a[2] = {fabs(fz[0]), fold(fz[1], 1.1)};
+        xtract_harmonic_spectrum(input, VEC_N, maybe_null(null_argv, a), result);
         break;
     }
     case FZ_MFCC:
-        xtract_mfcc(input, VEC_N, &mel, result);
+        xtract_mfcc(input, VEC_N, maybe_null(null_argv, &mel), result);
         break;
     case FZ_MEL_SPECTROGRAM:
-        xtract_mel_spectrogram(input, VEC_N, &mel, result);
+        xtract_mel_spectrogram(input, VEC_N, maybe_null(null_argv, &mel), result);
         break;
     case FZ_MMBSES:
-        xtract_mmbses(input, VEC_N, &mel, result);
+        xtract_mmbses(input, VEC_N, maybe_null(null_argv, &mel), result);
         break;
     case FZ_SPECTRAL_SUBBAND_CENTROIDS:
-        xtract_spectral_subband_centroids(input, VEC_N, &mel, result);
+        xtract_spectral_subband_centroids(input, VEC_N, maybe_null(null_argv, &mel), result);
         break;
     case FZ_GFCC:
-        xtract_gfcc(input, VEC_N, &gammatone, result);
+        xtract_gfcc(input, VEC_N, maybe_null(null_argv, &gammatone), result);
         break;
     case FZ_GAMMATONE_SPECTROGRAM:
-        xtract_gammatone_spectrogram(input, VEC_N, &gammatone, result);
+        xtract_gammatone_spectrogram(input, VEC_N, maybe_null(null_argv, &gammatone), result);
         break;
     case FZ_BARK_COEFFICIENTS:
-        xtract_bark_coefficients(input, VEC_N, bark_limits, result);
+        xtract_bark_coefficients(input, VEC_N, maybe_null(null_argv, bark_limits), result);
         break;
     case FZ_SUBBANDS:
     {
@@ -247,14 +262,14 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
         a[1] = clamp_int(fz[1], 1, VEC_N);
         a[2] = (fz[2] < 0.0) ? XTRACT_OCTAVE_SUBBANDS : XTRACT_LINEAR_SUBBANDS;
         a[3] = clamp_int(fz[3], 0, VEC_N - 1);
-        xtract_subbands(input, VEC_N, a, result);
+        xtract_subbands(input, VEC_N, maybe_null(null_argv, a), result);
         break;
     }
     case FZ_LPCC:
     {
         /* argv = order Q, which is also the result length. */
         int order = clamp_int(fz[0], 1, VEC_N);
-        xtract_lpcc(input, n, &order, result);
+        xtract_lpcc(input, n, maybe_null(null_argv, &order), result);
         break;
     }
     case FZ_AUTOCORRELATION_FFT:

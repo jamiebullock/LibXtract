@@ -10,8 +10,8 @@
  *
  * All share the uniform signature and take a plain double / NULL argv with no
  * setup, so one harness drives them via the xtract[] dispatch table. The
- * fuzzer's bytes become a feature selector, an argv buffer, and the input
- * vector. Run under AddressSanitizer + UBSan.
+ * fuzzer's bytes become a feature selector, a flag that passes a NULL argv,
+ * an argv buffer, and the input vector. Run under AddressSanitizer + UBSan.
  *
  * Build/run: make fuzz   (see fuzz/Makefile)
  */
@@ -33,6 +33,7 @@ static const int eligible[] = {
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     int feature;
+    int null_argv;
     int n;
     double argv[XTRACT_MAXARGS];
     double *in;
@@ -40,12 +41,13 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     double *result;
     size_t argv_bytes;
 
-    if (size < 1)
+    if (size < 2)
         return 0;
 
     feature = eligible[data[0] % N_ELIGIBLE];
-    data++;
-    size--;
+    null_argv = data[1] & 1;
+    data += 2;
+    size -= 2;
 
     memset(argv, 0, sizeof(argv));
     argv_bytes = size < sizeof(argv) ? size : sizeof(argv);
@@ -72,7 +74,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     memcpy(in, data, (size_t)n * sizeof(double));
     input = n > 0 ? in : in + 1;
 
-    (void)xtract[feature](input, n, argv, result);
+    (void)xtract[feature](input, n, null_argv ? NULL : argv, result);
 
     free(in);
     free(result);
