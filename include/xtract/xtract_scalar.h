@@ -156,7 +156,7 @@ extern "C"
      * \param *data: a pointer to the first element in an array of doubles representing a harmonic spectrum of size N/2, and a frequency spectrum of size N/2 (This is the output format of xtract_harmonic_spectrum())
      * \param N: the number of elements to be considered, at least 2 and even
      * \param *argv: a pointer to a double representing the fundamental frequency of the input vector, finite and at least 0; 0 gives no result
-     * \param *result: the share of the total energy held by the fundamental
+     * \param *result: the coefficient at the fundamental as a fraction of the sum of all coefficients, in whatever unit the coefficients are given: magnitudes give an amplitude ratio, power coefficients an energy ratio
      */
     int xtract_tristimulus_1(const double *data, const int N, const void *argv, double *result);
 
@@ -165,7 +165,7 @@ extern "C"
      * \param *data: a pointer to the first element in an array of doubles representing a harmonic spectrum of size N/2, and a frequency spectrum of size N/2 (This is the output format of xtract_harmonic_spectrum())
      * \param N: the number of elements to be considered, at least 2 and even
      * \param *argv: a pointer to a double representing the fundamental frequency of the input vector, finite and at least 0; 0 gives no result
-     * \param *result: the share of the total energy held by the second, third and fourth harmonics
+     * \param *result: the sum of the coefficients at the second, third and fourth harmonics as a fraction of the sum of all coefficients, in whatever unit the coefficients are given
      */
     int xtract_tristimulus_2(const double *data, const int N, const void *argv, double *result);
 
@@ -174,7 +174,7 @@ extern "C"
      * \param *data: a pointer to the first element in an array of doubles representing a harmonic spectrum of size N/2, and a frequency spectrum of size N/2 (This is the output format of xtract_harmonic_spectrum())
      * \param N: the number of elements to be considered, at least 2 and even
      * \param *argv: a pointer to a double representing the fundamental frequency of the input vector, finite and at least 0; 0 gives no result
-     * \param *result: the share of the total energy held by the fifth and higher harmonics
+     * \param *result: the sum of the coefficients at the fifth and higher harmonics as a fraction of the sum of all coefficients, in whatever unit the coefficients are given
      */
     int xtract_tristimulus_3(const double *data, const int N, const void *argv, double *result);
 
