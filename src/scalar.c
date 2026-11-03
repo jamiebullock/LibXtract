@@ -520,7 +520,7 @@ int xtract_tristimulus_1(const double *data, const int N, const void *argv, doub
     fund = *(double *)argv;
     freqs = data + n;
 
-    if (!(fund >= 0.0))
+    if (!isfinite(fund) || fund < 0.0)
     {
         *result = 0.0;
         return XTRACT_ARGUMENT_ERROR;
@@ -571,7 +571,7 @@ int xtract_tristimulus_2(const double *data, const int N, const void *argv, doub
     fund = *(double *)argv;
     freqs = data + n;
 
-    if (!(fund >= 0.0))
+    if (!isfinite(fund) || fund < 0.0)
     {
         *result = 0.0;
         return XTRACT_ARGUMENT_ERROR;
@@ -637,7 +637,7 @@ int xtract_tristimulus_3(const double *data, const int N, const void *argv, doub
     fund = *(double *)argv;
     freqs = data + n;
 
-    if (!(fund >= 0.0))
+    if (!isfinite(fund) || fund < 0.0)
     {
         *result = 0.0;
         return XTRACT_ARGUMENT_ERROR;
@@ -955,7 +955,7 @@ int xtract_spectral_inharmonicity(const double *data, const int N, const void *a
     amps = data;
     freqs = data + n;
 
-    if (!(fund >= 0.0))
+    if (!isfinite(fund) || fund < 0.0)
     {
         *result = 0.0;
         return XTRACT_ARGUMENT_ERROR;
@@ -1007,7 +1007,7 @@ int xtract_odd_even_ratio(const double *data, const int N, const void *argv, dou
     fund = *(double *)argv;
     freqs = data + n;
 
-    if (!(fund >= 0.0))
+    if (!isfinite(fund) || fund < 0.0)
     {
         *result = 0.0;
         return XTRACT_ARGUMENT_ERROR;

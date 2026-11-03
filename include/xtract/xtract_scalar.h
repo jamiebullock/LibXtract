@@ -151,18 +151,31 @@ extern "C"
      */
     int xtract_irregularity_j(const double *data, const int N, const void *argv, double *result);
 
-    /** \brief Calculate the Tristimulus of an input vector using a method described by Pollard and Jansson (1982)
+    /** \brief Calculate the first order Tristimulus of an input vector using a method described by Pollard and Jansson (1982)
      *
      * \param *data: a pointer to the first element in an array of doubles representing a harmonic spectrum of size N/2, and a frequency spectrum of size N/2 (This is the output format of xtract_harmonic_spectrum())
      * \param N: the number of elements to be considered, at least 2 and even
-     * \param *argv: a pointer to a double representing the fundamental frequency of the input vector, at least 0; 0 gives no result
-     * \param *result: the tristimulus of N values from the array pointed to by *data
-     *
-     * These three functions provide the first, second and third order tristimulus formulae
-     *
+     * \param *argv: a pointer to a double representing the fundamental frequency of the input vector, finite and at least 0; 0 gives no result
+     * \param *result: the share of the total energy held by the fundamental
      */
     int xtract_tristimulus_1(const double *data, const int N, const void *argv, double *result);
+
+    /** \brief Calculate the second order Tristimulus of an input vector using a method described by Pollard and Jansson (1982)
+     *
+     * \param *data: a pointer to the first element in an array of doubles representing a harmonic spectrum of size N/2, and a frequency spectrum of size N/2 (This is the output format of xtract_harmonic_spectrum())
+     * \param N: the number of elements to be considered, at least 2 and even
+     * \param *argv: a pointer to a double representing the fundamental frequency of the input vector, finite and at least 0; 0 gives no result
+     * \param *result: the share of the total energy held by the second, third and fourth harmonics
+     */
     int xtract_tristimulus_2(const double *data, const int N, const void *argv, double *result);
+
+    /** \brief Calculate the third order Tristimulus of an input vector using a method described by Pollard and Jansson (1982)
+     *
+     * \param *data: a pointer to the first element in an array of doubles representing a harmonic spectrum of size N/2, and a frequency spectrum of size N/2 (This is the output format of xtract_harmonic_spectrum())
+     * \param N: the number of elements to be considered, at least 2 and even
+     * \param *argv: a pointer to a double representing the fundamental frequency of the input vector, finite and at least 0; 0 gives no result
+     * \param *result: the share of the total energy held by the fifth and higher harmonics
+     */
     int xtract_tristimulus_3(const double *data, const int N, const void *argv, double *result);
 
     /** \brief Extract the smoothness of an input vector using a method described by McAdams (1999)
@@ -269,7 +282,7 @@ extern "C"
      *
      * \param *data: a pointer to the first element in an array of doubles represeting a magnitude peak spectrum of size N/2, and a frequency spectrum of size N/2 (This is the output format of xtract_peak_spectrum())
      * \param N: the number of elements to be considered, at least 2 and even
-     * \param *argv: a pointer to a double representing the fundamental frequency of the input vector, at least 0; 0 gives no result
+     * \param *argv: a pointer to a double representing the fundamental frequency of the input vector, finite and at least 0; 0 gives no result
      * \param *result: the inharmonicity of N values from the array pointed to by *data
      */
     int xtract_spectral_inharmonicity(const double *data, const int N, const void *argv, double *result);
@@ -297,7 +310,7 @@ extern "C"
      *
      * \param *data: a pointer to the first element in an array of doubles representing a harmonic spectrum of size N/2, and a frequency spectrum of size N/2 (This is the output format of xtract_harmonic_spectrum())
      * \param N: the number of elements to be considered, at least 2 and even
-     * \param *argv: a pointer to a double representing the fundamental frequency of the input vector, at least 0; 0 gives no result
+     * \param *argv: a pointer to a double representing the fundamental frequency of the input vector, finite and at least 0; 0 gives no result
      * \param *result: the odd/even harmonic ratio of N values from the array pointed to by *data
      *
      * Harmonics are numbered from 1 (the fundamental); bins nearest to harmonic

@@ -2557,11 +2557,12 @@ UTEST(scalar, spectral_centroid_of_a_silent_spectrum_has_no_result)
     ASSERT_EQ(result, 0.0);
 }
 
-UTEST(scalar, harmonic_features_treat_a_zero_fundamental_as_no_result_and_a_negative_one_as_an_error)
+UTEST(scalar, harmonic_features_treat_a_zero_fundamental_as_no_result_and_a_negative_or_infinite_one_as_an_error)
 {
     double data[4] = {1.0, 2.0, 100.0, 200.0};
     double zero = 0.0;
     double negative = -100.0;
+    double infinite = INFINITY;
     double result;
 
     result = 1.0;
@@ -2582,6 +2583,12 @@ UTEST(scalar, harmonic_features_treat_a_zero_fundamental_as_no_result_and_a_nega
     ASSERT_REJECTED(xtract_tristimulus_3(data, 4, &negative, &result));
     ASSERT_REJECTED(xtract_spectral_inharmonicity(data, 4, &negative, &result));
     ASSERT_REJECTED(xtract_odd_even_ratio(data, 4, &negative, &result));
+
+    ASSERT_REJECTED(xtract_tristimulus_1(data, 4, &infinite, &result));
+    ASSERT_REJECTED(xtract_tristimulus_2(data, 4, &infinite, &result));
+    ASSERT_REJECTED(xtract_tristimulus_3(data, 4, &infinite, &result));
+    ASSERT_REJECTED(xtract_spectral_inharmonicity(data, 4, &infinite, &result));
+    ASSERT_REJECTED(xtract_odd_even_ratio(data, 4, &infinite, &result));
 }
 
 UTEST(scalar, peak_sets_the_result_to_zero_when_there_is_no_peak)
