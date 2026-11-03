@@ -181,12 +181,12 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             break;
             /* argc = 4 */
         case XTRACT_SPECTRUM:
-            *argv_min = XTRACT_SR_LOWER_LIMIT / XTRACT_FFT_BANDS_MIN;
-            *argv_max = XTRACT_SR_UPPER_LIMIT / XTRACT_FFT_BANDS_MAX;
+            *argv_min = XTRACT_SR_LOWER_LIMIT / XTRACT_FFT_BANDS_MAX;
+            *argv_max = XTRACT_SR_UPPER_LIMIT / XTRACT_FFT_BANDS_MIN;
             *argv_def = XTRACT_SR_DEFAULT / XTRACT_FFT_BANDS_DEF;
             *argv_unit = XTRACT_HERTZ;
             *(argv_min + 1) = 0;
-            *(argv_max + 1) = 3;
+            *(argv_max + 1) = XTRACT_MAGNITUDE_PHASE_SPECTRUM;
             *(argv_def + 1) = 0;
             *(argv_unit + 1) = XTRACT_UNIT_NONE;
             *(argv_min + 2) = 0;

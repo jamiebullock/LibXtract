@@ -2345,3 +2345,40 @@ UTEST(init, fft_rejects_sizes_with_no_bins)
     ASSERT_EQ(xtract_init_fft(3, XTRACT_SPECTRUM), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(xtract_init_fft(2, XTRACT_SPECTRUM), XTRACT_SUCCESS);
 }
+
+/* ===== Argument contract ===== */
+
+UTEST(vector, spectrum_rejects_a_null_argv_and_a_type_outside_the_enumeration)
+{
+    double data[8] = {0};
+    double result[8] = {0};
+    double argv[4] = {0.0, 5.0, 0.0, 0.0};
+
+    xtract_init_fft(8, XTRACT_SPECTRUM);
+    ASSERT_EQ(xtract_spectrum(data, 8, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_spectrum(data, 8, argv, result), XTRACT_ARGUMENT_ERROR);
+    argv[1] = -1.0;
+    ASSERT_EQ(xtract_spectrum(data, 8, argv, result), XTRACT_ARGUMENT_ERROR);
+    argv[1] = NAN;
+    ASSERT_EQ(xtract_spectrum(data, 8, argv, result), XTRACT_ARGUMENT_ERROR);
+    argv[1] = XTRACT_MAGNITUDE_PHASE_SPECTRUM;
+    ASSERT_EQ(xtract_spectrum(data, 8, argv, result), XTRACT_SUCCESS);
+}
+
+UTEST(vector, fft_features_report_a_bad_state_without_a_matching_initialisation)
+{
+    double data[16] = {0};
+    double result[32] = {0};
+    double argv[4] = {0.0, 0.0, 0.0, 0.0};
+
+    xtract_free_fft();
+    ASSERT_EQ(xtract_spectrum(data, 8, argv, result), XTRACT_BAD_STATE);
+    ASSERT_EQ(xtract_autocorrelation_fft(data, 8, NULL, result), XTRACT_BAD_STATE);
+
+    xtract_init_fft(16, XTRACT_SPECTRUM);
+    xtract_init_fft(16, XTRACT_AUTOCORRELATION_FFT);
+    ASSERT_EQ(xtract_spectrum(data, 8, argv, result), XTRACT_BAD_STATE);
+    ASSERT_EQ(xtract_autocorrelation_fft(data, 8, NULL, result), XTRACT_BAD_STATE);
+    ASSERT_EQ(xtract_spectrum(data, 16, argv, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_autocorrelation_fft(data, 16, NULL, result), XTRACT_SUCCESS);
+}

@@ -127,6 +127,10 @@ UTEST(descriptors, argv_ranges_match_the_functions)
     CHECK_REL(fd[XTRACT_TRISTIMULUS_2].argv.min[0], 0.0, EPSILON);
     ASSERT_EQ(fd[XTRACT_TRISTIMULUS_3].argv.donor[0], XTRACT_FAILSAFE_F0);
 
+    CHECK_REL(fd[XTRACT_SPECTRUM].argv.min[0], 22050.0 / 65536.0, EPSILON);
+    CHECK_REL(fd[XTRACT_SPECTRUM].argv.max[0], 192000.0 / 16.0, EPSILON);
+    CHECK_REL(fd[XTRACT_SPECTRUM].argv.max[1], (double)XTRACT_MAGNITUDE_PHASE_SPECTRUM, EPSILON);
+
     ASSERT_EQ(fd[XTRACT_SPREAD].data.format, XTRACT_SPECTRAL);
     ASSERT_EQ(fd[XTRACT_HPS].data.format, XTRACT_SPECTRAL);
 

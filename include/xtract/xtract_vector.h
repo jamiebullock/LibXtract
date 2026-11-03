@@ -25,8 +25,8 @@ extern "C"
     /** \brief Extract frequency domain spectrum from time domain signal
      *
      * \param *data: a pointer to the first element in an array of doubles representing an audio vector
-     * \param N: the number of array elements to be considered
-     * \param *argv: a pointer to an array of doubles, the first representing (samplerate / N), the second will be cast to an integer and determines the spectrum type (e.g. XTRACT_MAGNITUDE_SPECTRUM, XTRACT_LOG_POWER_SPECTRUM). The third argument determines whether or not the DC component is included in the output. If argv[2] == 0 (the default), the N/2 coefficients are bins 1 to N/2, so the Nyquist bin is included, DC is not, and the frequency of coefficient m is (m + 1) * samplerate / N. If argv[2] == 1, the N/2 coefficients are bins 0 to N/2 - 1, so DC is included, the Nyquist bin is not, and the frequency of coefficient m is m * samplerate / N. The output is N elements in either case. The fourth argument determines whether the magnitude/power coefficients are to be normalised. If argv[3] == 1, then the coefficients are normalised.
+     * \param N: the number of array elements to be considered, equal to the size passed to xtract_init_fft(); any other size, or no initialisation, is a bad state
+     * \param *argv: a pointer to an array of doubles, the first representing (samplerate / N), the second will be cast to an integer and determines the spectrum type, a value of the enumeration xtract_spectrum_ (e.g. XTRACT_MAGNITUDE_SPECTRUM, XTRACT_LOG_POWER_SPECTRUM). The third argument determines whether or not the DC component is included in the output. If argv[2] == 0 (the default), the N/2 coefficients are bins 1 to N/2, so the Nyquist bin is included, DC is not, and the frequency of coefficient m is (m + 1) * samplerate / N. If argv[2] == 1, the N/2 coefficients are bins 0 to N/2 - 1, so DC is included, the Nyquist bin is not, and the frequency of coefficient m is m * samplerate / N. The output is N elements in either case. The fourth argument determines whether the magnitude/power coefficients are to be normalised. If argv[3] == 1, then the coefficients are normalised.
      * \param *result: a pointer to an array of size N containing N/2 magnitude/power/log magnitude/log power coefficients and N/2 bin frequencies.
      *
      * The magnitude/power coefficients are scaled to the range 0-1 so that for a given coefficient x, 0 <= x <= 1
@@ -39,9 +39,11 @@ extern "C"
     /** \brief Extract autocorrelation from time domain signal using FFT based method
      *
      * \param *data: a pointer to the first element in an array of doubles representing an audio vector
-     * \param N: the number of array elements to be considered
+     * \param N: the number of array elements to be considered, equal to the size passed to xtract_init_fft(); any other size, or no initialisation, is a bad state
      * \param *argv: a pointer to NULL
      * \param *result: the autocorrelation of N values from the array pointed to by *data
+     *
+     * \note Before calling xtract_autocorrelation_fft(), the FFT must be initialised by calling xtract_init_fft(N, XTRACT_AUTOCORRELATION_FFT)
      */
     int xtract_autocorrelation_fft(const double *data, const int N, const void *argv, double *result);
 

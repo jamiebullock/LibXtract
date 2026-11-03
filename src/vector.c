@@ -25,6 +25,7 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
     int vector = 0;
     int withDC = 0;
     int normalise = 0;
+    double type = 0.0;
     double q = 0.0;
     double temp = 0.0;
     double max = 0.0;
@@ -41,23 +42,25 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
     double half = 0.5;
 #endif
 
+    if (argv == NULL)
+        return XTRACT_ARGUMENT_ERROR;
+
     q = *(double *)argv;
-    vector = xtract_argv_int(*((double *)argv + 1));
+    type = *((double *)argv + 1);
+    if (!(type >= XTRACT_MAGNITUDE_SPECTRUM && type <= XTRACT_MAGNITUDE_PHASE_SPECTRUM))
+        return XTRACT_ARGUMENT_ERROR;
+    vector = (int)type;
     withDC = xtract_argv_int(*((double *)argv + 2));
     normalise = xtract_argv_int(*((double *)argv + 3));
 
-    XTRACT_CHECK_q;
 #ifdef USE_OOURA
-    if (!ooura_data_spectrum.initialised)
+    if (!ooura_data_spectrum.initialised || ooura_data_spectrum.N != N)
 #else
-    if (!vdsp_data_spectrum.initialised)
+    if (!vdsp_data_spectrum.initialised || vdsp_data_spectrum.N != N)
 #endif
-    {
-        fprintf(stderr,
-                "libxtract: error: xtract_spectrum() failed, "
-                "fft data unitialised.\n");
-        return XTRACT_NO_RESULT;
-    }
+        return XTRACT_BAD_STATE;
+
+    XTRACT_CHECK_q;
 
 #ifdef USE_OOURA
     /* ooura is in-place
@@ -378,6 +381,13 @@ int xtract_autocorrelation_fft(const double *data, const int N, const void *argv
     double nyquist = 0.0;
     double norm = 0.0;
 #endif
+
+#ifdef USE_OOURA
+    if (!ooura_data_autocorrelation_fft.initialised || ooura_data_autocorrelation_fft.N != N)
+#else
+    if (!vdsp_data_autocorrelation_fft.initialised || vdsp_data_autocorrelation_fft.N != N)
+#endif
+        return XTRACT_BAD_STATE;
 
 #ifdef USE_OOURA
     /* Zero pad the input vector */
