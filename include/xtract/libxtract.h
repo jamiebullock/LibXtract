@@ -163,7 +163,18 @@ extern "C"
         XTRACT_NEGATIVE_SLOPE
     };
 
-    /** \brief Enumeration of return codes */
+    /** \brief Enumeration of return codes
+     *
+     * Every feature function returns one of these. A code other than XTRACT_SUCCESS means the result is not usable.
+     *
+     * XTRACT_ARGUMENT_ERROR: the caller broke the function's contract: N below the documented minimum, a NULL argv where one is required, an argv value outside its documented range, or more elements than the fixed table the function applies. A scalar result is set to 0, a vector result is left untouched, and nothing is computed.
+     *
+     * XTRACT_NO_RESULT: the arguments are valid but the data has no answer, such as a zero amplitude sum, a zero denominator or no periodicity. The result is set to 0.
+     *
+     * XTRACT_BAD_STATE: the initialisation the function needs is missing or was done for a different size. The result is left untouched.
+     *
+     * XTRACT_BAD_ARGV, XTRACT_BAD_VECTOR_SIZE and XTRACT_DENORMAL_FOUND are deprecated: XTRACT_ARGUMENT_ERROR is returned in their place, and they will be removed in 2.0.
+     */
     enum xtract_return_codes_
     {
         XTRACT_SUCCESS,
@@ -172,7 +183,7 @@ extern "C"
         XTRACT_BAD_VECTOR_SIZE,
         XTRACT_BAD_STATE,
         XTRACT_DENORMAL_FOUND,
-        XTRACT_NO_RESULT, /* This usually occurs when the correct calculation cannot take place because required data is missing or would result in a NaN or infinity/-infinity. Under these curcumstances 0.f is usually given by *result */
+        XTRACT_NO_RESULT,
         XTRACT_FEATURE_NOT_IMPLEMENTED,
         XTRACT_ARGUMENT_ERROR
     };
