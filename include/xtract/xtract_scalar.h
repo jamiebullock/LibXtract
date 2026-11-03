@@ -155,7 +155,7 @@ extern "C"
      *
      * \param *data: a pointer to the first element in an array of doubles representing a harmonic spectrum of size N/2, and a frequency spectrum of size N/2 (This is the output format of xtract_harmonic_spectrum())
      * \param N: the number of elements to be considered, at least 2 and even
-     * \param *argv: a pointer to a double representing the fundamental frequency of the input vector; 0 or below gives no result
+     * \param *argv: a pointer to a double representing the fundamental frequency of the input vector, at least 0; 0 gives no result
      * \param *result: the tristimulus of N values from the array pointed to by *data
      *
      * These three functions provide the first, second and third order tristimulus formulae
@@ -269,7 +269,7 @@ extern "C"
      *
      * \param *data: a pointer to the first element in an array of doubles represeting a magnitude peak spectrum of size N/2, and a frequency spectrum of size N/2 (This is the output format of xtract_peak_spectrum())
      * \param N: the number of elements to be considered, at least 2 and even
-     * \param *argv: a pointer to a double representing the fundamental frequency of the input vector; 0 gives no result
+     * \param *argv: a pointer to a double representing the fundamental frequency of the input vector, at least 0; 0 gives no result
      * \param *result: the inharmonicity of N values from the array pointed to by *data
      */
     int xtract_spectral_inharmonicity(const double *data, const int N, const void *argv, double *result);
@@ -297,7 +297,7 @@ extern "C"
      *
      * \param *data: a pointer to the first element in an array of doubles representing a harmonic spectrum of size N/2, and a frequency spectrum of size N/2 (This is the output format of xtract_harmonic_spectrum())
      * \param N: the number of elements to be considered, at least 2 and even
-     * \param *argv: a pointer to a double representing the fundamental frequency of the input vector; 0 gives no result
+     * \param *argv: a pointer to a double representing the fundamental frequency of the input vector, at least 0; 0 gives no result
      * \param *result: the odd/even harmonic ratio of N values from the array pointed to by *data
      *
      * Harmonics are numbered from 1 (the fundamental); bins nearest to harmonic
@@ -429,7 +429,7 @@ extern "C"
      *
      * \param *data: not used
      * \param N: not used
-     * \param *argv: a pointer to a double-precision floating point value representing a frequency in Hertz; 0 or below gives no result
+     * \param *argv: a pointer to a double-precision floating point value representing a frequency in Hertz, at least 0; 0 gives no result
      * \param *result: a pointer to a double-precision floating point value representing a "pitch" in MIDI cents, from 0 to 12700; a frequency whose pitch falls outside that range gives no result
      *
      */
@@ -451,7 +451,7 @@ extern "C"
      * \param *data: a pointer to an array containing a time series as provided by *result from xtract_last_n(), where the Nth value is the 'current' value
      * \param N: the number of elements in the time series, at least 1
      * \param *argv: a pointer to a double representing the threshold: the current value is a peak if it is the maximum of the series and exceeds the average of the N values by at least the threshold
-     * \param *result: a pointer to a copy of the current value if it is a peak; XTRACT_NO_RESULT is returned and *result is left unchanged if it is not
+     * \param *result: a pointer to a copy of the current value if it is a peak, or 0 with no result if it is not
      */
     int xtract_peak(const double *data, const int N, const void *argv, double *result);
 

@@ -121,6 +121,12 @@ UTEST(descriptors, argv_ranges_match_the_functions)
     CHECK_REL(fd[XTRACT_MIDICENT].argv.max[0], 96000.0, EPSILON);
     ASSERT_EQ(fd[XTRACT_MIDICENT].argv.unit[0], XTRACT_HERTZ);
 
+    ASSERT_EQ(fd[XTRACT_TRISTIMULUS_1].argc, 1);
+    ASSERT_EQ(fd[XTRACT_ODD_EVEN_RATIO].argc, 1);
+    ASSERT_EQ(fd[XTRACT_ODD_EVEN_RATIO].argv.type, XTRACT_FLOAT);
+    CHECK_REL(fd[XTRACT_TRISTIMULUS_2].argv.min[0], 0.0, EPSILON);
+    ASSERT_EQ(fd[XTRACT_TRISTIMULUS_3].argv.donor[0], XTRACT_FAILSAFE_F0);
+
     ASSERT_EQ(fd[XTRACT_SPREAD].data.format, XTRACT_SPECTRAL);
     ASSERT_EQ(fd[XTRACT_HPS].data.format, XTRACT_SPECTRAL);
 

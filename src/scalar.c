@@ -520,7 +520,12 @@ int xtract_tristimulus_1(const double *data, const int N, const void *argv, doub
     fund = *(double *)argv;
     freqs = data + n;
 
-    if (fund <= 0.0)
+    if (!(fund >= 0.0))
+    {
+        *result = 0.0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
+    if (fund == 0.0)
     {
         *result = 0.0;
         return XTRACT_NO_RESULT;
@@ -566,7 +571,12 @@ int xtract_tristimulus_2(const double *data, const int N, const void *argv, doub
     fund = *(double *)argv;
     freqs = data + n;
 
-    if (fund <= 0.0)
+    if (!(fund >= 0.0))
+    {
+        *result = 0.0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
+    if (fund == 0.0)
     {
         *result = 0.0;
         return XTRACT_NO_RESULT;
@@ -627,7 +637,12 @@ int xtract_tristimulus_3(const double *data, const int N, const void *argv, doub
     fund = *(double *)argv;
     freqs = data + n;
 
-    if (fund <= 0.0)
+    if (!(fund >= 0.0))
+    {
+        *result = 0.0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
+    if (fund == 0.0)
     {
         *result = 0.0;
         return XTRACT_NO_RESULT;
@@ -940,9 +955,14 @@ int xtract_spectral_inharmonicity(const double *data, const int N, const void *a
     amps = data;
     freqs = data + n;
 
-    if (fund == 0)
+    if (!(fund >= 0.0))
     {
-        *result = 0;
+        *result = 0.0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
+    if (fund == 0.0)
+    {
+        *result = 0.0;
         return XTRACT_NO_RESULT;
     }
 
@@ -987,6 +1007,11 @@ int xtract_odd_even_ratio(const double *data, const int N, const void *argv, dou
     fund = *(double *)argv;
     freqs = data + n;
 
+    if (!(fund >= 0.0))
+    {
+        *result = 0.0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
     if (fund == 0.0)
     {
         *result = 0.0;
@@ -1703,7 +1728,12 @@ int xtract_midicent(const double *data, const int N, const void *argv, double *r
 
     f0 = *(double *)argv;
 
-    if (f0 <= 0.0)
+    if (!(f0 >= 0.0))
+    {
+        *result = 0.0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
+    if (f0 == 0.0)
     {
         *result = 0.0;
         return XTRACT_NO_RESULT;
@@ -1751,13 +1781,9 @@ int xtract_peak(const double *data, const int N, const void *argv, double *resul
 
     average /= (double)N;
 
-    if (current != maximum)
+    if (current != maximum || current < average + threshold)
     {
-        return XTRACT_NO_RESULT;
-    }
-
-    if (current < average + threshold)
-    {
+        *result = 0.0;
         return XTRACT_NO_RESULT;
     }
 
