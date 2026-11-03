@@ -104,7 +104,7 @@ extern "C"
      *
      * \param *data: a magnitude/phase spectrum, the result from xtract_spectrum() by XTRACT_MAGNITUDE_PHASE_SPECTRUM. The first N/2 elements are bin magnitudes and the next N/2 the corresponding phases.
      * \param N: the number of array elements to be considered (the full magnitude+phase array length; N/2 frequency bins are processed), at least 2 and even
-     * \param *argv: a pointer to a data structure of type xtract_mel_filter, containing n_filters coefficient tables to make up a mel-spaced filterbank; n_filters must be at least 1 and filters, and each of its rows, non-NULL, each row holding at least N coefficients
+     * \param *argv: a pointer to a data structure of type xtract_mel_filter, containing n_filters coefficient tables to make up a mel-spaced filterbank; n_filters must be at least 1 and filters, and each of its rows, non-NULL, each row holding at least N / 2 coefficients
      * \param *result: a pointer to an array of n_filters elements containing the resultant MEL-MBSES
      *
      * Each filter band's complex coefficients are modelled as a zero-mean bivariate (real, imaginary) Gaussian and the band's value is that distribution's differential entropy, H = ln(2*pi*e) + (1/2)ln(det of the 2x2 covariance).
