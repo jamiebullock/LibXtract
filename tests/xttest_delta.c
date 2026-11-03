@@ -157,3 +157,36 @@ UTEST(delta, lnorm_out_of_range_argv)
     ASSERT_EQ(xtract_lnorm(data, 4, argv_huge, &result), XTRACT_SUCCESS);
     CHECK_REL(result, sqrt(30.0), 1e-10);
 }
+
+UTEST(delta, delta_features_reject_a_short_or_odd_input_and_a_null_argv)
+{
+    double data[4] = {1.0, 2.0, 3.0, 4.0};
+    double argv[3] = {2.0, 0.0, 0.0};
+    double result = 1.0;
+    double vec[2] = {-1.0, -1.0};
+
+    ASSERT_EQ(xtract_flux(data, 3, argv, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    result = 1.0;
+    ASSERT_EQ(xtract_flux(data, 0, argv, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    result = 1.0;
+    ASSERT_EQ(xtract_flux(data, 4, NULL, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    result = 1.0;
+    ASSERT_EQ(xtract_lnorm(data, 0, argv, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    result = 1.0;
+    ASSERT_EQ(xtract_lnorm(data, 4, NULL, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    ASSERT_EQ(xtract_difference_vector(data, 3, NULL, vec), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_difference_vector(data, 0, NULL, vec), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(vec[0], -1.0);
+
+    ASSERT_EQ(xtract_flux(data, 2, argv, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 1.0, 1e-12);
+    ASSERT_EQ(xtract_lnorm(data, 1, argv, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 1.0, 1e-12);
+    ASSERT_EQ(xtract_difference_vector(data, 2, NULL, vec), XTRACT_SUCCESS);
+    CHECK_REL(vec[0], -1.0, 1e-12);
+}
