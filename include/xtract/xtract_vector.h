@@ -127,7 +127,7 @@ extern "C"
 
     /** \brief Extract the Discrete Cosine transform of a time domain signal
      * \param *data: a pointer to the first element in an array of doubles representing an audio vector
-     * \param N: the number of array elements to be considered
+     * \param N: the number of array elements to be considered, at least 1
      * \param *argv: a pointer to a cosine table as allocated by xtract_init_dct(N), or NULL. Both give the same result but the table avoids the need to recompute the table on each call
      * \param *result: a pointer to an array of at least N doubles to receive the dct coefficients
      */
@@ -136,7 +136,7 @@ extern "C"
     /** \brief Extract autocorrelation from time domain signal using time-domain autocorrelation technique
      *
      * \param *data: a pointer to the first element in an array of doubles representing an audio vector
-     * \param N: the number of array elements to be considered
+     * \param N: the number of array elements to be considered, at least 1
      * \param *argv: a pointer to NULL
      * \param *result: the autocorrelation of N values from the array pointed to by *data
      */
@@ -145,7 +145,7 @@ extern "C"
     /** \brief Extract Average Magnitude Difference Function from time domain signal
      *
      * \param *data: a pointer to the first element in an array of doubles representing an audio vector
-     * \param N: the number of array elements to be considered
+     * \param N: the number of array elements to be considered, at least 1
      * \param *argv: a pointer to NULL
      * \param *result: the AMDF of N values from the array pointed to by *data
      */
@@ -154,7 +154,7 @@ extern "C"
     /** \brief Extract Average Squared Difference Function from time domain signal
      *
      * \param *data: a pointer to the first element in an array of doubles representing an audio vector
-     * \param N: the number of array elements to be considered
+     * \param N: the number of array elements to be considered, at least 1
      * \param *argv: a pointer to NULL
      * \param *result: the ASDF of N values from the array pointed to by *data
      */
@@ -162,8 +162,8 @@ extern "C"
 
     /** \brief Extract Bark band coefficients based on a method
      * \param *data: a pointer to the first element in an array of spectral coefficients, the first half of the array pointed to by *result from xtract_spectrum() called with DC included (argv[2] == 1), so that element k is bin k as the band limits expect
-     * \param N: the number of coefficients, half the transform size the band limits were initialised with
-     * \param *argv: a pointer to an array of XTRACT_BARK_BANDS ints representing the limits of each bark band, obtained by calling xtract_init_bark() with the transform size
+     * \param N: the number of coefficients, half the transform size the band limits were initialised with, at least 1
+     * \param *argv: a pointer to an array of XTRACT_BARK_BANDS ints representing the limits of each bark band, obtained by calling xtract_init_bark() with the transform size; each limit must be at least 0 and no lower than the one before it
      * \param *result: a pointer to an array of XTRACT_BARK_BANDS doubles containing the resultant bark coefficients, the sum of the coefficients in each band
      *
      * The limits array pointed to by *argv must be obtained by first calling xtract_init_bark
@@ -173,8 +173,8 @@ extern "C"
 
     /** \brief Extract the amplitude and frequency of spectral peaks from a magnitude spectrum
      * \param *data: a pointer to an array of size N containing N magnitude/power/log magnitude/log power coefficients. (e.g. the first half of the array pointed to by *result from xtract_spectrum().
-     * \param N: the size of the input array (note: it is assumed that enough memory has been allocated for an output array twice the size)
-     * \param *argv: a pointer to an array of doubles, the first representing (samplerate / N), the second representing the peak threshold as percentage of the magnitude of the maximum peak found
+     * \param N: the size of the input array, at least 1 (note: it is assumed that enough memory has been allocated for an output array twice the size)
+     * \param *argv: a pointer to an array of doubles, the first representing (samplerate / N), the second representing the peak threshold as percentage of the magnitude of the maximum peak found, from 0 to 100
      * \param *result: a pointer to an array of size N * 2 containing N magnitude/power/log magnitude/log power coefficients and N bin frequencies.
      *
      */
@@ -182,8 +182,8 @@ extern "C"
 
     /** \brief Extract the harmonic spectrum of from a of a peak spectrum
      * \param *data: a pointer to the first element in an array of doubles representing the peak spectrum of an audio vector (e.g. *result from  xtract_peaks). It is expected that the first half of the array pointed to by *data will contain amplitudes for each peak considered, and the the second half will contain the respective frequencies
-     * \param N: the size of the array pointed to by *data
-     * \param *argv: a pointer to an array containing the fundamental (f0) of the spectrum, and a threshold (t) where 0<=t<=1.0, and t determines the distance from the nearest harmonic number within which a partial can be considered harmonic.
+     * \param N: the size of the array pointed to by *data, at least 2 and even
+     * \param *argv: a pointer to an array containing the fundamental (f0) of the spectrum, finite and at least 0 (0 gives no result), and a threshold (t) where 0<=t<=1.0, and t determines the distance from the nearest harmonic number within which a partial can be considered harmonic.
      * \param *result: a pointer to an array of size N containing N/2 magnitude coefficients and N/2 bin frequencies.
      */
     int xtract_harmonic_spectrum(const double *data, const int N, const void *argv, double *result);

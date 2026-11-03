@@ -637,6 +637,9 @@ int xtract_dct(const double *data, const int N, const void *argv, double *result
     const double *table = (const double *)argv;
     int n, m;
 
+    if (N < 1)
+        return XTRACT_ARGUMENT_ERROR;
+
     for (n = 0; n < N; ++n)
     {
         double acc = 0.0;
@@ -667,6 +670,9 @@ int xtract_autocorrelation(const double *data, const int N, const void *argv, do
 
     double corr;
 
+    if (N < 1)
+        return XTRACT_ARGUMENT_ERROR;
+
     while (n--)
     {
         corr = 0;
@@ -685,6 +691,9 @@ int xtract_amdf(const double *data, const int N, const void *argv, double *resul
     int n = N, i;
 
     double md, temp;
+
+    if (N < 1)
+        return XTRACT_ARGUMENT_ERROR;
 
     while (n--)
     {
@@ -707,6 +716,9 @@ int xtract_asdf(const double *data, const int N, const void *argv, double *resul
 
     double sd;
 
+    if (N < 1)
+        return XTRACT_ARGUMENT_ERROR;
+
     while (n--)
     {
         sd = 0.0;
@@ -725,7 +737,18 @@ int xtract_bark_coefficients(const double *data, const int N, const void *argv, 
 {
     int *limits, band, n;
 
+    if (N < 1 || argv == NULL)
+        return XTRACT_ARGUMENT_ERROR;
+
     limits = (int *)argv;
+
+    if (limits[0] < 0)
+        return XTRACT_ARGUMENT_ERROR;
+    for (band = 1; band < XTRACT_BARK_BANDS; band++)
+    {
+        if (limits[band] < limits[band - 1])
+            return XTRACT_ARGUMENT_ERROR;
+    }
 
     for (band = 0; band < XTRACT_BARK_BANDS - 1; band++)
     {
@@ -745,23 +768,17 @@ int xtract_bark_coefficients(const double *data, const int N, const void *argv, 
 int xtract_peak_spectrum(const double *data, const int N, const void *argv, double *result)
 {
     double threshold, max, y, y2, y3, p, q;
-    int n = N, rv = XTRACT_SUCCESS;
+    int n = N;
 
-    threshold = max = q = 0.0;
+    if (N < 1 || argv == NULL)
+        return XTRACT_ARGUMENT_ERROR;
 
-    if (argv != NULL)
-    {
-        q = ((double *)argv)[0];
-        threshold = ((double *)argv)[1];
-    }
-    else
-        rv = XTRACT_BAD_ARGV;
+    q = ((double *)argv)[0];
+    threshold = ((double *)argv)[1];
+    if (!(threshold >= 0.0 && threshold <= 100.0))
+        return XTRACT_ARGUMENT_ERROR;
 
-    if (threshold < 0 || threshold > 100)
-    {
-        threshold = 0;
-        rv = XTRACT_BAD_ARGV;
-    }
+    max = 0.0;
 
     XTRACT_CHECK_q;
 
@@ -799,7 +816,7 @@ int xtract_peak_spectrum(const double *data, const int N, const void *argv, doub
         }
     }
 
-    return (rv ? rv : XTRACT_SUCCESS);
+    return XTRACT_SUCCESS;
 }
 
 int xtract_harmonic_spectrum(const double *data, const int N, const void *argv, double *result)
@@ -809,10 +826,16 @@ int xtract_harmonic_spectrum(const double *data, const int N, const void *argv, 
     const double *freqs, *amps;
     double f0, threshold, ratio, nearest, distance;
 
+    if (N < 2 || (N & 1) || argv == NULL)
+        return XTRACT_ARGUMENT_ERROR;
+
     amps = data;
     freqs = data + n;
     f0 = *((double *)argv);
     threshold = *((double *)argv + 1);
+
+    if (!isfinite(f0) || f0 < 0.0 || !(threshold >= 0.0 && threshold <= 1.0))
+        return XTRACT_ARGUMENT_ERROR;
 
     if (f0 == 0.0)
     {

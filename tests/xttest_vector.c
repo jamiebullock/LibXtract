@@ -1762,12 +1762,17 @@ UTEST(vector, peak_spectrum_threshold_range_is_0_to_100_inclusive)
     CHECK_REL(result[7], 50.0, 1e-12);
 
     argv[1] = 100.0000001;
-    ASSERT_EQ(xtract_peak_spectrum(data, N, argv, result), XTRACT_BAD_ARGV);
-    /* An out-of-range threshold is treated as zero, so every peak is kept */
-    CHECK_REL(result[7], 50.0, 1e-12);
+    result[7] = -1.0;
+    ASSERT_EQ(xtract_peak_spectrum(data, N, argv, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result[7], -1.0);
 
     argv[1] = -0.0000001;
-    ASSERT_EQ(xtract_peak_spectrum(data, N, argv, result), XTRACT_BAD_ARGV);
+    ASSERT_EQ(xtract_peak_spectrum(data, N, argv, result), XTRACT_ARGUMENT_ERROR);
+    argv[1] = NAN;
+    ASSERT_EQ(xtract_peak_spectrum(data, N, argv, result), XTRACT_ARGUMENT_ERROR);
+    argv[1] = 50.0;
+    ASSERT_EQ(xtract_peak_spectrum(data, N, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_peak_spectrum(data, 0, argv, result), XTRACT_ARGUMENT_ERROR);
 }
 
 UTEST(vector, dct_changing_size_should_not_crash)
@@ -2424,4 +2429,72 @@ UTEST(vector, filterbank_features_reject_a_short_input_and_an_unusable_filterban
     CHECK_REL(result[0], log(2.0), EPSILON);
     ASSERT_EQ(xtract_mfcc(data, 4, &f, result), XTRACT_SUCCESS);
     ASSERT_EQ(xtract_mmbses(data, 4, &f, result), XTRACT_SUCCESS);
+}
+
+UTEST(vector, time_domain_vector_features_reject_an_empty_input)
+{
+    double data[2] = {1.0, 2.0};
+    double result[4] = {-1.0, -1.0, -1.0, -1.0};
+
+    ASSERT_EQ(xtract_dct(data, 0, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_autocorrelation(data, 0, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_amdf(data, 0, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_asdf(data, 0, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result[0], -1.0);
+
+    ASSERT_EQ(xtract_dct(data, 1, NULL, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_autocorrelation(data, 1, NULL, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_amdf(data, 1, NULL, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_asdf(data, 1, NULL, result), XTRACT_SUCCESS);
+}
+
+UTEST(vector, bark_coefficients_reject_an_empty_input_and_negative_or_unordered_limits)
+{
+    double data[8] = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
+    double result[XTRACT_BARK_BANDS];
+    int limits[XTRACT_BARK_BANDS];
+    int i;
+
+    for (i = 0; i < XTRACT_BARK_BANDS; i++)
+        limits[i] = i;
+    result[0] = -1.0;
+
+    ASSERT_EQ(xtract_bark_coefficients(data, 0, limits, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_bark_coefficients(data, 8, NULL, result), XTRACT_ARGUMENT_ERROR);
+    limits[0] = -1;
+    ASSERT_EQ(xtract_bark_coefficients(data, 8, limits, result), XTRACT_ARGUMENT_ERROR);
+    limits[0] = 0;
+    limits[5] = 3;
+    ASSERT_EQ(xtract_bark_coefficients(data, 8, limits, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result[0], -1.0);
+
+    limits[5] = 5;
+    ASSERT_EQ(xtract_bark_coefficients(data, 8, limits, result), XTRACT_SUCCESS);
+    CHECK_REL(result[0], 1.0, EPSILON);
+}
+
+UTEST(vector, harmonic_spectrum_rejects_an_odd_or_short_input_a_null_argv_and_out_of_range_arguments)
+{
+    double data[4] = {1.0, 1.0, 100.0, 200.0};
+    double result[4] = {-1.0, -1.0, -1.0, -1.0};
+    double argv[2] = {100.0, 0.1};
+
+    ASSERT_EQ(xtract_harmonic_spectrum(data, 3, argv, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_harmonic_spectrum(data, 0, argv, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_harmonic_spectrum(data, 4, NULL, result), XTRACT_ARGUMENT_ERROR);
+    argv[0] = -100.0;
+    ASSERT_EQ(xtract_harmonic_spectrum(data, 4, argv, result), XTRACT_ARGUMENT_ERROR);
+    argv[0] = INFINITY;
+    ASSERT_EQ(xtract_harmonic_spectrum(data, 4, argv, result), XTRACT_ARGUMENT_ERROR);
+    argv[0] = 100.0;
+    argv[1] = 1.5;
+    ASSERT_EQ(xtract_harmonic_spectrum(data, 4, argv, result), XTRACT_ARGUMENT_ERROR);
+    argv[1] = -0.1;
+    ASSERT_EQ(xtract_harmonic_spectrum(data, 4, argv, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result[0], -1.0);
+
+    argv[1] = 0.1;
+    ASSERT_EQ(xtract_harmonic_spectrum(data, 4, argv, result), XTRACT_SUCCESS);
+    CHECK_REL(result[0], 1.0, EPSILON);
+    CHECK_REL(result[2], 100.0, EPSILON);
 }
