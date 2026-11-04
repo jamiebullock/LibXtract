@@ -17,3 +17,8 @@ double cbrt(double x)
 {
     return nondet_double();
 }
+
+int __builtin_isfinite(double x)
+{
+    return __CPROVER_isfinited(x);
+}

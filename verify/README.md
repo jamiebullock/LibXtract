@@ -28,7 +28,7 @@ CBMC then checks every array bound, pointer dereference, integer division, signe
 
 The portable `USE_OOURA` code path is checked on every host (`__APPLE__` is undefined for the build, so the vDSP paths are not covered). The OOURA transform itself is replaced by `fft_stub.c`, whose `rdft` fills the buffer with arbitrary values: the spectrum proofs cover the library's handling of any transform output and say nothing about the transform.
 
-CBMC models the C maths library itself, and reports a call to any function it has no model of as a failure, so a passing proof depends on no unmodelled code. Two functions are the exception: `pow` and `cbrt`, which `math_stub.c` replaces with functions returning any value, because CBMC's own `pow` model needs a floating-point remainder the SMT backend cannot encode and `cbrt` has no model. A stub that returns any value covers every result the real function could give, so the proofs stay sound; they say nothing about what `pow` or `cbrt` return.
+CBMC models the C maths library itself, and reports a call to any function it has no model of as a failure, so a passing proof depends on no unmodelled code. Three functions are the exception, replaced in `math_stub.c`. `pow` and `cbrt` return any value, because CBMC's own `pow` model needs a floating-point remainder the SMT backend cannot encode and `cbrt` has no model; a stub that returns any value covers every result the real function could give, so the proofs stay sound, and they say nothing about what `pow` or `cbrt` return. `__builtin_isfinite`, which glibc's `isfinite` expands to, has no model either and is implemented with CBMC's own finiteness test, so it behaves exactly as the real function.
 
 ## Bounds
 

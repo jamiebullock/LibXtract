@@ -43,6 +43,8 @@ PROOF_DIR = .proofs
 LIB_SRC := $(filter-out ../src/ooura/fftsg.c, \
 	$(wildcard ../src/*.c ../src/ooura/*.c ../src/c-ringbuf/*.c ../src/dywapitchtrack/*.c))
 HARNESS_SRC := $(wildcard verify_*.c) fft_stub.c math_stub.c
+HEADERS := verify.h $(wildcard ../include/xtract/*.h ../src/*.h ../src/ooura/*.h \
+	../src/c-ringbuf/*.h ../src/dywapitchtrack/*.h)
 
 CFLAGS = -U__APPLE__ -DUSE_OOURA -DVERIFY_MAX_N=$(VERIFY_MAX_N) -DVERIFY_SMALL_N=$(VERIFY_SMALL_N) \
 	-DVERIFY_MAX_FILTERS=$(VERIFY_MAX_FILTERS) -std=c99 -I../include -I../src
@@ -69,8 +71,9 @@ CBMC_FLAGS = --unwind $(UNWIND) --unwinding-assertions --slice-formula $(CBMC_SO
 	--bounds-check --pointer-check --div-by-zero-check --signed-overflow-check \
 	--malloc-may-fail --malloc-fail-null --drop-unused-functions
 
-# The stamps hold the flags each product was made with, so that a changed
-# bound or solver rebuilds the binary or reruns the proofs.
+# The stamps hold the flags and the source list each product was made with, so
+# that a changed bound, solver or source set rebuilds the binary or reruns the
+# proofs.
 CFLAGS_STAMP = $(PROOF_DIR)/cflags
 CBMC_FLAGS_STAMP = $(PROOF_DIR)/cbmc_flags
 HARNESS_LIST = $(PROOF_DIR)/harnesses
@@ -80,7 +83,7 @@ all: $(HARNESS_LIST)
 
 $(CFLAGS_STAMP): force
 	@mkdir -p $(PROOF_DIR)
-	@echo '$(CFLAGS)' > $@.new
+	@echo '$(CFLAGS) $(LIB_SRC) $(HARNESS_SRC)' > $@.new
 	@if cmp -s $@ $@.new; then $(RM) $@.new; else mv $@.new $@; fi
 
 $(CBMC_FLAGS_STAMP): force
@@ -88,7 +91,7 @@ $(CBMC_FLAGS_STAMP): force
 	@echo '$(UNWIND) $(SMALL_UNWIND) $(CBMC_FLAGS)' > $@.new
 	@if cmp -s $@ $@.new; then $(RM) $@.new; else mv $@.new $@; fi
 
-$(GOTO_BINARY): $(LIB_SRC) $(HARNESS_SRC) verify.h $(CFLAGS_STAMP)
+$(GOTO_BINARY): $(LIB_SRC) $(HARNESS_SRC) $(HEADERS) $(CFLAGS_STAMP)
 	$(GOTO_CC) $(CFLAGS) -o $@ $(LIB_SRC) $(HARNESS_SRC)
 
 $(HARNESS_LIST): $(GOTO_BINARY)
