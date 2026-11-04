@@ -1482,6 +1482,19 @@ UTEST(scalar, crest_of_impulse)
     CHECK_REL(result, 4.0, EPSILON);
 }
 
+UTEST(scalar, flatness_of_a_flat_spectrum_never_exceeds_one)
+{
+    double data[64];
+    double result = 0.0;
+    int i;
+
+    for (i = 0; i < 64; i++)
+        data[i] = 0.1 + (i % 2) * 1e-14;
+    ASSERT_EQ(xtract_flatness(data, 64, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_TRUE(result <= 1.0);
+    ASSERT_EQ(xtract_flatness_db(NULL, 0, &result, &result), XTRACT_SUCCESS);
+}
+
 UTEST(scalar, flatness_of_constant_spectrum)
 {
     /* geometric mean = arithmetic mean for constant data => flatness = 1.0 */

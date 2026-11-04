@@ -17,6 +17,9 @@ int xtract_windowed(const double *data, const int N, const void *argv, double *r
     int n;
     const double *window;
 
+    if (N < 1 || argv == NULL)
+        return XTRACT_ARGUMENT_ERROR;
+
     n = N;
     window = (const double *)argv;
 
@@ -95,9 +98,15 @@ int xtract_features_from_subframes(const double *data, const int N, const int fe
  */
 int xtract_smoothed(const double *data, const int N, const void *argv, double *result)
 {
-    double gain = *(double *)argv;
-    double oneminusgain = 1.0 - gain;
+    double gain;
+    double oneminusgain;
     int i;
+
+    if (N < 1 || argv == NULL)
+        return XTRACT_ARGUMENT_ERROR;
+
+    gain = *(double *)argv;
+    oneminusgain = 1.0 - gain;
 
     /* reverse filtering first; the final element seeds the recursion */
     result[N - 1] = data[N - 1];

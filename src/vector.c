@@ -25,7 +25,7 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
     int vector = 0;
     int withDC = 0;
     int normalise = 0;
-    double type;
+    double type, dc, norm;
     double q = 0.0;
     double temp = 0.0;
     double max = 0.0;
@@ -47,11 +47,15 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
 
     q = *(double *)argv;
     type = *((double *)argv + 1);
-    if (!(type >= XTRACT_MAGNITUDE_SPECTRUM && type <= XTRACT_MAGNITUDE_PHASE_SPECTRUM))
+    dc = *((double *)argv + 2);
+    norm = *((double *)argv + 3);
+    if (!isfinite(q) || q < 0.0 ||
+        !(type >= XTRACT_MAGNITUDE_SPECTRUM && type <= XTRACT_MAGNITUDE_PHASE_SPECTRUM) ||
+        (dc != 0.0 && dc != 1.0) || (norm != 0.0 && norm != 1.0))
         return XTRACT_ARGUMENT_ERROR;
     vector = (int)type;
-    withDC = xtract_argv_int(*((double *)argv + 2));
-    normalise = xtract_argv_int(*((double *)argv + 3));
+    withDC = (int)dc;
+    normalise = (int)norm;
 
 #ifdef USE_OOURA
     if (!ooura_data_spectrum.initialised || ooura_data_spectrum.N != N)
@@ -786,12 +790,14 @@ int xtract_peak_spectrum(const double *data, const int N, const void *argv, doub
 
     q = ((double *)argv)[0];
     threshold = ((double *)argv)[1];
-    if (!(threshold >= 0.0 && threshold <= 100.0))
+    if (!isfinite(q) || q < 0.0 || !(threshold >= 0.0 && threshold <= 100.0))
         return XTRACT_ARGUMENT_ERROR;
 
     max = 0.0;
 
-    XTRACT_CHECK_q;
+    /* N coefficients are the first half of a 2N-point transform */
+    if (q == 0.0)
+        q = XTRACT_SR_DEFAULT / (2.0 * N);
 
     /* Find max amplitude for threshold calculation */
     for (n = 1; n < N; n++)

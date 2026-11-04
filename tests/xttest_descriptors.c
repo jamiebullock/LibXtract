@@ -106,8 +106,8 @@ UTEST(descriptors, argv_ranges_match_the_functions)
     xtract_function_descriptor_t *fd = xtract_make_descriptors();
     ASSERT_TRUE(fd != NULL);
 
-    CHECK_REL(fd[XTRACT_ROLLOFF].argv.min[0], 22050.0 / 65536.0, EPSILON);
-    CHECK_REL(fd[XTRACT_ROLLOFF].argv.max[0], 192000.0 / 16.0, EPSILON);
+    CHECK_REL(fd[XTRACT_ROLLOFF].argv.min[0], 0.0, EPSILON);
+    ASSERT_EQ(fd[XTRACT_ROLLOFF].argv.max[0], XTRACT_UNBOUNDED_MAX);
     ASSERT_EQ(fd[XTRACT_ROLLOFF].argv.unit[0], XTRACT_HERTZ);
     CHECK_REL(fd[XTRACT_ROLLOFF].argv.min[1], 0.0, EPSILON);
     CHECK_REL(fd[XTRACT_ROLLOFF].argv.max[1], 100.0, EPSILON);
@@ -119,9 +119,9 @@ UTEST(descriptors, argv_ranges_match_the_functions)
 
     CHECK_REL(fd[XTRACT_F0].argv.min[0], 0.0, EPSILON);
     CHECK_REL(fd[XTRACT_MCLEOD_F0].argv.min[0], 0.0, EPSILON);
-    CHECK_REL(fd[XTRACT_WAVELET_F0].argv.min[0], 22050.0, EPSILON);
+    CHECK_REL(fd[XTRACT_WAVELET_F0].argv.min[0], 0.0, EPSILON);
     CHECK_REL(fd[XTRACT_MIDICENT].argv.min[0], 0.0, EPSILON);
-    CHECK_REL(fd[XTRACT_MIDICENT].argv.max[0], 96000.0, EPSILON);
+    ASSERT_EQ(fd[XTRACT_MIDICENT].argv.max[0], XTRACT_UNBOUNDED_MAX);
     ASSERT_EQ(fd[XTRACT_MIDICENT].argv.unit[0], XTRACT_HERTZ);
 
     ASSERT_EQ(fd[XTRACT_TRISTIMULUS_1].argc, 1);
@@ -130,8 +130,8 @@ UTEST(descriptors, argv_ranges_match_the_functions)
     CHECK_REL(fd[XTRACT_TRISTIMULUS_2].argv.min[0], 0.0, EPSILON);
     ASSERT_EQ(fd[XTRACT_TRISTIMULUS_3].argv.donor[0], XTRACT_FAILSAFE_F0);
 
-    CHECK_REL(fd[XTRACT_SPECTRUM].argv.min[0], 22050.0 / 65536.0, EPSILON);
-    CHECK_REL(fd[XTRACT_SPECTRUM].argv.max[0], 192000.0 / 16.0, EPSILON);
+    CHECK_REL(fd[XTRACT_SPECTRUM].argv.min[0], 0.0, EPSILON);
+    ASSERT_EQ(fd[XTRACT_SPECTRUM].argv.max[0], XTRACT_UNBOUNDED_MAX);
     CHECK_REL(fd[XTRACT_SPECTRUM].argv.max[1], (double)XTRACT_MAGNITUDE_PHASE_SPECTRUM, EPSILON);
 
     CHECK_REL(fd[XTRACT_SUBBANDS].argv.max[0], (double)(XTRACT_FEATURES - 1), EPSILON);
@@ -201,4 +201,221 @@ UTEST(dispatch, slots_map_to_the_expected_function)
     ASSERT_TRUE(xtract[XTRACT_PEAK] == xtract_peak);
     ASSERT_TRUE(xtract[XTRACT_MMBSES] == xtract_mmbses);
     ASSERT_TRUE(xtract[XTRACT_SPECTRAL_SUBBAND_CENTROIDS] == xtract_spectral_subband_centroids);
+}
+
+/* ===== Descriptor conformance ===== */
+
+enum
+{
+    CONF_N = 16,
+    CONF_FILTERS = 2
+};
+
+static int conf_two_half(const xtract_function_descriptor_t *d)
+{
+    switch (d->data.format)
+    {
+    case XTRACT_SPECTRAL:
+    case XTRACT_SPECTRAL_PEAKS:
+    case XTRACT_SPECTRAL_HARMONICS:
+    case XTRACT_SPECTRAL_MAGNITUDE_PHASE:
+    case XTRACT_SUBFRAMES:
+        return 1;
+    default:
+        return 0;
+    }
+}
+
+static int conf_min_n(const xtract_function_descriptor_t *d)
+{
+    switch (d->id)
+    {
+    case XTRACT_HPS:
+        return 4;
+    case XTRACT_IRREGULARITY_K:
+    case XTRACT_SMOOTHNESS:
+        return 3;
+    case XTRACT_IRREGULARITY_J:
+    case XTRACT_VARIANCE:
+    case XTRACT_LPC:
+    case XTRACT_LPCC:
+        return 2;
+    case XTRACT_SPECTRUM:
+    case XTRACT_AUTOCORRELATION_FFT:
+        return CONF_N;
+    default:
+        break;
+    }
+    if (conf_two_half(d))
+        return 2;
+    return d->data.format == XTRACT_NO_DATA ? 0 : 1;
+}
+
+static int conf_call_n(const xtract_function_descriptor_t *d)
+{
+    switch (d->id)
+    {
+    case XTRACT_SUBBANDS:
+        return 8;
+    case XTRACT_FAILSAFE_F0:
+    case XTRACT_WAVELET_F0:
+        return CONF_N;
+    default:
+        return conf_min_n(d);
+    }
+}
+
+static int conf_below_min_code(const xtract_function_descriptor_t *d)
+{
+    if (d->id == XTRACT_SPECTRUM || d->id == XTRACT_AUTOCORRELATION_FFT)
+        return XTRACT_BAD_STATE;
+    return XTRACT_ARGUMENT_ERROR;
+}
+
+static int conf_null_argv_allowed(const xtract_function_descriptor_t *d)
+{
+    return d->argc == 0 || d->id == XTRACT_LPCC || d->id == XTRACT_HPS;
+}
+
+static int conf_bounds_checkable(const xtract_function_descriptor_t *d, int i)
+{
+    if (d->argc < 1 || d->argc > XTRACT_MAXARGS)
+        return 0;
+    if (d->argv.type != XTRACT_FLOAT && d->argv.type != XTRACT_INT)
+        return 0;
+    return !(d->id == XTRACT_SUBBANDS && i == 0);
+}
+
+static double conf_default(const xtract_function_descriptor_t *d, int i)
+{
+    double v = d->argv.def[i];
+
+    if (d->argv.min[i] != XTRACT_UNBOUNDED_MIN && v < d->argv.min[i])
+        v = d->argv.min[i];
+    if (d->argv.max[i] != XTRACT_UNBOUNDED_MAX && v > d->argv.max[i])
+        v = d->argv.max[i];
+    return v;
+}
+
+static void conf_set(const xtract_function_descriptor_t *d, double *argf, int *argi, int i, double v)
+{
+    if (d->argv.type == XTRACT_INT)
+        argi[i] = (int)v;
+    else
+        argf[i] = v;
+}
+
+static const void *conf_argv(const xtract_function_descriptor_t *d, double *argf, int *argi,
+                             const xtract_mel_filter *mel, const int *bark, const double *window)
+{
+    int i;
+
+    if (d->argc == 0)
+        return NULL;
+    if (d->argv.type == XTRACT_MEL_FILTER)
+        return mel;
+    if (d->id == XTRACT_BARK_COEFFICIENTS)
+        return bark;
+    if (d->id == XTRACT_WINDOWED)
+        return window;
+    for (i = 0; i < d->argc && i < XTRACT_MAXARGS; i++)
+        conf_set(d, argf, argi, i, conf_default(d, i));
+    return d->argv.type == XTRACT_INT ? (const void *)argi : (const void *)argf;
+}
+
+static void conf_fill_data(const xtract_function_descriptor_t *d, double *data, int n)
+{
+    int i;
+
+    for (i = 0; i < n; i++)
+        data[i] = 1.0;
+    if (conf_two_half(d))
+    {
+        for (i = n / 2; i < n; i++)
+            data[i] = (i - n / 2 + 1) * 100.0;
+    }
+}
+
+UTEST(descriptors, every_feature_conforms_to_its_descriptor)
+{
+    xtract_function_descriptor_t *fd = xtract_make_descriptors();
+    double data[2 * CONF_N + 64];
+    double result[2 * CONF_N + 64];
+    double argf[XTRACT_MAXARGS];
+    int argi[XTRACT_MAXARGS];
+    double window[XTRACT_WINDOW_SIZE];
+    double row_store[CONF_FILTERS][CONF_N];
+    double *rows[CONF_FILTERS];
+    xtract_mel_filter mel;
+    int bark[XTRACT_BARK_BANDS];
+    int f, i, rv;
+    const void *argv;
+
+    ASSERT_TRUE(fd != NULL);
+    xtract_init_fft(CONF_N, XTRACT_SPECTRUM);
+    xtract_init_fft(CONF_N, XTRACT_AUTOCORRELATION_FFT);
+    for (i = 0; i < CONF_FILTERS; i++)
+        rows[i] = row_store[i];
+    xtract_init_mfcc(CONF_N, 22050.0, XTRACT_EQUAL_GAIN, 100.0, 8000.0, CONF_FILTERS, rows);
+    mel.n_filters = CONF_FILTERS;
+    mel.filters = rows;
+    mel.dct_table = NULL;
+    xtract_init_bark(2 * CONF_N, 44100.0, bark);
+    xtract_init_wavelet_f0_state();
+    for (i = 0; i < XTRACT_WINDOW_SIZE; i++)
+        window[i] = 1.0;
+
+    for (f = 0; f < XTRACT_FEATURES; f++)
+    {
+        const xtract_function_descriptor_t *d = &fd[f];
+        const int min_n = conf_min_n(d);
+        const int call_n = conf_call_n(d);
+
+        conf_fill_data(d, data, call_n);
+        argv = conf_argv(d, argf, argi, &mel, bark, window);
+
+        rv = xtract[f](data, call_n, argv, result);
+        if (rv == XTRACT_FEATURE_NOT_IMPLEMENTED)
+        {
+            ASSERT_TRUE_MSG(f == XTRACT_POWER || f == XTRACT_ATTACK_TIME || f == XTRACT_DECAY_TIME, d->algo.name);
+            continue;
+        }
+        ASSERT_NE_MSG(rv, XTRACT_ARGUMENT_ERROR, d->algo.name);
+        ASSERT_NE_MSG(rv, XTRACT_BAD_STATE, d->algo.name);
+
+        if (conf_null_argv_allowed(d))
+            ASSERT_NE_MSG(xtract[f](data, call_n, NULL, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
+        else
+            ASSERT_EQ_MSG(xtract[f](data, call_n, NULL, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
+
+        if (min_n > 0)
+            ASSERT_EQ_MSG(xtract[f](data, min_n - 1, argv, result), conf_below_min_code(d), d->algo.name);
+        if (conf_two_half(d))
+            ASSERT_EQ_MSG(xtract[f](data, min_n + 1, argv, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
+        if (d->data.format == XTRACT_BARK_COEFFS)
+            ASSERT_EQ_MSG(xtract[f](data, XTRACT_BARK_BANDS + 1, argv, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
+
+        for (i = 0; i < d->argc && i < XTRACT_MAXARGS; i++)
+        {
+            if (!conf_bounds_checkable(d, i))
+                continue;
+            if (d->argv.min[i] != XTRACT_UNBOUNDED_MIN)
+            {
+                conf_set(d, argf, argi, i, d->argv.min[i] - 1.0);
+                ASSERT_EQ_MSG(xtract[f](data, call_n, argv, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
+                conf_set(d, argf, argi, i, d->argv.min[i]);
+                ASSERT_NE_MSG(xtract[f](data, call_n, argv, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
+            }
+            if (d->argv.max[i] != XTRACT_UNBOUNDED_MAX)
+            {
+                conf_set(d, argf, argi, i, d->argv.max[i] + 1.0);
+                ASSERT_EQ_MSG(xtract[f](data, call_n, argv, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
+                conf_set(d, argf, argi, i, d->argv.max[i]);
+                ASSERT_NE_MSG(xtract[f](data, call_n, argv, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
+            }
+            conf_set(d, argf, argi, i, conf_default(d, i));
+        }
+    }
+
+    ASSERT_EQ(xtract_free_descriptors(fd), XTRACT_SUCCESS);
 }
