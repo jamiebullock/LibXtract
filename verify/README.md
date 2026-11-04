@@ -38,10 +38,10 @@ The solver cost is in the doubles: every floating-point operation is bit-blasted
 
 ## Running
 
-Requires `cbmc` and `goto-cc` (Homebrew `cbmc`; on Ubuntu the `.deb` from the CBMC releases page) and `bitwuzla` on the PATH (Homebrew `bitwuzla`; on Linux the static binary from the Bitwuzla releases page). Each proof needs up to a couple of GB of memory, so keep `-j` low:
+Requires `cbmc` and `goto-cc` (Homebrew `cbmc`; on Ubuntu the `.deb` from the CBMC releases page) and `bitwuzla` on the PATH (Homebrew `bitwuzla`; on Linux the static binary from the Bitwuzla releases page). A proof needs up to 7 GB of memory, so run them one at a time unless the machine has memory for more (`make -j2 verify`):
 
 ```
-make -j2 verify
+make verify
 ```
 
-Logs are written to `verify/.proofs/<proof>.log`; a proof that passes leaves `verify/.proofs/<proof>.proved`, and a later `make verify` reruns only the proofs whose inputs changed.
+Logs are written to `verify/.proofs/<proof>.log`; a proof that passes leaves `verify/.proofs/<proof>.proved`, and a later `make verify` reruns only the proofs whose inputs changed, where a changed bound or solver setting counts as a change to every proof.

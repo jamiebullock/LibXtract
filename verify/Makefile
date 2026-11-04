@@ -69,16 +69,38 @@ CBMC_FLAGS = --unwind $(UNWIND) --unwinding-assertions --slice-formula $(CBMC_SO
 	--bounds-check --pointer-check --div-by-zero-check --signed-overflow-check \
 	--malloc-may-fail --malloc-fail-null --drop-unused-functions
 
-all: $(GOTO_BINARY)
-	@$(MAKE) proofs HARNESSES="$$($(GOTO_INSTRUMENT) --list-goto-functions $(GOTO_BINARY) | awk '/^verify_/ { printf "%s ", $$1 }')"
+# The stamps hold the flags each product was made with, so that a changed
+# bound or solver rebuilds the binary or reruns the proofs.
+CFLAGS_STAMP = $(PROOF_DIR)/cflags
+CBMC_FLAGS_STAMP = $(PROOF_DIR)/cbmc_flags
+HARNESS_LIST = $(PROOF_DIR)/harnesses
 
-$(GOTO_BINARY): $(LIB_SRC) $(HARNESS_SRC) verify.h
+all: $(HARNESS_LIST)
+	@$(MAKE) proofs HARNESSES="$$(tr '\n' ' ' < $(HARNESS_LIST))"
+
+$(CFLAGS_STAMP): force
+	@mkdir -p $(PROOF_DIR)
+	@echo '$(CFLAGS)' > $@.new
+	@if cmp -s $@ $@.new; then $(RM) $@.new; else mv $@.new $@; fi
+
+$(CBMC_FLAGS_STAMP): force
+	@mkdir -p $(PROOF_DIR)
+	@echo '$(UNWIND) $(SMALL_UNWIND) $(CBMC_FLAGS)' > $@.new
+	@if cmp -s $@ $@.new; then $(RM) $@.new; else mv $@.new $@; fi
+
+$(GOTO_BINARY): $(LIB_SRC) $(HARNESS_SRC) verify.h $(CFLAGS_STAMP)
 	$(GOTO_CC) $(CFLAGS) -o $@ $(LIB_SRC) $(HARNESS_SRC)
 
+$(HARNESS_LIST): $(GOTO_BINARY)
+	@$(GOTO_INSTRUMENT) --list-goto-functions $(GOTO_BINARY) > $@.functions
+	@awk '/^verify_/ { print $$1 }' $@.functions > $@
+	@test -s $@ || { echo "no verify_ function in $(GOTO_BINARY)"; $(RM) $@; exit 1; }
+
 proofs: $(addprefix $(PROOF_DIR)/, $(addsuffix .proved, $(HARNESSES)))
+	@test -n "$(HARNESSES)" || { echo "no harness given"; exit 1; }
 	@echo "$(words $(HARNESSES)) proofs passed"
 
-$(PROOF_DIR)/%.proved: $(GOTO_BINARY)
+$(PROOF_DIR)/%.proved: $(GOTO_BINARY) $(CBMC_FLAGS_STAMP)
 	@mkdir -p $(PROOF_DIR)
 	@if $(CBMC) $(GOTO_BINARY) --function $* $(CBMC_FLAGS) > $(PROOF_DIR)/$*.log 2>&1; then \
 		echo "$*: proved"; touch $@; \
@@ -91,4 +113,4 @@ $(PROOF_DIR)/%.proved: $(GOTO_BINARY)
 clean:
 	@$(RM) -r $(GOTO_BINARY) $(PROOF_DIR)
 
-.PHONY: all proofs clean
+.PHONY: all proofs clean force

@@ -152,7 +152,7 @@ jobs:
 
   verify:
     runs-on: ubuntu-24.04
-    timeout-minutes: 60
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v6
 
@@ -166,7 +166,7 @@ jobs:
           bitwuzla --version
 
       - name: Bounded model checking (CBMC)
-        run: make -j2 verify
+        run: make verify
 
       - name: Upload proof logs on failure
         if: failure()
