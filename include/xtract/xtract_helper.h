@@ -37,8 +37,8 @@ extern "C"
     /** \brief Apply a window function to an array of length N
      *
      * \param *data a pointer to an array of doubles
-     * \param N the number of elements in the array pointed to by *data
-     * \param *argv a pointer to a window function as returned by xtract_make_window()
+     * \param N the number of elements in the array pointed to by *data, at least 1
+     * \param *argv a pointer to a window function of at least N elements as returned by xtract_make_window(); NULL is an argument error
      * \param *result a pointer to the first element an array containing the windowed data
      *
      * It is up to the caller to generate and free the array containing the window, and to allocate and free memory of size N to hold the data pointed to by *result
@@ -69,8 +69,8 @@ extern "C"
     /** \brief Smooth a vector
      *
      * \param *data a pointer to an array of doubles
-     * \param N the number of elements in the array pointed to by *data to be smoothed
-     * \param *argv a pointer to a double giving the smoothing gain
+     * \param N the number of elements in the array pointed to by *data to be smoothed, at least 1
+     * \param *argv a pointer to a double giving the smoothing gain; NULL is an argument error
      * \param *result a pointer to the first element an array containing the smoothed data
      *
      * \note if passing in a spectrum e.g. *result from xtract_spectrum(), then N for xtract_smoothed() should be N / 2 with respect to the N for xtract_spectrum() so only amplitude components are smoothed, not frequencies!

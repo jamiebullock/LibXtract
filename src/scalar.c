@@ -739,7 +739,7 @@ int xtract_zcr(const double *data, const int N, const void *argv, double *result
 int xtract_rolloff(const double *data, const int N, const void *argv, double *result)
 {
     int n = N;
-    double pivot, temp, percentile;
+    double pivot, temp, percentile, q;
 
     pivot = temp = 0.0;
 
@@ -749,8 +749,9 @@ int xtract_rolloff(const double *data, const int N, const void *argv, double *re
         return XTRACT_ARGUMENT_ERROR;
     }
 
+    q = ((double *)argv)[0];
     percentile = ((double *)argv)[1];
-    if (!(percentile >= 0.0 && percentile <= 100.0))
+    if (!isfinite(q) || q < 0.0 || !(percentile >= 0.0 && percentile <= 100.0))
     {
         *result = 0.0;
         return XTRACT_ARGUMENT_ERROR;
@@ -764,7 +765,7 @@ int xtract_rolloff(const double *data, const int N, const void *argv, double *re
     for (n = 0; n < N && temp < pivot; n++)
         temp += data[n];
 
-    *result = n * ((double *)argv)[0];
+    *result = n * q;
     /* *result = (n / (double)N) * (((double *)argv)[1] * .5); */
 
     return XTRACT_SUCCESS;
@@ -839,6 +840,11 @@ int xtract_flatness_db(const double *data, const int N, const void *argv, double
     }
 
     flatness = *(double *)argv;
+    if (!(flatness >= 0.0 && flatness <= 1.0))
+    {
+        *result = 0.0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
     if (flatness <= 0)
         flatness = XTRACT_LOG_LIMIT;
 
@@ -1407,6 +1413,11 @@ int xtract_f0(const double *data, const int N, const void *argv, double *result)
     }
 
     sr = *(double *)argv;
+    if (!isfinite(sr) || sr < 0.0)
+    {
+        *result = 0.0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
     if (sr == 0)
         sr = 44100.0;
 
@@ -1486,6 +1497,11 @@ int xtract_failsafe_f0(const double *data, const int N, const void *argv, double
         return rv;
 
     sr = *(double *)argv;
+    if (!isfinite(sr) || sr < 0.0)
+    {
+        *result = 0.0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
     if (sr == 0)
         sr = 44100.0;
     spectrum = (double *)calloc(N, sizeof(double));
@@ -1534,6 +1550,11 @@ int xtract_wavelet_f0(const double *data, const int N, const void *argv, double 
     }
 
     sr = *(double *)argv;
+    if (!isfinite(sr) || sr < 0.0)
+    {
+        *result = 0.0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
 
     *result = dywapitch_computepitch(&wavelet_f0_state, data, 0, N);
 
@@ -1583,6 +1604,11 @@ int xtract_mcleod_f0(const double *data, const int N, const void *argv, double *
     }
 
     sr = *(double *)argv;
+    if (!isfinite(sr) || sr < 0.0)
+    {
+        *result = 0.0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
     if (sr == 0)
         sr = 44100.0;
 
