@@ -26,7 +26,19 @@ extern "C"
 
     typedef struct xtract_last_n_state_ xtract_last_n_state;
 
+    /**
+     *  Allocate the state for xtract_last_n() over frames of capacity values
+     *
+     *  @param capacity  the N that xtract_last_n() will be called with
+     *  @return a pointer to the new state, or NULL if memory cannot be allocated
+     */
     xtract_last_n_state *xtract_last_n_state_new(size_t capacity);
+
+    /**
+     *  Free a state allocated by xtract_last_n_state_new()
+     *
+     *  @param last_n_state  the state to free, as returned by xtract_last_n_state_new()
+     */
     void xtract_last_n_state_delete(xtract_last_n_state *last_n_state);
 
     /**

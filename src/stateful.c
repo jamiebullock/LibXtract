@@ -35,6 +35,8 @@ xtract_last_n_state *xtract_last_n_state_new(size_t N)
     if (last_n_state->ringbuf == NULL)
     {
         perror("could not allocate memory for xtract_last_n_state->ringbuf");
+        free(last_n_state);
+        return NULL;
     }
 
     return last_n_state;
