@@ -172,7 +172,7 @@ extern "C"
     int xtract_bark_coefficients(const double *data, const int N, const void *argv, double *result);
 
     /** \brief Extract the amplitude and frequency of spectral peaks from a magnitude spectrum
-     * \param *data: a pointer to an array of size N containing N magnitude/power/log magnitude/log power coefficients. (e.g. the first half of the array pointed to by *result from xtract_spectrum().
+     * \param *data: a pointer to an array of size N containing N magnitude/power/log magnitude/log power coefficients: the first half of the array pointed to by *result from xtract_spectrum() with DC discarded (argv[2] == 0, the default), so that coefficient n is bin n + 1 and the reported frequencies follow that layout
      * \param N: the size of the input array, at least 1 (note: it is assumed that enough memory has been allocated for an output array twice the size)
      * \param *argv: a pointer to an array of doubles, the first representing the bin spacing in Hz, the sample rate divided by the transform length (twice N for the first half of an xtract_spectrum() output), finite and at least 0 (0 selects 44100 Hz over a transform of 2N), the second representing the peak threshold as percentage of the magnitude of the maximum peak found, from 0 to 100
      * \param *result: a pointer to an array of size N * 2 containing N magnitude/power/log magnitude/log power coefficients and N bin frequencies.
