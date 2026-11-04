@@ -45,3 +45,7 @@ reports/
 # Project-specific files
 examples/simpletest/simpletest
 tests/xttest
+
+# Bounded model checking (make verify)
+verify/xtract.gb
+verify/.proofs
