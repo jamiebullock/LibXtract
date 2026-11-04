@@ -174,7 +174,7 @@ extern "C"
     /** \brief Extract the amplitude and frequency of spectral peaks from a magnitude spectrum
      * \param *data: a pointer to an array of size N containing N magnitude/power/log magnitude/log power coefficients. (e.g. the first half of the array pointed to by *result from xtract_spectrum().
      * \param N: the size of the input array, at least 1 (note: it is assumed that enough memory has been allocated for an output array twice the size)
-     * \param *argv: a pointer to an array of doubles, the first representing (samplerate / N), finite and at least 0, the second representing the peak threshold as percentage of the magnitude of the maximum peak found, from 0 to 100
+     * \param *argv: a pointer to an array of doubles, the first representing the bin spacing in Hz, the sample rate divided by the transform length (twice N for the first half of an xtract_spectrum() output), finite and at least 0 (0 selects 44100 Hz over a transform of 2N), the second representing the peak threshold as percentage of the magnitude of the maximum peak found, from 0 to 100
      * \param *result: a pointer to an array of size N * 2 containing N magnitude/power/log magnitude/log power coefficients and N bin frequencies.
      *
      */

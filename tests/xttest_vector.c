@@ -2538,3 +2538,13 @@ UTEST(vector, subbands_accepts_only_features_that_reduce_a_plain_vector_to_one_s
     }
     ASSERT_EQ(xtract_free_descriptors(fd), XTRACT_SUCCESS);
 }
+
+UTEST(vector, peak_spectrum_zero_spacing_defaults_to_44100_over_the_transform_length)
+{
+    double data[4] = {0.0, 1.0, 0.0, 0.0};
+    double result[8] = {0};
+    double argv[2] = {0.0, 0.0};
+
+    ASSERT_EQ(xtract_peak_spectrum(data, 4, argv, result), XTRACT_SUCCESS);
+    CHECK_REL(result[4 + 1], 2.0 * 44100.0 / 8.0, EPSILON);
+}

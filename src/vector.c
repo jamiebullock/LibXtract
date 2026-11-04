@@ -51,7 +51,7 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
     norm = *((double *)argv + 3);
     if (!isfinite(q) || q < 0.0 ||
         !(type >= XTRACT_MAGNITUDE_SPECTRUM && type <= XTRACT_MAGNITUDE_PHASE_SPECTRUM) ||
-        !(dc >= 0.0 && dc <= 1.0) || !(norm >= 0.0 && norm <= 1.0))
+        (dc != 0.0 && dc != 1.0) || (norm != 0.0 && norm != 1.0))
         return XTRACT_ARGUMENT_ERROR;
     vector = (int)type;
     withDC = (int)dc;
@@ -795,7 +795,9 @@ int xtract_peak_spectrum(const double *data, const int N, const void *argv, doub
 
     max = 0.0;
 
-    XTRACT_CHECK_q;
+    /* N coefficients are the first half of a 2N-point transform */
+    if (q == 0.0)
+        q = XTRACT_SR_DEFAULT / (2.0 * N);
 
     /* Find max amplitude for threshold calculation */
     for (n = 1; n < N; n++)

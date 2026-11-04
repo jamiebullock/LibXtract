@@ -376,7 +376,10 @@ UTEST(descriptors, every_feature_conforms_to_its_descriptor)
 
         rv = xtract[f](data, call_n, argv, result);
         if (rv == XTRACT_FEATURE_NOT_IMPLEMENTED)
+        {
+            ASSERT_TRUE_MSG(f == XTRACT_POWER || f == XTRACT_ATTACK_TIME || f == XTRACT_DECAY_TIME, d->algo.name);
             continue;
+        }
         ASSERT_NE_MSG(rv, XTRACT_ARGUMENT_ERROR, d->algo.name);
         ASSERT_NE_MSG(rv, XTRACT_BAD_STATE, d->algo.name);
 
@@ -392,8 +395,10 @@ UTEST(descriptors, every_feature_conforms_to_its_descriptor)
         if (d->data.format == XTRACT_BARK_COEFFS)
             ASSERT_EQ_MSG(xtract[f](data, XTRACT_BARK_BANDS + 1, argv, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
 
-        for (i = 0; i < d->argc && conf_bounds_checkable(d, i); i++)
+        for (i = 0; i < d->argc && i < XTRACT_MAXARGS; i++)
         {
+            if (!conf_bounds_checkable(d, i))
+                continue;
             if (d->argv.min[i] != XTRACT_UNBOUNDED_MIN)
             {
                 conf_set(d, argf, argi, i, d->argv.min[i] - 1.0);

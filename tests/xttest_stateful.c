@@ -142,6 +142,21 @@ UTEST(stateful, wavelet_f0_detects_sine_pitch)
     CHECK_REL(result, frequency, 0.01);
 }
 
+UTEST(stateful, wavelet_f0_zero_sample_rate_means_44100)
+{
+    double table[WAVELET_N];
+    double samplerate = 44100.0;
+    double zero = 0.0;
+    double at_44100 = -1.0;
+    double at_zero = -1.0;
+
+    xtract_init_wavelet_f0_state();
+    xttest_gen_sine(table, WAVELET_N, samplerate, 440.0, 1.0);
+    ASSERT_EQ(xtract_wavelet_f0(table, WAVELET_N, &samplerate, &at_44100), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_wavelet_f0(table, WAVELET_N, &zero, &at_zero), XTRACT_SUCCESS);
+    CHECK_REL(at_zero, at_44100, EPSILON);
+}
+
 UTEST(stateful, wavelet_f0_silence_yields_no_result)
 {
     double table[WAVELET_N];

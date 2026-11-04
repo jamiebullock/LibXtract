@@ -826,6 +826,11 @@ int xtract_flatness(const double *data, const int N, const void *argv, double *r
 
     *result = exp(log_sum / (double)count) / (den / (double)count);
 
+    /* The ratio is at most 1 by the AM-GM inequality; rounding can push it
+     * just above */
+    if (*result > 1.0)
+        *result = 1.0;
+
     return XTRACT_SUCCESS;
 }
 
@@ -1555,6 +1560,8 @@ int xtract_wavelet_f0(const double *data, const int N, const void *argv, double 
         *result = 0.0;
         return XTRACT_ARGUMENT_ERROR;
     }
+    if (sr == 0)
+        sr = 44100.0;
 
     *result = dywapitch_computepitch(&wavelet_f0_state, data, 0, N);
 
