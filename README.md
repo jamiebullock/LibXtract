@@ -29,7 +29,7 @@ On Windows, an MSYS2/MinGW environment is required to provide `make` and a POSIX
 make           # build library and examples
 make check     # build and run tests
 make mutation  # mutation-test the suite with Mull (needs clang-18 and mull-18; CI runs it)
-make verify    # bounded model checking of the feature functions with CBMC (CI runs it on merge)
+make verify    # bounded model checking of the feature functions with CBMC (CI runs it on pull requests that are ready for review and on pushes to main and develop)
 ```
 
 For further details on `make verify` see [verify/README.md](verify/README.md).
