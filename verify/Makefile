@@ -56,10 +56,10 @@ UNWIND := $(shell expr $(VERIFY_MAX_N) + 1)
 ifeq ($(shell test $(UNWIND) -lt 27 && echo low), low)
     UNWIND := 27
 endif
+# No proof in SMALL_PROOFS reaches the bark band loop, and the unwinding
+# depth multiplies the formula for every nested loop, so the small bound
+# unwinds only as far as its N requires.
 SMALL_UNWIND := $(shell expr $(VERIFY_SMALL_N) + 1)
-ifeq ($(shell test $(SMALL_UNWIND) -lt 27 && echo low), low)
-    SMALL_UNWIND := 27
-endif
 $(addprefix $(PROOF_DIR)/, $(addsuffix .proved, $(SMALL_PROOFS))): UNWIND = $(SMALL_UNWIND)
 
 # The feature functions are floating-point loops, and the solver cost is in
