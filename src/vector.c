@@ -548,6 +548,28 @@ int xtract_gfcc(const double *data, const int N, const void *argv, double *resul
     return cepstral_coefficients(data, N, (const xtract_mel_filter *)argv, result);
 }
 
+static double bivariate_gaussian_entropy(double sxx, double syy, double sxy, const int count)
+{
+    /* ln(2*pi*e) = ln(2*pi) + 1, avoiding the non-portable M_E. */
+    const double gaussian_term = log(2.0 * M_PI) + 1.0;
+    double det;
+
+    if (count == 0)
+        return 0.0;
+
+    sxx /= count;
+    syy /= count;
+    sxy /= count;
+    /* A single passed bin leaves the covariance rank-deficient (det == 0),
+     * so the entropy floors without a dedicated case. */
+    det = sxx * syy - XTRACT_SQ(sxy);
+
+    if (det < XTRACT_LOG_LIMIT)
+        return gaussian_term + 0.5 * XTRACT_LOG_LIMIT_DB;
+
+    return gaussian_term + 0.5 * log(det);
+}
+
 int xtract_mmbses(const double *data, const int N, const void *argv, double *result)
 {
     /* data is a magnitude/phase spectrum as produced by xtract_spectrum() with
@@ -563,8 +585,6 @@ int xtract_mmbses(const double *data, const int N, const void *argv, double *res
      * Camarena-Ibarrola & Chavez). */
     const xtract_mel_filter *f = (const xtract_mel_filter *)argv;
     const int M = N >> 1;
-    /* ln(2*pi*e) = ln(2*pi) + 1, avoiding the non-portable M_E. */
-    const double gaussian_term = log(2.0 * M_PI) + 1.0;
     int n, filter;
 
     if (N < 2 || (N & 1) || !filterbank_is_valid(f))
@@ -574,7 +594,6 @@ int xtract_mmbses(const double *data, const int N, const void *argv, double *res
     {
         int count = 0;
         double sxx = 0.0, syy = 0.0, sxy = 0.0;
-        double det;
 
         /* Accumulate the zero-mean second moments of the filter-weighted
          * complex coefficients (real = mag*cos(phase), imag = mag*sin(phase)). */
@@ -594,24 +613,7 @@ int xtract_mmbses(const double *data, const int N, const void *argv, double *res
             count++;
         }
 
-        if (count == 0)
-        {
-            /* No bin passes the filter: the band carries no information. */
-            result[filter] = 0.0;
-            continue;
-        }
-
-        sxx /= count;
-        syy /= count;
-        sxy /= count;
-        /* A single passed bin leaves the covariance rank-deficient (det == 0),
-         * so the entropy floors without a dedicated case. */
-        det = sxx * syy - XTRACT_SQ(sxy);
-
-        if (det < XTRACT_LOG_LIMIT)
-            result[filter] = gaussian_term + 0.5 * XTRACT_LOG_LIMIT_DB;
-        else
-            result[filter] = gaussian_term + 0.5 * log(det);
+        result[filter] = bivariate_gaussian_entropy(sxx, syy, sxy, count);
     }
 
     return XTRACT_SUCCESS;

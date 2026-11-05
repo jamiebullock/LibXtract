@@ -32,7 +32,7 @@ VERIFY_SMALL_N ?= 8
 SMALL_PROOFS = verify_hps verify_mcleod_f0 verify_sharpness \
 	verify_tristimulus_1 verify_tristimulus_2 verify_tristimulus_3 \
 	verify_mel_spectrogram verify_mfcc verify_gammatone_spectrogram verify_gfcc \
-	verify_spectral_subband_centroids
+	verify_mmbses verify_spectral_subband_centroids
 # The filterbank proofs take a filterbank of up to this many filters; the
 # count multiplies the formula, and N is the bound the proofs are about.
 VERIFY_MAX_FILTERS ?= 2

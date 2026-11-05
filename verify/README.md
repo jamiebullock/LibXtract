@@ -12,15 +12,14 @@ Each function named `verify_*` in `verify_scalar.c`, `verify_vector.c`, `verify_
 - for the FFT features, a transform state that is either uninitialised or initialised for any power of two up to the bound;
 - for the filterbank features, a filterbank of up to `VERIFY_MAX_FILTERS` filters whose rows are exactly as wide as the input, with any row, the row table or the DCT table possibly NULL.
 
-Five functions have no proof, each because the formula outgrows both solvers before N reaches 8:
+Four functions have no proof, each because the formula outgrows both solvers before N reaches 8:
 
 - `xtract_subbands` reduces each band by calling through the `xtract[]` table, so its proof is the union of a proof for every permitted feature, once per band. Restricting the call site to the twelve permitted features with `goto-instrument --restrict-function-pointer` and bounding the band count to two was not enough.
 - `xtract_features_from_subframes` dispatches through the same table with nearly every feature permitted.
 - `xtract_wavelet_f0` runs the bundled dywapitchtrack pitch tracker, whose loop counts do not follow N.
-- `xtract_mmbses` branches on the determinant of each band's covariance, which is built from products of every magnitude, phase and filter weight in the band; with the solver unable to drop any of that arithmetic, two filters over four bins did not finish in an hour.
 - `xtract_spectrum` tracks the running maximum of every coefficient for its normalisation, a branch on every element that keeps the square roots and logarithms in the formula; `xtract_autocorrelation_fft`, which shares the transform state and the stub, is proved.
 
-The sanitizer and fuzz jobs remain the evidence for those five.
+The sanitizer and fuzz jobs remain the evidence for those four.
 
 CBMC then checks every array bound, pointer dereference, integer division, signed overflow and loop bound on every path. `malloc` may return NULL. NaN and infinity are valid inputs, so floating-point results are not checked. A passing proof means the function returns a status code for every such input without reading or writing outside its buffers.
 
@@ -32,7 +31,7 @@ CBMC models the C maths library itself, and reports a call to any function it ha
 
 ## Bounds
 
-`VERIFY_MAX_N` (default 32) is the input length bound. The proofs listed in `SMALL_PROOFS` in the Makefile run at `VERIFY_SMALL_N` (default 8) instead. Formula slicing cannot drop a floating-point sum that a branch tests, such as `sharpness`'s loudness total or the filterbank features' log floor, and the solver's cost in those sums grows too fast for the full bound to be reachable. `VERIFY_MAX_FILTERS` (default 2) bounds the filterbank size, which multiplies the formula without bearing on the per-element code the proofs are about. The loop unwinding bound is the proof's input bound plus one, with a floor of 27 because the bark band loop runs `XTRACT_BARK_BANDS` times whatever N is.
+`VERIFY_MAX_N` (default 32) is the input length bound. The proofs listed in `SMALL_PROOFS` in the Makefile run at `VERIFY_SMALL_N` (default 8) instead. Formula slicing cannot drop a floating-point sum that a branch tests, such as `sharpness`'s loudness total or the filterbank features' log floor, and the solver's cost in those sums grows too fast for the full bound to be reachable. The same effect decides whether a proof finishes at all: `xtract_mmbses` writes each band's result once, after the branch on the covariance determinant, so the determinant and the products behind it drop out of the formula; a write inside that branch keeps them in, and the proof does not finish. `VERIFY_MAX_FILTERS` (default 2) bounds the filterbank size, which multiplies the formula without bearing on the per-element code the proofs are about. The loop unwinding bound is the proof's input bound plus one, with a floor of 27 because the bark band loop runs `XTRACT_BARK_BANDS` times whatever N is.
 
 The solver cost is in the doubles: every floating-point operation is bit-blasted, so the quadratic loops cost far more than the linear ones. Two settings keep them tractable. Formula slicing (`--slice-formula`) removes the arithmetic no property depends on, and Bitwuzla (`--bitwuzla`) decides what remains in a fraction of the time and memory of the built-in SAT solver. `make verify CBMC_SOLVER=` runs the built-in solver instead.
 

@@ -72,6 +72,7 @@ FILTERBANK_HARNESS(mel_spectrogram, nondet_small_length(), N)
 FILTERBANK_HARNESS(mfcc, nondet_small_length(), N)
 FILTERBANK_HARNESS(gammatone_spectrogram, nondet_small_length(), N)
 FILTERBANK_HARNESS(gfcc, nondet_small_length(), N)
+FILTERBANK_HARNESS(mmbses, nondet_small_length(), N / 2)
 FILTERBANK_HARNESS(spectral_subband_centroids, nondet_small_length(), N / 2)
 
 #define FFT_HARNESS(feature, length, plan, result_length)           \
