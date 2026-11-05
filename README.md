@@ -32,15 +32,7 @@ make mutation  # mutation-test the suite with Mull (needs clang-18 and mull-18; 
 make verify    # bounded model checking of the feature functions with CBMC (CI runs it)
 ```
 
-`make verify` proves with CBMC that a feature function does not read or
-write out of bounds, divide by zero or overflow a signed integer, for every
-input up to a bound (32 elements, or 8 for the proofs whose formulas grow
-fastest) and every argument block. Four functions have no proof, and the
-filterbank proofs cover filterbanks of up to two filters. The sanitizer and
-fuzz jobs sample those properties at larger sizes; the proofs establish
-them within the bound. [verify/README.md](verify/README.md) describes what
-a proof covers, what is stubbed, the bounds, and the functions that have no
-proof.
+For further details on `make verify` see [verify/README.md](verify/README.md).
 
 ### Install
 
