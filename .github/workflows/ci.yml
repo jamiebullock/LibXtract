@@ -150,6 +150,33 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install CBMC 6.11.0 and Bitwuzla 0.9.1
+        run: |
+          curl -sSL -o cbmc.deb https://github.com/diffblue/cbmc/releases/download/cbmc-6.11.0/ubuntu-24.04-cbmc-6.11.0-Linux.deb
+          sudo dpkg -i cbmc.deb
+          curl -sSL -o bitwuzla.zip https://github.com/bitwuzla/bitwuzla/releases/download/0.9.1/Bitwuzla-Linux-x86_64-static.zip
+          unzip -q bitwuzla.zip
+          sudo install Bitwuzla-Linux-x86_64-static/bin/bitwuzla /usr/local/bin/bitwuzla
+          bitwuzla --version
+
+      - name: Bounded model checking (CBMC)
+        run: make verify
+
+      - name: Upload proof logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: verify-logs
+          path: verify/.proofs/*.log
+          include-hidden-files: true
+          if-no-files-found: ignore
+
   format:
     runs-on: ubuntu-latest
     steps:

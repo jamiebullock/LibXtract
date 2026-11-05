@@ -11,7 +11,7 @@ HPATH = include/xtract
 
 export XTRACT_VERSION PREFIX LIBRARY
 
-.PHONY: examples clean install doc src swig bench analyze check-asan cppcheck coverage fuzz mutation format format-check
+.PHONY: examples clean install doc src swig bench analyze check-asan cppcheck coverage fuzz mutation verify format format-check
 
 all: src examples
 
@@ -130,6 +130,13 @@ mutation:
 		--workers $(MULL_WORKERS) --timeout 10000 --mutation-score-threshold $(MULL_THRESHOLD) ./xttest ); \
 	status=$$?; $(RESTORE_EXIT)
 
+# Bounded model checking of every feature function with CBMC: one proof per
+# function over every input of length up to VERIFY_MAX_N (see verify/Makefile).
+# Requires cbmc and goto-cc. The proofs are independent, so `make -j verify`
+# runs them in parallel; each needs up to a few GB of memory.
+verify:
+	@$(MAKE) -C verify
+
 # clang-format over the first-party C sources (third-party, SWIG bindings and
 # the C++ examples are excluded). The pinned CLANG_FORMAT version must match
 # the one CI installs so a local `make format` and the enforced
@@ -162,4 +169,5 @@ clean:
 	@$(MAKE) -C examples clean
 	@$(MAKE) -C swig clean
 	@$(MAKE) -C bench clean
+	@$(MAKE) -C verify clean
 	@$(RM) -r dist
