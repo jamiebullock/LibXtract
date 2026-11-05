@@ -5,6 +5,7 @@ on:
     branches: [main, develop]
   pull_request:
     branches: [main, develop]
+  merge_group:
 
 jobs:
   build-and-test:
@@ -150,7 +151,10 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
+  # The proofs take about fifteen minutes, so they run once per merge, on the
+  # merge queue's candidate commit.
   verify:
+    if: github.event_name == 'merge_group'
     runs-on: ubuntu-24.04
     timeout-minutes: 90
     steps:
