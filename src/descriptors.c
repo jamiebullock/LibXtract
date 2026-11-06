@@ -126,6 +126,16 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *argv_def = 10;
             *argv_unit = (xtract_unit_t)XTRACT_NONE;
             break;
+        case XTRACT_PERMUTATION_ENTROPY:
+            *argv_min = 2;
+            *argv_max = 8;
+            *argv_def = 3;
+            *argv_unit = (xtract_unit_t)XTRACT_NONE;
+            *(argv_min + 1) = 1;
+            *(argv_max + 1) = XTRACT_UNBOUNDED_MAX;
+            *(argv_def + 1) = 1;
+            *(argv_unit + 1) = (xtract_unit_t)XTRACT_NONE;
+            break;
         case XTRACT_STANDARD_DEVIATION:
         case XTRACT_SPECTRAL_STANDARD_DEVIATION:
             *argv_min = 0.0;
@@ -421,6 +431,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_PETROSIAN_FRACTAL_DIMENSION:
         case XTRACT_KATZ_FRACTAL_DIMENSION:
         case XTRACT_HIGUCHI_FRACTAL_DIMENSION:
+        case XTRACT_PERMUTATION_ENTROPY:
         case XTRACT_SKEWNESS:
         case XTRACT_KURTOSIS:
         case XTRACT_LOWEST_VALUE:
@@ -546,6 +557,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_PETROSIAN_FRACTAL_DIMENSION:
         case XTRACT_KATZ_FRACTAL_DIMENSION:
         case XTRACT_HIGUCHI_FRACTAL_DIMENSION:
+        case XTRACT_PERMUTATION_ENTROPY:
         case XTRACT_SKEWNESS:
         case XTRACT_KURTOSIS:
         case XTRACT_LOWEST_VALUE:
@@ -1012,6 +1024,14 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             copy_author(author, "T. Higuchi");
             *year = 1988;
             break;
+        case XTRACT_PERMUTATION_ENTROPY:
+            copy_name(name, "permutation_entropy");
+            copy_name(p_name, "Permutation Entropy");
+            copy_desc(desc, "Extract the normalised permutation entropy of an input vector");
+            copy_desc(p_desc, "Extract the normalised permutation entropy of a range of values");
+            copy_author(author, "Christoph Bandt, Bernd Pompe");
+            *year = 2002;
+            break;
         case XTRACT_MFCC:
             copy_name(name, "mfcc");
             copy_name(p_name, "Mel-Frequency Cepstral Coefficients");
@@ -1418,6 +1438,10 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *argc = 1;
             *argv_type = XTRACT_INT;
             break;
+        case XTRACT_PERMUTATION_ENTROPY:
+            *argc = 2;
+            *argv_type = XTRACT_INT;
+            break;
         case XTRACT_EWMA_AVERAGE:
         case XTRACT_EWMA_VARIANCE:
             *argc = 1;
@@ -1494,6 +1518,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_PETROSIAN_FRACTAL_DIMENSION:
         case XTRACT_KATZ_FRACTAL_DIMENSION:
         case XTRACT_HIGUCHI_FRACTAL_DIMENSION:
+        case XTRACT_PERMUTATION_ENTROPY:
         case XTRACT_SKEWNESS:
         case XTRACT_KURTOSIS:
         case XTRACT_SPECTRAL_MEAN:
@@ -1598,6 +1623,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_PETROSIAN_FRACTAL_DIMENSION:
         case XTRACT_KATZ_FRACTAL_DIMENSION:
         case XTRACT_HIGUCHI_FRACTAL_DIMENSION:
+        case XTRACT_PERMUTATION_ENTROPY:
         case XTRACT_SKEWNESS:
         case XTRACT_KURTOSIS:
         case XTRACT_SPECTRAL_MEAN:
@@ -1769,6 +1795,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             case XTRACT_FLATNESS:
                 /* geometric mean / arithmetic mean (Wiener entropy): [0, 1] */
             case XTRACT_SPECTRAL_ENTROPY:
+            case XTRACT_PERMUTATION_ENTROPY:
             case XTRACT_TONALITY:
                 /* min(flatness_db / -60, 1): [0, 1] */
             case XTRACT_SPECTRAL_INHARMONICITY:

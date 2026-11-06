@@ -3205,3 +3205,119 @@ UTEST(scalar, higuchi_fractal_dimension_rejects_a_missing_or_unusable_k_max_and_
     ASSERT_EQ(result, 0.0);
     ASSERT_EQ(xtract_higuchi_fractal_dimension(data, 4, &k_max, &result), XTRACT_SUCCESS);
 }
+
+UTEST(scalar, permutation_entropy_of_the_bandt_pompe_example_is_their_published_value)
+{
+    double data[7] = {4.0, 7.0, 9.0, 10.0, 6.0, 11.0, 3.0};
+    double result = -1.0;
+    int args[2] = {3, 1};
+    double expected = -(2.0 * 0.4 * log(0.4) + 0.2 * log(0.2)) / log(6.0);
+
+    ASSERT_EQ(xtract_permutation_entropy(data, 7, args, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, expected, EPSILON);
+    CHECK_NEAR(result * log(6.0), 1.0549, 1e-4);
+}
+
+UTEST(scalar, permutation_entropy_of_a_monotonic_series_is_0)
+{
+    double data[6] = {1.0, 2.0, 3.0, 5.0, 8.0, 13.0};
+    double result = -1.0;
+    int args[2] = {3, 1};
+
+    ASSERT_EQ(xtract_permutation_entropy(data, 6, args, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(result, 0.0);
+    args[0] = 2;
+    ASSERT_EQ(xtract_permutation_entropy(data, 6, args, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(result, 0.0);
+}
+
+UTEST(scalar, permutation_entropy_of_an_alternating_series_at_order_2)
+{
+    double data[6] = {1.0, 3.0, 2.0, 4.0, 3.0, 5.0};
+    double result = -1.0;
+    int args[2] = {2, 1};
+    double expected = -(0.6 * log(0.6) + 0.4 * log(0.4)) / log(2.0);
+
+    ASSERT_EQ(xtract_permutation_entropy(data, 6, args, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, expected, EPSILON);
+}
+
+UTEST(scalar, permutation_entropy_with_a_delay_skips_elements_between_pattern_points)
+{
+    double data[6] = {1.0, 5.0, 2.0, 6.0, 3.0, 7.0};
+    double result = -1.0;
+    int args[2] = {2, 2};
+
+    ASSERT_EQ(xtract_permutation_entropy(data, 6, args, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(result, 0.0);
+    args[1] = 1;
+    ASSERT_EQ(xtract_permutation_entropy(data, 6, args, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, -(0.6 * log(0.6) + 0.4 * log(0.4)) / log(2.0), EPSILON);
+}
+
+UTEST(scalar, permutation_entropy_orders_equal_values_by_position)
+{
+    double data[4] = {1.0, 1.0, 2.0, 1.0};
+    double result = -1.0;
+    int args[2] = {2, 1};
+    double expected = -(2.0 / 3.0 * log(2.0 / 3.0) + 1.0 / 3.0 * log(1.0 / 3.0)) / log(2.0);
+
+    ASSERT_EQ(xtract_permutation_entropy(data, 4, args, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, expected, EPSILON);
+}
+
+UTEST(scalar, permutation_entropy_of_a_noise_series_is_close_to_1_at_every_order)
+{
+    double data[4096];
+    double result = -1.0;
+    int args[2] = {3, 1};
+    unsigned int state = 54321u;
+    int i;
+
+    for (i = 0; i < 4096; i++)
+    {
+        state = state * 1664525u + 1013904223u;
+        data[i] = (state >> 8) / 16777216.0;
+    }
+    for (args[0] = 2; args[0] <= 5; args[0]++)
+    {
+        ASSERT_EQ(xtract_permutation_entropy(data, 4096, args, &result), XTRACT_SUCCESS);
+        CHECK_NEAR(result, 1.0, 0.02);
+    }
+}
+
+UTEST(scalar, permutation_entropy_rejects_a_missing_or_out_of_range_argument_and_sets_the_result_to_zero)
+{
+    double data[8] = {3.0, -1.5, 4.25, 0.0, 2.0, 9.5, -6.0, 1.0};
+    double result = -1.0;
+    int args[2] = {3, 1};
+
+    ASSERT_EQ(xtract_permutation_entropy(data, 8, NULL, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    args[0] = 1;
+    result = -1.0;
+    ASSERT_EQ(xtract_permutation_entropy(data, 8, args, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    args[0] = 9;
+    result = -1.0;
+    ASSERT_EQ(xtract_permutation_entropy(data, 8, args, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    args[0] = 3;
+    args[1] = 0;
+    result = -1.0;
+    ASSERT_EQ(xtract_permutation_entropy(data, 8, args, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    args[1] = 4;
+    result = -1.0;
+    ASSERT_EQ(xtract_permutation_entropy(data, 8, args, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    args[1] = 3;
+    ASSERT_EQ(xtract_permutation_entropy(data, 8, args, &result), XTRACT_SUCCESS);
+    args[0] = 8;
+    args[1] = 1;
+    ASSERT_EQ(xtract_permutation_entropy(data, 8, args, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(result, 0.0);
+    result = -1.0;
+    ASSERT_EQ(xtract_permutation_entropy(data, 7, args, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+}

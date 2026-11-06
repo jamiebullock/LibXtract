@@ -60,7 +60,7 @@ static const int enum_features[] = {
     XTRACT_HJORTH_MOBILITY, XTRACT_HJORTH_COMPLEXITY,
     XTRACT_TIME_REVERSAL_ASYMMETRY, XTRACT_SPECTRAL_ENTROPY,
     XTRACT_PETROSIAN_FRACTAL_DIMENSION, XTRACT_KATZ_FRACTAL_DIMENSION,
-    XTRACT_HIGUCHI_FRACTAL_DIMENSION};
+    XTRACT_HIGUCHI_FRACTAL_DIMENSION, XTRACT_PERMUTATION_ENTROPY};
 
 #define N_FEATURES ((int)(sizeof(enum_features) / sizeof(enum_features[0])))
 
@@ -81,7 +81,8 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     int null_argv;
     int (*fn)(const double *, const int, const void *, double *);
     double argv[XTRACT_MAXARGS];
-    int lag;
+    int int_args[XTRACT_MAXARGS];
+    int i;
     double *in;
     const double *input;
     double *result;
@@ -134,10 +135,12 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     memcpy(in, data, (avail < (size_t)n ? avail : (size_t)n) * sizeof(double));
     input = n > 0 ? in : in + 1;
 
-    if (feature == XTRACT_TIME_REVERSAL_ASYMMETRY || feature == XTRACT_HIGUCHI_FRACTAL_DIMENSION)
+    if (feature == XTRACT_TIME_REVERSAL_ASYMMETRY || feature == XTRACT_HIGUCHI_FRACTAL_DIMENSION ||
+        feature == XTRACT_PERMUTATION_ENTROPY)
     {
-        lag = argv[0] >= -1.0 && argv[0] <= (double)MAX_N ? (int)argv[0] : -1;
-        (void)fn(input, n, null_argv ? NULL : &lag, result);
+        for (i = 0; i < XTRACT_MAXARGS; i++)
+            int_args[i] = argv[i] >= -1.0 && argv[i] <= (double)MAX_N ? (int)argv[i] : -1;
+        (void)fn(input, n, null_argv ? NULL : int_args, result);
     }
     else
         (void)fn(input, n, null_argv ? NULL : argv, result);
