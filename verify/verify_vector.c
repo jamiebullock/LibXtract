@@ -131,12 +131,12 @@ void verify_bark_coefficients(void)
     free(result);
 }
 
-#define MOVING_HARNESS(feature)                                         \
+#define MOVING_HARNESS(feature, length, max_window)                     \
     void verify_##feature(void)                                         \
     {                                                                   \
-        const int N = nondet_length();                                  \
+        const int N = length;                                           \
         double *data = nondet_doubles(N);                               \
-        const int window = nondet_between(-1, VERIFY_MAX_N + 1);        \
+        const int window = nondet_between(-1, max_window + 1);          \
         const void *argv = nondet_argv(&window);                        \
         double *result = nondet_doubles(at_least_zero(N - window + 1)); \
                                                                         \
@@ -145,10 +145,12 @@ void verify_bark_coefficients(void)
         free(result);                                                   \
     }
 
-MOVING_HARNESS(moving_sum)
-MOVING_HARNESS(moving_average)
-MOVING_HARNESS(moving_variance)
-MOVING_HARNESS(moving_standard_deviation)
+MOVING_HARNESS(moving_sum, nondet_length(), VERIFY_MAX_N)
+MOVING_HARNESS(moving_average, nondet_length(), VERIFY_MAX_N)
+MOVING_HARNESS(moving_variance, nondet_length(), VERIFY_MAX_N)
+MOVING_HARNESS(moving_standard_deviation, nondet_length(), VERIFY_MAX_N)
+MOVING_HARNESS(moving_max, nondet_small_length(), VERIFY_SMALL_N)
+MOVING_HARNESS(moving_min, nondet_small_length(), VERIFY_SMALL_N)
 
 void verify_lpcc(void)
 {

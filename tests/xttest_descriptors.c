@@ -177,7 +177,7 @@ UTEST(descriptors, appended_features_are_fully_described)
     ASSERT_EQ(fd[XTRACT_SPECTRAL_SUBBAND_CENTROIDS].result.vector.format, XTRACT_MEL_COEFFS);
     ASSERT_EQ(fd[XTRACT_SPECTRAL_SUBBAND_CENTROIDS].result.vector.unit, XTRACT_HERTZ);
 
-    for (f = XTRACT_MOVING_SUM; f <= XTRACT_MOVING_STANDARD_DEVIATION; f++)
+    for (f = XTRACT_MOVING_SUM; f <= XTRACT_MOVING_MIN; f++)
     {
         ASSERT_EQ_MSG(fd[f].argc, 1, fd[f].algo.name);
         ASSERT_EQ_MSG(fd[f].argv.type, XTRACT_INT, fd[f].algo.name);
@@ -194,6 +194,8 @@ UTEST(descriptors, appended_features_are_fully_described)
     CHECK_REL(fd[XTRACT_MOVING_AVERAGE].argv.min[0], 1.0, EPSILON);
     CHECK_REL(fd[XTRACT_MOVING_VARIANCE].argv.min[0], 2.0, EPSILON);
     CHECK_REL(fd[XTRACT_MOVING_STANDARD_DEVIATION].argv.min[0], 2.0, EPSILON);
+    CHECK_REL(fd[XTRACT_MOVING_MAX].argv.min[0], 1.0, EPSILON);
+    CHECK_REL(fd[XTRACT_MOVING_MIN].argv.min[0], 1.0, EPSILON);
 
     ASSERT_EQ(xtract_free_descriptors(fd), XTRACT_SUCCESS);
 }
@@ -226,6 +228,8 @@ UTEST(dispatch, slots_map_to_the_expected_function)
     ASSERT_TRUE(xtract[XTRACT_MOVING_AVERAGE] == xtract_moving_average);
     ASSERT_TRUE(xtract[XTRACT_MOVING_VARIANCE] == xtract_moving_variance);
     ASSERT_TRUE(xtract[XTRACT_MOVING_STANDARD_DEVIATION] == xtract_moving_standard_deviation);
+    ASSERT_TRUE(xtract[XTRACT_MOVING_MAX] == xtract_moving_max);
+    ASSERT_TRUE(xtract[XTRACT_MOVING_MIN] == xtract_moving_min);
 }
 
 /* ===== Descriptor conformance ===== */

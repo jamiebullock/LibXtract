@@ -1163,3 +1163,59 @@ int xtract_moving_standard_deviation(const double *data, const int N, const void
 
     return XTRACT_SUCCESS;
 }
+
+static int moving_extremum(const double *data, const int N, const void *argv, double *result, const int largest)
+{
+    const int window = moving_window(N, argv, 1);
+    int *deque;
+    int head = 0;
+    int count = 0;
+    int n, back;
+
+    if (window == 0)
+        return XTRACT_ARGUMENT_ERROR;
+
+    deque = (int *)malloc((size_t)window * sizeof(int));
+
+    if (deque == NULL)
+        return XTRACT_MALLOC_FAILED;
+
+    for (n = 0; n < N; n++)
+    {
+        if (count > 0 && deque[head] == n - window)
+        {
+            head = (head + 1) % window;
+            count--;
+        }
+
+        while (count > 0)
+        {
+            back = deque[(head + count - 1) % window];
+
+            if (largest ? data[back] > data[n] : data[back] < data[n])
+                break;
+
+            count--;
+        }
+
+        deque[(head + count) % window] = n;
+        count++;
+
+        if (n >= window - 1)
+            result[n - window + 1] = data[deque[head]];
+    }
+
+    free(deque);
+
+    return XTRACT_SUCCESS;
+}
+
+int xtract_moving_max(const double *data, const int N, const void *argv, double *result)
+{
+    return moving_extremum(data, N, argv, result, 1);
+}
+
+int xtract_moving_min(const double *data, const int N, const void *argv, double *result)
+{
+    return moving_extremum(data, N, argv, result, 0);
+}

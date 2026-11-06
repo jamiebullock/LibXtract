@@ -49,6 +49,13 @@ static void caller_moving_average(const double *data, int N, int window, double 
         xtract_mean(data + i, window, NULL, &result[i]);
 }
 
+static void caller_moving_max(const double *data, int N, int window, double *result)
+{
+    int i;
+    for (i = 0; i <= N - window; i++)
+        xtract_highest_value(data + i, window, NULL, &result[i]);
+}
+
 static void caller_moving_variance(const double *data, int N, int window, double *result)
 {
     int i;
@@ -79,6 +86,9 @@ MOVING_BENCH(moving_average, 16384, 512)
 MOVING_BENCH(moving_variance, 4096, 64)
 MOVING_BENCH(moving_variance, 4096, 256)
 MOVING_BENCH(moving_variance, 16384, 512)
+MOVING_BENCH(moving_max, 4096, 64)
+MOVING_BENCH(moving_max, 4096, 256)
+MOVING_BENCH(moving_max, 16384, 512)
 
 UBENCH_STATE();
 

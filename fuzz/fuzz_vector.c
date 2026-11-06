@@ -72,6 +72,8 @@ enum
     FZ_MOVING_AVERAGE,
     FZ_MOVING_VARIANCE,
     FZ_MOVING_STANDARD_DEVIATION,
+    FZ_MOVING_MAX,
+    FZ_MOVING_MIN,
     FZ_N_FEATURES
 };
 
@@ -132,6 +134,8 @@ static int input_length(int feature, int n)
     case FZ_MOVING_AVERAGE:
     case FZ_MOVING_VARIANCE:
     case FZ_MOVING_STANDARD_DEVIATION:
+    case FZ_MOVING_MAX:
+    case FZ_MOVING_MIN:
         return n;
     default:
         return VEC_N;
@@ -309,6 +313,18 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     {
         int window = clamp_int(fz[0], -1, VEC_N + 1);
         xtract_moving_standard_deviation(input, n, maybe_null(null_argv, &window), result);
+        break;
+    }
+    case FZ_MOVING_MAX:
+    {
+        int window = clamp_int(fz[0], -1, VEC_N + 1);
+        xtract_moving_max(input, n, maybe_null(null_argv, &window), result);
+        break;
+    }
+    case FZ_MOVING_MIN:
+    {
+        int window = clamp_int(fz[0], -1, VEC_N + 1);
+        xtract_moving_min(input, n, maybe_null(null_argv, &window), result);
         break;
     }
     default:

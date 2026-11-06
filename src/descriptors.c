@@ -97,6 +97,8 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             break;
         case XTRACT_MOVING_SUM:
         case XTRACT_MOVING_AVERAGE:
+        case XTRACT_MOVING_MAX:
+        case XTRACT_MOVING_MIN:
             *argv_min = 1;
             *argv_max = XTRACT_UNBOUNDED_MAX;
             *argv_def = XTRACT_NO_DEFAULT;
@@ -404,6 +406,8 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_MOVING_AVERAGE:
         case XTRACT_MOVING_VARIANCE:
         case XTRACT_MOVING_STANDARD_DEVIATION:
+        case XTRACT_MOVING_MAX:
+        case XTRACT_MOVING_MIN:
             *data_format = XTRACT_ARBITRARY_SERIES;
             break;
         case XTRACT_SPECTRAL_MEAN:
@@ -560,6 +564,8 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_MOVING_AVERAGE:
         case XTRACT_MOVING_VARIANCE:
         case XTRACT_MOVING_STANDARD_DEVIATION:
+        case XTRACT_MOVING_MAX:
+        case XTRACT_MOVING_MIN:
             *data_unit = XTRACT_UNIT_ANY;
             break;
         case XTRACT_SPECTRAL_MEAN:
@@ -858,6 +864,20 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             copy_name(p_name, "Moving Standard Deviation");
             copy_desc(desc, "Extract the standard deviation of a series over a sliding window");
             copy_desc(p_desc, "Extract the standard deviation of a series over a sliding window");
+            copy_author(author, "");
+            break;
+        case XTRACT_MOVING_MAX:
+            copy_name(name, "moving_max");
+            copy_name(p_name, "Moving Maximum");
+            copy_desc(desc, "Extract the largest value of a series over a sliding window");
+            copy_desc(p_desc, "Extract the largest value of a series over a sliding window");
+            copy_author(author, "");
+            break;
+        case XTRACT_MOVING_MIN:
+            copy_name(name, "moving_min");
+            copy_name(p_name, "Moving Minimum");
+            copy_desc(desc, "Extract the smallest value of a series over a sliding window");
+            copy_desc(p_desc, "Extract the smallest value of a series over a sliding window");
             copy_author(author, "");
             break;
         case XTRACT_MFCC:
@@ -1258,6 +1278,8 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_MOVING_AVERAGE:
         case XTRACT_MOVING_VARIANCE:
         case XTRACT_MOVING_STANDARD_DEVIATION:
+        case XTRACT_MOVING_MAX:
+        case XTRACT_MOVING_MIN:
             *argc = 1;
             *argv_type = XTRACT_INT;
             break;
@@ -1385,6 +1407,8 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_MOVING_AVERAGE:
         case XTRACT_MOVING_VARIANCE:
         case XTRACT_MOVING_STANDARD_DEVIATION:
+        case XTRACT_MOVING_MAX:
+        case XTRACT_MOVING_MIN:
             *is_scalar = XTRACT_FALSE;
             break;
         default:
@@ -1627,6 +1651,8 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             case XTRACT_MOVING_AVERAGE:
             case XTRACT_MOVING_VARIANCE:
             case XTRACT_MOVING_STANDARD_DEVIATION:
+            case XTRACT_MOVING_MAX:
+            case XTRACT_MOVING_MIN:
                 *result_format = XTRACT_ARBITRARY_SERIES;
                 *result_unit = XTRACT_UNIT_ANY;
                 break;

@@ -2747,3 +2747,111 @@ UTEST(vector, moving_standard_deviation_rejects_a_window_below_2_and_leaves_resu
     ASSERT_EQ(xtract_moving_standard_deviation(data, 4, &window, result), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(result[0], -1.0);
 }
+
+/* ===== xtract_moving_max / moving_min ===== */
+
+UTEST(vector, moving_max_and_min_of_a_mixed_series_over_a_window_of_3)
+{
+    double data[7] = {1.0, 3.0, 2.0, 5.0, 4.0, 0.0, 6.0};
+    double expected_max[5] = {3.0, 5.0, 5.0, 5.0, 6.0};
+    double expected_min[5] = {1.0, 2.0, 2.0, 0.0, 0.0};
+    double result[5];
+    int window = 3;
+    int i;
+
+    ASSERT_EQ(xtract_moving_max(data, 7, &window, result), XTRACT_SUCCESS);
+    for (i = 0; i < 5; i++)
+        ASSERT_EQ(result[i], expected_max[i]);
+    ASSERT_EQ(xtract_moving_min(data, 7, &window, result), XTRACT_SUCCESS);
+    for (i = 0; i < 5; i++)
+        ASSERT_EQ(result[i], expected_min[i]);
+}
+
+UTEST(vector, moving_max_of_a_falling_series_drops_each_value_as_it_leaves_the_window)
+{
+    double data[5] = {5.0, 4.0, 3.0, 2.0, 1.0};
+    double result[4];
+    int window = 2;
+    int i;
+
+    ASSERT_EQ(xtract_moving_max(data, 5, &window, result), XTRACT_SUCCESS);
+    for (i = 0; i < 4; i++)
+        ASSERT_EQ(result[i], data[i]);
+    ASSERT_EQ(xtract_moving_min(data, 5, &window, result), XTRACT_SUCCESS);
+    for (i = 0; i < 4; i++)
+        ASSERT_EQ(result[i], data[i + 1]);
+}
+
+UTEST(vector, moving_max_of_a_rising_series_follows_the_newest_value)
+{
+    double data[5] = {1.0, 2.0, 3.0, 4.0, 5.0};
+    double result[3];
+    int window = 3;
+    int i;
+
+    ASSERT_EQ(xtract_moving_max(data, 5, &window, result), XTRACT_SUCCESS);
+    for (i = 0; i < 3; i++)
+        ASSERT_EQ(result[i], data[i + 2]);
+    ASSERT_EQ(xtract_moving_min(data, 5, &window, result), XTRACT_SUCCESS);
+    for (i = 0; i < 3; i++)
+        ASSERT_EQ(result[i], data[i]);
+}
+
+UTEST(vector, moving_max_and_min_match_the_block_features_on_every_window)
+{
+    double data[12] = {3.0, -1.5, 4.25, 0.0, 2.0, 9.5, -6.0, 1.0, 1.0, 7.0, -2.5, 3.0};
+    double result[12];
+    double block;
+    double below_all = -100.0;
+    int window;
+    int i;
+
+    for (window = 1; window <= 12; window++)
+    {
+        ASSERT_EQ(xtract_moving_max(data, 12, &window, result), XTRACT_SUCCESS);
+        for (i = 0; i <= 12 - window; i++)
+        {
+            ASSERT_EQ(xtract_highest_value(data + i, window, NULL, &block), XTRACT_SUCCESS);
+            ASSERT_EQ(result[i], block);
+        }
+        ASSERT_EQ(xtract_moving_min(data, 12, &window, result), XTRACT_SUCCESS);
+        for (i = 0; i <= 12 - window; i++)
+        {
+            ASSERT_EQ(xtract_lowest_value(data + i, window, &below_all, &block), XTRACT_SUCCESS);
+            ASSERT_EQ(result[i], block);
+        }
+    }
+}
+
+UTEST(vector, moving_max_over_a_window_of_n_is_the_overall_maximum)
+{
+    double data[5] = {1.0, 7.0, 3.0, 4.0, 5.0};
+    double result[2] = {-1.0, -1.0};
+    int window = 5;
+
+    ASSERT_EQ(xtract_moving_max(data, 5, &window, result), XTRACT_SUCCESS);
+    ASSERT_EQ(result[0], 7.0);
+    ASSERT_EQ(result[1], -1.0);
+    ASSERT_EQ(xtract_moving_min(data, 5, &window, result), XTRACT_SUCCESS);
+    ASSERT_EQ(result[0], 1.0);
+    ASSERT_EQ(result[1], -1.0);
+}
+
+UTEST(vector, moving_max_and_min_reject_a_missing_or_out_of_range_window_and_leave_result_untouched)
+{
+    double data[4] = {1.0, 2.0, 3.0, 4.0};
+    double result[4];
+    int window;
+
+    fill_sentinel(result, 4);
+    ASSERT_EQ(xtract_moving_max(data, 4, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_moving_min(data, 4, NULL, result), XTRACT_ARGUMENT_ERROR);
+    window = 0;
+    ASSERT_EQ(xtract_moving_max(data, 4, &window, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_moving_min(data, 4, &window, result), XTRACT_ARGUMENT_ERROR);
+    window = 5;
+    ASSERT_EQ(xtract_moving_max(data, 4, &window, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_moving_min(data, 4, &window, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result[0], -1.0);
+    ASSERT_EQ(result[3], -1.0);
+}
