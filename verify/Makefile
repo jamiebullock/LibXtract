@@ -17,7 +17,9 @@
 # transform.
 # math_stub.c does the same for pow, whose CBMC model needs a floating-point
 # remainder the SMT backend cannot encode, and cbrt, which CBMC has no model
-# of: both return any value.
+# of: both return any value. stdlib_stub.c does the same for qsort, which
+# CBMC has no model of: it calls the comparator on each adjacent pair and
+# then fills the buffer with arbitrary values.
 # Requires cbmc, goto-cc and goto-instrument, and bitwuzla on the PATH.
 CBMC ?= cbmc
 GOTO_CC ?= goto-cc
@@ -44,7 +46,7 @@ PROOF_DIR = .proofs
 
 LIB_SRC := $(filter-out ../src/ooura/fftsg.c, \
 	$(wildcard ../src/*.c ../src/ooura/*.c ../src/c-ringbuf/*.c ../src/dywapitchtrack/*.c))
-HARNESS_SRC := $(wildcard verify_*.c) fft_stub.c math_stub.c
+HARNESS_SRC := $(wildcard verify_*.c) fft_stub.c math_stub.c stdlib_stub.c
 HEADERS := verify.h $(wildcard ../include/xtract/*.h ../src/*.h ../src/ooura/*.h \
 	../src/c-ringbuf/*.h ../src/dywapitchtrack/*.h)
 

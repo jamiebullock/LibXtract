@@ -2613,3 +2613,156 @@ UTEST(scalar, peak_sets_the_result_to_zero_when_there_is_no_peak)
     ASSERT_EQ(xtract_peak(data, 4, &threshold, &result), XTRACT_NO_RESULT);
     ASSERT_EQ(result, 0.0);
 }
+
+static void insertion_sort(double *values, int n)
+{
+    double key;
+    int i, j;
+
+    for (i = 1; i < n; i++)
+    {
+        key = values[i];
+        for (j = i - 1; j >= 0 && values[j] > key; j--)
+            values[j + 1] = values[j];
+        values[j + 1] = key;
+    }
+}
+
+UTEST(scalar, median_of_an_odd_length_series_is_the_middle_sorted_value)
+{
+    double data[5] = {4.0, 1.0, 5.0, 3.0, 2.0};
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_median(data, 5, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(result, 3.0);
+    ASSERT_EQ(data[0], 4.0);
+    ASSERT_EQ(data[4], 2.0);
+}
+
+UTEST(scalar, median_of_an_even_length_series_is_the_mean_of_the_two_middle_values)
+{
+    double data[6] = {9.5, -6.0, 1.0, 3.0, -1.5, 4.25};
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_median(data, 6, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(result, 2.0);
+}
+
+UTEST(scalar, median_of_two_values_at_the_double_limit_does_not_overflow)
+{
+    double data[2] = {DBL_MAX, DBL_MAX};
+    double result = 0.0;
+
+    ASSERT_EQ(xtract_median(data, 2, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(result, DBL_MAX);
+    data[0] = -DBL_MAX;
+    data[1] = -DBL_MAX;
+    ASSERT_EQ(xtract_median(data, 2, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(result, -DBL_MAX);
+}
+
+UTEST(scalar, median_of_a_single_value_is_that_value)
+{
+    double data[1] = {-7.25};
+    double result = 0.0;
+
+    ASSERT_EQ(xtract_median(data, 1, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(result, -7.25);
+}
+
+UTEST(scalar, median_orders_a_nan_element_after_every_number)
+{
+    double data[5] = {2.0, NAN, 1.0, 4.0, 3.0};
+    double result = 0.0;
+
+    ASSERT_EQ(xtract_median(data, 5, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(result, 3.0);
+    data[0] = NAN;
+    data[2] = NAN;
+    ASSERT_EQ(xtract_median(data, 5, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_TRUE(isnan(result));
+}
+
+UTEST(scalar, median_matches_a_sorted_copy_at_every_length)
+{
+    double data[12] = {3.0, -1.5, 4.25, 0.0, 2.0, 9.5, -6.0, 1.0, 1.0, 7.0, -2.5, 3.0};
+    double sorted[12];
+    double result, expected;
+    int n;
+
+    for (n = 1; n <= 12; n++)
+    {
+        memcpy(sorted, data, n * sizeof(double));
+        insertion_sort(sorted, n);
+        expected = n & 1 ? sorted[n / 2] : 0.5 * (sorted[n / 2 - 1] + sorted[n / 2]);
+        ASSERT_EQ(xtract_median(data, n, NULL, &result), XTRACT_SUCCESS);
+        ASSERT_EQ(result, expected);
+    }
+}
+
+UTEST(scalar, median_rejects_an_empty_series_and_sets_the_result_to_zero)
+{
+    double data[1] = {1.0};
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_median(data, 0, NULL, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+}
+
+UTEST(scalar, median_absolute_deviation_of_1_to_5_is_1)
+{
+    double data[5] = {1.0, 2.0, 3.0, 4.0, 5.0};
+    double median = 3.0;
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_median_absolute_deviation(data, 5, &median, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(result, 1.0);
+}
+
+UTEST(scalar, median_absolute_deviation_of_an_even_length_series)
+{
+    double data[4] = {1.0, 2.0, 4.0, 8.0};
+    double median = 3.0;
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_median_absolute_deviation(data, 4, &median, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(result, 1.5);
+}
+
+UTEST(scalar, median_absolute_deviation_of_a_constant_series_is_exactly_zero)
+{
+    double data[4] = {2.5, 2.5, 2.5, 2.5};
+    double median = 2.5;
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_median_absolute_deviation(data, 4, &median, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(result, 0.0);
+}
+
+UTEST(scalar, median_absolute_deviation_is_the_median_of_the_deviations_from_the_median)
+{
+    double data[9] = {3.0, -1.5, 4.25, 0.0, 2.0, 9.5, -6.0, 1.0, 7.0};
+    double deviations[9];
+    double median, expected, result;
+    int i;
+
+    ASSERT_EQ(xtract_median(data, 9, NULL, &median), XTRACT_SUCCESS);
+    for (i = 0; i < 9; i++)
+        deviations[i] = fabs(data[i] - median);
+    ASSERT_EQ(xtract_median(deviations, 9, NULL, &expected), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_median_absolute_deviation(data, 9, &median, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(result, expected);
+}
+
+UTEST(scalar, median_absolute_deviation_rejects_a_missing_median_or_empty_series_and_sets_the_result_to_zero)
+{
+    double data[3] = {1.0, 2.0, 3.0};
+    double median = 2.0;
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_median_absolute_deviation(data, 3, NULL, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    result = -1.0;
+    ASSERT_EQ(xtract_median_absolute_deviation(data, 0, &median, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+}

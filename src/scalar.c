@@ -1824,3 +1824,86 @@ int xtract_peak(const double *data, const int N, const void *argv, double *resul
 
     return XTRACT_SUCCESS;
 }
+
+static int compare_doubles(const void *a, const void *b)
+{
+    const double x = *(const double *)a;
+    const double y = *(const double *)b;
+
+    return (x > y) - (x < y);
+}
+
+static int is_nan(const double x)
+{
+    return x != x;
+}
+
+static double middle_of_sorted(const double *sorted, const int N)
+{
+    if (N & 1)
+        return sorted[N / 2];
+    return 0.5 * sorted[N / 2 - 1] + 0.5 * sorted[N / 2];
+}
+
+static double median_of_values(double *values, const int N)
+{
+    int numbers = 0;
+    int n;
+
+    for (n = 0; n < N; n++)
+    {
+        if (!is_nan(values[n]))
+            values[numbers++] = values[n];
+    }
+    for (n = numbers; n < N; n++)
+        values[n] = NAN;
+    qsort(values, (size_t)numbers, sizeof(double), compare_doubles);
+
+    return middle_of_sorted(values, N);
+}
+
+int xtract_median(const double *data, const int N, const void *argv, double *result)
+{
+    double *sorted;
+
+    if (N < 1)
+    {
+        *result = 0.0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
+
+    sorted = (double *)malloc((size_t)N * sizeof(double));
+    if (sorted == NULL)
+        return XTRACT_MALLOC_FAILED;
+
+    memcpy(sorted, data, (size_t)N * sizeof(double));
+    *result = median_of_values(sorted, N);
+    free(sorted);
+
+    return XTRACT_SUCCESS;
+}
+
+int xtract_median_absolute_deviation(const double *data, const int N, const void *argv, double *result)
+{
+    double *deviations;
+    double median;
+    int n;
+
+    if (N < 1 || argv == NULL)
+    {
+        *result = 0.0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
+
+    median = *(const double *)argv;
+    deviations = (double *)malloc((size_t)N * sizeof(double));
+    if (deviations == NULL)
+        return XTRACT_MALLOC_FAILED;
+
+    for (n = 0; n < N; n++)
+        deviations[n] = fabs(data[n] - median);
+    *result = median_of_values(deviations, N);
+    free(deviations);
+
+    return XTRACT_SUCCESS;
+}

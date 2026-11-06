@@ -75,6 +75,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_DIFFERENCE_VECTOR:
         case XTRACT_AVERAGE_DEVIATION:
             /* case XTRACT_SPECTRAL_AVERAGE_DEVIATION: */
+        case XTRACT_MEDIAN_ABSOLUTE_DEVIATION:
         case XTRACT_LOWEST_VALUE:
         case XTRACT_TONALITY:
         case XTRACT_MFCC:
@@ -300,6 +301,9 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_AVERAGE_DEVIATION:
             *argv_donor = XTRACT_MEAN;
             break;
+        case XTRACT_MEDIAN_ABSOLUTE_DEVIATION:
+            *argv_donor = XTRACT_MEDIAN;
+            break;
         case XTRACT_SPECTRAL_STANDARD_DEVIATION:
             *argv_donor = XTRACT_SPECTRAL_VARIANCE;
             break;
@@ -401,6 +405,8 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_MEAN:
         case XTRACT_VARIANCE:
         case XTRACT_AVERAGE_DEVIATION:
+        case XTRACT_MEDIAN:
+        case XTRACT_MEDIAN_ABSOLUTE_DEVIATION:
         case XTRACT_SKEWNESS:
         case XTRACT_KURTOSIS:
         case XTRACT_LOWEST_VALUE:
@@ -516,6 +522,8 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_VARIANCE:
         case XTRACT_STANDARD_DEVIATION:
         case XTRACT_AVERAGE_DEVIATION:
+        case XTRACT_MEDIAN:
+        case XTRACT_MEDIAN_ABSOLUTE_DEVIATION:
         case XTRACT_SKEWNESS:
         case XTRACT_KURTOSIS:
         case XTRACT_LOWEST_VALUE:
@@ -905,6 +913,20 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             copy_desc(p_desc, "Extract the exponentially weighted moving variance of a series");
             copy_author(author, "");
             break;
+        case XTRACT_MEDIAN:
+            copy_name(name, "median");
+            copy_name(p_name, "Median");
+            copy_desc(desc, "Extract the median of an input vector");
+            copy_desc(p_desc, "Extract the median of a range of values");
+            copy_author(author, "");
+            break;
+        case XTRACT_MEDIAN_ABSOLUTE_DEVIATION:
+            copy_name(name, "median_absolute_deviation");
+            copy_name(p_name, "Median Absolute Deviation");
+            copy_desc(desc, "Extract the median absolute deviation of an input vector");
+            copy_desc(p_desc, "Extract the median absolute deviation of a range of values");
+            copy_author(author, "");
+            break;
         case XTRACT_MFCC:
             copy_name(name, "mfcc");
             copy_name(p_name, "Mel-Frequency Cepstral Coefficients");
@@ -1243,6 +1265,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_VARIANCE:
         case XTRACT_STANDARD_DEVIATION:
         case XTRACT_AVERAGE_DEVIATION:
+        case XTRACT_MEDIAN_ABSOLUTE_DEVIATION:
         case XTRACT_SPECTRAL_VARIANCE:
         case XTRACT_SPECTRAL_STANDARD_DEVIATION:
         case XTRACT_SPREAD:
@@ -1330,6 +1353,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *argv_type = XTRACT_FLOAT;
             break;
         case XTRACT_MEAN:
+        case XTRACT_MEDIAN:
         case XTRACT_SPECTRAL_MEAN:
         case XTRACT_SPECTRAL_CENTROID:
         case XTRACT_IRREGULARITY_K:
@@ -1367,6 +1391,8 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_VARIANCE:
         case XTRACT_STANDARD_DEVIATION:
         case XTRACT_AVERAGE_DEVIATION:
+        case XTRACT_MEDIAN:
+        case XTRACT_MEDIAN_ABSOLUTE_DEVIATION:
         case XTRACT_SKEWNESS:
         case XTRACT_KURTOSIS:
         case XTRACT_SPECTRAL_MEAN:
@@ -1461,6 +1487,8 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_VARIANCE:
         case XTRACT_STANDARD_DEVIATION:
         case XTRACT_AVERAGE_DEVIATION:
+        case XTRACT_MEDIAN:
+        case XTRACT_MEDIAN_ABSOLUTE_DEVIATION:
         case XTRACT_SKEWNESS:
         case XTRACT_KURTOSIS:
         case XTRACT_SPECTRAL_MEAN:
@@ -1539,6 +1567,8 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             case XTRACT_VARIANCE:
             case XTRACT_STANDARD_DEVIATION:
             case XTRACT_AVERAGE_DEVIATION:
+            case XTRACT_MEDIAN:
+            case XTRACT_MEDIAN_ABSOLUTE_DEVIATION:
             case XTRACT_SKEWNESS:
             case XTRACT_KURTOSIS:
             case XTRACT_RMS_AMPLITUDE:
