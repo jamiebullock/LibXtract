@@ -47,6 +47,7 @@ UTEST(descriptors, make_descriptors_scalar_vector_classification)
     ASSERT_EQ(fd[XTRACT_MEDIAN_ABSOLUTE_DEVIATION].is_scalar, XTRACT_TRUE);
     ASSERT_EQ(fd[XTRACT_HJORTH_COMPLEXITY].is_scalar, XTRACT_TRUE);
     ASSERT_EQ(fd[XTRACT_TIME_REVERSAL_ASYMMETRY].is_scalar, XTRACT_TRUE);
+    ASSERT_EQ(fd[XTRACT_SPECTRAL_ENTROPY].is_scalar, XTRACT_TRUE);
     ASSERT_EQ(xtract_free_descriptors(fd), XTRACT_SUCCESS);
 }
 
@@ -254,6 +255,14 @@ UTEST(descriptors, appended_features_are_fully_described)
     ASSERT_EQ(fd[XTRACT_TIME_REVERSAL_ASYMMETRY].result.scalar.unit, XTRACT_UNIT_ANY);
     ASSERT_EQ(fd[XTRACT_TIME_REVERSAL_ASYMMETRY].is_delta, XTRACT_FALSE);
 
+    ASSERT_EQ(fd[XTRACT_SPECTRAL_ENTROPY].argc, 0);
+    ASSERT_EQ(fd[XTRACT_SPECTRAL_ENTROPY].data.format, XTRACT_SPECTRAL_MAGNITUDES);
+    ASSERT_EQ(fd[XTRACT_SPECTRAL_ENTROPY].data.unit, XTRACT_UNIT_ANY);
+    ASSERT_EQ(fd[XTRACT_SPECTRAL_ENTROPY].result.scalar.unit, XTRACT_UNIT_NONE);
+    CHECK_NEAR(fd[XTRACT_SPECTRAL_ENTROPY].result.scalar.min, 0.0, EPSILON);
+    CHECK_REL(fd[XTRACT_SPECTRAL_ENTROPY].result.scalar.max, 1.0, EPSILON);
+    ASSERT_EQ(fd[XTRACT_SPECTRAL_ENTROPY].is_delta, XTRACT_FALSE);
+
     ASSERT_EQ(xtract_free_descriptors(fd), XTRACT_SUCCESS);
 }
 
@@ -295,6 +304,7 @@ UTEST(dispatch, slots_map_to_the_expected_function)
     ASSERT_TRUE(xtract[XTRACT_HJORTH_MOBILITY] == xtract_hjorth_mobility);
     ASSERT_TRUE(xtract[XTRACT_HJORTH_COMPLEXITY] == xtract_hjorth_complexity);
     ASSERT_TRUE(xtract[XTRACT_TIME_REVERSAL_ASYMMETRY] == xtract_time_reversal_asymmetry);
+    ASSERT_TRUE(xtract[XTRACT_SPECTRAL_ENTROPY] == xtract_spectral_entropy);
 }
 
 /* ===== Descriptor conformance ===== */
@@ -338,6 +348,7 @@ static int conf_min_n(const xtract_function_descriptor_t *d)
     case XTRACT_MOVING_VARIANCE:
     case XTRACT_MOVING_STANDARD_DEVIATION:
     case XTRACT_HJORTH_MOBILITY:
+    case XTRACT_SPECTRAL_ENTROPY:
         return 2;
     case XTRACT_SPECTRUM:
     case XTRACT_AUTOCORRELATION_FFT:

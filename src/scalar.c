@@ -2020,3 +2020,39 @@ int xtract_time_reversal_asymmetry(const double *data, const int N, const void *
 
     return XTRACT_SUCCESS;
 }
+
+int xtract_spectral_entropy(const double *data, const int N, const void *argv, double *result)
+{
+    int n;
+    double total = 0.0;
+    double weighted_log = 0.0;
+
+    if (N < 2)
+    {
+        *result = 0.0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
+
+    for (n = 0; n < N; n++)
+    {
+        if (data[n] > 0.0)
+        {
+            total += data[n];
+            weighted_log += data[n] * log(data[n]);
+        }
+    }
+
+    if (total == 0.0)
+    {
+        *result = 0.0;
+        return XTRACT_NO_RESULT;
+    }
+
+    *result = (log(total) - weighted_log / total) / log((double)N);
+    if (*result < 0.0)
+        *result = 0.0;
+    if (*result > 1.0)
+        *result = 1.0;
+
+    return XTRACT_SUCCESS;
+}

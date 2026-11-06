@@ -522,6 +522,15 @@ extern "C"
      */
     int xtract_time_reversal_asymmetry(const double *data, const int N, const void *argv, double *result);
 
+    /** \brief Extract the spectral entropy of a spectrum: the Shannon entropy of the spectrum normalised to sum to 1, divided by the entropy of a flat spectrum of the same length
+     *
+     * \param *data: a pointer to the first element in an array of doubles representing the coefficients of a spectrum, such as the first half of the array pointed to by *result from xtract_spectrum(); a power spectrum gives the usual definition, and a bin that is not positive counts as empty
+     * \param N: the number of *data array elements to be considered, at least 2
+     * \param *argv: not used
+     * \param *result: the spectral entropy of N values from the array pointed to by *data, between 0 for a single occupied bin and 1 for a flat spectrum, or 0 with no result if no bin is positive
+     */
+    int xtract_spectral_entropy(const double *data, const int N, const void *argv, double *result);
+
     /** @} */
 
 #ifdef __cplusplus
