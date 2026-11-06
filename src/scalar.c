@@ -2174,3 +2174,81 @@ int xtract_higuchi_fractal_dimension(const double *data, const int N, const void
 
     return XTRACT_SUCCESS;
 }
+
+static int ordinal_pattern(const double *window, const int order, const int delay)
+{
+    int ranks[8];
+    int i, j, smaller, weight, code;
+
+    for (i = 0; i < order; i++)
+    {
+        ranks[i] = i;
+        for (j = i; j > 0 && window[ranks[j] * delay] < window[ranks[j - 1] * delay]; j--)
+        {
+            smaller = ranks[j];
+            ranks[j] = ranks[j - 1];
+            ranks[j - 1] = smaller;
+        }
+    }
+
+    code = 0;
+    weight = 1;
+    for (i = order - 1; i >= 0; i--)
+    {
+        smaller = 0;
+        for (j = i + 1; j < order; j++)
+        {
+            if (ranks[j] < ranks[i])
+                smaller++;
+        }
+        code += smaller * weight;
+        weight *= order - i;
+    }
+
+    return code;
+}
+
+int xtract_permutation_entropy(const double *data, const int N, const void *argv, double *result)
+{
+    const int *args;
+    int order, delay, windows, patterns, n, i;
+    int *counts;
+    double entropy = 0.0;
+
+    if (argv == NULL)
+    {
+        *result = 0.0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
+
+    args = (const int *)argv;
+    order = args[0];
+    delay = args[1];
+    if (order < 2 || order > 8 || delay < 1 || N < 1 || delay > (N - 1) / (order - 1))
+    {
+        *result = 0.0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
+
+    patterns = 1;
+    for (i = 2; i <= order; i++)
+        patterns *= i;
+    counts = (int *)calloc((size_t)patterns, sizeof(int));
+    if (counts == NULL)
+        return XTRACT_MALLOC_FAILED;
+
+    windows = N - (order - 1) * delay;
+    for (n = 0; n < windows; n++)
+        counts[ordinal_pattern(data + n, order, delay)]++;
+    for (n = 0; n < windows; n++)
+        entropy -= log((double)counts[ordinal_pattern(data + n, order, delay)] / windows) / windows;
+    free(counts);
+
+    *result = entropy / log((double)patterns);
+    if (*result < 0.0)
+        *result = 0.0;
+    if (*result > 1.0)
+        *result = 1.0;
+
+    return XTRACT_SUCCESS;
+}

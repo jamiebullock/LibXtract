@@ -558,6 +558,15 @@ extern "C"
      */
     int xtract_higuchi_fractal_dimension(const double *data, const int N, const void *argv, double *result);
 
+    /** \brief Extract the permutation entropy of an input vector: the Shannon entropy of the ordinal patterns of its windows, divided by the entropy of every pattern being equally likely
+     *
+     * \param *data: a pointer to the first element in an array of doubles
+     * \param N: the number of elements to be considered, at least (order - 1) * delay + 1
+     * \param *argv: a pointer to an array of two ints: the order, the number of elements in a pattern, from 2 to 8; and the delay, the distance between consecutive elements of a pattern, at least 1
+     * \param *result: the permutation entropy of N values from the array pointed to by *data, between 0 when every window has the same pattern and 1 when every pattern is equally frequent; equal values within a window take the order of their positions
+     */
+    int xtract_permutation_entropy(const double *data, const int N, const void *argv, double *result);
+
     /** @} */
 
 #ifdef __cplusplus

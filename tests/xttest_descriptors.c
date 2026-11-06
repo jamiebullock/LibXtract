@@ -49,6 +49,7 @@ UTEST(descriptors, make_descriptors_scalar_vector_classification)
     ASSERT_EQ(fd[XTRACT_TIME_REVERSAL_ASYMMETRY].is_scalar, XTRACT_TRUE);
     ASSERT_EQ(fd[XTRACT_SPECTRAL_ENTROPY].is_scalar, XTRACT_TRUE);
     ASSERT_EQ(fd[XTRACT_HIGUCHI_FRACTAL_DIMENSION].is_scalar, XTRACT_TRUE);
+    ASSERT_EQ(fd[XTRACT_PERMUTATION_ENTROPY].is_scalar, XTRACT_TRUE);
     ASSERT_EQ(xtract_free_descriptors(fd), XTRACT_SUCCESS);
 }
 
@@ -279,6 +280,21 @@ UTEST(descriptors, appended_features_are_fully_described)
     CHECK_REL(fd[XTRACT_HIGUCHI_FRACTAL_DIMENSION].argv.min[0], 2.0, EPSILON);
     CHECK_REL(fd[XTRACT_HIGUCHI_FRACTAL_DIMENSION].argv.def[0], 10.0, EPSILON);
 
+    ASSERT_EQ(fd[XTRACT_PERMUTATION_ENTROPY].argc, 2);
+    ASSERT_EQ(fd[XTRACT_PERMUTATION_ENTROPY].argv.type, XTRACT_INT);
+    CHECK_REL(fd[XTRACT_PERMUTATION_ENTROPY].argv.min[0], 2.0, EPSILON);
+    CHECK_REL(fd[XTRACT_PERMUTATION_ENTROPY].argv.max[0], 8.0, EPSILON);
+    CHECK_REL(fd[XTRACT_PERMUTATION_ENTROPY].argv.def[0], 3.0, EPSILON);
+    CHECK_REL(fd[XTRACT_PERMUTATION_ENTROPY].argv.min[1], 1.0, EPSILON);
+    ASSERT_EQ(fd[XTRACT_PERMUTATION_ENTROPY].argv.max[1], XTRACT_UNBOUNDED_MAX);
+    CHECK_REL(fd[XTRACT_PERMUTATION_ENTROPY].argv.def[1], 1.0, EPSILON);
+    ASSERT_EQ(fd[XTRACT_PERMUTATION_ENTROPY].data.format, XTRACT_ARBITRARY_SERIES);
+    ASSERT_EQ(fd[XTRACT_PERMUTATION_ENTROPY].data.unit, XTRACT_UNIT_ANY);
+    ASSERT_EQ(fd[XTRACT_PERMUTATION_ENTROPY].result.scalar.unit, XTRACT_UNIT_NONE);
+    CHECK_NEAR(fd[XTRACT_PERMUTATION_ENTROPY].result.scalar.min, 0.0, EPSILON);
+    CHECK_REL(fd[XTRACT_PERMUTATION_ENTROPY].result.scalar.max, 1.0, EPSILON);
+    ASSERT_EQ(fd[XTRACT_PERMUTATION_ENTROPY].is_delta, XTRACT_FALSE);
+
     ASSERT_EQ(xtract_free_descriptors(fd), XTRACT_SUCCESS);
 }
 
@@ -324,6 +340,7 @@ UTEST(dispatch, slots_map_to_the_expected_function)
     ASSERT_TRUE(xtract[XTRACT_PETROSIAN_FRACTAL_DIMENSION] == xtract_petrosian_fractal_dimension);
     ASSERT_TRUE(xtract[XTRACT_KATZ_FRACTAL_DIMENSION] == xtract_katz_fractal_dimension);
     ASSERT_TRUE(xtract[XTRACT_HIGUCHI_FRACTAL_DIMENSION] == xtract_higuchi_fractal_dimension);
+    ASSERT_TRUE(xtract[XTRACT_PERMUTATION_ENTROPY] == xtract_permutation_entropy);
 }
 
 /* ===== Descriptor conformance ===== */
@@ -359,6 +376,7 @@ static int conf_min_n(const xtract_function_descriptor_t *d)
     case XTRACT_SMOOTHNESS:
     case XTRACT_HJORTH_COMPLEXITY:
     case XTRACT_TIME_REVERSAL_ASYMMETRY:
+    case XTRACT_PERMUTATION_ENTROPY:
         return 3;
     case XTRACT_IRREGULARITY_J:
     case XTRACT_VARIANCE:
@@ -390,6 +408,8 @@ static int conf_call_n(const xtract_function_descriptor_t *d)
     {
     case XTRACT_SUBBANDS:
         return 8;
+    case XTRACT_PERMUTATION_ENTROPY:
+        return 16;
     case XTRACT_FAILSAFE_F0:
     case XTRACT_WAVELET_F0:
         return CONF_N;
