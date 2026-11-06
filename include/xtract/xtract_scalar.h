@@ -531,6 +531,33 @@ extern "C"
      */
     int xtract_spectral_entropy(const double *data, const int N, const void *argv, double *result);
 
+    /** \brief Extract the Petrosian fractal dimension of an input vector, from the number of sign changes in its first difference
+     *
+     * \param *data: a pointer to the first element in an array of doubles
+     * \param N: the number of elements to be considered, at least 2
+     * \param *argv: not used
+     * \param *result: the Petrosian fractal dimension of N values from the array pointed to by *data, 1 for a series whose difference never changes sign
+     */
+    int xtract_petrosian_fractal_dimension(const double *data, const int N, const void *argv, double *result);
+
+    /** \brief Extract the Katz fractal dimension of an input vector, from the length of its path and its greatest distance from the first element
+     *
+     * \param *data: a pointer to the first element in an array of doubles
+     * \param N: the number of elements to be considered, at least 2
+     * \param *argv: not used
+     * \param *result: the Katz fractal dimension of N values from the array pointed to by *data, or 0 with no result if the values are all equal or the greatest distance from the first element equals the mean step
+     */
+    int xtract_katz_fractal_dimension(const double *data, const int N, const void *argv, double *result);
+
+    /** \brief Extract the Higuchi fractal dimension of an input vector: the slope of the log of its curve length against the log of the scale, over scales 1 to k_max
+     *
+     * \param *data: a pointer to the first element in an array of doubles
+     * \param N: the number of elements to be considered, at least twice k_max
+     * \param *argv: a pointer to an int holding k_max, the largest scale, at least 2
+     * \param *result: the Higuchi fractal dimension of N values from the array pointed to by *data, or 0 with no result if the curve length at some scale is 0
+     */
+    int xtract_higuchi_fractal_dimension(const double *data, const int N, const void *argv, double *result);
+
     /** @} */
 
 #ifdef __cplusplus

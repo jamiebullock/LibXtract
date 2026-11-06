@@ -58,7 +58,9 @@ static const int enum_features[] = {
     XTRACT_MIDICENT, XTRACT_PEAK, XTRACT_MEDIAN,
     XTRACT_MEDIAN_ABSOLUTE_DEVIATION, XTRACT_HJORTH_ACTIVITY,
     XTRACT_HJORTH_MOBILITY, XTRACT_HJORTH_COMPLEXITY,
-    XTRACT_TIME_REVERSAL_ASYMMETRY, XTRACT_SPECTRAL_ENTROPY};
+    XTRACT_TIME_REVERSAL_ASYMMETRY, XTRACT_SPECTRAL_ENTROPY,
+    XTRACT_PETROSIAN_FRACTAL_DIMENSION, XTRACT_KATZ_FRACTAL_DIMENSION,
+    XTRACT_HIGUCHI_FRACTAL_DIMENSION};
 
 #define N_FEATURES ((int)(sizeof(enum_features) / sizeof(enum_features[0])))
 
@@ -132,7 +134,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     memcpy(in, data, (avail < (size_t)n ? avail : (size_t)n) * sizeof(double));
     input = n > 0 ? in : in + 1;
 
-    if (feature == XTRACT_TIME_REVERSAL_ASYMMETRY)
+    if (feature == XTRACT_TIME_REVERSAL_ASYMMETRY || feature == XTRACT_HIGUCHI_FRACTAL_DIMENSION)
     {
         lag = argv[0] >= -1.0 && argv[0] <= (double)MAX_N ? (int)argv[0] : -1;
         (void)fn(input, n, null_argv ? NULL : &lag, result);

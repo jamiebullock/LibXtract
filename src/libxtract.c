@@ -97,4 +97,7 @@ int (*xtract[])(const double *, const int, const void *, double *) =
         xtract_hjorth_mobility,
         xtract_hjorth_complexity,
         xtract_time_reversal_asymmetry,
-        xtract_spectral_entropy};
+        xtract_spectral_entropy,
+        xtract_petrosian_fractal_dimension,
+        xtract_katz_fractal_dimension,
+        xtract_higuchi_fractal_dimension};

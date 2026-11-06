@@ -3059,3 +3059,149 @@ UTEST(scalar, spectral_entropy_rejects_fewer_than_two_bins_and_sets_the_result_t
     ASSERT_EQ(result, 0.0);
     ASSERT_EQ(xtract_spectral_entropy(data, 2, NULL, &result), XTRACT_SUCCESS);
 }
+
+UTEST(scalar, petrosian_fractal_dimension_of_a_line_is_1)
+{
+    double data[6] = {1.0, 2.0, 3.0, 4.0, 5.0, 6.0};
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_petrosian_fractal_dimension(data, 6, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 1.0, EPSILON);
+}
+
+UTEST(scalar, petrosian_fractal_dimension_counts_every_sign_change_of_the_difference)
+{
+    double data[6] = {0.0, 1.0, 0.0, 1.0, 0.0, 1.0};
+    double result = -1.0;
+    double expected = log10(6.0) / (log10(6.0) + log10(6.0 / (6.0 + 0.4 * 4.0)));
+
+    ASSERT_EQ(xtract_petrosian_fractal_dimension(data, 6, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, expected, EPSILON);
+}
+
+UTEST(scalar, petrosian_fractal_dimension_treats_a_zero_difference_as_non_negative)
+{
+    double data[5] = {0.0, 1.0, 1.0, 2.0, 1.0};
+    double result = -1.0;
+    double expected = log10(5.0) / (log10(5.0) + log10(5.0 / (5.0 + 0.4 * 1.0)));
+
+    ASSERT_EQ(xtract_petrosian_fractal_dimension(data, 5, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, expected, EPSILON);
+}
+
+UTEST(scalar, petrosian_fractal_dimension_rejects_fewer_than_two_values_and_sets_the_result_to_zero)
+{
+    double data[2] = {1.0, 2.0};
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_petrosian_fractal_dimension(data, 1, NULL, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    ASSERT_EQ(xtract_petrosian_fractal_dimension(data, 2, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 1.0, EPSILON);
+}
+
+UTEST(scalar, katz_fractal_dimension_matches_the_definition)
+{
+    double data[5] = {0.0, 1.0, 3.0, 2.0, 5.0};
+    double result = -1.0;
+    double expected = log10(4.0) / log10(5.0 / (7.0 / 4.0));
+
+    ASSERT_EQ(xtract_katz_fractal_dimension(data, 5, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, expected, EPSILON);
+}
+
+UTEST(scalar, katz_fractal_dimension_of_a_line_is_1)
+{
+    double data[7] = {-3.0, -1.0, 1.0, 3.0, 5.0, 7.0, 9.0};
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_katz_fractal_dimension(data, 7, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 1.0, EPSILON);
+}
+
+UTEST(scalar, katz_fractal_dimension_has_no_result_for_a_constant_or_a_unit_oscillation)
+{
+    double constant[4] = {2.0, 2.0, 2.0, 2.0};
+    double oscillation[5] = {0.0, 1.0, 0.0, 1.0, 0.0};
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_katz_fractal_dimension(constant, 4, NULL, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
+    result = -1.0;
+    ASSERT_EQ(xtract_katz_fractal_dimension(oscillation, 5, NULL, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
+}
+
+UTEST(scalar, katz_fractal_dimension_rejects_fewer_than_two_values_and_sets_the_result_to_zero)
+{
+    double data[1] = {1.0};
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_katz_fractal_dimension(data, 1, NULL, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+}
+
+UTEST(scalar, higuchi_fractal_dimension_of_a_line_is_1)
+{
+    double data[64];
+    double result = -1.0;
+    int k_max = 8;
+    int i;
+
+    for (i = 0; i < 64; i++)
+        data[i] = 0.5 * i - 3.0;
+    ASSERT_EQ(xtract_higuchi_fractal_dimension(data, 64, &k_max, &result), XTRACT_SUCCESS);
+    CHECK_NEAR(result, 1.0, 1e-9);
+}
+
+UTEST(scalar, higuchi_fractal_dimension_of_a_noise_series_is_close_to_2)
+{
+    double data[4096];
+    double result = -1.0;
+    int k_max = 10;
+    unsigned int state = 12345u;
+    int i;
+
+    for (i = 0; i < 4096; i++)
+    {
+        state = state * 1664525u + 1013904223u;
+        data[i] = (state >> 8) / 16777216.0 - 0.5;
+    }
+    ASSERT_EQ(xtract_higuchi_fractal_dimension(data, 4096, &k_max, &result), XTRACT_SUCCESS);
+    CHECK_NEAR(result, 2.0, 0.05);
+}
+
+UTEST(scalar, higuchi_fractal_dimension_of_a_constant_series_has_no_result)
+{
+    double data[20] = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
+    double result = -1.0;
+    int k_max = 4;
+
+    ASSERT_EQ(xtract_higuchi_fractal_dimension(data, 20, &k_max, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
+}
+
+UTEST(scalar, higuchi_fractal_dimension_rejects_a_missing_or_unusable_k_max_and_sets_the_result_to_zero)
+{
+    double data[10] = {1.0, 3.0, 2.0, 5.0, 4.0, 6.0, 2.0, 7.0, 1.0, 3.0};
+    double result = -1.0;
+    int k_max;
+
+    ASSERT_EQ(xtract_higuchi_fractal_dimension(data, 10, NULL, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    k_max = 1;
+    result = -1.0;
+    ASSERT_EQ(xtract_higuchi_fractal_dimension(data, 10, &k_max, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    k_max = 6;
+    result = -1.0;
+    ASSERT_EQ(xtract_higuchi_fractal_dimension(data, 10, &k_max, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    k_max = 5;
+    ASSERT_EQ(xtract_higuchi_fractal_dimension(data, 10, &k_max, &result), XTRACT_SUCCESS);
+    k_max = 2;
+    result = -1.0;
+    ASSERT_EQ(xtract_higuchi_fractal_dimension(data, 3, &k_max, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    ASSERT_EQ(xtract_higuchi_fractal_dimension(data, 4, &k_max, &result), XTRACT_SUCCESS);
+}

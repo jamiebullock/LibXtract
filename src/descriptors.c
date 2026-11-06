@@ -120,6 +120,12 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *argv_def = XTRACT_NO_DEFAULT;
             *argv_unit = (xtract_unit_t)XTRACT_NONE;
             break;
+        case XTRACT_HIGUCHI_FRACTAL_DIMENSION:
+            *argv_min = 2;
+            *argv_max = XTRACT_UNBOUNDED_MAX;
+            *argv_def = 10;
+            *argv_unit = (xtract_unit_t)XTRACT_NONE;
+            break;
         case XTRACT_STANDARD_DEVIATION:
         case XTRACT_SPECTRAL_STANDARD_DEVIATION:
             *argv_min = 0.0;
@@ -412,6 +418,9 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_HJORTH_MOBILITY:
         case XTRACT_HJORTH_COMPLEXITY:
         case XTRACT_TIME_REVERSAL_ASYMMETRY:
+        case XTRACT_PETROSIAN_FRACTAL_DIMENSION:
+        case XTRACT_KATZ_FRACTAL_DIMENSION:
+        case XTRACT_HIGUCHI_FRACTAL_DIMENSION:
         case XTRACT_SKEWNESS:
         case XTRACT_KURTOSIS:
         case XTRACT_LOWEST_VALUE:
@@ -534,6 +543,9 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_HJORTH_MOBILITY:
         case XTRACT_HJORTH_COMPLEXITY:
         case XTRACT_TIME_REVERSAL_ASYMMETRY:
+        case XTRACT_PETROSIAN_FRACTAL_DIMENSION:
+        case XTRACT_KATZ_FRACTAL_DIMENSION:
+        case XTRACT_HIGUCHI_FRACTAL_DIMENSION:
         case XTRACT_SKEWNESS:
         case XTRACT_KURTOSIS:
         case XTRACT_LOWEST_VALUE:
@@ -976,6 +988,30 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             copy_desc(p_desc, "Extract the normalised Shannon entropy of an audio spectrum");
             copy_author(author, "");
             break;
+        case XTRACT_PETROSIAN_FRACTAL_DIMENSION:
+            copy_name(name, "petrosian_fractal_dimension");
+            copy_name(p_name, "Petrosian Fractal Dimension");
+            copy_desc(desc, "Extract the Petrosian fractal dimension of an input vector");
+            copy_desc(p_desc, "Extract the Petrosian fractal dimension of a range of values");
+            copy_author(author, "A. Petrosian");
+            *year = 1995;
+            break;
+        case XTRACT_KATZ_FRACTAL_DIMENSION:
+            copy_name(name, "katz_fractal_dimension");
+            copy_name(p_name, "Katz Fractal Dimension");
+            copy_desc(desc, "Extract the Katz fractal dimension of an input vector");
+            copy_desc(p_desc, "Extract the Katz fractal dimension of a range of values");
+            copy_author(author, "Michael J. Katz");
+            *year = 1988;
+            break;
+        case XTRACT_HIGUCHI_FRACTAL_DIMENSION:
+            copy_name(name, "higuchi_fractal_dimension");
+            copy_name(p_name, "Higuchi Fractal Dimension");
+            copy_desc(desc, "Extract the Higuchi fractal dimension of an input vector");
+            copy_desc(p_desc, "Extract the Higuchi fractal dimension of a range of values");
+            copy_author(author, "T. Higuchi");
+            *year = 1988;
+            break;
         case XTRACT_MFCC:
             copy_name(name, "mfcc");
             copy_name(p_name, "Mel-Frequency Cepstral Coefficients");
@@ -1378,6 +1414,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_MOVING_MAX:
         case XTRACT_MOVING_MIN:
         case XTRACT_TIME_REVERSAL_ASYMMETRY:
+        case XTRACT_HIGUCHI_FRACTAL_DIMENSION:
             *argc = 1;
             *argv_type = XTRACT_INT;
             break;
@@ -1408,6 +1445,8 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_HJORTH_MOBILITY:
         case XTRACT_HJORTH_COMPLEXITY:
         case XTRACT_SPECTRAL_ENTROPY:
+        case XTRACT_PETROSIAN_FRACTAL_DIMENSION:
+        case XTRACT_KATZ_FRACTAL_DIMENSION:
         case XTRACT_SPECTRAL_MEAN:
         case XTRACT_SPECTRAL_CENTROID:
         case XTRACT_IRREGULARITY_K:
@@ -1452,6 +1491,9 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_HJORTH_COMPLEXITY:
         case XTRACT_TIME_REVERSAL_ASYMMETRY:
         case XTRACT_SPECTRAL_ENTROPY:
+        case XTRACT_PETROSIAN_FRACTAL_DIMENSION:
+        case XTRACT_KATZ_FRACTAL_DIMENSION:
+        case XTRACT_HIGUCHI_FRACTAL_DIMENSION:
         case XTRACT_SKEWNESS:
         case XTRACT_KURTOSIS:
         case XTRACT_SPECTRAL_MEAN:
@@ -1553,6 +1595,9 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_HJORTH_COMPLEXITY:
         case XTRACT_TIME_REVERSAL_ASYMMETRY:
         case XTRACT_SPECTRAL_ENTROPY:
+        case XTRACT_PETROSIAN_FRACTAL_DIMENSION:
+        case XTRACT_KATZ_FRACTAL_DIMENSION:
+        case XTRACT_HIGUCHI_FRACTAL_DIMENSION:
         case XTRACT_SKEWNESS:
         case XTRACT_KURTOSIS:
         case XTRACT_SPECTRAL_MEAN:
@@ -1747,6 +1792,13 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             case XTRACT_HJORTH_COMPLEXITY:
                 *result_unit = XTRACT_UNIT_NONE;
                 *result_min = 0.0;
+                *result_max = XTRACT_UNBOUNDED_MAX;
+                break;
+            case XTRACT_PETROSIAN_FRACTAL_DIMENSION:
+            case XTRACT_KATZ_FRACTAL_DIMENSION:
+            case XTRACT_HIGUCHI_FRACTAL_DIMENSION:
+                *result_unit = XTRACT_UNIT_NONE;
+                *result_min = XTRACT_UNBOUNDED_MIN;
                 *result_max = XTRACT_UNBOUNDED_MAX;
                 break;
             case XTRACT_SHARPNESS:

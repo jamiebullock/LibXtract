@@ -48,6 +48,7 @@ UTEST(descriptors, make_descriptors_scalar_vector_classification)
     ASSERT_EQ(fd[XTRACT_HJORTH_COMPLEXITY].is_scalar, XTRACT_TRUE);
     ASSERT_EQ(fd[XTRACT_TIME_REVERSAL_ASYMMETRY].is_scalar, XTRACT_TRUE);
     ASSERT_EQ(fd[XTRACT_SPECTRAL_ENTROPY].is_scalar, XTRACT_TRUE);
+    ASSERT_EQ(fd[XTRACT_HIGUCHI_FRACTAL_DIMENSION].is_scalar, XTRACT_TRUE);
     ASSERT_EQ(xtract_free_descriptors(fd), XTRACT_SUCCESS);
 }
 
@@ -263,6 +264,21 @@ UTEST(descriptors, appended_features_are_fully_described)
     CHECK_REL(fd[XTRACT_SPECTRAL_ENTROPY].result.scalar.max, 1.0, EPSILON);
     ASSERT_EQ(fd[XTRACT_SPECTRAL_ENTROPY].is_delta, XTRACT_FALSE);
 
+    for (f = XTRACT_PETROSIAN_FRACTAL_DIMENSION; f <= XTRACT_HIGUCHI_FRACTAL_DIMENSION; f++)
+    {
+        ASSERT_EQ_MSG(fd[f].data.format, XTRACT_ARBITRARY_SERIES, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].data.unit, XTRACT_UNIT_ANY, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].result.scalar.unit, XTRACT_UNIT_NONE, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].is_delta, XTRACT_FALSE, fd[f].algo.name);
+        ASSERT_TRUE_MSG(fd[f].algo.year != 0, fd[f].algo.name);
+    }
+    ASSERT_EQ(fd[XTRACT_PETROSIAN_FRACTAL_DIMENSION].argc, 0);
+    ASSERT_EQ(fd[XTRACT_KATZ_FRACTAL_DIMENSION].argc, 0);
+    ASSERT_EQ(fd[XTRACT_HIGUCHI_FRACTAL_DIMENSION].argc, 1);
+    ASSERT_EQ(fd[XTRACT_HIGUCHI_FRACTAL_DIMENSION].argv.type, XTRACT_INT);
+    CHECK_REL(fd[XTRACT_HIGUCHI_FRACTAL_DIMENSION].argv.min[0], 2.0, EPSILON);
+    CHECK_REL(fd[XTRACT_HIGUCHI_FRACTAL_DIMENSION].argv.def[0], 10.0, EPSILON);
+
     ASSERT_EQ(xtract_free_descriptors(fd), XTRACT_SUCCESS);
 }
 
@@ -305,6 +321,9 @@ UTEST(dispatch, slots_map_to_the_expected_function)
     ASSERT_TRUE(xtract[XTRACT_HJORTH_COMPLEXITY] == xtract_hjorth_complexity);
     ASSERT_TRUE(xtract[XTRACT_TIME_REVERSAL_ASYMMETRY] == xtract_time_reversal_asymmetry);
     ASSERT_TRUE(xtract[XTRACT_SPECTRAL_ENTROPY] == xtract_spectral_entropy);
+    ASSERT_TRUE(xtract[XTRACT_PETROSIAN_FRACTAL_DIMENSION] == xtract_petrosian_fractal_dimension);
+    ASSERT_TRUE(xtract[XTRACT_KATZ_FRACTAL_DIMENSION] == xtract_katz_fractal_dimension);
+    ASSERT_TRUE(xtract[XTRACT_HIGUCHI_FRACTAL_DIMENSION] == xtract_higuchi_fractal_dimension);
 }
 
 /* ===== Descriptor conformance ===== */
@@ -349,7 +368,11 @@ static int conf_min_n(const xtract_function_descriptor_t *d)
     case XTRACT_MOVING_STANDARD_DEVIATION:
     case XTRACT_HJORTH_MOBILITY:
     case XTRACT_SPECTRAL_ENTROPY:
+    case XTRACT_PETROSIAN_FRACTAL_DIMENSION:
+    case XTRACT_KATZ_FRACTAL_DIMENSION:
         return 2;
+    case XTRACT_HIGUCHI_FRACTAL_DIMENSION:
+        return 20;
     case XTRACT_SPECTRUM:
     case XTRACT_AUTOCORRELATION_FFT:
         return CONF_N;

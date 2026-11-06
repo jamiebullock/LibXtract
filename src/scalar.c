@@ -2056,3 +2056,121 @@ int xtract_spectral_entropy(const double *data, const int N, const void *argv, d
 
     return XTRACT_SUCCESS;
 }
+
+int xtract_petrosian_fractal_dimension(const double *data, const int N, const void *argv, double *result)
+{
+    int n;
+    int sign_changes = 0;
+    double previous, current, log_n;
+
+    if (N < 2)
+    {
+        *result = 0.0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
+
+    previous = data[1] - data[0];
+    for (n = 2; n < N; n++)
+    {
+        current = data[n] - data[n - 1];
+        if ((current < 0.0) != (previous < 0.0))
+            sign_changes++;
+        previous = current;
+    }
+
+    log_n = log10((double)N);
+    *result = log_n / (log_n + log10((double)N / (N + 0.4 * sign_changes)));
+
+    return XTRACT_SUCCESS;
+}
+
+int xtract_katz_fractal_dimension(const double *data, const int N, const void *argv, double *result)
+{
+    int n;
+    double length = 0.0;
+    double diameter = 0.0;
+    double step, mean_step, log_ratio;
+
+    if (N < 2)
+    {
+        *result = 0.0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
+
+    for (n = 1; n < N; n++)
+    {
+        length += fabs(data[n] - data[n - 1]);
+        step = fabs(data[n] - data[0]);
+        if (step > diameter)
+            diameter = step;
+    }
+
+    mean_step = length / (N - 1);
+    if (length == 0.0 || diameter == 0.0)
+    {
+        *result = 0.0;
+        return XTRACT_NO_RESULT;
+    }
+    log_ratio = log10(diameter / mean_step);
+    if (log_ratio == 0.0)
+    {
+        *result = 0.0;
+        return XTRACT_NO_RESULT;
+    }
+
+    *result = log10((double)(N - 1)) / log_ratio;
+
+    return XTRACT_SUCCESS;
+}
+
+int xtract_higuchi_fractal_dimension(const double *data, const int N, const void *argv, double *result)
+{
+    int k_max, k, m, j, segments;
+    double curve_length, mean_length, log_scale, log_length;
+    double sum_x = 0.0;
+    double sum_y = 0.0;
+    double sum_xx = 0.0;
+    double sum_xy = 0.0;
+
+    if (argv == NULL)
+    {
+        *result = 0.0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
+
+    k_max = *(const int *)argv;
+    if (k_max < 2 || k_max > N / 2)
+    {
+        *result = 0.0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
+
+    for (k = 1; k <= k_max; k++)
+    {
+        mean_length = 0.0;
+        for (m = 0; m < k; m++)
+        {
+            segments = (N - m - 1) / k;
+            curve_length = 0.0;
+            for (j = 1; j <= segments; j++)
+                curve_length += fabs(data[m + j * k] - data[m + (j - 1) * k]);
+            mean_length += curve_length * (N - 1) / ((double)segments * k * k);
+        }
+        mean_length /= k;
+        if (mean_length == 0.0)
+        {
+            *result = 0.0;
+            return XTRACT_NO_RESULT;
+        }
+        log_scale = -log((double)k);
+        log_length = log(mean_length);
+        sum_x += log_scale;
+        sum_y += log_length;
+        sum_xx += log_scale * log_scale;
+        sum_xy += log_scale * log_length;
+    }
+
+    *result = (k_max * sum_xy - sum_x * sum_y) / (k_max * sum_xx - sum_x * sum_x);
+
+    return XTRACT_SUCCESS;
+}
