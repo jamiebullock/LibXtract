@@ -3321,3 +3321,82 @@ UTEST(scalar, permutation_entropy_rejects_a_missing_or_out_of_range_argument_and
     ASSERT_EQ(xtract_permutation_entropy(data, 7, args, &result), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(result, 0.0);
 }
+
+static double lempel_ziv_phrases(double normalised, int n)
+{
+    return normalised * n * log(2.0) / log((double)n);
+}
+
+UTEST(scalar, lempel_ziv_complexity_of_the_kaspar_schuster_example_has_6_phrases)
+{
+    double data[16] = {0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 1.0};
+    double threshold = 0.5;
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_lempel_ziv_complexity(data, 16, &threshold, &result), XTRACT_SUCCESS);
+    CHECK_REL(lempel_ziv_phrases(result, 16), 6.0, EPSILON);
+}
+
+UTEST(scalar, lempel_ziv_complexity_of_a_constant_series_has_2_phrases)
+{
+    double data[12] = {3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0};
+    double threshold = 3.0;
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_lempel_ziv_complexity(data, 12, &threshold, &result), XTRACT_SUCCESS);
+    CHECK_REL(lempel_ziv_phrases(result, 12), 2.0, EPSILON);
+}
+
+UTEST(scalar, lempel_ziv_complexity_of_an_alternating_series_has_3_phrases)
+{
+    double data[10] = {0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0};
+    double threshold = 0.5;
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_lempel_ziv_complexity(data, 10, &threshold, &result), XTRACT_SUCCESS);
+    CHECK_REL(lempel_ziv_phrases(result, 10), 3.0, EPSILON);
+}
+
+UTEST(scalar, lempel_ziv_complexity_binarises_above_the_threshold_from_argv)
+{
+    double data[4] = {1.0, 2.0, 3.0, 4.0};
+    double median, result;
+
+    ASSERT_EQ(xtract_median(data, 4, NULL, &median), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_lempel_ziv_complexity(data, 4, &median, &result), XTRACT_SUCCESS);
+    CHECK_REL(lempel_ziv_phrases(result, 4), 3.0, EPSILON);
+    median = 4.0;
+    ASSERT_EQ(xtract_lempel_ziv_complexity(data, 4, &median, &result), XTRACT_SUCCESS);
+    CHECK_REL(lempel_ziv_phrases(result, 4), 2.0, EPSILON);
+}
+
+UTEST(scalar, lempel_ziv_complexity_of_a_noise_series_is_close_to_1)
+{
+    double data[4096];
+    double threshold = 0.5;
+    double result = -1.0;
+    unsigned int state = 98765u;
+    int i;
+
+    for (i = 0; i < 4096; i++)
+    {
+        state = state * 1664525u + 1013904223u;
+        data[i] = (state >> 8) / 16777216.0;
+    }
+    ASSERT_EQ(xtract_lempel_ziv_complexity(data, 4096, &threshold, &result), XTRACT_SUCCESS);
+    CHECK_NEAR(result, 1.0, 0.15);
+}
+
+UTEST(scalar, lempel_ziv_complexity_rejects_a_missing_threshold_or_a_single_value_and_sets_the_result_to_zero)
+{
+    double data[3] = {1.0, 2.0, 3.0};
+    double threshold = 1.5;
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_lempel_ziv_complexity(data, 3, NULL, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    result = -1.0;
+    ASSERT_EQ(xtract_lempel_ziv_complexity(data, 1, &threshold, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    ASSERT_EQ(xtract_lempel_ziv_complexity(data, 2, &threshold, &result), XTRACT_SUCCESS);
+}

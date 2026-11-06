@@ -2252,3 +2252,43 @@ int xtract_permutation_entropy(const double *data, const int N, const void *argv
 
     return XTRACT_SUCCESS;
 }
+
+static int above_threshold(const double *data, const int n, const double threshold)
+{
+    return data[n] > threshold;
+}
+
+int xtract_lempel_ziv_complexity(const double *data, const int N, const void *argv, double *result)
+{
+    double threshold;
+    int phrases = 0;
+    int start = 0;
+    int longest, candidate, length;
+
+    if (argv == NULL || N < 2)
+    {
+        *result = 0.0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
+
+    threshold = *(const double *)argv;
+    while (start < N)
+    {
+        longest = 0;
+        for (candidate = 0; candidate < start; candidate++)
+        {
+            length = 0;
+            while (start + length < N &&
+                   above_threshold(data, candidate + length, threshold) == above_threshold(data, start + length, threshold))
+                length++;
+            if (length > longest)
+                longest = length;
+        }
+        phrases++;
+        start += longest + 1;
+    }
+
+    *result = phrases * log((double)N) / (log(2.0) * N);
+
+    return XTRACT_SUCCESS;
+}

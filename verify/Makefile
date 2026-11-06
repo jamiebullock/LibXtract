@@ -29,14 +29,16 @@ VERIFY_MAX_N ?= 32
 # draws its N from nondet_small_length(). Formula slicing cannot drop a
 # floating-point value that a branch tests (a loudness total, a filter's log
 # floor, a band's zero amplitude, the comparisons that order a moving
-# extremum's deque or an ordinal pattern), and the solver's cost in those
-# values grows too fast for VERIFY_MAX_N to be reachable.
+# extremum's deque or an ordinal pattern, the threshold test on every
+# element of a Lempel-Ziv phrase), and the solver's cost in those values
+# grows too fast for VERIFY_MAX_N to be reachable.
 VERIFY_SMALL_N ?= 8
 SMALL_PROOFS = verify_hps verify_mcleod_f0 verify_sharpness \
 	verify_tristimulus_1 verify_tristimulus_2 verify_tristimulus_3 \
 	verify_mel_spectrogram verify_mfcc verify_gammatone_spectrogram verify_gfcc \
 	verify_mmbses verify_spectral_subband_centroids \
-	verify_moving_max verify_moving_min verify_permutation_entropy
+	verify_moving_max verify_moving_min verify_permutation_entropy \
+	verify_lempel_ziv_complexity
 # The filterbank proofs take a filterbank of up to this many filters; the
 # count multiplies the formula, and N is the bound the proofs are about.
 VERIFY_MAX_FILTERS ?= 2
