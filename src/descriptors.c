@@ -76,6 +76,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_AVERAGE_DEVIATION:
             /* case XTRACT_SPECTRAL_AVERAGE_DEVIATION: */
         case XTRACT_MEDIAN_ABSOLUTE_DEVIATION:
+        case XTRACT_LEMPEL_ZIV_COMPLEXITY:
         case XTRACT_LOWEST_VALUE:
         case XTRACT_TONALITY:
         case XTRACT_MFCC:
@@ -319,6 +320,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *argv_donor = XTRACT_MEAN;
             break;
         case XTRACT_MEDIAN_ABSOLUTE_DEVIATION:
+        case XTRACT_LEMPEL_ZIV_COMPLEXITY:
             *argv_donor = XTRACT_MEDIAN;
             break;
         case XTRACT_SPECTRAL_STANDARD_DEVIATION:
@@ -432,6 +434,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_KATZ_FRACTAL_DIMENSION:
         case XTRACT_HIGUCHI_FRACTAL_DIMENSION:
         case XTRACT_PERMUTATION_ENTROPY:
+        case XTRACT_LEMPEL_ZIV_COMPLEXITY:
         case XTRACT_SKEWNESS:
         case XTRACT_KURTOSIS:
         case XTRACT_LOWEST_VALUE:
@@ -558,6 +561,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_KATZ_FRACTAL_DIMENSION:
         case XTRACT_HIGUCHI_FRACTAL_DIMENSION:
         case XTRACT_PERMUTATION_ENTROPY:
+        case XTRACT_LEMPEL_ZIV_COMPLEXITY:
         case XTRACT_SKEWNESS:
         case XTRACT_KURTOSIS:
         case XTRACT_LOWEST_VALUE:
@@ -1032,6 +1036,14 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             copy_author(author, "Christoph Bandt, Bernd Pompe");
             *year = 2002;
             break;
+        case XTRACT_LEMPEL_ZIV_COMPLEXITY:
+            copy_name(name, "lempel_ziv_complexity");
+            copy_name(p_name, "Lempel-Ziv Complexity");
+            copy_desc(desc, "Extract the normalised Lempel-Ziv complexity of an input vector");
+            copy_desc(p_desc, "Extract the normalised Lempel-Ziv complexity of a range of values");
+            copy_author(author, "Abraham Lempel, Jacob Ziv");
+            *year = 1976;
+            break;
         case XTRACT_MFCC:
             copy_name(name, "mfcc");
             copy_name(p_name, "Mel-Frequency Cepstral Coefficients");
@@ -1371,6 +1383,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_STANDARD_DEVIATION:
         case XTRACT_AVERAGE_DEVIATION:
         case XTRACT_MEDIAN_ABSOLUTE_DEVIATION:
+        case XTRACT_LEMPEL_ZIV_COMPLEXITY:
         case XTRACT_SPECTRAL_VARIANCE:
         case XTRACT_SPECTRAL_STANDARD_DEVIATION:
         case XTRACT_SPREAD:
@@ -1519,6 +1532,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_KATZ_FRACTAL_DIMENSION:
         case XTRACT_HIGUCHI_FRACTAL_DIMENSION:
         case XTRACT_PERMUTATION_ENTROPY:
+        case XTRACT_LEMPEL_ZIV_COMPLEXITY:
         case XTRACT_SKEWNESS:
         case XTRACT_KURTOSIS:
         case XTRACT_SPECTRAL_MEAN:
@@ -1624,6 +1638,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_KATZ_FRACTAL_DIMENSION:
         case XTRACT_HIGUCHI_FRACTAL_DIMENSION:
         case XTRACT_PERMUTATION_ENTROPY:
+        case XTRACT_LEMPEL_ZIV_COMPLEXITY:
         case XTRACT_SKEWNESS:
         case XTRACT_KURTOSIS:
         case XTRACT_SPECTRAL_MEAN:
@@ -1817,6 +1832,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
                 break;
             case XTRACT_HJORTH_MOBILITY:
             case XTRACT_HJORTH_COMPLEXITY:
+            case XTRACT_LEMPEL_ZIV_COMPLEXITY:
                 *result_unit = XTRACT_UNIT_NONE;
                 *result_min = 0.0;
                 *result_max = XTRACT_UNBOUNDED_MAX;

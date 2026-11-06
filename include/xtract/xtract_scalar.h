@@ -567,6 +567,15 @@ extern "C"
      */
     int xtract_permutation_entropy(const double *data, const int N, const void *argv, double *result);
 
+    /** \brief Extract the Lempel-Ziv complexity of an input vector: the number of distinct phrases in its exhaustive parse once each element is reduced to whether it exceeds a threshold, normalised by N over log2 N so that a random series scores about 1
+     *
+     * \param *data: a pointer to the first element in an array of doubles
+     * \param N: the number of elements to be considered, at least 2
+     * \param *argv: a pointer to a double holding the threshold, typically the median of the input vector; an element counts as 1 when it is greater than the threshold and 0 otherwise
+     * \param *result: the normalised Lempel-Ziv complexity of N values from the array pointed to by *data
+     */
+    int xtract_lempel_ziv_complexity(const double *data, const int N, const void *argv, double *result);
+
     /** @} */
 
 #ifdef __cplusplus

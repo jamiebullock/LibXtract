@@ -50,6 +50,7 @@ UTEST(descriptors, make_descriptors_scalar_vector_classification)
     ASSERT_EQ(fd[XTRACT_SPECTRAL_ENTROPY].is_scalar, XTRACT_TRUE);
     ASSERT_EQ(fd[XTRACT_HIGUCHI_FRACTAL_DIMENSION].is_scalar, XTRACT_TRUE);
     ASSERT_EQ(fd[XTRACT_PERMUTATION_ENTROPY].is_scalar, XTRACT_TRUE);
+    ASSERT_EQ(fd[XTRACT_LEMPEL_ZIV_COMPLEXITY].is_scalar, XTRACT_TRUE);
     ASSERT_EQ(xtract_free_descriptors(fd), XTRACT_SUCCESS);
 }
 
@@ -295,6 +296,15 @@ UTEST(descriptors, appended_features_are_fully_described)
     CHECK_REL(fd[XTRACT_PERMUTATION_ENTROPY].result.scalar.max, 1.0, EPSILON);
     ASSERT_EQ(fd[XTRACT_PERMUTATION_ENTROPY].is_delta, XTRACT_FALSE);
 
+    ASSERT_EQ(fd[XTRACT_LEMPEL_ZIV_COMPLEXITY].argc, 1);
+    ASSERT_EQ(fd[XTRACT_LEMPEL_ZIV_COMPLEXITY].argv.type, XTRACT_FLOAT);
+    ASSERT_EQ(fd[XTRACT_LEMPEL_ZIV_COMPLEXITY].argv.donor[0], XTRACT_MEDIAN);
+    ASSERT_EQ(fd[XTRACT_LEMPEL_ZIV_COMPLEXITY].data.format, XTRACT_ARBITRARY_SERIES);
+    ASSERT_EQ(fd[XTRACT_LEMPEL_ZIV_COMPLEXITY].data.unit, XTRACT_UNIT_ANY);
+    ASSERT_EQ(fd[XTRACT_LEMPEL_ZIV_COMPLEXITY].result.scalar.unit, XTRACT_UNIT_NONE);
+    CHECK_NEAR(fd[XTRACT_LEMPEL_ZIV_COMPLEXITY].result.scalar.min, 0.0, EPSILON);
+    ASSERT_EQ(fd[XTRACT_LEMPEL_ZIV_COMPLEXITY].is_delta, XTRACT_FALSE);
+
     ASSERT_EQ(xtract_free_descriptors(fd), XTRACT_SUCCESS);
 }
 
@@ -341,6 +351,7 @@ UTEST(dispatch, slots_map_to_the_expected_function)
     ASSERT_TRUE(xtract[XTRACT_KATZ_FRACTAL_DIMENSION] == xtract_katz_fractal_dimension);
     ASSERT_TRUE(xtract[XTRACT_HIGUCHI_FRACTAL_DIMENSION] == xtract_higuchi_fractal_dimension);
     ASSERT_TRUE(xtract[XTRACT_PERMUTATION_ENTROPY] == xtract_permutation_entropy);
+    ASSERT_TRUE(xtract[XTRACT_LEMPEL_ZIV_COMPLEXITY] == xtract_lempel_ziv_complexity);
 }
 
 /* ===== Descriptor conformance ===== */
@@ -388,6 +399,7 @@ static int conf_min_n(const xtract_function_descriptor_t *d)
     case XTRACT_SPECTRAL_ENTROPY:
     case XTRACT_PETROSIAN_FRACTAL_DIMENSION:
     case XTRACT_KATZ_FRACTAL_DIMENSION:
+    case XTRACT_LEMPEL_ZIV_COMPLEXITY:
         return 2;
     case XTRACT_HIGUCHI_FRACTAL_DIMENSION:
         return 20;
