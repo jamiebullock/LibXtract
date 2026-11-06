@@ -2648,6 +2648,19 @@ UTEST(scalar, median_of_an_even_length_series_is_the_mean_of_the_two_middle_valu
     ASSERT_EQ(result, 2.0);
 }
 
+UTEST(scalar, median_of_two_values_at_the_double_limit_does_not_overflow)
+{
+    double data[2] = {DBL_MAX, DBL_MAX};
+    double result = 0.0;
+
+    ASSERT_EQ(xtract_median(data, 2, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(result, DBL_MAX);
+    data[0] = -DBL_MAX;
+    data[1] = -DBL_MAX;
+    ASSERT_EQ(xtract_median(data, 2, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(result, -DBL_MAX);
+}
+
 UTEST(scalar, median_of_a_single_value_is_that_value)
 {
     double data[1] = {-7.25};

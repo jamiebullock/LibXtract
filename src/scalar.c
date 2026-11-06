@@ -1842,7 +1842,7 @@ static double middle_of_sorted(const double *sorted, const int N)
 {
     if (N & 1)
         return sorted[N / 2];
-    return 0.5 * (sorted[N / 2 - 1] + sorted[N / 2]);
+    return 0.5 * sorted[N / 2 - 1] + 0.5 * sorted[N / 2];
 }
 
 static double median_of_values(double *values, const int N)
