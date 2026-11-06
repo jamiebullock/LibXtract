@@ -286,6 +286,24 @@ extern "C"
      * \param *result: a pointer to an array of N - window + 1 doubles, one minimum per window position, the first over the first window elements of *data
      */
     int xtract_moving_min(const double *data, const int N, const void *argv, double *result);
+
+    /** \brief Extract the exponentially weighted moving average of a series
+     *
+     * \param *data: a pointer to the first element in an array of doubles
+     * \param N: the number of elements in the array pointed to by *data, at least 1
+     * \param *argv: a pointer to a double holding the smoothing factor, the weight given to each new element, between 0 and 1 inclusive
+     * \param *result: a pointer to an array of N doubles, one average per element of *data, the first equal to the first element
+     */
+    int xtract_ewma_average(const double *data, const int N, const void *argv, double *result);
+
+    /** \brief Extract the exponentially weighted moving variance of a series about its exponentially weighted moving average
+     *
+     * \param *data: a pointer to the first element in an array of doubles
+     * \param N: the number of elements in the array pointed to by *data, at least 1
+     * \param *argv: a pointer to a double holding the smoothing factor, the weight given to each new element, between 0 and 1 inclusive
+     * \param *result: a pointer to an array of N doubles, one variance per element of *data, the first being 0
+     */
+    int xtract_ewma_variance(const double *data, const int N, const void *argv, double *result);
     /** @} */
 
 #ifdef __cplusplus

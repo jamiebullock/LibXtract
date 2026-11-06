@@ -111,6 +111,13 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *argv_def = XTRACT_NO_DEFAULT;
             *argv_unit = (xtract_unit_t)XTRACT_NONE;
             break;
+        case XTRACT_EWMA_AVERAGE:
+        case XTRACT_EWMA_VARIANCE:
+            *argv_min = 0;
+            *argv_max = 1;
+            *argv_def = XTRACT_NO_DEFAULT;
+            *argv_unit = (xtract_unit_t)XTRACT_NONE;
+            break;
         case XTRACT_STANDARD_DEVIATION:
         case XTRACT_SPECTRAL_STANDARD_DEVIATION:
             *argv_min = 0.0;
@@ -408,6 +415,8 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_MOVING_STANDARD_DEVIATION:
         case XTRACT_MOVING_MAX:
         case XTRACT_MOVING_MIN:
+        case XTRACT_EWMA_AVERAGE:
+        case XTRACT_EWMA_VARIANCE:
             *data_format = XTRACT_ARBITRARY_SERIES;
             break;
         case XTRACT_SPECTRAL_MEAN:
@@ -566,6 +575,8 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_MOVING_STANDARD_DEVIATION:
         case XTRACT_MOVING_MAX:
         case XTRACT_MOVING_MIN:
+        case XTRACT_EWMA_AVERAGE:
+        case XTRACT_EWMA_VARIANCE:
             *data_unit = XTRACT_UNIT_ANY;
             break;
         case XTRACT_SPECTRAL_MEAN:
@@ -878,6 +889,20 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             copy_name(p_name, "Moving Minimum");
             copy_desc(desc, "Extract the smallest value of a series over a sliding window");
             copy_desc(p_desc, "Extract the smallest value of a series over a sliding window");
+            copy_author(author, "");
+            break;
+        case XTRACT_EWMA_AVERAGE:
+            copy_name(name, "ewma_average");
+            copy_name(p_name, "Exponentially Weighted Moving Average");
+            copy_desc(desc, "Extract the exponentially weighted moving average of a series");
+            copy_desc(p_desc, "Extract the exponentially weighted moving average of a series");
+            copy_author(author, "");
+            break;
+        case XTRACT_EWMA_VARIANCE:
+            copy_name(name, "ewma_variance");
+            copy_name(p_name, "Exponentially Weighted Moving Variance");
+            copy_desc(desc, "Extract the exponentially weighted moving variance of a series");
+            copy_desc(p_desc, "Extract the exponentially weighted moving variance of a series");
             copy_author(author, "");
             break;
         case XTRACT_MFCC:
@@ -1283,6 +1308,11 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *argc = 1;
             *argv_type = XTRACT_INT;
             break;
+        case XTRACT_EWMA_AVERAGE:
+        case XTRACT_EWMA_VARIANCE:
+            *argc = 1;
+            *argv_type = XTRACT_FLOAT;
+            break;
         case XTRACT_HPS:
             *argc = 1;
             *argv_type = XTRACT_FLOAT;
@@ -1409,6 +1439,8 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_MOVING_STANDARD_DEVIATION:
         case XTRACT_MOVING_MAX:
         case XTRACT_MOVING_MIN:
+        case XTRACT_EWMA_AVERAGE:
+        case XTRACT_EWMA_VARIANCE:
             *is_scalar = XTRACT_FALSE;
             break;
         default:
@@ -1653,6 +1685,8 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             case XTRACT_MOVING_STANDARD_DEVIATION:
             case XTRACT_MOVING_MAX:
             case XTRACT_MOVING_MIN:
+            case XTRACT_EWMA_AVERAGE:
+            case XTRACT_EWMA_VARIANCE:
                 *result_format = XTRACT_ARBITRARY_SERIES;
                 *result_unit = XTRACT_UNIT_ANY;
                 break;
