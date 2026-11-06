@@ -43,6 +43,8 @@ UTEST(descriptors, make_descriptors_scalar_vector_classification)
     ASSERT_EQ(fd[XTRACT_MOVING_STANDARD_DEVIATION].is_scalar, XTRACT_FALSE);
     ASSERT_EQ(fd[XTRACT_EWMA_AVERAGE].is_scalar, XTRACT_FALSE);
     ASSERT_EQ(fd[XTRACT_EWMA_VARIANCE].is_scalar, XTRACT_FALSE);
+    ASSERT_EQ(fd[XTRACT_MEDIAN].is_scalar, XTRACT_TRUE);
+    ASSERT_EQ(fd[XTRACT_MEDIAN_ABSOLUTE_DEVIATION].is_scalar, XTRACT_TRUE);
     ASSERT_EQ(xtract_free_descriptors(fd), XTRACT_SUCCESS);
 }
 
@@ -214,6 +216,19 @@ UTEST(descriptors, appended_features_are_fully_described)
         ASSERT_TRUE_MSG(fd[f].algo.name[0] != 0, "ewma feature without a name");
     }
 
+    ASSERT_EQ(fd[XTRACT_MEDIAN].argc, 0);
+    ASSERT_EQ(fd[XTRACT_MEDIAN].data.format, XTRACT_ARBITRARY_SERIES);
+    ASSERT_EQ(fd[XTRACT_MEDIAN].data.unit, XTRACT_UNIT_ANY);
+    ASSERT_EQ(fd[XTRACT_MEDIAN].result.scalar.unit, XTRACT_UNIT_ANY);
+    ASSERT_EQ(fd[XTRACT_MEDIAN].is_delta, XTRACT_FALSE);
+    ASSERT_EQ(fd[XTRACT_MEDIAN_ABSOLUTE_DEVIATION].argc, 1);
+    ASSERT_EQ(fd[XTRACT_MEDIAN_ABSOLUTE_DEVIATION].argv.type, XTRACT_FLOAT);
+    ASSERT_EQ(fd[XTRACT_MEDIAN_ABSOLUTE_DEVIATION].argv.donor[0], XTRACT_MEDIAN);
+    ASSERT_EQ(fd[XTRACT_MEDIAN_ABSOLUTE_DEVIATION].data.format, XTRACT_ARBITRARY_SERIES);
+    ASSERT_EQ(fd[XTRACT_MEDIAN_ABSOLUTE_DEVIATION].data.unit, XTRACT_UNIT_ANY);
+    ASSERT_EQ(fd[XTRACT_MEDIAN_ABSOLUTE_DEVIATION].result.scalar.unit, XTRACT_UNIT_ANY);
+    ASSERT_EQ(fd[XTRACT_MEDIAN_ABSOLUTE_DEVIATION].is_delta, XTRACT_FALSE);
+
     ASSERT_EQ(xtract_free_descriptors(fd), XTRACT_SUCCESS);
 }
 
@@ -249,6 +264,8 @@ UTEST(dispatch, slots_map_to_the_expected_function)
     ASSERT_TRUE(xtract[XTRACT_MOVING_MIN] == xtract_moving_min);
     ASSERT_TRUE(xtract[XTRACT_EWMA_AVERAGE] == xtract_ewma_average);
     ASSERT_TRUE(xtract[XTRACT_EWMA_VARIANCE] == xtract_ewma_variance);
+    ASSERT_TRUE(xtract[XTRACT_MEDIAN] == xtract_median);
+    ASSERT_TRUE(xtract[XTRACT_MEDIAN_ABSOLUTE_DEVIATION] == xtract_median_absolute_deviation);
 }
 
 /* ===== Descriptor conformance ===== */

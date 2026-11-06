@@ -1824,3 +1824,70 @@ int xtract_peak(const double *data, const int N, const void *argv, double *resul
 
     return XTRACT_SUCCESS;
 }
+
+static int compare_doubles_nan_last(const void *a, const void *b)
+{
+    const double x = *(const double *)a;
+    const double y = *(const double *)b;
+    const int x_nan = isnan(x);
+    const int y_nan = isnan(y);
+
+    if (x_nan || y_nan)
+        return x_nan - y_nan;
+    return (x > y) - (x < y);
+}
+
+static double middle_of_sorted(const double *sorted, const int N)
+{
+    if (N & 1)
+        return sorted[N / 2];
+    return 0.5 * (sorted[N / 2 - 1] + sorted[N / 2]);
+}
+
+int xtract_median(const double *data, const int N, const void *argv, double *result)
+{
+    double *sorted;
+
+    if (N < 1)
+    {
+        *result = 0.0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
+
+    sorted = (double *)malloc((size_t)N * sizeof(double));
+    if (sorted == NULL)
+        return XTRACT_MALLOC_FAILED;
+
+    memcpy(sorted, data, (size_t)N * sizeof(double));
+    qsort(sorted, (size_t)N, sizeof(double), compare_doubles_nan_last);
+    *result = middle_of_sorted(sorted, N);
+    free(sorted);
+
+    return XTRACT_SUCCESS;
+}
+
+int xtract_median_absolute_deviation(const double *data, const int N, const void *argv, double *result)
+{
+    double *deviations;
+    double median;
+    int n;
+
+    if (N < 1 || argv == NULL)
+    {
+        *result = 0.0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
+
+    median = *(const double *)argv;
+    deviations = (double *)malloc((size_t)N * sizeof(double));
+    if (deviations == NULL)
+        return XTRACT_MALLOC_FAILED;
+
+    for (n = 0; n < N; n++)
+        deviations[n] = fabs(data[n] - median);
+    qsort(deviations, (size_t)N, sizeof(double), compare_doubles_nan_last);
+    *result = middle_of_sorted(deviations, N);
+    free(deviations);
+
+    return XTRACT_SUCCESS;
+}
