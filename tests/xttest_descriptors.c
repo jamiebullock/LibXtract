@@ -45,6 +45,7 @@ UTEST(descriptors, make_descriptors_scalar_vector_classification)
     ASSERT_EQ(fd[XTRACT_EWMA_VARIANCE].is_scalar, XTRACT_FALSE);
     ASSERT_EQ(fd[XTRACT_MEDIAN].is_scalar, XTRACT_TRUE);
     ASSERT_EQ(fd[XTRACT_MEDIAN_ABSOLUTE_DEVIATION].is_scalar, XTRACT_TRUE);
+    ASSERT_EQ(fd[XTRACT_HJORTH_COMPLEXITY].is_scalar, XTRACT_TRUE);
     ASSERT_EQ(xtract_free_descriptors(fd), XTRACT_SUCCESS);
 }
 
@@ -229,6 +230,19 @@ UTEST(descriptors, appended_features_are_fully_described)
     ASSERT_EQ(fd[XTRACT_MEDIAN_ABSOLUTE_DEVIATION].result.scalar.unit, XTRACT_UNIT_ANY);
     ASSERT_EQ(fd[XTRACT_MEDIAN_ABSOLUTE_DEVIATION].is_delta, XTRACT_FALSE);
 
+    for (f = XTRACT_HJORTH_ACTIVITY; f <= XTRACT_HJORTH_COMPLEXITY; f++)
+    {
+        ASSERT_EQ_MSG(fd[f].argc, 0, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].data.format, XTRACT_ARBITRARY_SERIES, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].data.unit, XTRACT_UNIT_ANY, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].is_delta, XTRACT_FALSE, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].algo.year, 1970, fd[f].algo.name);
+        CHECK_NEAR(fd[f].result.scalar.min, 0.0, EPSILON);
+    }
+    ASSERT_EQ(fd[XTRACT_HJORTH_ACTIVITY].result.scalar.unit, XTRACT_UNIT_ANY);
+    ASSERT_EQ(fd[XTRACT_HJORTH_MOBILITY].result.scalar.unit, XTRACT_UNIT_NONE);
+    ASSERT_EQ(fd[XTRACT_HJORTH_COMPLEXITY].result.scalar.unit, XTRACT_UNIT_NONE);
+
     ASSERT_EQ(xtract_free_descriptors(fd), XTRACT_SUCCESS);
 }
 
@@ -266,6 +280,9 @@ UTEST(dispatch, slots_map_to_the_expected_function)
     ASSERT_TRUE(xtract[XTRACT_EWMA_VARIANCE] == xtract_ewma_variance);
     ASSERT_TRUE(xtract[XTRACT_MEDIAN] == xtract_median);
     ASSERT_TRUE(xtract[XTRACT_MEDIAN_ABSOLUTE_DEVIATION] == xtract_median_absolute_deviation);
+    ASSERT_TRUE(xtract[XTRACT_HJORTH_ACTIVITY] == xtract_hjorth_activity);
+    ASSERT_TRUE(xtract[XTRACT_HJORTH_MOBILITY] == xtract_hjorth_mobility);
+    ASSERT_TRUE(xtract[XTRACT_HJORTH_COMPLEXITY] == xtract_hjorth_complexity);
 }
 
 /* ===== Descriptor conformance ===== */
@@ -299,6 +316,7 @@ static int conf_min_n(const xtract_function_descriptor_t *d)
         return 4;
     case XTRACT_IRREGULARITY_K:
     case XTRACT_SMOOTHNESS:
+    case XTRACT_HJORTH_COMPLEXITY:
         return 3;
     case XTRACT_IRREGULARITY_J:
     case XTRACT_VARIANCE:
@@ -306,6 +324,7 @@ static int conf_min_n(const xtract_function_descriptor_t *d)
     case XTRACT_LPCC:
     case XTRACT_MOVING_VARIANCE:
     case XTRACT_MOVING_STANDARD_DEVIATION:
+    case XTRACT_HJORTH_MOBILITY:
         return 2;
     case XTRACT_SPECTRUM:
     case XTRACT_AUTOCORRELATION_FFT:

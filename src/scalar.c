@@ -1907,3 +1907,89 @@ int xtract_median_absolute_deviation(const double *data, const int N, const void
 
     return XTRACT_SUCCESS;
 }
+
+static double difference_of_order(const double *data, const int n, const int order)
+{
+    if (order == 0)
+        return data[n];
+    if (order == 1)
+        return data[n + 1] - data[n];
+    return data[n + 2] - 2.0 * data[n + 1] + data[n];
+}
+
+static double population_variance_of_difference(const double *data, const int N, const int order)
+{
+    const int count = N - order;
+    double mean = 0.0;
+    double m2 = 0.0;
+    double value, delta;
+    int n;
+
+    for (n = 0; n < count; n++)
+    {
+        value = difference_of_order(data, n, order);
+        delta = value - mean;
+        mean += delta / (n + 1);
+        m2 += delta * (value - mean);
+    }
+
+    return XTRACT_MAX(m2, 0.0) / count;
+}
+
+int xtract_hjorth_activity(const double *data, const int N, const void *argv, double *result)
+{
+    if (N < 1)
+    {
+        *result = 0.0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
+
+    *result = population_variance_of_difference(data, N, 0);
+
+    return XTRACT_SUCCESS;
+}
+
+int xtract_hjorth_mobility(const double *data, const int N, const void *argv, double *result)
+{
+    double activity;
+
+    if (N < 2)
+    {
+        *result = 0.0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
+
+    activity = population_variance_of_difference(data, N, 0);
+    if (activity == 0.0)
+    {
+        *result = 0.0;
+        return XTRACT_NO_RESULT;
+    }
+
+    *result = sqrt(population_variance_of_difference(data, N, 1) / activity);
+
+    return XTRACT_SUCCESS;
+}
+
+int xtract_hjorth_complexity(const double *data, const int N, const void *argv, double *result)
+{
+    double activity, first;
+
+    if (N < 3)
+    {
+        *result = 0.0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
+
+    activity = population_variance_of_difference(data, N, 0);
+    first = population_variance_of_difference(data, N, 1);
+    if (activity == 0.0 || first == 0.0)
+    {
+        *result = 0.0;
+        return XTRACT_NO_RESULT;
+    }
+
+    *result = sqrt(population_variance_of_difference(data, N, 2) / first) * sqrt(activity / first);
+
+    return XTRACT_SUCCESS;
+}

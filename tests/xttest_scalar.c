@@ -2766,3 +2766,125 @@ UTEST(scalar, median_absolute_deviation_rejects_a_missing_median_or_empty_series
     ASSERT_EQ(xtract_median_absolute_deviation(data, 0, &median, &result), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(result, 0.0);
 }
+
+static double population_variance(const double *values, int n)
+{
+    double mean = 0.0;
+    double sum = 0.0;
+    int i;
+
+    for (i = 0; i < n; i++)
+        mean += values[i] / n;
+    for (i = 0; i < n; i++)
+        sum += (values[i] - mean) * (values[i] - mean);
+    return sum / n;
+}
+
+UTEST(scalar, hjorth_activity_is_the_population_variance)
+{
+    double data[5] = {1.0, 2.0, 3.0, 4.0, 5.0};
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_hjorth_activity(data, 5, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 2.0, EPSILON);
+}
+
+UTEST(scalar, hjorth_parameters_of_a_geometric_series_match_the_definitions)
+{
+    double data[5] = {1.0, 2.0, 4.0, 8.0, 16.0};
+    double first[4] = {1.0, 2.0, 4.0, 8.0};
+    double second[3] = {1.0, 2.0, 4.0};
+    double activity, mobility, complexity;
+    double var_x = population_variance(data, 5);
+    double var_d = population_variance(first, 4);
+    double var_dd = population_variance(second, 3);
+
+    ASSERT_EQ(xtract_hjorth_activity(data, 5, NULL, &activity), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_hjorth_mobility(data, 5, NULL, &mobility), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_hjorth_complexity(data, 5, NULL, &complexity), XTRACT_SUCCESS);
+    CHECK_REL(activity, var_x, EPSILON);
+    CHECK_REL(mobility, sqrt(var_d / var_x), EPSILON);
+    CHECK_REL(complexity, sqrt(var_dd / var_d) / sqrt(var_d / var_x), EPSILON);
+}
+
+UTEST(scalar, hjorth_mobility_and_complexity_are_unchanged_by_scaling_to_the_limits_of_a_double)
+{
+    double data[6] = {1.0, -2.0, 0.5, 3.0, -1.0, 2.0};
+    double scaled[6];
+    double scales[2] = {1.0e150, 1.0e-150};
+    double mobility, complexity, scaled_mobility, scaled_complexity;
+    int k, i;
+
+    ASSERT_EQ(xtract_hjorth_mobility(data, 6, NULL, &mobility), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_hjorth_complexity(data, 6, NULL, &complexity), XTRACT_SUCCESS);
+    for (k = 0; k < 2; k++)
+    {
+        for (i = 0; i < 6; i++)
+            scaled[i] = data[i] * scales[k];
+        ASSERT_EQ(xtract_hjorth_mobility(scaled, 6, NULL, &scaled_mobility), XTRACT_SUCCESS);
+        ASSERT_EQ(xtract_hjorth_complexity(scaled, 6, NULL, &scaled_complexity), XTRACT_SUCCESS);
+        CHECK_REL(scaled_mobility, mobility, EPSILON);
+        CHECK_REL(scaled_complexity, complexity, EPSILON);
+    }
+}
+
+UTEST(scalar, hjorth_mobility_of_a_sinusoid_is_its_frequency_and_its_complexity_is_1)
+{
+    double data[2000];
+    double omega = 2.0 * M_PI * 32.0 / 2000.0;
+    double mobility, complexity;
+    int i;
+
+    for (i = 0; i < 2000; i++)
+        data[i] = sin(omega * i);
+
+    ASSERT_EQ(xtract_hjorth_mobility(data, 2000, NULL, &mobility), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_hjorth_complexity(data, 2000, NULL, &complexity), XTRACT_SUCCESS);
+    CHECK_NEAR(mobility, 2.0 * sin(omega / 2.0), 1e-3);
+    CHECK_NEAR(complexity, 1.0, 1e-2);
+}
+
+UTEST(scalar, hjorth_mobility_of_a_ramp_is_zero_and_its_complexity_has_no_result)
+{
+    double data[5] = {1.0, 2.0, 3.0, 4.0, 5.0};
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_hjorth_mobility(data, 5, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(result, 0.0);
+    result = -1.0;
+    ASSERT_EQ(xtract_hjorth_complexity(data, 5, NULL, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
+}
+
+UTEST(scalar, hjorth_mobility_and_complexity_of_a_constant_series_have_no_result)
+{
+    double data[4] = {3.0, 3.0, 3.0, 3.0};
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_hjorth_activity(data, 4, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(result, 0.0);
+    result = -1.0;
+    ASSERT_EQ(xtract_hjorth_mobility(data, 4, NULL, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
+    result = -1.0;
+    ASSERT_EQ(xtract_hjorth_complexity(data, 4, NULL, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
+}
+
+UTEST(scalar, hjorth_parameters_reject_a_series_shorter_than_their_differences_need)
+{
+    double data[3] = {1.0, 2.0, 4.0};
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_hjorth_activity(data, 0, NULL, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    result = -1.0;
+    ASSERT_EQ(xtract_hjorth_mobility(data, 1, NULL, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    result = -1.0;
+    ASSERT_EQ(xtract_hjorth_complexity(data, 2, NULL, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    ASSERT_EQ(xtract_hjorth_activity(data, 1, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_hjorth_mobility(data, 2, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_hjorth_complexity(data, 3, NULL, &result), XTRACT_SUCCESS);
+}

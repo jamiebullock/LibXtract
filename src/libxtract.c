@@ -92,4 +92,7 @@ int (*xtract[])(const double *, const int, const void *, double *) =
         xtract_ewma_average,
         xtract_ewma_variance,
         xtract_median,
-        xtract_median_absolute_deviation};
+        xtract_median_absolute_deviation,
+        xtract_hjorth_activity,
+        xtract_hjorth_mobility,
+        xtract_hjorth_complexity};
