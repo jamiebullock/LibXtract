@@ -2657,13 +2657,17 @@ UTEST(scalar, median_of_a_single_value_is_that_value)
     ASSERT_EQ(result, -7.25);
 }
 
-UTEST(scalar, median_sorts_a_nan_element_last_and_still_returns_a_value)
+UTEST(scalar, median_orders_a_nan_element_after_every_number)
 {
     double data[5] = {2.0, NAN, 1.0, 4.0, 3.0};
     double result = 0.0;
 
     ASSERT_EQ(xtract_median(data, 5, NULL, &result), XTRACT_SUCCESS);
     ASSERT_EQ(result, 3.0);
+    data[0] = NAN;
+    data[2] = NAN;
+    ASSERT_EQ(xtract_median(data, 5, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_TRUE(isnan(result));
 }
 
 UTEST(scalar, median_matches_a_sorted_copy_at_every_length)

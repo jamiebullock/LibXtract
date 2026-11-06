@@ -473,7 +473,7 @@ extern "C"
      * \param *data: a pointer to the first element in an array of doubles
      * \param N: the number of elements to be considered, at least 1
      * \param *argv: not used
-     * \param *result: the median of N values from the array pointed to by *data; for an even N, the mean of the two middle values
+     * \param *result: the median of N values from the array pointed to by *data; for an even N, the mean of the two middle values. A NaN element orders after every number
      */
     int xtract_median(const double *data, const int N, const void *argv, double *result);
 
@@ -482,7 +482,7 @@ extern "C"
      * \param *data: a pointer to the first element in an array of doubles
      * \param N: the number of elements to be considered, at least 1
      * \param *argv: a pointer to a double representing the median of the input vector
-     * \param *result: the median of the absolute deviations of N values from the array pointed to by *data from the given median
+     * \param *result: the median of the absolute deviations of N values from the array pointed to by *data from the given median. A NaN deviation orders after every number
      */
     int xtract_median_absolute_deviation(const double *data, const int N, const void *argv, double *result);
 

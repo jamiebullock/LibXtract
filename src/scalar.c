@@ -1825,16 +1825,17 @@ int xtract_peak(const double *data, const int N, const void *argv, double *resul
     return XTRACT_SUCCESS;
 }
 
-static int compare_doubles_nan_last(const void *a, const void *b)
+static int compare_doubles(const void *a, const void *b)
 {
     const double x = *(const double *)a;
     const double y = *(const double *)b;
-    const int x_nan = isnan(x);
-    const int y_nan = isnan(y);
 
-    if (x_nan || y_nan)
-        return x_nan - y_nan;
     return (x > y) - (x < y);
+}
+
+static int is_nan(const double x)
+{
+    return x != x;
 }
 
 static double middle_of_sorted(const double *sorted, const int N)
@@ -1842,6 +1843,23 @@ static double middle_of_sorted(const double *sorted, const int N)
     if (N & 1)
         return sorted[N / 2];
     return 0.5 * (sorted[N / 2 - 1] + sorted[N / 2]);
+}
+
+static double median_of_values(double *values, const int N)
+{
+    int numbers = 0;
+    int n;
+
+    for (n = 0; n < N; n++)
+    {
+        if (!is_nan(values[n]))
+            values[numbers++] = values[n];
+    }
+    for (n = numbers; n < N; n++)
+        values[n] = NAN;
+    qsort(values, (size_t)numbers, sizeof(double), compare_doubles);
+
+    return middle_of_sorted(values, N);
 }
 
 int xtract_median(const double *data, const int N, const void *argv, double *result)
@@ -1859,8 +1877,7 @@ int xtract_median(const double *data, const int N, const void *argv, double *res
         return XTRACT_MALLOC_FAILED;
 
     memcpy(sorted, data, (size_t)N * sizeof(double));
-    qsort(sorted, (size_t)N, sizeof(double), compare_doubles_nan_last);
-    *result = middle_of_sorted(sorted, N);
+    *result = median_of_values(sorted, N);
     free(sorted);
 
     return XTRACT_SUCCESS;
@@ -1885,8 +1902,7 @@ int xtract_median_absolute_deviation(const double *data, const int N, const void
 
     for (n = 0; n < N; n++)
         deviations[n] = fabs(data[n] - median);
-    qsort(deviations, (size_t)N, sizeof(double), compare_doubles_nan_last);
-    *result = middle_of_sorted(deviations, N);
+    *result = median_of_values(deviations, N);
     free(deviations);
 
     return XTRACT_SUCCESS;
