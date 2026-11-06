@@ -3400,3 +3400,134 @@ UTEST(scalar, lempel_ziv_complexity_rejects_a_missing_threshold_or_a_single_valu
     ASSERT_EQ(result, 0.0);
     ASSERT_EQ(xtract_lempel_ziv_complexity(data, 2, &threshold, &result), XTRACT_SUCCESS);
 }
+
+UTEST(scalar, sample_entropy_of_a_periodic_series_is_0)
+{
+    double data[10] = {1.0, 2.0, 3.0, 1.0, 2.0, 3.0, 1.0, 2.0, 3.0, 1.0};
+    double args[2] = {2.0, 0.1};
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_sample_entropy(data, 10, args, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(result, 0.0);
+}
+
+UTEST(scalar, sample_entropy_counts_template_pairs_without_self_matches)
+{
+    double data[8] = {1.0, 2.0, 3.0, 1.0, 2.0, 3.0, 1.0, 5.0};
+    double args[2] = {2.0, 0.1};
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_sample_entropy(data, 8, args, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, -log(2.0 / 3.0), EPSILON);
+}
+
+UTEST(scalar, approximate_entropy_counts_self_matches_and_is_the_signed_difference_of_the_log_fractions)
+{
+    double data[8] = {1.0, 2.0, 3.0, 1.0, 2.0, 3.0, 1.0, 5.0};
+    double args[2] = {2.0, 0.1};
+    double result = -1.0;
+    double phi_2 = (6.0 * log(2.0 / 7.0) + log(1.0 / 7.0)) / 7.0;
+    double phi_3 = (4.0 * log(2.0 / 6.0) + 2.0 * log(1.0 / 6.0)) / 6.0;
+
+    ASSERT_EQ(xtract_approximate_entropy(data, 8, args, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, phi_2 - phi_3, EPSILON);
+}
+
+UTEST(scalar, approximate_entropy_of_a_constant_series_is_0)
+{
+    double data[6] = {4.0, 4.0, 4.0, 4.0, 4.0, 4.0};
+    double args[2] = {2.0, 0.5};
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_approximate_entropy(data, 6, args, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(result, 0.0);
+}
+
+UTEST(scalar, sample_and_approximate_entropy_match_at_a_distance_equal_to_the_tolerance)
+{
+    double data[3] = {0.0, 1.0, 2.0};
+    double args[2] = {1.0, 1.0};
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_sample_entropy(data, 3, args, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(result, 0.0);
+    ASSERT_EQ(xtract_approximate_entropy(data, 3, args, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 2.0 * log(2.0 / 3.0) / 3.0, EPSILON);
+    args[1] = 0.99;
+    result = -1.0;
+    ASSERT_EQ(xtract_sample_entropy(data, 3, args, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
+}
+
+UTEST(scalar, sample_entropy_has_no_result_when_no_longer_template_matches)
+{
+    double data[5] = {1.0, 2.0, 1.0, 2.0, 5.0};
+    double args[2] = {2.0, 0.1};
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_sample_entropy(data, 5, args, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
+}
+
+UTEST(scalar, sample_and_approximate_entropy_are_unchanged_by_scaling_the_series_and_tolerance_together)
+{
+    double data[12] = {3.0, -1.5, 4.25, 0.0, 2.0, 9.5, -6.0, 1.0, 1.0, 7.0, -2.5, 3.0};
+    double scaled[12];
+    double args[2] = {2.0, 3.0};
+    double scaled_args[2] = {2.0, 3.0e-100};
+    double sample, approximate, scaled_sample, scaled_approximate;
+    int i;
+
+    for (i = 0; i < 12; i++)
+        scaled[i] = data[i] * 1.0e-100;
+    ASSERT_EQ(xtract_sample_entropy(data, 12, args, &sample), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_approximate_entropy(data, 12, args, &approximate), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_sample_entropy(scaled, 12, scaled_args, &scaled_sample), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_approximate_entropy(scaled, 12, scaled_args, &scaled_approximate), XTRACT_SUCCESS);
+    CHECK_REL(scaled_sample, sample, EPSILON);
+    CHECK_REL(scaled_approximate, approximate, EPSILON);
+}
+
+UTEST(scalar, sample_and_approximate_entropy_reject_a_missing_or_out_of_range_argument_and_set_the_result_to_zero)
+{
+    double data[6] = {3.0, -1.5, 4.25, 0.0, 2.0, 9.5};
+    double args[2] = {2.0, 1.0};
+    double result;
+    int (*functions[2])(const double *, const int, const void *, double *) = {xtract_sample_entropy, xtract_approximate_entropy};
+    int f;
+
+    for (f = 0; f < 2; f++)
+    {
+        result = -1.0;
+        ASSERT_EQ(functions[f](data, 6, NULL, &result), XTRACT_ARGUMENT_ERROR);
+        ASSERT_EQ(result, 0.0);
+        args[0] = 0.0;
+        result = -1.0;
+        ASSERT_EQ(functions[f](data, 6, args, &result), XTRACT_ARGUMENT_ERROR);
+        ASSERT_EQ(result, 0.0);
+        args[0] = 1.5;
+        result = -1.0;
+        ASSERT_EQ(functions[f](data, 6, args, &result), XTRACT_ARGUMENT_ERROR);
+        ASSERT_EQ(result, 0.0);
+        args[0] = 5.0;
+        result = -1.0;
+        ASSERT_EQ(functions[f](data, 6, args, &result), XTRACT_ARGUMENT_ERROR);
+        ASSERT_EQ(result, 0.0);
+        args[0] = 4.0;
+        ASSERT_NE(functions[f](data, 6, args, &result), XTRACT_ARGUMENT_ERROR);
+        args[0] = 2.0;
+        args[1] = -1.0;
+        result = -1.0;
+        ASSERT_EQ(functions[f](data, 6, args, &result), XTRACT_ARGUMENT_ERROR);
+        ASSERT_EQ(result, 0.0);
+        args[1] = NAN;
+        result = -1.0;
+        ASSERT_EQ(functions[f](data, 6, args, &result), XTRACT_ARGUMENT_ERROR);
+        ASSERT_EQ(result, 0.0);
+        args[1] = 1.0;
+        result = -1.0;
+        ASSERT_EQ(functions[f](data, 3, args, &result), XTRACT_ARGUMENT_ERROR);
+        ASSERT_EQ(result, 0.0);
+        ASSERT_NE(functions[f](data, 4, args, &result), XTRACT_ARGUMENT_ERROR);
+    }
+}

@@ -102,4 +102,6 @@ int (*xtract[])(const double *, const int, const void *, double *) =
         xtract_katz_fractal_dimension,
         xtract_higuchi_fractal_dimension,
         xtract_permutation_entropy,
-        xtract_lempel_ziv_complexity};
+        xtract_lempel_ziv_complexity,
+        xtract_sample_entropy,
+        xtract_approximate_entropy};

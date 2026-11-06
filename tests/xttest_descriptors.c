@@ -51,6 +51,8 @@ UTEST(descriptors, make_descriptors_scalar_vector_classification)
     ASSERT_EQ(fd[XTRACT_HIGUCHI_FRACTAL_DIMENSION].is_scalar, XTRACT_TRUE);
     ASSERT_EQ(fd[XTRACT_PERMUTATION_ENTROPY].is_scalar, XTRACT_TRUE);
     ASSERT_EQ(fd[XTRACT_LEMPEL_ZIV_COMPLEXITY].is_scalar, XTRACT_TRUE);
+    ASSERT_EQ(fd[XTRACT_SAMPLE_ENTROPY].is_scalar, XTRACT_TRUE);
+    ASSERT_EQ(fd[XTRACT_APPROXIMATE_ENTROPY].is_scalar, XTRACT_TRUE);
     ASSERT_EQ(xtract_free_descriptors(fd), XTRACT_SUCCESS);
 }
 
@@ -305,6 +307,23 @@ UTEST(descriptors, appended_features_are_fully_described)
     CHECK_NEAR(fd[XTRACT_LEMPEL_ZIV_COMPLEXITY].result.scalar.min, 0.0, EPSILON);
     ASSERT_EQ(fd[XTRACT_LEMPEL_ZIV_COMPLEXITY].is_delta, XTRACT_FALSE);
 
+    for (f = XTRACT_SAMPLE_ENTROPY; f <= XTRACT_APPROXIMATE_ENTROPY; f++)
+    {
+        ASSERT_EQ_MSG(fd[f].argc, 2, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].argv.type, XTRACT_FLOAT, fd[f].algo.name);
+        CHECK_REL(fd[f].argv.min[0], 1.0, EPSILON);
+        CHECK_REL(fd[f].argv.def[0], 2.0, EPSILON);
+        CHECK_NEAR(fd[f].argv.min[1], 0.0, EPSILON);
+        ASSERT_EQ_MSG(fd[f].argv.max[1], XTRACT_UNBOUNDED_MAX, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].argv.unit[1], XTRACT_UNIT_ANY, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].data.format, XTRACT_ARBITRARY_SERIES, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].data.unit, XTRACT_UNIT_ANY, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].result.scalar.unit, XTRACT_UNIT_NONE, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].is_delta, XTRACT_FALSE, fd[f].algo.name);
+    }
+    CHECK_NEAR(fd[XTRACT_SAMPLE_ENTROPY].result.scalar.min, 0.0, EPSILON);
+    ASSERT_EQ(fd[XTRACT_APPROXIMATE_ENTROPY].result.scalar.min, XTRACT_UNBOUNDED_MIN);
+
     ASSERT_EQ(xtract_free_descriptors(fd), XTRACT_SUCCESS);
 }
 
@@ -352,6 +371,8 @@ UTEST(dispatch, slots_map_to_the_expected_function)
     ASSERT_TRUE(xtract[XTRACT_HIGUCHI_FRACTAL_DIMENSION] == xtract_higuchi_fractal_dimension);
     ASSERT_TRUE(xtract[XTRACT_PERMUTATION_ENTROPY] == xtract_permutation_entropy);
     ASSERT_TRUE(xtract[XTRACT_LEMPEL_ZIV_COMPLEXITY] == xtract_lempel_ziv_complexity);
+    ASSERT_TRUE(xtract[XTRACT_SAMPLE_ENTROPY] == xtract_sample_entropy);
+    ASSERT_TRUE(xtract[XTRACT_APPROXIMATE_ENTROPY] == xtract_approximate_entropy);
 }
 
 /* ===== Descriptor conformance ===== */
@@ -382,6 +403,8 @@ static int conf_min_n(const xtract_function_descriptor_t *d)
     switch (d->id)
     {
     case XTRACT_HPS:
+    case XTRACT_SAMPLE_ENTROPY:
+    case XTRACT_APPROXIMATE_ENTROPY:
         return 4;
     case XTRACT_IRREGULARITY_K:
     case XTRACT_SMOOTHNESS:

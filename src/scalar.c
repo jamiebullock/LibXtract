@@ -2294,3 +2294,104 @@ int xtract_lempel_ziv_complexity(const double *data, const int N, const void *ar
 
     return XTRACT_SUCCESS;
 }
+
+static int templates_match(const double *data, const int i, const int j, const int length, const double tolerance)
+{
+    int k;
+
+    for (k = 0; k < length; k++)
+    {
+        if (fabs(data[i + k] - data[j + k]) > tolerance)
+            return 0;
+    }
+
+    return 1;
+}
+
+static int entropy_arguments(const int N, const void *argv, int *length, double *tolerance)
+{
+    const double *args;
+    double length_arg;
+
+    if (argv == NULL)
+        return 0;
+    args = (const double *)argv;
+    length_arg = args[0];
+    *tolerance = args[1];
+    if (!(length_arg >= 1.0 && length_arg <= N - 2) || length_arg != floor(length_arg) || !(*tolerance >= 0.0))
+        return 0;
+    *length = (int)length_arg;
+
+    return 1;
+}
+
+int xtract_sample_entropy(const double *data, const int N, const void *argv, double *result)
+{
+    int length, templates, i, j;
+    int shorter_matches = 0;
+    int longer_matches = 0;
+    double tolerance;
+
+    if (!entropy_arguments(N, argv, &length, &tolerance))
+    {
+        *result = 0.0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
+
+    templates = N - length;
+    for (i = 0; i < templates; i++)
+    {
+        for (j = i + 1; j < templates; j++)
+        {
+            if (templates_match(data, i, j, length, tolerance))
+            {
+                shorter_matches++;
+                if (fabs(data[i + length] - data[j + length]) <= tolerance)
+                    longer_matches++;
+            }
+        }
+    }
+
+    if (shorter_matches == 0 || longer_matches == 0)
+    {
+        *result = 0.0;
+        return XTRACT_NO_RESULT;
+    }
+
+    *result = -log((double)longer_matches / shorter_matches);
+
+    return XTRACT_SUCCESS;
+}
+
+static double mean_log_match_fraction(const double *data, const int N, const int length, const double tolerance)
+{
+    const int templates = N - length + 1;
+    int i, j, matches;
+    double sum = 0.0;
+
+    for (i = 0; i < templates; i++)
+    {
+        matches = 0;
+        for (j = 0; j < templates; j++)
+            matches += templates_match(data, i, j, length, tolerance);
+        sum += log((double)matches / templates);
+    }
+
+    return sum / templates;
+}
+
+int xtract_approximate_entropy(const double *data, const int N, const void *argv, double *result)
+{
+    int length;
+    double tolerance;
+
+    if (!entropy_arguments(N, argv, &length, &tolerance))
+    {
+        *result = 0.0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
+
+    *result = mean_log_match_fraction(data, N, length, tolerance) - mean_log_match_fraction(data, N, length + 1, tolerance);
+
+    return XTRACT_SUCCESS;
+}
