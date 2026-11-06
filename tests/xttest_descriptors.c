@@ -46,6 +46,7 @@ UTEST(descriptors, make_descriptors_scalar_vector_classification)
     ASSERT_EQ(fd[XTRACT_MEDIAN].is_scalar, XTRACT_TRUE);
     ASSERT_EQ(fd[XTRACT_MEDIAN_ABSOLUTE_DEVIATION].is_scalar, XTRACT_TRUE);
     ASSERT_EQ(fd[XTRACT_HJORTH_COMPLEXITY].is_scalar, XTRACT_TRUE);
+    ASSERT_EQ(fd[XTRACT_TIME_REVERSAL_ASYMMETRY].is_scalar, XTRACT_TRUE);
     ASSERT_EQ(xtract_free_descriptors(fd), XTRACT_SUCCESS);
 }
 
@@ -243,6 +244,16 @@ UTEST(descriptors, appended_features_are_fully_described)
     ASSERT_EQ(fd[XTRACT_HJORTH_MOBILITY].result.scalar.unit, XTRACT_UNIT_NONE);
     ASSERT_EQ(fd[XTRACT_HJORTH_COMPLEXITY].result.scalar.unit, XTRACT_UNIT_NONE);
 
+    ASSERT_EQ(fd[XTRACT_TIME_REVERSAL_ASYMMETRY].argc, 1);
+    ASSERT_EQ(fd[XTRACT_TIME_REVERSAL_ASYMMETRY].argv.type, XTRACT_INT);
+    ASSERT_EQ(fd[XTRACT_TIME_REVERSAL_ASYMMETRY].argv.donor[0], XTRACT_ANY);
+    CHECK_REL(fd[XTRACT_TIME_REVERSAL_ASYMMETRY].argv.min[0], 1.0, EPSILON);
+    ASSERT_EQ(fd[XTRACT_TIME_REVERSAL_ASYMMETRY].argv.max[0], XTRACT_UNBOUNDED_MAX);
+    ASSERT_EQ(fd[XTRACT_TIME_REVERSAL_ASYMMETRY].data.format, XTRACT_ARBITRARY_SERIES);
+    ASSERT_EQ(fd[XTRACT_TIME_REVERSAL_ASYMMETRY].data.unit, XTRACT_UNIT_ANY);
+    ASSERT_EQ(fd[XTRACT_TIME_REVERSAL_ASYMMETRY].result.scalar.unit, XTRACT_UNIT_ANY);
+    ASSERT_EQ(fd[XTRACT_TIME_REVERSAL_ASYMMETRY].is_delta, XTRACT_FALSE);
+
     ASSERT_EQ(xtract_free_descriptors(fd), XTRACT_SUCCESS);
 }
 
@@ -283,6 +294,7 @@ UTEST(dispatch, slots_map_to_the_expected_function)
     ASSERT_TRUE(xtract[XTRACT_HJORTH_ACTIVITY] == xtract_hjorth_activity);
     ASSERT_TRUE(xtract[XTRACT_HJORTH_MOBILITY] == xtract_hjorth_mobility);
     ASSERT_TRUE(xtract[XTRACT_HJORTH_COMPLEXITY] == xtract_hjorth_complexity);
+    ASSERT_TRUE(xtract[XTRACT_TIME_REVERSAL_ASYMMETRY] == xtract_time_reversal_asymmetry);
 }
 
 /* ===== Descriptor conformance ===== */
@@ -317,6 +329,7 @@ static int conf_min_n(const xtract_function_descriptor_t *d)
     case XTRACT_IRREGULARITY_K:
     case XTRACT_SMOOTHNESS:
     case XTRACT_HJORTH_COMPLEXITY:
+    case XTRACT_TIME_REVERSAL_ASYMMETRY:
         return 3;
     case XTRACT_IRREGULARITY_J:
     case XTRACT_VARIANCE:

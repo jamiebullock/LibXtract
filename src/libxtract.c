@@ -95,4 +95,5 @@ int (*xtract[])(const double *, const int, const void *, double *) =
         xtract_median_absolute_deviation,
         xtract_hjorth_activity,
         xtract_hjorth_mobility,
-        xtract_hjorth_complexity};
+        xtract_hjorth_complexity,
+        xtract_time_reversal_asymmetry};

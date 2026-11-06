@@ -1993,3 +1993,30 @@ int xtract_hjorth_complexity(const double *data, const int N, const void *argv, 
 
     return XTRACT_SUCCESS;
 }
+
+int xtract_time_reversal_asymmetry(const double *data, const int N, const void *argv, double *result)
+{
+    int lag, n, count;
+    double sum = 0.0;
+
+    if (argv == NULL)
+    {
+        *result = 0.0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
+
+    lag = *(const int *)argv;
+    if (lag < 1 || lag > (N - 1) / 2)
+    {
+        *result = 0.0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
+
+    count = N - 2 * lag;
+    for (n = 0; n < count; n++)
+        sum += data[n + lag] * (XTRACT_SQ(data[n + 2 * lag]) - XTRACT_SQ(data[n]));
+
+    *result = sum / count;
+
+    return XTRACT_SUCCESS;
+}

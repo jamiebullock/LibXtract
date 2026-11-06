@@ -100,6 +100,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_MOVING_AVERAGE:
         case XTRACT_MOVING_MAX:
         case XTRACT_MOVING_MIN:
+        case XTRACT_TIME_REVERSAL_ASYMMETRY:
             *argv_min = 1;
             *argv_max = XTRACT_UNBOUNDED_MAX;
             *argv_def = XTRACT_NO_DEFAULT;
@@ -410,6 +411,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_HJORTH_ACTIVITY:
         case XTRACT_HJORTH_MOBILITY:
         case XTRACT_HJORTH_COMPLEXITY:
+        case XTRACT_TIME_REVERSAL_ASYMMETRY:
         case XTRACT_SKEWNESS:
         case XTRACT_KURTOSIS:
         case XTRACT_LOWEST_VALUE:
@@ -530,6 +532,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_HJORTH_ACTIVITY:
         case XTRACT_HJORTH_MOBILITY:
         case XTRACT_HJORTH_COMPLEXITY:
+        case XTRACT_TIME_REVERSAL_ASYMMETRY:
         case XTRACT_SKEWNESS:
         case XTRACT_KURTOSIS:
         case XTRACT_LOWEST_VALUE:
@@ -957,6 +960,13 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             copy_author(author, "Bo Hjorth");
             *year = 1970;
             break;
+        case XTRACT_TIME_REVERSAL_ASYMMETRY:
+            copy_name(name, "time_reversal_asymmetry");
+            copy_name(p_name, "Time Reversal Asymmetry");
+            copy_desc(desc, "Extract the time reversal asymmetry statistic of an input vector");
+            copy_desc(p_desc, "Extract the time reversal asymmetry statistic of a range of values");
+            copy_author(author, "");
+            break;
         case XTRACT_MFCC:
             copy_name(name, "mfcc");
             copy_name(p_name, "Mel-Frequency Cepstral Coefficients");
@@ -1358,6 +1368,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_MOVING_STANDARD_DEVIATION:
         case XTRACT_MOVING_MAX:
         case XTRACT_MOVING_MIN:
+        case XTRACT_TIME_REVERSAL_ASYMMETRY:
             *argc = 1;
             *argv_type = XTRACT_INT;
             break;
@@ -1429,6 +1440,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_HJORTH_ACTIVITY:
         case XTRACT_HJORTH_MOBILITY:
         case XTRACT_HJORTH_COMPLEXITY:
+        case XTRACT_TIME_REVERSAL_ASYMMETRY:
         case XTRACT_SKEWNESS:
         case XTRACT_KURTOSIS:
         case XTRACT_SPECTRAL_MEAN:
@@ -1528,6 +1540,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_HJORTH_ACTIVITY:
         case XTRACT_HJORTH_MOBILITY:
         case XTRACT_HJORTH_COMPLEXITY:
+        case XTRACT_TIME_REVERSAL_ASYMMETRY:
         case XTRACT_SKEWNESS:
         case XTRACT_KURTOSIS:
         case XTRACT_SPECTRAL_MEAN:
@@ -1608,6 +1621,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             case XTRACT_AVERAGE_DEVIATION:
             case XTRACT_MEDIAN:
             case XTRACT_MEDIAN_ABSOLUTE_DEVIATION:
+            case XTRACT_TIME_REVERSAL_ASYMMETRY:
             case XTRACT_SKEWNESS:
             case XTRACT_KURTOSIS:
             case XTRACT_RMS_AMPLITUDE:

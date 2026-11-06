@@ -2888,3 +2888,81 @@ UTEST(scalar, hjorth_parameters_reject_a_series_shorter_than_their_differences_n
     ASSERT_EQ(xtract_hjorth_mobility(data, 2, NULL, &result), XTRACT_SUCCESS);
     ASSERT_EQ(xtract_hjorth_complexity(data, 3, NULL, &result), XTRACT_SUCCESS);
 }
+
+UTEST(scalar, time_reversal_asymmetry_of_1_to_5_at_lag_1)
+{
+    double data[5] = {1.0, 2.0, 3.0, 4.0, 5.0};
+    double result = -1.0;
+    int lag = 1;
+
+    ASSERT_EQ(xtract_time_reversal_asymmetry(data, 5, &lag, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 116.0 / 3.0, EPSILON);
+}
+
+UTEST(scalar, time_reversal_asymmetry_at_lag_2_uses_every_window_that_fits)
+{
+    double data[6] = {1.0, -2.0, 0.5, 3.0, -1.0, 2.0};
+    double result = -1.0;
+    double expected = 0.0;
+    int lag = 2;
+    int n;
+
+    for (n = 0; n < 2; n++)
+        expected += data[n + 4] * data[n + 4] * data[n + 2] - data[n + 2] * data[n] * data[n];
+    expected /= 2.0;
+    ASSERT_EQ(xtract_time_reversal_asymmetry(data, 6, &lag, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, expected, EPSILON);
+}
+
+UTEST(scalar, time_reversal_asymmetry_changes_sign_when_the_series_is_reversed)
+{
+    double data[8] = {3.0, -1.5, 4.25, 0.0, 2.0, 9.5, -6.0, 1.0};
+    double reversed[8];
+    double forward, backward;
+    int lag;
+    int i;
+
+    for (i = 0; i < 8; i++)
+        reversed[i] = data[7 - i];
+    for (lag = 1; lag <= 3; lag++)
+    {
+        ASSERT_EQ(xtract_time_reversal_asymmetry(data, 8, &lag, &forward), XTRACT_SUCCESS);
+        ASSERT_EQ(xtract_time_reversal_asymmetry(reversed, 8, &lag, &backward), XTRACT_SUCCESS);
+        CHECK_REL(backward, -forward, EPSILON);
+    }
+}
+
+UTEST(scalar, time_reversal_asymmetry_of_a_palindromic_series_is_zero)
+{
+    double data[7] = {1.0, 4.0, 2.0, 7.0, 2.0, 4.0, 1.0};
+    double result = -1.0;
+    int lag = 1;
+
+    ASSERT_EQ(xtract_time_reversal_asymmetry(data, 7, &lag, &result), XTRACT_SUCCESS);
+    CHECK_NEAR(result, 0.0, EPSILON);
+}
+
+UTEST(scalar, time_reversal_asymmetry_rejects_a_missing_or_unusable_lag_and_sets_the_result_to_zero)
+{
+    double data[5] = {1.0, 2.0, 3.0, 4.0, 5.0};
+    double result = -1.0;
+    int lag;
+
+    ASSERT_EQ(xtract_time_reversal_asymmetry(data, 5, NULL, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    lag = 0;
+    result = -1.0;
+    ASSERT_EQ(xtract_time_reversal_asymmetry(data, 5, &lag, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    lag = 3;
+    result = -1.0;
+    ASSERT_EQ(xtract_time_reversal_asymmetry(data, 5, &lag, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    lag = 2;
+    ASSERT_EQ(xtract_time_reversal_asymmetry(data, 5, &lag, &result), XTRACT_SUCCESS);
+    lag = 1;
+    result = -1.0;
+    ASSERT_EQ(xtract_time_reversal_asymmetry(data, 2, &lag, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    ASSERT_EQ(xtract_time_reversal_asymmetry(data, 3, &lag, &result), XTRACT_SUCCESS);
+}

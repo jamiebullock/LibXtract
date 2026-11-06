@@ -513,6 +513,15 @@ extern "C"
      */
     int xtract_hjorth_complexity(const double *data, const int N, const void *argv, double *result);
 
+    /** \brief Extract the time reversal asymmetry statistic of an input vector: the mean over every position of the product of the value one lag ahead with the difference between the squares of the values two lags ahead and at the position
+     *
+     * \param *data: a pointer to the first element in an array of doubles
+     * \param N: the number of elements to be considered, at least twice the lag plus 1
+     * \param *argv: a pointer to an int holding the lag, at least 1
+     * \param *result: the statistic of N values from the array pointed to by *data; 0 for a series that reads the same in both directions, and the negative of the statistic of the series reversed
+     */
+    int xtract_time_reversal_asymmetry(const double *data, const int N, const void *argv, double *result);
+
     /** @} */
 
 #ifdef __cplusplus
