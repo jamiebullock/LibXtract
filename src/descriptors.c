@@ -450,6 +450,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_IRREGULARITY_K:
         case XTRACT_IRREGULARITY_J:
         case XTRACT_SMOOTHNESS:
+        case XTRACT_SPECTRAL_ENTROPY:
         case XTRACT_FLATNESS:
         case XTRACT_POWER:
         case XTRACT_PEAK_SPECTRUM:
@@ -568,6 +569,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_CREST:
         case XTRACT_FLATNESS:
         case XTRACT_FLATNESS_DB:
+        case XTRACT_SPECTRAL_ENTROPY:
         case XTRACT_POWER:
         case XTRACT_BARK_COEFFICIENTS:
         case XTRACT_RMS_AMPLITUDE:
@@ -965,6 +967,13 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             copy_name(p_name, "Time Reversal Asymmetry");
             copy_desc(desc, "Extract the time reversal asymmetry statistic of an input vector");
             copy_desc(p_desc, "Extract the time reversal asymmetry statistic of a range of values");
+            copy_author(author, "");
+            break;
+        case XTRACT_SPECTRAL_ENTROPY:
+            copy_name(name, "spectral_entropy");
+            copy_name(p_name, "Spectral Entropy");
+            copy_desc(desc, "Extract the normalised Shannon entropy of a spectrum");
+            copy_desc(p_desc, "Extract the normalised Shannon entropy of an audio spectrum");
             copy_author(author, "");
             break;
         case XTRACT_MFCC:
@@ -1398,6 +1407,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_HJORTH_ACTIVITY:
         case XTRACT_HJORTH_MOBILITY:
         case XTRACT_HJORTH_COMPLEXITY:
+        case XTRACT_SPECTRAL_ENTROPY:
         case XTRACT_SPECTRAL_MEAN:
         case XTRACT_SPECTRAL_CENTROID:
         case XTRACT_IRREGULARITY_K:
@@ -1441,6 +1451,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_HJORTH_MOBILITY:
         case XTRACT_HJORTH_COMPLEXITY:
         case XTRACT_TIME_REVERSAL_ASYMMETRY:
+        case XTRACT_SPECTRAL_ENTROPY:
         case XTRACT_SKEWNESS:
         case XTRACT_KURTOSIS:
         case XTRACT_SPECTRAL_MEAN:
@@ -1541,6 +1552,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_HJORTH_MOBILITY:
         case XTRACT_HJORTH_COMPLEXITY:
         case XTRACT_TIME_REVERSAL_ASYMMETRY:
+        case XTRACT_SPECTRAL_ENTROPY:
         case XTRACT_SKEWNESS:
         case XTRACT_KURTOSIS:
         case XTRACT_SPECTRAL_MEAN:
@@ -1711,6 +1723,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
                 break;
             case XTRACT_FLATNESS:
                 /* geometric mean / arithmetic mean (Wiener entropy): [0, 1] */
+            case XTRACT_SPECTRAL_ENTROPY:
             case XTRACT_TONALITY:
                 /* min(flatness_db / -60, 1): [0, 1] */
             case XTRACT_SPECTRAL_INHARMONICITY:

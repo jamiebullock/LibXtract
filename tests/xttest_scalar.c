@@ -2966,3 +2966,96 @@ UTEST(scalar, time_reversal_asymmetry_rejects_a_missing_or_unusable_lag_and_sets
     ASSERT_EQ(result, 0.0);
     ASSERT_EQ(xtract_time_reversal_asymmetry(data, 3, &lag, &result), XTRACT_SUCCESS);
 }
+
+UTEST(scalar, spectral_entropy_of_a_flat_spectrum_is_1)
+{
+    double data[8] = {0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5};
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_spectral_entropy(data, 8, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 1.0, EPSILON);
+}
+
+UTEST(scalar, spectral_entropy_of_a_single_bin_is_0)
+{
+    double data[6] = {0.0, 0.0, 7.0, 0.0, 0.0, 0.0};
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_spectral_entropy(data, 6, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(result, 0.0);
+}
+
+UTEST(scalar, spectral_entropy_of_two_equal_bins_among_four_is_a_half)
+{
+    double data[4] = {3.0, 0.0, 3.0, 0.0};
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_spectral_entropy(data, 4, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 0.5, EPSILON);
+}
+
+UTEST(scalar, spectral_entropy_matches_the_normalised_distribution_definition)
+{
+    double data[7] = {0.1, 2.5, 0.0, 4.0, 1.25, 0.75, 3.0};
+    double total = 0.0;
+    double expected = 0.0;
+    double p, result;
+    int i;
+
+    for (i = 0; i < 7; i++)
+        total += data[i];
+    for (i = 0; i < 7; i++)
+    {
+        p = data[i] / total;
+        if (p > 0.0)
+            expected -= p * log(p);
+    }
+    expected /= log(7.0);
+    ASSERT_EQ(xtract_spectral_entropy(data, 7, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, expected, EPSILON);
+}
+
+UTEST(scalar, spectral_entropy_is_unchanged_by_scaling_the_spectrum)
+{
+    double data[5] = {0.1, 2.5, 4.0, 1.25, 0.75};
+    double scaled[5];
+    double result, scaled_result;
+    int i;
+
+    for (i = 0; i < 5; i++)
+        scaled[i] = data[i] * 1.0e100;
+    ASSERT_EQ(xtract_spectral_entropy(data, 5, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_spectral_entropy(scaled, 5, NULL, &scaled_result), XTRACT_SUCCESS);
+    CHECK_REL(scaled_result, result, EPSILON);
+}
+
+UTEST(scalar, spectral_entropy_ignores_negative_bins)
+{
+    double data[4] = {3.0, -1.0, 3.0, -5.0};
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_spectral_entropy(data, 4, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 0.5, EPSILON);
+}
+
+UTEST(scalar, spectral_entropy_of_an_empty_spectrum_has_no_result)
+{
+    double data[3] = {0.0, 0.0, 0.0};
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_spectral_entropy(data, 3, NULL, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
+}
+
+UTEST(scalar, spectral_entropy_rejects_fewer_than_two_bins_and_sets_the_result_to_zero)
+{
+    double data[2] = {1.0, 1.0};
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_spectral_entropy(data, 1, NULL, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    result = -1.0;
+    ASSERT_EQ(xtract_spectral_entropy(data, 0, NULL, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    ASSERT_EQ(xtract_spectral_entropy(data, 2, NULL, &result), XTRACT_SUCCESS);
+}
