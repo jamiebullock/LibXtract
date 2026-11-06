@@ -576,6 +576,24 @@ extern "C"
      */
     int xtract_lempel_ziv_complexity(const double *data, const int N, const void *argv, double *result);
 
+    /** \brief Extract the sample entropy of an input vector: the negative log of the fraction of its pairs of matching templates of a given length that still match when extended by one element, where two templates match when no pair of corresponding elements differs by more than the tolerance
+     *
+     * \param *data: a pointer to the first element in an array of doubles
+     * \param N: the number of elements to be considered, at least the template length plus 2
+     * \param *argv: a pointer to an array of two doubles: the template length, a whole number at least 1; and the tolerance in the units of the input, at least 0, typically 0.2 times the standard deviation of the input vector
+     * \param *result: the sample entropy of N values from the array pointed to by *data, in nats, or 0 with no result if no pair of templates matches at either length
+     */
+    int xtract_sample_entropy(const double *data, const int N, const void *argv, double *result);
+
+    /** \brief Extract the approximate entropy of an input vector: the difference between the mean log fraction of templates matching each template of a given length and the same for templates one element longer, where each template matches itself and two templates match when no pair of corresponding elements differs by more than the tolerance
+     *
+     * \param *data: a pointer to the first element in an array of doubles
+     * \param N: the number of elements to be considered, at least the template length plus 2
+     * \param *argv: a pointer to an array of two doubles: the template length, a whole number at least 1; and the tolerance in the units of the input, at least 0, typically 0.2 times the standard deviation of the input vector
+     * \param *result: the approximate entropy of N values from the array pointed to by *data, in nats
+     */
+    int xtract_approximate_entropy(const double *data, const int N, const void *argv, double *result);
+
     /** @} */
 
 #ifdef __cplusplus

@@ -137,6 +137,17 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *(argv_def + 1) = 1;
             *(argv_unit + 1) = (xtract_unit_t)XTRACT_NONE;
             break;
+        case XTRACT_SAMPLE_ENTROPY:
+        case XTRACT_APPROXIMATE_ENTROPY:
+            *argv_min = 1;
+            *argv_max = XTRACT_UNBOUNDED_MAX;
+            *argv_def = 2;
+            *argv_unit = (xtract_unit_t)XTRACT_NONE;
+            *(argv_min + 1) = 0;
+            *(argv_max + 1) = XTRACT_UNBOUNDED_MAX;
+            *(argv_def + 1) = XTRACT_NO_DEFAULT;
+            *(argv_unit + 1) = XTRACT_UNIT_ANY;
+            break;
         case XTRACT_STANDARD_DEVIATION:
         case XTRACT_SPECTRAL_STANDARD_DEVIATION:
             *argv_min = 0.0;
@@ -435,6 +446,8 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_HIGUCHI_FRACTAL_DIMENSION:
         case XTRACT_PERMUTATION_ENTROPY:
         case XTRACT_LEMPEL_ZIV_COMPLEXITY:
+        case XTRACT_SAMPLE_ENTROPY:
+        case XTRACT_APPROXIMATE_ENTROPY:
         case XTRACT_SKEWNESS:
         case XTRACT_KURTOSIS:
         case XTRACT_LOWEST_VALUE:
@@ -562,6 +575,8 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_HIGUCHI_FRACTAL_DIMENSION:
         case XTRACT_PERMUTATION_ENTROPY:
         case XTRACT_LEMPEL_ZIV_COMPLEXITY:
+        case XTRACT_SAMPLE_ENTROPY:
+        case XTRACT_APPROXIMATE_ENTROPY:
         case XTRACT_SKEWNESS:
         case XTRACT_KURTOSIS:
         case XTRACT_LOWEST_VALUE:
@@ -1044,6 +1059,22 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             copy_author(author, "Abraham Lempel, Jacob Ziv");
             *year = 1976;
             break;
+        case XTRACT_SAMPLE_ENTROPY:
+            copy_name(name, "sample_entropy");
+            copy_name(p_name, "Sample Entropy");
+            copy_desc(desc, "Extract the sample entropy of an input vector");
+            copy_desc(p_desc, "Extract the sample entropy of a range of values");
+            copy_author(author, "Joshua S. Richman, J. Randall Moorman");
+            *year = 2000;
+            break;
+        case XTRACT_APPROXIMATE_ENTROPY:
+            copy_name(name, "approximate_entropy");
+            copy_name(p_name, "Approximate Entropy");
+            copy_desc(desc, "Extract the approximate entropy of an input vector");
+            copy_desc(p_desc, "Extract the approximate entropy of a range of values");
+            copy_author(author, "Steven M. Pincus");
+            *year = 1991;
+            break;
         case XTRACT_MFCC:
             copy_name(name, "mfcc");
             copy_name(p_name, "Mel-Frequency Cepstral Coefficients");
@@ -1455,6 +1486,11 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *argc = 2;
             *argv_type = XTRACT_INT;
             break;
+        case XTRACT_SAMPLE_ENTROPY:
+        case XTRACT_APPROXIMATE_ENTROPY:
+            *argc = 2;
+            *argv_type = XTRACT_FLOAT;
+            break;
         case XTRACT_EWMA_AVERAGE:
         case XTRACT_EWMA_VARIANCE:
             *argc = 1;
@@ -1533,6 +1569,8 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_HIGUCHI_FRACTAL_DIMENSION:
         case XTRACT_PERMUTATION_ENTROPY:
         case XTRACT_LEMPEL_ZIV_COMPLEXITY:
+        case XTRACT_SAMPLE_ENTROPY:
+        case XTRACT_APPROXIMATE_ENTROPY:
         case XTRACT_SKEWNESS:
         case XTRACT_KURTOSIS:
         case XTRACT_SPECTRAL_MEAN:
@@ -1639,6 +1677,8 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_HIGUCHI_FRACTAL_DIMENSION:
         case XTRACT_PERMUTATION_ENTROPY:
         case XTRACT_LEMPEL_ZIV_COMPLEXITY:
+        case XTRACT_SAMPLE_ENTROPY:
+        case XTRACT_APPROXIMATE_ENTROPY:
         case XTRACT_SKEWNESS:
         case XTRACT_KURTOSIS:
         case XTRACT_SPECTRAL_MEAN:
@@ -1833,6 +1873,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             case XTRACT_HJORTH_MOBILITY:
             case XTRACT_HJORTH_COMPLEXITY:
             case XTRACT_LEMPEL_ZIV_COMPLEXITY:
+            case XTRACT_SAMPLE_ENTROPY:
                 *result_unit = XTRACT_UNIT_NONE;
                 *result_min = 0.0;
                 *result_max = XTRACT_UNBOUNDED_MAX;
@@ -1840,6 +1881,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             case XTRACT_PETROSIAN_FRACTAL_DIMENSION:
             case XTRACT_KATZ_FRACTAL_DIMENSION:
             case XTRACT_HIGUCHI_FRACTAL_DIMENSION:
+            case XTRACT_APPROXIMATE_ENTROPY:
                 *result_unit = XTRACT_UNIT_NONE;
                 *result_min = XTRACT_UNBOUNDED_MIN;
                 *result_max = XTRACT_UNBOUNDED_MAX;
