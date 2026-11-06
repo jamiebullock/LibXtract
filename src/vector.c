@@ -1062,3 +1062,104 @@ int xtract_subbands(const double *data, const int N, const void *argv, double *r
 
     return rv;
 }
+
+static int moving_window(const int N, const void *argv, const int min_window)
+{
+    int window;
+
+    if (argv == NULL)
+        return 0;
+
+    window = *(const int *)argv;
+
+    if (window < min_window || window > N)
+        return 0;
+
+    return window;
+}
+
+int xtract_moving_sum(const double *data, const int N, const void *argv, double *result)
+{
+    const int window = moving_window(N, argv, 1);
+    int n;
+    double sum = 0.0;
+
+    if (window == 0)
+        return XTRACT_ARGUMENT_ERROR;
+
+    for (n = 0; n < window; n++)
+        sum += data[n];
+    result[0] = sum;
+
+    for (n = window; n < N; n++)
+    {
+        sum += data[n] - data[n - window];
+        result[n - window + 1] = sum;
+    }
+
+    return XTRACT_SUCCESS;
+}
+
+int xtract_moving_average(const double *data, const int N, const void *argv, double *result)
+{
+    const int rv = xtract_moving_sum(data, N, argv, result);
+    int window, n;
+
+    if (rv != XTRACT_SUCCESS)
+        return rv;
+
+    window = *(const int *)argv;
+
+    for (n = 0; n <= N - window; n++)
+        result[n] /= window;
+
+    return XTRACT_SUCCESS;
+}
+
+int xtract_moving_variance(const double *data, const int N, const void *argv, double *result)
+{
+    const int window = moving_window(N, argv, 2);
+    int n;
+    double mean = 0.0;
+    double m2 = 0.0;
+    double delta, entering, leaving, next_mean;
+
+    if (window == 0)
+        return XTRACT_ARGUMENT_ERROR;
+
+    for (n = 0; n < window; n++)
+    {
+        delta = data[n] - mean;
+        mean += delta / (n + 1);
+        m2 += delta * (data[n] - mean);
+    }
+    result[0] = XTRACT_MAX(m2, 0.0) / (window - 1);
+
+    for (n = window; n < N; n++)
+    {
+        entering = data[n];
+        leaving = data[n - window];
+        next_mean = mean + (entering - leaving) / window;
+        m2 += (entering - leaving) * (entering - next_mean + leaving - mean);
+        mean = next_mean;
+        result[n - window + 1] = XTRACT_MAX(m2, 0.0) / (window - 1);
+    }
+
+    return XTRACT_SUCCESS;
+}
+
+int xtract_moving_standard_deviation(const double *data, const int N, const void *argv, double *result)
+{
+    const int rv = xtract_moving_variance(data, N, argv, result);
+    int window, n;
+
+    if (rv != XTRACT_SUCCESS)
+        return rv;
+
+    window = *(const int *)argv;
+
+    for (n = 0; n <= N - window; n++)
+        result[n] = sqrt(result[n]);
+
+    return XTRACT_SUCCESS;
+}

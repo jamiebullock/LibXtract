@@ -131,6 +131,25 @@ void verify_bark_coefficients(void)
     free(result);
 }
 
+#define MOVING_HARNESS(feature)                                         \
+    void verify_##feature(void)                                         \
+    {                                                                   \
+        const int N = nondet_length();                                  \
+        double *data = nondet_doubles(N);                               \
+        const int window = nondet_between(-1, VERIFY_MAX_N + 1);        \
+        const void *argv = nondet_argv(&window);                        \
+        double *result = nondet_doubles(at_least_zero(N - window + 1)); \
+                                                                        \
+        (void)xtract_##feature(data, N, argv, result);                  \
+        free(data);                                                     \
+        free(result);                                                   \
+    }
+
+MOVING_HARNESS(moving_sum)
+MOVING_HARNESS(moving_average)
+MOVING_HARNESS(moving_variance)
+MOVING_HARNESS(moving_standard_deviation)
+
 void verify_lpcc(void)
 {
     const int N = nondet_length();

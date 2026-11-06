@@ -45,6 +45,8 @@ reports/
 # Project-specific files
 examples/simpletest/simpletest
 tests/xttest
+bench/xtbench
+bench/xtbench_moving
 
 # Bounded model checking (make verify)
 verify/xtract.gb
