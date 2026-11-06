@@ -1989,7 +1989,7 @@ int xtract_hjorth_complexity(const double *data, const int N, const void *argv, 
         return XTRACT_NO_RESULT;
     }
 
-    *result = sqrt(population_variance_of_difference(data, N, 2) * activity) / first;
+    *result = sqrt(population_variance_of_difference(data, N, 2) / first) * sqrt(activity / first);
 
     return XTRACT_SUCCESS;
 }

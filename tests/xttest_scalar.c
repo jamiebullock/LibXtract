@@ -2807,6 +2807,27 @@ UTEST(scalar, hjorth_parameters_of_a_geometric_series_match_the_definitions)
     CHECK_REL(complexity, sqrt(var_dd / var_d) / sqrt(var_d / var_x), EPSILON);
 }
 
+UTEST(scalar, hjorth_mobility_and_complexity_are_unchanged_by_scaling_to_the_limits_of_a_double)
+{
+    double data[6] = {1.0, -2.0, 0.5, 3.0, -1.0, 2.0};
+    double scaled[6];
+    double scales[2] = {1.0e150, 1.0e-150};
+    double mobility, complexity, scaled_mobility, scaled_complexity;
+    int k, i;
+
+    ASSERT_EQ(xtract_hjorth_mobility(data, 6, NULL, &mobility), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_hjorth_complexity(data, 6, NULL, &complexity), XTRACT_SUCCESS);
+    for (k = 0; k < 2; k++)
+    {
+        for (i = 0; i < 6; i++)
+            scaled[i] = data[i] * scales[k];
+        ASSERT_EQ(xtract_hjorth_mobility(scaled, 6, NULL, &scaled_mobility), XTRACT_SUCCESS);
+        ASSERT_EQ(xtract_hjorth_complexity(scaled, 6, NULL, &scaled_complexity), XTRACT_SUCCESS);
+        CHECK_REL(scaled_mobility, mobility, EPSILON);
+        CHECK_REL(scaled_complexity, complexity, EPSILON);
+    }
+}
+
 UTEST(scalar, hjorth_mobility_of_a_sinusoid_is_its_frequency_and_its_complexity_is_1)
 {
     double data[2000];
