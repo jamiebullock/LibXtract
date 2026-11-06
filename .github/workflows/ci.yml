@@ -5,7 +5,6 @@ on:
     branches: [main, develop]
   pull_request:
     branches: [main, develop]
-    types: [opened, synchronize, reopened, ready_for_review]
 
 permissions:
   contents: read
@@ -154,12 +153,16 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
-  # The proofs take about fifteen minutes, so they run on pull requests that
-  # are ready for review, and on every push to main and develop.
+  # The proofs take about fifteen minutes, so they run on every push to main
+  # and develop and not on pull requests. A failure opens an issue, or adds
+  # a comment to the open issue for that branch, so that it is not missed.
   verify:
-    if: github.event_name == 'push' || github.event.pull_request.draft == false
+    if: github.event_name == 'push'
     runs-on: ubuntu-24.04
     timeout-minutes: 90
+    permissions:
+      contents: read
+      issues: write
     steps:
       - uses: actions/checkout@v6
 
@@ -176,13 +179,30 @@ jobs:
         run: make verify
 
       - name: Upload proof logs on failure
-        if: failure()
+        if: failure() || cancelled()
         uses: actions/upload-artifact@v4
         with:
           name: verify-logs
           path: verify/.proofs/*.log
           include-hidden-files: true
           if-no-files-found: ignore
+
+      # A proof that hits the job timeout ends the job as cancelled
+      - name: Open or update an issue on failure
+        if: failure() || cancelled()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          title="CBMC proofs failed on $GITHUB_REF_NAME"
+          body="The verify job failed on $GITHUB_REF_NAME at $GITHUB_SHA: $RUN_URL"
+          number=$(gh issue list --state open --search "\"$title\" in:title" --json number --jq '.[0].number')
+          if [ -n "$number" ]; then
+            gh issue comment "$number" --body "$body"
+          else
+            gh issue create --title "$title" --body "$body"
+          fi
 
   format:
     runs-on: ubuntu-latest
