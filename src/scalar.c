@@ -2283,6 +2283,8 @@ int xtract_lempel_ziv_complexity(const double *data, const int N, const void *ar
                 length++;
             if (length > longest)
                 longest = length;
+            if (start + longest == N)
+                break;
         }
         phrases++;
         start += longest + 1;
