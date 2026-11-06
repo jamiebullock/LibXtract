@@ -25,14 +25,16 @@ GOTO_INSTRUMENT ?= goto-instrument
 VERIFY_MAX_N ?= 32
 # The proofs in SMALL_PROOFS run at this input bound, and each such harness
 # draws its N from nondet_small_length(). Formula slicing cannot drop a
-# floating-point sum that a branch tests (a loudness total, a filter's log
-# floor, a band's zero amplitude), and the solver's cost in those sums grows
-# too fast for VERIFY_MAX_N to be reachable.
+# floating-point value that a branch tests (a loudness total, a filter's log
+# floor, a band's zero amplitude, the comparisons that order a moving
+# extremum's deque), and the solver's cost in those values grows too fast
+# for VERIFY_MAX_N to be reachable.
 VERIFY_SMALL_N ?= 8
 SMALL_PROOFS = verify_hps verify_mcleod_f0 verify_sharpness \
 	verify_tristimulus_1 verify_tristimulus_2 verify_tristimulus_3 \
 	verify_mel_spectrogram verify_mfcc verify_gammatone_spectrogram verify_gfcc \
-	verify_mmbses verify_spectral_subband_centroids
+	verify_mmbses verify_spectral_subband_centroids \
+	verify_moving_max verify_moving_min
 # The filterbank proofs take a filterbank of up to this many filters; the
 # count multiplies the formula, and N is the bound the proofs are about.
 VERIFY_MAX_FILTERS ?= 2

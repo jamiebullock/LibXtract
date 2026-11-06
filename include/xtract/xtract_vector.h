@@ -268,6 +268,24 @@ extern "C"
      * \param *result: a pointer to an array of N - window + 1 doubles, one sample standard deviation per window position, the square root of what xtract_moving_variance gives
      */
     int xtract_moving_standard_deviation(const double *data, const int N, const void *argv, double *result);
+
+    /** \brief Extract the largest value of a series over a sliding window
+     *
+     * \param *data: a pointer to the first element in an array of doubles
+     * \param N: the number of elements in the array pointed to by *data, at least the window length
+     * \param *argv: a pointer to an int holding the window length, at least 1 and at most N
+     * \param *result: a pointer to an array of N - window + 1 doubles, one maximum per window position, the first over the first window elements of *data
+     */
+    int xtract_moving_max(const double *data, const int N, const void *argv, double *result);
+
+    /** \brief Extract the smallest value of a series over a sliding window
+     *
+     * \param *data: a pointer to the first element in an array of doubles
+     * \param N: the number of elements in the array pointed to by *data, at least the window length
+     * \param *argv: a pointer to an int holding the window length, at least 1 and at most N
+     * \param *result: a pointer to an array of N - window + 1 doubles, one minimum per window position, the first over the first window elements of *data
+     */
+    int xtract_moving_min(const double *data, const int N, const void *argv, double *result);
     /** @} */
 
 #ifdef __cplusplus

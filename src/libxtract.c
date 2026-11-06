@@ -86,4 +86,6 @@ int (*xtract[])(const double *, const int, const void *, double *) =
         xtract_moving_sum,
         xtract_moving_average,
         xtract_moving_variance,
-        xtract_moving_standard_deviation};
+        xtract_moving_standard_deviation,
+        xtract_moving_max,
+        xtract_moving_min};
