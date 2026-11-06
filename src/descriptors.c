@@ -407,6 +407,9 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_AVERAGE_DEVIATION:
         case XTRACT_MEDIAN:
         case XTRACT_MEDIAN_ABSOLUTE_DEVIATION:
+        case XTRACT_HJORTH_ACTIVITY:
+        case XTRACT_HJORTH_MOBILITY:
+        case XTRACT_HJORTH_COMPLEXITY:
         case XTRACT_SKEWNESS:
         case XTRACT_KURTOSIS:
         case XTRACT_LOWEST_VALUE:
@@ -524,6 +527,9 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_AVERAGE_DEVIATION:
         case XTRACT_MEDIAN:
         case XTRACT_MEDIAN_ABSOLUTE_DEVIATION:
+        case XTRACT_HJORTH_ACTIVITY:
+        case XTRACT_HJORTH_MOBILITY:
+        case XTRACT_HJORTH_COMPLEXITY:
         case XTRACT_SKEWNESS:
         case XTRACT_KURTOSIS:
         case XTRACT_LOWEST_VALUE:
@@ -926,6 +932,30 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             copy_desc(desc, "Extract the median absolute deviation of an input vector");
             copy_desc(p_desc, "Extract the median absolute deviation of a range of values");
             copy_author(author, "");
+            break;
+        case XTRACT_HJORTH_ACTIVITY:
+            copy_name(name, "hjorth_activity");
+            copy_name(p_name, "Hjorth Activity");
+            copy_desc(desc, "Extract the Hjorth activity of an input vector");
+            copy_desc(p_desc, "Extract the Hjorth activity of a range of values");
+            copy_author(author, "Bo Hjorth");
+            *year = 1970;
+            break;
+        case XTRACT_HJORTH_MOBILITY:
+            copy_name(name, "hjorth_mobility");
+            copy_name(p_name, "Hjorth Mobility");
+            copy_desc(desc, "Extract the Hjorth mobility of an input vector");
+            copy_desc(p_desc, "Extract the Hjorth mobility of a range of values");
+            copy_author(author, "Bo Hjorth");
+            *year = 1970;
+            break;
+        case XTRACT_HJORTH_COMPLEXITY:
+            copy_name(name, "hjorth_complexity");
+            copy_name(p_name, "Hjorth Complexity");
+            copy_desc(desc, "Extract the Hjorth complexity of an input vector");
+            copy_desc(p_desc, "Extract the Hjorth complexity of a range of values");
+            copy_author(author, "Bo Hjorth");
+            *year = 1970;
             break;
         case XTRACT_MFCC:
             copy_name(name, "mfcc");
@@ -1354,6 +1384,9 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             break;
         case XTRACT_MEAN:
         case XTRACT_MEDIAN:
+        case XTRACT_HJORTH_ACTIVITY:
+        case XTRACT_HJORTH_MOBILITY:
+        case XTRACT_HJORTH_COMPLEXITY:
         case XTRACT_SPECTRAL_MEAN:
         case XTRACT_SPECTRAL_CENTROID:
         case XTRACT_IRREGULARITY_K:
@@ -1393,6 +1426,9 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_AVERAGE_DEVIATION:
         case XTRACT_MEDIAN:
         case XTRACT_MEDIAN_ABSOLUTE_DEVIATION:
+        case XTRACT_HJORTH_ACTIVITY:
+        case XTRACT_HJORTH_MOBILITY:
+        case XTRACT_HJORTH_COMPLEXITY:
         case XTRACT_SKEWNESS:
         case XTRACT_KURTOSIS:
         case XTRACT_SPECTRAL_MEAN:
@@ -1489,6 +1525,9 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_AVERAGE_DEVIATION:
         case XTRACT_MEDIAN:
         case XTRACT_MEDIAN_ABSOLUTE_DEVIATION:
+        case XTRACT_HJORTH_ACTIVITY:
+        case XTRACT_HJORTH_MOBILITY:
+        case XTRACT_HJORTH_COMPLEXITY:
         case XTRACT_SKEWNESS:
         case XTRACT_KURTOSIS:
         case XTRACT_SPECTRAL_MEAN:
@@ -1670,6 +1709,17 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
                 /* max / mean of non-negative data: >= 1, no upper bound */
                 *result_unit = XTRACT_UNIT_NONE;
                 *result_min = 1.0;
+                *result_max = XTRACT_UNBOUNDED_MAX;
+                break;
+            case XTRACT_HJORTH_ACTIVITY:
+                *result_unit = XTRACT_UNIT_ANY;
+                *result_min = 0.0;
+                *result_max = XTRACT_UNBOUNDED_MAX;
+                break;
+            case XTRACT_HJORTH_MOBILITY:
+            case XTRACT_HJORTH_COMPLEXITY:
+                *result_unit = XTRACT_UNIT_NONE;
+                *result_min = 0.0;
                 *result_max = XTRACT_UNBOUNDED_MAX;
                 break;
             case XTRACT_SHARPNESS:

@@ -486,6 +486,33 @@ extern "C"
      */
     int xtract_median_absolute_deviation(const double *data, const int N, const void *argv, double *result);
 
+    /** \brief Extract the Hjorth activity of an input vector: its variance, with N as the divisor
+     *
+     * \param *data: a pointer to the first element in an array of doubles
+     * \param N: the number of elements to be considered, at least 1
+     * \param *argv: not used
+     * \param *result: the activity of N values from the array pointed to by *data
+     */
+    int xtract_hjorth_activity(const double *data, const int N, const void *argv, double *result);
+
+    /** \brief Extract the Hjorth mobility of an input vector: the square root of the ratio of the activity of its first difference to its own activity
+     *
+     * \param *data: a pointer to the first element in an array of doubles
+     * \param N: the number of elements to be considered, at least 2
+     * \param *argv: not used
+     * \param *result: the mobility of N values from the array pointed to by *data, or 0 with no result if the values are all equal
+     */
+    int xtract_hjorth_mobility(const double *data, const int N, const void *argv, double *result);
+
+    /** \brief Extract the Hjorth complexity of an input vector: the ratio of the mobility of its first difference to its own mobility
+     *
+     * \param *data: a pointer to the first element in an array of doubles
+     * \param N: the number of elements to be considered, at least 3
+     * \param *argv: not used
+     * \param *result: the complexity of N values from the array pointed to by *data, or 0 with no result if the values or their first differences are all equal
+     */
+    int xtract_hjorth_complexity(const double *data, const int N, const void *argv, double *result);
+
     /** @} */
 
 #ifdef __cplusplus
