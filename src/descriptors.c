@@ -95,6 +95,20 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *argv_def = XTRACT_NO_DEFAULT;
             *argv_unit = XTRACT_UNIT_ANY;
             break;
+        case XTRACT_MOVING_SUM:
+        case XTRACT_MOVING_AVERAGE:
+            *argv_min = 1;
+            *argv_max = XTRACT_UNBOUNDED_MAX;
+            *argv_def = XTRACT_NO_DEFAULT;
+            *argv_unit = (xtract_unit_t)XTRACT_NONE;
+            break;
+        case XTRACT_MOVING_VARIANCE:
+        case XTRACT_MOVING_STANDARD_DEVIATION:
+            *argv_min = 2;
+            *argv_max = XTRACT_UNBOUNDED_MAX;
+            *argv_def = XTRACT_NO_DEFAULT;
+            *argv_unit = (xtract_unit_t)XTRACT_NONE;
+            break;
         case XTRACT_STANDARD_DEVIATION:
         case XTRACT_SPECTRAL_STANDARD_DEVIATION:
             *argv_min = 0.0;
@@ -386,6 +400,10 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_WINDOWED:
         case XTRACT_SMOOTHED:
         case XTRACT_PEAK:
+        case XTRACT_MOVING_SUM:
+        case XTRACT_MOVING_AVERAGE:
+        case XTRACT_MOVING_VARIANCE:
+        case XTRACT_MOVING_STANDARD_DEVIATION:
             *data_format = XTRACT_ARBITRARY_SERIES;
             break;
         case XTRACT_SPECTRAL_MEAN:
@@ -538,6 +556,10 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_SUBBANDS:
         case XTRACT_PEAK:
         case XTRACT_MMBSES:
+        case XTRACT_MOVING_SUM:
+        case XTRACT_MOVING_AVERAGE:
+        case XTRACT_MOVING_VARIANCE:
+        case XTRACT_MOVING_STANDARD_DEVIATION:
             *data_unit = XTRACT_UNIT_ANY;
             break;
         case XTRACT_SPECTRAL_MEAN:
@@ -808,6 +830,34 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             copy_name(p_name, "Spectral Subband Centroids");
             copy_desc(desc, "Extract the centroid of each mel band from a spectrum");
             copy_desc(p_desc, "Extract the spectral centroid of each mel band from an audio spectrum");
+            copy_author(author, "");
+            break;
+        case XTRACT_MOVING_SUM:
+            copy_name(name, "moving_sum");
+            copy_name(p_name, "Moving Sum");
+            copy_desc(desc, "Extract the sum of a series over a sliding window");
+            copy_desc(p_desc, "Extract the sum of a series over a sliding window");
+            copy_author(author, "");
+            break;
+        case XTRACT_MOVING_AVERAGE:
+            copy_name(name, "moving_average");
+            copy_name(p_name, "Moving Average");
+            copy_desc(desc, "Extract the mean of a series over a sliding window");
+            copy_desc(p_desc, "Extract the mean of a series over a sliding window");
+            copy_author(author, "");
+            break;
+        case XTRACT_MOVING_VARIANCE:
+            copy_name(name, "moving_variance");
+            copy_name(p_name, "Moving Variance");
+            copy_desc(desc, "Extract the variance of a series over a sliding window");
+            copy_desc(p_desc, "Extract the variance of a series over a sliding window");
+            copy_author(author, "");
+            break;
+        case XTRACT_MOVING_STANDARD_DEVIATION:
+            copy_name(name, "moving_standard_deviation");
+            copy_name(p_name, "Moving Standard Deviation");
+            copy_desc(desc, "Extract the standard deviation of a series over a sliding window");
+            copy_desc(p_desc, "Extract the standard deviation of a series over a sliding window");
             copy_author(author, "");
             break;
         case XTRACT_MFCC:
@@ -1204,6 +1254,10 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *argv_type = XTRACT_MEL_FILTER;
             break;
         case XTRACT_LPCC:
+        case XTRACT_MOVING_SUM:
+        case XTRACT_MOVING_AVERAGE:
+        case XTRACT_MOVING_VARIANCE:
+        case XTRACT_MOVING_STANDARD_DEVIATION:
             *argc = 1;
             *argv_type = XTRACT_INT;
             break;
@@ -1327,6 +1381,10 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_SMOOTHED:
         case XTRACT_MMBSES:
         case XTRACT_SPECTRAL_SUBBAND_CENTROIDS:
+        case XTRACT_MOVING_SUM:
+        case XTRACT_MOVING_AVERAGE:
+        case XTRACT_MOVING_VARIANCE:
+        case XTRACT_MOVING_STANDARD_DEVIATION:
             *is_scalar = XTRACT_FALSE;
             break;
         default:
@@ -1565,6 +1623,10 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             case XTRACT_SUBBANDS:
             case XTRACT_WINDOWED:
             case XTRACT_SMOOTHED:
+            case XTRACT_MOVING_SUM:
+            case XTRACT_MOVING_AVERAGE:
+            case XTRACT_MOVING_VARIANCE:
+            case XTRACT_MOVING_STANDARD_DEVIATION:
                 *result_format = XTRACT_ARBITRARY_SERIES;
                 *result_unit = XTRACT_UNIT_ANY;
                 break;

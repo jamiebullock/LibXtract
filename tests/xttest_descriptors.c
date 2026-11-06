@@ -39,6 +39,8 @@ UTEST(descriptors, make_descriptors_scalar_vector_classification)
     ASSERT_EQ(fd[XTRACT_PEAK].is_scalar, XTRACT_TRUE);
     ASSERT_EQ(fd[XTRACT_MMBSES].is_scalar, XTRACT_FALSE);
     ASSERT_EQ(fd[XTRACT_SPECTRAL_SUBBAND_CENTROIDS].is_scalar, XTRACT_FALSE);
+    ASSERT_EQ(fd[XTRACT_MOVING_SUM].is_scalar, XTRACT_FALSE);
+    ASSERT_EQ(fd[XTRACT_MOVING_STANDARD_DEVIATION].is_scalar, XTRACT_FALSE);
     ASSERT_EQ(xtract_free_descriptors(fd), XTRACT_SUCCESS);
 }
 
@@ -148,6 +150,7 @@ UTEST(descriptors, argv_ranges_match_the_functions)
 UTEST(descriptors, appended_features_are_fully_described)
 {
     xtract_function_descriptor_t *fd = xtract_make_descriptors();
+    int f;
     ASSERT_TRUE(fd != NULL);
 
     ASSERT_EQ(fd[XTRACT_PEAK].argc, 1);
@@ -173,6 +176,24 @@ UTEST(descriptors, appended_features_are_fully_described)
     ASSERT_EQ(fd[XTRACT_SPECTRAL_SUBBAND_CENTROIDS].data.unit, XTRACT_ANY_AMPLITUDE_HERTZ);
     ASSERT_EQ(fd[XTRACT_SPECTRAL_SUBBAND_CENTROIDS].result.vector.format, XTRACT_MEL_COEFFS);
     ASSERT_EQ(fd[XTRACT_SPECTRAL_SUBBAND_CENTROIDS].result.vector.unit, XTRACT_HERTZ);
+
+    for (f = XTRACT_MOVING_SUM; f <= XTRACT_MOVING_STANDARD_DEVIATION; f++)
+    {
+        ASSERT_EQ_MSG(fd[f].argc, 1, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].argv.type, XTRACT_INT, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].argv.donor[0], XTRACT_ANY, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].argv.max[0], XTRACT_UNBOUNDED_MAX, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].data.format, XTRACT_ARBITRARY_SERIES, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].data.unit, XTRACT_UNIT_ANY, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].result.vector.format, XTRACT_ARBITRARY_SERIES, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].result.vector.unit, XTRACT_UNIT_ANY, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].is_delta, XTRACT_FALSE, fd[f].algo.name);
+        ASSERT_TRUE_MSG(fd[f].algo.name[0] != 0, "moving feature without a name");
+    }
+    CHECK_REL(fd[XTRACT_MOVING_SUM].argv.min[0], 1.0, EPSILON);
+    CHECK_REL(fd[XTRACT_MOVING_AVERAGE].argv.min[0], 1.0, EPSILON);
+    CHECK_REL(fd[XTRACT_MOVING_VARIANCE].argv.min[0], 2.0, EPSILON);
+    CHECK_REL(fd[XTRACT_MOVING_STANDARD_DEVIATION].argv.min[0], 2.0, EPSILON);
 
     ASSERT_EQ(xtract_free_descriptors(fd), XTRACT_SUCCESS);
 }
@@ -201,6 +222,10 @@ UTEST(dispatch, slots_map_to_the_expected_function)
     ASSERT_TRUE(xtract[XTRACT_PEAK] == xtract_peak);
     ASSERT_TRUE(xtract[XTRACT_MMBSES] == xtract_mmbses);
     ASSERT_TRUE(xtract[XTRACT_SPECTRAL_SUBBAND_CENTROIDS] == xtract_spectral_subband_centroids);
+    ASSERT_TRUE(xtract[XTRACT_MOVING_SUM] == xtract_moving_sum);
+    ASSERT_TRUE(xtract[XTRACT_MOVING_AVERAGE] == xtract_moving_average);
+    ASSERT_TRUE(xtract[XTRACT_MOVING_VARIANCE] == xtract_moving_variance);
+    ASSERT_TRUE(xtract[XTRACT_MOVING_STANDARD_DEVIATION] == xtract_moving_standard_deviation);
 }
 
 /* ===== Descriptor conformance ===== */
@@ -239,6 +264,8 @@ static int conf_min_n(const xtract_function_descriptor_t *d)
     case XTRACT_VARIANCE:
     case XTRACT_LPC:
     case XTRACT_LPCC:
+    case XTRACT_MOVING_VARIANCE:
+    case XTRACT_MOVING_STANDARD_DEVIATION:
         return 2;
     case XTRACT_SPECTRUM:
     case XTRACT_AUTOCORRELATION_FFT:

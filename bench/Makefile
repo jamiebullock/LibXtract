@@ -3,9 +3,7 @@
 # SPDX-FileCopyrightText: 2026 Jamie Bullock
 # SPDX-License-Identifier: Zlib
 
-TARGET = xtbench
-SRC = bench_scalar.c
-OBJ = $(SRC:.c=.o)
+TARGETS = xtbench xtbench_moving
 CFLAGS = -O3 -I../include -I.
 LDFLAGS =
 LIBS =
@@ -17,16 +15,22 @@ endif
 
 LIBS += -lm
 
-$(TARGET): $(OBJ) ../src/libxtract.a
-	$(CC) $(LDFLAGS) -o $@ $(OBJ) ../src/libxtract.a $(LIBS)
+all: $(TARGETS)
+
+xtbench: bench_scalar.o ../src/libxtract.a
+	$(CC) $(LDFLAGS) -o $@ bench_scalar.o ../src/libxtract.a $(LIBS)
+
+xtbench_moving: bench_moving.o ../src/libxtract.a
+	$(CC) $(LDFLAGS) -o $@ bench_moving.o ../src/libxtract.a $(LIBS)
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-bench: $(TARGET)
-	@./$(TARGET)
+bench: $(TARGETS)
+	@./xtbench
+	@./xtbench_moving
 
 clean:
-	@$(RM) $(TARGET) $(OBJ)
+	@$(RM) $(TARGETS) *.o
 
-.PHONY: bench clean
+.PHONY: all bench clean

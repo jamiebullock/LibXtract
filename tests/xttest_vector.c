@@ -2548,3 +2548,202 @@ UTEST(vector, peak_spectrum_zero_spacing_defaults_to_44100_over_the_transform_le
     ASSERT_EQ(xtract_peak_spectrum(data, 4, argv, result), XTRACT_SUCCESS);
     CHECK_REL(result[4 + 1], 2.0 * 44100.0 / 8.0, EPSILON);
 }
+
+/* ===== xtract_moving_sum / average / variance / standard_deviation ===== */
+
+static void fill_sentinel(double *result, int n)
+{
+    int i;
+    for (i = 0; i < n; i++)
+        result[i] = -1.0;
+}
+
+UTEST(vector, moving_sum_of_1_to_5_over_a_window_of_2)
+{
+    double data[5] = {1.0, 2.0, 3.0, 4.0, 5.0};
+    double result[4];
+    int window = 2;
+
+    ASSERT_EQ(xtract_moving_sum(data, 5, &window, result), XTRACT_SUCCESS);
+    CHECK_REL(result[0], 3.0, EPSILON);
+    CHECK_REL(result[1], 5.0, EPSILON);
+    CHECK_REL(result[2], 7.0, EPSILON);
+    CHECK_REL(result[3], 9.0, EPSILON);
+}
+
+UTEST(vector, moving_sum_over_a_window_of_n_is_the_total)
+{
+    double data[5] = {1.0, 2.0, 3.0, 4.0, 5.0};
+    double result[2] = {-1.0, -1.0};
+    int window = 5;
+
+    ASSERT_EQ(xtract_moving_sum(data, 5, &window, result), XTRACT_SUCCESS);
+    CHECK_REL(result[0], 15.0, EPSILON);
+    ASSERT_EQ(result[1], -1.0);
+}
+
+UTEST(vector, moving_sum_over_a_window_of_1_copies_the_series)
+{
+    double data[4] = {0.5, -2.0, 3.25, 7.0};
+    double result[4];
+    int window = 1;
+    int i;
+
+    ASSERT_EQ(xtract_moving_sum(data, 4, &window, result), XTRACT_SUCCESS);
+    for (i = 0; i < 4; i++)
+        ASSERT_EQ(result[i], data[i]);
+}
+
+UTEST(vector, moving_sum_rejects_a_missing_or_out_of_range_window_and_leaves_result_untouched)
+{
+    double data[4] = {1.0, 2.0, 3.0, 4.0};
+    double result[4];
+    int window;
+
+    fill_sentinel(result, 4);
+    ASSERT_EQ(xtract_moving_sum(data, 4, NULL, result), XTRACT_ARGUMENT_ERROR);
+    window = 0;
+    ASSERT_EQ(xtract_moving_sum(data, 4, &window, result), XTRACT_ARGUMENT_ERROR);
+    window = 5;
+    ASSERT_EQ(xtract_moving_sum(data, 4, &window, result), XTRACT_ARGUMENT_ERROR);
+    window = 1;
+    ASSERT_EQ(xtract_moving_sum(data, 0, &window, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result[0], -1.0);
+    ASSERT_EQ(result[3], -1.0);
+}
+
+UTEST(vector, moving_average_of_1_to_5_over_a_window_of_2)
+{
+    double data[5] = {1.0, 2.0, 3.0, 4.0, 5.0};
+    double result[4];
+    int window = 2;
+
+    ASSERT_EQ(xtract_moving_average(data, 5, &window, result), XTRACT_SUCCESS);
+    CHECK_REL(result[0], 1.5, EPSILON);
+    CHECK_REL(result[1], 2.5, EPSILON);
+    CHECK_REL(result[2], 3.5, EPSILON);
+    CHECK_REL(result[3], 4.5, EPSILON);
+}
+
+UTEST(vector, moving_average_matches_xtract_mean_on_every_window)
+{
+    double data[8] = {3.0, -1.5, 4.25, 0.0, 2.0, 9.5, -6.0, 1.0};
+    double result[8];
+    double mean;
+    int window = 3;
+    int i;
+
+    ASSERT_EQ(xtract_moving_average(data, 8, &window, result), XTRACT_SUCCESS);
+    for (i = 0; i <= 8 - window; i++)
+    {
+        ASSERT_EQ(xtract_mean(data + i, window, NULL, &mean), XTRACT_SUCCESS);
+        CHECK_REL(result[i], mean, EPSILON);
+    }
+}
+
+UTEST(vector, moving_average_rejects_a_missing_or_out_of_range_window_and_leaves_result_untouched)
+{
+    double data[4] = {1.0, 2.0, 3.0, 4.0};
+    double result[4];
+    int window;
+
+    fill_sentinel(result, 4);
+    ASSERT_EQ(xtract_moving_average(data, 4, NULL, result), XTRACT_ARGUMENT_ERROR);
+    window = 0;
+    ASSERT_EQ(xtract_moving_average(data, 4, &window, result), XTRACT_ARGUMENT_ERROR);
+    window = 5;
+    ASSERT_EQ(xtract_moving_average(data, 4, &window, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result[0], -1.0);
+}
+
+UTEST(vector, moving_variance_matches_xtract_variance_on_every_window)
+{
+    double data[8] = {3.0, -1.5, 4.25, 0.0, 2.0, 9.5, -6.0, 1.0};
+    double result[8];
+    double mean, variance;
+    int window;
+    int i;
+
+    for (window = 2; window <= 8; window++)
+    {
+        ASSERT_EQ(xtract_moving_variance(data, 8, &window, result), XTRACT_SUCCESS);
+        for (i = 0; i <= 8 - window; i++)
+        {
+            ASSERT_EQ(xtract_mean(data + i, window, NULL, &mean), XTRACT_SUCCESS);
+            ASSERT_EQ(xtract_variance(data + i, window, &mean, &variance), XTRACT_SUCCESS);
+            CHECK_REL(result[i], variance, EPSILON);
+        }
+    }
+}
+
+UTEST(vector, moving_variance_of_1_to_5_over_a_window_of_3_is_1)
+{
+    double data[5] = {1.0, 2.0, 3.0, 4.0, 5.0};
+    double result[3];
+    int window = 3;
+    int i;
+
+    ASSERT_EQ(xtract_moving_variance(data, 5, &window, result), XTRACT_SUCCESS);
+    for (i = 0; i < 3; i++)
+        CHECK_REL(result[i], 1.0, EPSILON);
+}
+
+UTEST(vector, moving_variance_of_a_constant_tail_after_a_large_spike_is_exactly_zero)
+{
+    double data[8] = {1000000.3, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1};
+    double result[7];
+    int window = 2;
+    int i;
+
+    ASSERT_EQ(xtract_moving_variance(data, 8, &window, result), XTRACT_SUCCESS);
+    CHECK_REL(result[0], (1000000.3 - 1.1) * (1000000.3 - 1.1) / 2.0, 1e-9);
+    for (i = 1; i < 7; i++)
+        ASSERT_EQ(result[i], 0.0);
+}
+
+UTEST(vector, moving_variance_rejects_a_window_below_2_and_leaves_result_untouched)
+{
+    double data[4] = {1.0, 2.0, 3.0, 4.0};
+    double result[4];
+    int window;
+
+    fill_sentinel(result, 4);
+    ASSERT_EQ(xtract_moving_variance(data, 4, NULL, result), XTRACT_ARGUMENT_ERROR);
+    window = 1;
+    ASSERT_EQ(xtract_moving_variance(data, 4, &window, result), XTRACT_ARGUMENT_ERROR);
+    window = 5;
+    ASSERT_EQ(xtract_moving_variance(data, 4, &window, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result[0], -1.0);
+    window = 2;
+    ASSERT_EQ(xtract_moving_variance(data, 4, &window, result), XTRACT_SUCCESS);
+    CHECK_REL(result[0], 0.5, EPSILON);
+    CHECK_REL(result[2], 0.5, EPSILON);
+    ASSERT_EQ(result[3], -1.0);
+}
+
+UTEST(vector, moving_standard_deviation_is_the_square_root_of_the_moving_variance)
+{
+    double data[8] = {3.0, -1.5, 4.25, 0.0, 2.0, 9.5, -6.0, 1.0};
+    double variance[6];
+    double deviation[6];
+    int window = 3;
+    int i;
+
+    ASSERT_EQ(xtract_moving_variance(data, 8, &window, variance), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_moving_standard_deviation(data, 8, &window, deviation), XTRACT_SUCCESS);
+    for (i = 0; i < 6; i++)
+        CHECK_REL(deviation[i], sqrt(variance[i]), EPSILON);
+    CHECK_REL(deviation[0], sqrt(9.145833333333334), EPSILON);
+}
+
+UTEST(vector, moving_standard_deviation_rejects_a_window_below_2_and_leaves_result_untouched)
+{
+    double data[4] = {1.0, 2.0, 3.0, 4.0};
+    double result[4];
+    int window = 1;
+
+    fill_sentinel(result, 4);
+    ASSERT_EQ(xtract_moving_standard_deviation(data, 4, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_moving_standard_deviation(data, 4, &window, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result[0], -1.0);
+}

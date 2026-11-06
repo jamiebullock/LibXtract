@@ -82,4 +82,8 @@ int (*xtract[])(const double *, const int, const void *, double *) =
         /* appended */
         xtract_peak,
         xtract_mmbses,
-        xtract_spectral_subband_centroids};
+        xtract_spectral_subband_centroids,
+        xtract_moving_sum,
+        xtract_moving_average,
+        xtract_moving_variance,
+        xtract_moving_standard_deviation};
