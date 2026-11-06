@@ -2855,3 +2855,148 @@ UTEST(vector, moving_max_and_min_reject_a_missing_or_out_of_range_window_and_lea
     ASSERT_EQ(result[0], -1.0);
     ASSERT_EQ(result[3], -1.0);
 }
+
+static void ewma_by_definition(const double *data, int t, double alpha, double *mean, double *variance)
+{
+    double weight;
+    double total = 0.0;
+    double sum = 0.0;
+    int i;
+
+    for (i = 0; i <= t; i++)
+    {
+        weight = i == 0 ? pow(1.0 - alpha, t) : alpha * pow(1.0 - alpha, t - i);
+        total += weight;
+        sum += weight * data[i];
+    }
+    *mean = sum / total;
+    *variance = 0.0;
+    for (i = 0; i <= t; i++)
+    {
+        weight = i == 0 ? pow(1.0 - alpha, t) : alpha * pow(1.0 - alpha, t - i);
+        *variance += weight * (data[i] - *mean) * (data[i] - *mean) / total;
+    }
+}
+
+UTEST(vector, ewma_average_of_1_to_5_with_an_alpha_of_a_half)
+{
+    double data[5] = {1.0, 2.0, 3.0, 4.0, 5.0};
+    double result[5];
+    double alpha = 0.5;
+
+    ASSERT_EQ(xtract_ewma_average(data, 5, &alpha, result), XTRACT_SUCCESS);
+    ASSERT_EQ(result[0], 1.0);
+    ASSERT_EQ(result[1], 1.5);
+    ASSERT_EQ(result[2], 2.25);
+    ASSERT_EQ(result[3], 3.125);
+    ASSERT_EQ(result[4], 4.0625);
+}
+
+UTEST(vector, ewma_average_with_an_alpha_of_1_copies_the_series)
+{
+    double data[4] = {3.0, -1.5, 4.25, 0.0};
+    double result[4];
+    double alpha = 1.0;
+    int i;
+
+    ASSERT_EQ(xtract_ewma_average(data, 4, &alpha, result), XTRACT_SUCCESS);
+    for (i = 0; i < 4; i++)
+        ASSERT_EQ(result[i], data[i]);
+}
+
+UTEST(vector, ewma_average_with_an_alpha_of_0_holds_the_first_value)
+{
+    double data[4] = {3.0, -1.5, 4.25, 0.0};
+    double result[4];
+    double alpha = 0.0;
+    int i;
+
+    ASSERT_EQ(xtract_ewma_average(data, 4, &alpha, result), XTRACT_SUCCESS);
+    for (i = 0; i < 4; i++)
+        ASSERT_EQ(result[i], 3.0);
+}
+
+UTEST(vector, ewma_average_and_variance_match_the_weighted_definitions_at_every_position)
+{
+    double data[8] = {3.0, -1.5, 4.25, 0.0, 2.0, 9.5, -6.0, 1.0};
+    double average[8];
+    double variance[8];
+    double alphas[3] = {0.1, 0.5, 0.9};
+    double mean, expected;
+    int a, t;
+
+    for (a = 0; a < 3; a++)
+    {
+        ASSERT_EQ(xtract_ewma_average(data, 8, &alphas[a], average), XTRACT_SUCCESS);
+        ASSERT_EQ(xtract_ewma_variance(data, 8, &alphas[a], variance), XTRACT_SUCCESS);
+        for (t = 0; t < 8; t++)
+        {
+            ewma_by_definition(data, t, alphas[a], &mean, &expected);
+            CHECK_REL(average[t], mean, EPSILON);
+            CHECK_NEAR(variance[t], expected, EPSILON);
+        }
+    }
+}
+
+UTEST(vector, ewma_variance_of_1_to_5_with_an_alpha_of_a_half)
+{
+    double data[5] = {1.0, 2.0, 3.0, 4.0, 5.0};
+    double result[5];
+    double alpha = 0.5;
+
+    ASSERT_EQ(xtract_ewma_variance(data, 5, &alpha, result), XTRACT_SUCCESS);
+    ASSERT_EQ(result[0], 0.0);
+    ASSERT_EQ(result[1], 0.25);
+    ASSERT_EQ(result[2], 0.6875);
+    ASSERT_EQ(result[3], 1.109375);
+    ASSERT_EQ(result[4], 1.43359375);
+}
+
+UTEST(vector, ewma_variance_of_a_constant_series_is_exactly_zero)
+{
+    double data[6] = {1.0e9, 1.0e9, 1.0e9, 1.0e9, 1.0e9, 1.0e9};
+    double result[6];
+    double alpha = 0.3;
+    int i;
+
+    ASSERT_EQ(xtract_ewma_variance(data, 6, &alpha, result), XTRACT_SUCCESS);
+    for (i = 0; i < 6; i++)
+        ASSERT_EQ(result[i], 0.0);
+}
+
+UTEST(vector, ewma_variance_with_an_alpha_of_1_is_exactly_zero)
+{
+    double data[4] = {3.0, -1.5, 4.25, 0.0};
+    double result[4];
+    double alpha = 1.0;
+    int i;
+
+    ASSERT_EQ(xtract_ewma_variance(data, 4, &alpha, result), XTRACT_SUCCESS);
+    for (i = 0; i < 4; i++)
+        ASSERT_EQ(result[i], 0.0);
+}
+
+UTEST(vector, ewma_average_and_variance_reject_a_missing_or_out_of_range_alpha_and_leave_result_untouched)
+{
+    double data[4] = {1.0, 2.0, 3.0, 4.0};
+    double result[4];
+    double alpha;
+
+    fill_sentinel(result, 4);
+    ASSERT_EQ(xtract_ewma_average(data, 4, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_ewma_variance(data, 4, NULL, result), XTRACT_ARGUMENT_ERROR);
+    alpha = -0.5;
+    ASSERT_EQ(xtract_ewma_average(data, 4, &alpha, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_ewma_variance(data, 4, &alpha, result), XTRACT_ARGUMENT_ERROR);
+    alpha = 1.5;
+    ASSERT_EQ(xtract_ewma_average(data, 4, &alpha, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_ewma_variance(data, 4, &alpha, result), XTRACT_ARGUMENT_ERROR);
+    alpha = NAN;
+    ASSERT_EQ(xtract_ewma_average(data, 4, &alpha, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_ewma_variance(data, 4, &alpha, result), XTRACT_ARGUMENT_ERROR);
+    alpha = 0.5;
+    ASSERT_EQ(xtract_ewma_average(data, 0, &alpha, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_ewma_variance(data, 0, &alpha, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result[0], -1.0);
+    ASSERT_EQ(result[3], -1.0);
+}

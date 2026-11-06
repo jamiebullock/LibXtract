@@ -1219,3 +1219,46 @@ int xtract_moving_min(const double *data, const int N, const void *argv, double 
 {
     return moving_extremum(data, N, argv, result, 0);
 }
+
+static int ewma_alpha(const void *argv, double *alpha)
+{
+    if (argv == NULL)
+        return 0;
+    *alpha = *(const double *)argv;
+    return *alpha >= 0.0 && *alpha <= 1.0;
+}
+
+int xtract_ewma_average(const double *data, const int N, const void *argv, double *result)
+{
+    double alpha;
+    int n;
+
+    if (N < 1 || !ewma_alpha(argv, &alpha))
+        return XTRACT_ARGUMENT_ERROR;
+
+    result[0] = data[0];
+    for (n = 1; n < N; n++)
+        result[n] = result[n - 1] + alpha * (data[n] - result[n - 1]);
+
+    return XTRACT_SUCCESS;
+}
+
+int xtract_ewma_variance(const double *data, const int N, const void *argv, double *result)
+{
+    double alpha, mean, delta;
+    int n;
+
+    if (N < 1 || !ewma_alpha(argv, &alpha))
+        return XTRACT_ARGUMENT_ERROR;
+
+    mean = data[0];
+    result[0] = 0.0;
+    for (n = 1; n < N; n++)
+    {
+        delta = data[n] - mean;
+        mean += alpha * delta;
+        result[n] = (1.0 - alpha) * (result[n - 1] + alpha * delta * delta);
+    }
+
+    return XTRACT_SUCCESS;
+}

@@ -152,6 +152,23 @@ MOVING_HARNESS(moving_standard_deviation, nondet_length(), VERIFY_MAX_N)
 MOVING_HARNESS(moving_max, nondet_small_length(), VERIFY_SMALL_N)
 MOVING_HARNESS(moving_min, nondet_small_length(), VERIFY_SMALL_N)
 
+#define EWMA_HARNESS(feature)                          \
+    void verify_##feature(void)                        \
+    {                                                  \
+        const int N = nondet_length();                 \
+        double *data = nondet_doubles(N);              \
+        const double alpha = nondet_double();          \
+        const void *argv = nondet_argv(&alpha);        \
+        double *result = nondet_doubles(N);            \
+                                                       \
+        (void)xtract_##feature(data, N, argv, result); \
+        free(data);                                    \
+        free(result);                                  \
+    }
+
+EWMA_HARNESS(ewma_average)
+EWMA_HARNESS(ewma_variance)
+
 void verify_lpcc(void)
 {
     const int N = nondet_length();

@@ -41,6 +41,8 @@ UTEST(descriptors, make_descriptors_scalar_vector_classification)
     ASSERT_EQ(fd[XTRACT_SPECTRAL_SUBBAND_CENTROIDS].is_scalar, XTRACT_FALSE);
     ASSERT_EQ(fd[XTRACT_MOVING_SUM].is_scalar, XTRACT_FALSE);
     ASSERT_EQ(fd[XTRACT_MOVING_STANDARD_DEVIATION].is_scalar, XTRACT_FALSE);
+    ASSERT_EQ(fd[XTRACT_EWMA_AVERAGE].is_scalar, XTRACT_FALSE);
+    ASSERT_EQ(fd[XTRACT_EWMA_VARIANCE].is_scalar, XTRACT_FALSE);
     ASSERT_EQ(xtract_free_descriptors(fd), XTRACT_SUCCESS);
 }
 
@@ -197,6 +199,21 @@ UTEST(descriptors, appended_features_are_fully_described)
     CHECK_REL(fd[XTRACT_MOVING_MAX].argv.min[0], 1.0, EPSILON);
     CHECK_REL(fd[XTRACT_MOVING_MIN].argv.min[0], 1.0, EPSILON);
 
+    for (f = XTRACT_EWMA_AVERAGE; f <= XTRACT_EWMA_VARIANCE; f++)
+    {
+        ASSERT_EQ_MSG(fd[f].argc, 1, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].argv.type, XTRACT_FLOAT, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].argv.donor[0], XTRACT_ANY, fd[f].algo.name);
+        CHECK_NEAR(fd[f].argv.min[0], 0.0, EPSILON);
+        CHECK_REL(fd[f].argv.max[0], 1.0, EPSILON);
+        ASSERT_EQ_MSG(fd[f].data.format, XTRACT_ARBITRARY_SERIES, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].data.unit, XTRACT_UNIT_ANY, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].result.vector.format, XTRACT_ARBITRARY_SERIES, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].result.vector.unit, XTRACT_UNIT_ANY, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].is_delta, XTRACT_FALSE, fd[f].algo.name);
+        ASSERT_TRUE_MSG(fd[f].algo.name[0] != 0, "ewma feature without a name");
+    }
+
     ASSERT_EQ(xtract_free_descriptors(fd), XTRACT_SUCCESS);
 }
 
@@ -230,6 +247,8 @@ UTEST(dispatch, slots_map_to_the_expected_function)
     ASSERT_TRUE(xtract[XTRACT_MOVING_STANDARD_DEVIATION] == xtract_moving_standard_deviation);
     ASSERT_TRUE(xtract[XTRACT_MOVING_MAX] == xtract_moving_max);
     ASSERT_TRUE(xtract[XTRACT_MOVING_MIN] == xtract_moving_min);
+    ASSERT_TRUE(xtract[XTRACT_EWMA_AVERAGE] == xtract_ewma_average);
+    ASSERT_TRUE(xtract[XTRACT_EWMA_VARIANCE] == xtract_ewma_variance);
 }
 
 /* ===== Descriptor conformance ===== */
