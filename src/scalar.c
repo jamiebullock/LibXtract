@@ -2328,8 +2328,8 @@ static int entropy_arguments(const int N, const void *argv, int *length, double 
 int xtract_sample_entropy(const double *data, const int N, const void *argv, double *result)
 {
     int length, templates, i, j;
-    int shorter_matches = 0;
-    int longer_matches = 0;
+    double shorter_matches = 0.0;
+    double longer_matches = 0.0;
     double tolerance;
 
     if (!entropy_arguments(N, argv, &length, &tolerance))
@@ -2345,20 +2345,20 @@ int xtract_sample_entropy(const double *data, const int N, const void *argv, dou
         {
             if (templates_match(data, i, j, length, tolerance))
             {
-                shorter_matches++;
+                shorter_matches += 1.0;
                 if (fabs(data[i + length] - data[j + length]) <= tolerance)
-                    longer_matches++;
+                    longer_matches += 1.0;
             }
         }
     }
 
-    if (shorter_matches == 0 || longer_matches == 0)
+    if (shorter_matches == 0.0 || longer_matches == 0.0)
     {
         *result = 0.0;
         return XTRACT_NO_RESULT;
     }
 
-    *result = -log((double)longer_matches / shorter_matches);
+    *result = -log(longer_matches / shorter_matches);
 
     return XTRACT_SUCCESS;
 }
