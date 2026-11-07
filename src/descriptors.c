@@ -484,6 +484,10 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_ATTACK_TIME:
         case XTRACT_DECAY_TIME:
         case XTRACT_DECAY_RATE:
+        case XTRACT_TEMPORAL_CENTROID:
+        case XTRACT_MAX_POSITION:
+        case XTRACT_MIN_POSITION:
+        case XTRACT_PEAK_ASYMMETRY:
         case XTRACT_SKEWNESS:
         case XTRACT_KURTOSIS:
         case XTRACT_LOWEST_VALUE:
@@ -632,6 +636,10 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_ATTACK_TIME:
         case XTRACT_DECAY_TIME:
         case XTRACT_DECAY_RATE:
+        case XTRACT_TEMPORAL_CENTROID:
+        case XTRACT_MAX_POSITION:
+        case XTRACT_MIN_POSITION:
+        case XTRACT_PEAK_ASYMMETRY:
         case XTRACT_DIFFERENCE_VECTOR:
         case XTRACT_FLUX:
         case XTRACT_LNORM:
@@ -1394,6 +1402,34 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             copy_desc(p_desc, "Extract the rate at which an envelope falls from its peak");
             copy_author(author, "");
             break;
+        case XTRACT_TEMPORAL_CENTROID:
+            copy_name(name, "temporal_centroid");
+            copy_name(p_name, "Temporal Centroid");
+            copy_desc(desc, "Extract the temporal centroid of an envelope");
+            copy_desc(p_desc, "Extract the position of the centre of gravity of an envelope as a fraction of its length");
+            copy_author(author, "");
+            break;
+        case XTRACT_MAX_POSITION:
+            copy_name(name, "max_position");
+            copy_name(p_name, "Maximum Position");
+            copy_desc(desc, "Extract the position of the largest value in an input vector");
+            copy_desc(p_desc, "Extract the position of the largest value in a range of values as a fraction of the length");
+            copy_author(author, "");
+            break;
+        case XTRACT_MIN_POSITION:
+            copy_name(name, "min_position");
+            copy_name(p_name, "Minimum Position");
+            copy_desc(desc, "Extract the position of the smallest value in an input vector");
+            copy_desc(p_desc, "Extract the position of the smallest value in a range of values as a fraction of the length");
+            copy_author(author, "");
+            break;
+        case XTRACT_PEAK_ASYMMETRY:
+            copy_name(name, "peak_asymmetry");
+            copy_name(p_name, "Peak Asymmetry");
+            copy_desc(desc, "Extract the peak asymmetry of an envelope");
+            copy_desc(p_desc, "Extract the ratio of the energy of an envelope from its peak to the end to the energy from the start to its peak");
+            copy_author(author, "");
+            break;
         case XTRACT_DIFFERENCE_VECTOR:
             copy_name(name, "difference_vector");
             copy_name(p_name, "Difference vector");
@@ -1927,6 +1963,9 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             case XTRACT_PERMUTATION_ENTROPY:
             case XTRACT_PERIODICITY:
             case XTRACT_SIGNAL_CONFIDENCE:
+            case XTRACT_TEMPORAL_CENTROID:
+            case XTRACT_MAX_POSITION:
+            case XTRACT_MIN_POSITION:
             case XTRACT_TONALITY:
                 /* min(flatness_db / -60, 1): [0, 1] */
             case XTRACT_SPECTRAL_INHARMONICITY:
@@ -1950,6 +1989,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             case XTRACT_HJORTH_COMPLEXITY:
             case XTRACT_LEMPEL_ZIV_COMPLEXITY:
             case XTRACT_SAMPLE_ENTROPY:
+            case XTRACT_PEAK_ASYMMETRY:
                 *result_unit = XTRACT_UNIT_NONE;
                 *result_min = 0.0;
                 *result_max = XTRACT_UNBOUNDED_MAX;

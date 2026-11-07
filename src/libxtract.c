@@ -107,4 +107,8 @@ int (*xtract[])(const double *, const int, const void *, double *) =
         xtract_approximate_entropy,
         xtract_periodicity,
         xtract_signal_confidence,
-        xtract_decay_rate};
+        xtract_decay_rate,
+        xtract_temporal_centroid,
+        xtract_max_position,
+        xtract_min_position,
+        xtract_peak_asymmetry};

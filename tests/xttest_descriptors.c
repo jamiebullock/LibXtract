@@ -370,6 +370,20 @@ UTEST(descriptors, appended_features_are_fully_described)
         ASSERT_EQ_MSG(fd[f].is_delta, XTRACT_FALSE, fd[f].algo.name);
     }
 
+    for (f = XTRACT_TEMPORAL_CENTROID; f <= XTRACT_PEAK_ASYMMETRY; f++)
+    {
+        ASSERT_EQ_MSG(fd[f].argc, 0, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].data.format, XTRACT_ARBITRARY_SERIES, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].data.unit, XTRACT_UNIT_ANY, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].result.scalar.unit, XTRACT_UNIT_NONE, fd[f].algo.name);
+        CHECK_NEAR(fd[f].result.scalar.min, 0.0, EPSILON);
+        ASSERT_EQ_MSG(fd[f].is_scalar, XTRACT_TRUE, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].is_delta, XTRACT_FALSE, fd[f].algo.name);
+    }
+    for (f = XTRACT_TEMPORAL_CENTROID; f <= XTRACT_MIN_POSITION; f++)
+        CHECK_REL(fd[f].result.scalar.max, 1.0, EPSILON);
+    ASSERT_EQ(fd[XTRACT_PEAK_ASYMMETRY].result.scalar.max, XTRACT_UNBOUNDED_MAX);
+
     ASSERT_EQ(xtract_free_descriptors(fd), XTRACT_SUCCESS);
 }
 
@@ -424,6 +438,10 @@ UTEST(dispatch, slots_map_to_the_expected_function)
     ASSERT_TRUE(xtract[XTRACT_ATTACK_TIME] == xtract_attack_time);
     ASSERT_TRUE(xtract[XTRACT_DECAY_TIME] == xtract_decay_time);
     ASSERT_TRUE(xtract[XTRACT_DECAY_RATE] == xtract_decay_rate);
+    ASSERT_TRUE(xtract[XTRACT_TEMPORAL_CENTROID] == xtract_temporal_centroid);
+    ASSERT_TRUE(xtract[XTRACT_MAX_POSITION] == xtract_max_position);
+    ASSERT_TRUE(xtract[XTRACT_MIN_POSITION] == xtract_min_position);
+    ASSERT_TRUE(xtract[XTRACT_PEAK_ASYMMETRY] == xtract_peak_asymmetry);
 }
 
 /* ===== Descriptor conformance ===== */
@@ -464,6 +482,9 @@ static int conf_min_n(const xtract_function_descriptor_t *d)
     case XTRACT_PERMUTATION_ENTROPY:
         return 3;
     case XTRACT_IRREGULARITY_J:
+    case XTRACT_TEMPORAL_CENTROID:
+    case XTRACT_MAX_POSITION:
+    case XTRACT_MIN_POSITION:
     case XTRACT_VARIANCE:
     case XTRACT_LPC:
     case XTRACT_LPCC:

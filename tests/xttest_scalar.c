@@ -3847,3 +3847,173 @@ UTEST(scalar, sample_and_approximate_entropy_reject_a_missing_or_out_of_range_ar
         ASSERT_NE(functions[f](data, 4, args, &result), XTRACT_ARGUMENT_ERROR);
     }
 }
+
+/* ===== Temporal centroid ===== */
+
+UTEST(temporal_centroid, symmetric_envelope_is_centred)
+{
+    double data[] = {0.0, 1.0, 2.0, 3.0, 2.0, 1.0, 0.0};
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_temporal_centroid(data, 7, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 0.5, 1e-12);
+}
+
+UTEST(temporal_centroid, impulse_sits_at_its_own_position)
+{
+    double data[11] = {0.0};
+    double result = -1.0;
+
+    data[3] = 2.5;
+
+    ASSERT_EQ(xtract_temporal_centroid(data, 11, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 0.3, 1e-12);
+}
+
+UTEST(temporal_centroid, rising_ramp_lies_past_the_middle)
+{
+    /* data[n] = n: sum of n^2 over sum of n, divided by N - 1, is (2N - 1) / (3 (N - 1)) */
+    double data[10];
+    double result = -1.0;
+    int n;
+
+    for (n = 0; n < 10; n++)
+        data[n] = n;
+
+    ASSERT_EQ(xtract_temporal_centroid(data, 10, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 19.0 / 27.0, 1e-12);
+}
+
+UTEST(temporal_centroid, no_result_when_the_elements_do_not_sum_to_a_positive_value)
+{
+    double zeros[] = {0.0, 0.0, 0.0};
+    double cancelling[] = {1.0, -1.0};
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_temporal_centroid(zeros, 3, NULL, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
+    result = -1.0;
+    ASSERT_EQ(xtract_temporal_centroid(cancelling, 2, NULL, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
+}
+
+UTEST(temporal_centroid, needs_two_elements)
+{
+    double data[] = {1.0};
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_temporal_centroid(data, 1, NULL, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+}
+
+/* ===== Maximum and minimum position ===== */
+
+UTEST(max_position, ends_of_a_ramp)
+{
+    double rising[] = {0.0, 1.0, 2.0, 3.0, 4.0};
+    double falling[] = {4.0, 3.0, 2.0, 1.0, 0.0};
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_max_position(rising, 5, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 1.0, 1e-12);
+    ASSERT_EQ(xtract_max_position(falling, 5, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(result, 0.0);
+    ASSERT_EQ(xtract_min_position(rising, 5, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(result, 0.0);
+    ASSERT_EQ(xtract_min_position(falling, 5, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 1.0, 1e-12);
+}
+
+UTEST(max_position, first_occurrence_wins)
+{
+    double data[] = {0.0, 5.0, 5.0, -2.0, -2.0};
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_max_position(data, 5, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 0.25, 1e-12);
+    ASSERT_EQ(xtract_min_position(data, 5, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 0.75, 1e-12);
+}
+
+UTEST(max_position, constant_input_is_the_first_element)
+{
+    double data[] = {2.0, 2.0, 2.0};
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_max_position(data, 3, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(result, 0.0);
+    ASSERT_EQ(xtract_min_position(data, 3, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(result, 0.0);
+}
+
+UTEST(max_position, needs_two_elements)
+{
+    double data[] = {1.0};
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_max_position(data, 1, NULL, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    result = -1.0;
+    ASSERT_EQ(xtract_min_position(data, 1, NULL, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+}
+
+/* ===== Peak asymmetry ===== */
+
+UTEST(peak_asymmetry, symmetric_envelope_is_one)
+{
+    double data[] = {0.5, 1.0, 2.0, 1.0, 0.5};
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_peak_asymmetry(data, 5, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 1.0, 1e-12);
+}
+
+UTEST(peak_asymmetry, energy_after_the_peak_over_energy_before_it)
+{
+    /* before = 1 + 4 + 9 = 14, after = 9 + 1 = 10, the peak counting in both */
+    double data[] = {1.0, 2.0, 3.0, 1.0};
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_peak_asymmetry(data, 4, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 10.0 / 14.0, 1e-12);
+}
+
+UTEST(peak_asymmetry, peak_first_puts_all_energy_after)
+{
+    double data[] = {2.0, 1.0, 1.0};
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_peak_asymmetry(data, 3, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 6.0 / 4.0, 1e-12);
+}
+
+UTEST(peak_asymmetry, impulse_and_single_element_are_one)
+{
+    double impulse[] = {0.0, 0.0, 3.0, 0.0};
+    double single[] = {-4.0};
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_peak_asymmetry(impulse, 4, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 1.0, 1e-12);
+    ASSERT_EQ(xtract_peak_asymmetry(single, 1, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 1.0, 1e-12);
+}
+
+UTEST(peak_asymmetry, no_result_when_every_element_is_zero)
+{
+    double data[] = {0.0, 0.0};
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_peak_asymmetry(data, 2, NULL, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
+}
+
+UTEST(peak_asymmetry, n_zero_argument_error)
+{
+    double data[] = {1.0};
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_peak_asymmetry(data, 0, NULL, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+}

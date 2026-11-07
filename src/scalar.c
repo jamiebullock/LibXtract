@@ -2469,6 +2469,19 @@ static int index_of_maximum(const double *data, const int N)
     return peak;
 }
 
+static int index_of_minimum(const double *data, const int N)
+{
+    int n, trough = 0;
+
+    for (n = 1; n < N; n++)
+    {
+        if (data[n] < data[trough])
+            trough = n;
+    }
+
+    return trough;
+}
+
 static int sample_rate_argument(const double value, double *sr)
 {
     if (!isfinite(value) || value < 0.0)
@@ -2597,6 +2610,88 @@ int xtract_decay_rate(const double *data, const int N, const void *argv, double 
     }
 
     *result = covariance / variance;
+
+    return XTRACT_SUCCESS;
+}
+
+int xtract_temporal_centroid(const double *data, const int N, const void *argv, double *result)
+{
+    double weight = 0.0, moment = 0.0;
+    int n;
+
+    if (N < 2)
+    {
+        *result = 0.0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
+
+    for (n = 0; n < N; n++)
+    {
+        weight += data[n];
+        moment += n * data[n];
+    }
+
+    if (weight <= 0.0)
+    {
+        *result = 0.0;
+        return XTRACT_NO_RESULT;
+    }
+
+    *result = moment / weight / (N - 1);
+
+    return XTRACT_SUCCESS;
+}
+
+int xtract_max_position(const double *data, const int N, const void *argv, double *result)
+{
+    if (N < 2)
+    {
+        *result = 0.0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
+
+    *result = index_of_maximum(data, N) / (double)(N - 1);
+
+    return XTRACT_SUCCESS;
+}
+
+int xtract_min_position(const double *data, const int N, const void *argv, double *result)
+{
+    if (N < 2)
+    {
+        *result = 0.0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
+
+    *result = index_of_minimum(data, N) / (double)(N - 1);
+
+    return XTRACT_SUCCESS;
+}
+
+int xtract_peak_asymmetry(const double *data, const int N, const void *argv, double *result)
+{
+    double before = 0.0, after = 0.0;
+    int peak, n;
+
+    if (N < 1)
+    {
+        *result = 0.0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
+
+    peak = index_of_maximum(data, N);
+    for (n = 0; n <= peak; n++)
+        before += XTRACT_SQ(data[n]);
+    for (n = peak; n < N; n++)
+        after += XTRACT_SQ(data[n]);
+
+    if (before == 0.0)
+    {
+        *result = 0.0;
+        return XTRACT_NO_RESULT;
+    }
+
+    *result = after / before;
 
     return XTRACT_SUCCESS;
 }

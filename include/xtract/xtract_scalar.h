@@ -621,6 +621,42 @@ extern "C"
      */
     int xtract_decay_rate(const double *data, const int N, const void *argv, double *result);
 
+    /** \brief Extract the temporal centroid of an envelope: the position of its centre of gravity, with each element weighting its own position, as a fraction of the length
+     *
+     * \param *data: a pointer to the first element in an array of doubles representing an amplitude envelope or any non-negative series
+     * \param N: the number of elements to be considered, at least 2
+     * \param *argv: not used
+     * \param *result: the temporal centroid of N values from the array pointed to by *data, from 0 at the first element to 1 at the last, or 0 with no result when the elements do not sum to a positive value
+     */
+    int xtract_temporal_centroid(const double *data, const int N, const void *argv, double *result);
+
+    /** \brief Extract the position of the largest value in an input vector as a fraction of the length
+     *
+     * \param *data: a pointer to the first element in an array of doubles
+     * \param N: the number of elements to be considered, at least 2
+     * \param *argv: not used
+     * \param *result: the position of the first occurrence of the largest of N values from the array pointed to by *data, from 0 at the first element to 1 at the last
+     */
+    int xtract_max_position(const double *data, const int N, const void *argv, double *result);
+
+    /** \brief Extract the position of the smallest value in an input vector as a fraction of the length
+     *
+     * \param *data: a pointer to the first element in an array of doubles
+     * \param N: the number of elements to be considered, at least 2
+     * \param *argv: not used
+     * \param *result: the position of the first occurrence of the smallest of N values from the array pointed to by *data, from 0 at the first element to 1 at the last
+     */
+    int xtract_min_position(const double *data, const int N, const void *argv, double *result);
+
+    /** \brief Extract the peak asymmetry of an envelope: the energy from its maximum to the end over the energy from the start to its maximum, the maximum counting in both, so that a shape symmetric about its peak gives 1
+     *
+     * \param *data: a pointer to the first element in an array of doubles representing an amplitude envelope or any segment with a single peak
+     * \param N: the number of elements to be considered, at least 1
+     * \param *argv: not used
+     * \param *result: the peak asymmetry of N values from the array pointed to by *data, below 1 when the energy lies before the peak and above 1 when it lies after, or 0 with no result when the energy from the start to the maximum is 0
+     */
+    int xtract_peak_asymmetry(const double *data, const int N, const void *argv, double *result);
+
     /** @} */
 
 #ifdef __cplusplus
