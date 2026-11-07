@@ -77,4 +77,12 @@ static inline int xtract_argv_int(double v)
     return (v >= -2147483648.0 && v < 2147483648.0) ? (int)v : 0;
 }
 
+static inline int xtract_compare_doubles(const void *a, const void *b)
+{
+    const double x = *(const double *)a;
+    const double y = *(const double *)b;
+
+    return (x > y) - (x < y);
+}
+
 #endif

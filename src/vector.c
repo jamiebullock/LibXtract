@@ -1262,3 +1262,78 @@ int xtract_ewma_variance(const double *data, const int N, const void *argv, doub
 
     return XTRACT_SUCCESS;
 }
+
+static double mean_of(const double *values, const int count)
+{
+    int n;
+    double sum = 0.0;
+
+    for (n = 0; n < count; n++)
+        sum += values[n];
+
+    return sum / count;
+}
+
+static int contrast_no_result(double *sorted, double *result, const int bands)
+{
+    free(sorted);
+    memset(result, 0, (size_t)(bands + 1) * sizeof(double));
+    return XTRACT_NO_RESULT;
+}
+
+int xtract_spectral_contrast(const double *data, const int N, const void *argv, double *result)
+{
+    int bands, band, n, M, count, averaged;
+    double lowest, fraction, low, high, valley, peak;
+    const double *amps = data;
+    const double *freqs;
+    double *sorted;
+
+    if (N < 2 || (N & 1) || argv == NULL)
+        return XTRACT_ARGUMENT_ERROR;
+
+    bands = xtract_argv_int(((const double *)argv)[0]);
+    lowest = ((const double *)argv)[1];
+    fraction = ((const double *)argv)[2];
+    if (bands < 1 || !isfinite(lowest) || lowest < 0.0 || !(fraction >= 0.0 && fraction <= 1.0))
+        return XTRACT_ARGUMENT_ERROR;
+
+    M = N >> 1;
+    freqs = data + M;
+
+    sorted = (double *)malloc((size_t)M * sizeof(double));
+    if (sorted == NULL)
+        return XTRACT_MALLOC_FAILED;
+
+    low = 0.0;
+    high = lowest;
+    for (band = 0; band <= bands; band++)
+    {
+        count = 0;
+        for (n = 0; n < M; n++)
+        {
+            if (freqs[n] >= low && (band == bands || freqs[n] < high) && amps[n] == amps[n])
+                sorted[count++] = amps[n];
+        }
+
+        if (count == 0)
+            return contrast_no_result(sorted, result, bands);
+
+        qsort(sorted, (size_t)count, sizeof(double), xtract_compare_doubles);
+        averaged = (int)(fraction * count + 0.5);
+        if (averaged < 1)
+            averaged = 1;
+        valley = mean_of(sorted, averaged);
+        peak = mean_of(sorted + count - averaged, averaged);
+        if (valley <= 0.0)
+            return contrast_no_result(sorted, result, bands);
+
+        result[band] = log(peak / valley);
+        low = high;
+        high *= 2.0;
+    }
+
+    free(sorted);
+
+    return XTRACT_SUCCESS;
+}

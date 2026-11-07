@@ -321,6 +321,20 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *argv_def = XTRACT_NO_DEFAULT;
             *argv_unit = XTRACT_UNIT_ANY;
             break;
+        case XTRACT_SPECTRAL_CONTRAST:
+            *argv_min = 1.0;
+            *argv_max = XTRACT_UNBOUNDED_MAX;
+            *argv_def = 6.0;
+            *argv_unit = XTRACT_UNIT_NONE;
+            *(argv_min + 1) = 0.0;
+            *(argv_max + 1) = XTRACT_UNBOUNDED_MAX;
+            *(argv_def + 1) = 200.0;
+            *(argv_unit + 1) = XTRACT_HERTZ;
+            *(argv_min + 2) = 0.0;
+            *(argv_max + 2) = 1.0;
+            *(argv_def + 2) = 0.02;
+            *(argv_unit + 2) = XTRACT_UNIT_NONE;
+            break;
         case XTRACT_FLUX:
         case XTRACT_LNORM:
             *argv_min = XTRACT_UNBOUNDED_MIN;
@@ -443,6 +457,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *(argv_donor + 1) = XTRACT_MEAN;
             break;
         case XTRACT_ATTACK_TIME:
+        case XTRACT_SPECTRAL_CONTRAST:
             *argv_donor = XTRACT_ANY;
             *(argv_donor + 1) = XTRACT_ANY;
             *(argv_donor + 2) = XTRACT_ANY;
@@ -529,6 +544,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_SPREAD:
         case XTRACT_HPS:
         case XTRACT_SPECTRAL_SUBBAND_CENTROIDS:
+        case XTRACT_SPECTRAL_CONTRAST:
             *data_format = XTRACT_SPECTRAL;
             break;
         case XTRACT_MMBSES:
@@ -722,6 +738,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_SPECTRAL_INHARMONICITY:
         case XTRACT_ODD_EVEN_RATIO:
         case XTRACT_SPECTRAL_SUBBAND_CENTROIDS:
+        case XTRACT_SPECTRAL_CONTRAST:
             *data_unit = XTRACT_ANY_AMPLITUDE_HERTZ;
             break;
         }
@@ -1491,6 +1508,14 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             copy_author(author, "Stephen Hainsworth and Malcolm Macleod");
             *year = 2003;
             break;
+        case XTRACT_SPECTRAL_CONTRAST:
+            copy_name(name, "spectral_contrast");
+            copy_name(p_name, "Spectral Contrast");
+            copy_desc(desc, "Extract the spectral contrast of a spectrum");
+            copy_desc(p_desc, "Extract the difference in level between the peaks and the valleys of each octave band of a spectrum");
+            copy_author(author, "Dan-Ning Jiang, Lie Lu, Hong-Jiang Zhang, Jian-Hua Tao and Lian-Hong Cai");
+            *year = 2002;
+            break;
         case XTRACT_DIFFERENCE_VECTOR:
             copy_name(name, "difference_vector");
             copy_name(p_name, "Difference vector");
@@ -1608,6 +1633,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *argc = 2;
             *argv_type = XTRACT_FLOAT;
             break;
+        case XTRACT_SPECTRAL_CONTRAST:
         case XTRACT_FLUX:
         case XTRACT_LNORM:
             *argc = 3;
@@ -1817,6 +1843,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_EWMA_AVERAGE:
         case XTRACT_EWMA_VARIANCE:
         case XTRACT_CROSS_CORRELATION:
+        case XTRACT_SPECTRAL_CONTRAST:
             *is_scalar = XTRACT_FALSE;
             break;
         default:
@@ -2134,6 +2161,10 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             case XTRACT_CROSS_CORRELATION:
                 *result_format = XTRACT_ARBITRARY_SERIES;
                 *result_unit = XTRACT_UNIT_ANY;
+                break;
+            case XTRACT_SPECTRAL_CONTRAST:
+                *result_format = XTRACT_ARBITRARY_SERIES;
+                *result_unit = XTRACT_UNIT_NONE;
                 break;
             case XTRACT_BARK_COEFFICIENTS:
                 /* per-band sums on a Bark-band (not Hz) axis: dimensionless */

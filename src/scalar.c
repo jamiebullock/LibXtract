@@ -1820,14 +1820,6 @@ int xtract_peak(const double *data, const int N, const void *argv, double *resul
     return XTRACT_SUCCESS;
 }
 
-static int compare_doubles(const void *a, const void *b)
-{
-    const double x = *(const double *)a;
-    const double y = *(const double *)b;
-
-    return (x > y) - (x < y);
-}
-
 static int is_nan(const double x)
 {
     return x != x;
@@ -1852,7 +1844,7 @@ static double median_of_values(double *values, const int N)
     }
     for (n = numbers; n < N; n++)
         values[n] = NAN;
-    qsort(values, (size_t)numbers, sizeof(double), compare_doubles);
+    qsort(values, (size_t)numbers, sizeof(double), xtract_compare_doubles);
 
     return middle_of_sorted(values, N);
 }
