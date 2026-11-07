@@ -432,9 +432,9 @@ extern "C"
      * "A Smarter Way to Find Pitch".
      *
      * \param *data: a pointer to the first element in an array of doubles representing an audio vector
-     * \param N: the number of elements to be considered, at least 1
+     * \param N: the number of elements to be considered, at least 1; a period longer than N / 2 samples is not found, so N must span at least two periods of the lowest frequency expected
      * \param *argv: a pointer to a double representing the audio sample rate, finite and at least 0; 0 selects 44100 Hz
-     * \param *result: the pitch of N values from the array pointed to by *data
+     * \param *result: the pitch of N values from the array pointed to by *data, or 0 with no result when no period of at most N / 2 samples is found
      */
     int xtract_mcleod_f0(const double *data, const int N, const void *argv, double *result);
 
@@ -593,6 +593,24 @@ extern "C"
      * \param *result: the approximate entropy of N values from the array pointed to by *data, in nats
      */
     int xtract_approximate_entropy(const double *data, const int N, const void *argv, double *result);
+
+    /** \brief Extract the periodicity of an input vector: the height of the highest key maximum of its normalised square difference function, the measure the McLeod pitch method selects its pitch peak from
+     *
+     * \param *data: a pointer to the first element in an array of doubles
+     * \param N: the number of elements to be considered, at least 1
+     * \param *argv: not used
+     * \param *result: the periodicity of N values from the array pointed to by *data, from 0 for a signal that never repeats to 1 for one that repeats exactly, or 0 with no result when the function has no maximum between its first zero crossing and lag N / 2, as for silence or for a series with an offset that never crosses zero, whose mean should be removed first
+     */
+    int xtract_periodicity(const double *data, const int N, const void *argv, double *result);
+
+    /** \brief Extract the confidence of the McLeod pitch method's fundamental frequency estimate for an input vector: the height of the key maximum of its normalised square difference function that xtract_mcleod_f0() takes as the pitch peak
+     *
+     * \param *data: a pointer to the first element in an array of doubles representing an audio vector
+     * \param N: the number of elements to be considered, at least 1
+     * \param *argv: not used
+     * \param *result: the confidence in the fundamental frequency xtract_mcleod_f0() reports for the same N values, from 0 for a signal with no clear period to 1 for a perfectly periodic one, or 0 with no result exactly when xtract_mcleod_f0() gives no result
+     */
+    int xtract_signal_confidence(const double *data, const int N, const void *argv, double *result);
 
     /** @} */
 
