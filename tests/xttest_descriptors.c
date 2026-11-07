@@ -384,6 +384,24 @@ UTEST(descriptors, appended_features_are_fully_described)
         CHECK_REL(fd[f].result.scalar.max, 1.0, EPSILON);
     ASSERT_EQ(fd[XTRACT_PEAK_ASYMMETRY].result.scalar.max, XTRACT_UNBOUNDED_MAX);
 
+    ASSERT_EQ(fd[XTRACT_CROSS_CORRELATION].argc, 1);
+    ASSERT_EQ(fd[XTRACT_CROSS_CORRELATION].argv.type, XTRACT_FLOAT);
+    CHECK_NEAR(fd[XTRACT_CROSS_CORRELATION].argv.min[0], 0.0, EPSILON);
+    CHECK_REL(fd[XTRACT_CROSS_CORRELATION].argv.max[0], 1.0, EPSILON);
+    ASSERT_EQ(fd[XTRACT_CROSS_CORRELATION].is_scalar, XTRACT_FALSE);
+    ASSERT_EQ(fd[XTRACT_CROSS_CORRELATION].result.vector.format, XTRACT_ARBITRARY_SERIES);
+    ASSERT_EQ(fd[XTRACT_CROSS_CORRELATION].result.vector.unit, XTRACT_UNIT_ANY);
+    ASSERT_EQ(fd[XTRACT_CROSS_CORRELATION_LAG].argc, 0);
+    ASSERT_EQ(fd[XTRACT_CROSS_CORRELATION_LAG].is_scalar, XTRACT_TRUE);
+    ASSERT_EQ(fd[XTRACT_CROSS_CORRELATION_LAG].result.scalar.unit, XTRACT_UNIT_NONE);
+    ASSERT_EQ(fd[XTRACT_CROSS_CORRELATION_LAG].result.scalar.min, XTRACT_UNBOUNDED_MIN);
+    for (f = XTRACT_CROSS_CORRELATION; f <= XTRACT_CROSS_CORRELATION_LAG; f++)
+    {
+        ASSERT_EQ_MSG(fd[f].data.format, XTRACT_SUBFRAMES, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].data.unit, XTRACT_UNIT_ANY, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].is_delta, XTRACT_TRUE, fd[f].algo.name);
+    }
+
     ASSERT_EQ(xtract_free_descriptors(fd), XTRACT_SUCCESS);
 }
 
@@ -442,6 +460,8 @@ UTEST(dispatch, slots_map_to_the_expected_function)
     ASSERT_TRUE(xtract[XTRACT_MAX_POSITION] == xtract_max_position);
     ASSERT_TRUE(xtract[XTRACT_MIN_POSITION] == xtract_min_position);
     ASSERT_TRUE(xtract[XTRACT_PEAK_ASYMMETRY] == xtract_peak_asymmetry);
+    ASSERT_TRUE(xtract[XTRACT_CROSS_CORRELATION] == xtract_cross_correlation);
+    ASSERT_TRUE(xtract[XTRACT_CROSS_CORRELATION_LAG] == xtract_cross_correlation_lag);
 }
 
 /* ===== Descriptor conformance ===== */

@@ -111,4 +111,6 @@ int (*xtract[])(const double *, const int, const void *, double *) =
         xtract_temporal_centroid,
         xtract_max_position,
         xtract_min_position,
-        xtract_peak_asymmetry};
+        xtract_peak_asymmetry,
+        xtract_cross_correlation,
+        xtract_cross_correlation_lag};

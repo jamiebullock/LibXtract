@@ -6,7 +6,8 @@
 
 /*
  * libFuzzer harness for the delta (time-derivative) feature functions
- * (xtract_delta.h): flux, lnorm, attack_time, decay_time, difference_vector.
+ * (xtract_delta.h): flux, lnorm, attack_time, decay_time, difference_vector,
+ * cross_correlation, cross_correlation_lag.
  *
  * All share the uniform signature and take a plain double / NULL argv with no
  * setup, so one harness drives them via the xtract[] dispatch table. The
@@ -25,7 +26,8 @@
 
 static const int eligible[] = {
     XTRACT_FLUX, XTRACT_LNORM, XTRACT_ATTACK_TIME,
-    XTRACT_DECAY_TIME, XTRACT_DIFFERENCE_VECTOR};
+    XTRACT_DECAY_TIME, XTRACT_DIFFERENCE_VECTOR,
+    XTRACT_CROSS_CORRELATION, XTRACT_CROSS_CORRELATION_LAG};
 
 #define N_ELIGIBLE ((int)(sizeof(eligible) / sizeof(eligible[0])))
 #define MAX_N 4096
