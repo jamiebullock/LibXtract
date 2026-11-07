@@ -164,7 +164,7 @@ UTEST(descriptors, argv_ranges_match_the_functions)
 UTEST(descriptors, appended_features_are_fully_described)
 {
     xtract_function_descriptor_t *fd = xtract_make_descriptors();
-    int f;
+    int f, i;
     ASSERT_TRUE(fd != NULL);
 
     ASSERT_EQ(fd[XTRACT_PEAK].argc, 1);
@@ -338,6 +338,38 @@ UTEST(descriptors, appended_features_are_fully_described)
     ASSERT_EQ(fd[XTRACT_PERIODICITY].data.format, XTRACT_ARBITRARY_SERIES);
     ASSERT_EQ(fd[XTRACT_SIGNAL_CONFIDENCE].data.format, XTRACT_AUDIO_SAMPLES);
 
+    ASSERT_EQ(fd[XTRACT_ATTACK_TIME].argc, 3);
+    CHECK_REL(fd[XTRACT_ATTACK_TIME].argv.def[1], 0.2, EPSILON);
+    CHECK_REL(fd[XTRACT_ATTACK_TIME].argv.def[2], 0.9, EPSILON);
+    CHECK_NEAR(fd[XTRACT_ATTACK_TIME].argv.min[2], 0.0, EPSILON);
+    CHECK_REL(fd[XTRACT_ATTACK_TIME].argv.max[2], 1.0, EPSILON);
+    ASSERT_EQ(fd[XTRACT_DECAY_TIME].argc, 2);
+    ASSERT_EQ(fd[XTRACT_DECAY_RATE].argc, 2);
+    CHECK_REL(fd[XTRACT_DECAY_TIME].argv.def[1], 0.4, EPSILON);
+    CHECK_REL(fd[XTRACT_DECAY_RATE].argv.def[1], 0.4, EPSILON);
+    for (f = XTRACT_ATTACK_TIME; f <= XTRACT_DECAY_TIME; f++)
+    {
+        ASSERT_EQ_MSG(fd[f].result.scalar.unit, XTRACT_SECONDS, fd[f].algo.name);
+        CHECK_NEAR(fd[f].result.scalar.min, 0.0, EPSILON);
+    }
+    ASSERT_EQ(fd[XTRACT_DECAY_RATE].result.scalar.unit, XTRACT_PER_SECOND);
+    ASSERT_EQ(fd[XTRACT_DECAY_RATE].result.scalar.min, XTRACT_UNBOUNDED_MIN);
+    for (i = 0; i < 3; i++)
+    {
+        f = i == 0 ? XTRACT_ATTACK_TIME : i == 1 ? XTRACT_DECAY_TIME
+                                                 : XTRACT_DECAY_RATE;
+        ASSERT_EQ_MSG(fd[f].argv.type, XTRACT_FLOAT, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].argv.unit[0], XTRACT_HERTZ, fd[f].algo.name);
+        CHECK_REL(fd[f].argv.def[0], 44100.0, EPSILON);
+        CHECK_NEAR(fd[f].argv.min[1], 0.0, EPSILON);
+        CHECK_REL(fd[f].argv.max[1], 1.0, EPSILON);
+        ASSERT_EQ_MSG(fd[f].argv.donor[1], XTRACT_ANY, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].data.format, XTRACT_ARBITRARY_SERIES, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].data.unit, XTRACT_UNIT_ANY, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].is_scalar, XTRACT_TRUE, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].is_delta, XTRACT_FALSE, fd[f].algo.name);
+    }
+
     ASSERT_EQ(xtract_free_descriptors(fd), XTRACT_SUCCESS);
 }
 
@@ -389,6 +421,9 @@ UTEST(dispatch, slots_map_to_the_expected_function)
     ASSERT_TRUE(xtract[XTRACT_APPROXIMATE_ENTROPY] == xtract_approximate_entropy);
     ASSERT_TRUE(xtract[XTRACT_PERIODICITY] == xtract_periodicity);
     ASSERT_TRUE(xtract[XTRACT_SIGNAL_CONFIDENCE] == xtract_signal_confidence);
+    ASSERT_TRUE(xtract[XTRACT_ATTACK_TIME] == xtract_attack_time);
+    ASSERT_TRUE(xtract[XTRACT_DECAY_TIME] == xtract_decay_time);
+    ASSERT_TRUE(xtract[XTRACT_DECAY_RATE] == xtract_decay_rate);
 }
 
 /* ===== Descriptor conformance ===== */
@@ -581,7 +616,7 @@ UTEST(descriptors, every_feature_conforms_to_its_descriptor)
         rv = xtract[f](data, call_n, argv, result);
         if (rv == XTRACT_FEATURE_NOT_IMPLEMENTED)
         {
-            ASSERT_TRUE_MSG(f == XTRACT_POWER || f == XTRACT_ATTACK_TIME || f == XTRACT_DECAY_TIME, d->algo.name);
+            ASSERT_TRUE_MSG(f == XTRACT_POWER, d->algo.name);
             continue;
         }
         ASSERT_NE_MSG(rv, XTRACT_ARGUMENT_ERROR, d->algo.name);

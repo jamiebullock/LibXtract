@@ -125,16 +125,6 @@ int xtract_lnorm(const double *data, const int N, const void *argv, double *resu
     return XTRACT_SUCCESS;
 }
 
-int xtract_attack_time(const double *data, const int N, const void *argv, double *result)
-{
-    return XTRACT_FEATURE_NOT_IMPLEMENTED;
-}
-
-int xtract_decay_time(const double *data, const int N, const void *argv, double *result)
-{
-    return XTRACT_FEATURE_NOT_IMPLEMENTED;
-}
-
 int xtract_difference_vector(const double *data, const int N, const void *argv, double *result)
 {
     const double *frame1,

@@ -612,6 +612,15 @@ extern "C"
      */
     int xtract_signal_confidence(const double *data, const int N, const void *argv, double *result);
 
+    /** \brief Extract the decay rate of an envelope: the least-squares slope of the natural log of its elements against time, over the elements from its maximum onwards that exceed the threshold fraction of the maximum
+     *
+     * \param *data: a pointer to the first element in an array of doubles representing an amplitude envelope or any segment with a single peak
+     * \param N: the number of elements to be considered, at least 1
+     * \param *argv: a pointer to an array of two doubles: the sample rate, finite and at least 0, with 0 selecting 44100 Hz; and the threshold fraction of the maximum, from 0 to 1
+     * \param *result: the decay rate of N values from the array pointed to by *data in units of 1 per second, negative for an envelope that decays, or 0 with no result when the maximum is not positive or fewer than two elements exceed the threshold
+     */
+    int xtract_decay_rate(const double *data, const int N, const void *argv, double *result);
+
     /** @} */
 
 #ifdef __cplusplus

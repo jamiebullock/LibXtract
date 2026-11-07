@@ -284,6 +284,31 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *argv_def = XTRACT_HPS_HARMONICS_DEF;
             *argv_unit = XTRACT_UNIT_NONE;
             break;
+        case XTRACT_ATTACK_TIME:
+            *argv_min = 0.0;
+            *argv_max = XTRACT_UNBOUNDED_MAX;
+            *argv_def = XTRACT_SR_DEFAULT;
+            *argv_unit = XTRACT_HERTZ;
+            *(argv_min + 1) = 0.0;
+            *(argv_max + 1) = 1.0;
+            *(argv_def + 1) = 0.2;
+            *(argv_unit + 1) = XTRACT_UNIT_NONE;
+            *(argv_min + 2) = 0.0;
+            *(argv_max + 2) = 1.0;
+            *(argv_def + 2) = 0.9;
+            *(argv_unit + 2) = XTRACT_UNIT_NONE;
+            break;
+        case XTRACT_DECAY_TIME:
+        case XTRACT_DECAY_RATE:
+            *argv_min = 0.0;
+            *argv_max = XTRACT_UNBOUNDED_MAX;
+            *argv_def = XTRACT_SR_DEFAULT;
+            *argv_unit = XTRACT_HERTZ;
+            *(argv_min + 1) = 0.0;
+            *(argv_max + 1) = 1.0;
+            *(argv_def + 1) = 0.4;
+            *(argv_unit + 1) = XTRACT_UNIT_NONE;
+            break;
         case XTRACT_FLUX:
         case XTRACT_LNORM:
             *argv_min = XTRACT_UNBOUNDED_MIN;
@@ -375,6 +400,13 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             /* argc = 2 */;
         case XTRACT_ROLLOFF:
         case XTRACT_PEAK_SPECTRUM:
+        case XTRACT_ATTACK_TIME:
+            *argv_donor = XTRACT_ANY;
+            *(argv_donor + 1) = XTRACT_ANY;
+            *(argv_donor + 2) = XTRACT_ANY;
+            break;
+        case XTRACT_DECAY_TIME:
+        case XTRACT_DECAY_RATE:
         case XTRACT_FLUX:
         case XTRACT_LNORM:
             *argv_donor = XTRACT_ANY;
@@ -449,6 +481,9 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_SAMPLE_ENTROPY:
         case XTRACT_APPROXIMATE_ENTROPY:
         case XTRACT_PERIODICITY:
+        case XTRACT_ATTACK_TIME:
+        case XTRACT_DECAY_TIME:
+        case XTRACT_DECAY_RATE:
         case XTRACT_SKEWNESS:
         case XTRACT_KURTOSIS:
         case XTRACT_LOWEST_VALUE:
@@ -550,8 +585,6 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_FLUX:
             *data_format = XTRACT_SUBFRAMES;
             break;
-        case XTRACT_ATTACK_TIME:
-        case XTRACT_DECAY_TIME:
         case XTRACT_MIDICENT:
         default:
             *data_format = XTRACT_NO_DATA;
@@ -598,6 +631,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_IRREGULARITY_J:
         case XTRACT_ATTACK_TIME:
         case XTRACT_DECAY_TIME:
+        case XTRACT_DECAY_RATE:
         case XTRACT_DIFFERENCE_VECTOR:
         case XTRACT_FLUX:
         case XTRACT_LNORM:
@@ -1342,15 +1376,22 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_ATTACK_TIME:
             copy_name(name, "attack_time");
             copy_name(p_name, "Attack Time");
-            copy_desc(desc, "Extract the attack time of a signal");
-            copy_desc(p_desc, "Extract the attack time of an audio signal");
+            copy_desc(desc, "Extract the attack time of an envelope");
+            copy_desc(p_desc, "Extract the time an envelope takes to rise to its peak");
             copy_author(author, "");
             break;
         case XTRACT_DECAY_TIME:
             copy_name(name, "decay_time");
             copy_name(p_name, "Decay Time");
-            copy_desc(desc, "Extract the decay time of a signal");
-            copy_desc(p_desc, "Extract the decay time of an audio signal");
+            copy_desc(desc, "Extract the decay time of an envelope");
+            copy_desc(p_desc, "Extract the time an envelope takes to fall from its peak");
+            copy_author(author, "");
+            break;
+        case XTRACT_DECAY_RATE:
+            copy_name(name, "decay_rate");
+            copy_name(p_name, "Decay Rate");
+            copy_desc(desc, "Extract the exponential decay rate of an envelope");
+            copy_desc(p_desc, "Extract the rate at which an envelope falls from its peak");
             copy_author(author, "");
             break;
         case XTRACT_DIFFERENCE_VECTOR:
@@ -1506,6 +1547,15 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *argc = 2;
             *argv_type = XTRACT_INT;
             break;
+        case XTRACT_ATTACK_TIME:
+            *argc = 3;
+            *argv_type = XTRACT_FLOAT;
+            break;
+        case XTRACT_DECAY_TIME:
+        case XTRACT_DECAY_RATE:
+            *argc = 2;
+            *argv_type = XTRACT_FLOAT;
+            break;
         case XTRACT_SAMPLE_ENTROPY:
         case XTRACT_APPROXIMATE_ENTROPY:
             *argc = 2;
@@ -1556,8 +1606,6 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_POWER:
         case XTRACT_SHARPNESS:
         case XTRACT_SPECTRAL_SLOPE:
-        case XTRACT_ATTACK_TIME:
-        case XTRACT_DECAY_TIME:
         case XTRACT_DIFFERENCE_VECTOR:
         case XTRACT_AUTOCORRELATION_FFT:
         case XTRACT_DCT:
@@ -1923,6 +1971,17 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             case XTRACT_SPECTRAL_SLOPE:
                 /* least-squares regression slope: any real sign and magnitude */
                 *result_unit = XTRACT_UNIT_NONE;
+                *result_min = XTRACT_UNBOUNDED_MIN;
+                *result_max = XTRACT_UNBOUNDED_MAX;
+                break;
+            case XTRACT_ATTACK_TIME:
+            case XTRACT_DECAY_TIME:
+                *result_unit = XTRACT_SECONDS;
+                *result_min = 0.0;
+                *result_max = XTRACT_UNBOUNDED_MAX;
+                break;
+            case XTRACT_DECAY_RATE:
+                *result_unit = XTRACT_PER_SECOND;
                 *result_min = XTRACT_UNBOUNDED_MIN;
                 *result_max = XTRACT_UNBOUNDED_MAX;
                 break;

@@ -2106,6 +2106,109 @@ UTEST(signal_confidence, n_zero_argument_error)
     ASSERT_EQ(result, 0.0);
 }
 
+/* ===== Decay rate ===== */
+
+UTEST(decay_rate, exponential_decay_gives_its_exponent)
+{
+    /* exp(-n / 100) at 1000 Hz is exp(-10 t) */
+    double data[500];
+    double argv[] = {1000.0, 0.0};
+    double result = 1.0;
+    int n;
+
+    for (n = 0; n < 500; n++)
+        data[n] = exp(-n / 100.0);
+
+    ASSERT_EQ(xtract_decay_rate(data, 500, argv, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, -10.0, 1e-9);
+}
+
+UTEST(decay_rate, fits_only_the_elements_above_the_threshold)
+{
+    /* The zeros after the decay would send the log to minus infinity */
+    double data[500];
+    double argv[] = {1000.0, 0.0};
+    double result = 1.0;
+    int n;
+
+    for (n = 0; n < 500; n++)
+        data[n] = n < 300 ? exp(-n / 100.0) : 0.0;
+
+    ASSERT_EQ(xtract_decay_rate(data, 500, argv, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, -10.0, 1e-9);
+}
+
+UTEST(decay_rate, ignores_the_elements_before_the_peak)
+{
+    double data[600];
+    double argv[] = {1000.0, 0.0};
+    double result = 1.0;
+    int n;
+
+    for (n = 0; n < 100; n++)
+        data[n] = n / 100.0;
+    for (n = 100; n < 600; n++)
+        data[n] = exp(-(n - 100) / 100.0);
+
+    ASSERT_EQ(xtract_decay_rate(data, 600, argv, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, -10.0, 1e-9);
+}
+
+UTEST(decay_rate, is_zero_for_a_constant_envelope)
+{
+    double data[] = {1.0, 1.0, 1.0, 1.0};
+    double argv[] = {1.0, 0.4};
+    double result = 1.0;
+
+    ASSERT_EQ(xtract_decay_rate(data, 4, argv, &result), XTRACT_SUCCESS);
+    CHECK_NEAR(result, 0.0, 1e-12);
+}
+
+UTEST(decay_rate, no_result_with_fewer_than_two_elements_above_the_threshold)
+{
+    double single[] = {1.0};
+    double peak_only[] = {1.0, 0.1, 0.1};
+    double argv[] = {1.0, 0.5};
+    double result = 1.0;
+
+    ASSERT_EQ(xtract_decay_rate(single, 1, argv, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
+    result = 1.0;
+    ASSERT_EQ(xtract_decay_rate(peak_only, 3, argv, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
+}
+
+UTEST(decay_rate, no_result_when_the_maximum_is_not_positive)
+{
+    double data[] = {-1.0, -2.0, -3.0};
+    double argv[] = {1.0, 0.4};
+    double result = 1.0;
+
+    ASSERT_EQ(xtract_decay_rate(data, 3, argv, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
+}
+
+UTEST(decay_rate, rejects_bad_arguments)
+{
+    double data[] = {1.0, 0.5};
+    double negative_rate[] = {-1.0, 0.4};
+    double threshold_above_one[] = {1.0, 2.0};
+    double good[] = {1.0, 0.4};
+    double result = 1.0;
+
+    ASSERT_EQ(xtract_decay_rate(data, 2, NULL, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    result = 1.0;
+    ASSERT_EQ(xtract_decay_rate(data, 2, negative_rate, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    result = 1.0;
+    ASSERT_EQ(xtract_decay_rate(data, 2, threshold_above_one, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    result = 1.0;
+    ASSERT_EQ(xtract_decay_rate(data, 0, good, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+}
+
 UTEST(mcleod_f0, at_least_as_accurate_at_172hz)
 {
     uint32_t blocksize = 1024;
