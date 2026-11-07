@@ -118,6 +118,21 @@ VECTOR_HARNESS(lpc, nondet_length(), XTRACT_MAXARGS, 2 * at_least_zero(N - 1))
 VECTOR_HARNESS(windowed, nondet_length(), N, N)
 VECTOR_HARNESS(smoothed, nondet_length(), XTRACT_MAXARGS, N)
 
+void verify_spectral_contrast(void)
+{
+    const int N = nondet_small_length();
+    const int bands = nondet_small_length();
+    double *data = nondet_doubles(N);
+    double *argv = nondet_doubles(XTRACT_MAXARGS);
+    double *result = nondet_doubles(bands + 1);
+
+    argv[0] = bands;
+    (void)xtract_spectral_contrast(data, N, nondet_argv(argv), result);
+    free(data);
+    free(argv);
+    free(result);
+}
+
 void verify_bark_coefficients(void)
 {
     const int N = nondet_length();

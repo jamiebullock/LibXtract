@@ -3000,3 +3000,159 @@ UTEST(vector, ewma_average_and_variance_reject_a_missing_or_out_of_range_alpha_a
     ASSERT_EQ(result[0], -1.0);
     ASSERT_EQ(result[3], -1.0);
 }
+
+/* ===== Spectral contrast ===== */
+
+UTEST(spectral_contrast, log_ratio_of_the_top_and_bottom_fraction_of_each_band)
+{
+    double data[] = {1.0, 4.0, 2.0, 2.0, 8.0, 1.0, 1.0, 1.0,
+                     50.0, 100.0, 150.0, 250.0, 300.0, 500.0, 600.0, 700.0};
+    double argv[] = {2.0, 200.0, 0.5};
+    double result[3] = {-1.0, -1.0, -1.0};
+    ASSERT_EQ(xtract_spectral_contrast(data, 16, argv, result), XTRACT_SUCCESS);
+    CHECK_REL(result[0], log(2.0), EPSILON);
+    CHECK_REL(result[1], log(4.0), EPSILON);
+    CHECK_NEAR(result[2], 0.0, EPSILON);
+}
+
+UTEST(spectral_contrast, a_fraction_of_zero_still_averages_one_bin_at_each_end)
+{
+    double data[] = {3.0, 1.0, 6.0, 2.0, 100.0, 200.0, 300.0, 400.0};
+    double argv[] = {1.0, 1000.0, 0.0};
+    double result[2] = {-1.0, -1.0};
+    ASSERT_EQ(xtract_spectral_contrast(data, 8, argv, result), XTRACT_NO_RESULT);
+    argv[1] = 250.0;
+    ASSERT_EQ(xtract_spectral_contrast(data, 8, argv, result), XTRACT_SUCCESS);
+    CHECK_REL(result[0], log(3.0), EPSILON);
+    CHECK_REL(result[1], log(3.0), EPSILON);
+}
+
+UTEST(spectral_contrast, a_fraction_of_one_gives_no_contrast)
+{
+    double data[] = {3.0, 1.0, 6.0, 2.0, 100.0, 200.0, 300.0, 400.0};
+    double argv[] = {1.0, 250.0, 1.0};
+    double result[2] = {-1.0, -1.0};
+    ASSERT_EQ(xtract_spectral_contrast(data, 8, argv, result), XTRACT_SUCCESS);
+    CHECK_NEAR(result[0], 0.0, EPSILON);
+    CHECK_NEAR(result[1], 0.0, EPSILON);
+}
+
+UTEST(spectral_contrast, the_first_band_lies_below_the_edge_and_the_last_runs_to_the_highest_bin)
+{
+    double data[] = {1.0, 3.0, 2.0, 10.0, 100.0, 500.0, 2000.0, 50000.0};
+    double argv[] = {1.0, 1000.0, 0.0};
+    double result[2] = {-1.0, -1.0};
+    ASSERT_EQ(xtract_spectral_contrast(data, 8, argv, result), XTRACT_SUCCESS);
+    CHECK_REL(result[0], log(3.0), EPSILON);
+    CHECK_REL(result[1], log(5.0), EPSILON);
+}
+
+UTEST(spectral_contrast, the_bands_double_from_the_edge_and_a_bin_on_an_edge_joins_the_upper_band)
+{
+    double data[] = {1.0, 2.0, 4.0, 8.0, 100.0, 200.0, 400.0, 800.0};
+    double argv[] = {2.0, 200.0, 0.0};
+    double result[3] = {-1.0, -1.0, -1.0};
+    ASSERT_EQ(xtract_spectral_contrast(data, 8, argv, result), XTRACT_SUCCESS);
+    CHECK_NEAR(result[0], 0.0, EPSILON);
+    CHECK_NEAR(result[1], 0.0, EPSILON);
+    CHECK_REL(result[2], log(2.0), EPSILON);
+    data[6] = 399.0;
+    ASSERT_EQ(xtract_spectral_contrast(data, 8, argv, result), XTRACT_SUCCESS);
+    CHECK_NEAR(result[0], 0.0, EPSILON);
+    CHECK_REL(result[1], log(2.0), EPSILON);
+    CHECK_NEAR(result[2], 0.0, EPSILON);
+}
+
+UTEST(spectral_contrast, is_unchanged_by_a_common_gain)
+{
+    double data[] = {1.0, 4.0, 2.0, 2.0, 8.0, 1.0, 1.0, 1.0,
+                     50.0, 100.0, 150.0, 250.0, 300.0, 500.0, 600.0, 700.0};
+    double argv[] = {2.0, 200.0, 0.5};
+    double a[3], b[3];
+    int n;
+    ASSERT_EQ(xtract_spectral_contrast(data, 16, argv, a), XTRACT_SUCCESS);
+    for (n = 0; n < 8; n++)
+        data[n] *= 1e-3;
+    ASSERT_EQ(xtract_spectral_contrast(data, 16, argv, b), XTRACT_SUCCESS);
+    for (n = 0; n < 3; n++)
+        CHECK_NEAR(a[n], b[n], 1e-9);
+}
+
+UTEST(spectral_contrast, the_default_layout_fits_a_1024_point_spectrum_at_44100_hz)
+{
+    double data[1024];
+    double argv[] = {6.0, 200.0, 0.02};
+    double result[7];
+    int n;
+    for (n = 0; n < 512; n++)
+    {
+        data[n] = 1.0 + (n % 7 == 0 ? 9.0 : 0.0);
+        data[512 + n] = (n + 1) * 44100.0 / 1024.0;
+    }
+    ASSERT_EQ(xtract_spectral_contrast(data, 1024, argv, result), XTRACT_SUCCESS);
+    for (n = 0; n < 7; n++)
+        CHECK_REL(result[n], log(10.0), EPSILON);
+}
+
+UTEST(spectral_contrast, a_band_with_no_bin_has_no_result_and_zeroes_the_output)
+{
+    double data[] = {1.0, 2.0, 3.0, 4.0, 100.0, 200.0, 300.0, 400.0};
+    double argv[] = {3.0, 1000.0, 0.0};
+    double result[4] = {-1.0, -1.0, -1.0, -1.0};
+    int n;
+    ASSERT_EQ(xtract_spectral_contrast(data, 8, argv, result), XTRACT_NO_RESULT);
+    for (n = 0; n < 4; n++)
+        ASSERT_EQ(result[n], 0.0);
+}
+
+UTEST(spectral_contrast, an_edge_of_zero_has_no_result)
+{
+    double data[] = {1.0, 2.0, 3.0, 4.0, 100.0, 200.0, 300.0, 400.0};
+    double argv[] = {1.0, 0.0, 0.0};
+    double result[2] = {-1.0, -1.0};
+    ASSERT_EQ(xtract_spectral_contrast(data, 8, argv, result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result[0], 0.0);
+    ASSERT_EQ(result[1], 0.0);
+}
+
+UTEST(spectral_contrast, a_valley_that_is_not_positive_has_no_result)
+{
+    double data[] = {0.0, 2.0, 3.0, 4.0, 100.0, 200.0, 300.0, 400.0};
+    double argv[] = {1.0, 250.0, 0.0};
+    double result[2] = {-1.0, -1.0};
+    ASSERT_EQ(xtract_spectral_contrast(data, 8, argv, result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result[0], 0.0);
+    ASSERT_EQ(result[1], 0.0);
+    data[0] = -1.0;
+    result[0] = result[1] = -1.0;
+    ASSERT_EQ(xtract_spectral_contrast(data, 8, argv, result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result[0], 0.0);
+}
+
+UTEST(spectral_contrast, rejects_bad_arguments)
+{
+    double data[] = {1.0, 2.0, 3.0, 4.0, 100.0, 200.0, 300.0, 400.0};
+    double argv[] = {1.0, 250.0, 0.5};
+    double result[2] = {-1.0, -1.0};
+    ASSERT_EQ(xtract_spectral_contrast(data, 7, argv, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_spectral_contrast(data, 0, argv, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_spectral_contrast(data, 8, NULL, result), XTRACT_ARGUMENT_ERROR);
+    argv[0] = 0.0;
+    ASSERT_EQ(xtract_spectral_contrast(data, 8, argv, result), XTRACT_ARGUMENT_ERROR);
+    argv[0] = 1.0;
+    argv[1] = -1.0;
+    ASSERT_EQ(xtract_spectral_contrast(data, 8, argv, result), XTRACT_ARGUMENT_ERROR);
+    argv[1] = NAN;
+    ASSERT_EQ(xtract_spectral_contrast(data, 8, argv, result), XTRACT_ARGUMENT_ERROR);
+    argv[1] = INFINITY;
+    ASSERT_EQ(xtract_spectral_contrast(data, 8, argv, result), XTRACT_ARGUMENT_ERROR);
+    argv[1] = 250.0;
+    argv[2] = -0.1;
+    ASSERT_EQ(xtract_spectral_contrast(data, 8, argv, result), XTRACT_ARGUMENT_ERROR);
+    argv[2] = 1.1;
+    ASSERT_EQ(xtract_spectral_contrast(data, 8, argv, result), XTRACT_ARGUMENT_ERROR);
+    argv[2] = NAN;
+    ASSERT_EQ(xtract_spectral_contrast(data, 8, argv, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result[0], -1.0);
+    ASSERT_EQ(result[1], -1.0);
+}

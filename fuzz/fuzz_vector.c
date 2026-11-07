@@ -76,6 +76,7 @@ enum
     FZ_MOVING_MIN,
     FZ_EWMA_AVERAGE,
     FZ_EWMA_VARIANCE,
+    FZ_SPECTRAL_CONTRAST,
     FZ_N_FEATURES
 };
 
@@ -234,6 +235,12 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     {
         double a[2] = {fabs(fz[0]), fold(fz[1], 1.1)};
         xtract_harmonic_spectrum(input, VEC_N, maybe_null(null_argv, a), result);
+        break;
+    }
+    case FZ_SPECTRAL_CONTRAST:
+    {
+        double a[3] = {(double)clamp_int(fz[0], 0, 64), fz[1], fold(fz[2], 1.1)};
+        xtract_spectral_contrast(input, VEC_N, maybe_null(null_argv, a), result);
         break;
     }
     case FZ_MFCC:

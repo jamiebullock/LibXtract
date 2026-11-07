@@ -32,8 +32,9 @@ VERIFY_MAX_N ?= 32
 # extremum's deque or an ordinal pattern, the threshold test on every
 # element of a Lempel-Ziv phrase, the tolerance test on every pair of
 # elements that sample and approximate entropy compare, the sign of every
-# lag of the NSDF behind mcleod_f0, periodicity and signal_confidence), and
-# the solver's cost in those values grows too fast for VERIFY_MAX_N to be
+# lag of the NSDF behind mcleod_f0, periodicity and signal_confidence, the
+# band edge test on every bin frequency in spectral_contrast), and the
+# solver's cost in those values grows too fast for VERIFY_MAX_N to be
 # reachable.
 VERIFY_SMALL_N ?= 8
 SMALL_PROOFS = verify_hps verify_mcleod_f0 verify_sharpness \
@@ -42,7 +43,7 @@ SMALL_PROOFS = verify_hps verify_mcleod_f0 verify_sharpness \
 	verify_mmbses verify_spectral_subband_centroids \
 	verify_moving_max verify_moving_min verify_permutation_entropy \
 	verify_lempel_ziv_complexity verify_sample_entropy verify_approximate_entropy \
-	verify_periodicity verify_signal_confidence
+	verify_periodicity verify_signal_confidence verify_spectral_contrast
 # The filterbank proofs take a filterbank of up to this many filters; the
 # count multiplies the formula, and N is the bound the proofs are about.
 VERIFY_MAX_FILTERS ?= 2

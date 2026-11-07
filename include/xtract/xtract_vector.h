@@ -304,6 +304,15 @@ extern "C"
      * \param *result: a pointer to an array of N doubles, one variance per element of *data, the first being 0
      */
     int xtract_ewma_variance(const double *data, const int N, const void *argv, double *result);
+
+    /** \brief Extract the spectral contrast of a spectrum: in each of a set of octave bands, the natural log of the ratio of the mean of the band's largest coefficients to the mean of its smallest
+     *
+     * \param *data: a pointer to the first element in an array of doubles containing N/2 magnitude/power coefficients followed by N/2 bin frequencies in Hz, e.g. the *result from xtract_spectrum()
+     * \param N: the size of the array pointed to by *data, at least 2 and even
+     * \param *argv: a pointer to an array of three doubles: the number of octave bands, cast to an integer, at least 1; the lower edge of the first octave band in Hz, finite and at least 0; and the fraction of a band's bins averaged at each end, from 0 to 1, at least one bin being averaged whatever the fraction
+     * \param *result: a pointer to an array of argv[0] + 1 doubles: the contrast of the bins below the first edge, then of each octave band from that edge, the last band running to the highest bin frequency. The array is zeroed with no result when a band contains no bin or the mean of its smallest coefficients is not positive
+     */
+    int xtract_spectral_contrast(const double *data, const int N, const void *argv, double *result);
     /** @} */
 
 #ifdef __cplusplus
