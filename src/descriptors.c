@@ -400,11 +400,6 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             /* argc = 2 */;
         case XTRACT_ROLLOFF:
         case XTRACT_PEAK_SPECTRUM:
-        case XTRACT_ATTACK_TIME:
-            *argv_donor = XTRACT_ANY;
-            *(argv_donor + 1) = XTRACT_ANY;
-            *(argv_donor + 2) = XTRACT_ANY;
-            break;
         case XTRACT_DECAY_TIME:
         case XTRACT_DECAY_RATE:
         case XTRACT_FLUX:
@@ -433,6 +428,11 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_CREST:
             *argv_donor = XTRACT_HIGHEST_VALUE;
             *(argv_donor + 1) = XTRACT_MEAN;
+            break;
+        case XTRACT_ATTACK_TIME:
+            *argv_donor = XTRACT_ANY;
+            *(argv_donor + 1) = XTRACT_ANY;
+            *(argv_donor + 2) = XTRACT_ANY;
             break;
             /* argc = 4 */
         case XTRACT_SPECTRUM:
