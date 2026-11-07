@@ -3129,6 +3129,19 @@ UTEST(spectral_contrast, a_valley_that_is_not_positive_has_no_result)
     ASSERT_EQ(result[0], 0.0);
 }
 
+UTEST(spectral_contrast, a_nan_coefficient_is_left_out_of_its_band)
+{
+    double data[] = {3.0, NAN, 6.0, 2.0, 100.0, 200.0, 300.0, 400.0};
+    double argv[] = {1.0, 250.0, 0.0};
+    double result[2] = {-1.0, -1.0};
+    ASSERT_EQ(xtract_spectral_contrast(data, 8, argv, result), XTRACT_SUCCESS);
+    CHECK_NEAR(result[0], 0.0, EPSILON);
+    CHECK_REL(result[1], log(3.0), EPSILON);
+    data[0] = NAN;
+    ASSERT_EQ(xtract_spectral_contrast(data, 8, argv, result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result[0], 0.0);
+}
+
 UTEST(spectral_contrast, rejects_bad_arguments)
 {
     double data[] = {1.0, 2.0, 3.0, 4.0, 100.0, 200.0, 300.0, 400.0};

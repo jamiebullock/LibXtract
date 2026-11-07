@@ -1312,7 +1312,7 @@ int xtract_spectral_contrast(const double *data, const int N, const void *argv, 
         count = 0;
         for (n = 0; n < M; n++)
         {
-            if (freqs[n] >= low && (band == bands || freqs[n] < high))
+            if (freqs[n] >= low && (band == bands || freqs[n] < high) && amps[n] == amps[n])
                 sorted[count++] = amps[n];
         }
 
