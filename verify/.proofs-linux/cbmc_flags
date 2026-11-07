@@ -1,0 +1,1 @@
+9 9 --unwind 9 --unwinding-assertions --slice-formula --bitwuzla --bounds-check --pointer-check --div-by-zero-check --signed-overflow-check --malloc-may-fail --malloc-fail-null --drop-unused-functions
