@@ -395,12 +395,28 @@ UTEST(descriptors, appended_features_are_fully_described)
     ASSERT_EQ(fd[XTRACT_CROSS_CORRELATION_LAG].is_scalar, XTRACT_TRUE);
     ASSERT_EQ(fd[XTRACT_CROSS_CORRELATION_LAG].result.scalar.unit, XTRACT_UNIT_NONE);
     ASSERT_EQ(fd[XTRACT_CROSS_CORRELATION_LAG].result.scalar.min, XTRACT_UNBOUNDED_MIN);
-    for (f = XTRACT_CROSS_CORRELATION; f <= XTRACT_CROSS_CORRELATION_LAG; f++)
+    for (f = XTRACT_CROSS_CORRELATION; f <= XTRACT_MODIFIED_KULLBACK_LEIBLER; f++)
     {
         ASSERT_EQ_MSG(fd[f].data.format, XTRACT_SUBFRAMES, fd[f].algo.name);
         ASSERT_EQ_MSG(fd[f].data.unit, XTRACT_UNIT_ANY, fd[f].algo.name);
         ASSERT_EQ_MSG(fd[f].is_delta, XTRACT_TRUE, fd[f].algo.name);
     }
+
+    for (f = XTRACT_KULLBACK_LEIBLER_DIVERGENCE; f <= XTRACT_MODIFIED_KULLBACK_LEIBLER; f++)
+    {
+        ASSERT_EQ_MSG(fd[f].is_scalar, XTRACT_TRUE, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].result.scalar.unit, XTRACT_UNIT_NONE, fd[f].algo.name);
+        CHECK_NEAR(fd[f].result.scalar.min, 0.0, EPSILON);
+        ASSERT_EQ_MSG(fd[f].result.scalar.max, XTRACT_UNBOUNDED_MAX, fd[f].algo.name);
+    }
+    ASSERT_EQ(fd[XTRACT_KULLBACK_LEIBLER_DIVERGENCE].argc, 0);
+    ASSERT_EQ(fd[XTRACT_ITAKURA_SAITO_DIVERGENCE].argc, 0);
+    ASSERT_EQ(fd[XTRACT_MODIFIED_KULLBACK_LEIBLER].argc, 1);
+    ASSERT_EQ(fd[XTRACT_MODIFIED_KULLBACK_LEIBLER].argv.type, XTRACT_FLOAT);
+    CHECK_NEAR(fd[XTRACT_MODIFIED_KULLBACK_LEIBLER].argv.min[0], 0.0, EPSILON);
+    ASSERT_EQ(fd[XTRACT_MODIFIED_KULLBACK_LEIBLER].argv.max[0], XTRACT_UNBOUNDED_MAX);
+    ASSERT_EQ(fd[XTRACT_MODIFIED_KULLBACK_LEIBLER].argv.unit[0], XTRACT_UNIT_ANY);
+    ASSERT_EQ(fd[XTRACT_MODIFIED_KULLBACK_LEIBLER].argv.donor[0], XTRACT_ANY);
 
     ASSERT_EQ(xtract_free_descriptors(fd), XTRACT_SUCCESS);
 }
@@ -462,6 +478,9 @@ UTEST(dispatch, slots_map_to_the_expected_function)
     ASSERT_TRUE(xtract[XTRACT_PEAK_ASYMMETRY] == xtract_peak_asymmetry);
     ASSERT_TRUE(xtract[XTRACT_CROSS_CORRELATION] == xtract_cross_correlation);
     ASSERT_TRUE(xtract[XTRACT_CROSS_CORRELATION_LAG] == xtract_cross_correlation_lag);
+    ASSERT_TRUE(xtract[XTRACT_KULLBACK_LEIBLER_DIVERGENCE] == xtract_kullback_leibler_divergence);
+    ASSERT_TRUE(xtract[XTRACT_ITAKURA_SAITO_DIVERGENCE] == xtract_itakura_saito_divergence);
+    ASSERT_TRUE(xtract[XTRACT_MODIFIED_KULLBACK_LEIBLER] == xtract_modified_kullback_leibler);
 }
 
 /* ===== Descriptor conformance ===== */

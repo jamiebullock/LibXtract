@@ -93,6 +93,16 @@ int xtract_lnorm(const double *data, const int N, const void *argv, double *resu
             }
         }
         break;
+    case XTRACT_NEGATIVE_SLOPE:
+        for (n = 0; n < N; n++)
+        {
+            if (data[n] < 0)
+            {
+                *result += xtract_pow_order(-data[n], order);
+                ++k;
+            }
+        }
+        break;
     default:
         for (n = 0; n < N; n++)
         {
@@ -237,6 +247,123 @@ int xtract_cross_correlation_lag(const double *data, const int N, const void *ar
     *result = best - (M - 1);
 
     free(correlation);
+
+    return XTRACT_SUCCESS;
+}
+
+int xtract_kullback_leibler_divergence(const double *data, const int N, const void *argv, double *result)
+{
+    int n, M;
+    const double *current = data;
+    const double *previous;
+    double current_total = 0.0;
+    double previous_total = 0.0;
+    double weighted_log_ratio = 0.0;
+
+    if (N < 2 || (N & 1))
+    {
+        *result = 0.0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
+
+    M = N >> 1;
+    previous = data + M;
+
+    for (n = 0; n < M; n++)
+    {
+        if (previous[n] > 0.0)
+            previous_total += previous[n];
+        if (current[n] > 0.0)
+        {
+            if (previous[n] <= 0.0)
+            {
+                *result = 0.0;
+                return XTRACT_NO_RESULT;
+            }
+            current_total += current[n];
+            weighted_log_ratio += current[n] * log(current[n] / previous[n]);
+        }
+    }
+
+    if (current_total == 0.0)
+    {
+        *result = 0.0;
+        return XTRACT_NO_RESULT;
+    }
+
+    *result = weighted_log_ratio / current_total + log(previous_total / current_total);
+    if (*result < 0.0)
+        *result = 0.0;
+
+    return XTRACT_SUCCESS;
+}
+
+int xtract_itakura_saito_divergence(const double *data, const int N, const void *argv, double *result)
+{
+    int n, M;
+    double ratio;
+    double sum = 0.0;
+
+    if (N < 2 || (N & 1))
+    {
+        *result = 0.0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
+
+    M = N >> 1;
+
+    for (n = 0; n < M; n++)
+    {
+        if (data[n] <= 0.0 || data[M + n] <= 0.0)
+        {
+            *result = 0.0;
+            return XTRACT_NO_RESULT;
+        }
+        ratio = data[n] / data[M + n];
+        sum += ratio - log(ratio) - 1.0;
+    }
+
+    *result = sum < 0.0 ? 0.0 : sum;
+
+    return XTRACT_SUCCESS;
+}
+
+int xtract_modified_kullback_leibler(const double *data, const int N, const void *argv, double *result)
+{
+    int n, M;
+    double epsilon, current, previous;
+    double sum = 0.0;
+
+    if (N < 2 || (N & 1) || argv == NULL)
+    {
+        *result = 0.0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
+
+    epsilon = *(const double *)argv;
+    if (!isfinite(epsilon) || epsilon < 0.0)
+    {
+        *result = 0.0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
+
+    M = N >> 1;
+
+    for (n = 0; n < M; n++)
+    {
+        current = data[n] > 0.0 ? data[n] : 0.0;
+        previous = (data[M + n] > 0.0 ? data[M + n] : 0.0) + epsilon;
+        if (current == 0.0)
+            continue;
+        if (previous == 0.0)
+        {
+            *result = 0.0;
+            return XTRACT_NO_RESULT;
+        }
+        sum += log(1.0 + current / previous);
+    }
+
+    *result = sum;
 
     return XTRACT_SUCCESS;
 }
