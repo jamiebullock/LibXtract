@@ -3255,7 +3255,7 @@ UTEST(chroma, a_bin_at_zero_hertz_is_never_included)
         CHECK_NEAR(result[n], n == PC_A ? 1.0 : 0.0, EPSILON);
 }
 
-UTEST(chroma, a_major_triad_from_a_4096_point_spectrum_at_44100_hz)
+UTEST(chroma, c_major_triad_from_a_4096_point_spectrum_at_44100_hz)
 {
     double data[4096];
     double argv[] = {440.0, 40.0, 5000.0};
