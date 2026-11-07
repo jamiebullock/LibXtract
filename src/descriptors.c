@@ -309,6 +309,12 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *(argv_def + 1) = 0.4;
             *(argv_unit + 1) = XTRACT_UNIT_NONE;
             break;
+        case XTRACT_CROSS_CORRELATION:
+            *argv_min = 0.0;
+            *argv_max = 1.0;
+            *argv_def = 0.0;
+            *argv_unit = XTRACT_UNIT_NONE;
+            break;
         case XTRACT_FLUX:
         case XTRACT_LNORM:
             *argv_min = XTRACT_UNBOUNDED_MIN;
@@ -587,6 +593,8 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             break;
         case XTRACT_DIFFERENCE_VECTOR:
         case XTRACT_FLUX:
+        case XTRACT_CROSS_CORRELATION:
+        case XTRACT_CROSS_CORRELATION_LAG:
             *data_format = XTRACT_SUBFRAMES;
             break;
         case XTRACT_MIDICENT:
@@ -640,6 +648,8 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_MAX_POSITION:
         case XTRACT_MIN_POSITION:
         case XTRACT_PEAK_ASYMMETRY:
+        case XTRACT_CROSS_CORRELATION:
+        case XTRACT_CROSS_CORRELATION_LAG:
         case XTRACT_DIFFERENCE_VECTOR:
         case XTRACT_FLUX:
         case XTRACT_LNORM:
@@ -1430,6 +1440,20 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             copy_desc(p_desc, "Extract the ratio of the energy of an envelope from its peak to the end to the energy from the start to its peak");
             copy_author(author, "");
             break;
+        case XTRACT_CROSS_CORRELATION:
+            copy_name(name, "cross_correlation");
+            copy_name(p_name, "Cross-correlation");
+            copy_desc(desc, "Extract the cross-correlation of two series at every lag");
+            copy_desc(p_desc, "Extract the similarity of two series as a function of the lag between them");
+            copy_author(author, "");
+            break;
+        case XTRACT_CROSS_CORRELATION_LAG:
+            copy_name(name, "cross_correlation_lag");
+            copy_name(p_name, "Cross-correlation Lag");
+            copy_desc(desc, "Extract the lag at which two series are most correlated");
+            copy_desc(p_desc, "Extract the lag at which two series are most correlated");
+            copy_author(author, "");
+            break;
         case XTRACT_DIFFERENCE_VECTOR:
             copy_name(name, "difference_vector");
             copy_name(p_name, "Difference vector");
@@ -1530,6 +1554,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_FLATNESS_DB:
         case XTRACT_TONALITY:
         case XTRACT_PEAK:
+        case XTRACT_CROSS_CORRELATION:
             *argc = 1;
             *argv_type = XTRACT_FLOAT;
             break;
@@ -1753,6 +1778,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_MOVING_MIN:
         case XTRACT_EWMA_AVERAGE:
         case XTRACT_EWMA_VARIANCE:
+        case XTRACT_CROSS_CORRELATION:
             *is_scalar = XTRACT_FALSE;
             break;
         default:
@@ -1767,6 +1793,8 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_FLUX:
         case XTRACT_LNORM:
         case XTRACT_DIFFERENCE_VECTOR:
+        case XTRACT_CROSS_CORRELATION:
+        case XTRACT_CROSS_CORRELATION_LAG:
             *is_delta = XTRACT_TRUE;
             break;
         case XTRACT_MEAN:
@@ -1998,6 +2026,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             case XTRACT_KATZ_FRACTAL_DIMENSION:
             case XTRACT_HIGUCHI_FRACTAL_DIMENSION:
             case XTRACT_APPROXIMATE_ENTROPY:
+            case XTRACT_CROSS_CORRELATION_LAG:
                 *result_unit = XTRACT_UNIT_NONE;
                 *result_min = XTRACT_UNBOUNDED_MIN;
                 *result_max = XTRACT_UNBOUNDED_MAX;
@@ -2058,6 +2087,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             case XTRACT_MOVING_MIN:
             case XTRACT_EWMA_AVERAGE:
             case XTRACT_EWMA_VARIANCE:
+            case XTRACT_CROSS_CORRELATION:
                 *result_format = XTRACT_ARBITRARY_SERIES;
                 *result_unit = XTRACT_UNIT_ANY;
                 break;
