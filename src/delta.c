@@ -275,7 +275,7 @@ int xtract_kullback_leibler_divergence(const double *data, const int N, const vo
             previous_total += previous[n];
         if (current[n] > 0.0)
         {
-            if (previous[n] <= 0.0)
+            if (!(previous[n] > 0.0))
             {
                 *result = 0.0;
                 return XTRACT_NO_RESULT;
@@ -314,7 +314,7 @@ int xtract_itakura_saito_divergence(const double *data, const int N, const void 
 
     for (n = 0; n < M; n++)
     {
-        if (data[n] <= 0.0 || data[M + n] <= 0.0)
+        if (!(data[n] > 0.0) || !(data[M + n] > 0.0))
         {
             *result = 0.0;
             return XTRACT_NO_RESULT;

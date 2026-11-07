@@ -108,12 +108,12 @@ extern "C"
      */
     int xtract_itakura_saito_divergence(const double *data, const int N, const void *argv, double *result);
 
-    /** \brief Extract the modified Kullback-Leibler onset function of Hainsworth and Macleod: the sum over the frame of the logarithm of 1 plus the ratio of each element to its value in the previous frame, so that elements rising from near silence dominate, falling elements add almost nothing and a gain common to both frames leaves the result almost unchanged
+    /** \brief Extract the modified Kullback-Leibler onset function of Hainsworth and Macleod: the sum over the frame of the logarithm of 1 plus the ratio of each element to its value in the previous frame, so that an element rising from near silence dominates, an element falling by a large factor adds almost nothing and a gain common to both frames leaves the result almost unchanged
      *
      * \param *data: a pointer to the first element in an array of doubles comprising two successive frames of non-negative coefficients, e.g. magnitude spectra: the current frame in the first N/2 elements, the previous frame in the second N/2 elements
      * \param N: the total number of elements in the array pointed to by *data (twice the frame size), at least 2 and even
      * \param *argv: a pointer to a double, the value added to every element of the previous frame before the ratio is taken, finite and at least 0; it bounds the contribution of an element that rises from 0
-     * \param *result: the onset function, at least 0 and 0 when no element rose. Elements that are not positive count as 0. The result is 0 with no result when the value in argv is 0 and an element rises from 0
+     * \param *result: the onset function, at least 0 and 0 when the current frame has no positive element; an unchanged element adds the logarithm of 2. Elements that are not positive count as 0. The result is 0 with no result when the value in argv is 0 and an element rises from 0
      */
     int xtract_modified_kullback_leibler(const double *data, const int N, const void *argv, double *result);
     /*xtract_frame_tracker *xf */
