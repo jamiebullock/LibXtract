@@ -117,6 +117,7 @@ VECTOR_HARNESS(harmonic_spectrum, nondet_length(), XTRACT_MAXARGS, N)
 VECTOR_HARNESS(lpc, nondet_length(), XTRACT_MAXARGS, 2 * at_least_zero(N - 1))
 VECTOR_HARNESS(windowed, nondet_length(), N, N)
 VECTOR_HARNESS(smoothed, nondet_length(), XTRACT_MAXARGS, N)
+VECTOR_HARNESS(chroma, nondet_small_length(), XTRACT_MAXARGS, XTRACT_PITCH_CLASSES)
 
 void verify_spectral_contrast(void)
 {

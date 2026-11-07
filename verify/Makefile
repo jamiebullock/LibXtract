@@ -33,7 +33,8 @@ VERIFY_MAX_N ?= 32
 # element of a Lempel-Ziv phrase, the tolerance test on every pair of
 # elements that sample and approximate entropy compare, the sign of every
 # lag of the NSDF behind mcleod_f0, periodicity and signal_confidence, the
-# band edge test on every bin frequency in spectral_contrast), and the
+# band edge test on every bin frequency in spectral_contrast, the range test
+# and pitch class of every bin frequency in chroma), and the
 # solver's cost in those values grows too fast for VERIFY_MAX_N to be
 # reachable.
 VERIFY_SMALL_N ?= 8
@@ -43,7 +44,8 @@ SMALL_PROOFS = verify_hps verify_mcleod_f0 verify_sharpness \
 	verify_mmbses verify_spectral_subband_centroids \
 	verify_moving_max verify_moving_min verify_permutation_entropy \
 	verify_lempel_ziv_complexity verify_sample_entropy verify_approximate_entropy \
-	verify_periodicity verify_signal_confidence verify_spectral_contrast
+	verify_periodicity verify_signal_confidence verify_spectral_contrast \
+	verify_chroma
 # The filterbank proofs take a filterbank of up to this many filters; the
 # count multiplies the formula, and N is the bound the proofs are about.
 VERIFY_MAX_FILTERS ?= 2
@@ -72,6 +74,8 @@ endif
 # unwinds only as far as its N requires.
 SMALL_UNWIND := $(shell expr $(VERIFY_SMALL_N) + 1)
 $(addprefix $(PROOF_DIR)/, $(addsuffix .proved, $(SMALL_PROOFS))): UNWIND = $(SMALL_UNWIND)
+# chroma's loops over the result run XTRACT_PITCH_CLASSES times whatever N is.
+$(PROOF_DIR)/verify_chroma.proved: UNWIND = $(shell expr $(VERIFY_SMALL_N) + 1 + 12)
 
 # The feature functions are floating-point loops, and the solver cost is in
 # the doubles. Formula slicing drops the arithmetic that no property depends
