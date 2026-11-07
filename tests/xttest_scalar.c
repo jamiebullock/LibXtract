@@ -2309,29 +2309,58 @@ UTEST(mcleod_f0, a_period_longer_than_half_the_window_gives_no_result)
     ASSERT_EQ(result, 0.0);
 }
 
-UTEST(mcleod_f0, a_region_cut_off_at_half_the_window_still_yields_its_maximum)
+UTEST(mcleod_f0, a_region_still_rising_at_the_last_scanned_lag_has_no_key_maximum)
 {
     /* Period 70 in 128 samples: the positive region around lag 70 is still
-     * open when the scan stops at lag 64, so its highest scanned lag is
-     * taken and the interpolation reaches past the cut-off */
+     * rising when the scan stops at lag 64, so the lag beyond the scan is
+     * higher than any scanned one and the region has no maximum of its own */
     const int N = 128;
     const double sr = 44100.0;
     double data[128];
-    double result = 0.0;
+    double result = -1.0;
     int n;
 
     for (n = 0; n < N; n++)
         data[n] = cos(2.0 * M_PI * n / 70.0);
 
-    ASSERT_EQ(xtract_mcleod_f0(data, N, &sr, &result), XTRACT_SUCCESS);
-    CHECK_REL(result, sr / 70.0, 5e-2);
+    ASSERT_EQ(xtract_mcleod_f0(data, N, &sr, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
+}
+
+UTEST(mcleod_f0, every_period_up_to_half_the_window_is_found_and_none_beyond)
+{
+    const int N = 128;
+    const double sr = 44100.0;
+    double data[128];
+    double f0, periodicity;
+    int period, n;
+
+    for (period = 2; period < N; period++)
+    {
+        for (n = 0; n < N; n++)
+            data[n] = cos(2.0 * M_PI * n / period);
+
+        if (period <= N / 2)
+        {
+            ASSERT_EQ(xtract_mcleod_f0(data, N, &sr, &f0), XTRACT_SUCCESS);
+            CHECK_REL(f0, sr / period, 1e-2);
+            ASSERT_EQ(xtract_periodicity(data, N, NULL, &periodicity), XTRACT_SUCCESS);
+            ASSERT_GE(periodicity, 0.95);
+        }
+        else
+        {
+            ASSERT_EQ(xtract_mcleod_f0(data, N, &sr, &f0), XTRACT_NO_RESULT);
+            ASSERT_EQ(xtract_periodicity(data, N, NULL, &periodicity), XTRACT_NO_RESULT);
+        }
+    }
 }
 
 UTEST(mcleod_f0, a_peak_on_the_last_scanned_lag_is_interpolated)
 {
     /* cos with period N / 2 peaks exactly on the last lag scanned, so the
-     * interpolation reads the lag beyond the scan; the shrinking window
-     * makes the two neighbours unequal, which moves the peak slightly */
+     * region is kept and the interpolation reads the lag beyond the scan;
+     * the shrinking window makes the two neighbours unequal, which moves
+     * the peak slightly */
     const int N = 128;
     const double sr = 44100.0;
     double data[128];

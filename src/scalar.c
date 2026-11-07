@@ -1576,21 +1576,35 @@ int xtract_wavelet_f0(const double *data, const int N, const void *argv, double 
     return XTRACT_SUCCESS;
 }
 
-/* Height of the parabola through (tau-1, tau, tau+1) at its vertex, used to
- * compare NSDF key maxima at sub-sample accuracy (McLeod and Wyvill 2005) */
-static double mcleod_peak_height(const double *nsdf, const int tau)
+/* The parabola through (tau-1, tau, tau+1) locates an NSDF key maximum at
+ * sub-sample accuracy (McLeod and Wyvill 2005): its vertex lies at tau plus
+ * the offset, at the height. The NSDF never exceeds 1, so the height is
+ * clamped there. */
+static void mcleod_interpolate(const double *nsdf, const int tau, double *offset, double *height)
 {
-    double a, b, c, denom;
-
-    a = nsdf[tau - 1];
-    b = nsdf[tau];
-    c = nsdf[tau + 1];
-    denom = a - 2.0 * b + c;
+    const double a = nsdf[tau - 1];
+    const double b = nsdf[tau];
+    const double c = nsdf[tau + 1];
+    const double denom = a - 2.0 * b + c;
 
     if (denom == 0.0)
-        return b;
+    {
+        *offset = 0.0;
+        *height = b;
+        return;
+    }
 
-    return b - 0.125 * (a - c) * (a - c) / denom;
+    *offset = 0.5 * (a - c) / denom;
+    *height = XTRACT_MIN(b - 0.125 * (a - c) * (a - c) / denom, 1.0);
+}
+
+static double mcleod_peak_height(const double *nsdf, const int tau)
+{
+    double offset, height;
+
+    mcleod_interpolate(nsdf, tau, &offset, &height);
+
+    return height;
 }
 
 /* The key maximum scan covers lags 1 to half the window: beyond it too few
@@ -1623,8 +1637,10 @@ static void mcleod_nsdf(const double *data, const int N, const int lags, double 
 /* Key maxima (McLeod and Wyvill 2005): each positive region of the NSDF,
  * from a positively sloped zero crossing to the next negatively sloped one,
  * contributes its highest sample. The lag at tau = 0 lies before the first
- * crossing, so its lobe never forms a region, and the final region may be
- * cut off by the last lag scanned. */
+ * crossing, so its lobe never forms a region. The final region may be cut
+ * off by the last lag scanned; it still counts unless the NSDF is still
+ * rising there, since then the lag beyond the scan is higher and the region
+ * has no maximum of its own. */
 static int mcleod_next_key_maximum(const double *nsdf, const int lags, int *scan, int *peak)
 {
     int tau = *scan;
@@ -1646,7 +1662,7 @@ static int mcleod_next_key_maximum(const double *nsdf, const int lags, int *scan
     }
     *scan = tau;
 
-    return 1;
+    return !(*peak == lags - 1 && nsdf[lags] > nsdf[*peak]);
 }
 
 static int mcleod_highest_key_maximum(const double *nsdf, const int lags, double *highest)
@@ -1687,7 +1703,7 @@ int xtract_mcleod_f0(const double *data, const int N, const void *argv, double *
     double sr;
     double *nsdf;
     int lags, best_tau;
-    double a, b, c, denom, peak_tau;
+    double offset, height;
 
     if (N < 1 || argv == NULL)
     {
@@ -1718,13 +1734,9 @@ int xtract_mcleod_f0(const double *data, const int N, const void *argv, double *
         return XTRACT_NO_RESULT;
     }
 
-    a = nsdf[best_tau - 1];
-    b = nsdf[best_tau];
-    c = nsdf[best_tau + 1];
-    denom = a - 2.0 * b + c;
-    peak_tau = (denom != 0.0) ? best_tau + 0.5 * (a - c) / denom : (double)best_tau;
+    mcleod_interpolate(nsdf, best_tau, &offset, &height);
 
-    *result = sr / peak_tau;
+    *result = sr / (best_tau + offset);
 
     free(nsdf);
 
@@ -2406,7 +2418,7 @@ int xtract_periodicity(const double *data, const int N, const void *argv, double
         return XTRACT_NO_RESULT;
     }
 
-    *result = XTRACT_MIN(highest, 1.0);
+    *result = highest;
 
     return XTRACT_SUCCESS;
 }
@@ -2439,7 +2451,7 @@ int xtract_signal_confidence(const double *data, const int N, const void *argv, 
         return XTRACT_NO_RESULT;
     }
 
-    *result = XTRACT_MIN(height, 1.0);
+    *result = height;
 
     return XTRACT_SUCCESS;
 }
