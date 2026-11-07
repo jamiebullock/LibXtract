@@ -156,6 +156,7 @@ extern "C"
         XTRACT_APPROXIMATE_ENTROPY,
         XTRACT_PERIODICITY,
         XTRACT_SIGNAL_CONFIDENCE,
+        XTRACT_DECAY_RATE,
         XTRACT_FEATURE_COUNT
     };
 
@@ -258,7 +259,9 @@ extern "C"
         XTRACT_BINS,
         XTRACT_SONE,
         XTRACT_MIDI_CENT,
-        XTRACT_ACUM
+        XTRACT_ACUM,
+        XTRACT_SECONDS,
+        XTRACT_PER_SECOND
     } xtract_unit_t;
 
     /** \brief Boolean */

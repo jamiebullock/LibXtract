@@ -44,13 +44,23 @@ extern "C"
     int xtract_lnorm(const double *data, const int N, const void *argv, double *result);
     /*xtract_frame_tracker *xf */
 
-    /** \brief Extract attack Time */
+    /** \brief Extract the attack time of an envelope: the time from the first element that reaches the start fraction of the maximum to the first element from there that reaches the stop fraction
+     *
+     * \param *data: a pointer to the first element in an array of doubles representing an amplitude envelope or any segment with a single peak
+     * \param N: the number of elements to be considered, at least 1
+     * \param *argv: a pointer to an array of three doubles: the sample rate, finite and at least 0, with 0 selecting 44100 Hz; the start fraction of the maximum; and the stop fraction of the maximum, each from 0 to 1
+     * \param *result: the attack time of N values from the array pointed to by *data in seconds, or 0 with no result when the maximum is not positive
+     */
     int xtract_attack_time(const double *data, const int N, const void *argv, double *result);
-    /* xtract_amp_tracker *xa */
 
-    /** Extract temporal decrease */
+    /** \brief Extract the decay time of an envelope: the time from its maximum to the first later element at or below the threshold fraction of the maximum, or to the last element when none is
+     *
+     * \param *data: a pointer to the first element in an array of doubles representing an amplitude envelope or any segment with a single peak
+     * \param N: the number of elements to be considered, at least 1
+     * \param *argv: a pointer to an array of two doubles: the sample rate, finite and at least 0, with 0 selecting 44100 Hz; and the threshold fraction of the maximum, from 0 to 1
+     * \param *result: the decay time of N values from the array pointed to by *data in seconds, or 0 with no result when the maximum is not positive
+     */
     int xtract_decay_time(const double *data, const int N, const void *argv, double *result);
-    /* xtract_amp_tracker *xa */
 
     /** \brief Extract the difference between two vectors
      *

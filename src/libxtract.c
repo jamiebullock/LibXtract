@@ -106,4 +106,5 @@ int (*xtract[])(const double *, const int, const void *, double *) =
         xtract_sample_entropy,
         xtract_approximate_entropy,
         xtract_periodicity,
-        xtract_signal_confidence};
+        xtract_signal_confidence,
+        xtract_decay_rate};

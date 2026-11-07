@@ -82,20 +82,182 @@ UTEST(delta, flux_positive_slope_no_rising_bins_yields_no_result)
     ASSERT_EQ(rv, XTRACT_NO_RESULT);
 }
 
-UTEST(delta, attack_time_not_implemented)
+/* ===== Attack time ===== */
+
+UTEST(attack_time, linear_ramp_between_the_fractions)
 {
-    /* Documented as not yet implemented; lock that contract so a future
-     * implementation deliberately replaces this expectation. */
-    double data[] = {1.0, 2.0, 3.0, 4.0};
+    /* data[n] = n / 99 first reaches 0.2 at n = 20 and 0.9 at n = 90 */
+    double data[100];
+    double argv[] = {1000.0, 0.2, 0.9};
     double result = -1.0;
-    ASSERT_EQ(xtract_attack_time(data, 4, NULL, &result), XTRACT_FEATURE_NOT_IMPLEMENTED);
+    int n;
+
+    for (n = 0; n < 100; n++)
+        data[n] = n / 99.0;
+
+    ASSERT_EQ(xtract_attack_time(data, 100, argv, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 70.0 / 1000.0, EPSILON);
 }
 
-UTEST(delta, decay_time_not_implemented)
+UTEST(attack_time, zero_sample_rate_selects_44100)
 {
-    double data[] = {1.0, 2.0, 3.0, 4.0};
+    double data[100];
+    double argv[] = {0.0, 0.2, 0.9};
     double result = -1.0;
-    ASSERT_EQ(xtract_decay_time(data, 4, NULL, &result), XTRACT_FEATURE_NOT_IMPLEMENTED);
+    int n;
+
+    for (n = 0; n < 100; n++)
+        data[n] = n / 99.0;
+
+    ASSERT_EQ(xtract_attack_time(data, 100, argv, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 70.0 / 44100.0, EPSILON);
+}
+
+UTEST(attack_time, fractions_are_relative_to_the_maximum)
+{
+    double data[100];
+    double scaled[100];
+    double argv[] = {1000.0, 0.2, 0.9};
+    double unit = -1.0;
+    double times_seven = -1.0;
+    int n;
+
+    for (n = 0; n < 100; n++)
+    {
+        data[n] = n / 99.0;
+        scaled[n] = 7.0 * data[n];
+    }
+
+    ASSERT_EQ(xtract_attack_time(data, 100, argv, &unit), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_attack_time(scaled, 100, argv, &times_seven), XTRACT_SUCCESS);
+    CHECK_REL(times_seven, unit, EPSILON);
+}
+
+UTEST(attack_time, is_zero_when_the_first_element_is_the_peak)
+{
+    double data[] = {1.0, 0.5, 0.2};
+    double argv[] = {1.0, 0.2, 0.9};
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_attack_time(data, 3, argv, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(result, 0.0);
+}
+
+UTEST(attack_time, no_result_when_the_maximum_is_not_positive)
+{
+    double zeros[] = {0.0, 0.0, 0.0};
+    double negatives[] = {-1.0, -2.0};
+    double argv[] = {1.0, 0.2, 0.9};
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_attack_time(zeros, 3, argv, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
+    result = -1.0;
+    ASSERT_EQ(xtract_attack_time(negatives, 2, argv, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
+}
+
+UTEST(attack_time, rejects_bad_arguments)
+{
+    double data[] = {0.0, 1.0};
+    double negative_rate[] = {-1.0, 0.2, 0.9};
+    double start_above_one[] = {1.0, 1.5, 0.9};
+    double stop_below_zero[] = {1.0, 0.2, -0.1};
+    double good[] = {1.0, 0.2, 0.9};
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_attack_time(data, 2, NULL, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    result = -1.0;
+    ASSERT_EQ(xtract_attack_time(data, 2, negative_rate, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    result = -1.0;
+    ASSERT_EQ(xtract_attack_time(data, 2, start_above_one, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    result = -1.0;
+    ASSERT_EQ(xtract_attack_time(data, 2, stop_below_zero, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    result = -1.0;
+    ASSERT_EQ(xtract_attack_time(data, 0, good, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+}
+
+/* ===== Decay time ===== */
+
+UTEST(decay_time, exponential_decay_to_the_threshold)
+{
+    /* exp(-n / 100) first falls to 0.4 at n = 92 */
+    double data[1000];
+    double argv[] = {1000.0, 0.4};
+    double result = -1.0;
+    int n;
+
+    for (n = 0; n < 1000; n++)
+        data[n] = exp(-n / 100.0);
+
+    ASSERT_EQ(xtract_decay_time(data, 1000, argv, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 92.0 / 1000.0, EPSILON);
+}
+
+UTEST(decay_time, runs_to_the_last_element_when_the_threshold_is_not_reached)
+{
+    double data[] = {1.0, 0.9, 0.8, 0.7};
+    double argv[] = {1.0, 0.4};
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_decay_time(data, 4, argv, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 3.0, EPSILON);
+}
+
+UTEST(decay_time, starts_at_the_first_occurrence_of_the_maximum)
+{
+    double data[] = {0.0, 1.0, 1.0, 0.1};
+    double argv[] = {1.0, 0.5};
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_decay_time(data, 4, argv, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 2.0, EPSILON);
+}
+
+UTEST(decay_time, is_zero_when_the_last_element_is_the_peak)
+{
+    double data[] = {0.1, 0.5, 1.0};
+    double argv[] = {1.0, 0.4};
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_decay_time(data, 3, argv, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(result, 0.0);
+}
+
+UTEST(decay_time, no_result_when_the_maximum_is_not_positive)
+{
+    double data[] = {0.0, -1.0, 0.0};
+    double argv[] = {1.0, 0.4};
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_decay_time(data, 3, argv, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
+}
+
+UTEST(decay_time, rejects_bad_arguments)
+{
+    double data[] = {1.0, 0.0};
+    double negative_rate[] = {-1.0, 0.4};
+    double threshold_above_one[] = {1.0, 2.0};
+    double good[] = {1.0, 0.4};
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_decay_time(data, 2, NULL, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    result = -1.0;
+    ASSERT_EQ(xtract_decay_time(data, 2, negative_rate, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    result = -1.0;
+    ASSERT_EQ(xtract_decay_time(data, 2, threshold_above_one, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    result = -1.0;
+    ASSERT_EQ(xtract_decay_time(data, 0, good, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
 }
 
 UTEST(delta, lnorm_each_integer_order_and_a_fractional_one)

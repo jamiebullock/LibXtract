@@ -2455,3 +2455,148 @@ int xtract_signal_confidence(const double *data, const int N, const void *argv, 
 
     return XTRACT_SUCCESS;
 }
+
+static int index_of_maximum(const double *data, const int N)
+{
+    int n, peak = 0;
+
+    for (n = 1; n < N; n++)
+    {
+        if (data[n] > data[peak])
+            peak = n;
+    }
+
+    return peak;
+}
+
+static int sample_rate_argument(const double value, double *sr)
+{
+    if (!isfinite(value) || value < 0.0)
+        return 0;
+
+    *sr = value == 0.0 ? XTRACT_SR_DEFAULT : value;
+
+    return 1;
+}
+
+static int is_fraction(const double value)
+{
+    return value >= 0.0 && value <= 1.0;
+}
+
+int xtract_attack_time(const double *data, const int N, const void *argv, double *result)
+{
+    const double *args = (const double *)argv;
+    double sr, peak;
+    int start, stop;
+
+    if (N < 1 || argv == NULL || !sample_rate_argument(args[0], &sr) || !is_fraction(args[1]) || !is_fraction(args[2]))
+    {
+        *result = 0.0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
+
+    peak = data[index_of_maximum(data, N)];
+    if (peak <= 0.0)
+    {
+        *result = 0.0;
+        return XTRACT_NO_RESULT;
+    }
+
+    for (start = 0; start < N - 1 && data[start] < args[1] * peak; start++)
+        ;
+    for (stop = start; stop < N - 1 && data[stop] < args[2] * peak; stop++)
+        ;
+
+    *result = (stop - start) / sr;
+
+    return XTRACT_SUCCESS;
+}
+
+int xtract_decay_time(const double *data, const int N, const void *argv, double *result)
+{
+    const double *args = (const double *)argv;
+    double sr, peak;
+    int peak_index, end;
+
+    if (N < 1 || argv == NULL || !sample_rate_argument(args[0], &sr) || !is_fraction(args[1]))
+    {
+        *result = 0.0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
+
+    peak_index = index_of_maximum(data, N);
+    peak = data[peak_index];
+    if (peak <= 0.0)
+    {
+        *result = 0.0;
+        return XTRACT_NO_RESULT;
+    }
+
+    for (end = peak_index; end < N - 1 && data[end] > args[1] * peak; end++)
+        ;
+
+    *result = (end - peak_index) / sr;
+
+    return XTRACT_SUCCESS;
+}
+
+int xtract_decay_rate(const double *data, const int N, const void *argv, double *result)
+{
+    const double *args = (const double *)argv;
+    double sr, peak, floor_value, mean_time, mean_log, covariance, variance;
+    int peak_index, n, count;
+
+    if (N < 1 || argv == NULL || !sample_rate_argument(args[0], &sr) || !is_fraction(args[1]))
+    {
+        *result = 0.0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
+
+    peak_index = index_of_maximum(data, N);
+    peak = data[peak_index];
+    if (peak <= 0.0)
+    {
+        *result = 0.0;
+        return XTRACT_NO_RESULT;
+    }
+
+    floor_value = args[1] * peak;
+    count = 0;
+    mean_time = 0.0;
+    mean_log = 0.0;
+    for (n = peak_index; n < N; n++)
+    {
+        if (data[n] > floor_value)
+        {
+            count++;
+            mean_time += n / sr;
+            mean_log += log(data[n]);
+        }
+    }
+
+    if (count < 2)
+    {
+        *result = 0.0;
+        return XTRACT_NO_RESULT;
+    }
+
+    mean_time /= count;
+    mean_log /= count;
+    covariance = 0.0;
+    variance = 0.0;
+    for (n = peak_index; n < N; n++)
+    {
+        if (data[n] > floor_value)
+        {
+            const double time_offset = n / sr - mean_time;
+
+            covariance += time_offset * (log(data[n]) - mean_log);
+            variance += time_offset * time_offset;
+        }
+    }
+
+    *result = covariance / variance;
+
+    return XTRACT_SUCCESS;
+}
