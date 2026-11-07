@@ -448,6 +448,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_LEMPEL_ZIV_COMPLEXITY:
         case XTRACT_SAMPLE_ENTROPY:
         case XTRACT_APPROXIMATE_ENTROPY:
+        case XTRACT_PERIODICITY:
         case XTRACT_SKEWNESS:
         case XTRACT_KURTOSIS:
         case XTRACT_LOWEST_VALUE:
@@ -514,6 +515,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_FAILSAFE_F0:
         case XTRACT_WAVELET_F0:
         case XTRACT_MCLEOD_F0:
+        case XTRACT_SIGNAL_CONFIDENCE:
         case XTRACT_SPECTRUM:
         case XTRACT_AUTOCORRELATION:
         case XTRACT_AUTOCORRELATION_FFT:
@@ -577,6 +579,8 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_LEMPEL_ZIV_COMPLEXITY:
         case XTRACT_SAMPLE_ENTROPY:
         case XTRACT_APPROXIMATE_ENTROPY:
+        case XTRACT_PERIODICITY:
+        case XTRACT_SIGNAL_CONFIDENCE:
         case XTRACT_SKEWNESS:
         case XTRACT_KURTOSIS:
         case XTRACT_LOWEST_VALUE:
@@ -1075,6 +1079,22 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             copy_author(author, "Steven M. Pincus");
             *year = 1991;
             break;
+        case XTRACT_PERIODICITY:
+            copy_name(name, "periodicity");
+            copy_name(p_name, "Periodicity");
+            copy_desc(desc, "Extract the periodicity of an input vector");
+            copy_desc(p_desc, "Extract the degree to which a range of values repeats itself");
+            copy_author(author, "Philip McLeod");
+            *year = 2005;
+            break;
+        case XTRACT_SIGNAL_CONFIDENCE:
+            copy_name(name, "signal_confidence");
+            copy_name(p_name, "Signal Confidence");
+            copy_desc(desc, "Extract the confidence of the McLeod fundamental frequency estimate of a signal");
+            copy_desc(p_desc, "Extract the confidence of the fundamental frequency estimate of an audio signal");
+            copy_author(author, "Philip McLeod");
+            *year = 2005;
+            break;
         case XTRACT_MFCC:
             copy_name(name, "mfcc");
             copy_name(p_name, "Mel-Frequency Cepstral Coefficients");
@@ -1520,6 +1540,8 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_SPECTRAL_ENTROPY:
         case XTRACT_PETROSIAN_FRACTAL_DIMENSION:
         case XTRACT_KATZ_FRACTAL_DIMENSION:
+        case XTRACT_PERIODICITY:
+        case XTRACT_SIGNAL_CONFIDENCE:
         case XTRACT_SPECTRAL_MEAN:
         case XTRACT_SPECTRAL_CENTROID:
         case XTRACT_IRREGULARITY_K:
@@ -1571,6 +1593,8 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_LEMPEL_ZIV_COMPLEXITY:
         case XTRACT_SAMPLE_ENTROPY:
         case XTRACT_APPROXIMATE_ENTROPY:
+        case XTRACT_PERIODICITY:
+        case XTRACT_SIGNAL_CONFIDENCE:
         case XTRACT_SKEWNESS:
         case XTRACT_KURTOSIS:
         case XTRACT_SPECTRAL_MEAN:
@@ -1679,6 +1703,8 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_LEMPEL_ZIV_COMPLEXITY:
         case XTRACT_SAMPLE_ENTROPY:
         case XTRACT_APPROXIMATE_ENTROPY:
+        case XTRACT_PERIODICITY:
+        case XTRACT_SIGNAL_CONFIDENCE:
         case XTRACT_SKEWNESS:
         case XTRACT_KURTOSIS:
         case XTRACT_SPECTRAL_MEAN:
@@ -1851,6 +1877,8 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
                 /* geometric mean / arithmetic mean (Wiener entropy): [0, 1] */
             case XTRACT_SPECTRAL_ENTROPY:
             case XTRACT_PERMUTATION_ENTROPY:
+            case XTRACT_PERIODICITY:
+            case XTRACT_SIGNAL_CONFIDENCE:
             case XTRACT_TONALITY:
                 /* min(flatness_db / -60, 1): [0, 1] */
             case XTRACT_SPECTRAL_INHARMONICITY:

@@ -1578,12 +1578,9 @@ int xtract_wavelet_f0(const double *data, const int N, const void *argv, double 
 
 /* Height of the parabola through (tau-1, tau, tau+1) at its vertex, used to
  * compare NSDF key maxima at sub-sample accuracy (McLeod and Wyvill 2005) */
-static double mcleod_peak_height(const double *nsdf, const int tau, const int N)
+static double mcleod_peak_height(const double *nsdf, const int tau)
 {
     double a, b, c, denom;
-
-    if (tau <= 0 || tau >= N - 1)
-        return nsdf[tau];
 
     a = nsdf[tau - 1];
     b = nsdf[tau];
@@ -1596,13 +1593,101 @@ static double mcleod_peak_height(const double *nsdf, const int tau, const int N)
     return b - 0.125 * (a - c) * (a - c) / denom;
 }
 
+/* The key maximum scan covers lags 1 to half the window: beyond it too few
+ * samples overlap for the NSDF to mean anything. The lag after the last one
+ * scanned is computed as well, so the parabola through a maximum on the last
+ * lag has its upper neighbour, which is why the count stays below N - 1. */
+static int mcleod_lags(const int N)
+{
+    return XTRACT_MIN(N / 2 + 1, N - 1);
+}
+
+static void mcleod_nsdf(const double *data, const int N, const int lags, double *nsdf)
+{
+    int tau, n;
+
+    for (tau = 0; tau <= lags; tau++)
+    {
+        double r_tau = 0.0;
+        double m_tau = 0.0;
+
+        for (n = 0; n < N - tau; n++)
+        {
+            r_tau += data[n] * data[n + tau];
+            m_tau += data[n] * data[n] + data[n + tau] * data[n + tau];
+        }
+        nsdf[tau] = (m_tau > 0.0) ? 2.0 * r_tau / m_tau : 0.0;
+    }
+}
+
+/* Key maxima (McLeod and Wyvill 2005): each positive region of the NSDF,
+ * from a positively sloped zero crossing to the next negatively sloped one,
+ * contributes its highest sample. The lag at tau = 0 lies before the first
+ * crossing, so its lobe never forms a region, and the final region may be
+ * cut off by the last lag scanned. */
+static int mcleod_next_key_maximum(const double *nsdf, const int lags, int *scan, int *peak)
+{
+    int tau = *scan;
+
+    while (tau < lags && !(nsdf[tau] > 0.0 && nsdf[tau - 1] <= 0.0))
+        tau++;
+
+    if (tau >= lags)
+    {
+        *scan = lags;
+        return 0;
+    }
+
+    *peak = tau;
+    while (++tau < lags && nsdf[tau] > 0.0)
+    {
+        if (nsdf[tau] > nsdf[*peak])
+            *peak = tau;
+    }
+    *scan = tau;
+
+    return 1;
+}
+
+static int mcleod_highest_key_maximum(const double *nsdf, const int lags, double *highest)
+{
+    int scan = 1, peak, found = 0;
+
+    *highest = 0.0;
+    while (mcleod_next_key_maximum(nsdf, lags, &scan, &peak))
+    {
+        *highest = XTRACT_MAX(*highest, mcleod_peak_height(nsdf, peak));
+        found = 1;
+    }
+
+    return found;
+}
+
+static int mcleod_pitch_peak(const double *nsdf, const int lags, int *peak)
+{
+    const double threshold = 0.8;
+    double highest, cutoff;
+    int scan = 1;
+
+    if (!mcleod_highest_key_maximum(nsdf, lags, &highest) || highest < 0.01)
+        return 0;
+
+    cutoff = threshold * highest;
+    while (mcleod_next_key_maximum(nsdf, lags, &scan, peak))
+    {
+        if (mcleod_peak_height(nsdf, *peak) >= cutoff)
+            return 1;
+    }
+
+    return 0;
+}
+
 int xtract_mcleod_f0(const double *data, const int N, const void *argv, double *result)
 {
-    double sr, threshold;
+    double sr;
     double *nsdf;
-    int tau, n, best_tau;
-    double best_val, a, b, c, peak_tau;
-    int in_region, region_tau;
+    int lags, best_tau;
+    double a, b, c, denom, peak_tau;
 
     if (N < 1 || argv == NULL)
     {
@@ -1619,127 +1704,25 @@ int xtract_mcleod_f0(const double *data, const int N, const void *argv, double *
     if (sr == 0)
         sr = 44100.0;
 
-    threshold = 0.8;
-
-    nsdf = (double *)calloc(N, sizeof(double));
+    lags = mcleod_lags(N);
+    nsdf = (double *)malloc((lags + 1) * sizeof(double));
     if (nsdf == NULL)
         return XTRACT_MALLOC_FAILED;
 
-    /* Compute the type II normalisation term m(tau) and
-     * the unnormalised autocorrelation r(tau) simultaneously.
-     * NSDF(tau) = 2 * r(tau) / m(tau)
-     * where m(tau) = sum_{j=0}^{N-tau-1} (x[j]^2 + x[j+tau]^2) */
-    for (tau = 0; tau < N; tau++)
-    {
-        double r_tau = 0.0;
-        double m_tau = 0.0;
+    mcleod_nsdf(data, N, lags, nsdf);
 
-        for (n = 0; n < N - tau; n++)
-        {
-            r_tau += data[n] * data[n + tau];
-            m_tau += data[n] * data[n] + data[n + tau] * data[n + tau];
-        }
-        nsdf[tau] = (m_tau > 0.0) ? 2.0 * r_tau / m_tau : 0.0;
-    }
-
-    /* Key maxima selection (McLeod and Wyvill 2005): each positive region
-     * of the NSDF — from a positively sloped zero crossing to the next
-     * negatively sloped one — contributes one key maximum, its highest
-     * local maximum. The lag at tau = 0 lies before the first crossing,
-     * so its lobe never forms a region. The pitch peak is the first key
-     * maximum whose interpolated height is within threshold of the
-     * highest key maximum. */
-
-    /* First pass: the height of the highest key maximum */
-    best_val = 0.0;
-    in_region = 0;
-    region_tau = -1;
-
-    for (tau = 1; tau < N; tau++)
-    {
-        if (!in_region && nsdf[tau] > 0.0 && nsdf[tau - 1] <= 0.0)
-        {
-            in_region = 1;
-            region_tau = tau;
-        }
-        else if (in_region)
-        {
-            if (nsdf[tau] <= 0.0)
-            {
-                best_val = XTRACT_MAX(best_val, mcleod_peak_height(nsdf, region_tau, N));
-                in_region = 0;
-            }
-            else if (nsdf[tau] > nsdf[region_tau])
-                region_tau = tau;
-        }
-    }
-
-    /* The final region may be cut off by the end of the buffer */
-    if (in_region)
-        best_val = XTRACT_MAX(best_val, mcleod_peak_height(nsdf, region_tau, N));
-
-    if (best_val < 0.01)
-    {
-        /* No significant periodicity found */
-        *result = 0.0;
-        free(nsdf);
-        return XTRACT_NO_RESULT;
-    }
-
-    /* Second pass: the first key maximum above threshold * best_val */
-    best_tau = -1;
-    in_region = 0;
-    region_tau = -1;
-
-    for (tau = 1; tau < N; tau++)
-    {
-        if (!in_region && nsdf[tau] > 0.0 && nsdf[tau - 1] <= 0.0)
-        {
-            in_region = 1;
-            region_tau = tau;
-        }
-        else if (in_region)
-        {
-            if (nsdf[tau] <= 0.0)
-            {
-                if (mcleod_peak_height(nsdf, region_tau, N) >= threshold * best_val)
-                {
-                    best_tau = region_tau;
-                    break;
-                }
-                in_region = 0;
-            }
-            else if (nsdf[tau] > nsdf[region_tau])
-                region_tau = tau;
-        }
-    }
-
-    if (best_tau < 0 && in_region &&
-        mcleod_peak_height(nsdf, region_tau, N) >= threshold * best_val)
-        best_tau = region_tau;
-
-    if (best_tau < 1)
+    if (!mcleod_pitch_peak(nsdf, lags, &best_tau))
     {
         *result = 0.0;
         free(nsdf);
         return XTRACT_NO_RESULT;
     }
 
-    /* Parabolic interpolation around the peak for sub-sample accuracy.
-     * A key maximum in the final region may sit on the last lag, where
-     * no upper neighbour exists for interpolation. */
-    if (best_tau < N - 1)
-    {
-        double denom;
-
-        a = nsdf[best_tau - 1];
-        b = nsdf[best_tau];
-        c = nsdf[best_tau + 1];
-        denom = a - 2.0 * b + c;
-        peak_tau = (denom != 0.0) ? best_tau + 0.5 * (a - c) / denom : (double)best_tau;
-    }
-    else
-        peak_tau = (double)best_tau;
+    a = nsdf[best_tau - 1];
+    b = nsdf[best_tau];
+    c = nsdf[best_tau + 1];
+    denom = a - 2.0 * b + c;
+    peak_tau = (denom != 0.0) ? best_tau + 0.5 * (a - c) / denom : (double)best_tau;
 
     *result = sr / peak_tau;
 
@@ -2392,6 +2375,71 @@ int xtract_approximate_entropy(const double *data, const int N, const void *argv
     }
 
     *result = mean_log_match_fraction(data, N, length, tolerance) - mean_log_match_fraction(data, N, length + 1, tolerance);
+
+    return XTRACT_SUCCESS;
+}
+
+int xtract_periodicity(const double *data, const int N, const void *argv, double *result)
+{
+    double *nsdf;
+    double highest;
+    int lags, found;
+
+    if (N < 1)
+    {
+        *result = 0.0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
+
+    lags = mcleod_lags(N);
+    nsdf = (double *)malloc((lags + 1) * sizeof(double));
+    if (nsdf == NULL)
+        return XTRACT_MALLOC_FAILED;
+
+    mcleod_nsdf(data, N, lags, nsdf);
+    found = mcleod_highest_key_maximum(nsdf, lags, &highest);
+    free(nsdf);
+
+    if (!found)
+    {
+        *result = 0.0;
+        return XTRACT_NO_RESULT;
+    }
+
+    *result = XTRACT_MIN(highest, 1.0);
+
+    return XTRACT_SUCCESS;
+}
+
+int xtract_signal_confidence(const double *data, const int N, const void *argv, double *result)
+{
+    double *nsdf;
+    double height;
+    int lags, peak, found;
+
+    if (N < 1)
+    {
+        *result = 0.0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
+
+    lags = mcleod_lags(N);
+    nsdf = (double *)malloc((lags + 1) * sizeof(double));
+    if (nsdf == NULL)
+        return XTRACT_MALLOC_FAILED;
+
+    mcleod_nsdf(data, N, lags, nsdf);
+    found = mcleod_pitch_peak(nsdf, lags, &peak);
+    height = found ? mcleod_peak_height(nsdf, peak) : 0.0;
+    free(nsdf);
+
+    if (!found)
+    {
+        *result = 0.0;
+        return XTRACT_NO_RESULT;
+    }
+
+    *result = XTRACT_MIN(height, 1.0);
 
     return XTRACT_SUCCESS;
 }

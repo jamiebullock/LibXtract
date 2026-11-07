@@ -53,6 +53,8 @@ UTEST(descriptors, make_descriptors_scalar_vector_classification)
     ASSERT_EQ(fd[XTRACT_LEMPEL_ZIV_COMPLEXITY].is_scalar, XTRACT_TRUE);
     ASSERT_EQ(fd[XTRACT_SAMPLE_ENTROPY].is_scalar, XTRACT_TRUE);
     ASSERT_EQ(fd[XTRACT_APPROXIMATE_ENTROPY].is_scalar, XTRACT_TRUE);
+    ASSERT_EQ(fd[XTRACT_PERIODICITY].is_scalar, XTRACT_TRUE);
+    ASSERT_EQ(fd[XTRACT_SIGNAL_CONFIDENCE].is_scalar, XTRACT_TRUE);
     ASSERT_EQ(xtract_free_descriptors(fd), XTRACT_SUCCESS);
 }
 
@@ -324,6 +326,18 @@ UTEST(descriptors, appended_features_are_fully_described)
     CHECK_NEAR(fd[XTRACT_SAMPLE_ENTROPY].result.scalar.min, 0.0, EPSILON);
     ASSERT_EQ(fd[XTRACT_APPROXIMATE_ENTROPY].result.scalar.min, XTRACT_UNBOUNDED_MIN);
 
+    for (f = XTRACT_PERIODICITY; f <= XTRACT_SIGNAL_CONFIDENCE; f++)
+    {
+        ASSERT_EQ_MSG(fd[f].argc, 0, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].data.unit, XTRACT_UNIT_ANY, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].result.scalar.unit, XTRACT_UNIT_NONE, fd[f].algo.name);
+        CHECK_NEAR(fd[f].result.scalar.min, 0.0, EPSILON);
+        CHECK_REL(fd[f].result.scalar.max, 1.0, EPSILON);
+        ASSERT_EQ_MSG(fd[f].is_delta, XTRACT_FALSE, fd[f].algo.name);
+    }
+    ASSERT_EQ(fd[XTRACT_PERIODICITY].data.format, XTRACT_ARBITRARY_SERIES);
+    ASSERT_EQ(fd[XTRACT_SIGNAL_CONFIDENCE].data.format, XTRACT_AUDIO_SAMPLES);
+
     ASSERT_EQ(xtract_free_descriptors(fd), XTRACT_SUCCESS);
 }
 
@@ -373,6 +387,8 @@ UTEST(dispatch, slots_map_to_the_expected_function)
     ASSERT_TRUE(xtract[XTRACT_LEMPEL_ZIV_COMPLEXITY] == xtract_lempel_ziv_complexity);
     ASSERT_TRUE(xtract[XTRACT_SAMPLE_ENTROPY] == xtract_sample_entropy);
     ASSERT_TRUE(xtract[XTRACT_APPROXIMATE_ENTROPY] == xtract_approximate_entropy);
+    ASSERT_TRUE(xtract[XTRACT_PERIODICITY] == xtract_periodicity);
+    ASSERT_TRUE(xtract[XTRACT_SIGNAL_CONFIDENCE] == xtract_signal_confidence);
 }
 
 /* ===== Descriptor conformance ===== */

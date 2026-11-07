@@ -1939,6 +1939,173 @@ UTEST(mcleod_f0, beats_f0_at_86hz)
     ASSERT_EQ(actual, expected);
 }
 
+/* ===== Periodicity and signal confidence ===== */
+
+UTEST(periodicity, sine_is_one)
+{
+    double table[1024];
+    double result = -1.0;
+
+    xttest_gen_sine(table, 1024, 44100.0, 220.0, 1.0);
+
+    ASSERT_EQ(xtract_periodicity(table, 1024, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 1.0, 1e-4);
+}
+
+UTEST(periodicity, is_scale_invariant)
+{
+    double table[1024];
+    double scaled[1024];
+    double noise[1024];
+    double unit = -1.0;
+    double times_five = -1.0;
+    int n;
+
+    xttest_gen_sine(table, 1024, 44100.0, 220.0, 1.0);
+    xttest_gen_noise(noise, 1024, 0.5);
+    xttest_add(table, noise, 1024);
+    for (n = 0; n < 1024; n++)
+        scaled[n] = 5.0 * table[n];
+
+    ASSERT_EQ(xtract_periodicity(table, 1024, NULL, &unit), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_periodicity(scaled, 1024, NULL, &times_five), XTRACT_SUCCESS);
+    CHECK_REL(times_five, unit, 1e-12);
+}
+
+UTEST(periodicity, noise_is_low)
+{
+    double table[1024];
+    double result = -1.0;
+
+    xttest_gen_noise(table, 1024, 1.0);
+
+    ASSERT_EQ(xtract_periodicity(table, 1024, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_LT(result, 0.3);
+}
+
+UTEST(periodicity, silence_no_result)
+{
+    double table[1024];
+    double result = -1.0;
+
+    memset(table, 0, sizeof(table));
+
+    ASSERT_EQ(xtract_periodicity(table, 1024, NULL, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
+}
+
+UTEST(periodicity, series_with_an_offset_no_result)
+{
+    /* The NSDF of a series that never crosses zero stays positive at every
+     * lag, so there is no positively sloped zero crossing to open a region */
+    double table[1024];
+    double result = -1.0;
+    int n;
+
+    xttest_gen_sine(table, 1024, 44100.0, 220.0, 1.0);
+    for (n = 0; n < 1024; n++)
+        table[n] += 10.0;
+
+    ASSERT_EQ(xtract_periodicity(table, 1024, NULL, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
+}
+
+UTEST(periodicity, single_sample_no_result)
+{
+    double data[] = {1.0};
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_periodicity(data, 1, NULL, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
+}
+
+UTEST(periodicity, n_zero_argument_error)
+{
+    double data[] = {1.0};
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_periodicity(data, 0, NULL, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+}
+
+UTEST(signal_confidence, sine_is_one)
+{
+    double table[1024];
+    double result = -1.0;
+
+    xttest_gen_sine(table, 1024, 44100.0, 220.0, 1.0);
+
+    ASSERT_EQ(xtract_signal_confidence(table, 1024, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 1.0, 1e-4);
+}
+
+UTEST(signal_confidence, is_the_height_of_the_chosen_peak_not_the_highest)
+{
+    /* A fifth above the fundamental anticorrelates at the fundamental's
+     * period, so that key maximum is lower than the one a full cycle of
+     * both later, yet it is the first within threshold of the highest and
+     * is the peak the f0 estimate comes from */
+    double table[1024];
+    double samplerate = 44100.0;
+    double confidence = -1.0;
+    double periodicity = -1.0;
+    double f0 = -1.0;
+    int n;
+
+    for (n = 0; n < 1024; n++)
+        table[n] = sin(2.0 * M_PI * 220.0 * n / samplerate) + 0.3 * sin(2.0 * M_PI * 330.0 * n / samplerate);
+
+    ASSERT_EQ(xtract_signal_confidence(table, 1024, NULL, &confidence), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_periodicity(table, 1024, NULL, &periodicity), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_mcleod_f0(table, 1024, &samplerate, &f0), XTRACT_SUCCESS);
+
+    CHECK_NEAR(confidence, (1.0 - 0.09) / 1.09, 1e-2);
+    CHECK_REL(periodicity, 1.0, 1e-4);
+    ASSERT_LE(abs((int)xttest_ftom(f0) - (int)xttest_ftom(220.0)), 10);
+}
+
+UTEST(signal_confidence, is_at_most_the_periodicity)
+{
+    double table[1024];
+    double noise[1024];
+    double confidence = -1.0;
+    double periodicity = -1.0;
+
+    xttest_gen_sine(table, 1024, 44100.0, 344.0, 1.0);
+    xttest_gen_noise(noise, 1024, 1.0);
+    xttest_add(table, noise, 1024);
+
+    ASSERT_EQ(xtract_signal_confidence(table, 1024, NULL, &confidence), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_periodicity(table, 1024, NULL, &periodicity), XTRACT_SUCCESS);
+    ASSERT_LE(confidence, periodicity);
+    ASSERT_GT(confidence, 0.0);
+}
+
+UTEST(signal_confidence, no_result_exactly_when_f0_has_none)
+{
+    double table[1024];
+    double samplerate = 44100.0;
+    double confidence = -1.0;
+    double f0 = -1.0;
+
+    memset(table, 0, sizeof(table));
+    ASSERT_EQ(xtract_signal_confidence(table, 1024, NULL, &confidence), XTRACT_NO_RESULT);
+    ASSERT_EQ(xtract_mcleod_f0(table, 1024, &samplerate, &f0), XTRACT_NO_RESULT);
+    ASSERT_EQ(confidence, 0.0);
+
+    xttest_gen_noise(table, 1024, 1.0);
+    ASSERT_EQ(xtract_signal_confidence(table, 1024, NULL, &confidence), xtract_mcleod_f0(table, 1024, &samplerate, &f0));
+}
+
+UTEST(signal_confidence, n_zero_argument_error)
+{
+    double data[] = {1.0};
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_signal_confidence(data, 0, NULL, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+}
+
 UTEST(mcleod_f0, at_least_as_accurate_at_172hz)
 {
     uint32_t blocksize = 1024;
@@ -2125,40 +2292,57 @@ UTEST(mcleod_f0, key_maximum_height_is_the_interpolated_peak_not_the_sample)
     CHECK_REL(result, sr / period, 1e-3);
 }
 
-UTEST(mcleod_f0, a_region_cut_off_by_the_buffer_end_still_yields_its_maximum)
+UTEST(mcleod_f0, a_period_longer_than_half_the_window_gives_no_result)
 {
-    /* Period 60 in 64 samples: the positive region around lag 60 is still
-     * open when the lags run out, so its maximum is taken without a closing
-     * zero crossing. */
+    /* Period 60 in 64 samples: no lag up to 32 completes a cycle, so the
+     * NSDF has no key maximum within the scanned lags */
     const int N = 64;
     const double sr = 44100.0;
     double data[64];
-    double result = 0.0;
+    double result = -1.0;
     int n;
 
     for (n = 0; n < N; n++)
         data[n] = cos(2.0 * M_PI * n / 60.0);
 
-    ASSERT_EQ(xtract_mcleod_f0(data, N, &sr, &result), XTRACT_SUCCESS);
-    CHECK_REL(result, sr / 60.0, 2e-2);
+    ASSERT_EQ(xtract_mcleod_f0(data, N, &sr, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
 }
 
-UTEST(mcleod_f0, a_peak_on_the_last_lag_is_reported_without_interpolation)
+UTEST(mcleod_f0, a_region_cut_off_at_half_the_window_still_yields_its_maximum)
 {
-    /* cos with period N - 1 returns to its starting value on the final
-     * sample, so the NSDF at the last lag is exactly 1 with no lag beyond
-     * it to interpolate against. */
-    const int N = 64;
+    /* Period 70 in 128 samples: the positive region around lag 70 is still
+     * open when the scan stops at lag 64, so its highest scanned lag is
+     * taken and the interpolation reaches past the cut-off */
+    const int N = 128;
     const double sr = 44100.0;
-    double data[64];
+    double data[128];
     double result = 0.0;
     int n;
 
     for (n = 0; n < N; n++)
-        data[n] = cos(2.0 * M_PI * n / (N - 1));
+        data[n] = cos(2.0 * M_PI * n / 70.0);
 
     ASSERT_EQ(xtract_mcleod_f0(data, N, &sr, &result), XTRACT_SUCCESS);
-    CHECK_REL(result, sr / (N - 1), 1e-12);
+    CHECK_REL(result, sr / 70.0, 5e-2);
+}
+
+UTEST(mcleod_f0, a_peak_on_the_last_scanned_lag_is_interpolated)
+{
+    /* cos with period N / 2 peaks exactly on the last lag scanned, so the
+     * interpolation reads the lag beyond the scan; the shrinking window
+     * makes the two neighbours unequal, which moves the peak slightly */
+    const int N = 128;
+    const double sr = 44100.0;
+    double data[128];
+    double result = 0.0;
+    int n;
+
+    for (n = 0; n < N; n++)
+        data[n] = cos(2.0 * M_PI * n / (N / 2));
+
+    ASSERT_EQ(xtract_mcleod_f0(data, N, &sr, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, sr / (N / 2), 1e-3);
 }
 
 /* ===== Flatness numerical stability ===== */
