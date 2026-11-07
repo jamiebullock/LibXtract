@@ -212,7 +212,7 @@ int xtract_cross_correlation_lag(const double *data, const int N, const void *ar
         return XTRACT_ARGUMENT_ERROR;
     }
 
-    correlation = (double *)malloc((N - 1) * sizeof(double));
+    correlation = (double *)malloc((size_t)(N - 1) * sizeof(double));
     if (correlation == NULL)
         return XTRACT_MALLOC_FAILED;
 
