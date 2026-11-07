@@ -1377,7 +1377,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             copy_name(name, "attack_time");
             copy_name(p_name, "Attack Time");
             copy_desc(desc, "Extract the attack time of an envelope");
-            copy_desc(p_desc, "Extract the time an envelope takes to rise to its peak");
+            copy_desc(p_desc, "Extract the time an envelope takes to rise between two fractions of its peak");
             copy_author(author, "");
             break;
         case XTRACT_DECAY_TIME:
