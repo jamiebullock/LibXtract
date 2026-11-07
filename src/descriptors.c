@@ -1427,7 +1427,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             copy_name(name, "peak_asymmetry");
             copy_name(p_name, "Peak Asymmetry");
             copy_desc(desc, "Extract the peak asymmetry of an envelope");
-            copy_desc(p_desc, "Extract the ratio of the energy after the peak of an envelope to the energy before it");
+            copy_desc(p_desc, "Extract the ratio of the energy of an envelope from its peak to the end to the energy from the start to its peak");
             copy_author(author, "");
             break;
         case XTRACT_DIFFERENCE_VECTOR:

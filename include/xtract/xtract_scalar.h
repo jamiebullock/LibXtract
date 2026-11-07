@@ -653,7 +653,7 @@ extern "C"
      * \param *data: a pointer to the first element in an array of doubles representing an amplitude envelope or any segment with a single peak
      * \param N: the number of elements to be considered, at least 1
      * \param *argv: not used
-     * \param *result: the peak asymmetry of N values from the array pointed to by *data, below 1 when the energy lies before the peak and above 1 when it lies after, or 0 with no result when every element is 0
+     * \param *result: the peak asymmetry of N values from the array pointed to by *data, below 1 when the energy lies before the peak and above 1 when it lies after, or 0 with no result when the energy from the start to the maximum is 0
      */
     int xtract_peak_asymmetry(const double *data, const int N, const void *argv, double *result);
 
