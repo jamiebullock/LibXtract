@@ -315,6 +315,12 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *argv_def = 0.0;
             *argv_unit = XTRACT_UNIT_NONE;
             break;
+        case XTRACT_MODIFIED_KULLBACK_LEIBLER:
+            *argv_min = 0.0;
+            *argv_max = XTRACT_UNBOUNDED_MAX;
+            *argv_def = XTRACT_NO_DEFAULT;
+            *argv_unit = XTRACT_UNIT_ANY;
+            break;
         case XTRACT_FLUX:
         case XTRACT_LNORM:
             *argv_min = XTRACT_UNBOUNDED_MIN;
@@ -391,6 +397,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_MCLEOD_F0:
         case XTRACT_MIDICENT:
         case XTRACT_PEAK:
+        case XTRACT_MODIFIED_KULLBACK_LEIBLER:
             *argv_donor = XTRACT_ANY;
             break;
         case XTRACT_MFCC:
@@ -595,6 +602,9 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_FLUX:
         case XTRACT_CROSS_CORRELATION:
         case XTRACT_CROSS_CORRELATION_LAG:
+        case XTRACT_KULLBACK_LEIBLER_DIVERGENCE:
+        case XTRACT_ITAKURA_SAITO_DIVERGENCE:
+        case XTRACT_MODIFIED_KULLBACK_LEIBLER:
             *data_format = XTRACT_SUBFRAMES;
             break;
         case XTRACT_MIDICENT:
@@ -650,6 +660,9 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_PEAK_ASYMMETRY:
         case XTRACT_CROSS_CORRELATION:
         case XTRACT_CROSS_CORRELATION_LAG:
+        case XTRACT_KULLBACK_LEIBLER_DIVERGENCE:
+        case XTRACT_ITAKURA_SAITO_DIVERGENCE:
+        case XTRACT_MODIFIED_KULLBACK_LEIBLER:
         case XTRACT_DIFFERENCE_VECTOR:
         case XTRACT_FLUX:
         case XTRACT_LNORM:
@@ -1454,6 +1467,30 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             copy_desc(p_desc, "Extract the lag at which two series are most correlated");
             copy_author(author, "");
             break;
+        case XTRACT_KULLBACK_LEIBLER_DIVERGENCE:
+            copy_name(name, "kullback_leibler_divergence");
+            copy_name(p_name, "Kullback-Leibler Divergence");
+            copy_desc(desc, "Extract the Kullback-Leibler divergence between two spectral frames");
+            copy_desc(p_desc, "Extract the information lost when the previous spectral frame stands in for the current one");
+            copy_author(author, "Solomon Kullback and Richard Leibler");
+            *year = 1951;
+            break;
+        case XTRACT_ITAKURA_SAITO_DIVERGENCE:
+            copy_name(name, "itakura_saito_divergence");
+            copy_name(p_name, "Itakura-Saito Divergence");
+            copy_desc(desc, "Extract the Itakura-Saito divergence between two spectral frames");
+            copy_desc(p_desc, "Extract the spectral distance from the previous frame to the current one");
+            copy_author(author, "Fumitada Itakura and Shuzo Saito");
+            *year = 1968;
+            break;
+        case XTRACT_MODIFIED_KULLBACK_LEIBLER:
+            copy_name(name, "modified_kullback_leibler");
+            copy_name(p_name, "Modified Kullback-Leibler");
+            copy_desc(desc, "Extract the modified Kullback-Leibler onset function between two spectral frames");
+            copy_desc(p_desc, "Extract a measure of the spectral energy that appeared since the previous frame");
+            copy_author(author, "Stephen Hainsworth and Malcolm Macleod");
+            *year = 2003;
+            break;
         case XTRACT_DIFFERENCE_VECTOR:
             copy_name(name, "difference_vector");
             copy_name(p_name, "Difference vector");
@@ -1555,6 +1592,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_TONALITY:
         case XTRACT_PEAK:
         case XTRACT_CROSS_CORRELATION:
+        case XTRACT_MODIFIED_KULLBACK_LEIBLER:
             *argc = 1;
             *argv_type = XTRACT_FLOAT;
             break;
@@ -1795,6 +1833,9 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_DIFFERENCE_VECTOR:
         case XTRACT_CROSS_CORRELATION:
         case XTRACT_CROSS_CORRELATION_LAG:
+        case XTRACT_KULLBACK_LEIBLER_DIVERGENCE:
+        case XTRACT_ITAKURA_SAITO_DIVERGENCE:
+        case XTRACT_MODIFIED_KULLBACK_LEIBLER:
             *is_delta = XTRACT_TRUE;
             break;
         case XTRACT_MEAN:
@@ -2018,6 +2059,9 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             case XTRACT_LEMPEL_ZIV_COMPLEXITY:
             case XTRACT_SAMPLE_ENTROPY:
             case XTRACT_PEAK_ASYMMETRY:
+            case XTRACT_KULLBACK_LEIBLER_DIVERGENCE:
+            case XTRACT_ITAKURA_SAITO_DIVERGENCE:
+            case XTRACT_MODIFIED_KULLBACK_LEIBLER:
                 *result_unit = XTRACT_UNIT_NONE;
                 *result_min = 0.0;
                 *result_max = XTRACT_UNBOUNDED_MAX;
