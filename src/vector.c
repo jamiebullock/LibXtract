@@ -279,8 +279,10 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
             }
             else
             {
+                /* rdft returns the imaginary part as sum a[j] sin(2 pi j k / n),
+                 * the conjugate of the transform whose phases are given */
                 real = fft[n * 2];
-                imag = fft[n * 2 + 1];
+                imag = -fft[n * 2 + 1];
             }
 #else
             if (n == M && !withDC)
