@@ -13,6 +13,7 @@
 #include "fft.h"
 
 #include "xtract/libxtract.h"
+#include "xtract_cqt_private.h"
 #include "xtract_macros_private.h"
 #include "xtract_globals_private.h"
 
@@ -1389,6 +1390,48 @@ int xtract_chroma(const double *data, const int N, const void *argv, double *res
 
     for (n = 0; n < XTRACT_PITCH_CLASSES; n++)
         result[n] /= largest;
+
+    return XTRACT_SUCCESS;
+}
+
+int xtract_cqt(const double *data, const int N, const void *argv, double *result)
+{
+    const xtract_cqt_kernel *kernel = (const xtract_cqt_kernel *)argv;
+    const int M = N >> 1;
+    double *real, *imag;
+    int n, band, e;
+
+    if (N < 2 || (N & 1) || kernel == NULL || kernel->N != N)
+        return XTRACT_ARGUMENT_ERROR;
+
+    real = (double *)malloc((size_t)N * sizeof(double));
+    if (real == NULL)
+        return XTRACT_MALLOC_FAILED;
+    imag = real + M;
+
+    for (n = 0; n < M; n++)
+    {
+        real[n] = data[n] * cos(data[M + n]);
+        imag[n] = data[n] * sin(data[M + n]);
+    }
+
+    for (band = 0; band < kernel->n_bins; band++)
+    {
+        double sum_real = 0.0;
+        double sum_imag = 0.0;
+
+        for (e = kernel->first[band]; e < kernel->first[band + 1]; e++)
+        {
+            const int j = kernel->bin[e];
+
+            sum_real += real[j] * kernel->real[e] + imag[j] * kernel->imag[e];
+            sum_imag += imag[j] * kernel->real[e] - real[j] * kernel->imag[e];
+        }
+        result[band] = sqrt(sum_real * sum_real + sum_imag * sum_imag);
+        result[kernel->n_bins + band] = kernel->frequencies[band];
+    }
+
+    free(real);
 
     return XTRACT_SUCCESS;
 }
