@@ -37,8 +37,8 @@ extern "C"
     /** \brief Apply a window function to an array of length N
      *
      * \param *data a pointer to an array of doubles
-     * \param N the number of elements in the array pointed to by *data
-     * \param *argv a pointer to a window function as returned by xtract_make_window()
+     * \param N the number of elements in the array pointed to by *data, at least 1
+     * \param *argv a pointer to a window function of at least N elements as returned by xtract_make_window(); NULL is an argument error
      * \param *result a pointer to the first element an array containing the windowed data
      *
      * It is up to the caller to generate and free the array containing the window, and to allocate and free memory of size N to hold the data pointed to by *result
@@ -49,10 +49,10 @@ extern "C"
     /** \brief Divides the array pointed to by *data into two subframes, and applies a given feature to each subframe, returning them in a single array pointed to by result
      *
      * \param *data an array of doubles
-     * \param N the number of elements in the array pointed by *data
-     * \param feature an integer representing the feature to be applied to each subframe in data. This will be a value as given in the enumeration xtract_features_ (libxtract.h)
+     * \param N the number of elements in the array pointed by *data, at least 2 and even
+     * \param feature an integer representing the feature to be applied to each subframe in data, a value as given in the enumeration xtract_features_ (libxtract.h) whose result is no longer than its input: every scalar feature, and XTRACT_DCT, XTRACT_AUTOCORRELATION, XTRACT_AMDF, XTRACT_ASDF, XTRACT_AUTOCORRELATION_FFT, XTRACT_SPECTRUM, XTRACT_HARMONIC_SPECTRUM, XTRACT_DIFFERENCE_VECTOR, XTRACT_WINDOWED and XTRACT_SMOOTHED. Any other feature is an argument error, as the two results of N / 2 values could not both fit in *result
      * \param *argv a pointer to the argument vector to be passed to the feature extraction function as determined by feature
-     * \param *result a pointer to the 'packed' results of the feature calculation. This may be passed in as *data to xtract_features_from_subframes() to calculate further features on the subframes, or xtract_difference_vector(), to get the difference between the subframes.
+     * \param *result a pointer to the 'packed' results of the feature calculation. This may be passed in as *data to xtract_features_from_subframes() to calculate further features on the subframes, or xtract_difference_vector(), to get the difference between the subframes. A subframe that yields no result has its N / 2 values set to 0 while the other subframe is still computed, and XTRACT_NO_RESULT is returned; any other failure is returned as soon as a subframe reports it
      *
      *
      * It is important to ensure that any _init_*() functions that are called in preparation for functions that are called on subframes are given the subframe size as 'N', and not the frame size. i.e. if xtract_features_from_subframes() is called with N=64, and feature=XTRACT_SPECTRUM, then xtract_init_fft() should be called with N=32.
@@ -69,8 +69,8 @@ extern "C"
     /** \brief Smooth a vector
      *
      * \param *data a pointer to an array of doubles
-     * \param N the number of elements in the array pointed to by *data to be smoothed
-     * \param *argv a pointer to a double giving the smoothing gain
+     * \param N the number of elements in the array pointed to by *data to be smoothed, at least 1
+     * \param *argv a pointer to a double giving the smoothing gain; NULL is an argument error
      * \param *result a pointer to the first element an array containing the smoothed data
      *
      * \note if passing in a spectrum e.g. *result from xtract_spectrum(), then N for xtract_smoothed() should be N / 2 with respect to the N for xtract_spectrum() so only amplitude components are smoothed, not frequencies!

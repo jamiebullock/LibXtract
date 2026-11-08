@@ -71,19 +71,87 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             /* argc = 1 */
         case XTRACT_VARIANCE:
         case XTRACT_SPECTRAL_VARIANCE:
-        case XTRACT_STANDARD_DEVIATION:
+        case XTRACT_SPREAD:
         case XTRACT_DIFFERENCE_VECTOR:
         case XTRACT_AVERAGE_DEVIATION:
-        case XTRACT_SPECTRAL_STANDARD_DEVIATION:
             /* case XTRACT_SPECTRAL_AVERAGE_DEVIATION: */
+        case XTRACT_MEDIAN_ABSOLUTE_DEVIATION:
+        case XTRACT_LEMPEL_ZIV_COMPLEXITY:
         case XTRACT_LOWEST_VALUE:
         case XTRACT_TONALITY:
         case XTRACT_MFCC:
         case XTRACT_MEL_SPECTROGRAM:
         case XTRACT_GFCC:
         case XTRACT_GAMMATONE_SPECTROGRAM:
+        case XTRACT_MMBSES:
+        case XTRACT_SPECTRAL_SUBBAND_CENTROIDS:
+        case XTRACT_CQT:
         case XTRACT_LPC:
             *argv_min = XTRACT_UNBOUNDED_MIN;
+            *argv_max = XTRACT_UNBOUNDED_MAX;
+            *argv_def = XTRACT_NO_DEFAULT;
+            *argv_unit = XTRACT_DBFS;
+            break;
+        case XTRACT_PEAK:
+            *argv_min = XTRACT_UNBOUNDED_MIN;
+            *argv_max = XTRACT_UNBOUNDED_MAX;
+            *argv_def = XTRACT_NO_DEFAULT;
+            *argv_unit = XTRACT_UNIT_ANY;
+            break;
+        case XTRACT_MOVING_SUM:
+        case XTRACT_MOVING_AVERAGE:
+        case XTRACT_MOVING_MAX:
+        case XTRACT_MOVING_MIN:
+        case XTRACT_TIME_REVERSAL_ASYMMETRY:
+            *argv_min = 1;
+            *argv_max = XTRACT_UNBOUNDED_MAX;
+            *argv_def = XTRACT_NO_DEFAULT;
+            *argv_unit = (xtract_unit_t)XTRACT_NONE;
+            break;
+        case XTRACT_MOVING_VARIANCE:
+        case XTRACT_MOVING_STANDARD_DEVIATION:
+            *argv_min = 2;
+            *argv_max = XTRACT_UNBOUNDED_MAX;
+            *argv_def = XTRACT_NO_DEFAULT;
+            *argv_unit = (xtract_unit_t)XTRACT_NONE;
+            break;
+        case XTRACT_EWMA_AVERAGE:
+        case XTRACT_EWMA_VARIANCE:
+            *argv_min = 0;
+            *argv_max = 1;
+            *argv_def = XTRACT_NO_DEFAULT;
+            *argv_unit = (xtract_unit_t)XTRACT_NONE;
+            break;
+        case XTRACT_HIGUCHI_FRACTAL_DIMENSION:
+            *argv_min = 2;
+            *argv_max = XTRACT_UNBOUNDED_MAX;
+            *argv_def = 10;
+            *argv_unit = (xtract_unit_t)XTRACT_NONE;
+            break;
+        case XTRACT_PERMUTATION_ENTROPY:
+            *argv_min = 2;
+            *argv_max = 8;
+            *argv_def = 3;
+            *argv_unit = (xtract_unit_t)XTRACT_NONE;
+            *(argv_min + 1) = 1;
+            *(argv_max + 1) = XTRACT_UNBOUNDED_MAX;
+            *(argv_def + 1) = 1;
+            *(argv_unit + 1) = (xtract_unit_t)XTRACT_NONE;
+            break;
+        case XTRACT_SAMPLE_ENTROPY:
+        case XTRACT_APPROXIMATE_ENTROPY:
+            *argv_min = 1;
+            *argv_max = XTRACT_UNBOUNDED_MAX;
+            *argv_def = 2;
+            *argv_unit = (xtract_unit_t)XTRACT_NONE;
+            *(argv_min + 1) = 0;
+            *(argv_max + 1) = XTRACT_UNBOUNDED_MAX;
+            *(argv_def + 1) = XTRACT_NO_DEFAULT;
+            *(argv_unit + 1) = XTRACT_UNIT_ANY;
+            break;
+        case XTRACT_STANDARD_DEVIATION:
+        case XTRACT_SPECTRAL_STANDARD_DEVIATION:
+            *argv_min = 0.0;
             *argv_max = XTRACT_UNBOUNDED_MAX;
             *argv_def = XTRACT_NO_DEFAULT;
             *argv_unit = XTRACT_DBFS;
@@ -98,8 +166,12 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *argv_unit = (xtract_unit_t)XTRACT_NONE;
             break;
         case XTRACT_SPECTRAL_INHARMONICITY:
+        case XTRACT_TRISTIMULUS_1:
+        case XTRACT_TRISTIMULUS_2:
+        case XTRACT_TRISTIMULUS_3:
+        case XTRACT_ODD_EVEN_RATIO:
             *argv_min = 0.0;
-            *argv_max = XTRACT_SR_UPPER_LIMIT / 2.0;
+            *argv_max = XTRACT_UNBOUNDED_MAX;
             *argv_def = XTRACT_FUNDAMENTAL_DEFAULT;
             *argv_unit = XTRACT_HERTZ;
             break;
@@ -107,10 +179,15 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_FAILSAFE_F0:
         case XTRACT_WAVELET_F0:
         case XTRACT_MCLEOD_F0:
-        case XTRACT_MIDICENT:
-            *argv_min = XTRACT_SR_LOWER_LIMIT;
-            *argv_max = XTRACT_SR_UPPER_LIMIT;
+            *argv_min = 0.0;
+            *argv_max = XTRACT_UNBOUNDED_MAX;
             *argv_def = XTRACT_SR_DEFAULT;
+            *argv_unit = XTRACT_HERTZ;
+            break;
+        case XTRACT_MIDICENT:
+            *argv_min = 0.0;
+            *argv_max = XTRACT_UNBOUNDED_MAX;
+            *argv_def = XTRACT_NO_DEFAULT;
             *argv_unit = XTRACT_HERTZ;
             break;
         case XTRACT_FLATNESS_DB:
@@ -121,8 +198,8 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             break;
             /* argc = 2 */;
         case XTRACT_ROLLOFF:
-            *argv_min = XTRACT_FFT_BANDS_MIN;
-            *argv_max = XTRACT_FFT_BANDS_MAX;
+            *argv_min = 0.0;
+            *argv_max = XTRACT_UNBOUNDED_MAX;
             *argv_def = XTRACT_SPEC_BW_DEF;
             *argv_unit = XTRACT_HERTZ;
             *(argv_min + 1) = 0.0;
@@ -131,8 +208,8 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *(argv_unit + 1) = XTRACT_PERCENT;
             break;
         case XTRACT_PEAK_SPECTRUM:
-            *argv_min = XTRACT_SR_LOWER_LIMIT / 2.0;
-            *argv_max = XTRACT_SR_UPPER_LIMIT / 2.0;
+            *argv_min = 0.0;
+            *argv_max = XTRACT_UNBOUNDED_MAX;
             *argv_def = XTRACT_SR_DEFAULT / 2.0;
             *argv_unit = XTRACT_HERTZ;
             *(argv_min + 1) = 0.0;
@@ -142,7 +219,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             break;
         case XTRACT_HARMONIC_SPECTRUM:
             *argv_min = 0.0;
-            *argv_max = XTRACT_SR_UPPER_LIMIT / 2.0;
+            *argv_max = XTRACT_UNBOUNDED_MAX;
             *argv_def = XTRACT_FUNDAMENTAL_DEFAULT;
             *argv_unit = XTRACT_HERTZ;
             *(argv_min + 1) = 0.0;
@@ -156,23 +233,23 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_SPECTRAL_SKEWNESS:
         case XTRACT_SPECTRAL_KURTOSIS:
         case XTRACT_CREST:
-            *argv_min = XTRACT_NONE;
-            *argv_max = XTRACT_NONE;
-            *argv_def = XTRACT_NONE;
+            *argv_min = XTRACT_UNBOUNDED_MIN;
+            *argv_max = XTRACT_UNBOUNDED_MAX;
+            *argv_def = XTRACT_NO_DEFAULT;
             *argv_unit = XTRACT_UNIT_NONE;
-            *(argv_min + 1) = XTRACT_NONE;
-            *(argv_max + 1) = XTRACT_NONE;
-            *(argv_def + 1) = XTRACT_NONE;
+            *(argv_min + 1) = XTRACT_UNBOUNDED_MIN;
+            *(argv_max + 1) = XTRACT_UNBOUNDED_MAX;
+            *(argv_def + 1) = XTRACT_NO_DEFAULT;
             *(argv_unit + 1) = XTRACT_UNIT_NONE;
             break;
             /* argc = 4 */
         case XTRACT_SPECTRUM:
-            *argv_min = XTRACT_SR_LOWER_LIMIT / XTRACT_FFT_BANDS_MIN;
-            *argv_max = XTRACT_SR_UPPER_LIMIT / XTRACT_FFT_BANDS_MAX;
+            *argv_min = 0.0;
+            *argv_max = XTRACT_UNBOUNDED_MAX;
             *argv_def = XTRACT_SR_DEFAULT / XTRACT_FFT_BANDS_DEF;
             *argv_unit = XTRACT_HERTZ;
             *(argv_min + 1) = 0;
-            *(argv_max + 1) = 3;
+            *(argv_max + 1) = XTRACT_MAGNITUDE_PHASE_SPECTRUM;
             *(argv_def + 1) = 0;
             *(argv_unit + 1) = XTRACT_UNIT_NONE;
             *(argv_min + 2) = 0;
@@ -185,21 +262,21 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *(argv_unit + 3) = XTRACT_UNIT_NONE;
             break;
         case XTRACT_SUBBANDS:
-            *argv_min = XTRACT_UNBOUNDED_MIN;
-            *argv_max = XTRACT_UNBOUNDED_MAX;
+            *argv_min = 0;
+            *argv_max = XTRACT_FEATURES - 1;
             *argv_def = XTRACT_MEAN;
             *argv_unit = XTRACT_UNIT_NONE;
             *(argv_min + 1) = 1;
-            *(argv_max + 1) = 16384;
+            *(argv_max + 1) = XTRACT_UNBOUNDED_MAX;
             *(argv_def + 1) = 4;
             *(argv_unit + 1) = XTRACT_UNIT_NONE;
             *(argv_min + 2) = 0;
-            *(argv_max + 2) = 32;
-            *(argv_def + 2) = 0;
+            *(argv_max + 2) = XTRACT_LINEAR_SUBBANDS;
+            *(argv_def + 2) = XTRACT_LINEAR_SUBBANDS;
             *(argv_unit + 2) = XTRACT_UNIT_NONE;
             *(argv_min + 3) = 0;
             *(argv_max + 3) = XTRACT_UNBOUNDED_MAX;
-            *(argv_def + 3) = 0;
+            *(argv_def + 3) = 1;
             *(argv_unit + 3) = XTRACT_BINS;
             break;
         case XTRACT_HPS:
@@ -208,15 +285,95 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *argv_def = XTRACT_HPS_HARMONICS_DEF;
             *argv_unit = XTRACT_UNIT_NONE;
             break;
+        case XTRACT_ATTACK_TIME:
+            *argv_min = 0.0;
+            *argv_max = XTRACT_UNBOUNDED_MAX;
+            *argv_def = XTRACT_SR_DEFAULT;
+            *argv_unit = XTRACT_HERTZ;
+            *(argv_min + 1) = 0.0;
+            *(argv_max + 1) = 1.0;
+            *(argv_def + 1) = 0.2;
+            *(argv_unit + 1) = XTRACT_UNIT_NONE;
+            *(argv_min + 2) = 0.0;
+            *(argv_max + 2) = 1.0;
+            *(argv_def + 2) = 0.9;
+            *(argv_unit + 2) = XTRACT_UNIT_NONE;
+            break;
+        case XTRACT_DECAY_TIME:
+        case XTRACT_DECAY_RATE:
+            *argv_min = 0.0;
+            *argv_max = XTRACT_UNBOUNDED_MAX;
+            *argv_def = XTRACT_SR_DEFAULT;
+            *argv_unit = XTRACT_HERTZ;
+            *(argv_min + 1) = 0.0;
+            *(argv_max + 1) = 1.0;
+            *(argv_def + 1) = 0.4;
+            *(argv_unit + 1) = XTRACT_UNIT_NONE;
+            break;
+        case XTRACT_CROSS_CORRELATION:
+            *argv_min = 0.0;
+            *argv_max = 1.0;
+            *argv_def = 0.0;
+            *argv_unit = XTRACT_UNIT_NONE;
+            break;
+        case XTRACT_MODIFIED_KULLBACK_LEIBLER:
+            *argv_min = 0.0;
+            *argv_max = XTRACT_UNBOUNDED_MAX;
+            *argv_def = XTRACT_NO_DEFAULT;
+            *argv_unit = XTRACT_UNIT_ANY;
+            break;
+        case XTRACT_SPECTRAL_CONTRAST:
+            *argv_min = 1.0;
+            *argv_max = XTRACT_UNBOUNDED_MAX;
+            *argv_def = 6.0;
+            *argv_unit = XTRACT_UNIT_NONE;
+            *(argv_min + 1) = 0.0;
+            *(argv_max + 1) = XTRACT_UNBOUNDED_MAX;
+            *(argv_def + 1) = 200.0;
+            *(argv_unit + 1) = XTRACT_HERTZ;
+            *(argv_min + 2) = 0.0;
+            *(argv_max + 2) = 1.0;
+            *(argv_def + 2) = 0.02;
+            *(argv_unit + 2) = XTRACT_UNIT_NONE;
+            break;
+        case XTRACT_CHROMA:
+            *argv_min = 0.0;
+            *argv_max = XTRACT_UNBOUNDED_MAX;
+            *argv_def = 440.0;
+            *argv_unit = XTRACT_HERTZ;
+            *(argv_min + 1) = 0.0;
+            *(argv_max + 1) = XTRACT_UNBOUNDED_MAX;
+            *(argv_def + 1) = 40.0;
+            *(argv_unit + 1) = XTRACT_HERTZ;
+            *(argv_min + 2) = 0.0;
+            *(argv_max + 2) = XTRACT_UNBOUNDED_MAX;
+            *(argv_def + 2) = 5000.0;
+            *(argv_unit + 2) = XTRACT_HERTZ;
+            break;
+        case XTRACT_FLUX:
+        case XTRACT_LNORM:
+            *argv_min = XTRACT_UNBOUNDED_MIN;
+            *argv_max = XTRACT_UNBOUNDED_MAX;
+            *argv_def = 2.0;
+            *argv_unit = XTRACT_UNIT_NONE;
+            *(argv_min + 1) = XTRACT_UNBOUNDED_MIN;
+            *(argv_max + 1) = XTRACT_UNBOUNDED_MAX;
+            *(argv_def + 1) = XTRACT_NO_LNORM_FILTER;
+            *(argv_unit + 1) = XTRACT_UNIT_NONE;
+            *(argv_min + 2) = XTRACT_UNBOUNDED_MIN;
+            *(argv_max + 2) = XTRACT_UNBOUNDED_MAX;
+            *(argv_def + 2) = 0;
+            *(argv_unit + 2) = XTRACT_UNIT_NONE;
+            break;
         case XTRACT_BARK_COEFFICIENTS:
             /* BARK_COEFFICIENTS is special because argc = BARK_BANDS */
         case XTRACT_WINDOWED:
             /* WINDOWED is special because argc = window size = N */
         case XTRACT_SMOOTHED:
         default:
-            *argv_min = XTRACT_NONE;
-            *argv_max = XTRACT_NONE;
-            *argv_def = XTRACT_NONE;
+            *argv_min = XTRACT_UNBOUNDED_MIN;
+            *argv_max = XTRACT_UNBOUNDED_MAX;
+            *argv_def = XTRACT_NO_DEFAULT;
             *argv_unit = XTRACT_UNIT_NONE;
             break;
         }
@@ -230,6 +387,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *argv_donor = XTRACT_MEAN;
             break;
         case XTRACT_SPECTRAL_VARIANCE:
+        case XTRACT_SPREAD:
             *argv_donor = XTRACT_SPECTRAL_MEAN;
             break;
         case XTRACT_STANDARD_DEVIATION:
@@ -238,6 +396,10 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_AVERAGE_DEVIATION:
             *argv_donor = XTRACT_MEAN;
             break;
+        case XTRACT_MEDIAN_ABSOLUTE_DEVIATION:
+        case XTRACT_LEMPEL_ZIV_COMPLEXITY:
+            *argv_donor = XTRACT_MEDIAN;
+            break;
         case XTRACT_SPECTRAL_STANDARD_DEVIATION:
             *argv_donor = XTRACT_SPECTRAL_VARIANCE;
             break;
@@ -245,6 +407,10 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
                 *argv_donor = XTRACT_SPECTRAL_MEAN;
                 break; */
         case XTRACT_SPECTRAL_INHARMONICITY:
+        case XTRACT_TRISTIMULUS_1:
+        case XTRACT_TRISTIMULUS_2:
+        case XTRACT_TRISTIMULUS_3:
+        case XTRACT_ODD_EVEN_RATIO:
             *argv_donor = XTRACT_FAILSAFE_F0;
             break;
         case XTRACT_FLATNESS_DB:
@@ -259,19 +425,28 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_WAVELET_F0:
         case XTRACT_MCLEOD_F0:
         case XTRACT_MIDICENT:
+        case XTRACT_PEAK:
+        case XTRACT_MODIFIED_KULLBACK_LEIBLER:
             *argv_donor = XTRACT_ANY;
             break;
         case XTRACT_MFCC:
         case XTRACT_MEL_SPECTROGRAM:
+        case XTRACT_MMBSES:
+        case XTRACT_SPECTRAL_SUBBAND_CENTROIDS:
             *argv_donor = XTRACT_INIT_MFCC;
             break;
         case XTRACT_GFCC:
         case XTRACT_GAMMATONE_SPECTROGRAM:
             *argv_donor = XTRACT_INIT_GFCC;
             break;
+        case XTRACT_CQT:
+            *argv_donor = XTRACT_INIT_CQT;
+            break;
             /* argc = 2 */;
         case XTRACT_ROLLOFF:
         case XTRACT_PEAK_SPECTRUM:
+        case XTRACT_DECAY_TIME:
+        case XTRACT_DECAY_RATE:
         case XTRACT_FLUX:
         case XTRACT_LNORM:
             *argv_donor = XTRACT_ANY;
@@ -298,6 +473,13 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_CREST:
             *argv_donor = XTRACT_HIGHEST_VALUE;
             *(argv_donor + 1) = XTRACT_MEAN;
+            break;
+        case XTRACT_ATTACK_TIME:
+        case XTRACT_SPECTRAL_CONTRAST:
+        case XTRACT_CHROMA:
+            *argv_donor = XTRACT_ANY;
+            *(argv_donor + 1) = XTRACT_ANY;
+            *(argv_donor + 2) = XTRACT_ANY;
             break;
             /* argc = 4 */
         case XTRACT_SPECTRUM:
@@ -331,8 +513,28 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         {
         case XTRACT_MEAN:
         case XTRACT_VARIANCE:
-        case XTRACT_STANDARD_DEVIATION:
         case XTRACT_AVERAGE_DEVIATION:
+        case XTRACT_MEDIAN:
+        case XTRACT_MEDIAN_ABSOLUTE_DEVIATION:
+        case XTRACT_HJORTH_ACTIVITY:
+        case XTRACT_HJORTH_MOBILITY:
+        case XTRACT_HJORTH_COMPLEXITY:
+        case XTRACT_TIME_REVERSAL_ASYMMETRY:
+        case XTRACT_PETROSIAN_FRACTAL_DIMENSION:
+        case XTRACT_KATZ_FRACTAL_DIMENSION:
+        case XTRACT_HIGUCHI_FRACTAL_DIMENSION:
+        case XTRACT_PERMUTATION_ENTROPY:
+        case XTRACT_LEMPEL_ZIV_COMPLEXITY:
+        case XTRACT_SAMPLE_ENTROPY:
+        case XTRACT_APPROXIMATE_ENTROPY:
+        case XTRACT_PERIODICITY:
+        case XTRACT_ATTACK_TIME:
+        case XTRACT_DECAY_TIME:
+        case XTRACT_DECAY_RATE:
+        case XTRACT_TEMPORAL_CENTROID:
+        case XTRACT_MAX_POSITION:
+        case XTRACT_MIN_POSITION:
+        case XTRACT_PEAK_ASYMMETRY:
         case XTRACT_SKEWNESS:
         case XTRACT_KURTOSIS:
         case XTRACT_LOWEST_VALUE:
@@ -340,29 +542,43 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_SUM:
         case XTRACT_WINDOWED:
         case XTRACT_SMOOTHED:
+        case XTRACT_PEAK:
+        case XTRACT_MOVING_SUM:
+        case XTRACT_MOVING_AVERAGE:
+        case XTRACT_MOVING_VARIANCE:
+        case XTRACT_MOVING_STANDARD_DEVIATION:
+        case XTRACT_MOVING_MAX:
+        case XTRACT_MOVING_MIN:
+        case XTRACT_EWMA_AVERAGE:
+        case XTRACT_EWMA_VARIANCE:
             *data_format = XTRACT_ARBITRARY_SERIES;
             break;
         case XTRACT_SPECTRAL_MEAN:
         case XTRACT_SPECTRAL_VARIANCE:
-        case XTRACT_SPECTRAL_STANDARD_DEVIATION:
             /* case XTRACT_SPECTRAL_AVERAGE_DEVIATION: */
         case XTRACT_SPECTRAL_SKEWNESS:
         case XTRACT_SPECTRAL_KURTOSIS:
         case XTRACT_SPECTRAL_CENTROID:
         case XTRACT_SPECTRAL_SLOPE:
+        case XTRACT_SPREAD:
+        case XTRACT_HPS:
+        case XTRACT_SPECTRAL_SUBBAND_CENTROIDS:
+        case XTRACT_SPECTRAL_CONTRAST:
+        case XTRACT_CHROMA:
             *data_format = XTRACT_SPECTRAL;
             break;
+        case XTRACT_MMBSES:
+        case XTRACT_CQT:
+            *data_format = XTRACT_SPECTRAL_MAGNITUDE_PHASE;
+            break;
         case XTRACT_ROLLOFF:
-        case XTRACT_NOISINESS:
         case XTRACT_BARK_COEFFICIENTS:
-        case XTRACT_CREST:
         case XTRACT_IRREGULARITY_K:
         case XTRACT_IRREGULARITY_J:
         case XTRACT_SMOOTHNESS:
+        case XTRACT_SPECTRAL_ENTROPY:
         case XTRACT_FLATNESS:
-        case XTRACT_SPREAD:
         case XTRACT_POWER:
-        case XTRACT_HPS:
         case XTRACT_PEAK_SPECTRUM:
         case XTRACT_SUBBANDS:
         case XTRACT_MFCC:
@@ -388,6 +604,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_FAILSAFE_F0:
         case XTRACT_WAVELET_F0:
         case XTRACT_MCLEOD_F0:
+        case XTRACT_SIGNAL_CONFIDENCE:
         case XTRACT_SPECTRUM:
         case XTRACT_AUTOCORRELATION:
         case XTRACT_AUTOCORRELATION_FFT:
@@ -396,12 +613,15 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_ASDF:
         case XTRACT_ZCR:
         case XTRACT_RMS_AMPLITUDE:
-        case XTRACT_FLUX:
         case XTRACT_LNORM:
             *data_format = XTRACT_AUDIO_SAMPLES;
             break;
         case XTRACT_TONALITY:
         case XTRACT_FLATNESS_DB:
+        case XTRACT_STANDARD_DEVIATION:
+        case XTRACT_SPECTRAL_STANDARD_DEVIATION:
+        case XTRACT_CREST:
+        case XTRACT_NOISINESS:
             *data_format = XTRACT_NO_DATA;
             break;
         case XTRACT_TRISTIMULUS_1:
@@ -416,10 +636,14 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *data_format = XTRACT_BARK_COEFFS;
             break;
         case XTRACT_DIFFERENCE_VECTOR:
+        case XTRACT_FLUX:
+        case XTRACT_CROSS_CORRELATION:
+        case XTRACT_CROSS_CORRELATION_LAG:
+        case XTRACT_KULLBACK_LEIBLER_DIVERGENCE:
+        case XTRACT_ITAKURA_SAITO_DIVERGENCE:
+        case XTRACT_MODIFIED_KULLBACK_LEIBLER:
             *data_format = XTRACT_SUBFRAMES;
             break;
-        case XTRACT_ATTACK_TIME:
-        case XTRACT_DECAY_TIME:
         case XTRACT_MIDICENT:
         default:
             *data_format = XTRACT_NO_DATA;
@@ -434,6 +658,21 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_VARIANCE:
         case XTRACT_STANDARD_DEVIATION:
         case XTRACT_AVERAGE_DEVIATION:
+        case XTRACT_MEDIAN:
+        case XTRACT_MEDIAN_ABSOLUTE_DEVIATION:
+        case XTRACT_HJORTH_ACTIVITY:
+        case XTRACT_HJORTH_MOBILITY:
+        case XTRACT_HJORTH_COMPLEXITY:
+        case XTRACT_TIME_REVERSAL_ASYMMETRY:
+        case XTRACT_PETROSIAN_FRACTAL_DIMENSION:
+        case XTRACT_KATZ_FRACTAL_DIMENSION:
+        case XTRACT_HIGUCHI_FRACTAL_DIMENSION:
+        case XTRACT_PERMUTATION_ENTROPY:
+        case XTRACT_LEMPEL_ZIV_COMPLEXITY:
+        case XTRACT_SAMPLE_ENTROPY:
+        case XTRACT_APPROXIMATE_ENTROPY:
+        case XTRACT_PERIODICITY:
+        case XTRACT_SIGNAL_CONFIDENCE:
         case XTRACT_SKEWNESS:
         case XTRACT_KURTOSIS:
         case XTRACT_LOWEST_VALUE:
@@ -451,6 +690,16 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_IRREGULARITY_J:
         case XTRACT_ATTACK_TIME:
         case XTRACT_DECAY_TIME:
+        case XTRACT_DECAY_RATE:
+        case XTRACT_TEMPORAL_CENTROID:
+        case XTRACT_MAX_POSITION:
+        case XTRACT_MIN_POSITION:
+        case XTRACT_PEAK_ASYMMETRY:
+        case XTRACT_CROSS_CORRELATION:
+        case XTRACT_CROSS_CORRELATION_LAG:
+        case XTRACT_KULLBACK_LEIBLER_DIVERGENCE:
+        case XTRACT_ITAKURA_SAITO_DIVERGENCE:
+        case XTRACT_MODIFIED_KULLBACK_LEIBLER:
         case XTRACT_DIFFERENCE_VECTOR:
         case XTRACT_FLUX:
         case XTRACT_LNORM:
@@ -469,6 +718,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_CREST:
         case XTRACT_FLATNESS:
         case XTRACT_FLATNESS_DB:
+        case XTRACT_SPECTRAL_ENTROPY:
         case XTRACT_POWER:
         case XTRACT_BARK_COEFFICIENTS:
         case XTRACT_RMS_AMPLITUDE:
@@ -485,6 +735,17 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_WINDOWED:
         case XTRACT_SMOOTHED:
         case XTRACT_SUBBANDS:
+        case XTRACT_PEAK:
+        case XTRACT_MMBSES:
+        case XTRACT_CQT:
+        case XTRACT_MOVING_SUM:
+        case XTRACT_MOVING_AVERAGE:
+        case XTRACT_MOVING_VARIANCE:
+        case XTRACT_MOVING_STANDARD_DEVIATION:
+        case XTRACT_MOVING_MAX:
+        case XTRACT_MOVING_MIN:
+        case XTRACT_EWMA_AVERAGE:
+        case XTRACT_EWMA_VARIANCE:
             *data_unit = XTRACT_UNIT_ANY;
             break;
         case XTRACT_SPECTRAL_MEAN:
@@ -498,6 +759,9 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_HARMONIC_SPECTRUM:
         case XTRACT_SPECTRAL_INHARMONICITY:
         case XTRACT_ODD_EVEN_RATIO:
+        case XTRACT_SPECTRAL_SUBBAND_CENTROIDS:
+        case XTRACT_CHROMA:
+        case XTRACT_SPECTRAL_CONTRAST:
             *data_unit = XTRACT_ANY_AMPLITUDE_HERTZ;
             break;
         }
@@ -733,6 +997,208 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
                       "Extract the spectral crest measure of an audio spectrum");
             copy_author(author, "Peeters");
             *year = 2003;
+            break;
+        case XTRACT_PEAK:
+            copy_name(name, "peak");
+            copy_name(p_name, "Peak");
+            copy_desc(desc, "Report whether the last value of a series is a peak");
+            copy_desc(p_desc, "Report whether the current value is a peak of the recent values");
+            copy_author(author, "");
+            break;
+        case XTRACT_MMBSES:
+            copy_name(name, "mmbses");
+            copy_name(p_name, "Mel Multi-Band Spectral Entropy Signature");
+            copy_desc(desc, "Extract mel band spectral entropies from a magnitude/phase spectrum");
+            copy_desc(p_desc, "Extract the spectral entropy of each mel band from an audio spectrum");
+            copy_author(author, "Rincon et al.");
+            *year = 2013;
+            break;
+        case XTRACT_SPECTRAL_SUBBAND_CENTROIDS:
+            copy_name(name, "spectral_subband_centroids");
+            copy_name(p_name, "Spectral Subband Centroids");
+            copy_desc(desc, "Extract the centroid of each mel band from a spectrum");
+            copy_desc(p_desc, "Extract the spectral centroid of each mel band from an audio spectrum");
+            copy_author(author, "");
+            break;
+        case XTRACT_MOVING_SUM:
+            copy_name(name, "moving_sum");
+            copy_name(p_name, "Moving Sum");
+            copy_desc(desc, "Extract the sum of a series over a sliding window");
+            copy_desc(p_desc, "Extract the sum of a series over a sliding window");
+            copy_author(author, "");
+            break;
+        case XTRACT_MOVING_AVERAGE:
+            copy_name(name, "moving_average");
+            copy_name(p_name, "Moving Average");
+            copy_desc(desc, "Extract the mean of a series over a sliding window");
+            copy_desc(p_desc, "Extract the mean of a series over a sliding window");
+            copy_author(author, "");
+            break;
+        case XTRACT_MOVING_VARIANCE:
+            copy_name(name, "moving_variance");
+            copy_name(p_name, "Moving Variance");
+            copy_desc(desc, "Extract the variance of a series over a sliding window");
+            copy_desc(p_desc, "Extract the variance of a series over a sliding window");
+            copy_author(author, "");
+            break;
+        case XTRACT_MOVING_STANDARD_DEVIATION:
+            copy_name(name, "moving_standard_deviation");
+            copy_name(p_name, "Moving Standard Deviation");
+            copy_desc(desc, "Extract the standard deviation of a series over a sliding window");
+            copy_desc(p_desc, "Extract the standard deviation of a series over a sliding window");
+            copy_author(author, "");
+            break;
+        case XTRACT_MOVING_MAX:
+            copy_name(name, "moving_max");
+            copy_name(p_name, "Moving Maximum");
+            copy_desc(desc, "Extract the largest value of a series over a sliding window");
+            copy_desc(p_desc, "Extract the largest value of a series over a sliding window");
+            copy_author(author, "");
+            break;
+        case XTRACT_MOVING_MIN:
+            copy_name(name, "moving_min");
+            copy_name(p_name, "Moving Minimum");
+            copy_desc(desc, "Extract the smallest value of a series over a sliding window");
+            copy_desc(p_desc, "Extract the smallest value of a series over a sliding window");
+            copy_author(author, "");
+            break;
+        case XTRACT_EWMA_AVERAGE:
+            copy_name(name, "ewma_average");
+            copy_name(p_name, "Exponentially Weighted Moving Average");
+            copy_desc(desc, "Extract the exponentially weighted moving average of a series");
+            copy_desc(p_desc, "Extract the exponentially weighted moving average of a series");
+            copy_author(author, "");
+            break;
+        case XTRACT_EWMA_VARIANCE:
+            copy_name(name, "ewma_variance");
+            copy_name(p_name, "Exponentially Weighted Moving Variance");
+            copy_desc(desc, "Extract the exponentially weighted moving variance of a series");
+            copy_desc(p_desc, "Extract the exponentially weighted moving variance of a series");
+            copy_author(author, "");
+            break;
+        case XTRACT_MEDIAN:
+            copy_name(name, "median");
+            copy_name(p_name, "Median");
+            copy_desc(desc, "Extract the median of an input vector");
+            copy_desc(p_desc, "Extract the median of a range of values");
+            copy_author(author, "");
+            break;
+        case XTRACT_MEDIAN_ABSOLUTE_DEVIATION:
+            copy_name(name, "median_absolute_deviation");
+            copy_name(p_name, "Median Absolute Deviation");
+            copy_desc(desc, "Extract the median absolute deviation of an input vector");
+            copy_desc(p_desc, "Extract the median absolute deviation of a range of values");
+            copy_author(author, "");
+            break;
+        case XTRACT_HJORTH_ACTIVITY:
+            copy_name(name, "hjorth_activity");
+            copy_name(p_name, "Hjorth Activity");
+            copy_desc(desc, "Extract the Hjorth activity of an input vector");
+            copy_desc(p_desc, "Extract the Hjorth activity of a range of values");
+            copy_author(author, "Bo Hjorth");
+            *year = 1970;
+            break;
+        case XTRACT_HJORTH_MOBILITY:
+            copy_name(name, "hjorth_mobility");
+            copy_name(p_name, "Hjorth Mobility");
+            copy_desc(desc, "Extract the Hjorth mobility of an input vector");
+            copy_desc(p_desc, "Extract the Hjorth mobility of a range of values");
+            copy_author(author, "Bo Hjorth");
+            *year = 1970;
+            break;
+        case XTRACT_HJORTH_COMPLEXITY:
+            copy_name(name, "hjorth_complexity");
+            copy_name(p_name, "Hjorth Complexity");
+            copy_desc(desc, "Extract the Hjorth complexity of an input vector");
+            copy_desc(p_desc, "Extract the Hjorth complexity of a range of values");
+            copy_author(author, "Bo Hjorth");
+            *year = 1970;
+            break;
+        case XTRACT_TIME_REVERSAL_ASYMMETRY:
+            copy_name(name, "time_reversal_asymmetry");
+            copy_name(p_name, "Time Reversal Asymmetry");
+            copy_desc(desc, "Extract the time reversal asymmetry statistic of an input vector");
+            copy_desc(p_desc, "Extract the time reversal asymmetry statistic of a range of values");
+            copy_author(author, "");
+            break;
+        case XTRACT_SPECTRAL_ENTROPY:
+            copy_name(name, "spectral_entropy");
+            copy_name(p_name, "Spectral Entropy");
+            copy_desc(desc, "Extract the normalised Shannon entropy of a spectrum");
+            copy_desc(p_desc, "Extract the normalised Shannon entropy of an audio spectrum");
+            copy_author(author, "");
+            break;
+        case XTRACT_PETROSIAN_FRACTAL_DIMENSION:
+            copy_name(name, "petrosian_fractal_dimension");
+            copy_name(p_name, "Petrosian Fractal Dimension");
+            copy_desc(desc, "Extract the Petrosian fractal dimension of an input vector");
+            copy_desc(p_desc, "Extract the Petrosian fractal dimension of a range of values");
+            copy_author(author, "A. Petrosian");
+            *year = 1995;
+            break;
+        case XTRACT_KATZ_FRACTAL_DIMENSION:
+            copy_name(name, "katz_fractal_dimension");
+            copy_name(p_name, "Katz Fractal Dimension");
+            copy_desc(desc, "Extract the Katz fractal dimension of an input vector");
+            copy_desc(p_desc, "Extract the Katz fractal dimension of a range of values");
+            copy_author(author, "Michael J. Katz");
+            *year = 1988;
+            break;
+        case XTRACT_HIGUCHI_FRACTAL_DIMENSION:
+            copy_name(name, "higuchi_fractal_dimension");
+            copy_name(p_name, "Higuchi Fractal Dimension");
+            copy_desc(desc, "Extract the Higuchi fractal dimension of an input vector");
+            copy_desc(p_desc, "Extract the Higuchi fractal dimension of a range of values");
+            copy_author(author, "T. Higuchi");
+            *year = 1988;
+            break;
+        case XTRACT_PERMUTATION_ENTROPY:
+            copy_name(name, "permutation_entropy");
+            copy_name(p_name, "Permutation Entropy");
+            copy_desc(desc, "Extract the normalised permutation entropy of an input vector");
+            copy_desc(p_desc, "Extract the normalised permutation entropy of a range of values");
+            copy_author(author, "Christoph Bandt, Bernd Pompe");
+            *year = 2002;
+            break;
+        case XTRACT_LEMPEL_ZIV_COMPLEXITY:
+            copy_name(name, "lempel_ziv_complexity");
+            copy_name(p_name, "Lempel-Ziv Complexity");
+            copy_desc(desc, "Extract the normalised Lempel-Ziv complexity of an input vector");
+            copy_desc(p_desc, "Extract the normalised Lempel-Ziv complexity of a range of values");
+            copy_author(author, "Abraham Lempel, Jacob Ziv");
+            *year = 1976;
+            break;
+        case XTRACT_SAMPLE_ENTROPY:
+            copy_name(name, "sample_entropy");
+            copy_name(p_name, "Sample Entropy");
+            copy_desc(desc, "Extract the sample entropy of an input vector");
+            copy_desc(p_desc, "Extract the sample entropy of a range of values");
+            copy_author(author, "Joshua S. Richman, J. Randall Moorman");
+            *year = 2000;
+            break;
+        case XTRACT_APPROXIMATE_ENTROPY:
+            copy_name(name, "approximate_entropy");
+            copy_name(p_name, "Approximate Entropy");
+            copy_desc(desc, "Extract the approximate entropy of an input vector");
+            copy_desc(p_desc, "Extract the approximate entropy of a range of values");
+            copy_author(author, "Steven M. Pincus");
+            *year = 1991;
+            break;
+        case XTRACT_PERIODICITY:
+            copy_name(name, "periodicity");
+            copy_name(p_name, "Periodicity");
+            copy_desc(desc, "Extract the periodicity of an input vector");
+            copy_desc(p_desc, "Extract the degree to which a range of values repeats itself");
+            copy_author(author, "Philip McLeod");
+            *year = 2005;
+            break;
+        case XTRACT_SIGNAL_CONFIDENCE:
+            copy_name(name, "signal_confidence");
+            copy_name(p_name, "Signal Confidence");
+            copy_desc(desc, "Extract the confidence of the McLeod fundamental frequency estimate of a signal");
+            copy_desc(p_desc, "Extract the confidence of the fundamental frequency estimate of an audio signal");
+            copy_author(author, "Philip McLeod");
+            *year = 2005;
             break;
         case XTRACT_MFCC:
             copy_name(name, "mfcc");
@@ -981,16 +1447,113 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_ATTACK_TIME:
             copy_name(name, "attack_time");
             copy_name(p_name, "Attack Time");
-            copy_desc(desc, "Extract the attack time of a signal");
-            copy_desc(p_desc, "Extract the attack time of an audio signal");
+            copy_desc(desc, "Extract the attack time of an envelope");
+            copy_desc(p_desc, "Extract the time an envelope takes to rise between two fractions of its peak");
             copy_author(author, "");
             break;
         case XTRACT_DECAY_TIME:
             copy_name(name, "decay_time");
             copy_name(p_name, "Decay Time");
-            copy_desc(desc, "Extract the decay time of a signal");
-            copy_desc(p_desc, "Extract the decay time of an audio signal");
+            copy_desc(desc, "Extract the decay time of an envelope");
+            copy_desc(p_desc, "Extract the time an envelope takes to fall from its peak");
             copy_author(author, "");
+            break;
+        case XTRACT_DECAY_RATE:
+            copy_name(name, "decay_rate");
+            copy_name(p_name, "Decay Rate");
+            copy_desc(desc, "Extract the exponential decay rate of an envelope");
+            copy_desc(p_desc, "Extract the rate at which an envelope falls from its peak");
+            copy_author(author, "");
+            break;
+        case XTRACT_TEMPORAL_CENTROID:
+            copy_name(name, "temporal_centroid");
+            copy_name(p_name, "Temporal Centroid");
+            copy_desc(desc, "Extract the temporal centroid of an envelope");
+            copy_desc(p_desc, "Extract the position of the centre of gravity of an envelope as a fraction of its length");
+            copy_author(author, "");
+            break;
+        case XTRACT_MAX_POSITION:
+            copy_name(name, "max_position");
+            copy_name(p_name, "Maximum Position");
+            copy_desc(desc, "Extract the position of the largest value in an input vector");
+            copy_desc(p_desc, "Extract the position of the largest value in a range of values as a fraction of the length");
+            copy_author(author, "");
+            break;
+        case XTRACT_MIN_POSITION:
+            copy_name(name, "min_position");
+            copy_name(p_name, "Minimum Position");
+            copy_desc(desc, "Extract the position of the smallest value in an input vector");
+            copy_desc(p_desc, "Extract the position of the smallest value in a range of values as a fraction of the length");
+            copy_author(author, "");
+            break;
+        case XTRACT_PEAK_ASYMMETRY:
+            copy_name(name, "peak_asymmetry");
+            copy_name(p_name, "Peak Asymmetry");
+            copy_desc(desc, "Extract the peak asymmetry of an envelope");
+            copy_desc(p_desc, "Extract the ratio of the energy of an envelope from its peak to the end to the energy from the start to its peak");
+            copy_author(author, "");
+            break;
+        case XTRACT_CROSS_CORRELATION:
+            copy_name(name, "cross_correlation");
+            copy_name(p_name, "Cross-correlation");
+            copy_desc(desc, "Extract the cross-correlation of two series at every lag");
+            copy_desc(p_desc, "Extract the similarity of two series as a function of the lag between them");
+            copy_author(author, "");
+            break;
+        case XTRACT_CROSS_CORRELATION_LAG:
+            copy_name(name, "cross_correlation_lag");
+            copy_name(p_name, "Cross-correlation Lag");
+            copy_desc(desc, "Extract the lag at which two series are most correlated");
+            copy_desc(p_desc, "Extract the lag at which two series are most correlated");
+            copy_author(author, "");
+            break;
+        case XTRACT_KULLBACK_LEIBLER_DIVERGENCE:
+            copy_name(name, "kullback_leibler_divergence");
+            copy_name(p_name, "Kullback-Leibler Divergence");
+            copy_desc(desc, "Extract the Kullback-Leibler divergence between two spectral frames");
+            copy_desc(p_desc, "Extract the information lost when the previous spectral frame stands in for the current one");
+            copy_author(author, "Solomon Kullback and Richard Leibler");
+            *year = 1951;
+            break;
+        case XTRACT_ITAKURA_SAITO_DIVERGENCE:
+            copy_name(name, "itakura_saito_divergence");
+            copy_name(p_name, "Itakura-Saito Divergence");
+            copy_desc(desc, "Extract the Itakura-Saito divergence between two spectral frames");
+            copy_desc(p_desc, "Extract the spectral distance from the previous frame to the current one");
+            copy_author(author, "Fumitada Itakura and Shuzo Saito");
+            *year = 1968;
+            break;
+        case XTRACT_MODIFIED_KULLBACK_LEIBLER:
+            copy_name(name, "modified_kullback_leibler");
+            copy_name(p_name, "Modified Kullback-Leibler");
+            copy_desc(desc, "Extract the modified Kullback-Leibler onset function between two spectral frames");
+            copy_desc(p_desc, "Extract a measure of the spectral energy that appeared since the previous frame");
+            copy_author(author, "Stephen Hainsworth and Malcolm Macleod");
+            *year = 2003;
+            break;
+        case XTRACT_SPECTRAL_CONTRAST:
+            copy_name(name, "spectral_contrast");
+            copy_name(p_name, "Spectral Contrast");
+            copy_desc(desc, "Extract the spectral contrast of a spectrum");
+            copy_desc(p_desc, "Extract the difference in level between the peaks and the valleys of each octave band of a spectrum");
+            copy_author(author, "Dan-Ning Jiang, Lie Lu, Hong-Jiang Zhang, Jian-Hua Tao and Lian-Hong Cai");
+            *year = 2002;
+            break;
+        case XTRACT_CHROMA:
+            copy_name(name, "chroma");
+            copy_name(p_name, "Chroma");
+            copy_desc(desc, "Extract the chroma of a spectrum");
+            copy_desc(p_desc, "Extract the energy of a spectrum in each of the twelve pitch classes from C to B, scaled to a maximum of 1");
+            copy_author(author, "Takuya Fujishima");
+            *year = 1999;
+            break;
+        case XTRACT_CQT:
+            copy_name(name, "cqt");
+            copy_name(p_name, "Constant-Q Transform");
+            copy_desc(desc, "Extract the constant-Q spectrum of a magnitude/phase spectrum");
+            copy_desc(p_desc, "Extract the magnitude of an audio spectrum in bands spaced evenly in pitch, with the band centre frequencies");
+            copy_author(author, "Judith C. Brown and Miller S. Puckette");
+            *year = 1992;
             break;
         case XTRACT_DIFFERENCE_VECTOR:
             copy_name(name, "difference_vector");
@@ -1072,10 +1635,17 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_VARIANCE:
         case XTRACT_STANDARD_DEVIATION:
         case XTRACT_AVERAGE_DEVIATION:
+        case XTRACT_MEDIAN_ABSOLUTE_DEVIATION:
+        case XTRACT_LEMPEL_ZIV_COMPLEXITY:
         case XTRACT_SPECTRAL_VARIANCE:
         case XTRACT_SPECTRAL_STANDARD_DEVIATION:
+        case XTRACT_SPREAD:
             /* case XTRACT_SPECTRAL_AVERAGE_DEVIATION: */
         case XTRACT_SPECTRAL_INHARMONICITY:
+        case XTRACT_TRISTIMULUS_1:
+        case XTRACT_TRISTIMULUS_2:
+        case XTRACT_TRISTIMULUS_3:
+        case XTRACT_ODD_EVEN_RATIO:
         case XTRACT_LOWEST_VALUE:
         case XTRACT_F0:
         case XTRACT_FAILSAFE_F0:
@@ -1084,6 +1654,9 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_MIDICENT:
         case XTRACT_FLATNESS_DB:
         case XTRACT_TONALITY:
+        case XTRACT_PEAK:
+        case XTRACT_CROSS_CORRELATION:
+        case XTRACT_MODIFIED_KULLBACK_LEIBLER:
             *argc = 1;
             *argv_type = XTRACT_FLOAT;
             break;
@@ -1099,6 +1672,8 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *argc = 2;
             *argv_type = XTRACT_FLOAT;
             break;
+        case XTRACT_CHROMA:
+        case XTRACT_SPECTRAL_CONTRAST:
         case XTRACT_FLUX:
         case XTRACT_LNORM:
             *argc = 3;
@@ -1116,12 +1691,49 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_MEL_SPECTROGRAM:
         case XTRACT_GFCC:
         case XTRACT_GAMMATONE_SPECTROGRAM:
+        case XTRACT_MMBSES:
+        case XTRACT_SPECTRAL_SUBBAND_CENTROIDS:
             *argc = 1;
             *argv_type = XTRACT_MEL_FILTER;
             break;
+        case XTRACT_CQT:
+            *argc = 1;
+            *argv_type = XTRACT_CQT_KERNEL;
+            break;
         case XTRACT_LPCC:
+        case XTRACT_MOVING_SUM:
+        case XTRACT_MOVING_AVERAGE:
+        case XTRACT_MOVING_VARIANCE:
+        case XTRACT_MOVING_STANDARD_DEVIATION:
+        case XTRACT_MOVING_MAX:
+        case XTRACT_MOVING_MIN:
+        case XTRACT_TIME_REVERSAL_ASYMMETRY:
+        case XTRACT_HIGUCHI_FRACTAL_DIMENSION:
             *argc = 1;
             *argv_type = XTRACT_INT;
+            break;
+        case XTRACT_PERMUTATION_ENTROPY:
+            *argc = 2;
+            *argv_type = XTRACT_INT;
+            break;
+        case XTRACT_ATTACK_TIME:
+            *argc = 3;
+            *argv_type = XTRACT_FLOAT;
+            break;
+        case XTRACT_DECAY_TIME:
+        case XTRACT_DECAY_RATE:
+            *argc = 2;
+            *argv_type = XTRACT_FLOAT;
+            break;
+        case XTRACT_SAMPLE_ENTROPY:
+        case XTRACT_APPROXIMATE_ENTROPY:
+            *argc = 2;
+            *argv_type = XTRACT_FLOAT;
+            break;
+        case XTRACT_EWMA_AVERAGE:
+        case XTRACT_EWMA_VARIANCE:
+            *argc = 1;
+            *argv_type = XTRACT_FLOAT;
             break;
         case XTRACT_HPS:
             *argc = 1;
@@ -1140,16 +1752,21 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *argv_type = XTRACT_FLOAT;
             break;
         case XTRACT_MEAN:
+        case XTRACT_MEDIAN:
+        case XTRACT_HJORTH_ACTIVITY:
+        case XTRACT_HJORTH_MOBILITY:
+        case XTRACT_HJORTH_COMPLEXITY:
+        case XTRACT_SPECTRAL_ENTROPY:
+        case XTRACT_PETROSIAN_FRACTAL_DIMENSION:
+        case XTRACT_KATZ_FRACTAL_DIMENSION:
+        case XTRACT_PERIODICITY:
+        case XTRACT_SIGNAL_CONFIDENCE:
         case XTRACT_SPECTRAL_MEAN:
         case XTRACT_SPECTRAL_CENTROID:
         case XTRACT_IRREGULARITY_K:
         case XTRACT_IRREGULARITY_J:
-        case XTRACT_TRISTIMULUS_1:
-        case XTRACT_TRISTIMULUS_2:
-        case XTRACT_TRISTIMULUS_3:
         case XTRACT_SMOOTHNESS:
         case XTRACT_FLATNESS:
-        case XTRACT_SPREAD:
         case XTRACT_ZCR:
         case XTRACT_LOUDNESS:
         case XTRACT_HIGHEST_VALUE:
@@ -1158,8 +1775,6 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_POWER:
         case XTRACT_SHARPNESS:
         case XTRACT_SPECTRAL_SLOPE:
-        case XTRACT_ATTACK_TIME:
-        case XTRACT_DECAY_TIME:
         case XTRACT_DIFFERENCE_VECTOR:
         case XTRACT_AUTOCORRELATION_FFT:
         case XTRACT_DCT:
@@ -1167,7 +1782,6 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_AMDF:
         case XTRACT_ASDF:
         case XTRACT_NONZERO_COUNT:
-        case XTRACT_ODD_EVEN_RATIO:
         case XTRACT_LPC:
         default:
             *argc = 0;
@@ -1182,6 +1796,22 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_VARIANCE:
         case XTRACT_STANDARD_DEVIATION:
         case XTRACT_AVERAGE_DEVIATION:
+        case XTRACT_MEDIAN:
+        case XTRACT_MEDIAN_ABSOLUTE_DEVIATION:
+        case XTRACT_HJORTH_ACTIVITY:
+        case XTRACT_HJORTH_MOBILITY:
+        case XTRACT_HJORTH_COMPLEXITY:
+        case XTRACT_TIME_REVERSAL_ASYMMETRY:
+        case XTRACT_SPECTRAL_ENTROPY:
+        case XTRACT_PETROSIAN_FRACTAL_DIMENSION:
+        case XTRACT_KATZ_FRACTAL_DIMENSION:
+        case XTRACT_HIGUCHI_FRACTAL_DIMENSION:
+        case XTRACT_PERMUTATION_ENTROPY:
+        case XTRACT_LEMPEL_ZIV_COMPLEXITY:
+        case XTRACT_SAMPLE_ENTROPY:
+        case XTRACT_APPROXIMATE_ENTROPY:
+        case XTRACT_PERIODICITY:
+        case XTRACT_SIGNAL_CONFIDENCE:
         case XTRACT_SKEWNESS:
         case XTRACT_KURTOSIS:
         case XTRACT_SPECTRAL_MEAN:
@@ -1224,6 +1854,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_FLUX:
         case XTRACT_LNORM:
         case XTRACT_NONZERO_COUNT:
+        case XTRACT_PEAK:
             *is_scalar = XTRACT_TRUE;
             break;
         case XTRACT_AUTOCORRELATION:
@@ -1245,6 +1876,20 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_DIFFERENCE_VECTOR:
         case XTRACT_WINDOWED:
         case XTRACT_SMOOTHED:
+        case XTRACT_MMBSES:
+        case XTRACT_SPECTRAL_SUBBAND_CENTROIDS:
+        case XTRACT_MOVING_SUM:
+        case XTRACT_MOVING_AVERAGE:
+        case XTRACT_MOVING_VARIANCE:
+        case XTRACT_MOVING_STANDARD_DEVIATION:
+        case XTRACT_MOVING_MAX:
+        case XTRACT_MOVING_MIN:
+        case XTRACT_EWMA_AVERAGE:
+        case XTRACT_EWMA_VARIANCE:
+        case XTRACT_CROSS_CORRELATION:
+        case XTRACT_SPECTRAL_CONTRAST:
+        case XTRACT_CHROMA:
+        case XTRACT_CQT:
             *is_scalar = XTRACT_FALSE;
             break;
         default:
@@ -1259,12 +1904,33 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_FLUX:
         case XTRACT_LNORM:
         case XTRACT_DIFFERENCE_VECTOR:
+        case XTRACT_CROSS_CORRELATION:
+        case XTRACT_CROSS_CORRELATION_LAG:
+        case XTRACT_KULLBACK_LEIBLER_DIVERGENCE:
+        case XTRACT_ITAKURA_SAITO_DIVERGENCE:
+        case XTRACT_MODIFIED_KULLBACK_LEIBLER:
             *is_delta = XTRACT_TRUE;
             break;
         case XTRACT_MEAN:
         case XTRACT_VARIANCE:
         case XTRACT_STANDARD_DEVIATION:
         case XTRACT_AVERAGE_DEVIATION:
+        case XTRACT_MEDIAN:
+        case XTRACT_MEDIAN_ABSOLUTE_DEVIATION:
+        case XTRACT_HJORTH_ACTIVITY:
+        case XTRACT_HJORTH_MOBILITY:
+        case XTRACT_HJORTH_COMPLEXITY:
+        case XTRACT_TIME_REVERSAL_ASYMMETRY:
+        case XTRACT_SPECTRAL_ENTROPY:
+        case XTRACT_PETROSIAN_FRACTAL_DIMENSION:
+        case XTRACT_KATZ_FRACTAL_DIMENSION:
+        case XTRACT_HIGUCHI_FRACTAL_DIMENSION:
+        case XTRACT_PERMUTATION_ENTROPY:
+        case XTRACT_LEMPEL_ZIV_COMPLEXITY:
+        case XTRACT_SAMPLE_ENTROPY:
+        case XTRACT_APPROXIMATE_ENTROPY:
+        case XTRACT_PERIODICITY:
+        case XTRACT_SIGNAL_CONFIDENCE:
         case XTRACT_SKEWNESS:
         case XTRACT_KURTOSIS:
         case XTRACT_SPECTRAL_MEAN:
@@ -1323,6 +1989,9 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_HARMONIC_SPECTRUM:
         case XTRACT_WINDOWED:
         case XTRACT_SMOOTHED:
+        case XTRACT_PEAK:
+        case XTRACT_MMBSES:
+        case XTRACT_SPECTRAL_SUBBAND_CENTROIDS:
         default:
             *is_delta = XTRACT_FALSE;
             break;
@@ -1340,6 +2009,9 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             case XTRACT_VARIANCE:
             case XTRACT_STANDARD_DEVIATION:
             case XTRACT_AVERAGE_DEVIATION:
+            case XTRACT_MEDIAN:
+            case XTRACT_MEDIAN_ABSOLUTE_DEVIATION:
+            case XTRACT_TIME_REVERSAL_ASYMMETRY:
             case XTRACT_SKEWNESS:
             case XTRACT_KURTOSIS:
             case XTRACT_RMS_AMPLITUDE:
@@ -1350,6 +2022,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             case XTRACT_LNORM:
             case XTRACT_NONZERO_COUNT:
             case XTRACT_WINDOWED:
+            case XTRACT_PEAK:
                 *result_unit = XTRACT_UNIT_ANY;
                 *result_min = XTRACT_UNBOUNDED_MIN;
                 *result_max = XTRACT_UNBOUNDED_MAX;
@@ -1428,6 +2101,13 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
                 break;
             case XTRACT_FLATNESS:
                 /* geometric mean / arithmetic mean (Wiener entropy): [0, 1] */
+            case XTRACT_SPECTRAL_ENTROPY:
+            case XTRACT_PERMUTATION_ENTROPY:
+            case XTRACT_PERIODICITY:
+            case XTRACT_SIGNAL_CONFIDENCE:
+            case XTRACT_TEMPORAL_CENTROID:
+            case XTRACT_MAX_POSITION:
+            case XTRACT_MIN_POSITION:
             case XTRACT_TONALITY:
                 /* min(flatness_db / -60, 1): [0, 1] */
             case XTRACT_SPECTRAL_INHARMONICITY:
@@ -1442,6 +2122,32 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
                 *result_min = 1.0;
                 *result_max = XTRACT_UNBOUNDED_MAX;
                 break;
+            case XTRACT_HJORTH_ACTIVITY:
+                *result_unit = XTRACT_UNIT_ANY;
+                *result_min = 0.0;
+                *result_max = XTRACT_UNBOUNDED_MAX;
+                break;
+            case XTRACT_HJORTH_MOBILITY:
+            case XTRACT_HJORTH_COMPLEXITY:
+            case XTRACT_LEMPEL_ZIV_COMPLEXITY:
+            case XTRACT_SAMPLE_ENTROPY:
+            case XTRACT_PEAK_ASYMMETRY:
+            case XTRACT_KULLBACK_LEIBLER_DIVERGENCE:
+            case XTRACT_ITAKURA_SAITO_DIVERGENCE:
+            case XTRACT_MODIFIED_KULLBACK_LEIBLER:
+                *result_unit = XTRACT_UNIT_NONE;
+                *result_min = 0.0;
+                *result_max = XTRACT_UNBOUNDED_MAX;
+                break;
+            case XTRACT_PETROSIAN_FRACTAL_DIMENSION:
+            case XTRACT_KATZ_FRACTAL_DIMENSION:
+            case XTRACT_HIGUCHI_FRACTAL_DIMENSION:
+            case XTRACT_APPROXIMATE_ENTROPY:
+            case XTRACT_CROSS_CORRELATION_LAG:
+                *result_unit = XTRACT_UNIT_NONE;
+                *result_min = XTRACT_UNBOUNDED_MIN;
+                *result_max = XTRACT_UNBOUNDED_MAX;
+                break;
             case XTRACT_SHARPNESS:
                 /* loudness-weighted Bark centroid: >= 0, in acums */
                 *result_unit = XTRACT_ACUM;
@@ -1451,6 +2157,17 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             case XTRACT_SPECTRAL_SLOPE:
                 /* least-squares regression slope: any real sign and magnitude */
                 *result_unit = XTRACT_UNIT_NONE;
+                *result_min = XTRACT_UNBOUNDED_MIN;
+                *result_max = XTRACT_UNBOUNDED_MAX;
+                break;
+            case XTRACT_ATTACK_TIME:
+            case XTRACT_DECAY_TIME:
+                *result_unit = XTRACT_SECONDS;
+                *result_min = 0.0;
+                *result_max = XTRACT_UNBOUNDED_MAX;
+                break;
+            case XTRACT_DECAY_RATE:
+                *result_unit = XTRACT_PER_SECOND;
                 *result_min = XTRACT_UNBOUNDED_MIN;
                 *result_max = XTRACT_UNBOUNDED_MAX;
                 break;
@@ -1479,8 +2196,25 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             case XTRACT_SUBBANDS:
             case XTRACT_WINDOWED:
             case XTRACT_SMOOTHED:
+            case XTRACT_MOVING_SUM:
+            case XTRACT_MOVING_AVERAGE:
+            case XTRACT_MOVING_VARIANCE:
+            case XTRACT_MOVING_STANDARD_DEVIATION:
+            case XTRACT_MOVING_MAX:
+            case XTRACT_MOVING_MIN:
+            case XTRACT_EWMA_AVERAGE:
+            case XTRACT_EWMA_VARIANCE:
+            case XTRACT_CROSS_CORRELATION:
                 *result_format = XTRACT_ARBITRARY_SERIES;
                 *result_unit = XTRACT_UNIT_ANY;
+                break;
+            case XTRACT_SPECTRAL_CONTRAST:
+                *result_format = XTRACT_ARBITRARY_SERIES;
+                *result_unit = XTRACT_UNIT_NONE;
+                break;
+            case XTRACT_CHROMA:
+                *result_format = XTRACT_CHROMA_COEFFS;
+                *result_unit = XTRACT_UNIT_NONE;
                 break;
             case XTRACT_BARK_COEFFICIENTS:
                 /* per-band sums on a Bark-band (not Hz) axis: dimensionless */
@@ -1490,6 +2224,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             case XTRACT_PEAK_SPECTRUM:
             case XTRACT_SPECTRUM:
             case XTRACT_HARMONIC_SPECTRUM:
+            case XTRACT_CQT:
                 *result_format = XTRACT_SPECTRAL;
                 *result_unit = XTRACT_ANY_AMPLITUDE_HERTZ;
                 break;
@@ -1512,6 +2247,15 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             case XTRACT_GAMMATONE_SPECTROGRAM:
                 *result_format = XTRACT_MEL_COEFFS;
                 *result_unit = XTRACT_DBFS;
+                break;
+            case XTRACT_MMBSES:
+                /* differential entropy per band, in nats: dimensionless */
+                *result_format = XTRACT_MEL_COEFFS;
+                *result_unit = XTRACT_UNIT_NONE;
+                break;
+            case XTRACT_SPECTRAL_SUBBAND_CENTROIDS:
+                *result_format = XTRACT_MEL_COEFFS;
+                *result_unit = XTRACT_HERTZ;
                 break;
             case XTRACT_LPC:
                 /* predictor/reflection coefficients: dimensionless */

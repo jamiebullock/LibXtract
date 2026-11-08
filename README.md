@@ -29,7 +29,10 @@ On Windows, an MSYS2/MinGW environment is required to provide `make` and a POSIX
 make           # build library and examples
 make check     # build and run tests
 make mutation  # mutation-test the suite with Mull (needs clang-18 and mull-18; CI runs it)
+make verify    # bounded model checking of the feature functions with CBMC (CI runs it on every push to main and develop)
 ```
+
+For further details on `make verify` see [verify/README.md](verify/README.md).
 
 ### Install
 
@@ -122,6 +125,17 @@ Breaking changes — removing or renaming a public function, changing a
 signature, or renumbering an enum — are batched into the next major release
 (2.0) so that dependent code has a single migration. Where practical, a
 function to be removed in 2.0 is deprecated in a preceding 1.x release first.
+
+From 1.2 the return code of every feature function is part of the contract.
+`XTRACT_ARGUMENT_ERROR` means the caller broke the function's documented
+argument rules (a vector result is left untouched, a scalar result is set to
+0); `XTRACT_NO_RESULT` means the arguments were valid, but the data has no
+answer; `XTRACT_BAD_STATE` means the initialisation the function needs is
+missing or was done for another size. The argument rules are stated by each
+function's Doxygen and by its descriptor from `xtract_make_descriptors()`,
+and a test keeps the descriptors and the code in step. `XTRACT_BAD_ARGV`,
+`XTRACT_BAD_VECTOR_SIZE` and `XTRACT_DENORMAL_FOUND` are deprecated from
+1.2, are never returned, and will be removed in 2.0.
 
 ## Licence
 

@@ -26,15 +26,27 @@ extern "C"
 
     typedef struct xtract_last_n_state_ xtract_last_n_state;
 
+    /**
+     *  Allocate the state for xtract_last_n() over frames of capacity values
+     *
+     *  @param capacity  the N that xtract_last_n() will be called with
+     *  @return a pointer to the new state, or NULL if memory cannot be allocated
+     */
     xtract_last_n_state *xtract_last_n_state_new(size_t capacity);
+
+    /**
+     *  Free a state allocated by xtract_last_n_state_new()
+     *
+     *  @param last_n_state  the state to free, as returned by xtract_last_n_state_new()
+     */
     void xtract_last_n_state_delete(xtract_last_n_state *last_n_state);
 
     /**
      *  Write a vector of the last N input values to `result`
      *
-     *  @param state  a pointer to an xtract_last_n_state struct as allocated by xtract_last_n_state_new()
+     *  @param state  a pointer to an xtract_last_n_state struct as allocated by xtract_last_n_state_new(); NULL is an argument error
      *  @param data   a pointer to a double representing the current input value
-     *  @param N      an integer representing 'N' the number of values to be written to *result
+     *  @param N      an integer representing 'N' the number of values to be written to *result, at least 1 (fewer is an argument error) and equal to the capacity the state was created with (any other positive size is a bad state)
      *  @param argv   a pointer to NULL
      *  @param result a pointer to an array of doubles representing the last N values, where the nth value is the current one. The array must have been allocated to size N elements and initialised by the caller
      *

@@ -11,7 +11,7 @@ HPATH = include/xtract
 
 export XTRACT_VERSION PREFIX LIBRARY
 
-.PHONY: examples clean install doc src swig bench analyze check-asan cppcheck coverage fuzz mutation format format-check
+.PHONY: examples clean install doc src swig bench analyze check-asan cppcheck coverage fuzz mutation verify format format-check
 
 all: src examples
 
@@ -110,7 +110,10 @@ fuzz:
 # a mutant that reads past an array is detected rather than surviving, and
 # the test binary is run once per mutant. mull.yml at the root scopes the
 # mutants to the first-party sources. MULL_THRESHOLD is the minimum score
-# out of 100 for the target to succeed.
+# out of 100 for the target to succeed. The runner starts with PATH as its
+# whole environment: the instrumented library calls getenv for each mutant
+# on every call of a mutated function, so the tests slow down with the
+# number of environment variables.
 MULL_LLVM ?= 18
 MULL_CC ?= clang-$(MULL_LLVM)
 MULL_PLUGIN ?= /usr/lib/mull-ir-frontend-$(MULL_LLVM)
@@ -123,9 +126,16 @@ mutation:
 	&& $(MAKE) -C src CC=$(MULL_CC) EXTRA_FLAGS="$(SANITIZE_FLAGS) -fpass-plugin=$(MULL_PLUGIN) -grecord-command-line" \
 	&& $(MAKE) -C tests CC=$(MULL_CC) EXTRA_FLAGS="$(SANITIZE_FLAGS)" \
 	&& mkdir -p reports \
-	&& ( cd tests && $(MULL_RUNNER) --reporters IDE --reporters Elements --report-dir ../reports --report-name mutation \
+	&& ( cd tests && env -i PATH="$$PATH" $(MULL_RUNNER) --reporters IDE --reporters Elements --report-dir ../reports --report-name mutation \
 		--workers $(MULL_WORKERS) --timeout 10000 --mutation-score-threshold $(MULL_THRESHOLD) ./xttest ); \
 	status=$$?; $(RESTORE_EXIT)
+
+# Bounded model checking of every feature function with CBMC: one proof per
+# function over every input of length up to VERIFY_MAX_N (see verify/Makefile).
+# Requires cbmc and goto-cc. The proofs are independent, so `make -j verify`
+# runs them in parallel; each needs up to a few GB of memory.
+verify:
+	@$(MAKE) -C verify
 
 # clang-format over the first-party C sources (third-party, SWIG bindings and
 # the C++ examples are excluded). The pinned CLANG_FORMAT version must match
@@ -159,4 +169,5 @@ clean:
 	@$(MAKE) -C examples clean
 	@$(MAKE) -C swig clean
 	@$(MAKE) -C bench clean
+	@$(MAKE) -C verify clean
 	@$(RM) -r dist

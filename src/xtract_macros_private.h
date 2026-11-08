@@ -22,9 +22,11 @@
 #define XTRACT_LOG_LIMIT_DB -96.0
 #define XTRACT_DB_SCALE_OFFSET 96.0
 #define XTRACT_VERY_BIG_NUMBER 2e42
+#define XTRACT_LN_2 0.69314718055994531
 #define XTRACT_SR_UPPER_LIMIT 192000.0
 #define XTRACT_SR_LOWER_LIMIT 22050.0
 #define XTRACT_SR_DEFAULT 44100.0
+#define XTRACT_CHROMA_REFERENCE_DEFAULT 440.0
 #define XTRACT_FUNDAMENTAL_DEFAULT 440.0
 
 /* Clipping thresholds for the xtract_f0 time-domain tracker, as fractions of
@@ -74,6 +76,14 @@ static inline double xtract_dct_cosine(int n, int m, int N)
 static inline int xtract_argv_int(double v)
 {
     return (v >= -2147483648.0 && v < 2147483648.0) ? (int)v : 0;
+}
+
+static inline int xtract_compare_doubles(const void *a, const void *b)
+{
+    const double x = *(const double *)a;
+    const double y = *(const double *)b;
+
+    return (x > y) - (x < y);
 }
 
 #endif

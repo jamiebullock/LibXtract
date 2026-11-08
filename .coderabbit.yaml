@@ -54,7 +54,9 @@ reviews:
       mode: off
   auto_review:
     enabled: true
-    drafts: false
+    drafts: true
+    base_branches:
+      - main
 
 chat:
   auto_reply: true

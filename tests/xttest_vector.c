@@ -134,6 +134,52 @@ UTEST(helper, smoothed_output_does_not_depend_on_prior_result_buffer)
 
 /* ===== xtract_subbands ===== */
 
+UTEST(vector, subbands_rejects_invalid_arguments)
+{
+    double data[8] = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
+    double result[8] = {-1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0};
+    int argv[4];
+
+    argv[0] = XTRACT_MEAN;
+    argv[1] = 2;
+    argv[2] = XTRACT_LINEAR_SUBBANDS;
+    argv[3] = 0;
+
+    ASSERT_EQ(xtract_subbands(data, 8, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_subbands(data, 0, argv, result), XTRACT_ARGUMENT_ERROR);
+
+    argv[1] = 0; /* no bands */
+    ASSERT_EQ(xtract_subbands(data, 8, argv, result), XTRACT_ARGUMENT_ERROR);
+    argv[1] = 9; /* more linear bands than bins */
+    ASSERT_EQ(xtract_subbands(data, 8, argv, result), XTRACT_ARGUMENT_ERROR);
+    argv[1] = 2;
+
+    argv[0] = -1;
+    ASSERT_EQ(xtract_subbands(data, 8, argv, result), XTRACT_ARGUMENT_ERROR);
+    argv[0] = XTRACT_FEATURES;
+    ASSERT_EQ(xtract_subbands(data, 8, argv, result), XTRACT_ARGUMENT_ERROR);
+    argv[0] = XTRACT_MEAN;
+
+    argv[2] = 2; /* neither subband scale */
+    ASSERT_EQ(xtract_subbands(data, 8, argv, result), XTRACT_ARGUMENT_ERROR);
+    argv[2] = XTRACT_OCTAVE_SUBBANDS;
+    argv[3] = 0; /* octave bands double from the start bin, so 0 never grows */
+    ASSERT_EQ(xtract_subbands(data, 8, argv, result), XTRACT_ARGUMENT_ERROR);
+    argv[2] = XTRACT_LINEAR_SUBBANDS;
+
+    argv[3] = -1;
+    ASSERT_EQ(xtract_subbands(data, 8, argv, result), XTRACT_ARGUMENT_ERROR);
+    argv[3] = 8;
+    ASSERT_EQ(xtract_subbands(data, 8, argv, result), XTRACT_ARGUMENT_ERROR);
+
+    CHECK_REL(result[0], -1.0, EPSILON);
+
+    argv[3] = 0;
+    ASSERT_EQ(xtract_subbands(data, 8, argv, result), XTRACT_SUCCESS);
+    CHECK_REL(result[0], 1.0, EPSILON);
+    CHECK_REL(result[1], 1.0, EPSILON);
+}
+
 UTEST(vector, subbands_last_band_computed_when_linear_bands_tile_exactly)
 {
     const int N = 16;
@@ -184,9 +230,8 @@ UTEST(vector, subbands_final_octave_band_computed_when_it_ends_at_n)
 
 UTEST(vector, spectral_subband_centroids_single_partial_per_band)
 {
-    /* Input follows the documented xtract_spectrum() layout:
-     * amplitudes in data[0..N), frequencies in data[N..2N). */
-    const int N = 8;
+    const int N = 16;
+    const int M = N / 2;
     double data[16] = {0};
     double filter_bank[2][8];
     double *filter_ptrs[2] = {filter_bank[0], filter_bank[1]};
@@ -194,15 +239,12 @@ UTEST(vector, spectral_subband_centroids_single_partial_per_band)
     double result[2] = {0};
     int n;
 
-    /* One partial per band: a band containing a single partial has its
-     * centroid at that partial's frequency. */
     data[2] = 3.0;
     data[5] = 2.0;
-    for (n = 0; n < N; n++)
-        data[N + n] = (n + 1) * 100.0;
+    for (n = 0; n < M; n++)
+        data[M + n] = (n + 1) * 100.0;
 
-    /* Two rectangular filters covering bins [0, 4) and [4, 8) */
-    for (n = 0; n < N; n++)
+    for (n = 0; n < M; n++)
     {
         filter_bank[0][n] = n < 4 ? 1.0 : 0.0;
         filter_bank[1][n] = n < 4 ? 0.0 : 1.0;
@@ -211,13 +253,28 @@ UTEST(vector, spectral_subband_centroids_single_partial_per_band)
     mf.dct_table = NULL;
     mf.filters = filter_ptrs;
 
-    xtract_spectral_subband_centroids(data, N, &mf, result);
-
+    ASSERT_EQ(xtract_spectral_subband_centroids(data, N, &mf, result), XTRACT_SUCCESS);
     CHECK_REL(result[0], 300.0, EPSILON);
     CHECK_REL(result[1], 600.0, EPSILON);
+
+    result[0] = -1.0;
+    ASSERT_EQ(xtract_spectral_subband_centroids(data, N - 1, &mf, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result[0], -1.0);
 }
 
 /* ===== xtract_lpcc ===== */
+
+UTEST(vector, lpcc_rejects_fewer_than_two_coefficients)
+{
+    double lpc[2] = {1.0, 0.5};
+    double result[4] = {-1.0, -1.0, -1.0, -1.0};
+    int cep_length = 3;
+
+    ASSERT_EQ(xtract_lpcc(lpc, 1, &cep_length, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_lpcc(lpc, 0, NULL, result), XTRACT_ARGUMENT_ERROR);
+    CHECK_REL(result[0], -1.0, EPSILON);
+    ASSERT_EQ(xtract_lpcc(lpc, 2, &cep_length, result), XTRACT_SUCCESS);
+}
 
 UTEST(vector, lpcc_rejects_non_positive_cepstrum_length)
 {
@@ -720,11 +777,11 @@ UTEST(vector, spectrum_log_types_floor_a_silent_signal_at_exactly_zero)
     }
 }
 
-UTEST(vector, spectrum_magnitude_phase_keeps_magnitudes_and_gives_quadrature_phases)
+UTEST(vector, spectrum_magnitude_phase_keeps_magnitudes_and_a_sine_bin_reads_minus_a_quarter_turn)
 {
     /* The cosine bin is purely real, so its phase is 0; the sine bin is
-     * purely imaginary, so its phase is a quarter turn. The second half of
-     * the result holds phases, not frequencies. */
+     * purely imaginary and negative, so its phase is -pi/2. The second half
+     * of the result holds phases, not frequencies. */
     double result[SPEC_N];
     int with_dc, m;
 
@@ -737,7 +794,7 @@ UTEST(vector, spectrum_magnitude_phase_keeps_magnitudes_and_gives_quadrature_pha
         for (m = 0; m < SPEC_M; m++)
             CHECK_NEAR(result[m], spec_bin_magnitude(with_dc ? m : m + 1), 1e-12);
         CHECK_NEAR(result[SPEC_M + cos_m], 0.0, 1e-9);
-        CHECK_NEAR(fabs(result[SPEC_M + sin_m]), M_PI / 2.0, 1e-9);
+        CHECK_NEAR(result[SPEC_M + sin_m], -M_PI / 2.0, 1e-9);
     }
 }
 
@@ -1040,6 +1097,19 @@ UTEST(scalar, hps_rejects_a_fractional_or_non_finite_harmonic_count)
 
 /* ===== xtract_lpc known values ===== */
 
+UTEST(vector, lpc_rejects_fewer_than_two_autocorrelation_values)
+{
+    double data[2] = {1.0, 0.5};
+    double result[2] = {-1.0, -1.0};
+
+    ASSERT_EQ(xtract_lpc(data, 0, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_lpc(data, 1, NULL, result), XTRACT_ARGUMENT_ERROR);
+    CHECK_REL(result[0], -1.0, EPSILON);
+    /* N = 2: one reflection coefficient, -r[1] / r[0] = -0.5 */
+    ASSERT_EQ(xtract_lpc(data, 2, NULL, result), XTRACT_SUCCESS);
+    CHECK_REL(result[0], -0.5, EPSILON);
+}
+
 UTEST(vector, lpc_of_simple_autocorrelation_sequence)
 {
     /* For a first-order AR process with coefficient a = 0.5:
@@ -1187,54 +1257,89 @@ UTEST(vector, init_bark_band_limits_are_rounded)
 
 /* ===== xtract_bark_coefficients ===== */
 
-UTEST(vector, bark_coefficients_basic_summation)
+/* A 1024-point block at 44.1 kHz carries a DC offset and five cosines placed
+ * on exact bins, so the magnitude spectrum with DC included is zero except at
+ * those bins, where it holds the offset and half of each amplitude. The bins
+ * are chosen against the band limits pinned above: 2 and 5 sit exactly on the
+ * lower edge of bands 1 and 2, 10 lies inside band 4, 400 inside band 24 and
+ * 500 in the last band, which runs to the end of the spectrum. */
+#define BARK_N 1024
+#define BARK_M (BARK_N / 2)
+static const double BARK_SR = 44100.0;
+static const double BARK_DC = 0.3;
+static const int BARK_BIN[5] = {2, 5, 10, 400, 500};
+static const double BARK_AMP[5] = {0.2, 0.4, 0.6, 0.8, 1.0};
+static const int BARK_BAND[5] = {1, 2, 4, 24, 25};
+
+UTEST(vector, bark_coefficients_sum_the_bins_of_a_dc_included_spectrum)
 {
-    /* xtract_bark_coefficients sums amplitude bins within each bark band.
-     * We need to init bark band limits first. */
-    const int N = 1024;
-    double sr = 44100.0;
+    double signal[BARK_N];
+    double spectrum[BARK_N];
+    double argv[4];
     int band_limits[XTRACT_BARK_BANDS];
-    double data[1024];
-    double result[XTRACT_BARK_BANDS] = {0};
-    double total = 0.0;
-    int i;
+    double result[XTRACT_BARK_BANDS];
+    double expected[XTRACT_BARK_BANDS] = {0.0};
+    int n, i;
 
-    xtract_init_bark(N, sr, band_limits);
-
-    /* Create a flat spectrum — all bins have amplitude 1.0 */
-    for (i = 0; i < N; i++)
-        data[i] = 1.0;
-
-    xtract_bark_coefficients(data, N, band_limits, result);
-
-    /* Each bark band should contain a positive sum (number of bins in that band) */
-    for (i = 0; i < XTRACT_BARK_BANDS - 1; i++)
+    for (n = 0; n < BARK_N; n++)
     {
-        ASSERT_GE(result[i], 0.0);
+        signal[n] = BARK_DC;
+        for (i = 0; i < 5; i++)
+            signal[n] += BARK_AMP[i] * cos(2.0 * M_PI * BARK_BIN[i] * n / BARK_N);
     }
+    expected[0] = BARK_DC;
+    for (i = 0; i < 5; i++)
+        expected[BARK_BAND[i]] = BARK_AMP[i] / 2.0;
 
-    /* Total across all bands should equal sum of amplitudes within the
-     * frequency range covered by the bark scale */
-    for (i = 0; i < XTRACT_BARK_BANDS - 1; i++)
-        total += result[i];
-    ASSERT_GT(total, 0.0);
+    argv[0] = BARK_SR / BARK_N;
+    argv[1] = XTRACT_MAGNITUDE_SPECTRUM;
+    argv[2] = 1;
+    argv[3] = 0;
+    xtract_init_fft(BARK_N, XTRACT_SPECTRUM);
+    ASSERT_EQ(xtract_spectrum(signal, BARK_N, argv, spectrum), XTRACT_SUCCESS);
+    xtract_free_fft();
+
+    ASSERT_EQ(xtract_init_bark(BARK_N, BARK_SR, band_limits), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_bark_coefficients(spectrum, BARK_M, band_limits, result), XTRACT_SUCCESS);
+
+    for (i = 0; i < XTRACT_BARK_BANDS; i++)
+        CHECK_NEAR(result[i], expected[i], 1e-9);
 }
 
 /* ===== xtract_loudness ===== */
 
 UTEST(scalar, loudness_of_uniform_bark_coefficients)
 {
-    /* loudness = sum(data[n]^0.23) for n=1..N-1 (skips n=0) */
     double result = 0.0;
     double data[XTRACT_BARK_BANDS];
     int i;
     for (i = 0; i < XTRACT_BARK_BANDS; i++)
         data[i] = 1.0;
 
-    xtract_loudness(data, XTRACT_BARK_BANDS, NULL, &result);
+    ASSERT_EQ(xtract_loudness(data, XTRACT_BARK_BANDS, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, (double)XTRACT_BARK_BANDS, 1e-6);
+}
 
-    /* N-1 terms of 1.0^0.23 = 1.0 each, so result = XTRACT_BARK_BANDS - 1 = 25 */
-    CHECK_REL(result, 25.0, 1e-6);
+UTEST(scalar, loudness_rejects_more_than_bark_bands_or_none_and_skips_non_positive_coefficients)
+{
+    double data[XTRACT_BARK_BANDS + 1];
+    double result = 1.0;
+    int i;
+
+    for (i = 0; i <= XTRACT_BARK_BANDS; i++)
+        data[i] = 1.0;
+
+    ASSERT_EQ(xtract_loudness(data, XTRACT_BARK_BANDS + 1, NULL, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    result = 1.0;
+    ASSERT_EQ(xtract_loudness(data, 0, NULL, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+
+    data[0] = -1.0;
+    ASSERT_EQ(xtract_loudness(data, XTRACT_BARK_BANDS, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, XTRACT_BARK_BANDS - 1.0, 1e-6);
+    ASSERT_EQ(xtract_loudness(data + 1, 1, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 1.0, 1e-6);
 }
 
 UTEST(scalar, loudness_of_silence_is_0)
@@ -1350,21 +1455,21 @@ UTEST(scalar, sharpness_silent_input_yields_no_result)
     ASSERT_EQ(result, 0.0);
 }
 
-UTEST(scalar, sharpness_bands_beyond_bark_bands_are_ignored)
+UTEST(scalar, sharpness_rejects_more_than_bark_bands_or_none)
 {
-    /* The extra bands carry huge values that must not contribute:
-     * both calls then sum the same 26 bands. */
-    double data[30];
-    double result26 = 0.0;
-    double result30 = 0.0;
+    double data[XTRACT_BARK_BANDS + 1];
+    double result = 1.0;
     int i;
 
-    for (i = 0; i < 30; i++)
-        data[i] = i < XTRACT_BARK_BANDS ? 1.0 : 1.0e12;
+    for (i = 0; i <= XTRACT_BARK_BANDS; i++)
+        data[i] = 1.0;
 
-    ASSERT_EQ(xtract_sharpness(data, 30, NULL, &result30), XTRACT_BAD_VECTOR_SIZE);
-    ASSERT_EQ(xtract_sharpness(data, XTRACT_BARK_BANDS, NULL, &result26), XTRACT_SUCCESS);
-    CHECK_REL(result30, result26, 1e-10);
+    ASSERT_EQ(xtract_sharpness(data, XTRACT_BARK_BANDS + 1, NULL, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    result = 1.0;
+    ASSERT_EQ(xtract_sharpness(data, 0, NULL, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    ASSERT_EQ(xtract_sharpness(data, XTRACT_BARK_BANDS, NULL, &result), XTRACT_SUCCESS);
 }
 
 /* ===== Bug-specific tests ===== */
@@ -1656,12 +1761,17 @@ UTEST(vector, peak_spectrum_threshold_range_is_0_to_100_inclusive)
     CHECK_REL(result[7], 50.0, 1e-12);
 
     argv[1] = 100.0000001;
-    ASSERT_EQ(xtract_peak_spectrum(data, N, argv, result), XTRACT_BAD_ARGV);
-    /* An out-of-range threshold is treated as zero, so every peak is kept */
-    CHECK_REL(result[7], 50.0, 1e-12);
+    result[7] = -1.0;
+    ASSERT_EQ(xtract_peak_spectrum(data, N, argv, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result[7], -1.0);
 
     argv[1] = -0.0000001;
-    ASSERT_EQ(xtract_peak_spectrum(data, N, argv, result), XTRACT_BAD_ARGV);
+    ASSERT_EQ(xtract_peak_spectrum(data, N, argv, result), XTRACT_ARGUMENT_ERROR);
+    argv[1] = NAN;
+    ASSERT_EQ(xtract_peak_spectrum(data, N, argv, result), XTRACT_ARGUMENT_ERROR);
+    argv[1] = 50.0;
+    ASSERT_EQ(xtract_peak_spectrum(data, N, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_peak_spectrum(data, 0, argv, result), XTRACT_ARGUMENT_ERROR);
 }
 
 UTEST(vector, dct_changing_size_should_not_crash)
@@ -2238,4 +2348,1260 @@ UTEST(init, fft_rejects_sizes_with_no_bins)
     ASSERT_EQ(xtract_init_fft(0, XTRACT_SPECTRUM), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(xtract_init_fft(3, XTRACT_SPECTRUM), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(xtract_init_fft(2, XTRACT_SPECTRUM), XTRACT_SUCCESS);
+}
+
+/* ===== Argument contract ===== */
+
+UTEST(vector, spectrum_rejects_a_null_argv_and_a_type_outside_the_enumeration)
+{
+    double data[8] = {0};
+    double result[8] = {0};
+    double argv[4] = {0.0, 5.0, 0.0, 0.0};
+
+    xtract_init_fft(8, XTRACT_SPECTRUM);
+    ASSERT_EQ(xtract_spectrum(data, 8, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_spectrum(data, 8, argv, result), XTRACT_ARGUMENT_ERROR);
+    argv[1] = -1.0;
+    ASSERT_EQ(xtract_spectrum(data, 8, argv, result), XTRACT_ARGUMENT_ERROR);
+    argv[1] = NAN;
+    ASSERT_EQ(xtract_spectrum(data, 8, argv, result), XTRACT_ARGUMENT_ERROR);
+    argv[1] = XTRACT_MAGNITUDE_PHASE_SPECTRUM;
+    ASSERT_EQ(xtract_spectrum(data, 8, argv, result), XTRACT_SUCCESS);
+}
+
+UTEST(vector, fft_features_report_a_bad_state_without_a_matching_initialisation)
+{
+    double data[16] = {0};
+    double result[32] = {0};
+    double argv[4] = {0.0, 0.0, 0.0, 0.0};
+
+    xtract_free_fft();
+    ASSERT_EQ(xtract_spectrum(data, 8, argv, result), XTRACT_BAD_STATE);
+    ASSERT_EQ(xtract_autocorrelation_fft(data, 8, NULL, result), XTRACT_BAD_STATE);
+
+    xtract_init_fft(16, XTRACT_SPECTRUM);
+    xtract_init_fft(16, XTRACT_AUTOCORRELATION_FFT);
+    ASSERT_EQ(xtract_spectrum(data, 8, argv, result), XTRACT_BAD_STATE);
+    ASSERT_EQ(xtract_autocorrelation_fft(data, 8, NULL, result), XTRACT_BAD_STATE);
+    ASSERT_EQ(xtract_spectrum(data, 16, argv, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_autocorrelation_fft(data, 16, NULL, result), XTRACT_SUCCESS);
+}
+
+UTEST(vector, filterbank_features_reject_a_short_input_and_an_unusable_filterbank)
+{
+    double data[4] = {1.0, 1.0, 0.0, 0.0};
+    double row[4] = {1.0, 1.0, 1.0, 1.0};
+    double *rows[1] = {row};
+    xtract_mel_filter f;
+    double result[2] = {-1.0, -1.0};
+
+    f.n_filters = 1;
+    f.filters = rows;
+    f.dct_table = NULL;
+
+    ASSERT_EQ(xtract_mel_spectrogram(data, 0, &f, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_mfcc(data, 0, &f, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_gammatone_spectrogram(data, 0, &f, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_gfcc(data, 0, &f, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_mmbses(data, 1, &f, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_mmbses(data, 3, &f, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_spectral_subband_centroids(data, 0, &f, result), XTRACT_ARGUMENT_ERROR);
+
+    ASSERT_EQ(xtract_mel_spectrogram(data, 4, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_mfcc(data, 4, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_gammatone_spectrogram(data, 4, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_gfcc(data, 4, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_mmbses(data, 4, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_spectral_subband_centroids(data, 2, NULL, result), XTRACT_ARGUMENT_ERROR);
+
+    f.n_filters = 0;
+    ASSERT_EQ(xtract_mel_spectrogram(data, 4, &f, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_mfcc(data, 4, &f, result), XTRACT_ARGUMENT_ERROR);
+    f.n_filters = 1;
+    f.filters = NULL;
+    ASSERT_EQ(xtract_mel_spectrogram(data, 4, &f, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_mmbses(data, 4, &f, result), XTRACT_ARGUMENT_ERROR);
+    f.filters = rows;
+    rows[0] = NULL;
+    ASSERT_EQ(xtract_mel_spectrogram(data, 4, &f, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_gfcc(data, 4, &f, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_mmbses(data, 4, &f, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_spectral_subband_centroids(data, 2, &f, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result[0], -1.0);
+
+    rows[0] = row;
+    ASSERT_EQ(xtract_mel_spectrogram(data, 4, &f, result), XTRACT_SUCCESS);
+    CHECK_REL(result[0], log(2.0), EPSILON);
+    ASSERT_EQ(xtract_mfcc(data, 4, &f, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_mmbses(data, 4, &f, result), XTRACT_SUCCESS);
+}
+
+UTEST(vector, time_domain_vector_features_reject_an_empty_input)
+{
+    double data[2] = {1.0, 2.0};
+    double result[4] = {-1.0, -1.0, -1.0, -1.0};
+
+    ASSERT_EQ(xtract_dct(data, 0, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_autocorrelation(data, 0, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_amdf(data, 0, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_asdf(data, 0, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result[0], -1.0);
+
+    ASSERT_EQ(xtract_dct(data, 1, NULL, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_autocorrelation(data, 1, NULL, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_amdf(data, 1, NULL, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_asdf(data, 1, NULL, result), XTRACT_SUCCESS);
+}
+
+UTEST(vector, bark_coefficients_reject_an_empty_input_and_negative_or_unordered_limits)
+{
+    double data[8] = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
+    double result[XTRACT_BARK_BANDS];
+    int limits[XTRACT_BARK_BANDS];
+    int i;
+
+    for (i = 0; i < XTRACT_BARK_BANDS; i++)
+        limits[i] = i;
+    result[0] = -1.0;
+
+    ASSERT_EQ(xtract_bark_coefficients(data, 0, limits, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_bark_coefficients(data, 8, NULL, result), XTRACT_ARGUMENT_ERROR);
+    limits[0] = -1;
+    ASSERT_EQ(xtract_bark_coefficients(data, 8, limits, result), XTRACT_ARGUMENT_ERROR);
+    limits[0] = 0;
+    limits[5] = 3;
+    ASSERT_EQ(xtract_bark_coefficients(data, 8, limits, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result[0], -1.0);
+
+    limits[5] = 5;
+    ASSERT_EQ(xtract_bark_coefficients(data, 8, limits, result), XTRACT_SUCCESS);
+    CHECK_REL(result[0], 1.0, EPSILON);
+}
+
+UTEST(vector, harmonic_spectrum_rejects_an_odd_or_short_input_a_null_argv_and_out_of_range_arguments)
+{
+    double data[4] = {1.0, 1.0, 100.0, 200.0};
+    double result[4] = {-1.0, -1.0, -1.0, -1.0};
+    double argv[2] = {100.0, 0.1};
+
+    ASSERT_EQ(xtract_harmonic_spectrum(data, 3, argv, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_harmonic_spectrum(data, 0, argv, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_harmonic_spectrum(data, 4, NULL, result), XTRACT_ARGUMENT_ERROR);
+    argv[0] = -100.0;
+    ASSERT_EQ(xtract_harmonic_spectrum(data, 4, argv, result), XTRACT_ARGUMENT_ERROR);
+    argv[0] = INFINITY;
+    ASSERT_EQ(xtract_harmonic_spectrum(data, 4, argv, result), XTRACT_ARGUMENT_ERROR);
+    argv[0] = 100.0;
+    argv[1] = 1.5;
+    ASSERT_EQ(xtract_harmonic_spectrum(data, 4, argv, result), XTRACT_ARGUMENT_ERROR);
+    argv[1] = -0.1;
+    ASSERT_EQ(xtract_harmonic_spectrum(data, 4, argv, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result[0], -1.0);
+
+    argv[1] = 0.1;
+    ASSERT_EQ(xtract_harmonic_spectrum(data, 4, argv, result), XTRACT_SUCCESS);
+    CHECK_REL(result[0], 1.0, EPSILON);
+    CHECK_REL(result[2], 100.0, EPSILON);
+}
+
+UTEST(vector, subbands_accepts_only_features_that_reduce_a_plain_vector_to_one_scalar)
+{
+    static const int allowed[] = {
+        XTRACT_MEAN, XTRACT_IRREGULARITY_K, XTRACT_IRREGULARITY_J, XTRACT_SMOOTHNESS,
+        XTRACT_ZCR, XTRACT_LOUDNESS, XTRACT_FLATNESS, XTRACT_RMS_AMPLITUDE,
+        XTRACT_SHARPNESS, XTRACT_HIGHEST_VALUE, XTRACT_SUM, XTRACT_NONZERO_COUNT};
+    static const int rejected[] = {
+        XTRACT_VARIANCE, XTRACT_SPECTRAL_CENTROID, XTRACT_SPECTRAL_SLOPE, XTRACT_POWER,
+        XTRACT_SPECTRUM, XTRACT_DIFFERENCE_VECTOR, XTRACT_SUBBANDS};
+    xtract_function_descriptor_t *fd = xtract_make_descriptors();
+    double data[8] = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
+    double result[2] = {-1.0, -1.0};
+    int argv[4] = {XTRACT_MEAN, 2, XTRACT_LINEAR_SUBBANDS, 0};
+    size_t i;
+
+    ASSERT_TRUE(fd != NULL);
+    for (i = 0; i < sizeof(allowed) / sizeof(allowed[0]); i++)
+    {
+        argv[0] = allowed[i];
+        ASSERT_EQ(fd[allowed[i]].argc, 0);
+        ASSERT_EQ(fd[allowed[i]].is_scalar, XTRACT_TRUE);
+        ASSERT_NE(fd[allowed[i]].data.format, XTRACT_SPECTRAL);
+        ASSERT_NE(fd[allowed[i]].data.format, XTRACT_NO_DATA);
+        ASSERT_EQ(xtract_subbands(data, 8, argv, result), XTRACT_SUCCESS);
+    }
+    for (i = 0; i < sizeof(rejected) / sizeof(rejected[0]); i++)
+    {
+        argv[0] = rejected[i];
+        result[0] = -1.0;
+        ASSERT_EQ(xtract_subbands(data, 8, argv, result), XTRACT_ARGUMENT_ERROR);
+        ASSERT_EQ(result[0], -1.0);
+    }
+    ASSERT_EQ(xtract_free_descriptors(fd), XTRACT_SUCCESS);
+}
+
+UTEST(vector, peak_spectrum_zero_spacing_defaults_to_44100_over_the_transform_length)
+{
+    double data[4] = {0.0, 1.0, 0.0, 0.0};
+    double result[8] = {0};
+    double argv[2] = {0.0, 0.0};
+
+    ASSERT_EQ(xtract_peak_spectrum(data, 4, argv, result), XTRACT_SUCCESS);
+    CHECK_REL(result[4 + 1], 2.0 * 44100.0 / 8.0, EPSILON);
+}
+
+/* ===== xtract_moving_sum / average / variance / standard_deviation ===== */
+
+static void fill_sentinel(double *result, int n)
+{
+    int i;
+    for (i = 0; i < n; i++)
+        result[i] = -1.0;
+}
+
+UTEST(vector, moving_sum_of_1_to_5_over_a_window_of_2)
+{
+    double data[5] = {1.0, 2.0, 3.0, 4.0, 5.0};
+    double result[4];
+    int window = 2;
+
+    ASSERT_EQ(xtract_moving_sum(data, 5, &window, result), XTRACT_SUCCESS);
+    CHECK_REL(result[0], 3.0, EPSILON);
+    CHECK_REL(result[1], 5.0, EPSILON);
+    CHECK_REL(result[2], 7.0, EPSILON);
+    CHECK_REL(result[3], 9.0, EPSILON);
+}
+
+UTEST(vector, moving_sum_over_a_window_of_n_is_the_total)
+{
+    double data[5] = {1.0, 2.0, 3.0, 4.0, 5.0};
+    double result[2] = {-1.0, -1.0};
+    int window = 5;
+
+    ASSERT_EQ(xtract_moving_sum(data, 5, &window, result), XTRACT_SUCCESS);
+    CHECK_REL(result[0], 15.0, EPSILON);
+    ASSERT_EQ(result[1], -1.0);
+}
+
+UTEST(vector, moving_sum_over_a_window_of_1_copies_the_series)
+{
+    double data[4] = {0.5, -2.0, 3.25, 7.0};
+    double result[4];
+    int window = 1;
+    int i;
+
+    ASSERT_EQ(xtract_moving_sum(data, 4, &window, result), XTRACT_SUCCESS);
+    for (i = 0; i < 4; i++)
+        ASSERT_EQ(result[i], data[i]);
+}
+
+UTEST(vector, moving_sum_rejects_a_missing_or_out_of_range_window_and_leaves_result_untouched)
+{
+    double data[4] = {1.0, 2.0, 3.0, 4.0};
+    double result[4];
+    int window;
+
+    fill_sentinel(result, 4);
+    ASSERT_EQ(xtract_moving_sum(data, 4, NULL, result), XTRACT_ARGUMENT_ERROR);
+    window = 0;
+    ASSERT_EQ(xtract_moving_sum(data, 4, &window, result), XTRACT_ARGUMENT_ERROR);
+    window = 5;
+    ASSERT_EQ(xtract_moving_sum(data, 4, &window, result), XTRACT_ARGUMENT_ERROR);
+    window = 1;
+    ASSERT_EQ(xtract_moving_sum(data, 0, &window, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result[0], -1.0);
+    ASSERT_EQ(result[3], -1.0);
+}
+
+UTEST(vector, moving_average_of_1_to_5_over_a_window_of_2)
+{
+    double data[5] = {1.0, 2.0, 3.0, 4.0, 5.0};
+    double result[4];
+    int window = 2;
+
+    ASSERT_EQ(xtract_moving_average(data, 5, &window, result), XTRACT_SUCCESS);
+    CHECK_REL(result[0], 1.5, EPSILON);
+    CHECK_REL(result[1], 2.5, EPSILON);
+    CHECK_REL(result[2], 3.5, EPSILON);
+    CHECK_REL(result[3], 4.5, EPSILON);
+}
+
+UTEST(vector, moving_average_matches_xtract_mean_on_every_window)
+{
+    double data[8] = {3.0, -1.5, 4.25, 0.0, 2.0, 9.5, -6.0, 1.0};
+    double result[8];
+    double mean;
+    int window = 3;
+    int i;
+
+    ASSERT_EQ(xtract_moving_average(data, 8, &window, result), XTRACT_SUCCESS);
+    for (i = 0; i <= 8 - window; i++)
+    {
+        ASSERT_EQ(xtract_mean(data + i, window, NULL, &mean), XTRACT_SUCCESS);
+        CHECK_REL(result[i], mean, EPSILON);
+    }
+}
+
+UTEST(vector, moving_average_rejects_a_missing_or_out_of_range_window_and_leaves_result_untouched)
+{
+    double data[4] = {1.0, 2.0, 3.0, 4.0};
+    double result[4];
+    int window;
+
+    fill_sentinel(result, 4);
+    ASSERT_EQ(xtract_moving_average(data, 4, NULL, result), XTRACT_ARGUMENT_ERROR);
+    window = 0;
+    ASSERT_EQ(xtract_moving_average(data, 4, &window, result), XTRACT_ARGUMENT_ERROR);
+    window = 5;
+    ASSERT_EQ(xtract_moving_average(data, 4, &window, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result[0], -1.0);
+}
+
+UTEST(vector, moving_variance_matches_xtract_variance_on_every_window)
+{
+    double data[8] = {3.0, -1.5, 4.25, 0.0, 2.0, 9.5, -6.0, 1.0};
+    double result[8];
+    double mean, variance;
+    int window;
+    int i;
+
+    for (window = 2; window <= 8; window++)
+    {
+        ASSERT_EQ(xtract_moving_variance(data, 8, &window, result), XTRACT_SUCCESS);
+        for (i = 0; i <= 8 - window; i++)
+        {
+            ASSERT_EQ(xtract_mean(data + i, window, NULL, &mean), XTRACT_SUCCESS);
+            ASSERT_EQ(xtract_variance(data + i, window, &mean, &variance), XTRACT_SUCCESS);
+            CHECK_REL(result[i], variance, EPSILON);
+        }
+    }
+}
+
+UTEST(vector, moving_variance_of_1_to_5_over_a_window_of_3_is_1)
+{
+    double data[5] = {1.0, 2.0, 3.0, 4.0, 5.0};
+    double result[3];
+    int window = 3;
+    int i;
+
+    ASSERT_EQ(xtract_moving_variance(data, 5, &window, result), XTRACT_SUCCESS);
+    for (i = 0; i < 3; i++)
+        CHECK_REL(result[i], 1.0, EPSILON);
+}
+
+UTEST(vector, moving_variance_of_a_constant_tail_after_a_large_spike_is_exactly_zero)
+{
+    double data[8] = {1000000.3, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1};
+    double result[7];
+    int window = 2;
+    int i;
+
+    ASSERT_EQ(xtract_moving_variance(data, 8, &window, result), XTRACT_SUCCESS);
+    CHECK_REL(result[0], (1000000.3 - 1.1) * (1000000.3 - 1.1) / 2.0, 1e-9);
+    for (i = 1; i < 7; i++)
+        ASSERT_EQ(result[i], 0.0);
+}
+
+UTEST(vector, moving_variance_rejects_a_window_below_2_and_leaves_result_untouched)
+{
+    double data[4] = {1.0, 2.0, 3.0, 4.0};
+    double result[4];
+    int window;
+
+    fill_sentinel(result, 4);
+    ASSERT_EQ(xtract_moving_variance(data, 4, NULL, result), XTRACT_ARGUMENT_ERROR);
+    window = 1;
+    ASSERT_EQ(xtract_moving_variance(data, 4, &window, result), XTRACT_ARGUMENT_ERROR);
+    window = 5;
+    ASSERT_EQ(xtract_moving_variance(data, 4, &window, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result[0], -1.0);
+    window = 2;
+    ASSERT_EQ(xtract_moving_variance(data, 4, &window, result), XTRACT_SUCCESS);
+    CHECK_REL(result[0], 0.5, EPSILON);
+    CHECK_REL(result[2], 0.5, EPSILON);
+    ASSERT_EQ(result[3], -1.0);
+}
+
+UTEST(vector, moving_standard_deviation_is_the_square_root_of_the_moving_variance)
+{
+    double data[8] = {3.0, -1.5, 4.25, 0.0, 2.0, 9.5, -6.0, 1.0};
+    double variance[6];
+    double deviation[6];
+    int window = 3;
+    int i;
+
+    ASSERT_EQ(xtract_moving_variance(data, 8, &window, variance), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_moving_standard_deviation(data, 8, &window, deviation), XTRACT_SUCCESS);
+    for (i = 0; i < 6; i++)
+        CHECK_REL(deviation[i], sqrt(variance[i]), EPSILON);
+    CHECK_REL(deviation[0], sqrt(9.145833333333334), EPSILON);
+}
+
+UTEST(vector, moving_standard_deviation_rejects_a_window_below_2_and_leaves_result_untouched)
+{
+    double data[4] = {1.0, 2.0, 3.0, 4.0};
+    double result[4];
+    int window = 1;
+
+    fill_sentinel(result, 4);
+    ASSERT_EQ(xtract_moving_standard_deviation(data, 4, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_moving_standard_deviation(data, 4, &window, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result[0], -1.0);
+}
+
+/* ===== xtract_moving_max / moving_min ===== */
+
+UTEST(vector, moving_max_and_min_of_a_mixed_series_over_a_window_of_3)
+{
+    double data[7] = {1.0, 3.0, 2.0, 5.0, 4.0, 0.0, 6.0};
+    double expected_max[5] = {3.0, 5.0, 5.0, 5.0, 6.0};
+    double expected_min[5] = {1.0, 2.0, 2.0, 0.0, 0.0};
+    double result[5];
+    int window = 3;
+    int i;
+
+    ASSERT_EQ(xtract_moving_max(data, 7, &window, result), XTRACT_SUCCESS);
+    for (i = 0; i < 5; i++)
+        ASSERT_EQ(result[i], expected_max[i]);
+    ASSERT_EQ(xtract_moving_min(data, 7, &window, result), XTRACT_SUCCESS);
+    for (i = 0; i < 5; i++)
+        ASSERT_EQ(result[i], expected_min[i]);
+}
+
+UTEST(vector, moving_max_of_a_falling_series_drops_each_value_as_it_leaves_the_window)
+{
+    double data[5] = {5.0, 4.0, 3.0, 2.0, 1.0};
+    double result[4];
+    int window = 2;
+    int i;
+
+    ASSERT_EQ(xtract_moving_max(data, 5, &window, result), XTRACT_SUCCESS);
+    for (i = 0; i < 4; i++)
+        ASSERT_EQ(result[i], data[i]);
+    ASSERT_EQ(xtract_moving_min(data, 5, &window, result), XTRACT_SUCCESS);
+    for (i = 0; i < 4; i++)
+        ASSERT_EQ(result[i], data[i + 1]);
+}
+
+UTEST(vector, moving_max_of_a_rising_series_follows_the_newest_value)
+{
+    double data[5] = {1.0, 2.0, 3.0, 4.0, 5.0};
+    double result[3];
+    int window = 3;
+    int i;
+
+    ASSERT_EQ(xtract_moving_max(data, 5, &window, result), XTRACT_SUCCESS);
+    for (i = 0; i < 3; i++)
+        ASSERT_EQ(result[i], data[i + 2]);
+    ASSERT_EQ(xtract_moving_min(data, 5, &window, result), XTRACT_SUCCESS);
+    for (i = 0; i < 3; i++)
+        ASSERT_EQ(result[i], data[i]);
+}
+
+UTEST(vector, moving_max_and_min_match_the_block_features_on_every_window)
+{
+    double data[12] = {3.0, -1.5, 4.25, 0.0, 2.0, 9.5, -6.0, 1.0, 1.0, 7.0, -2.5, 3.0};
+    double result[12];
+    double block;
+    double below_all = -100.0;
+    int window;
+    int i;
+
+    for (window = 1; window <= 12; window++)
+    {
+        ASSERT_EQ(xtract_moving_max(data, 12, &window, result), XTRACT_SUCCESS);
+        for (i = 0; i <= 12 - window; i++)
+        {
+            ASSERT_EQ(xtract_highest_value(data + i, window, NULL, &block), XTRACT_SUCCESS);
+            ASSERT_EQ(result[i], block);
+        }
+        ASSERT_EQ(xtract_moving_min(data, 12, &window, result), XTRACT_SUCCESS);
+        for (i = 0; i <= 12 - window; i++)
+        {
+            ASSERT_EQ(xtract_lowest_value(data + i, window, &below_all, &block), XTRACT_SUCCESS);
+            ASSERT_EQ(result[i], block);
+        }
+    }
+}
+
+UTEST(vector, moving_max_over_a_window_of_n_is_the_overall_maximum)
+{
+    double data[5] = {1.0, 7.0, 3.0, 4.0, 5.0};
+    double result[2] = {-1.0, -1.0};
+    int window = 5;
+
+    ASSERT_EQ(xtract_moving_max(data, 5, &window, result), XTRACT_SUCCESS);
+    ASSERT_EQ(result[0], 7.0);
+    ASSERT_EQ(result[1], -1.0);
+    ASSERT_EQ(xtract_moving_min(data, 5, &window, result), XTRACT_SUCCESS);
+    ASSERT_EQ(result[0], 1.0);
+    ASSERT_EQ(result[1], -1.0);
+}
+
+UTEST(vector, moving_max_and_min_reject_a_missing_or_out_of_range_window_and_leave_result_untouched)
+{
+    double data[4] = {1.0, 2.0, 3.0, 4.0};
+    double result[4];
+    int window;
+
+    fill_sentinel(result, 4);
+    ASSERT_EQ(xtract_moving_max(data, 4, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_moving_min(data, 4, NULL, result), XTRACT_ARGUMENT_ERROR);
+    window = 0;
+    ASSERT_EQ(xtract_moving_max(data, 4, &window, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_moving_min(data, 4, &window, result), XTRACT_ARGUMENT_ERROR);
+    window = 5;
+    ASSERT_EQ(xtract_moving_max(data, 4, &window, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_moving_min(data, 4, &window, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result[0], -1.0);
+    ASSERT_EQ(result[3], -1.0);
+}
+
+static void ewma_by_definition(const double *data, int t, double alpha, double *mean, double *variance)
+{
+    double weight;
+    double total = 0.0;
+    double sum = 0.0;
+    int i;
+
+    for (i = 0; i <= t; i++)
+    {
+        weight = i == 0 ? pow(1.0 - alpha, t) : alpha * pow(1.0 - alpha, t - i);
+        total += weight;
+        sum += weight * data[i];
+    }
+    *mean = sum / total;
+    *variance = 0.0;
+    for (i = 0; i <= t; i++)
+    {
+        weight = i == 0 ? pow(1.0 - alpha, t) : alpha * pow(1.0 - alpha, t - i);
+        *variance += weight * (data[i] - *mean) * (data[i] - *mean) / total;
+    }
+}
+
+UTEST(vector, ewma_average_of_1_to_5_with_an_alpha_of_a_half)
+{
+    double data[5] = {1.0, 2.0, 3.0, 4.0, 5.0};
+    double result[5];
+    double alpha = 0.5;
+
+    ASSERT_EQ(xtract_ewma_average(data, 5, &alpha, result), XTRACT_SUCCESS);
+    ASSERT_EQ(result[0], 1.0);
+    ASSERT_EQ(result[1], 1.5);
+    ASSERT_EQ(result[2], 2.25);
+    ASSERT_EQ(result[3], 3.125);
+    ASSERT_EQ(result[4], 4.0625);
+}
+
+UTEST(vector, ewma_average_with_an_alpha_of_1_copies_the_series)
+{
+    double data[4] = {3.0, -1.5, 4.25, 0.0};
+    double result[4];
+    double alpha = 1.0;
+    int i;
+
+    ASSERT_EQ(xtract_ewma_average(data, 4, &alpha, result), XTRACT_SUCCESS);
+    for (i = 0; i < 4; i++)
+        ASSERT_EQ(result[i], data[i]);
+}
+
+UTEST(vector, ewma_average_with_an_alpha_of_0_holds_the_first_value)
+{
+    double data[4] = {3.0, -1.5, 4.25, 0.0};
+    double result[4];
+    double alpha = 0.0;
+    int i;
+
+    ASSERT_EQ(xtract_ewma_average(data, 4, &alpha, result), XTRACT_SUCCESS);
+    for (i = 0; i < 4; i++)
+        ASSERT_EQ(result[i], 3.0);
+}
+
+UTEST(vector, ewma_average_and_variance_match_the_weighted_definitions_at_every_position)
+{
+    double data[8] = {3.0, -1.5, 4.25, 0.0, 2.0, 9.5, -6.0, 1.0};
+    double average[8];
+    double variance[8];
+    double alphas[3] = {0.1, 0.5, 0.9};
+    double mean, expected;
+    int a, t;
+
+    for (a = 0; a < 3; a++)
+    {
+        ASSERT_EQ(xtract_ewma_average(data, 8, &alphas[a], average), XTRACT_SUCCESS);
+        ASSERT_EQ(xtract_ewma_variance(data, 8, &alphas[a], variance), XTRACT_SUCCESS);
+        for (t = 0; t < 8; t++)
+        {
+            ewma_by_definition(data, t, alphas[a], &mean, &expected);
+            CHECK_REL(average[t], mean, EPSILON);
+            CHECK_NEAR(variance[t], expected, EPSILON);
+        }
+    }
+}
+
+UTEST(vector, ewma_variance_of_1_to_5_with_an_alpha_of_a_half)
+{
+    double data[5] = {1.0, 2.0, 3.0, 4.0, 5.0};
+    double result[5];
+    double alpha = 0.5;
+
+    ASSERT_EQ(xtract_ewma_variance(data, 5, &alpha, result), XTRACT_SUCCESS);
+    ASSERT_EQ(result[0], 0.0);
+    ASSERT_EQ(result[1], 0.25);
+    ASSERT_EQ(result[2], 0.6875);
+    ASSERT_EQ(result[3], 1.109375);
+    ASSERT_EQ(result[4], 1.43359375);
+}
+
+UTEST(vector, ewma_variance_of_a_constant_series_is_exactly_zero)
+{
+    double data[6] = {1.0e9, 1.0e9, 1.0e9, 1.0e9, 1.0e9, 1.0e9};
+    double result[6];
+    double alpha = 0.3;
+    int i;
+
+    ASSERT_EQ(xtract_ewma_variance(data, 6, &alpha, result), XTRACT_SUCCESS);
+    for (i = 0; i < 6; i++)
+        ASSERT_EQ(result[i], 0.0);
+}
+
+UTEST(vector, ewma_variance_with_an_alpha_of_1_is_exactly_zero)
+{
+    double data[4] = {3.0, -1.5, 4.25, 0.0};
+    double result[4];
+    double alpha = 1.0;
+    int i;
+
+    ASSERT_EQ(xtract_ewma_variance(data, 4, &alpha, result), XTRACT_SUCCESS);
+    for (i = 0; i < 4; i++)
+        ASSERT_EQ(result[i], 0.0);
+}
+
+UTEST(vector, ewma_average_and_variance_reject_a_missing_or_out_of_range_alpha_and_leave_result_untouched)
+{
+    double data[4] = {1.0, 2.0, 3.0, 4.0};
+    double result[4];
+    double alpha;
+
+    fill_sentinel(result, 4);
+    ASSERT_EQ(xtract_ewma_average(data, 4, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_ewma_variance(data, 4, NULL, result), XTRACT_ARGUMENT_ERROR);
+    alpha = -0.5;
+    ASSERT_EQ(xtract_ewma_average(data, 4, &alpha, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_ewma_variance(data, 4, &alpha, result), XTRACT_ARGUMENT_ERROR);
+    alpha = 1.5;
+    ASSERT_EQ(xtract_ewma_average(data, 4, &alpha, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_ewma_variance(data, 4, &alpha, result), XTRACT_ARGUMENT_ERROR);
+    alpha = NAN;
+    ASSERT_EQ(xtract_ewma_average(data, 4, &alpha, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_ewma_variance(data, 4, &alpha, result), XTRACT_ARGUMENT_ERROR);
+    alpha = 0.5;
+    ASSERT_EQ(xtract_ewma_average(data, 0, &alpha, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_ewma_variance(data, 0, &alpha, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result[0], -1.0);
+    ASSERT_EQ(result[3], -1.0);
+}
+
+/* ===== Spectral contrast ===== */
+
+UTEST(spectral_contrast, log_ratio_of_the_top_and_bottom_fraction_of_each_band)
+{
+    double data[] = {1.0, 4.0, 2.0, 2.0, 8.0, 1.0, 1.0, 1.0,
+                     50.0, 100.0, 150.0, 250.0, 300.0, 500.0, 600.0, 700.0};
+    double argv[] = {2.0, 200.0, 0.5};
+    double result[3] = {-1.0, -1.0, -1.0};
+    ASSERT_EQ(xtract_spectral_contrast(data, 16, argv, result), XTRACT_SUCCESS);
+    CHECK_REL(result[0], log(2.0), EPSILON);
+    CHECK_REL(result[1], log(4.0), EPSILON);
+    CHECK_NEAR(result[2], 0.0, EPSILON);
+}
+
+UTEST(spectral_contrast, a_fraction_of_zero_still_averages_one_bin_at_each_end)
+{
+    double data[] = {3.0, 1.0, 6.0, 2.0, 100.0, 200.0, 300.0, 400.0};
+    double argv[] = {1.0, 1000.0, 0.0};
+    double result[2] = {-1.0, -1.0};
+    ASSERT_EQ(xtract_spectral_contrast(data, 8, argv, result), XTRACT_NO_RESULT);
+    argv[1] = 250.0;
+    ASSERT_EQ(xtract_spectral_contrast(data, 8, argv, result), XTRACT_SUCCESS);
+    CHECK_REL(result[0], log(3.0), EPSILON);
+    CHECK_REL(result[1], log(3.0), EPSILON);
+}
+
+UTEST(spectral_contrast, a_fraction_of_one_gives_no_contrast)
+{
+    double data[] = {3.0, 1.0, 6.0, 2.0, 100.0, 200.0, 300.0, 400.0};
+    double argv[] = {1.0, 250.0, 1.0};
+    double result[2] = {-1.0, -1.0};
+    ASSERT_EQ(xtract_spectral_contrast(data, 8, argv, result), XTRACT_SUCCESS);
+    CHECK_NEAR(result[0], 0.0, EPSILON);
+    CHECK_NEAR(result[1], 0.0, EPSILON);
+}
+
+UTEST(spectral_contrast, the_first_band_lies_below_the_edge_and_the_last_runs_to_the_highest_bin)
+{
+    double data[] = {1.0, 3.0, 2.0, 10.0, 100.0, 500.0, 2000.0, 50000.0};
+    double argv[] = {1.0, 1000.0, 0.0};
+    double result[2] = {-1.0, -1.0};
+    ASSERT_EQ(xtract_spectral_contrast(data, 8, argv, result), XTRACT_SUCCESS);
+    CHECK_REL(result[0], log(3.0), EPSILON);
+    CHECK_REL(result[1], log(5.0), EPSILON);
+}
+
+UTEST(spectral_contrast, the_bands_double_from_the_edge_and_a_bin_on_an_edge_joins_the_upper_band)
+{
+    double data[] = {1.0, 2.0, 4.0, 8.0, 100.0, 200.0, 400.0, 800.0};
+    double argv[] = {2.0, 200.0, 0.0};
+    double result[3] = {-1.0, -1.0, -1.0};
+    ASSERT_EQ(xtract_spectral_contrast(data, 8, argv, result), XTRACT_SUCCESS);
+    CHECK_NEAR(result[0], 0.0, EPSILON);
+    CHECK_NEAR(result[1], 0.0, EPSILON);
+    CHECK_REL(result[2], log(2.0), EPSILON);
+    data[6] = 399.0;
+    ASSERT_EQ(xtract_spectral_contrast(data, 8, argv, result), XTRACT_SUCCESS);
+    CHECK_NEAR(result[0], 0.0, EPSILON);
+    CHECK_REL(result[1], log(2.0), EPSILON);
+    CHECK_NEAR(result[2], 0.0, EPSILON);
+}
+
+UTEST(spectral_contrast, is_unchanged_by_a_common_gain)
+{
+    double data[] = {1.0, 4.0, 2.0, 2.0, 8.0, 1.0, 1.0, 1.0,
+                     50.0, 100.0, 150.0, 250.0, 300.0, 500.0, 600.0, 700.0};
+    double argv[] = {2.0, 200.0, 0.5};
+    double a[3], b[3];
+    int n;
+    ASSERT_EQ(xtract_spectral_contrast(data, 16, argv, a), XTRACT_SUCCESS);
+    for (n = 0; n < 8; n++)
+        data[n] *= 1e-3;
+    ASSERT_EQ(xtract_spectral_contrast(data, 16, argv, b), XTRACT_SUCCESS);
+    for (n = 0; n < 3; n++)
+        CHECK_NEAR(a[n], b[n], 1e-9);
+}
+
+UTEST(spectral_contrast, the_default_layout_fits_a_1024_point_spectrum_at_44100_hz)
+{
+    double data[1024];
+    double argv[] = {6.0, 200.0, 0.02};
+    double result[7];
+    int n;
+    for (n = 0; n < 512; n++)
+    {
+        data[n] = 1.0 + (n % 7 == 0 ? 9.0 : 0.0);
+        data[512 + n] = (n + 1) * 44100.0 / 1024.0;
+    }
+    ASSERT_EQ(xtract_spectral_contrast(data, 1024, argv, result), XTRACT_SUCCESS);
+    for (n = 0; n < 7; n++)
+        CHECK_REL(result[n], log(10.0), EPSILON);
+}
+
+UTEST(spectral_contrast, a_band_with_no_bin_has_no_result_and_zeroes_the_output)
+{
+    double data[] = {1.0, 2.0, 3.0, 4.0, 100.0, 200.0, 300.0, 400.0};
+    double argv[] = {3.0, 1000.0, 0.0};
+    double result[4] = {-1.0, -1.0, -1.0, -1.0};
+    int n;
+    ASSERT_EQ(xtract_spectral_contrast(data, 8, argv, result), XTRACT_NO_RESULT);
+    for (n = 0; n < 4; n++)
+        ASSERT_EQ(result[n], 0.0);
+}
+
+UTEST(spectral_contrast, an_edge_of_zero_has_no_result)
+{
+    double data[] = {1.0, 2.0, 3.0, 4.0, 100.0, 200.0, 300.0, 400.0};
+    double argv[] = {1.0, 0.0, 0.0};
+    double result[2] = {-1.0, -1.0};
+    ASSERT_EQ(xtract_spectral_contrast(data, 8, argv, result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result[0], 0.0);
+    ASSERT_EQ(result[1], 0.0);
+}
+
+UTEST(spectral_contrast, a_valley_that_is_not_positive_has_no_result)
+{
+    double data[] = {0.0, 2.0, 3.0, 4.0, 100.0, 200.0, 300.0, 400.0};
+    double argv[] = {1.0, 250.0, 0.0};
+    double result[2] = {-1.0, -1.0};
+    ASSERT_EQ(xtract_spectral_contrast(data, 8, argv, result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result[0], 0.0);
+    ASSERT_EQ(result[1], 0.0);
+    data[0] = -1.0;
+    result[0] = result[1] = -1.0;
+    ASSERT_EQ(xtract_spectral_contrast(data, 8, argv, result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result[0], 0.0);
+}
+
+UTEST(spectral_contrast, a_nan_coefficient_is_left_out_of_its_band)
+{
+    double data[] = {3.0, NAN, 6.0, 2.0, 100.0, 200.0, 300.0, 400.0};
+    double argv[] = {1.0, 250.0, 0.0};
+    double result[2] = {-1.0, -1.0};
+    ASSERT_EQ(xtract_spectral_contrast(data, 8, argv, result), XTRACT_SUCCESS);
+    CHECK_NEAR(result[0], 0.0, EPSILON);
+    CHECK_REL(result[1], log(3.0), EPSILON);
+    data[0] = NAN;
+    ASSERT_EQ(xtract_spectral_contrast(data, 8, argv, result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result[0], 0.0);
+}
+
+UTEST(spectral_contrast, rejects_bad_arguments)
+{
+    double data[] = {1.0, 2.0, 3.0, 4.0, 100.0, 200.0, 300.0, 400.0};
+    double argv[] = {1.0, 250.0, 0.5};
+    double result[2] = {-1.0, -1.0};
+    ASSERT_EQ(xtract_spectral_contrast(data, 7, argv, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_spectral_contrast(data, 0, argv, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_spectral_contrast(data, 8, NULL, result), XTRACT_ARGUMENT_ERROR);
+    argv[0] = 0.0;
+    ASSERT_EQ(xtract_spectral_contrast(data, 8, argv, result), XTRACT_ARGUMENT_ERROR);
+    argv[0] = 1.0;
+    argv[1] = -1.0;
+    ASSERT_EQ(xtract_spectral_contrast(data, 8, argv, result), XTRACT_ARGUMENT_ERROR);
+    argv[1] = NAN;
+    ASSERT_EQ(xtract_spectral_contrast(data, 8, argv, result), XTRACT_ARGUMENT_ERROR);
+    argv[1] = INFINITY;
+    ASSERT_EQ(xtract_spectral_contrast(data, 8, argv, result), XTRACT_ARGUMENT_ERROR);
+    argv[1] = 250.0;
+    argv[2] = -0.1;
+    ASSERT_EQ(xtract_spectral_contrast(data, 8, argv, result), XTRACT_ARGUMENT_ERROR);
+    argv[2] = 1.1;
+    ASSERT_EQ(xtract_spectral_contrast(data, 8, argv, result), XTRACT_ARGUMENT_ERROR);
+    argv[2] = NAN;
+    ASSERT_EQ(xtract_spectral_contrast(data, 8, argv, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result[0], -1.0);
+    ASSERT_EQ(result[1], -1.0);
+}
+
+/* ===== Chroma ===== */
+
+enum
+{
+    PC_C = 0,
+    PC_D_SHARP = 3,
+    PC_E = 4,
+    PC_G = 7,
+    PC_A = 9
+};
+
+UTEST(chroma, a_bin_at_the_reference_is_a_and_c_lies_three_semitones_above)
+{
+    double data[] = {1.0, 1.0, 440.0, 440.0 * pow(2.0, 3.0 / 12.0)};
+    double argv[] = {440.0, 0.0, 0.0};
+    double result[XTRACT_PITCH_CLASSES];
+    int n;
+    ASSERT_EQ(xtract_chroma(data, 4, argv, result), XTRACT_SUCCESS);
+    for (n = 0; n < XTRACT_PITCH_CLASSES; n++)
+        CHECK_NEAR(result[n], n == PC_A || n == PC_C ? 1.0 : 0.0, EPSILON);
+}
+
+UTEST(chroma, every_octave_of_a_pitch_folds_into_one_class_and_the_classes_sum)
+{
+    double data[] = {1.0, 2.0, 3.0, 0.5, 55.0, 110.0, 880.0, 7040.0};
+    double argv[] = {440.0, 0.0, 0.0};
+    double result[XTRACT_PITCH_CLASSES];
+    int n;
+    ASSERT_EQ(xtract_chroma(data, 8, argv, result), XTRACT_SUCCESS);
+    for (n = 0; n < XTRACT_PITCH_CLASSES; n++)
+        CHECK_NEAR(result[n], n == PC_A ? 1.0 : 0.0, EPSILON);
+}
+
+UTEST(chroma, a_bin_rounds_to_the_nearest_pitch_class_and_the_largest_class_is_one)
+{
+    double data[] = {2.0, 4.0, 440.0 * pow(2.0, 0.4 / 12.0), 440.0 * pow(2.0, 6.6 / 12.0)};
+    double argv[] = {440.0, 0.0, 0.0};
+    double result[XTRACT_PITCH_CLASSES];
+    ASSERT_EQ(xtract_chroma(data, 4, argv, result), XTRACT_SUCCESS);
+    CHECK_REL(result[PC_A], 0.5, EPSILON);
+    CHECK_REL(result[PC_E], 1.0, EPSILON);
+    CHECK_NEAR(result[PC_C], 0.0, EPSILON);
+}
+
+UTEST(chroma, the_reference_moves_every_class_and_zero_selects_440)
+{
+    double data[] = {1.0, 1.0, 440.0, 660.0};
+    double argv[] = {0.0, 0.0, 0.0};
+    double result[XTRACT_PITCH_CLASSES];
+    ASSERT_EQ(xtract_chroma(data, 4, argv, result), XTRACT_SUCCESS);
+    CHECK_REL(result[PC_A], 1.0, EPSILON);
+    CHECK_REL(result[PC_E], 1.0, EPSILON);
+    argv[0] = 660.0;
+    ASSERT_EQ(xtract_chroma(data, 4, argv, result), XTRACT_SUCCESS);
+    CHECK_REL(result[PC_A], 1.0, EPSILON);
+    CHECK_NEAR(result[PC_E], 0.0, EPSILON);
+    CHECK_REL(result[2], 1.0, EPSILON);
+}
+
+UTEST(chroma, bins_outside_the_frequency_range_are_left_out)
+{
+    double data[] = {1.0, 1.0, 1.0, 1.0, 0.0, 20.0, 440.0, 10000.0};
+    double argv[] = {440.0, 40.0, 5000.0};
+    double result[XTRACT_PITCH_CLASSES];
+    int n;
+    ASSERT_EQ(xtract_chroma(data, 8, argv, result), XTRACT_SUCCESS);
+    for (n = 0; n < XTRACT_PITCH_CLASSES; n++)
+        CHECK_NEAR(result[n], n == PC_A ? 1.0 : 0.0, EPSILON);
+    argv[2] = 0.0;
+    ASSERT_EQ(xtract_chroma(data, 8, argv, result), XTRACT_SUCCESS);
+    CHECK_REL(result[PC_A], 1.0, EPSILON);
+    CHECK_REL(result[PC_D_SHARP], 1.0, EPSILON);
+}
+
+UTEST(chroma, a_bin_at_zero_hertz_is_never_included)
+{
+    double data[] = {5.0, 1.0, 0.0, 440.0};
+    double argv[] = {440.0, 0.0, 0.0};
+    double result[XTRACT_PITCH_CLASSES];
+    int n;
+    ASSERT_EQ(xtract_chroma(data, 4, argv, result), XTRACT_SUCCESS);
+    for (n = 0; n < XTRACT_PITCH_CLASSES; n++)
+        CHECK_NEAR(result[n], n == PC_A ? 1.0 : 0.0, EPSILON);
+}
+
+UTEST(chroma, c_major_triad_from_a_4096_point_spectrum_at_44100_hz)
+{
+    double data[4096];
+    double argv[] = {440.0, 40.0, 5000.0};
+    double result[XTRACT_PITCH_CLASSES];
+    int n;
+    for (n = 0; n < 2048; n++)
+    {
+        data[n] = 0.0;
+        data[2048 + n] = (n + 1) * 44100.0 / 4096.0;
+    }
+    data[(int)(261.63 * 4096.0 / 44100.0 + 0.5) - 1] = 4.0;
+    data[(int)(329.63 * 4096.0 / 44100.0 + 0.5) - 1] = 2.0;
+    data[(int)(392.0 * 4096.0 / 44100.0 + 0.5) - 1] = 1.0;
+    ASSERT_EQ(xtract_chroma(data, 4096, argv, result), XTRACT_SUCCESS);
+    CHECK_REL(result[PC_C], 1.0, EPSILON);
+    CHECK_REL(result[PC_E], 0.5, EPSILON);
+    CHECK_REL(result[PC_G], 0.25, EPSILON);
+    CHECK_NEAR(result[PC_A], 0.0, EPSILON);
+}
+
+UTEST(chroma, nothing_positive_in_range_has_no_result_and_zeroes_the_output)
+{
+    double data[] = {1.0, 1.0, 20.0, 30.0};
+    double argv[] = {440.0, 40.0, 5000.0};
+    double result[XTRACT_PITCH_CLASSES];
+    int n;
+    for (n = 0; n < XTRACT_PITCH_CLASSES; n++)
+        result[n] = -1.0;
+    ASSERT_EQ(xtract_chroma(data, 4, argv, result), XTRACT_NO_RESULT);
+    for (n = 0; n < XTRACT_PITCH_CLASSES; n++)
+        ASSERT_EQ(result[n], 0.0);
+    data[2] = 440.0;
+    data[0] = 0.0;
+    result[PC_A] = -1.0;
+    ASSERT_EQ(xtract_chroma(data, 4, argv, result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result[PC_A], 0.0);
+}
+
+UTEST(chroma, rejects_bad_arguments)
+{
+    double data[] = {1.0, 1.0, 440.0, 880.0};
+    double argv[] = {440.0, 40.0, 5000.0};
+    double result[XTRACT_PITCH_CLASSES];
+    result[0] = -1.0;
+    ASSERT_EQ(xtract_chroma(data, 3, argv, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_chroma(data, 0, argv, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_chroma(data, 4, NULL, result), XTRACT_ARGUMENT_ERROR);
+    argv[0] = -1.0;
+    ASSERT_EQ(xtract_chroma(data, 4, argv, result), XTRACT_ARGUMENT_ERROR);
+    argv[0] = NAN;
+    ASSERT_EQ(xtract_chroma(data, 4, argv, result), XTRACT_ARGUMENT_ERROR);
+    argv[0] = INFINITY;
+    ASSERT_EQ(xtract_chroma(data, 4, argv, result), XTRACT_ARGUMENT_ERROR);
+    argv[0] = 440.0;
+    argv[1] = -1.0;
+    ASSERT_EQ(xtract_chroma(data, 4, argv, result), XTRACT_ARGUMENT_ERROR);
+    argv[1] = NAN;
+    ASSERT_EQ(xtract_chroma(data, 4, argv, result), XTRACT_ARGUMENT_ERROR);
+    argv[1] = 40.0;
+    argv[2] = -1.0;
+    ASSERT_EQ(xtract_chroma(data, 4, argv, result), XTRACT_ARGUMENT_ERROR);
+    argv[2] = 40.0;
+    ASSERT_EQ(xtract_chroma(data, 4, argv, result), XTRACT_ARGUMENT_ERROR);
+    argv[2] = 30.0;
+    ASSERT_EQ(xtract_chroma(data, 4, argv, result), XTRACT_ARGUMENT_ERROR);
+    argv[2] = INFINITY;
+    ASSERT_EQ(xtract_chroma(data, 4, argv, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result[0], -1.0);
+}
+
+/* ===== xtract_cqt ===== */
+
+enum
+{
+    CQT_N = 4096,
+    CQT_BINS = 48
+};
+
+static const double CQT_SR = 44100.0;
+static const double CQT_FMIN = 200.0;
+
+static double cqt_quality(const int bins_per_octave)
+{
+    return 1.0 / (pow(2.0, 1.0 / bins_per_octave) - 1.0);
+}
+
+static double cqt_band_frequency(const double fmin, const int bins_per_octave, const int band)
+{
+    return fmin * pow(2.0, (double)band / bins_per_octave);
+}
+
+static int cqt_spectrum(const double *signal, const int n, double *spectrum)
+{
+    double argv[4];
+
+    argv[0] = CQT_SR / n;
+    argv[1] = XTRACT_MAGNITUDE_PHASE_SPECTRUM;
+    argv[2] = 1.0;
+    argv[3] = 0.0;
+    xtract_init_fft(n, XTRACT_SPECTRUM);
+    return xtract_spectrum(signal, n, argv, spectrum);
+}
+
+static void cqt_tone(double *signal, const int n, const double amplitude, const double frequency, const double phase)
+{
+    int i;
+
+    for (i = 0; i < n; i++)
+        signal[i] += amplitude * cos(2.0 * M_PI * frequency * i / CQT_SR + phase);
+}
+
+static double cqt_windowed_correlation(const double *signal, const int n, const double frequency, const double quality)
+{
+    const int length = (int)floor(quality * CQT_SR / frequency + 0.5);
+    const int start = (n - length) / 2;
+    double window_sum = 0.0;
+    double real = 0.0;
+    double imag = 0.0;
+    int m;
+
+    for (m = 0; m < length; m++)
+    {
+        const double window = 0.5 * (1.0 - cos(2.0 * M_PI * m / (length - 1)));
+        const double angle = 2.0 * M_PI * frequency * m / CQT_SR;
+
+        window_sum += window;
+        real += signal[start + m] * window * cos(angle);
+        imag -= signal[start + m] * window * sin(angle);
+    }
+
+    return sqrt(real * real + imag * imag) / window_sum;
+}
+
+UTEST(cqt, init_rejects_out_of_range_arguments)
+{
+    xtract_cqt_kernel *kernel = xtract_init_cqt(CQT_N, CQT_SR, CQT_FMIN, 12, CQT_BINS, 0.01);
+
+    ASSERT_TRUE(kernel != NULL);
+    xtract_free_cqt(kernel);
+    xtract_free_cqt(NULL);
+    ASSERT_TRUE(xtract_init_cqt(1, CQT_SR, CQT_FMIN, 12, CQT_BINS, 0.01) == NULL);
+    ASSERT_TRUE(xtract_init_cqt(CQT_N + 1, CQT_SR, CQT_FMIN, 12, CQT_BINS, 0.01) == NULL);
+    ASSERT_TRUE(xtract_init_cqt(CQT_N, -1.0, CQT_FMIN, 12, CQT_BINS, 0.01) == NULL);
+    ASSERT_TRUE(xtract_init_cqt(CQT_N, NAN, CQT_FMIN, 12, CQT_BINS, 0.01) == NULL);
+    ASSERT_TRUE(xtract_init_cqt(CQT_N, INFINITY, CQT_FMIN, 12, CQT_BINS, 0.01) == NULL);
+    ASSERT_TRUE(xtract_init_cqt(CQT_N, CQT_SR, 0.0, 12, CQT_BINS, 0.01) == NULL);
+    ASSERT_TRUE(xtract_init_cqt(CQT_N, CQT_SR, -200.0, 12, CQT_BINS, 0.01) == NULL);
+    ASSERT_TRUE(xtract_init_cqt(CQT_N, CQT_SR, NAN, 12, CQT_BINS, 0.01) == NULL);
+    ASSERT_TRUE(xtract_init_cqt(CQT_N, CQT_SR, INFINITY, 12, CQT_BINS, 0.01) == NULL);
+    ASSERT_TRUE(xtract_init_cqt(CQT_N, CQT_SR, CQT_FMIN, 0, CQT_BINS, 0.01) == NULL);
+    ASSERT_TRUE(xtract_init_cqt(CQT_N, CQT_SR, CQT_FMIN, 12, 0, 0.01) == NULL);
+    ASSERT_TRUE(xtract_init_cqt(CQT_N, CQT_SR, CQT_FMIN, 12, CQT_BINS, -0.1) == NULL);
+    ASSERT_TRUE(xtract_init_cqt(CQT_N, CQT_SR, CQT_FMIN, 12, CQT_BINS, 1.1) == NULL);
+    ASSERT_TRUE(xtract_init_cqt(CQT_N, CQT_SR, CQT_FMIN, 12, CQT_BINS, NAN) == NULL);
+}
+
+UTEST(cqt, init_rejects_a_lowest_band_whose_window_is_longer_than_the_transform)
+{
+    xtract_cqt_kernel *kernel = xtract_init_cqt(CQT_N, CQT_SR, 190.0, 12, 1, 0.01);
+
+    ASSERT_TRUE(kernel != NULL);
+    xtract_free_cqt(kernel);
+    ASSERT_TRUE(xtract_init_cqt(CQT_N, CQT_SR, 100.0, 12, 1, 0.01) == NULL);
+    ASSERT_TRUE(xtract_init_cqt(CQT_N, CQT_SR, 180.0, 12, 1, 0.01) == NULL);
+}
+
+UTEST(cqt, init_rejects_a_highest_band_whose_passband_crosses_nyquist)
+{
+    xtract_cqt_kernel *kernel = xtract_init_cqt(CQT_N, CQT_SR, CQT_FMIN, 12, 81, 0.01);
+
+    ASSERT_TRUE(kernel != NULL);
+    xtract_free_cqt(kernel);
+    ASSERT_TRUE(xtract_init_cqt(CQT_N, CQT_SR, CQT_FMIN, 12, 82, 0.01) == NULL);
+}
+
+UTEST(cqt, band_frequencies_step_by_the_bins_per_octave_from_the_lowest)
+{
+    xtract_cqt_kernel *twelve = xtract_init_cqt(CQT_N, CQT_SR, CQT_FMIN, 12, CQT_BINS, 0.01);
+    xtract_cqt_kernel *three = xtract_init_cqt(CQT_N, CQT_SR, 500.0, 3, 9, 0.01);
+    static double spectrum[CQT_N];
+    double result[2 * CQT_BINS];
+    int band;
+
+    ASSERT_TRUE(twelve != NULL);
+    ASSERT_TRUE(three != NULL);
+    memset(spectrum, 0, sizeof(spectrum));
+    ASSERT_EQ(xtract_cqt(spectrum, CQT_N, twelve, result), XTRACT_SUCCESS);
+    for (band = 0; band < CQT_BINS; band++)
+        CHECK_REL(result[CQT_BINS + band], cqt_band_frequency(CQT_FMIN, 12, band), 1e-12);
+    ASSERT_EQ(xtract_cqt(spectrum, CQT_N, three, result), XTRACT_SUCCESS);
+    for (band = 0; band < 9; band++)
+        CHECK_REL(result[9 + band], cqt_band_frequency(500.0, 3, band), 1e-12);
+    CHECK_REL(result[9 + 3], 1000.0, 1e-12);
+    xtract_free_cqt(twelve);
+    xtract_free_cqt(three);
+}
+
+UTEST(cqt, silence_gives_zero_in_every_band)
+{
+    xtract_cqt_kernel *kernel = xtract_init_cqt(CQT_N, CQT_SR, CQT_FMIN, 12, CQT_BINS, 0.01);
+    static double spectrum[CQT_N];
+    double result[2 * CQT_BINS];
+    int band;
+
+    ASSERT_TRUE(kernel != NULL);
+    memset(spectrum, 0, sizeof(spectrum));
+    ASSERT_EQ(xtract_cqt(spectrum, CQT_N, kernel, result), XTRACT_SUCCESS);
+    for (band = 0; band < CQT_BINS; band++)
+        ASSERT_EQ(result[band], 0.0);
+    xtract_free_cqt(kernel);
+}
+
+UTEST(cqt, tone_at_a_band_centre_reads_half_its_amplitude_and_half_that_a_semitone_below)
+{
+    xtract_cqt_kernel *kernel = xtract_init_cqt(CQT_N, CQT_SR, CQT_FMIN, 12, CQT_BINS, 0.01);
+    static double signal[CQT_N], spectrum[CQT_N];
+    double result[2 * CQT_BINS];
+    const int band = 17;
+
+    ASSERT_TRUE(kernel != NULL);
+    memset(signal, 0, sizeof(signal));
+    cqt_tone(signal, CQT_N, 0.8, cqt_band_frequency(CQT_FMIN, 12, band), 0.3);
+    ASSERT_EQ(cqt_spectrum(signal, CQT_N, spectrum), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_cqt(spectrum, CQT_N, kernel, result), XTRACT_SUCCESS);
+    CHECK_NEAR(result[band], 0.4, 1e-3);
+    CHECK_NEAR(result[band - 1], 0.2, 2e-3);
+    ASSERT_LT(result[band - 2], 0.02);
+    ASSERT_LT(result[band + 2], 0.02);
+    ASSERT_LT(result[0], 1e-3);
+    ASSERT_LT(result[CQT_BINS - 1], 1e-3);
+    xtract_free_cqt(kernel);
+}
+
+UTEST(cqt, equals_the_windowed_correlation_of_the_signal_with_each_band)
+{
+    xtract_cqt_kernel *kernel = xtract_init_cqt(CQT_N, CQT_SR, CQT_FMIN, 12, CQT_BINS, 0.0);
+    static double signal[CQT_N], spectrum[CQT_N];
+    double result[2 * CQT_BINS];
+    int band;
+
+    ASSERT_TRUE(kernel != NULL);
+    memset(signal, 0, sizeof(signal));
+    cqt_tone(signal, CQT_N, 0.5, 311.1, 0.0);
+    cqt_tone(signal, CQT_N, 0.3, 1234.5, 1.0);
+    cqt_tone(signal, CQT_N, 0.2, 2222.2, 2.0);
+    ASSERT_EQ(cqt_spectrum(signal, CQT_N, spectrum), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_cqt(spectrum, CQT_N, kernel, result), XTRACT_SUCCESS);
+    for (band = 0; band < CQT_BINS; band++)
+        CHECK_NEAR(result[band], cqt_windowed_correlation(signal, CQT_N, cqt_band_frequency(CQT_FMIN, 12, band), cqt_quality(12)), 1e-4);
+    xtract_free_cqt(kernel);
+}
+
+UTEST(cqt, leaving_out_the_coefficients_below_the_threshold_changes_little)
+{
+    xtract_cqt_kernel *dense = xtract_init_cqt(CQT_N, CQT_SR, CQT_FMIN, 12, CQT_BINS, 0.0);
+    xtract_cqt_kernel *sparse = xtract_init_cqt(CQT_N, CQT_SR, CQT_FMIN, 12, CQT_BINS, 0.01);
+    static double signal[CQT_N], spectrum[CQT_N];
+    double full[2 * CQT_BINS], thinned[2 * CQT_BINS];
+    int band;
+
+    ASSERT_TRUE(dense != NULL);
+    ASSERT_TRUE(sparse != NULL);
+    memset(signal, 0, sizeof(signal));
+    cqt_tone(signal, CQT_N, 0.5, 311.1, 0.0);
+    cqt_tone(signal, CQT_N, 0.3, 1234.5, 1.0);
+    ASSERT_EQ(cqt_spectrum(signal, CQT_N, spectrum), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_cqt(spectrum, CQT_N, dense, full), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_cqt(spectrum, CQT_N, sparse, thinned), XTRACT_SUCCESS);
+    for (band = 0; band < CQT_BINS; band++)
+    {
+        CHECK_NEAR(thinned[band], full[band], 0.01);
+        if (full[band] > 0.01)
+            CHECK_REL(thinned[band], full[band], 0.01);
+    }
+    xtract_free_cqt(dense);
+    xtract_free_cqt(sparse);
+}
+
+UTEST(cqt, a_sample_rate_of_zero_selects_44100)
+{
+    xtract_cqt_kernel *given = xtract_init_cqt(CQT_N, 44100.0, CQT_FMIN, 12, CQT_BINS, 0.01);
+    xtract_cqt_kernel *defaulted = xtract_init_cqt(CQT_N, 0.0, CQT_FMIN, 12, CQT_BINS, 0.01);
+    static double signal[CQT_N], spectrum[CQT_N];
+    double expected[2 * CQT_BINS], result[2 * CQT_BINS];
+    int band;
+
+    ASSERT_TRUE(given != NULL);
+    ASSERT_TRUE(defaulted != NULL);
+    memset(signal, 0, sizeof(signal));
+    cqt_tone(signal, CQT_N, 0.5, 311.1, 0.0);
+    ASSERT_EQ(cqt_spectrum(signal, CQT_N, spectrum), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_cqt(spectrum, CQT_N, given, expected), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_cqt(spectrum, CQT_N, defaulted, result), XTRACT_SUCCESS);
+    for (band = 0; band < 2 * CQT_BINS; band++)
+        ASSERT_EQ(result[band], expected[band]);
+    xtract_free_cqt(given);
+    xtract_free_cqt(defaulted);
+}
+
+UTEST(cqt, result_is_a_spectrum_chroma_reads_pitch_classes_from)
+{
+    enum
+    {
+        CHROMA_N = 8192,
+        CHROMA_BINS = 36,
+        BAND_E4 = 16
+    };
+    const double c3 = 130.8128;
+    xtract_cqt_kernel *kernel = xtract_init_cqt(CHROMA_N, CQT_SR, c3, 12, CHROMA_BINS, 0.01);
+    static double signal[CHROMA_N], spectrum[CHROMA_N];
+    double bands[2 * CHROMA_BINS];
+    double argv[3] = {440.0, 0.0, 0.0};
+    double chroma[XTRACT_PITCH_CLASSES];
+
+    ASSERT_TRUE(kernel != NULL);
+    memset(signal, 0, sizeof(signal));
+    cqt_tone(signal, CHROMA_N, 0.6, cqt_band_frequency(c3, 12, BAND_E4), 0.0);
+    ASSERT_EQ(cqt_spectrum(signal, CHROMA_N, spectrum), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_cqt(spectrum, CHROMA_N, kernel, bands), XTRACT_SUCCESS);
+    CHECK_NEAR(bands[BAND_E4], 0.3, 1e-3);
+    ASSERT_EQ(xtract_chroma(bands, 2 * CHROMA_BINS, argv, chroma), XTRACT_SUCCESS);
+    ASSERT_EQ(chroma[PC_E], 1.0);
+    CHECK_NEAR(chroma[PC_D_SHARP], 0.5, 0.01);
+    ASSERT_LT(chroma[PC_C], 0.05);
+    ASSERT_LT(chroma[PC_G], 0.05);
+    ASSERT_LT(chroma[PC_A], 0.05);
+    xtract_free_cqt(kernel);
+}
+
+UTEST(cqt, rejects_a_spectrum_of_another_size_a_missing_kernel_and_an_odd_length)
+{
+    xtract_cqt_kernel *kernel = xtract_init_cqt(16, 1000.0, 100.0, 1, 2, 0.01);
+    double spectrum[18];
+    double result[4];
+    int n;
+
+    ASSERT_TRUE(kernel != NULL);
+    for (n = 0; n < 18; n++)
+        spectrum[n] = 1.0;
+    result[0] = -1.0;
+    ASSERT_EQ(xtract_cqt(spectrum, 16, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_cqt(spectrum, 18, kernel, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_cqt(spectrum, 15, kernel, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_cqt(spectrum, 2, kernel, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_cqt(spectrum, 0, kernel, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result[0], -1.0);
+    ASSERT_EQ(xtract_cqt(spectrum, 16, kernel, result), XTRACT_SUCCESS);
+    xtract_free_cqt(kernel);
 }

@@ -128,6 +128,47 @@ extern "C"
         /* Helper functions */
         XTRACT_WINDOWED,
         XTRACT_SMOOTHED,
+        /* Appended after the helpers: a 1.x release never renumbers a value */
+        XTRACT_PEAK,
+        XTRACT_MMBSES,
+        XTRACT_SPECTRAL_SUBBAND_CENTROIDS,
+        XTRACT_MOVING_SUM,
+        XTRACT_MOVING_AVERAGE,
+        XTRACT_MOVING_VARIANCE,
+        XTRACT_MOVING_STANDARD_DEVIATION,
+        XTRACT_MOVING_MAX,
+        XTRACT_MOVING_MIN,
+        XTRACT_EWMA_AVERAGE,
+        XTRACT_EWMA_VARIANCE,
+        XTRACT_MEDIAN,
+        XTRACT_MEDIAN_ABSOLUTE_DEVIATION,
+        XTRACT_HJORTH_ACTIVITY,
+        XTRACT_HJORTH_MOBILITY,
+        XTRACT_HJORTH_COMPLEXITY,
+        XTRACT_TIME_REVERSAL_ASYMMETRY,
+        XTRACT_SPECTRAL_ENTROPY,
+        XTRACT_PETROSIAN_FRACTAL_DIMENSION,
+        XTRACT_KATZ_FRACTAL_DIMENSION,
+        XTRACT_HIGUCHI_FRACTAL_DIMENSION,
+        XTRACT_PERMUTATION_ENTROPY,
+        XTRACT_LEMPEL_ZIV_COMPLEXITY,
+        XTRACT_SAMPLE_ENTROPY,
+        XTRACT_APPROXIMATE_ENTROPY,
+        XTRACT_PERIODICITY,
+        XTRACT_SIGNAL_CONFIDENCE,
+        XTRACT_DECAY_RATE,
+        XTRACT_TEMPORAL_CENTROID,
+        XTRACT_MAX_POSITION,
+        XTRACT_MIN_POSITION,
+        XTRACT_PEAK_ASYMMETRY,
+        XTRACT_CROSS_CORRELATION,
+        XTRACT_CROSS_CORRELATION_LAG,
+        XTRACT_KULLBACK_LEIBLER_DIVERGENCE,
+        XTRACT_ITAKURA_SAITO_DIVERGENCE,
+        XTRACT_MODIFIED_KULLBACK_LEIBLER,
+        XTRACT_SPECTRAL_CONTRAST,
+        XTRACT_CHROMA,
+        XTRACT_CQT,
         XTRACT_FEATURE_COUNT
     };
 
@@ -137,7 +178,8 @@ extern "C"
         XTRACT_INIT_MFCC = 100,
         XTRACT_INIT_BARK,
         XTRACT_INIT_WINDOWED,
-        XTRACT_INIT_GFCC
+        XTRACT_INIT_GFCC,
+        XTRACT_INIT_CQT
     };
 
     /** \brief Enumeration of feature types */
@@ -163,7 +205,18 @@ extern "C"
         XTRACT_NEGATIVE_SLOPE
     };
 
-    /** \brief Enumeration of return codes */
+    /** \brief Enumeration of return codes
+     *
+     * Every feature function returns one of these. A code other than XTRACT_SUCCESS means the result is not usable.
+     *
+     * XTRACT_ARGUMENT_ERROR: the caller broke the function's contract: N below the documented minimum, a NULL argv where one is required, an argv value outside its documented range, or more elements than the fixed table the function applies. A scalar result is set to 0, a vector result is left untouched, and nothing is computed.
+     *
+     * XTRACT_NO_RESULT: the arguments are valid but the data has no answer, such as a zero amplitude sum, a zero denominator or no periodicity. The result is set to 0.
+     *
+     * XTRACT_BAD_STATE: the initialisation the function needs is missing or was done for a different size. The result is left untouched.
+     *
+     * XTRACT_BAD_ARGV, XTRACT_BAD_VECTOR_SIZE and XTRACT_DENORMAL_FOUND are deprecated: XTRACT_ARGUMENT_ERROR is returned in their place, and they will be removed in 2.0.
+     */
     enum xtract_return_codes_
     {
         XTRACT_SUCCESS,
@@ -172,7 +225,7 @@ extern "C"
         XTRACT_BAD_VECTOR_SIZE,
         XTRACT_BAD_STATE,
         XTRACT_DENORMAL_FOUND,
-        XTRACT_NO_RESULT, /* This usually occurs when the correct calculation cannot take place because required data is missing or would result in a NaN or infinity/-infinity. Under these curcumstances 0.f is usually given by *result */
+        XTRACT_NO_RESULT,
         XTRACT_FEATURE_NOT_IMPLEMENTED,
         XTRACT_ARGUMENT_ERROR
     };
@@ -200,7 +253,8 @@ extern "C"
         XTRACT_FLOAT,
         XTRACT_FLOATARRAY,
         XTRACT_INT,
-        XTRACT_MEL_FILTER
+        XTRACT_MEL_FILTER,
+        XTRACT_CQT_KERNEL
     } xtract_type_t;
 
     /** \brief Enumeration of units*/
@@ -219,7 +273,9 @@ extern "C"
         XTRACT_BINS,
         XTRACT_SONE,
         XTRACT_MIDI_CENT,
-        XTRACT_ACUM
+        XTRACT_ACUM,
+        XTRACT_SECONDS,
+        XTRACT_PER_SECOND
     } xtract_unit_t;
 
     /** \brief Boolean */
@@ -272,7 +328,12 @@ extern "C"
         XTRACT_LPCC_COEFFS,
         XTRACT_BARK_COEFFS,
         XTRACT_SUBFRAMES,
-        XTRACT_NO_DATA
+        XTRACT_NO_DATA,
+        /* N/2 magnitudes and N/2 phases, as xtract_spectrum() gives for
+         * XTRACT_MAGNITUDE_PHASE_SPECTRUM */
+        XTRACT_SPECTRAL_MAGNITUDE_PHASE,
+        /* 12 pitch class values from C to B */
+        XTRACT_CHROMA_COEFFS
     } xtract_vector_t;
 
     /** \brief Data structure containing useful information about functions provided by LibXtract. */
@@ -381,7 +442,7 @@ extern "C"
 
     /** \brief A structure to store a set of n_filters Mel filters
      *
-     * Zero-initialise the structure, or set every field, before passing it to a feature function. dct_table is the cosine table used by xtract_mfcc() and xtract_gfcc() for their final DCT: either the result of xtract_init_dct(n_filters), which the caller frees with xtract_free_dct(), or NULL to have the cosines evaluated on each call.
+     * Zero-initialise the structure, or set every field, before passing it to a feature function. The feature functions accept any n_filters of at least 1, so a structure filled by hand may hold a single filter; xtract_init_mfcc() and xtract_init_gfcc() build at least 2. dct_table is the cosine table used by xtract_mfcc() and xtract_gfcc() for their final DCT: either the result of xtract_init_dct(n_filters), which the caller frees with xtract_free_dct(), or NULL to have the cosines evaluated on each call.
      */
     typedef struct xtract_mel_filter_
     {
@@ -399,7 +460,7 @@ extern "C"
      * \param style: XTRACT_EQUAL_GAIN or XTRACT_EQUAL_AREA, as given in the enumeration xtract_mfcc_types_
      * \param freq_min: the peak frequency of the first filter
      * \param freq_max: the frequency the peaks step towards, reached one step beyond the last filter
-     * \param freq_bands: the number of filters
+     * \param freq_bands: the number of filters, at least 2
      * \param **fft_tables: an array of pointers to arrays of length N, to be populated with filter coefficients
      */
     int xtract_init_mfcc(int N, double nyquist, int style, double freq_min, double freq_max, int freq_bands, double **fft_tables);
@@ -412,24 +473,24 @@ extern "C"
      * \param nyquist: the Nyquist frequency
      * \param freq_min: the minimum frequency for the filter bank
      * \param freq_max: the maximum frequency for the filter bank
-     * \param freq_bands: the number of gammatone filters
+     * \param freq_bands: the number of gammatone filters, at least 2
      * \param **fft_tables: an array of pointers to arrays of length N, to be populated with filter coefficients
      */
     int xtract_init_gfcc(int N, double nyquist, double freq_min, double freq_max, int freq_bands, double **fft_tables);
 
     /** \brief A function to initialise bark filter bounds
      *
-     * A pointer to an array of BARK_BANDS ints most be passed in, and is populated with BARK_BANDS fft bin numbers representing the limits of each band
+     * A pointer to an array of XTRACT_BARK_BANDS ints must be passed in, and is populated with the bin number at which each band starts, on the bin grid of an N-point transform with DC at bin 0. The spectrum these limits are applied to by xtract_bark_coefficients() therefore has N / 2 elements, element k being bin k
      *
-     * \param N: the audio block size
-     * \param sr: The sample audio sample rate
-     * \param *band_limits: a pointer to an array of BARK_BANDS ints
+     * \param N: the size of the transform the band limits will be applied to
+     * \param sr: the sample rate
+     * \param *band_limits: a pointer to an array of XTRACT_BARK_BANDS ints
      */
     int xtract_init_bark(int N, double sr, int *band_limits);
 
     /** \brief An initialisation function for functions using FFT
      *
-     * This function initialises global data structures used by functions requiring FFT functionality. It can be called multiple times with different feature names. Calling it more than once with the same feature name is not a valid operation and will result in a memory leak.
+     * This function initialises global data structures used by functions requiring FFT functionality. It can be called multiple times with different feature names. Calling it again with a feature name already initialised replaces that feature's FFT with one of the new size and leaves the FFTs of the other features unchanged. The data structures belong to the calling thread, so every thread that calls a function using the FFT must call xtract_init_fft() itself, and a thread that ends before the process must call xtract_free_fft() first.
      *
      * \param N: the size of the FFT, a power of two of at least 2
      * \param feature_name: the name of the feature the FFT is being used for,
@@ -440,7 +501,7 @@ extern "C"
 
     /** \brief Free memory used for fft plans
      *
-     * This function should be used to explicitly free memory allocated for ffts by xtract_init_fft(). It is primarily intended for use if a new FFT needs to be taken with a different blocksize. If only one fft size is required then there is no need to call this function since it will be called when the program exits.
+     * This function frees the memory allocated by xtract_init_fft() on the calling thread for every feature. The memory belonging to the thread that exits the process is freed on exit; any other thread must call this function before it ends, since no other thread can free its memory.
      * */
     void xtract_free_fft(void);
 
@@ -471,6 +532,29 @@ extern "C"
      * \param *table: a pointer to a table as allocated by xtract_init_dct(), or NULL
      */
     void xtract_free_dct(double *table);
+
+    /** \brief The kernel xtract_cqt() applies, built by xtract_init_cqt() and freed by xtract_free_cqt() */
+    typedef struct xtract_cqt_kernel_ xtract_cqt_kernel;
+
+    /** \brief Build a constant-Q kernel for xtract_cqt()
+     *
+     * The kernel has n_bins bands, bins_per_octave to the octave from fmin upward, each analysing Q cycles of its centre frequency through a Hann window, where Q = 1 / (2^(1 / bins_per_octave) - 1). A tone at a band's centre frequency reads half its amplitude, as a tone centred on a bin of xtract_spectrum() does. Building the kernel evaluates every band at every bin of the transform, so it is done once and kept for every frame of the same size.
+     *
+     * \param N: the size of the transform whose spectrum xtract_cqt() will be given, at least 2 and even. The lowest band's window must fit in N samples: Q times the sample rate divided by fmin, which for 12 bands to the octave from 32.7 Hz at 44100 Hz is about 22680, so N must then be at least 22680, and 32768 when the spectrum comes from an FFT of xtract_init_fft(), whose size is a power of two
+     * \param sr: the sample rate in Hz, finite and at least 0, with 0 selecting 44100
+     * \param fmin: the centre frequency of the lowest band in Hz, finite and above 0; 32.7, the C two octaves below middle C, is usual
+     * \param bins_per_octave: the number of bands to the octave, at least 1; 12 is usual
+     * \param n_bins: the number of bands, at least 1. The highest band's passband must stay below half the sample rate: its centre frequency times 1 + 1 / (2 Q); 84 bands at 12 to the octave is usual
+     * \param threshold: the fraction of a band's largest kernel coefficient below which its coefficients are left out, from 0 to 1; 0.01 is usual and 0 keeps every coefficient
+     * \return a pointer to the kernel, or NULL if an argument is out of range or allocation fails
+     */
+    xtract_cqt_kernel *xtract_init_cqt(const int N, const double sr, const double fmin, const int bins_per_octave, const int n_bins, const double threshold);
+
+    /** \brief Free a kernel as allocated by xtract_init_cqt()
+     *
+     * \param *kernel: a pointer to a kernel as allocated by xtract_init_cqt(), or NULL
+     */
+    void xtract_free_cqt(xtract_cqt_kernel *kernel);
 
     /* \brief A function to build an array of function descriptors */
     xtract_function_descriptor_t *xtract_make_descriptors(void);

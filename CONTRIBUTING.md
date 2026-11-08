@@ -54,7 +54,7 @@ The README's "Code standard" section is the reference. In short:
 
 ## Pull requests
 
-- Branch from `main` and name the branch `<type>/<short-description>`, where
+- Branch from `develop` and name the branch `<type>/<short-description>`, where
   type is `feat`, `fix`, `chore` or `refactor`.
 - Prefix the pull request title the same way: `fix: ...`, `feat: ...`.
 - If the pull request resolves an issue, put `Closes #N` in the description

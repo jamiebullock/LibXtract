@@ -17,6 +17,9 @@ int xtract_windowed(const double *data, const int N, const void *argv, double *r
     int n;
     const double *window;
 
+    if (N < 1 || argv == NULL)
+        return XTRACT_ARGUMENT_ERROR;
+
     n = N;
     window = (const double *)argv;
 
@@ -26,6 +29,47 @@ int xtract_windowed(const double *data, const int N, const void *argv, double *r
     return XTRACT_SUCCESS;
 }
 
+/* The features a subframe may be given: each writes no more values than it
+ * reads, so the two results of N / 2 values fit in result */
+static const int subframe_features[] = {
+    XTRACT_MEAN, XTRACT_VARIANCE, XTRACT_STANDARD_DEVIATION, XTRACT_AVERAGE_DEVIATION,
+    XTRACT_SKEWNESS, XTRACT_KURTOSIS, XTRACT_SPECTRAL_MEAN, XTRACT_SPECTRAL_VARIANCE,
+    XTRACT_SPECTRAL_STANDARD_DEVIATION, XTRACT_SPECTRAL_SKEWNESS, XTRACT_SPECTRAL_KURTOSIS,
+    XTRACT_SPECTRAL_CENTROID, XTRACT_IRREGULARITY_K, XTRACT_IRREGULARITY_J,
+    XTRACT_TRISTIMULUS_1, XTRACT_TRISTIMULUS_2, XTRACT_TRISTIMULUS_3, XTRACT_SMOOTHNESS,
+    XTRACT_SPREAD, XTRACT_ZCR, XTRACT_ROLLOFF, XTRACT_LOUDNESS, XTRACT_FLATNESS,
+    XTRACT_FLATNESS_DB, XTRACT_TONALITY, XTRACT_CREST, XTRACT_NOISINESS,
+    XTRACT_RMS_AMPLITUDE, XTRACT_SPECTRAL_INHARMONICITY, XTRACT_POWER,
+    XTRACT_ODD_EVEN_RATIO, XTRACT_SHARPNESS, XTRACT_SPECTRAL_SLOPE, XTRACT_LOWEST_VALUE,
+    XTRACT_HIGHEST_VALUE, XTRACT_SUM, XTRACT_NONZERO_COUNT, XTRACT_HPS, XTRACT_F0,
+    XTRACT_FAILSAFE_F0, XTRACT_WAVELET_F0, XTRACT_MCLEOD_F0, XTRACT_MIDICENT,
+    XTRACT_LNORM, XTRACT_FLUX, XTRACT_ATTACK_TIME, XTRACT_DECAY_TIME,
+    XTRACT_DIFFERENCE_VECTOR, XTRACT_AUTOCORRELATION, XTRACT_AMDF, XTRACT_ASDF,
+    XTRACT_SPECTRUM, XTRACT_AUTOCORRELATION_FFT, XTRACT_DCT, XTRACT_HARMONIC_SPECTRUM,
+    XTRACT_WINDOWED, XTRACT_SMOOTHED, XTRACT_PEAK, XTRACT_MEDIAN,
+    XTRACT_MEDIAN_ABSOLUTE_DEVIATION, XTRACT_HJORTH_ACTIVITY, XTRACT_HJORTH_MOBILITY,
+    XTRACT_HJORTH_COMPLEXITY, XTRACT_TIME_REVERSAL_ASYMMETRY, XTRACT_SPECTRAL_ENTROPY,
+    XTRACT_PETROSIAN_FRACTAL_DIMENSION, XTRACT_KATZ_FRACTAL_DIMENSION,
+    XTRACT_HIGUCHI_FRACTAL_DIMENSION, XTRACT_PERMUTATION_ENTROPY, XTRACT_LEMPEL_ZIV_COMPLEXITY,
+    XTRACT_SAMPLE_ENTROPY, XTRACT_APPROXIMATE_ENTROPY, XTRACT_PERIODICITY,
+    XTRACT_SIGNAL_CONFIDENCE, XTRACT_DECAY_RATE, XTRACT_TEMPORAL_CENTROID, XTRACT_MAX_POSITION,
+    XTRACT_MIN_POSITION, XTRACT_PEAK_ASYMMETRY, XTRACT_CROSS_CORRELATION_LAG,
+    XTRACT_KULLBACK_LEIBLER_DIVERGENCE, XTRACT_ITAKURA_SAITO_DIVERGENCE,
+    XTRACT_MODIFIED_KULLBACK_LEIBLER};
+
+static int is_subframe_feature(const int feature)
+{
+    size_t i;
+
+    for (i = 0; i < sizeof(subframe_features) / sizeof(subframe_features[0]); i++)
+    {
+        if (subframe_features[i] == feature)
+            return 1;
+    }
+
+    return 0;
+}
+
 int xtract_features_from_subframes(const double *data, const int N, const int feature, const void *argv, double *result)
 {
     const double *frame1,
@@ -33,7 +77,10 @@ int xtract_features_from_subframes(const double *data, const int N, const int fe
     double *result1,
         *result2;
 
-    int n, rv;
+    int n, rv, rv2;
+
+    if (N < 2 || (N & 1) || !is_subframe_feature(feature))
+        return XTRACT_ARGUMENT_ERROR;
 
     n = N >> 1;
 
@@ -42,17 +89,17 @@ int xtract_features_from_subframes(const double *data, const int N, const int fe
     result1 = result;
     result2 = result + n;
 
-    if (feature < 0 || feature >= XTRACT_FEATURES)
-    {
-        return XTRACT_ARGUMENT_ERROR;
-    }
-
     rv = xtract[feature](frame1, n, argv, result1);
+    if (rv == XTRACT_NO_RESULT)
+        memset(result1, 0, n * sizeof(double));
+    else if (rv != XTRACT_SUCCESS)
+        return rv;
 
-    if (rv == XTRACT_SUCCESS)
-        rv = xtract[feature](frame2, n, argv, result2);
+    rv2 = xtract[feature](frame2, n, argv, result2);
+    if (rv2 == XTRACT_NO_RESULT)
+        memset(result2, 0, n * sizeof(double));
 
-    return rv;
+    return rv2 != XTRACT_SUCCESS ? rv2 : rv;
 }
 
 /*
@@ -60,9 +107,15 @@ int xtract_features_from_subframes(const double *data, const int N, const int fe
  */
 int xtract_smoothed(const double *data, const int N, const void *argv, double *result)
 {
-    double gain = *(double *)argv;
-    double oneminusgain = 1.0 - gain;
+    double gain;
+    double oneminusgain;
     int i;
+
+    if (N < 1 || argv == NULL)
+        return XTRACT_ARGUMENT_ERROR;
+
+    gain = *(double *)argv;
+    oneminusgain = 1.0 - gain;
 
     /* reverse filtering first; the final element seeds the recursion */
     result[N - 1] = data[N - 1];

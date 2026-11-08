@@ -36,6 +36,25 @@ UTEST(descriptors, make_descriptors_scalar_vector_classification)
     ASSERT_TRUE(fd != NULL);
     ASSERT_EQ(fd[XTRACT_MEAN].is_scalar, XTRACT_TRUE);
     ASSERT_EQ(fd[XTRACT_SPECTRUM].is_scalar, XTRACT_FALSE);
+    ASSERT_EQ(fd[XTRACT_PEAK].is_scalar, XTRACT_TRUE);
+    ASSERT_EQ(fd[XTRACT_MMBSES].is_scalar, XTRACT_FALSE);
+    ASSERT_EQ(fd[XTRACT_SPECTRAL_SUBBAND_CENTROIDS].is_scalar, XTRACT_FALSE);
+    ASSERT_EQ(fd[XTRACT_MOVING_SUM].is_scalar, XTRACT_FALSE);
+    ASSERT_EQ(fd[XTRACT_MOVING_STANDARD_DEVIATION].is_scalar, XTRACT_FALSE);
+    ASSERT_EQ(fd[XTRACT_EWMA_AVERAGE].is_scalar, XTRACT_FALSE);
+    ASSERT_EQ(fd[XTRACT_EWMA_VARIANCE].is_scalar, XTRACT_FALSE);
+    ASSERT_EQ(fd[XTRACT_MEDIAN].is_scalar, XTRACT_TRUE);
+    ASSERT_EQ(fd[XTRACT_MEDIAN_ABSOLUTE_DEVIATION].is_scalar, XTRACT_TRUE);
+    ASSERT_EQ(fd[XTRACT_HJORTH_COMPLEXITY].is_scalar, XTRACT_TRUE);
+    ASSERT_EQ(fd[XTRACT_TIME_REVERSAL_ASYMMETRY].is_scalar, XTRACT_TRUE);
+    ASSERT_EQ(fd[XTRACT_SPECTRAL_ENTROPY].is_scalar, XTRACT_TRUE);
+    ASSERT_EQ(fd[XTRACT_HIGUCHI_FRACTAL_DIMENSION].is_scalar, XTRACT_TRUE);
+    ASSERT_EQ(fd[XTRACT_PERMUTATION_ENTROPY].is_scalar, XTRACT_TRUE);
+    ASSERT_EQ(fd[XTRACT_LEMPEL_ZIV_COMPLEXITY].is_scalar, XTRACT_TRUE);
+    ASSERT_EQ(fd[XTRACT_SAMPLE_ENTROPY].is_scalar, XTRACT_TRUE);
+    ASSERT_EQ(fd[XTRACT_APPROXIMATE_ENTROPY].is_scalar, XTRACT_TRUE);
+    ASSERT_EQ(fd[XTRACT_PERIODICITY].is_scalar, XTRACT_TRUE);
+    ASSERT_EQ(fd[XTRACT_SIGNAL_CONFIDENCE].is_scalar, XTRACT_TRUE);
     ASSERT_EQ(xtract_free_descriptors(fd), XTRACT_SUCCESS);
 }
 
@@ -98,6 +117,357 @@ UTEST(descriptors, audited_result_ranges_and_units)
     ASSERT_EQ(xtract_free_descriptors(fd), XTRACT_SUCCESS);
 }
 
+UTEST(descriptors, argv_ranges_match_the_functions)
+{
+    xtract_function_descriptor_t *fd = xtract_make_descriptors();
+    ASSERT_TRUE(fd != NULL);
+
+    CHECK_REL(fd[XTRACT_ROLLOFF].argv.min[0], 0.0, EPSILON);
+    ASSERT_EQ(fd[XTRACT_ROLLOFF].argv.max[0], XTRACT_UNBOUNDED_MAX);
+    ASSERT_EQ(fd[XTRACT_ROLLOFF].argv.unit[0], XTRACT_HERTZ);
+    CHECK_REL(fd[XTRACT_ROLLOFF].argv.min[1], 0.0, EPSILON);
+    CHECK_REL(fd[XTRACT_ROLLOFF].argv.max[1], 100.0, EPSILON);
+
+    ASSERT_EQ(fd[XTRACT_SKEWNESS].argv.min[0], XTRACT_UNBOUNDED_MIN);
+    ASSERT_EQ(fd[XTRACT_SKEWNESS].argv.max[1], XTRACT_UNBOUNDED_MAX);
+    ASSERT_EQ(fd[XTRACT_CREST].argv.min[1], XTRACT_UNBOUNDED_MIN);
+    ASSERT_EQ(fd[XTRACT_NOISINESS].argv.max[0], XTRACT_UNBOUNDED_MAX);
+
+    CHECK_REL(fd[XTRACT_F0].argv.min[0], 0.0, EPSILON);
+    CHECK_REL(fd[XTRACT_MCLEOD_F0].argv.min[0], 0.0, EPSILON);
+    CHECK_REL(fd[XTRACT_WAVELET_F0].argv.min[0], 0.0, EPSILON);
+    CHECK_REL(fd[XTRACT_MIDICENT].argv.min[0], 0.0, EPSILON);
+    ASSERT_EQ(fd[XTRACT_MIDICENT].argv.max[0], XTRACT_UNBOUNDED_MAX);
+    ASSERT_EQ(fd[XTRACT_MIDICENT].argv.unit[0], XTRACT_HERTZ);
+
+    ASSERT_EQ(fd[XTRACT_TRISTIMULUS_1].argc, 1);
+    ASSERT_EQ(fd[XTRACT_ODD_EVEN_RATIO].argc, 1);
+    ASSERT_EQ(fd[XTRACT_ODD_EVEN_RATIO].argv.type, XTRACT_FLOAT);
+    CHECK_REL(fd[XTRACT_TRISTIMULUS_2].argv.min[0], 0.0, EPSILON);
+    ASSERT_EQ(fd[XTRACT_TRISTIMULUS_3].argv.donor[0], XTRACT_FAILSAFE_F0);
+
+    CHECK_REL(fd[XTRACT_SPECTRUM].argv.min[0], 0.0, EPSILON);
+    ASSERT_EQ(fd[XTRACT_SPECTRUM].argv.max[0], XTRACT_UNBOUNDED_MAX);
+    CHECK_REL(fd[XTRACT_SPECTRUM].argv.max[1], (double)XTRACT_MAGNITUDE_PHASE_SPECTRUM, EPSILON);
+
+    CHECK_REL(fd[XTRACT_SUBBANDS].argv.max[0], (double)(XTRACT_FEATURES - 1), EPSILON);
+    CHECK_REL(fd[XTRACT_SUBBANDS].argv.max[2], (double)XTRACT_LINEAR_SUBBANDS, EPSILON);
+    ASSERT_EQ(fd[XTRACT_SPREAD].argc, 1);
+    ASSERT_EQ(fd[XTRACT_SPREAD].argv.donor[0], XTRACT_SPECTRAL_MEAN);
+
+    ASSERT_EQ(fd[XTRACT_SPREAD].data.format, XTRACT_SPECTRAL);
+    ASSERT_EQ(fd[XTRACT_HPS].data.format, XTRACT_SPECTRAL);
+
+    ASSERT_EQ(xtract_free_descriptors(fd), XTRACT_SUCCESS);
+}
+
+UTEST(descriptors, appended_features_are_fully_described)
+{
+    xtract_function_descriptor_t *fd = xtract_make_descriptors();
+    int f, i;
+    ASSERT_TRUE(fd != NULL);
+
+    ASSERT_EQ(fd[XTRACT_PEAK].argc, 1);
+    ASSERT_EQ(fd[XTRACT_PEAK].argv.type, XTRACT_FLOAT);
+    ASSERT_EQ(fd[XTRACT_PEAK].argv.donor[0], XTRACT_ANY);
+    ASSERT_EQ(fd[XTRACT_PEAK].data.format, XTRACT_ARBITRARY_SERIES);
+    ASSERT_EQ(fd[XTRACT_PEAK].result.scalar.unit, XTRACT_UNIT_ANY);
+    ASSERT_EQ(fd[XTRACT_PEAK].is_delta, XTRACT_FALSE);
+    ASSERT_TRUE(fd[XTRACT_PEAK].algo.name[0] != 0);
+
+    ASSERT_EQ(fd[XTRACT_MMBSES].argc, 1);
+    ASSERT_EQ(fd[XTRACT_MMBSES].argv.type, XTRACT_MEL_FILTER);
+    ASSERT_EQ(fd[XTRACT_MMBSES].argv.donor[0], XTRACT_INIT_MFCC);
+    ASSERT_EQ(fd[XTRACT_MMBSES].data.format, XTRACT_SPECTRAL_MAGNITUDE_PHASE);
+    ASSERT_EQ(fd[XTRACT_MMBSES].result.vector.format, XTRACT_MEL_COEFFS);
+    ASSERT_EQ(fd[XTRACT_MMBSES].result.vector.unit, XTRACT_UNIT_NONE);
+    ASSERT_EQ(fd[XTRACT_MMBSES].algo.year, 2013);
+
+    ASSERT_EQ(fd[XTRACT_SPECTRAL_SUBBAND_CENTROIDS].argc, 1);
+    ASSERT_EQ(fd[XTRACT_SPECTRAL_SUBBAND_CENTROIDS].argv.type, XTRACT_MEL_FILTER);
+    ASSERT_EQ(fd[XTRACT_SPECTRAL_SUBBAND_CENTROIDS].argv.donor[0], XTRACT_INIT_MFCC);
+    ASSERT_EQ(fd[XTRACT_SPECTRAL_SUBBAND_CENTROIDS].data.format, XTRACT_SPECTRAL);
+    ASSERT_EQ(fd[XTRACT_SPECTRAL_SUBBAND_CENTROIDS].data.unit, XTRACT_ANY_AMPLITUDE_HERTZ);
+    ASSERT_EQ(fd[XTRACT_SPECTRAL_SUBBAND_CENTROIDS].result.vector.format, XTRACT_MEL_COEFFS);
+    ASSERT_EQ(fd[XTRACT_SPECTRAL_SUBBAND_CENTROIDS].result.vector.unit, XTRACT_HERTZ);
+
+    for (f = XTRACT_MOVING_SUM; f <= XTRACT_MOVING_MIN; f++)
+    {
+        ASSERT_EQ_MSG(fd[f].argc, 1, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].argv.type, XTRACT_INT, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].argv.donor[0], XTRACT_ANY, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].argv.max[0], XTRACT_UNBOUNDED_MAX, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].data.format, XTRACT_ARBITRARY_SERIES, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].data.unit, XTRACT_UNIT_ANY, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].result.vector.format, XTRACT_ARBITRARY_SERIES, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].result.vector.unit, XTRACT_UNIT_ANY, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].is_delta, XTRACT_FALSE, fd[f].algo.name);
+        ASSERT_TRUE_MSG(fd[f].algo.name[0] != 0, "moving feature without a name");
+    }
+    CHECK_REL(fd[XTRACT_MOVING_SUM].argv.min[0], 1.0, EPSILON);
+    CHECK_REL(fd[XTRACT_MOVING_AVERAGE].argv.min[0], 1.0, EPSILON);
+    CHECK_REL(fd[XTRACT_MOVING_VARIANCE].argv.min[0], 2.0, EPSILON);
+    CHECK_REL(fd[XTRACT_MOVING_STANDARD_DEVIATION].argv.min[0], 2.0, EPSILON);
+    CHECK_REL(fd[XTRACT_MOVING_MAX].argv.min[0], 1.0, EPSILON);
+    CHECK_REL(fd[XTRACT_MOVING_MIN].argv.min[0], 1.0, EPSILON);
+
+    for (f = XTRACT_EWMA_AVERAGE; f <= XTRACT_EWMA_VARIANCE; f++)
+    {
+        ASSERT_EQ_MSG(fd[f].argc, 1, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].argv.type, XTRACT_FLOAT, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].argv.donor[0], XTRACT_ANY, fd[f].algo.name);
+        CHECK_NEAR(fd[f].argv.min[0], 0.0, EPSILON);
+        CHECK_REL(fd[f].argv.max[0], 1.0, EPSILON);
+        ASSERT_EQ_MSG(fd[f].data.format, XTRACT_ARBITRARY_SERIES, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].data.unit, XTRACT_UNIT_ANY, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].result.vector.format, XTRACT_ARBITRARY_SERIES, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].result.vector.unit, XTRACT_UNIT_ANY, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].is_delta, XTRACT_FALSE, fd[f].algo.name);
+        ASSERT_TRUE_MSG(fd[f].algo.name[0] != 0, "ewma feature without a name");
+    }
+
+    ASSERT_EQ(fd[XTRACT_MEDIAN].argc, 0);
+    ASSERT_EQ(fd[XTRACT_MEDIAN].data.format, XTRACT_ARBITRARY_SERIES);
+    ASSERT_EQ(fd[XTRACT_MEDIAN].data.unit, XTRACT_UNIT_ANY);
+    ASSERT_EQ(fd[XTRACT_MEDIAN].result.scalar.unit, XTRACT_UNIT_ANY);
+    ASSERT_EQ(fd[XTRACT_MEDIAN].is_delta, XTRACT_FALSE);
+    ASSERT_EQ(fd[XTRACT_MEDIAN_ABSOLUTE_DEVIATION].argc, 1);
+    ASSERT_EQ(fd[XTRACT_MEDIAN_ABSOLUTE_DEVIATION].argv.type, XTRACT_FLOAT);
+    ASSERT_EQ(fd[XTRACT_MEDIAN_ABSOLUTE_DEVIATION].argv.donor[0], XTRACT_MEDIAN);
+    ASSERT_EQ(fd[XTRACT_MEDIAN_ABSOLUTE_DEVIATION].data.format, XTRACT_ARBITRARY_SERIES);
+    ASSERT_EQ(fd[XTRACT_MEDIAN_ABSOLUTE_DEVIATION].data.unit, XTRACT_UNIT_ANY);
+    ASSERT_EQ(fd[XTRACT_MEDIAN_ABSOLUTE_DEVIATION].result.scalar.unit, XTRACT_UNIT_ANY);
+    ASSERT_EQ(fd[XTRACT_MEDIAN_ABSOLUTE_DEVIATION].is_delta, XTRACT_FALSE);
+
+    for (f = XTRACT_HJORTH_ACTIVITY; f <= XTRACT_HJORTH_COMPLEXITY; f++)
+    {
+        ASSERT_EQ_MSG(fd[f].argc, 0, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].data.format, XTRACT_ARBITRARY_SERIES, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].data.unit, XTRACT_UNIT_ANY, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].is_delta, XTRACT_FALSE, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].algo.year, 1970, fd[f].algo.name);
+        CHECK_NEAR(fd[f].result.scalar.min, 0.0, EPSILON);
+    }
+    ASSERT_EQ(fd[XTRACT_HJORTH_ACTIVITY].result.scalar.unit, XTRACT_UNIT_ANY);
+    ASSERT_EQ(fd[XTRACT_HJORTH_MOBILITY].result.scalar.unit, XTRACT_UNIT_NONE);
+    ASSERT_EQ(fd[XTRACT_HJORTH_COMPLEXITY].result.scalar.unit, XTRACT_UNIT_NONE);
+
+    ASSERT_EQ(fd[XTRACT_TIME_REVERSAL_ASYMMETRY].argc, 1);
+    ASSERT_EQ(fd[XTRACT_TIME_REVERSAL_ASYMMETRY].argv.type, XTRACT_INT);
+    ASSERT_EQ(fd[XTRACT_TIME_REVERSAL_ASYMMETRY].argv.donor[0], XTRACT_ANY);
+    CHECK_REL(fd[XTRACT_TIME_REVERSAL_ASYMMETRY].argv.min[0], 1.0, EPSILON);
+    ASSERT_EQ(fd[XTRACT_TIME_REVERSAL_ASYMMETRY].argv.max[0], XTRACT_UNBOUNDED_MAX);
+    ASSERT_EQ(fd[XTRACT_TIME_REVERSAL_ASYMMETRY].data.format, XTRACT_ARBITRARY_SERIES);
+    ASSERT_EQ(fd[XTRACT_TIME_REVERSAL_ASYMMETRY].data.unit, XTRACT_UNIT_ANY);
+    ASSERT_EQ(fd[XTRACT_TIME_REVERSAL_ASYMMETRY].result.scalar.unit, XTRACT_UNIT_ANY);
+    ASSERT_EQ(fd[XTRACT_TIME_REVERSAL_ASYMMETRY].is_delta, XTRACT_FALSE);
+
+    ASSERT_EQ(fd[XTRACT_SPECTRAL_ENTROPY].argc, 0);
+    ASSERT_EQ(fd[XTRACT_SPECTRAL_ENTROPY].data.format, XTRACT_SPECTRAL_MAGNITUDES);
+    ASSERT_EQ(fd[XTRACT_SPECTRAL_ENTROPY].data.unit, XTRACT_UNIT_ANY);
+    ASSERT_EQ(fd[XTRACT_SPECTRAL_ENTROPY].result.scalar.unit, XTRACT_UNIT_NONE);
+    CHECK_NEAR(fd[XTRACT_SPECTRAL_ENTROPY].result.scalar.min, 0.0, EPSILON);
+    CHECK_REL(fd[XTRACT_SPECTRAL_ENTROPY].result.scalar.max, 1.0, EPSILON);
+    ASSERT_EQ(fd[XTRACT_SPECTRAL_ENTROPY].is_delta, XTRACT_FALSE);
+
+    for (f = XTRACT_PETROSIAN_FRACTAL_DIMENSION; f <= XTRACT_HIGUCHI_FRACTAL_DIMENSION; f++)
+    {
+        ASSERT_EQ_MSG(fd[f].data.format, XTRACT_ARBITRARY_SERIES, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].data.unit, XTRACT_UNIT_ANY, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].result.scalar.unit, XTRACT_UNIT_NONE, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].is_delta, XTRACT_FALSE, fd[f].algo.name);
+        ASSERT_TRUE_MSG(fd[f].algo.year != 0, fd[f].algo.name);
+    }
+    ASSERT_EQ(fd[XTRACT_PETROSIAN_FRACTAL_DIMENSION].argc, 0);
+    ASSERT_EQ(fd[XTRACT_KATZ_FRACTAL_DIMENSION].argc, 0);
+    ASSERT_EQ(fd[XTRACT_HIGUCHI_FRACTAL_DIMENSION].argc, 1);
+    ASSERT_EQ(fd[XTRACT_HIGUCHI_FRACTAL_DIMENSION].argv.type, XTRACT_INT);
+    CHECK_REL(fd[XTRACT_HIGUCHI_FRACTAL_DIMENSION].argv.min[0], 2.0, EPSILON);
+    CHECK_REL(fd[XTRACT_HIGUCHI_FRACTAL_DIMENSION].argv.def[0], 10.0, EPSILON);
+
+    ASSERT_EQ(fd[XTRACT_PERMUTATION_ENTROPY].argc, 2);
+    ASSERT_EQ(fd[XTRACT_PERMUTATION_ENTROPY].argv.type, XTRACT_INT);
+    CHECK_REL(fd[XTRACT_PERMUTATION_ENTROPY].argv.min[0], 2.0, EPSILON);
+    CHECK_REL(fd[XTRACT_PERMUTATION_ENTROPY].argv.max[0], 8.0, EPSILON);
+    CHECK_REL(fd[XTRACT_PERMUTATION_ENTROPY].argv.def[0], 3.0, EPSILON);
+    CHECK_REL(fd[XTRACT_PERMUTATION_ENTROPY].argv.min[1], 1.0, EPSILON);
+    ASSERT_EQ(fd[XTRACT_PERMUTATION_ENTROPY].argv.max[1], XTRACT_UNBOUNDED_MAX);
+    CHECK_REL(fd[XTRACT_PERMUTATION_ENTROPY].argv.def[1], 1.0, EPSILON);
+    ASSERT_EQ(fd[XTRACT_PERMUTATION_ENTROPY].data.format, XTRACT_ARBITRARY_SERIES);
+    ASSERT_EQ(fd[XTRACT_PERMUTATION_ENTROPY].data.unit, XTRACT_UNIT_ANY);
+    ASSERT_EQ(fd[XTRACT_PERMUTATION_ENTROPY].result.scalar.unit, XTRACT_UNIT_NONE);
+    CHECK_NEAR(fd[XTRACT_PERMUTATION_ENTROPY].result.scalar.min, 0.0, EPSILON);
+    CHECK_REL(fd[XTRACT_PERMUTATION_ENTROPY].result.scalar.max, 1.0, EPSILON);
+    ASSERT_EQ(fd[XTRACT_PERMUTATION_ENTROPY].is_delta, XTRACT_FALSE);
+
+    ASSERT_EQ(fd[XTRACT_LEMPEL_ZIV_COMPLEXITY].argc, 1);
+    ASSERT_EQ(fd[XTRACT_LEMPEL_ZIV_COMPLEXITY].argv.type, XTRACT_FLOAT);
+    ASSERT_EQ(fd[XTRACT_LEMPEL_ZIV_COMPLEXITY].argv.donor[0], XTRACT_MEDIAN);
+    ASSERT_EQ(fd[XTRACT_LEMPEL_ZIV_COMPLEXITY].data.format, XTRACT_ARBITRARY_SERIES);
+    ASSERT_EQ(fd[XTRACT_LEMPEL_ZIV_COMPLEXITY].data.unit, XTRACT_UNIT_ANY);
+    ASSERT_EQ(fd[XTRACT_LEMPEL_ZIV_COMPLEXITY].result.scalar.unit, XTRACT_UNIT_NONE);
+    CHECK_NEAR(fd[XTRACT_LEMPEL_ZIV_COMPLEXITY].result.scalar.min, 0.0, EPSILON);
+    ASSERT_EQ(fd[XTRACT_LEMPEL_ZIV_COMPLEXITY].is_delta, XTRACT_FALSE);
+
+    for (f = XTRACT_SAMPLE_ENTROPY; f <= XTRACT_APPROXIMATE_ENTROPY; f++)
+    {
+        ASSERT_EQ_MSG(fd[f].argc, 2, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].argv.type, XTRACT_FLOAT, fd[f].algo.name);
+        CHECK_REL(fd[f].argv.min[0], 1.0, EPSILON);
+        CHECK_REL(fd[f].argv.def[0], 2.0, EPSILON);
+        CHECK_NEAR(fd[f].argv.min[1], 0.0, EPSILON);
+        ASSERT_EQ_MSG(fd[f].argv.max[1], XTRACT_UNBOUNDED_MAX, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].argv.unit[1], XTRACT_UNIT_ANY, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].data.format, XTRACT_ARBITRARY_SERIES, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].data.unit, XTRACT_UNIT_ANY, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].result.scalar.unit, XTRACT_UNIT_NONE, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].is_delta, XTRACT_FALSE, fd[f].algo.name);
+    }
+    CHECK_NEAR(fd[XTRACT_SAMPLE_ENTROPY].result.scalar.min, 0.0, EPSILON);
+    ASSERT_EQ(fd[XTRACT_APPROXIMATE_ENTROPY].result.scalar.min, XTRACT_UNBOUNDED_MIN);
+
+    for (f = XTRACT_PERIODICITY; f <= XTRACT_SIGNAL_CONFIDENCE; f++)
+    {
+        ASSERT_EQ_MSG(fd[f].argc, 0, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].data.unit, XTRACT_UNIT_ANY, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].result.scalar.unit, XTRACT_UNIT_NONE, fd[f].algo.name);
+        CHECK_NEAR(fd[f].result.scalar.min, 0.0, EPSILON);
+        CHECK_REL(fd[f].result.scalar.max, 1.0, EPSILON);
+        ASSERT_EQ_MSG(fd[f].is_delta, XTRACT_FALSE, fd[f].algo.name);
+    }
+    ASSERT_EQ(fd[XTRACT_PERIODICITY].data.format, XTRACT_ARBITRARY_SERIES);
+    ASSERT_EQ(fd[XTRACT_SIGNAL_CONFIDENCE].data.format, XTRACT_AUDIO_SAMPLES);
+
+    ASSERT_EQ(fd[XTRACT_ATTACK_TIME].argc, 3);
+    CHECK_REL(fd[XTRACT_ATTACK_TIME].argv.def[1], 0.2, EPSILON);
+    CHECK_REL(fd[XTRACT_ATTACK_TIME].argv.def[2], 0.9, EPSILON);
+    CHECK_NEAR(fd[XTRACT_ATTACK_TIME].argv.min[2], 0.0, EPSILON);
+    CHECK_REL(fd[XTRACT_ATTACK_TIME].argv.max[2], 1.0, EPSILON);
+    ASSERT_EQ(fd[XTRACT_DECAY_TIME].argc, 2);
+    ASSERT_EQ(fd[XTRACT_DECAY_RATE].argc, 2);
+    CHECK_REL(fd[XTRACT_DECAY_TIME].argv.def[1], 0.4, EPSILON);
+    CHECK_REL(fd[XTRACT_DECAY_RATE].argv.def[1], 0.4, EPSILON);
+    for (f = XTRACT_ATTACK_TIME; f <= XTRACT_DECAY_TIME; f++)
+    {
+        ASSERT_EQ_MSG(fd[f].result.scalar.unit, XTRACT_SECONDS, fd[f].algo.name);
+        CHECK_NEAR(fd[f].result.scalar.min, 0.0, EPSILON);
+    }
+    ASSERT_EQ(fd[XTRACT_DECAY_RATE].result.scalar.unit, XTRACT_PER_SECOND);
+    ASSERT_EQ(fd[XTRACT_DECAY_RATE].result.scalar.min, XTRACT_UNBOUNDED_MIN);
+    for (i = 0; i < 3; i++)
+    {
+        f = i == 0 ? XTRACT_ATTACK_TIME : i == 1 ? XTRACT_DECAY_TIME
+                                                 : XTRACT_DECAY_RATE;
+        ASSERT_EQ_MSG(fd[f].argv.type, XTRACT_FLOAT, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].argv.unit[0], XTRACT_HERTZ, fd[f].algo.name);
+        CHECK_REL(fd[f].argv.def[0], 44100.0, EPSILON);
+        CHECK_NEAR(fd[f].argv.min[1], 0.0, EPSILON);
+        CHECK_REL(fd[f].argv.max[1], 1.0, EPSILON);
+        ASSERT_EQ_MSG(fd[f].argv.donor[1], XTRACT_ANY, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].data.format, XTRACT_ARBITRARY_SERIES, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].data.unit, XTRACT_UNIT_ANY, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].is_scalar, XTRACT_TRUE, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].is_delta, XTRACT_FALSE, fd[f].algo.name);
+    }
+
+    for (f = XTRACT_TEMPORAL_CENTROID; f <= XTRACT_PEAK_ASYMMETRY; f++)
+    {
+        ASSERT_EQ_MSG(fd[f].argc, 0, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].data.format, XTRACT_ARBITRARY_SERIES, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].data.unit, XTRACT_UNIT_ANY, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].result.scalar.unit, XTRACT_UNIT_NONE, fd[f].algo.name);
+        CHECK_NEAR(fd[f].result.scalar.min, 0.0, EPSILON);
+        ASSERT_EQ_MSG(fd[f].is_scalar, XTRACT_TRUE, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].is_delta, XTRACT_FALSE, fd[f].algo.name);
+    }
+    for (f = XTRACT_TEMPORAL_CENTROID; f <= XTRACT_MIN_POSITION; f++)
+        CHECK_REL(fd[f].result.scalar.max, 1.0, EPSILON);
+    ASSERT_EQ(fd[XTRACT_PEAK_ASYMMETRY].result.scalar.max, XTRACT_UNBOUNDED_MAX);
+
+    ASSERT_EQ(fd[XTRACT_CROSS_CORRELATION].argc, 1);
+    ASSERT_EQ(fd[XTRACT_CROSS_CORRELATION].argv.type, XTRACT_FLOAT);
+    CHECK_NEAR(fd[XTRACT_CROSS_CORRELATION].argv.min[0], 0.0, EPSILON);
+    CHECK_REL(fd[XTRACT_CROSS_CORRELATION].argv.max[0], 1.0, EPSILON);
+    ASSERT_EQ(fd[XTRACT_CROSS_CORRELATION].is_scalar, XTRACT_FALSE);
+    ASSERT_EQ(fd[XTRACT_CROSS_CORRELATION].result.vector.format, XTRACT_ARBITRARY_SERIES);
+    ASSERT_EQ(fd[XTRACT_CROSS_CORRELATION].result.vector.unit, XTRACT_UNIT_ANY);
+    ASSERT_EQ(fd[XTRACT_CROSS_CORRELATION_LAG].argc, 0);
+    ASSERT_EQ(fd[XTRACT_CROSS_CORRELATION_LAG].is_scalar, XTRACT_TRUE);
+    ASSERT_EQ(fd[XTRACT_CROSS_CORRELATION_LAG].result.scalar.unit, XTRACT_UNIT_NONE);
+    ASSERT_EQ(fd[XTRACT_CROSS_CORRELATION_LAG].result.scalar.min, XTRACT_UNBOUNDED_MIN);
+    for (f = XTRACT_CROSS_CORRELATION; f <= XTRACT_MODIFIED_KULLBACK_LEIBLER; f++)
+    {
+        ASSERT_EQ_MSG(fd[f].data.format, XTRACT_SUBFRAMES, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].data.unit, XTRACT_UNIT_ANY, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].is_delta, XTRACT_TRUE, fd[f].algo.name);
+    }
+
+    for (f = XTRACT_KULLBACK_LEIBLER_DIVERGENCE; f <= XTRACT_MODIFIED_KULLBACK_LEIBLER; f++)
+    {
+        ASSERT_EQ_MSG(fd[f].is_scalar, XTRACT_TRUE, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].result.scalar.unit, XTRACT_UNIT_NONE, fd[f].algo.name);
+        CHECK_NEAR(fd[f].result.scalar.min, 0.0, EPSILON);
+        ASSERT_EQ_MSG(fd[f].result.scalar.max, XTRACT_UNBOUNDED_MAX, fd[f].algo.name);
+    }
+    ASSERT_EQ(fd[XTRACT_KULLBACK_LEIBLER_DIVERGENCE].argc, 0);
+    ASSERT_EQ(fd[XTRACT_ITAKURA_SAITO_DIVERGENCE].argc, 0);
+    ASSERT_EQ(fd[XTRACT_MODIFIED_KULLBACK_LEIBLER].argc, 1);
+    ASSERT_EQ(fd[XTRACT_MODIFIED_KULLBACK_LEIBLER].argv.type, XTRACT_FLOAT);
+    CHECK_NEAR(fd[XTRACT_MODIFIED_KULLBACK_LEIBLER].argv.min[0], 0.0, EPSILON);
+    ASSERT_EQ(fd[XTRACT_MODIFIED_KULLBACK_LEIBLER].argv.max[0], XTRACT_UNBOUNDED_MAX);
+    ASSERT_EQ(fd[XTRACT_MODIFIED_KULLBACK_LEIBLER].argv.unit[0], XTRACT_UNIT_ANY);
+    ASSERT_EQ(fd[XTRACT_MODIFIED_KULLBACK_LEIBLER].argv.donor[0], XTRACT_ANY);
+
+    ASSERT_EQ(fd[XTRACT_SPECTRAL_CONTRAST].argc, 3);
+    ASSERT_EQ(fd[XTRACT_SPECTRAL_CONTRAST].argv.type, XTRACT_FLOAT);
+    CHECK_REL(fd[XTRACT_SPECTRAL_CONTRAST].argv.min[0], 1.0, EPSILON);
+    CHECK_REL(fd[XTRACT_SPECTRAL_CONTRAST].argv.def[0], 6.0, EPSILON);
+    CHECK_NEAR(fd[XTRACT_SPECTRAL_CONTRAST].argv.min[1], 0.0, EPSILON);
+    CHECK_REL(fd[XTRACT_SPECTRAL_CONTRAST].argv.def[1], 200.0, EPSILON);
+    ASSERT_EQ(fd[XTRACT_SPECTRAL_CONTRAST].argv.unit[1], XTRACT_HERTZ);
+    CHECK_NEAR(fd[XTRACT_SPECTRAL_CONTRAST].argv.min[2], 0.0, EPSILON);
+    CHECK_REL(fd[XTRACT_SPECTRAL_CONTRAST].argv.max[2], 1.0, EPSILON);
+    CHECK_REL(fd[XTRACT_SPECTRAL_CONTRAST].argv.def[2], 0.02, EPSILON);
+    ASSERT_EQ(fd[XTRACT_SPECTRAL_CONTRAST].data.format, XTRACT_SPECTRAL);
+    ASSERT_EQ(fd[XTRACT_SPECTRAL_CONTRAST].data.unit, XTRACT_ANY_AMPLITUDE_HERTZ);
+    ASSERT_EQ(fd[XTRACT_SPECTRAL_CONTRAST].is_scalar, XTRACT_FALSE);
+    ASSERT_EQ(fd[XTRACT_SPECTRAL_CONTRAST].is_delta, XTRACT_FALSE);
+    ASSERT_EQ(fd[XTRACT_SPECTRAL_CONTRAST].result.vector.format, XTRACT_ARBITRARY_SERIES);
+    ASSERT_EQ(fd[XTRACT_SPECTRAL_CONTRAST].result.vector.unit, XTRACT_UNIT_NONE);
+
+    ASSERT_EQ(fd[XTRACT_CHROMA].argc, 3);
+    ASSERT_EQ(fd[XTRACT_CHROMA].argv.type, XTRACT_FLOAT);
+    CHECK_REL(fd[XTRACT_CHROMA].argv.def[0], 440.0, EPSILON);
+    CHECK_REL(fd[XTRACT_CHROMA].argv.def[1], 40.0, EPSILON);
+    CHECK_REL(fd[XTRACT_CHROMA].argv.def[2], 5000.0, EPSILON);
+    for (i = 0; i < 3; i++)
+    {
+        CHECK_NEAR(fd[XTRACT_CHROMA].argv.min[i], 0.0, EPSILON);
+        ASSERT_EQ(fd[XTRACT_CHROMA].argv.max[i], XTRACT_UNBOUNDED_MAX);
+        ASSERT_EQ(fd[XTRACT_CHROMA].argv.unit[i], XTRACT_HERTZ);
+        ASSERT_EQ(fd[XTRACT_CHROMA].argv.donor[i], XTRACT_ANY);
+    }
+    ASSERT_EQ(fd[XTRACT_CHROMA].data.format, XTRACT_SPECTRAL);
+    ASSERT_EQ(fd[XTRACT_CHROMA].data.unit, XTRACT_ANY_AMPLITUDE_HERTZ);
+    ASSERT_EQ(fd[XTRACT_CHROMA].is_scalar, XTRACT_FALSE);
+    ASSERT_EQ(fd[XTRACT_CHROMA].is_delta, XTRACT_FALSE);
+    ASSERT_EQ(fd[XTRACT_CHROMA].result.vector.format, XTRACT_CHROMA_COEFFS);
+    ASSERT_EQ(fd[XTRACT_CHROMA].result.vector.unit, XTRACT_UNIT_NONE);
+
+    ASSERT_EQ(fd[XTRACT_CQT].argc, 1);
+    ASSERT_EQ(fd[XTRACT_CQT].argv.type, XTRACT_CQT_KERNEL);
+    ASSERT_EQ(fd[XTRACT_CQT].argv.donor[0], XTRACT_INIT_CQT);
+    ASSERT_EQ(fd[XTRACT_CQT].data.format, XTRACT_SPECTRAL_MAGNITUDE_PHASE);
+    ASSERT_EQ(fd[XTRACT_CQT].data.unit, XTRACT_UNIT_ANY);
+    ASSERT_EQ(fd[XTRACT_CQT].is_scalar, XTRACT_FALSE);
+    ASSERT_EQ(fd[XTRACT_CQT].is_delta, XTRACT_FALSE);
+    ASSERT_EQ(fd[XTRACT_CQT].result.vector.format, XTRACT_SPECTRAL);
+    ASSERT_EQ(fd[XTRACT_CQT].result.vector.unit, XTRACT_ANY_AMPLITUDE_HERTZ);
+    ASSERT_EQ(fd[XTRACT_CQT].algo.year, 1992);
+
+    ASSERT_EQ(xtract_free_descriptors(fd), XTRACT_SUCCESS);
+}
+
 UTEST(dispatch, every_feature_slot_points_to_a_function)
 {
     int f;
@@ -118,4 +488,290 @@ UTEST(dispatch, slots_map_to_the_expected_function)
 
     ASSERT_EQ(xtract[XTRACT_SUM](data, 4, NULL, &result), XTRACT_SUCCESS);
     CHECK_REL(result, 20.0, EPSILON);
+
+    ASSERT_TRUE(xtract[XTRACT_PEAK] == xtract_peak);
+    ASSERT_TRUE(xtract[XTRACT_MMBSES] == xtract_mmbses);
+    ASSERT_TRUE(xtract[XTRACT_SPECTRAL_SUBBAND_CENTROIDS] == xtract_spectral_subband_centroids);
+    ASSERT_TRUE(xtract[XTRACT_MOVING_SUM] == xtract_moving_sum);
+    ASSERT_TRUE(xtract[XTRACT_MOVING_AVERAGE] == xtract_moving_average);
+    ASSERT_TRUE(xtract[XTRACT_MOVING_VARIANCE] == xtract_moving_variance);
+    ASSERT_TRUE(xtract[XTRACT_MOVING_STANDARD_DEVIATION] == xtract_moving_standard_deviation);
+    ASSERT_TRUE(xtract[XTRACT_MOVING_MAX] == xtract_moving_max);
+    ASSERT_TRUE(xtract[XTRACT_MOVING_MIN] == xtract_moving_min);
+    ASSERT_TRUE(xtract[XTRACT_EWMA_AVERAGE] == xtract_ewma_average);
+    ASSERT_TRUE(xtract[XTRACT_EWMA_VARIANCE] == xtract_ewma_variance);
+    ASSERT_TRUE(xtract[XTRACT_MEDIAN] == xtract_median);
+    ASSERT_TRUE(xtract[XTRACT_MEDIAN_ABSOLUTE_DEVIATION] == xtract_median_absolute_deviation);
+    ASSERT_TRUE(xtract[XTRACT_HJORTH_ACTIVITY] == xtract_hjorth_activity);
+    ASSERT_TRUE(xtract[XTRACT_HJORTH_MOBILITY] == xtract_hjorth_mobility);
+    ASSERT_TRUE(xtract[XTRACT_HJORTH_COMPLEXITY] == xtract_hjorth_complexity);
+    ASSERT_TRUE(xtract[XTRACT_TIME_REVERSAL_ASYMMETRY] == xtract_time_reversal_asymmetry);
+    ASSERT_TRUE(xtract[XTRACT_SPECTRAL_ENTROPY] == xtract_spectral_entropy);
+    ASSERT_TRUE(xtract[XTRACT_PETROSIAN_FRACTAL_DIMENSION] == xtract_petrosian_fractal_dimension);
+    ASSERT_TRUE(xtract[XTRACT_KATZ_FRACTAL_DIMENSION] == xtract_katz_fractal_dimension);
+    ASSERT_TRUE(xtract[XTRACT_HIGUCHI_FRACTAL_DIMENSION] == xtract_higuchi_fractal_dimension);
+    ASSERT_TRUE(xtract[XTRACT_PERMUTATION_ENTROPY] == xtract_permutation_entropy);
+    ASSERT_TRUE(xtract[XTRACT_LEMPEL_ZIV_COMPLEXITY] == xtract_lempel_ziv_complexity);
+    ASSERT_TRUE(xtract[XTRACT_SAMPLE_ENTROPY] == xtract_sample_entropy);
+    ASSERT_TRUE(xtract[XTRACT_APPROXIMATE_ENTROPY] == xtract_approximate_entropy);
+    ASSERT_TRUE(xtract[XTRACT_PERIODICITY] == xtract_periodicity);
+    ASSERT_TRUE(xtract[XTRACT_SIGNAL_CONFIDENCE] == xtract_signal_confidence);
+    ASSERT_TRUE(xtract[XTRACT_ATTACK_TIME] == xtract_attack_time);
+    ASSERT_TRUE(xtract[XTRACT_DECAY_TIME] == xtract_decay_time);
+    ASSERT_TRUE(xtract[XTRACT_DECAY_RATE] == xtract_decay_rate);
+    ASSERT_TRUE(xtract[XTRACT_TEMPORAL_CENTROID] == xtract_temporal_centroid);
+    ASSERT_TRUE(xtract[XTRACT_MAX_POSITION] == xtract_max_position);
+    ASSERT_TRUE(xtract[XTRACT_MIN_POSITION] == xtract_min_position);
+    ASSERT_TRUE(xtract[XTRACT_PEAK_ASYMMETRY] == xtract_peak_asymmetry);
+    ASSERT_TRUE(xtract[XTRACT_CROSS_CORRELATION] == xtract_cross_correlation);
+    ASSERT_TRUE(xtract[XTRACT_CROSS_CORRELATION_LAG] == xtract_cross_correlation_lag);
+    ASSERT_TRUE(xtract[XTRACT_KULLBACK_LEIBLER_DIVERGENCE] == xtract_kullback_leibler_divergence);
+    ASSERT_TRUE(xtract[XTRACT_ITAKURA_SAITO_DIVERGENCE] == xtract_itakura_saito_divergence);
+    ASSERT_TRUE(xtract[XTRACT_MODIFIED_KULLBACK_LEIBLER] == xtract_modified_kullback_leibler);
+    ASSERT_TRUE(xtract[XTRACT_SPECTRAL_CONTRAST] == xtract_spectral_contrast);
+    ASSERT_TRUE(xtract[XTRACT_CHROMA] == xtract_chroma);
+    ASSERT_TRUE(xtract[XTRACT_CQT] == xtract_cqt);
+}
+
+/* ===== Descriptor conformance ===== */
+
+enum
+{
+    CONF_N = 16,
+    CONF_FILTERS = 2
+};
+
+static int conf_two_half(const xtract_function_descriptor_t *d)
+{
+    switch (d->data.format)
+    {
+    case XTRACT_SPECTRAL:
+    case XTRACT_SPECTRAL_PEAKS:
+    case XTRACT_SPECTRAL_HARMONICS:
+    case XTRACT_SPECTRAL_MAGNITUDE_PHASE:
+    case XTRACT_SUBFRAMES:
+        return 1;
+    default:
+        return 0;
+    }
+}
+
+static int conf_min_n(const xtract_function_descriptor_t *d)
+{
+    switch (d->id)
+    {
+    case XTRACT_HPS:
+    case XTRACT_SAMPLE_ENTROPY:
+    case XTRACT_APPROXIMATE_ENTROPY:
+        return 4;
+    case XTRACT_IRREGULARITY_K:
+    case XTRACT_SMOOTHNESS:
+    case XTRACT_HJORTH_COMPLEXITY:
+    case XTRACT_TIME_REVERSAL_ASYMMETRY:
+    case XTRACT_PERMUTATION_ENTROPY:
+        return 3;
+    case XTRACT_IRREGULARITY_J:
+    case XTRACT_TEMPORAL_CENTROID:
+    case XTRACT_MAX_POSITION:
+    case XTRACT_MIN_POSITION:
+    case XTRACT_VARIANCE:
+    case XTRACT_LPC:
+    case XTRACT_LPCC:
+    case XTRACT_MOVING_VARIANCE:
+    case XTRACT_MOVING_STANDARD_DEVIATION:
+    case XTRACT_HJORTH_MOBILITY:
+    case XTRACT_SPECTRAL_ENTROPY:
+    case XTRACT_PETROSIAN_FRACTAL_DIMENSION:
+    case XTRACT_KATZ_FRACTAL_DIMENSION:
+    case XTRACT_LEMPEL_ZIV_COMPLEXITY:
+        return 2;
+    case XTRACT_HIGUCHI_FRACTAL_DIMENSION:
+        return 20;
+    case XTRACT_SPECTRUM:
+    case XTRACT_AUTOCORRELATION_FFT:
+    case XTRACT_CQT:
+        return CONF_N;
+    default:
+        break;
+    }
+    if (conf_two_half(d))
+        return 2;
+    return d->data.format == XTRACT_NO_DATA ? 0 : 1;
+}
+
+static int conf_call_n(const xtract_function_descriptor_t *d)
+{
+    switch (d->id)
+    {
+    case XTRACT_SUBBANDS:
+        return 8;
+    case XTRACT_PERMUTATION_ENTROPY:
+        return 16;
+    case XTRACT_FAILSAFE_F0:
+    case XTRACT_WAVELET_F0:
+        return CONF_N;
+    default:
+        return conf_min_n(d);
+    }
+}
+
+static int conf_below_min_code(const xtract_function_descriptor_t *d)
+{
+    if (d->id == XTRACT_SPECTRUM || d->id == XTRACT_AUTOCORRELATION_FFT)
+        return XTRACT_BAD_STATE;
+    return XTRACT_ARGUMENT_ERROR;
+}
+
+static int conf_null_argv_allowed(const xtract_function_descriptor_t *d)
+{
+    return d->argc == 0 || d->id == XTRACT_LPCC || d->id == XTRACT_HPS;
+}
+
+static int conf_bounds_checkable(const xtract_function_descriptor_t *d, int i)
+{
+    if (d->argc < 1 || d->argc > XTRACT_MAXARGS)
+        return 0;
+    if (d->argv.type != XTRACT_FLOAT && d->argv.type != XTRACT_INT)
+        return 0;
+    return !(d->id == XTRACT_SUBBANDS && i == 0);
+}
+
+static double conf_default(const xtract_function_descriptor_t *d, int i)
+{
+    double v = d->argv.def[i];
+
+    if (d->argv.min[i] != XTRACT_UNBOUNDED_MIN && v < d->argv.min[i])
+        v = d->argv.min[i];
+    if (d->argv.max[i] != XTRACT_UNBOUNDED_MAX && v > d->argv.max[i])
+        v = d->argv.max[i];
+    return v;
+}
+
+static void conf_set(const xtract_function_descriptor_t *d, double *argf, int *argi, int i, double v)
+{
+    if (d->argv.type == XTRACT_INT)
+        argi[i] = (int)v;
+    else
+        argf[i] = v;
+}
+
+static const void *conf_argv(const xtract_function_descriptor_t *d, double *argf, int *argi,
+                             const xtract_mel_filter *mel, const int *bark, const double *window,
+                             const xtract_cqt_kernel *cqt)
+{
+    int i;
+
+    if (d->argc == 0)
+        return NULL;
+    if (d->argv.type == XTRACT_MEL_FILTER)
+        return mel;
+    if (d->argv.type == XTRACT_CQT_KERNEL)
+        return cqt;
+    if (d->id == XTRACT_BARK_COEFFICIENTS)
+        return bark;
+    if (d->id == XTRACT_WINDOWED)
+        return window;
+    for (i = 0; i < d->argc && i < XTRACT_MAXARGS; i++)
+        conf_set(d, argf, argi, i, conf_default(d, i));
+    return d->argv.type == XTRACT_INT ? (const void *)argi : (const void *)argf;
+}
+
+static void conf_fill_data(const xtract_function_descriptor_t *d, double *data, int n)
+{
+    int i;
+
+    for (i = 0; i < n; i++)
+        data[i] = 1.0;
+    if (conf_two_half(d))
+    {
+        for (i = n / 2; i < n; i++)
+            data[i] = (i - n / 2 + 1) * 100.0;
+    }
+}
+
+UTEST(descriptors, every_feature_conforms_to_its_descriptor)
+{
+    xtract_function_descriptor_t *fd = xtract_make_descriptors();
+    double data[2 * CONF_N + 64];
+    double result[2 * CONF_N + 64];
+    double argf[XTRACT_MAXARGS];
+    int argi[XTRACT_MAXARGS];
+    double window[XTRACT_WINDOW_SIZE];
+    double row_store[CONF_FILTERS][CONF_N];
+    double *rows[CONF_FILTERS];
+    xtract_mel_filter mel;
+    xtract_cqt_kernel *cqt = xtract_init_cqt(CONF_N, 1000.0, 100.0, 1, 2, 0.01);
+    int bark[XTRACT_BARK_BANDS];
+    int f, i, rv;
+    const void *argv;
+
+    ASSERT_TRUE(fd != NULL);
+    ASSERT_TRUE(cqt != NULL);
+    xtract_init_fft(CONF_N, XTRACT_SPECTRUM);
+    xtract_init_fft(CONF_N, XTRACT_AUTOCORRELATION_FFT);
+    for (i = 0; i < CONF_FILTERS; i++)
+        rows[i] = row_store[i];
+    xtract_init_mfcc(CONF_N, 22050.0, XTRACT_EQUAL_GAIN, 100.0, 8000.0, CONF_FILTERS, rows);
+    mel.n_filters = CONF_FILTERS;
+    mel.filters = rows;
+    mel.dct_table = NULL;
+    xtract_init_bark(2 * CONF_N, 44100.0, bark);
+    xtract_init_wavelet_f0_state();
+    for (i = 0; i < XTRACT_WINDOW_SIZE; i++)
+        window[i] = 1.0;
+
+    for (f = 0; f < XTRACT_FEATURES; f++)
+    {
+        const xtract_function_descriptor_t *d = &fd[f];
+        const int min_n = conf_min_n(d);
+        const int call_n = conf_call_n(d);
+
+        conf_fill_data(d, data, call_n);
+        argv = conf_argv(d, argf, argi, &mel, bark, window, cqt);
+
+        rv = xtract[f](data, call_n, argv, result);
+        if (rv == XTRACT_FEATURE_NOT_IMPLEMENTED)
+        {
+            ASSERT_TRUE_MSG(f == XTRACT_POWER, d->algo.name);
+            continue;
+        }
+        ASSERT_NE_MSG(rv, XTRACT_ARGUMENT_ERROR, d->algo.name);
+        ASSERT_NE_MSG(rv, XTRACT_BAD_STATE, d->algo.name);
+
+        if (conf_null_argv_allowed(d))
+            ASSERT_NE_MSG(xtract[f](data, call_n, NULL, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
+        else
+            ASSERT_EQ_MSG(xtract[f](data, call_n, NULL, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
+
+        if (min_n > 0)
+            ASSERT_EQ_MSG(xtract[f](data, min_n - 1, argv, result), conf_below_min_code(d), d->algo.name);
+        if (conf_two_half(d))
+            ASSERT_EQ_MSG(xtract[f](data, min_n + 1, argv, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
+        if (d->data.format == XTRACT_BARK_COEFFS)
+            ASSERT_EQ_MSG(xtract[f](data, XTRACT_BARK_BANDS + 1, argv, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
+
+        for (i = 0; i < d->argc && i < XTRACT_MAXARGS; i++)
+        {
+            if (!conf_bounds_checkable(d, i))
+                continue;
+            if (d->argv.min[i] != XTRACT_UNBOUNDED_MIN)
+            {
+                conf_set(d, argf, argi, i, d->argv.min[i] - 1.0);
+                ASSERT_EQ_MSG(xtract[f](data, call_n, argv, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
+                conf_set(d, argf, argi, i, d->argv.min[i]);
+                ASSERT_NE_MSG(xtract[f](data, call_n, argv, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
+            }
+            if (d->argv.max[i] != XTRACT_UNBOUNDED_MAX)
+            {
+                conf_set(d, argf, argi, i, d->argv.max[i] + 1.0);
+                ASSERT_EQ_MSG(xtract[f](data, call_n, argv, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
+                conf_set(d, argf, argi, i, d->argv.max[i]);
+                ASSERT_NE_MSG(xtract[f](data, call_n, argv, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
+            }
+            conf_set(d, argf, argi, i, conf_default(d, i));
+        }
+    }
+
+    xtract_free_cqt(cqt);
+    ASSERT_EQ(xtract_free_descriptors(fd), XTRACT_SUCCESS);
 }

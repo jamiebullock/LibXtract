@@ -25,9 +25,9 @@ extern "C"
     /** \brief Extract frequency domain spectrum from time domain signal
      *
      * \param *data: a pointer to the first element in an array of doubles representing an audio vector
-     * \param N: the number of array elements to be considered
-     * \param *argv: a pointer to an array of doubles, the first representing (samplerate / N), the second will be cast to an integer and determines the spectrum type (e.g. XTRACT_MAGNITUDE_SPECTRUM, XTRACT_LOG_POWER_SPECTRUM). The third argument determines whether or not the DC component is included in the output. If argv[2] == 0 (the default), the N/2 coefficients are bins 1 to N/2, so the Nyquist bin is included, DC is not, and the frequency of coefficient m is (m + 1) * samplerate / N. If argv[2] == 1, the N/2 coefficients are bins 0 to N/2 - 1, so DC is included, the Nyquist bin is not, and the frequency of coefficient m is m * samplerate / N. The output is N elements in either case. The fourth argument determines whether the magnitude/power coefficients are to be normalised. If argv[3] == 1, then the coefficients are normalised.
-     * \param *result: a pointer to an array of size N containing N/2 magnitude/power/log magnitude/log power coefficients and N/2 bin frequencies.
+     * \param N: the number of array elements to be considered, equal to the size passed to xtract_init_fft(); any other size, or no initialisation, is a bad state
+     * \param *argv: a pointer to an array of doubles, the first representing (samplerate / N), finite and at least 0 (0 selects 44100 / N), the second will be cast to an integer and determines the spectrum type, a value of the enumeration xtract_spectrum_ (e.g. XTRACT_MAGNITUDE_SPECTRUM, XTRACT_LOG_POWER_SPECTRUM). The third argument determines whether or not the DC component is included in the output. If argv[2] == 0 (the default), the N/2 coefficients are bins 1 to N/2, so the Nyquist bin is included, DC is not, and the frequency of coefficient m is (m + 1) * samplerate / N. If argv[2] == 1, the N/2 coefficients are bins 0 to N/2 - 1, so DC is included, the Nyquist bin is not, and the frequency of coefficient m is m * samplerate / N. The output is N elements in either case. The fourth argument determines whether the magnitude/power coefficients are to be normalised. If argv[3] == 1, then the coefficients are normalised. Both flags must be 0 or 1.
+     * \param *result: a pointer to an array of size N containing N/2 magnitude/power/log magnitude/log power coefficients and N/2 bin frequencies. For XTRACT_MAGNITUDE_PHASE_SPECTRUM the second N/2 elements are instead the bin phases in radians, in the convention where a cosine centred on a bin has phase 0 and a sine -pi/2, on every platform.
      *
      * The magnitude/power coefficients are scaled to the range 0-1 so that for a given coefficient x, 0 <= x <= 1
      *
@@ -39,17 +39,19 @@ extern "C"
     /** \brief Extract autocorrelation from time domain signal using FFT based method
      *
      * \param *data: a pointer to the first element in an array of doubles representing an audio vector
-     * \param N: the number of array elements to be considered
+     * \param N: the number of array elements to be considered, equal to the size passed to xtract_init_fft(); any other size, or no initialisation, is a bad state
      * \param *argv: a pointer to NULL
      * \param *result: the autocorrelation of N values from the array pointed to by *data
+     *
+     * \note Before calling xtract_autocorrelation_fft(), the FFT must be initialised by calling xtract_init_fft(N, XTRACT_AUTOCORRELATION_FFT)
      */
     int xtract_autocorrelation_fft(const double *data, const int N, const void *argv, double *result);
 
     /** \brief Extract Mel Frequency Cepstral Coefficients based on a method described by Rabiner
      *
      * \param *data: a pointer to the first element in an array of spectral coefficients, the first half of the array pointed to by *result from xtract_spectrum() called with DC included (argv[2] == 1), so that element k is bin k as the filterbank expects. Rabiner and Juang define the mel cepstrum on the power spectrum (XTRACT_POWER_SPECTRUM); a magnitude spectrum may be passed instead
-     * \param N: the number of coefficients, half the transform size the filterbank was initialised with
-     * \param *argv: a pointer to a data structure of type xtract_mel_filter, containing n_filters coefficient tables to make up a mel-spaced filterbank
+     * \param N: the number of coefficients, half the transform size the filterbank was initialised with, at least 1
+     * \param *argv: a pointer to a data structure of type xtract_mel_filter, containing n_filters coefficient tables to make up a mel-spaced filterbank; n_filters must be at least 1 and filters, and each of its rows, non-NULL, each row holding at least N coefficients
      * \param *result: a pointer to an array containing the resultant MFCC
      *
      * The data structure pointed to by *argv must be obtained by first calling xtract_init_mfcc. Its dct_table field is passed to xtract_dct() as the table for the final transform; set it from xtract_init_dct(n_filters) or to NULL
@@ -62,8 +64,8 @@ extern "C"
      * is applied to the magnitude spectrum and the result is log-scaled.
      *
      * \param *data: a pointer to the first element in an array of spectral coefficients, the first half of the array pointed to by *result from xtract_spectrum() called with DC included (argv[2] == 1), so that element k is bin k as the filterbank expects. Rabiner and Juang define the mel cepstrum on the power spectrum (XTRACT_POWER_SPECTRUM); a magnitude spectrum may be passed instead
-     * \param N: the number of coefficients, half the transform size the filterbank was initialised with
-     * \param *argv: a pointer to a data structure of type xtract_mel_filter, containing n_filters coefficient tables to make up a mel-spaced filterbank
+     * \param N: the number of coefficients, half the transform size the filterbank was initialised with, at least 1
+     * \param *argv: a pointer to a data structure of type xtract_mel_filter, containing n_filters coefficient tables to make up a mel-spaced filterbank; n_filters must be at least 1 and filters, and each of its rows, non-NULL, each row holding at least N coefficients
      * \param *result: a pointer to an array containing the resultant log mel energies (one per filter)
      *
      * The data structure pointed to by *argv must be obtained by first calling xtract_init_mfcc
@@ -76,8 +78,8 @@ extern "C"
      * offering superior noise robustness compared to MFCCs.
      *
      * \param *data: a pointer to the first element in an array of spectral coefficients, the first half of the array pointed to by *result from xtract_spectrum() called with DC included (argv[2] == 1), so that element k is bin k as the filterbank expects. the gammatone filterbank is applied to the power spectrum (XTRACT_POWER_SPECTRUM) in the same way; a magnitude spectrum may be passed instead
-     * \param N: the number of coefficients, half the transform size the filterbank was initialised with
-     * \param *argv: a pointer to a data structure of type xtract_mel_filter, containing n_filters coefficient tables to make up a gammatone filterbank
+     * \param N: the number of coefficients, half the transform size the filterbank was initialised with, at least 1
+     * \param *argv: a pointer to a data structure of type xtract_mel_filter, containing n_filters coefficient tables to make up a gammatone filterbank; n_filters must be at least 1 and filters, and each of its rows, non-NULL, each row holding at least N coefficients
      * \param *result: a pointer to an array containing the resultant GFCC
      *
      * The data structure pointed to by *argv must be obtained by first calling xtract_init_gfcc. Its dct_table field is passed to xtract_dct() as the table for the final transform; set it from xtract_init_dct(n_filters) or to NULL
@@ -90,8 +92,8 @@ extern "C"
      * is applied to the magnitude spectrum and the result is log-scaled.
      *
      * \param *data: a pointer to the first element in an array of spectral coefficients, the first half of the array pointed to by *result from xtract_spectrum() called with DC included (argv[2] == 1), so that element k is bin k as the filterbank expects. the gammatone filterbank is applied to the power spectrum (XTRACT_POWER_SPECTRUM) in the same way; a magnitude spectrum may be passed instead
-     * \param N: the number of coefficients, half the transform size the filterbank was initialised with
-     * \param *argv: a pointer to a data structure of type xtract_mel_filter, containing n_filters coefficient tables to make up a gammatone filterbank
+     * \param N: the number of coefficients, half the transform size the filterbank was initialised with, at least 1
+     * \param *argv: a pointer to a data structure of type xtract_mel_filter, containing n_filters coefficient tables to make up a gammatone filterbank; n_filters must be at least 1 and filters, and each of its rows, non-NULL, each row holding at least N coefficients
      * \param *result: a pointer to an array containing the resultant log gammatone energies (one per filter)
      *
      * The data structure pointed to by *argv must be obtained by first calling xtract_init_gfcc
@@ -101,8 +103,8 @@ extern "C"
     /** \brief Extract Mel based Multi-Band Spectral Entropy Signature coefficients
      *
      * \param *data: a magnitude/phase spectrum, the result from xtract_spectrum() by XTRACT_MAGNITUDE_PHASE_SPECTRUM. The first N/2 elements are bin magnitudes and the next N/2 the corresponding phases.
-     * \param N: the number of array elements to be considered (the full magnitude+phase array length; N/2 frequency bins are processed)
-     * \param *argv: a pointer to a data structure of type xtract_mel_filter, containing n_filters coefficient tables to make up a mel-spaced filterbank
+     * \param N: the number of array elements to be considered (the full magnitude+phase array length; N/2 frequency bins are processed), at least 2 and even
+     * \param *argv: a pointer to a data structure of type xtract_mel_filter, containing n_filters coefficient tables to make up a mel-spaced filterbank; n_filters must be at least 1 and filters, and each of its rows, non-NULL, each row holding at least N / 2 coefficients
      * \param *result: a pointer to an array of n_filters elements containing the resultant MEL-MBSES
      *
      * Each filter band's complex coefficients are modelled as a zero-mean bivariate (real, imaginary) Gaussian and the band's value is that distribution's differential entropy, H = ln(2*pi*e) + (1/2)ln(det of the 2x2 covariance).
@@ -114,10 +116,10 @@ extern "C"
 
     /** \brief Extract centroids of the spectral mel subbands
      *
-     * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector, (e.g. the array pointed to by *result from xtract_spectrum(), xtract_peak_spectrum() or xtract_harmonic_spectrum()).
-     * \param N: the number of array elements to be considered
-     * \param *argv: a pointer to a data structure of type xtract_mel_filter, containing n_filters coefficient tables to make up a mel-spaced filterbank
-     * \param *result: a pointer to an array containing the spectral band centroids
+     * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector, (e.g. the array pointed to by *result from xtract_spectrum(), xtract_peak_spectrum() or xtract_harmonic_spectrum()): N/2 amplitudes followed by N/2 frequencies
+     * \param N: the size of the array pointed to by *data, at least 2 and even
+     * \param *argv: a pointer to a data structure of type xtract_mel_filter, containing n_filters coefficient tables to make up a mel-spaced filterbank over the N/2 bins, the bank xtract_init_mfcc() builds for the transform that produced the spectrum; n_filters must be at least 1 and filters, and each of its rows, non-NULL, each row holding at least N / 2 coefficients
+     * \param *result: a pointer to an array of n_filters doubles containing the spectral band centroids, in the unit of the frequencies
      *
      * Note: for a more 'accurate' result *result from xtract_peak_spectrum() can be passed in. This gives the interpolated peak frequency locations.
      */
@@ -125,7 +127,7 @@ extern "C"
 
     /** \brief Extract the Discrete Cosine transform of a time domain signal
      * \param *data: a pointer to the first element in an array of doubles representing an audio vector
-     * \param N: the number of array elements to be considered
+     * \param N: the number of array elements to be considered, at least 1
      * \param *argv: a pointer to a cosine table as allocated by xtract_init_dct(N), or NULL. Both give the same result but the table avoids the need to recompute the table on each call
      * \param *result: a pointer to an array of at least N doubles to receive the dct coefficients
      */
@@ -134,7 +136,7 @@ extern "C"
     /** \brief Extract autocorrelation from time domain signal using time-domain autocorrelation technique
      *
      * \param *data: a pointer to the first element in an array of doubles representing an audio vector
-     * \param N: the number of array elements to be considered
+     * \param N: the number of array elements to be considered, at least 1
      * \param *argv: a pointer to NULL
      * \param *result: the autocorrelation of N values from the array pointed to by *data
      */
@@ -143,7 +145,7 @@ extern "C"
     /** \brief Extract Average Magnitude Difference Function from time domain signal
      *
      * \param *data: a pointer to the first element in an array of doubles representing an audio vector
-     * \param N: the number of array elements to be considered
+     * \param N: the number of array elements to be considered, at least 1
      * \param *argv: a pointer to NULL
      * \param *result: the AMDF of N values from the array pointed to by *data
      */
@@ -152,17 +154,17 @@ extern "C"
     /** \brief Extract Average Squared Difference Function from time domain signal
      *
      * \param *data: a pointer to the first element in an array of doubles representing an audio vector
-     * \param N: the number of array elements to be considered
+     * \param N: the number of array elements to be considered, at least 1
      * \param *argv: a pointer to NULL
      * \param *result: the ASDF of N values from the array pointed to by *data
      */
     int xtract_asdf(const double *data, const int N, const void *argv, double *result);
 
     /** \brief Extract Bark band coefficients based on a method
-     * \param *data: a pointer to the first element in an array of doubles representing the magnitude coefficients from the magnitude spectrum of an audio vector, (e.g. the first half of the array pointed to by *result from xtract_spectrum().
-     * \param N: the number of array elements to be considered
-     * \param *argv: a pointer to an array of ints representing the limits of each bark band. This can be obtained  by calling xtract_init_bark.
-     * \param *result: a pointer to an array containing resultant bark coefficients
+     * \param *data: a pointer to the first element in an array of spectral coefficients, the first half of the array pointed to by *result from xtract_spectrum() called with DC included (argv[2] == 1), so that element k is bin k as the band limits expect
+     * \param N: the number of coefficients, half the transform size the band limits were initialised with, at least 1
+     * \param *argv: a pointer to an array of XTRACT_BARK_BANDS ints representing the limits of each bark band, obtained by calling xtract_init_bark() with the transform size; each limit must be at least 0 and no lower than the one before it
+     * \param *result: a pointer to an array of XTRACT_BARK_BANDS doubles containing the resultant bark coefficients, the sum of the coefficients in each band
      *
      * The limits array pointed to by *argv must be obtained by first calling xtract_init_bark
      *
@@ -170,9 +172,9 @@ extern "C"
     int xtract_bark_coefficients(const double *data, const int N, const void *argv, double *result);
 
     /** \brief Extract the amplitude and frequency of spectral peaks from a magnitude spectrum
-     * \param *data: a pointer to an array of size N containing N magnitude/power/log magnitude/log power coefficients. (e.g. the first half of the array pointed to by *result from xtract_spectrum().
-     * \param N: the size of the input array (note: it is assumed that enough memory has been allocated for an output array twice the size)
-     * \param *argv: a pointer to an array of doubles, the first representing (samplerate / N), the second representing the peak threshold as percentage of the magnitude of the maximum peak found
+     * \param *data: a pointer to an array of size N containing N magnitude/power/log magnitude/log power coefficients: the first half of the array pointed to by *result from xtract_spectrum() with DC discarded (argv[2] == 0, the default), so that coefficient n is bin n + 1 and the reported frequencies follow that layout
+     * \param N: the size of the input array, at least 1 (note: it is assumed that enough memory has been allocated for an output array twice the size)
+     * \param *argv: a pointer to an array of doubles, the first representing the bin spacing in Hz, the sample rate divided by the transform length (twice N for the first half of an xtract_spectrum() output), finite and at least 0 (0 selects 44100 Hz over a transform of 2N), the second representing the peak threshold as percentage of the magnitude of the maximum peak found, from 0 to 100
      * \param *result: a pointer to an array of size N * 2 containing N magnitude/power/log magnitude/log power coefficients and N bin frequencies.
      *
      */
@@ -180,8 +182,8 @@ extern "C"
 
     /** \brief Extract the harmonic spectrum of from a of a peak spectrum
      * \param *data: a pointer to the first element in an array of doubles representing the peak spectrum of an audio vector (e.g. *result from  xtract_peaks). It is expected that the first half of the array pointed to by *data will contain amplitudes for each peak considered, and the the second half will contain the respective frequencies
-     * \param N: the size of the array pointed to by *data
-     * \param *argv: a pointer to an array containing the fundamental (f0) of the spectrum, and a threshold (t) where 0<=t<=1.0, and t determines the distance from the nearest harmonic number within which a partial can be considered harmonic.
+     * \param N: the size of the array pointed to by *data, at least 2 and even
+     * \param *argv: a pointer to an array containing the fundamental (f0) of the spectrum, finite and at least 0 (0 gives no result), and a threshold (t) where 0<=t<=1.0, and t determines the distance from the nearest harmonic number within which a partial can be considered harmonic.
      * \param *result: a pointer to an array of size N containing N/2 magnitude coefficients and N/2 bin frequencies.
      */
     int xtract_harmonic_spectrum(const double *data, const int N, const void *argv, double *result);
@@ -193,7 +195,7 @@ extern "C"
      * Returns N-1 reflection (PARCOR) coefficients and N-1 LPC coefficients via *result
      *
      * \param *data: N autocorrelation values e.g the data pointed to by *result from xtract_autocorrelation()
-     * \param N: the number of autocorrelation values to be considered
+     * \param N: the number of autocorrelation values to be considered, at least 2
      * \param *argv: a pointer to NULL
      * \param *result: a pointer to an array containing N-1 reflection coefficients and N-1 LPC coefficients.
      *
@@ -203,8 +205,8 @@ extern "C"
 
     /** \brief Extract Linear Predictive Coding Cepstral Coefficients
      *
-     * \param *data: a pointer to the first element in an array of LPC coeffiecients e.g. a pointer to the second half of the array pointed to by *result from xtract_lpc()
-     * \param N: the number of LPC coefficients to be considered
+     * \param *data: a pointer to an array of N doubles: a gain term followed by the p LPC coefficients a[1] to a[p], e.g. one element followed by the second half of the array pointed to by *result from xtract_lpc(). The gain term is not read
+     * \param N: the size of the array pointed to by *data, one more than the number of LPC coefficients p, at least 2
      * \param *argv: a pointer to an int representing the order (Q) of the result vector. Must be greater than 0. According to Rabiner and Juang the recommended ratio is Q ~ (3/2)p where p is the number of LPC coefficients and Q > p; XTRACT_LPCC_CEPSTRUM_ORDER(p) computes this value. If argv is NULL, Q defaults to p (the result is then no longer than the input).
      * \param *result: a pointer to an array containing the resultant LPCC.
      *
@@ -216,8 +218,8 @@ extern "C"
     /** \brief Extract subbands from a spectrum
      *
      * \param *data: a pointer to an array of size N containing N magnitude/power/log magnitude/log power coefficients. (e.g. the first half of the array pointed to by *result from xtract_spectrum().
-     * \param N: the number of elements from the array pointed to by *data to be considered
-     * \param *argv: A pointer to an array containing four integers. The first represents the \a scalar extraction function to applied to each subband e.g. XTRACT_SUM or XTRACT_MEAN, the second represents the number of subbands required, and the third represents the frequency scale to be used for the subband bounds as defined in the enumeration xtract_subband_scales_ (libxtract.h). The fourth integer represent the start point of the subbands as a location in the input array as pointed to by *data (e.g. a value of 5 would start the subband extraction at bin 5)
+     * \param N: the number of elements from the array pointed to by *data to be considered, at least 1
+     * \param *argv: A pointer to an array containing four integers. The first represents the \a scalar extraction function to applied to each subband e.g. XTRACT_SUM or XTRACT_MEAN, one of the features listed below; the second represents the number of subbands required, at least 1; the third represents the frequency scale to be used for the subband bounds as defined in the enumeration xtract_subband_scales_ (libxtract.h). The fourth integer represent the start point of the subbands as a location in the input array as pointed to by *data (e.g. a value of 5 would start the subband extraction at bin 5), from 0 to N - 1. More linear bands than there are bins after the start, or an octave start of 0, gives a band of no bins and is an argument error
      * \param *result: A pointer to an array containing the resultant subband values. The calling function is responsible for allocating and freeing memory for *result. xtract_subbands() assumes that at least argv[1] * sizeof(double) bytes have been allocated. If the requested nbands extends the subband range beyond N, then the remaining bands will be set to 0. If the array pointed to by *result has more than argv[1] elements, the superfluous elements will be unchanged.
      *
      * xtract_subbands() divides a spectrum into subbands and applies the function given by argv[0] to the values in each subband to give a 'reduced' representation of the spectrum as *result
@@ -226,10 +228,111 @@ extern "C"
      * Specifying XTRACT_LINEAR_SUBBANDS will extract argv[1] equal sized subbands between the start bin and N
      *
      *
-     * It is assumed that a sensible function will be given in argv[0], and for this function argv will always be NULL. Sensible values for argv[0] are XTRACT_MEAN and XTRACT_SUM, although something like XTRACT_IRREGULARITY_K might yield interesting results.
+     * argv[0] must be a feature that reduces a plain vector to one scalar with a NULL argv: XTRACT_MEAN, XTRACT_SUM, XTRACT_HIGHEST_VALUE, XTRACT_NONZERO_COUNT, XTRACT_RMS_AMPLITUDE, XTRACT_ZCR, XTRACT_FLATNESS, XTRACT_IRREGULARITY_K, XTRACT_IRREGULARITY_J, XTRACT_SMOOTHNESS, XTRACT_LOUDNESS or XTRACT_SHARPNESS. Any other feature is an argument error. The feature is called on each band with a NULL argv, and its own argument checks apply to the band
      *
      */
     int xtract_subbands(const double *data, const int N, const void *argv, double *result);
+
+    /** \brief Extract the sum of a series over a sliding window
+     *
+     * \param *data: a pointer to the first element in an array of doubles
+     * \param N: the number of elements in the array pointed to by *data, at least the window length
+     * \param *argv: a pointer to an int holding the window length, at least 1 and at most N
+     * \param *result: a pointer to an array of N - window + 1 doubles, one sum per window position, the first over the first window elements of *data
+     */
+    int xtract_moving_sum(const double *data, const int N, const void *argv, double *result);
+
+    /** \brief Extract the mean of a series over a sliding window
+     *
+     * \param *data: a pointer to the first element in an array of doubles
+     * \param N: the number of elements in the array pointed to by *data, at least the window length
+     * \param *argv: a pointer to an int holding the window length, at least 1 and at most N
+     * \param *result: a pointer to an array of N - window + 1 doubles, one mean per window position, the first over the first window elements of *data
+     */
+    int xtract_moving_average(const double *data, const int N, const void *argv, double *result);
+
+    /** \brief Extract the variance of a series over a sliding window
+     *
+     * \param *data: a pointer to the first element in an array of doubles
+     * \param N: the number of elements in the array pointed to by *data, at least the window length
+     * \param *argv: a pointer to an int holding the window length, at least 2 and at most N
+     * \param *result: a pointer to an array of N - window + 1 doubles, one sample variance (with Bessel's correction, as xtract_variance gives) per window position, the first over the first window elements of *data
+     */
+    int xtract_moving_variance(const double *data, const int N, const void *argv, double *result);
+
+    /** \brief Extract the standard deviation of a series over a sliding window
+     *
+     * \param *data: a pointer to the first element in an array of doubles
+     * \param N: the number of elements in the array pointed to by *data, at least the window length
+     * \param *argv: a pointer to an int holding the window length, at least 2 and at most N
+     * \param *result: a pointer to an array of N - window + 1 doubles, one sample standard deviation per window position, the square root of what xtract_moving_variance gives
+     */
+    int xtract_moving_standard_deviation(const double *data, const int N, const void *argv, double *result);
+
+    /** \brief Extract the largest value of a series over a sliding window
+     *
+     * \param *data: a pointer to the first element in an array of doubles
+     * \param N: the number of elements in the array pointed to by *data, at least the window length
+     * \param *argv: a pointer to an int holding the window length, at least 1 and at most N
+     * \param *result: a pointer to an array of N - window + 1 doubles, one maximum per window position, the first over the first window elements of *data
+     */
+    int xtract_moving_max(const double *data, const int N, const void *argv, double *result);
+
+    /** \brief Extract the smallest value of a series over a sliding window
+     *
+     * \param *data: a pointer to the first element in an array of doubles
+     * \param N: the number of elements in the array pointed to by *data, at least the window length
+     * \param *argv: a pointer to an int holding the window length, at least 1 and at most N
+     * \param *result: a pointer to an array of N - window + 1 doubles, one minimum per window position, the first over the first window elements of *data
+     */
+    int xtract_moving_min(const double *data, const int N, const void *argv, double *result);
+
+    /** \brief Extract the exponentially weighted moving average of a series
+     *
+     * \param *data: a pointer to the first element in an array of doubles
+     * \param N: the number of elements in the array pointed to by *data, at least 1
+     * \param *argv: a pointer to a double holding the smoothing factor, the weight given to each new element, between 0 and 1 inclusive
+     * \param *result: a pointer to an array of N doubles, one average per element of *data, the first equal to the first element
+     */
+    int xtract_ewma_average(const double *data, const int N, const void *argv, double *result);
+
+    /** \brief Extract the exponentially weighted moving variance of a series about its exponentially weighted moving average
+     *
+     * \param *data: a pointer to the first element in an array of doubles
+     * \param N: the number of elements in the array pointed to by *data, at least 1
+     * \param *argv: a pointer to a double holding the smoothing factor, the weight given to each new element, between 0 and 1 inclusive
+     * \param *result: a pointer to an array of N doubles, one variance per element of *data, the first being 0
+     */
+    int xtract_ewma_variance(const double *data, const int N, const void *argv, double *result);
+
+    /** \brief Extract the spectral contrast of a spectrum: in each of a set of octave bands, the natural log of the ratio of the mean of the band's largest coefficients to the mean of its smallest
+     *
+     * \param *data: a pointer to the first element in an array of doubles containing N/2 magnitude/power coefficients followed by N/2 bin frequencies in Hz, e.g. the *result from xtract_spectrum()
+     * \param N: the size of the array pointed to by *data, at least 2 and even
+     * \param *argv: a pointer to an array of three doubles: the number of octave bands, cast to an integer, at least 1; the lower edge of the first octave band in Hz, finite and at least 0; and the fraction of a band's bins averaged at each end, from 0 to 1, at least one bin being averaged whatever the fraction
+     * \param *result: a pointer to an array of argv[0] + 1 doubles: the contrast of the bins below the first edge, then of each octave band from that edge, the last band running to the highest bin frequency. A coefficient that is NaN is left out of its band. The array is zeroed with no result when a band contains no bin or the mean of its smallest coefficients is not positive
+     */
+    int xtract_spectral_contrast(const double *data, const int N, const void *argv, double *result);
+
+    /** \brief Extract the chroma of a spectrum: the coefficients of the bins nearest each of the twelve pitch classes summed and scaled so that the largest class is 1
+     *
+     * \param *data: a pointer to the first element in an array of doubles containing N/2 magnitude/power coefficients followed by N/2 bin frequencies in Hz, e.g. the *result from xtract_spectrum(). The coefficients are summed as given, so a power spectrum gives the energy in each class
+     * \param N: the size of the array pointed to by *data, at least 2 and even
+     * \param *argv: a pointer to an array of three doubles, each finite and at least 0: the frequency of A4 in Hz, with 0 selecting 440; the lowest bin frequency included, with 0 including every bin above 0 Hz; and the highest bin frequency included, with 0 including every bin above the lowest, and otherwise greater than the lowest. The 40 Hz and 5000 Hz range the descriptor gives as defaults is applied only when passed
+     * \param *result: a pointer to an array of XTRACT_PITCH_CLASSES doubles, the first for C and the last for B, each from the bins whose frequency rounds to that pitch class in any octave, scaled to a maximum of 1. The array is zeroed with no result when no included bin has a positive coefficient; bins at or below 0 Hz are never included
+     *
+     * \note For pitch classes from constant-Q bands, which resolve the semitones of the low octaves that the bins of xtract_spectrum() merge, pass the *result of xtract_cqt() with N twice its number of bands
+     */
+    int xtract_chroma(const double *data, const int N, const void *argv, double *result);
+
+    /** \brief Extract the constant-Q spectrum of a magnitude/phase spectrum: the magnitude in each band of a kernel from xtract_init_cqt(), followed by the band centre frequencies
+     *
+     * \param *data: a magnitude/phase spectrum with DC included, the *result of xtract_spectrum() by XTRACT_MAGNITUDE_PHASE_SPECTRUM with the third argument 1: the first N/2 elements are the bin magnitudes from DC upward and the next N/2 their phases
+     * \param N: the number of array elements to be considered, at least 2 and even, and equal to the N the kernel was built for
+     * \param *argv: a pointer to an xtract_cqt_kernel from xtract_init_cqt()
+     * \param *result: a pointer to an array of twice the kernel's n_bins doubles: the n_bins band magnitudes, on the scale of the magnitudes given, followed by the band centre frequencies in Hz. This is the layout of the *result of xtract_spectrum(), so it can be passed on to xtract_chroma(), xtract_spectral_contrast() and the other functions that take a spectrum with its frequencies
+     */
+    int xtract_cqt(const double *data, const int N, const void *argv, double *result);
     /** @} */
 
 #ifdef __cplusplus

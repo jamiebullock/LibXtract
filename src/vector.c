@@ -13,6 +13,7 @@
 #include "fft.h"
 
 #include "xtract/libxtract.h"
+#include "xtract_cqt_private.h"
 #include "xtract_macros_private.h"
 #include "xtract_globals_private.h"
 
@@ -25,6 +26,7 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
     int vector = 0;
     int withDC = 0;
     int normalise = 0;
+    double type, dc, norm;
     double q = 0.0;
     double temp = 0.0;
     double max = 0.0;
@@ -41,23 +43,29 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
     double half = 0.5;
 #endif
 
+    if (argv == NULL)
+        return XTRACT_ARGUMENT_ERROR;
+
     q = *(double *)argv;
-    vector = xtract_argv_int(*((double *)argv + 1));
-    withDC = xtract_argv_int(*((double *)argv + 2));
-    normalise = xtract_argv_int(*((double *)argv + 3));
+    type = *((double *)argv + 1);
+    dc = *((double *)argv + 2);
+    norm = *((double *)argv + 3);
+    if (!isfinite(q) || q < 0.0 ||
+        !(type >= XTRACT_MAGNITUDE_SPECTRUM && type <= XTRACT_MAGNITUDE_PHASE_SPECTRUM) ||
+        (dc != 0.0 && dc != 1.0) || (norm != 0.0 && norm != 1.0))
+        return XTRACT_ARGUMENT_ERROR;
+    vector = (int)type;
+    withDC = (int)dc;
+    normalise = (int)norm;
+
+#ifdef USE_OOURA
+    if (!ooura_data_spectrum.initialised || ooura_data_spectrum.N != N)
+#else
+    if (!vdsp_data_spectrum.initialised || vdsp_data_spectrum.N != N)
+#endif
+        return XTRACT_BAD_STATE;
 
     XTRACT_CHECK_q;
-#ifdef USE_OOURA
-    if (!ooura_data_spectrum.initialised)
-#else
-    if (!vdsp_data_spectrum.initialised)
-#endif
-    {
-        fprintf(stderr,
-                "libxtract: error: xtract_spectrum() failed, "
-                "fft data unitialised.\n");
-        return XTRACT_NO_RESULT;
-    }
 
 #ifdef USE_OOURA
     /* ooura is in-place
@@ -271,8 +279,10 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
             }
             else
             {
+                /* rdft returns the imaginary part as sum a[j] sin(2 pi j k / n),
+                 * the conjugate of the transform whose phases are given */
                 real = fft[n * 2];
-                imag = fft[n * 2 + 1];
+                imag = -fft[n * 2 + 1];
             }
 #else
             if (n == M && !withDC)
@@ -380,6 +390,13 @@ int xtract_autocorrelation_fft(const double *data, const int N, const void *argv
 #endif
 
 #ifdef USE_OOURA
+    if (!ooura_data_autocorrelation_fft.initialised || ooura_data_autocorrelation_fft.N != N)
+#else
+    if (!vdsp_data_autocorrelation_fft.initialised || vdsp_data_autocorrelation_fft.N != N)
+#endif
+        return XTRACT_BAD_STATE;
+
+#ifdef USE_OOURA
     /* Zero pad the input vector */
     rfft = (double *)calloc(M, sizeof(double));
     if (rfft == NULL)
@@ -453,9 +470,28 @@ int xtract_autocorrelation_fft(const double *data, const int N, const void *argv
     return XTRACT_SUCCESS;
 }
 
+/* A usable filterbank: at least one filter, each with a table to read */
+static int filterbank_is_valid(const xtract_mel_filter *f)
+{
+    int filter;
+
+    if (f == NULL || f->n_filters < 1 || f->filters == NULL)
+        return 0;
+    for (filter = 0; filter < f->n_filters; filter++)
+    {
+        if (f->filters[filter] == NULL)
+            return 0;
+    }
+
+    return 1;
+}
+
 static int filterbank_spectrogram(const double *data, const int N, const xtract_mel_filter *f, double *result)
 {
     int n, filter;
+
+    if (N < 1 || !filterbank_is_valid(f))
+        return XTRACT_ARGUMENT_ERROR;
 
     for (filter = 0; filter < f->n_filters; filter++)
     {
@@ -477,15 +513,22 @@ static int filterbank_spectrogram(const double *data, const int N, const xtract_
 
 static int cepstral_coefficients(const double *data, const int N, const xtract_mel_filter *f, double *result)
 {
-    double *temp = (double *)calloc(f->n_filters, sizeof(double));
+    double *temp;
+    int rv;
+
+    if (N < 1 || !filterbank_is_valid(f))
+        return XTRACT_ARGUMENT_ERROR;
+
+    temp = (double *)calloc(f->n_filters, sizeof(double));
     if (temp == NULL)
         return XTRACT_MALLOC_FAILED;
 
-    filterbank_spectrogram(data, N, f, temp);
-    xtract_dct(temp, f->n_filters, f->dct_table, result);
+    rv = filterbank_spectrogram(data, N, f, temp);
+    if (rv == XTRACT_SUCCESS)
+        rv = xtract_dct(temp, f->n_filters, f->dct_table, result);
     free(temp);
 
-    return XTRACT_SUCCESS;
+    return rv;
 }
 
 int xtract_mel_spectrogram(const double *data, const int N, const void *argv, double *result)
@@ -508,6 +551,28 @@ int xtract_gfcc(const double *data, const int N, const void *argv, double *resul
     return cepstral_coefficients(data, N, (const xtract_mel_filter *)argv, result);
 }
 
+static double bivariate_gaussian_entropy(double sxx, double syy, double sxy, const int count)
+{
+    /* ln(2*pi*e) = ln(2*pi) + 1, avoiding the non-portable M_E. */
+    const double gaussian_term = log(2.0 * M_PI) + 1.0;
+    double det;
+
+    if (count == 0)
+        return 0.0;
+
+    sxx /= count;
+    syy /= count;
+    sxy /= count;
+    /* A single passed bin leaves the covariance rank-deficient (det == 0),
+     * so the entropy floors without a dedicated case. */
+    det = sxx * syy - XTRACT_SQ(sxy);
+
+    if (det < XTRACT_LOG_LIMIT)
+        return gaussian_term + 0.5 * XTRACT_LOG_LIMIT_DB;
+
+    return gaussian_term + 0.5 * log(det);
+}
+
 int xtract_mmbses(const double *data, const int N, const void *argv, double *result)
 {
     /* data is a magnitude/phase spectrum as produced by xtract_spectrum() with
@@ -523,15 +588,15 @@ int xtract_mmbses(const double *data, const int N, const void *argv, double *res
      * Camarena-Ibarrola & Chavez). */
     const xtract_mel_filter *f = (const xtract_mel_filter *)argv;
     const int M = N >> 1;
-    /* ln(2*pi*e) = ln(2*pi) + 1, avoiding the non-portable M_E. */
-    const double gaussian_term = log(2.0 * M_PI) + 1.0;
     int n, filter;
+
+    if (N < 2 || (N & 1) || !filterbank_is_valid(f))
+        return XTRACT_ARGUMENT_ERROR;
 
     for (filter = 0; filter < f->n_filters; filter++)
     {
         int count = 0;
         double sxx = 0.0, syy = 0.0, sxy = 0.0;
-        double det;
 
         /* Accumulate the zero-mean second moments of the filter-weighted
          * complex coefficients (real = mag*cos(phase), imag = mag*sin(phase)). */
@@ -551,24 +616,7 @@ int xtract_mmbses(const double *data, const int N, const void *argv, double *res
             count++;
         }
 
-        if (count == 0)
-        {
-            /* No bin passes the filter: the band carries no information. */
-            result[filter] = 0.0;
-            continue;
-        }
-
-        sxx /= count;
-        syy /= count;
-        sxy /= count;
-        /* A single passed bin leaves the covariance rank-deficient (det == 0),
-         * so the entropy floors without a dedicated case. */
-        det = sxx * syy - XTRACT_SQ(sxy);
-
-        if (det < XTRACT_LOG_LIMIT)
-            result[filter] = gaussian_term + 0.5 * XTRACT_LOG_LIMIT_DB;
-        else
-            result[filter] = gaussian_term + 0.5 * log(det);
+        result[filter] = bivariate_gaussian_entropy(sxx, syy, sxy, count);
     }
 
     return XTRACT_SUCCESS;
@@ -578,14 +626,18 @@ int xtract_spectral_subband_centroids(const double *data, const int N, const voi
 {
     xtract_mel_filter *f = (xtract_mel_filter *)argv;
     int n, filter;
+    const int M = N >> 1;
     const double *amps = data;
-    const double *freqs = data + N;
+    const double *freqs = data + M;
+
+    if (N < 2 || (N & 1) || !filterbank_is_valid(f))
+        return XTRACT_ARGUMENT_ERROR;
 
     for (filter = 0; filter < f->n_filters; filter++)
     {
         double FA = 0.0, A = 0.0;
 
-        for (n = 0; n < N; n++)
+        for (n = 0; n < M; n++)
         {
             double weighted_amp = amps[n] * f->filters[filter][n];
 
@@ -604,6 +656,9 @@ int xtract_dct(const double *data, const int N, const void *argv, double *result
 {
     const double *table = (const double *)argv;
     int n, m;
+
+    if (N < 1)
+        return XTRACT_ARGUMENT_ERROR;
 
     for (n = 0; n < N; ++n)
     {
@@ -635,6 +690,9 @@ int xtract_autocorrelation(const double *data, const int N, const void *argv, do
 
     double corr;
 
+    if (N < 1)
+        return XTRACT_ARGUMENT_ERROR;
+
     while (n--)
     {
         corr = 0;
@@ -653,6 +711,9 @@ int xtract_amdf(const double *data, const int N, const void *argv, double *resul
     int n = N, i;
 
     double md, temp;
+
+    if (N < 1)
+        return XTRACT_ARGUMENT_ERROR;
 
     while (n--)
     {
@@ -675,6 +736,9 @@ int xtract_asdf(const double *data, const int N, const void *argv, double *resul
 
     double sd;
 
+    if (N < 1)
+        return XTRACT_ARGUMENT_ERROR;
+
     while (n--)
     {
         sd = 0.0;
@@ -693,7 +757,18 @@ int xtract_bark_coefficients(const double *data, const int N, const void *argv, 
 {
     int *limits, band, n;
 
+    if (N < 1 || argv == NULL)
+        return XTRACT_ARGUMENT_ERROR;
+
     limits = (int *)argv;
+
+    if (limits[0] < 0)
+        return XTRACT_ARGUMENT_ERROR;
+    for (band = 1; band < XTRACT_BARK_BANDS; band++)
+    {
+        if (limits[band] < limits[band - 1])
+            return XTRACT_ARGUMENT_ERROR;
+    }
 
     for (band = 0; band < XTRACT_BARK_BANDS - 1; band++)
     {
@@ -713,25 +788,21 @@ int xtract_bark_coefficients(const double *data, const int N, const void *argv, 
 int xtract_peak_spectrum(const double *data, const int N, const void *argv, double *result)
 {
     double threshold, max, y, y2, y3, p, q;
-    int n = N, rv = XTRACT_SUCCESS;
+    int n;
 
-    threshold = max = q = 0.0;
+    if (N < 1 || argv == NULL)
+        return XTRACT_ARGUMENT_ERROR;
 
-    if (argv != NULL)
-    {
-        q = ((double *)argv)[0];
-        threshold = ((double *)argv)[1];
-    }
-    else
-        rv = XTRACT_BAD_ARGV;
+    q = ((double *)argv)[0];
+    threshold = ((double *)argv)[1];
+    if (!isfinite(q) || q < 0.0 || !(threshold >= 0.0 && threshold <= 100.0))
+        return XTRACT_ARGUMENT_ERROR;
 
-    if (threshold < 0 || threshold > 100)
-    {
-        threshold = 0;
-        rv = XTRACT_BAD_ARGV;
-    }
+    max = 0.0;
 
-    XTRACT_CHECK_q;
+    /* N coefficients are the first half of a 2N-point transform */
+    if (q == 0.0)
+        q = XTRACT_SR_DEFAULT / (2.0 * N);
 
     /* Find max amplitude for threshold calculation */
     for (n = 1; n < N; n++)
@@ -767,7 +838,7 @@ int xtract_peak_spectrum(const double *data, const int N, const void *argv, doub
         }
     }
 
-    return (rv ? rv : XTRACT_SUCCESS);
+    return XTRACT_SUCCESS;
 }
 
 int xtract_harmonic_spectrum(const double *data, const int N, const void *argv, double *result)
@@ -777,10 +848,16 @@ int xtract_harmonic_spectrum(const double *data, const int N, const void *argv, 
     const double *freqs, *amps;
     double f0, threshold, ratio, nearest, distance;
 
+    if (N < 2 || (N & 1) || argv == NULL)
+        return XTRACT_ARGUMENT_ERROR;
+
     amps = data;
     freqs = data + n;
     f0 = *((double *)argv);
     threshold = *((double *)argv + 1);
+
+    if (!isfinite(f0) || f0 < 0.0 || !(threshold >= 0.0 && threshold <= 1.0))
+        return XTRACT_ARGUMENT_ERROR;
 
     if (f0 == 0.0)
     {
@@ -817,6 +894,10 @@ int xtract_lpc(const double *data, const int N, const void *argv, double *result
 
     double *ref = NULL,
            *lpc = NULL;
+
+    /* One coefficient needs the zero-lag term and one further lag */
+    if (N < 2)
+        return XTRACT_ARGUMENT_ERROR;
 
     error = data[0];
     L = N - 1; /* The number of LPC coefficients */
@@ -864,8 +945,13 @@ int xtract_lpcc(const double *data, const int N, const void *argv, double *resul
 
     int n, k;
     double sum;
-    int order = N - 1; /* LPC order p (data[0] is the gain term) */
+    int order; /* LPC order p (data[0] is the gain term) */
     int cep_length;
+
+    if (N < 2)
+        return XTRACT_ARGUMENT_ERROR;
+
+    order = N - 1;
 
     if (argv == NULL)
         cep_length = order; /* default keeps the output no longer than the input */
@@ -899,9 +985,33 @@ int xtract_lpcc(const double *data, const int N, const void *argv, double *resul
     return XTRACT_SUCCESS;
 }
 
+/* The features a band may be reduced with: each reads a plain vector with a
+ * NULL argv and writes one scalar, so the dispatch below cannot overrun the
+ * result or dereference the NULL argv */
+static const int subband_features[] = {
+    XTRACT_MEAN, XTRACT_IRREGULARITY_K, XTRACT_IRREGULARITY_J, XTRACT_SMOOTHNESS,
+    XTRACT_ZCR, XTRACT_LOUDNESS, XTRACT_FLATNESS, XTRACT_RMS_AMPLITUDE,
+    XTRACT_SHARPNESS, XTRACT_HIGHEST_VALUE, XTRACT_SUM, XTRACT_NONZERO_COUNT};
+
+static int is_subband_feature(const int feature)
+{
+    size_t i;
+
+    for (i = 0; i < sizeof(subband_features) / sizeof(subband_features[0]); i++)
+    {
+        if (subband_features[i] == feature)
+            return 1;
+    }
+
+    return 0;
+}
+
 int xtract_subbands(const double *data, const int N, const void *argv, double *result)
 {
     int n, bw, xtract_func, nbands, scale, start, lower, *argi, rv;
+
+    if (argv == NULL || N < 1)
+        return XTRACT_ARGUMENT_ERROR;
 
     argi = (int *)argv;
 
@@ -910,10 +1020,19 @@ int xtract_subbands(const double *data, const int N, const void *argv, double *r
     scale = argi[2];
     start = argi[3];
 
+    if (!is_subband_feature(xtract_func) || nbands < 1 || start < 0 || start >= N)
+        return XTRACT_ARGUMENT_ERROR;
+
     if (scale == XTRACT_LINEAR_SUBBANDS)
-        bw = floorf((N - start) / nbands);
-    else
+        bw = (N - start) / nbands;
+    else if (scale == XTRACT_OCTAVE_SUBBANDS)
         bw = start;
+    else
+        return XTRACT_ARGUMENT_ERROR;
+
+    /* Linear: more bands than remaining bins; octave: a start of 0 */
+    if (bw < 1)
+        return XTRACT_ARGUMENT_ERROR;
 
     lower = start;
     rv = XTRACT_SUCCESS;
@@ -945,4 +1064,376 @@ int xtract_subbands(const double *data, const int N, const void *argv, double *r
     }
 
     return rv;
+}
+
+static int moving_window(const int N, const void *argv, const int min_window)
+{
+    int window;
+
+    if (argv == NULL)
+        return 0;
+
+    window = *(const int *)argv;
+
+    if (window < min_window || window > N)
+        return 0;
+
+    return window;
+}
+
+int xtract_moving_sum(const double *data, const int N, const void *argv, double *result)
+{
+    const int window = moving_window(N, argv, 1);
+    int n;
+    double sum = 0.0;
+
+    if (window == 0)
+        return XTRACT_ARGUMENT_ERROR;
+
+    for (n = 0; n < window; n++)
+        sum += data[n];
+    result[0] = sum;
+
+    for (n = window; n < N; n++)
+    {
+        sum += data[n] - data[n - window];
+        result[n - window + 1] = sum;
+    }
+
+    return XTRACT_SUCCESS;
+}
+
+int xtract_moving_average(const double *data, const int N, const void *argv, double *result)
+{
+    const int rv = xtract_moving_sum(data, N, argv, result);
+    int window, n;
+
+    if (rv != XTRACT_SUCCESS)
+        return rv;
+
+    window = *(const int *)argv;
+
+    for (n = 0; n <= N - window; n++)
+        result[n] /= window;
+
+    return XTRACT_SUCCESS;
+}
+
+int xtract_moving_variance(const double *data, const int N, const void *argv, double *result)
+{
+    const int window = moving_window(N, argv, 2);
+    int n;
+    double mean = 0.0;
+    double m2 = 0.0;
+    double delta, entering, leaving, next_mean;
+
+    if (window == 0)
+        return XTRACT_ARGUMENT_ERROR;
+
+    for (n = 0; n < window; n++)
+    {
+        delta = data[n] - mean;
+        mean += delta / (n + 1);
+        m2 += delta * (data[n] - mean);
+    }
+    result[0] = XTRACT_MAX(m2, 0.0) / (window - 1);
+
+    for (n = window; n < N; n++)
+    {
+        entering = data[n];
+        leaving = data[n - window];
+        next_mean = mean + (entering - leaving) / window;
+        m2 += (entering - leaving) * (entering - next_mean + leaving - mean);
+        mean = next_mean;
+        result[n - window + 1] = XTRACT_MAX(m2, 0.0) / (window - 1);
+    }
+
+    return XTRACT_SUCCESS;
+}
+
+int xtract_moving_standard_deviation(const double *data, const int N, const void *argv, double *result)
+{
+    const int rv = xtract_moving_variance(data, N, argv, result);
+    int window, n;
+
+    if (rv != XTRACT_SUCCESS)
+        return rv;
+
+    window = *(const int *)argv;
+
+    for (n = 0; n <= N - window; n++)
+        result[n] = sqrt(result[n]);
+
+    return XTRACT_SUCCESS;
+}
+
+static int moving_extremum(const double *data, const int N, const void *argv, double *result, const int largest)
+{
+    const int window = moving_window(N, argv, 1);
+    int *deque;
+    int head = 0;
+    int count = 0;
+    int n, back;
+
+    if (window == 0)
+        return XTRACT_ARGUMENT_ERROR;
+
+    deque = (int *)malloc((size_t)window * sizeof(int));
+
+    if (deque == NULL)
+        return XTRACT_MALLOC_FAILED;
+
+    for (n = 0; n < N; n++)
+    {
+        if (count > 0 && deque[head] == n - window)
+        {
+            head = (head + 1) % window;
+            count--;
+        }
+
+        while (count > 0)
+        {
+            back = deque[(head + count - 1) % window];
+
+            if (largest ? data[back] > data[n] : data[back] < data[n])
+                break;
+
+            count--;
+        }
+
+        deque[(head + count) % window] = n;
+        count++;
+
+        if (n >= window - 1)
+            result[n - window + 1] = data[deque[head]];
+    }
+
+    free(deque);
+
+    return XTRACT_SUCCESS;
+}
+
+int xtract_moving_max(const double *data, const int N, const void *argv, double *result)
+{
+    return moving_extremum(data, N, argv, result, 1);
+}
+
+int xtract_moving_min(const double *data, const int N, const void *argv, double *result)
+{
+    return moving_extremum(data, N, argv, result, 0);
+}
+
+static int ewma_alpha(const void *argv, double *alpha)
+{
+    if (argv == NULL)
+        return 0;
+    *alpha = *(const double *)argv;
+    return *alpha >= 0.0 && *alpha <= 1.0;
+}
+
+int xtract_ewma_average(const double *data, const int N, const void *argv, double *result)
+{
+    double alpha;
+    int n;
+
+    if (N < 1 || !ewma_alpha(argv, &alpha))
+        return XTRACT_ARGUMENT_ERROR;
+
+    result[0] = data[0];
+    for (n = 1; n < N; n++)
+        result[n] = result[n - 1] + alpha * (data[n] - result[n - 1]);
+
+    return XTRACT_SUCCESS;
+}
+
+int xtract_ewma_variance(const double *data, const int N, const void *argv, double *result)
+{
+    double alpha, mean, delta;
+    int n;
+
+    if (N < 1 || !ewma_alpha(argv, &alpha))
+        return XTRACT_ARGUMENT_ERROR;
+
+    mean = data[0];
+    result[0] = 0.0;
+    for (n = 1; n < N; n++)
+    {
+        delta = data[n] - mean;
+        mean += alpha * delta;
+        result[n] = (1.0 - alpha) * (result[n - 1] + alpha * delta * delta);
+    }
+
+    return XTRACT_SUCCESS;
+}
+
+static double mean_of(const double *values, const int count)
+{
+    int n;
+    double sum = 0.0;
+
+    for (n = 0; n < count; n++)
+        sum += values[n];
+
+    return sum / count;
+}
+
+static int contrast_no_result(double *sorted, double *result, const int bands)
+{
+    free(sorted);
+    memset(result, 0, (size_t)(bands + 1) * sizeof(double));
+    return XTRACT_NO_RESULT;
+}
+
+int xtract_spectral_contrast(const double *data, const int N, const void *argv, double *result)
+{
+    int bands, band, n, M, count, averaged;
+    double lowest, fraction, low, high, valley, peak;
+    const double *amps = data;
+    const double *freqs;
+    double *sorted;
+
+    if (N < 2 || (N & 1) || argv == NULL)
+        return XTRACT_ARGUMENT_ERROR;
+
+    bands = xtract_argv_int(((const double *)argv)[0]);
+    lowest = ((const double *)argv)[1];
+    fraction = ((const double *)argv)[2];
+    if (bands < 1 || !isfinite(lowest) || lowest < 0.0 || !(fraction >= 0.0 && fraction <= 1.0))
+        return XTRACT_ARGUMENT_ERROR;
+
+    M = N >> 1;
+    freqs = data + M;
+
+    sorted = (double *)malloc((size_t)M * sizeof(double));
+    if (sorted == NULL)
+        return XTRACT_MALLOC_FAILED;
+
+    low = 0.0;
+    high = lowest;
+    for (band = 0; band <= bands; band++)
+    {
+        count = 0;
+        for (n = 0; n < M; n++)
+        {
+            if (freqs[n] >= low && (band == bands || freqs[n] < high) && amps[n] == amps[n])
+                sorted[count++] = amps[n];
+        }
+
+        if (count == 0)
+            return contrast_no_result(sorted, result, bands);
+
+        qsort(sorted, (size_t)count, sizeof(double), xtract_compare_doubles);
+        averaged = (int)(fraction * count + 0.5);
+        if (averaged < 1)
+            averaged = 1;
+        valley = mean_of(sorted, averaged);
+        peak = mean_of(sorted + count - averaged, averaged);
+        if (valley <= 0.0)
+            return contrast_no_result(sorted, result, bands);
+
+        result[band] = log(peak / valley);
+        low = high;
+        high *= 2.0;
+    }
+
+    free(sorted);
+
+    return XTRACT_SUCCESS;
+}
+
+int xtract_chroma(const double *data, const int N, const void *argv, double *result)
+{
+    const double semitones_per_log_unit = 12.0 / log(2.0);
+    int n, M, pitch_class;
+    double reference, lowest, highest, largest, position;
+    const double *amps = data;
+    const double *freqs;
+
+    if (N < 2 || (N & 1) || argv == NULL)
+        return XTRACT_ARGUMENT_ERROR;
+
+    reference = ((const double *)argv)[0];
+    lowest = ((const double *)argv)[1];
+    highest = ((const double *)argv)[2];
+    if (!isfinite(reference) || reference < 0.0 || !isfinite(lowest) || lowest < 0.0 ||
+        !isfinite(highest) || highest < 0.0 || (highest > 0.0 && highest <= lowest))
+        return XTRACT_ARGUMENT_ERROR;
+
+    if (reference == 0.0)
+        reference = XTRACT_CHROMA_REFERENCE_DEFAULT;
+
+    M = N >> 1;
+    freqs = data + M;
+
+    memset(result, 0, XTRACT_PITCH_CLASSES * sizeof(double));
+
+    for (n = 0; n < M; n++)
+    {
+        if (!(freqs[n] > 0.0) || freqs[n] < lowest || (highest > 0.0 && freqs[n] > highest))
+            continue;
+        position = floor(log(freqs[n] / reference) * semitones_per_log_unit + 0.5) - 3.0;
+        if (!(position > -2147483648.0 && position < 2147483648.0))
+            continue;
+        pitch_class = (int)position % XTRACT_PITCH_CLASSES;
+        if (pitch_class < 0)
+            pitch_class += XTRACT_PITCH_CLASSES;
+        result[pitch_class] += amps[n];
+    }
+
+    largest = result[0];
+    for (n = 1; n < XTRACT_PITCH_CLASSES; n++)
+        if (result[n] > largest)
+            largest = result[n];
+    if (!(largest > 0.0))
+    {
+        memset(result, 0, XTRACT_PITCH_CLASSES * sizeof(double));
+        return XTRACT_NO_RESULT;
+    }
+
+    for (n = 0; n < XTRACT_PITCH_CLASSES; n++)
+        result[n] /= largest;
+
+    return XTRACT_SUCCESS;
+}
+
+int xtract_cqt(const double *data, const int N, const void *argv, double *result)
+{
+    const xtract_cqt_kernel *kernel = (const xtract_cqt_kernel *)argv;
+    const int M = N >> 1;
+    double *real, *imag;
+    int n, band, e;
+
+    if (N < 2 || (N & 1) || kernel == NULL || kernel->N != N)
+        return XTRACT_ARGUMENT_ERROR;
+
+    real = (double *)malloc((size_t)N * sizeof(double));
+    if (real == NULL)
+        return XTRACT_MALLOC_FAILED;
+    imag = real + M;
+
+    for (n = 0; n < M; n++)
+    {
+        real[n] = data[n] * cos(data[M + n]);
+        imag[n] = data[n] * sin(data[M + n]);
+    }
+
+    for (band = 0; band < kernel->n_bins; band++)
+    {
+        double sum_real = 0.0;
+        double sum_imag = 0.0;
+
+        for (e = kernel->first[band]; e < kernel->first[band + 1]; e++)
+        {
+            const int j = kernel->bin[e];
+
+            sum_real += real[j] * kernel->real[e] + imag[j] * kernel->imag[e];
+            sum_imag += imag[j] * kernel->real[e] - real[j] * kernel->imag[e];
+        }
+        result[band] = sqrt(sum_real * sum_real + sum_imag * sum_imag);
+        result[kernel->n_bins + band] = kernel->frequencies[band];
+    }
+
+    free(real);
+
+    return XTRACT_SUCCESS;
 }

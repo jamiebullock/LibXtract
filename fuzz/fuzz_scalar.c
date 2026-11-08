@@ -9,18 +9,18 @@
  *
  * Every scalar feature has the uniform signature
  *     int xtract_f(const double *data, int N, const void *argv, double *result)
- * and writes a single scalar to result[0]. This harness drives all of them:
- * the enum-backed features through the xtract[] dispatch table, and peak (the
- * one feature with no table slot) by direct call.
+ * and writes a single scalar to result[0]. This harness drives all of them
+ * through the xtract[] dispatch table.
  *
- * The fuzzer's bytes become a feature selector, an argv buffer, and the input
- * vector, so NaN, +/-Inf, denormals, N=1, all-zero, etc. are exercised. Run
- * under AddressSanitizer + UBSan.
+ * The fuzzer's bytes become a feature selector, a flag that passes a NULL
+ * argv, an argv buffer, and the input vector, so NaN, +/-Inf, denormals,
+ * N=0, N=1, all-zero, a missing argv, etc. are exercised. Run under
+ * AddressSanitizer + UBSan.
  *
  * failsafe_f0 computes a spectrum internally, so it runs at a fixed
  * power-of-two N with the FFT initialised once; wavelet_f0 runs its detector
- * at the size its state was built for and needs a non-NULL sample-rate argv.
- * Every other feature takes a fuzzer-chosen N.
+ * at the size its state was built for. Every other feature takes a
+ * fuzzer-chosen N.
  *
  * Build/run: make fuzz   (see fuzz/Makefile)
  */
@@ -55,11 +55,18 @@ static const int enum_features[] = {
     XTRACT_SHARPNESS, XTRACT_SPECTRAL_SLOPE, XTRACT_LOWEST_VALUE,
     XTRACT_HIGHEST_VALUE, XTRACT_SUM, XTRACT_NONZERO_COUNT, XTRACT_HPS,
     XTRACT_F0, XTRACT_FAILSAFE_F0, XTRACT_WAVELET_F0, XTRACT_MCLEOD_F0,
-    XTRACT_MIDICENT};
+    XTRACT_MIDICENT, XTRACT_PEAK, XTRACT_MEDIAN,
+    XTRACT_MEDIAN_ABSOLUTE_DEVIATION, XTRACT_HJORTH_ACTIVITY,
+    XTRACT_HJORTH_MOBILITY, XTRACT_HJORTH_COMPLEXITY,
+    XTRACT_TIME_REVERSAL_ASYMMETRY, XTRACT_SPECTRAL_ENTROPY,
+    XTRACT_PETROSIAN_FRACTAL_DIMENSION, XTRACT_KATZ_FRACTAL_DIMENSION,
+    XTRACT_HIGUCHI_FRACTAL_DIMENSION, XTRACT_PERMUTATION_ENTROPY,
+    XTRACT_LEMPEL_ZIV_COMPLEXITY, XTRACT_SAMPLE_ENTROPY,
+    XTRACT_APPROXIMATE_ENTROPY, XTRACT_PERIODICITY, XTRACT_SIGNAL_CONFIDENCE,
+    XTRACT_DECAY_RATE, XTRACT_TEMPORAL_CENTROID, XTRACT_MAX_POSITION,
+    XTRACT_MIN_POSITION, XTRACT_PEAK_ASYMMETRY};
 
-#define N_ENUM ((int)(sizeof(enum_features) / sizeof(enum_features[0])))
-/* peak has no enum / dispatch slot, so it is one extra feature called directly. */
-#define N_FEATURES (N_ENUM + 1)
+#define N_FEATURES ((int)(sizeof(enum_features) / sizeof(enum_features[0])))
 
 int LLVMFuzzerInitialize(int *argc, char ***argv)
 {
@@ -75,19 +82,24 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     int sel;
     int feature;
     int n;
+    int null_argv;
     int (*fn)(const double *, const int, const void *, double *);
     double argv[XTRACT_MAXARGS];
+    int int_args[XTRACT_MAXARGS];
+    int i;
     double *in;
+    const double *input;
     double *result;
     size_t argv_bytes;
     size_t avail;
 
-    if (size < 1)
+    if (size < 2)
         return 0;
 
     sel = data[0] % N_FEATURES;
-    data++;
-    size--;
+    null_argv = data[1] & 1;
+    data += 2;
+    size -= 2;
 
     memset(argv, 0, sizeof(argv));
     argv_bytes = size < sizeof(argv) ? size : sizeof(argv);
@@ -95,16 +107,8 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     data += argv_bytes;
     size -= argv_bytes;
 
-    if (sel < N_ENUM)
-    {
-        feature = enum_features[sel];
-        fn = xtract[feature];
-    }
-    else
-    {
-        feature = -1;
-        fn = xtract_peak;
-    }
+    feature = enum_features[sel];
+    fn = xtract[feature];
 
     /* The two state-dependent features run at the size they were initialised
      * for, reading a full window padded with zeros when the fuzzer gave less. */
@@ -115,13 +119,13 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     else
     {
         n = (int)(size / sizeof(double));
-        if (n < 1)
-            return 0;
         if (n > MAX_N)
             n = MAX_N;
     }
 
-    in = (double *)calloc((size_t)n, sizeof(double));
+    /* At N = 0 the allocation holds one element and the call receives the
+     * pointer one past it: non-NULL, with nothing that may be read */
+    in = (double *)calloc(n > 0 ? (size_t)n : 1, sizeof(double));
     /* Over-allocate the result: covered features write a single value, but the
      * margin keeps a harness mis-sizing from masquerading as an overflow. */
     result = (double *)calloc((size_t)n + 64, sizeof(double));
@@ -133,8 +137,17 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     }
     avail = size / sizeof(double);
     memcpy(in, data, (avail < (size_t)n ? avail : (size_t)n) * sizeof(double));
+    input = n > 0 ? in : in + 1;
 
-    (void)fn(in, n, argv, result);
+    if (feature == XTRACT_TIME_REVERSAL_ASYMMETRY || feature == XTRACT_HIGUCHI_FRACTAL_DIMENSION ||
+        feature == XTRACT_PERMUTATION_ENTROPY)
+    {
+        for (i = 0; i < XTRACT_MAXARGS; i++)
+            int_args[i] = argv[i] >= -1.0 && argv[i] <= (double)MAX_N ? (int)argv[i] : -1;
+        (void)fn(input, n, null_argv ? NULL : int_args, result);
+    }
+    else
+        (void)fn(input, n, null_argv ? NULL : argv, result);
 
     free(in);
     free(result);
