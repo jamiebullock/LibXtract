@@ -2,8 +2,6 @@ language: en-GB
 
 reviews:
   profile: chill
-  base_branches:
-    - main
   high_level_summary: true
   poem: false
   request_changes_workflow: true
@@ -57,6 +55,8 @@ reviews:
   auto_review:
     enabled: true
     drafts: true
+    base_branches:
+      - main
 
 chat:
   auto_reply: true
