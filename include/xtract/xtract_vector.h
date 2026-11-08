@@ -313,6 +313,15 @@ extern "C"
      * \param *result: a pointer to an array of argv[0] + 1 doubles: the contrast of the bins below the first edge, then of each octave band from that edge, the last band running to the highest bin frequency. A coefficient that is NaN is left out of its band. The array is zeroed with no result when a band contains no bin or the mean of its smallest coefficients is not positive
      */
     int xtract_spectral_contrast(const double *data, const int N, const void *argv, double *result);
+
+    /** \brief Extract the chroma of a spectrum: the coefficients of the bins nearest each of the twelve pitch classes summed and scaled so that the largest class is 1
+     *
+     * \param *data: a pointer to the first element in an array of doubles containing N/2 magnitude/power coefficients followed by N/2 bin frequencies in Hz, e.g. the *result from xtract_spectrum(). The coefficients are summed as given, so a power spectrum gives the energy in each class
+     * \param N: the size of the array pointed to by *data, at least 2 and even
+     * \param *argv: a pointer to an array of three doubles, each finite and at least 0: the frequency of A4 in Hz, with 0 selecting 440; the lowest bin frequency included, with 0 including every bin above 0 Hz; and the highest bin frequency included, with 0 including every bin above the lowest, and otherwise greater than the lowest. The 40 Hz and 5000 Hz range the descriptor gives as defaults is applied only when passed
+     * \param *result: a pointer to an array of XTRACT_PITCH_CLASSES doubles, the first for C and the last for B, each from the bins whose frequency rounds to that pitch class in any octave, scaled to a maximum of 1. The array is zeroed with no result when no included bin has a positive coefficient; bins at or below 0 Hz are never included
+     */
+    int xtract_chroma(const double *data, const int N, const void *argv, double *result);
     /** @} */
 
 #ifdef __cplusplus

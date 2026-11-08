@@ -167,6 +167,7 @@ extern "C"
         XTRACT_ITAKURA_SAITO_DIVERGENCE,
         XTRACT_MODIFIED_KULLBACK_LEIBLER,
         XTRACT_SPECTRAL_CONTRAST,
+        XTRACT_CHROMA,
         XTRACT_FEATURE_COUNT
     };
 
@@ -327,7 +328,9 @@ extern "C"
         XTRACT_NO_DATA,
         /* N/2 magnitudes and N/2 phases, as xtract_spectrum() gives for
          * XTRACT_MAGNITUDE_PHASE_SPECTRUM */
-        XTRACT_SPECTRAL_MAGNITUDE_PHASE
+        XTRACT_SPECTRAL_MAGNITUDE_PHASE,
+        /* 12 pitch class values from C to B */
+        XTRACT_CHROMA_COEFFS
     } xtract_vector_t;
 
     /** \brief Data structure containing useful information about functions provided by LibXtract. */

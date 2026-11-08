@@ -1337,3 +1337,58 @@ int xtract_spectral_contrast(const double *data, const int N, const void *argv, 
 
     return XTRACT_SUCCESS;
 }
+
+int xtract_chroma(const double *data, const int N, const void *argv, double *result)
+{
+    const double semitones_per_log_unit = 12.0 / log(2.0);
+    int n, M, pitch_class;
+    double reference, lowest, highest, largest, position;
+    const double *amps = data;
+    const double *freqs;
+
+    if (N < 2 || (N & 1) || argv == NULL)
+        return XTRACT_ARGUMENT_ERROR;
+
+    reference = ((const double *)argv)[0];
+    lowest = ((const double *)argv)[1];
+    highest = ((const double *)argv)[2];
+    if (!isfinite(reference) || reference < 0.0 || !isfinite(lowest) || lowest < 0.0 ||
+        !isfinite(highest) || highest < 0.0 || (highest > 0.0 && highest <= lowest))
+        return XTRACT_ARGUMENT_ERROR;
+
+    if (reference == 0.0)
+        reference = XTRACT_CHROMA_REFERENCE_DEFAULT;
+
+    M = N >> 1;
+    freqs = data + M;
+
+    memset(result, 0, XTRACT_PITCH_CLASSES * sizeof(double));
+
+    for (n = 0; n < M; n++)
+    {
+        if (!(freqs[n] > 0.0) || freqs[n] < lowest || (highest > 0.0 && freqs[n] > highest))
+            continue;
+        position = floor(log(freqs[n] / reference) * semitones_per_log_unit + 0.5) - 3.0;
+        if (!(position > -2147483648.0 && position < 2147483648.0))
+            continue;
+        pitch_class = (int)position % XTRACT_PITCH_CLASSES;
+        if (pitch_class < 0)
+            pitch_class += XTRACT_PITCH_CLASSES;
+        result[pitch_class] += amps[n];
+    }
+
+    largest = result[0];
+    for (n = 1; n < XTRACT_PITCH_CLASSES; n++)
+        if (result[n] > largest)
+            largest = result[n];
+    if (!(largest > 0.0))
+    {
+        memset(result, 0, XTRACT_PITCH_CLASSES * sizeof(double));
+        return XTRACT_NO_RESULT;
+    }
+
+    for (n = 0; n < XTRACT_PITCH_CLASSES; n++)
+        result[n] /= largest;
+
+    return XTRACT_SUCCESS;
+}
