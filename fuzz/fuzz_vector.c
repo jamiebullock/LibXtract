@@ -77,6 +77,7 @@ enum
     FZ_EWMA_AVERAGE,
     FZ_EWMA_VARIANCE,
     FZ_SPECTRAL_CONTRAST,
+    FZ_CHROMA,
     FZ_N_FEATURES
 };
 
@@ -241,6 +242,12 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     {
         double a[3] = {(double)clamp_int(fz[0], 0, 64), fz[1], fold(fz[2], 1.1)};
         xtract_spectral_contrast(input, VEC_N, maybe_null(null_argv, a), result);
+        break;
+    }
+    case FZ_CHROMA:
+    {
+        double a[3] = {fz[0], fabs(fz[1]), fabs(fz[2])};
+        xtract_chroma(input, VEC_N, maybe_null(null_argv, a), result);
         break;
     }
     case FZ_MFCC:

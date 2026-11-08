@@ -3169,3 +3169,159 @@ UTEST(spectral_contrast, rejects_bad_arguments)
     ASSERT_EQ(result[0], -1.0);
     ASSERT_EQ(result[1], -1.0);
 }
+
+/* ===== Chroma ===== */
+
+enum
+{
+    PC_C = 0,
+    PC_D_SHARP = 3,
+    PC_E = 4,
+    PC_G = 7,
+    PC_A = 9
+};
+
+UTEST(chroma, a_bin_at_the_reference_is_a_and_c_lies_three_semitones_above)
+{
+    double data[] = {1.0, 1.0, 440.0, 440.0 * pow(2.0, 3.0 / 12.0)};
+    double argv[] = {440.0, 0.0, 0.0};
+    double result[XTRACT_PITCH_CLASSES];
+    int n;
+    ASSERT_EQ(xtract_chroma(data, 4, argv, result), XTRACT_SUCCESS);
+    for (n = 0; n < XTRACT_PITCH_CLASSES; n++)
+        CHECK_NEAR(result[n], n == PC_A || n == PC_C ? 1.0 : 0.0, EPSILON);
+}
+
+UTEST(chroma, every_octave_of_a_pitch_folds_into_one_class_and_the_classes_sum)
+{
+    double data[] = {1.0, 2.0, 3.0, 0.5, 55.0, 110.0, 880.0, 7040.0};
+    double argv[] = {440.0, 0.0, 0.0};
+    double result[XTRACT_PITCH_CLASSES];
+    int n;
+    ASSERT_EQ(xtract_chroma(data, 8, argv, result), XTRACT_SUCCESS);
+    for (n = 0; n < XTRACT_PITCH_CLASSES; n++)
+        CHECK_NEAR(result[n], n == PC_A ? 1.0 : 0.0, EPSILON);
+}
+
+UTEST(chroma, a_bin_rounds_to_the_nearest_pitch_class_and_the_largest_class_is_one)
+{
+    double data[] = {2.0, 4.0, 440.0 * pow(2.0, 0.4 / 12.0), 440.0 * pow(2.0, 6.6 / 12.0)};
+    double argv[] = {440.0, 0.0, 0.0};
+    double result[XTRACT_PITCH_CLASSES];
+    ASSERT_EQ(xtract_chroma(data, 4, argv, result), XTRACT_SUCCESS);
+    CHECK_REL(result[PC_A], 0.5, EPSILON);
+    CHECK_REL(result[PC_E], 1.0, EPSILON);
+    CHECK_NEAR(result[PC_C], 0.0, EPSILON);
+}
+
+UTEST(chroma, the_reference_moves_every_class_and_zero_selects_440)
+{
+    double data[] = {1.0, 1.0, 440.0, 660.0};
+    double argv[] = {0.0, 0.0, 0.0};
+    double result[XTRACT_PITCH_CLASSES];
+    ASSERT_EQ(xtract_chroma(data, 4, argv, result), XTRACT_SUCCESS);
+    CHECK_REL(result[PC_A], 1.0, EPSILON);
+    CHECK_REL(result[PC_E], 1.0, EPSILON);
+    argv[0] = 660.0;
+    ASSERT_EQ(xtract_chroma(data, 4, argv, result), XTRACT_SUCCESS);
+    CHECK_REL(result[PC_A], 1.0, EPSILON);
+    CHECK_NEAR(result[PC_E], 0.0, EPSILON);
+    CHECK_REL(result[2], 1.0, EPSILON);
+}
+
+UTEST(chroma, bins_outside_the_frequency_range_are_left_out)
+{
+    double data[] = {1.0, 1.0, 1.0, 1.0, 0.0, 20.0, 440.0, 10000.0};
+    double argv[] = {440.0, 40.0, 5000.0};
+    double result[XTRACT_PITCH_CLASSES];
+    int n;
+    ASSERT_EQ(xtract_chroma(data, 8, argv, result), XTRACT_SUCCESS);
+    for (n = 0; n < XTRACT_PITCH_CLASSES; n++)
+        CHECK_NEAR(result[n], n == PC_A ? 1.0 : 0.0, EPSILON);
+    argv[2] = 0.0;
+    ASSERT_EQ(xtract_chroma(data, 8, argv, result), XTRACT_SUCCESS);
+    CHECK_REL(result[PC_A], 1.0, EPSILON);
+    CHECK_REL(result[PC_D_SHARP], 1.0, EPSILON);
+}
+
+UTEST(chroma, a_bin_at_zero_hertz_is_never_included)
+{
+    double data[] = {5.0, 1.0, 0.0, 440.0};
+    double argv[] = {440.0, 0.0, 0.0};
+    double result[XTRACT_PITCH_CLASSES];
+    int n;
+    ASSERT_EQ(xtract_chroma(data, 4, argv, result), XTRACT_SUCCESS);
+    for (n = 0; n < XTRACT_PITCH_CLASSES; n++)
+        CHECK_NEAR(result[n], n == PC_A ? 1.0 : 0.0, EPSILON);
+}
+
+UTEST(chroma, c_major_triad_from_a_4096_point_spectrum_at_44100_hz)
+{
+    double data[4096];
+    double argv[] = {440.0, 40.0, 5000.0};
+    double result[XTRACT_PITCH_CLASSES];
+    int n;
+    for (n = 0; n < 2048; n++)
+    {
+        data[n] = 0.0;
+        data[2048 + n] = (n + 1) * 44100.0 / 4096.0;
+    }
+    data[(int)(261.63 * 4096.0 / 44100.0 + 0.5) - 1] = 4.0;
+    data[(int)(329.63 * 4096.0 / 44100.0 + 0.5) - 1] = 2.0;
+    data[(int)(392.0 * 4096.0 / 44100.0 + 0.5) - 1] = 1.0;
+    ASSERT_EQ(xtract_chroma(data, 4096, argv, result), XTRACT_SUCCESS);
+    CHECK_REL(result[PC_C], 1.0, EPSILON);
+    CHECK_REL(result[PC_E], 0.5, EPSILON);
+    CHECK_REL(result[PC_G], 0.25, EPSILON);
+    CHECK_NEAR(result[PC_A], 0.0, EPSILON);
+}
+
+UTEST(chroma, nothing_positive_in_range_has_no_result_and_zeroes_the_output)
+{
+    double data[] = {1.0, 1.0, 20.0, 30.0};
+    double argv[] = {440.0, 40.0, 5000.0};
+    double result[XTRACT_PITCH_CLASSES];
+    int n;
+    for (n = 0; n < XTRACT_PITCH_CLASSES; n++)
+        result[n] = -1.0;
+    ASSERT_EQ(xtract_chroma(data, 4, argv, result), XTRACT_NO_RESULT);
+    for (n = 0; n < XTRACT_PITCH_CLASSES; n++)
+        ASSERT_EQ(result[n], 0.0);
+    data[2] = 440.0;
+    data[0] = 0.0;
+    result[PC_A] = -1.0;
+    ASSERT_EQ(xtract_chroma(data, 4, argv, result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result[PC_A], 0.0);
+}
+
+UTEST(chroma, rejects_bad_arguments)
+{
+    double data[] = {1.0, 1.0, 440.0, 880.0};
+    double argv[] = {440.0, 40.0, 5000.0};
+    double result[XTRACT_PITCH_CLASSES];
+    result[0] = -1.0;
+    ASSERT_EQ(xtract_chroma(data, 3, argv, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_chroma(data, 0, argv, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_chroma(data, 4, NULL, result), XTRACT_ARGUMENT_ERROR);
+    argv[0] = -1.0;
+    ASSERT_EQ(xtract_chroma(data, 4, argv, result), XTRACT_ARGUMENT_ERROR);
+    argv[0] = NAN;
+    ASSERT_EQ(xtract_chroma(data, 4, argv, result), XTRACT_ARGUMENT_ERROR);
+    argv[0] = INFINITY;
+    ASSERT_EQ(xtract_chroma(data, 4, argv, result), XTRACT_ARGUMENT_ERROR);
+    argv[0] = 440.0;
+    argv[1] = -1.0;
+    ASSERT_EQ(xtract_chroma(data, 4, argv, result), XTRACT_ARGUMENT_ERROR);
+    argv[1] = NAN;
+    ASSERT_EQ(xtract_chroma(data, 4, argv, result), XTRACT_ARGUMENT_ERROR);
+    argv[1] = 40.0;
+    argv[2] = -1.0;
+    ASSERT_EQ(xtract_chroma(data, 4, argv, result), XTRACT_ARGUMENT_ERROR);
+    argv[2] = 40.0;
+    ASSERT_EQ(xtract_chroma(data, 4, argv, result), XTRACT_ARGUMENT_ERROR);
+    argv[2] = 30.0;
+    ASSERT_EQ(xtract_chroma(data, 4, argv, result), XTRACT_ARGUMENT_ERROR);
+    argv[2] = INFINITY;
+    ASSERT_EQ(xtract_chroma(data, 4, argv, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result[0], -1.0);
+}

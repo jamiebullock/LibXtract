@@ -435,6 +435,25 @@ UTEST(descriptors, appended_features_are_fully_described)
     ASSERT_EQ(fd[XTRACT_SPECTRAL_CONTRAST].result.vector.format, XTRACT_ARBITRARY_SERIES);
     ASSERT_EQ(fd[XTRACT_SPECTRAL_CONTRAST].result.vector.unit, XTRACT_UNIT_NONE);
 
+    ASSERT_EQ(fd[XTRACT_CHROMA].argc, 3);
+    ASSERT_EQ(fd[XTRACT_CHROMA].argv.type, XTRACT_FLOAT);
+    CHECK_REL(fd[XTRACT_CHROMA].argv.def[0], 440.0, EPSILON);
+    CHECK_REL(fd[XTRACT_CHROMA].argv.def[1], 40.0, EPSILON);
+    CHECK_REL(fd[XTRACT_CHROMA].argv.def[2], 5000.0, EPSILON);
+    for (i = 0; i < 3; i++)
+    {
+        CHECK_NEAR(fd[XTRACT_CHROMA].argv.min[i], 0.0, EPSILON);
+        ASSERT_EQ(fd[XTRACT_CHROMA].argv.max[i], XTRACT_UNBOUNDED_MAX);
+        ASSERT_EQ(fd[XTRACT_CHROMA].argv.unit[i], XTRACT_HERTZ);
+        ASSERT_EQ(fd[XTRACT_CHROMA].argv.donor[i], XTRACT_ANY);
+    }
+    ASSERT_EQ(fd[XTRACT_CHROMA].data.format, XTRACT_SPECTRAL);
+    ASSERT_EQ(fd[XTRACT_CHROMA].data.unit, XTRACT_ANY_AMPLITUDE_HERTZ);
+    ASSERT_EQ(fd[XTRACT_CHROMA].is_scalar, XTRACT_FALSE);
+    ASSERT_EQ(fd[XTRACT_CHROMA].is_delta, XTRACT_FALSE);
+    ASSERT_EQ(fd[XTRACT_CHROMA].result.vector.format, XTRACT_CHROMA_COEFFS);
+    ASSERT_EQ(fd[XTRACT_CHROMA].result.vector.unit, XTRACT_UNIT_NONE);
+
     ASSERT_EQ(xtract_free_descriptors(fd), XTRACT_SUCCESS);
 }
 
@@ -499,6 +518,7 @@ UTEST(dispatch, slots_map_to_the_expected_function)
     ASSERT_TRUE(xtract[XTRACT_ITAKURA_SAITO_DIVERGENCE] == xtract_itakura_saito_divergence);
     ASSERT_TRUE(xtract[XTRACT_MODIFIED_KULLBACK_LEIBLER] == xtract_modified_kullback_leibler);
     ASSERT_TRUE(xtract[XTRACT_SPECTRAL_CONTRAST] == xtract_spectral_contrast);
+    ASSERT_TRUE(xtract[XTRACT_CHROMA] == xtract_chroma);
 }
 
 /* ===== Descriptor conformance ===== */

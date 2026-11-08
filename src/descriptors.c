@@ -335,6 +335,20 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *(argv_def + 2) = 0.02;
             *(argv_unit + 2) = XTRACT_UNIT_NONE;
             break;
+        case XTRACT_CHROMA:
+            *argv_min = 0.0;
+            *argv_max = XTRACT_UNBOUNDED_MAX;
+            *argv_def = 440.0;
+            *argv_unit = XTRACT_HERTZ;
+            *(argv_min + 1) = 0.0;
+            *(argv_max + 1) = XTRACT_UNBOUNDED_MAX;
+            *(argv_def + 1) = 40.0;
+            *(argv_unit + 1) = XTRACT_HERTZ;
+            *(argv_min + 2) = 0.0;
+            *(argv_max + 2) = XTRACT_UNBOUNDED_MAX;
+            *(argv_def + 2) = 5000.0;
+            *(argv_unit + 2) = XTRACT_HERTZ;
+            break;
         case XTRACT_FLUX:
         case XTRACT_LNORM:
             *argv_min = XTRACT_UNBOUNDED_MIN;
@@ -458,6 +472,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             break;
         case XTRACT_ATTACK_TIME:
         case XTRACT_SPECTRAL_CONTRAST:
+        case XTRACT_CHROMA:
             *argv_donor = XTRACT_ANY;
             *(argv_donor + 1) = XTRACT_ANY;
             *(argv_donor + 2) = XTRACT_ANY;
@@ -545,6 +560,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_HPS:
         case XTRACT_SPECTRAL_SUBBAND_CENTROIDS:
         case XTRACT_SPECTRAL_CONTRAST:
+        case XTRACT_CHROMA:
             *data_format = XTRACT_SPECTRAL;
             break;
         case XTRACT_MMBSES:
@@ -738,6 +754,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_SPECTRAL_INHARMONICITY:
         case XTRACT_ODD_EVEN_RATIO:
         case XTRACT_SPECTRAL_SUBBAND_CENTROIDS:
+        case XTRACT_CHROMA:
         case XTRACT_SPECTRAL_CONTRAST:
             *data_unit = XTRACT_ANY_AMPLITUDE_HERTZ;
             break;
@@ -1516,6 +1533,14 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             copy_author(author, "Dan-Ning Jiang, Lie Lu, Hong-Jiang Zhang, Jian-Hua Tao and Lian-Hong Cai");
             *year = 2002;
             break;
+        case XTRACT_CHROMA:
+            copy_name(name, "chroma");
+            copy_name(p_name, "Chroma");
+            copy_desc(desc, "Extract the chroma of a spectrum");
+            copy_desc(p_desc, "Extract the energy of a spectrum in each of the twelve pitch classes from C to B, scaled to a maximum of 1");
+            copy_author(author, "Takuya Fujishima");
+            *year = 1999;
+            break;
         case XTRACT_DIFFERENCE_VECTOR:
             copy_name(name, "difference_vector");
             copy_name(p_name, "Difference vector");
@@ -1633,6 +1658,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *argc = 2;
             *argv_type = XTRACT_FLOAT;
             break;
+        case XTRACT_CHROMA:
         case XTRACT_SPECTRAL_CONTRAST:
         case XTRACT_FLUX:
         case XTRACT_LNORM:
@@ -1844,6 +1870,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_EWMA_VARIANCE:
         case XTRACT_CROSS_CORRELATION:
         case XTRACT_SPECTRAL_CONTRAST:
+        case XTRACT_CHROMA:
             *is_scalar = XTRACT_FALSE;
             break;
         default:
@@ -2164,6 +2191,10 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
                 break;
             case XTRACT_SPECTRAL_CONTRAST:
                 *result_format = XTRACT_ARBITRARY_SERIES;
+                *result_unit = XTRACT_UNIT_NONE;
+                break;
+            case XTRACT_CHROMA:
+                *result_format = XTRACT_CHROMA_COEFFS;
                 *result_unit = XTRACT_UNIT_NONE;
                 break;
             case XTRACT_BARK_COEFFICIENTS:

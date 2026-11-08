@@ -26,6 +26,7 @@
 #define XTRACT_SR_UPPER_LIMIT 192000.0
 #define XTRACT_SR_LOWER_LIMIT 22050.0
 #define XTRACT_SR_DEFAULT 44100.0
+#define XTRACT_CHROMA_REFERENCE_DEFAULT 440.0
 #define XTRACT_FUNDAMENTAL_DEFAULT 440.0
 
 /* Clipping thresholds for the xtract_f0 time-domain tracker, as fractions of
