@@ -19,6 +19,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
 
       - name: Setup Java
         uses: actions/setup-java@v5
@@ -116,6 +118,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
 
       - name: Install clang (provides libFuzzer)
         run: sudo apt-get update && sudo apt-get install -y clang
@@ -135,10 +139,13 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
 
       - name: Install clang-18 and Mull
         run: |
           curl -fsSL --retry 5 --retry-all-errors --retry-delay 10 -o mull.deb https://github.com/mull-project/mull/releases/download/0.34.1/Mull-18-0.34.1-LLVM-18.1.3-ubuntu-amd64-24.04.deb
+          echo "983ea9c84ecab621414d5442a66c1a1ce4127491b79d42fd5e2fd6fe01d02699  mull.deb" | sha256sum -c -
           sudo apt-get update && sudo apt-get install -y clang-18 ./mull.deb
 
       - name: Mutation tests (Mull, ASan + UBSan)
@@ -165,12 +172,16 @@ jobs:
       issues: write
     steps:
       - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
 
       - name: Install CBMC 6.11.0 and Bitwuzla 0.9.1
         run: |
           curl -fsSL --retry 5 --retry-all-errors --retry-delay 10 -o cbmc.deb https://github.com/diffblue/cbmc/releases/download/cbmc-6.11.0/ubuntu-24.04-cbmc-6.11.0-Linux.deb
+          echo "b3721aa541038384d7801ea3aeabbcddc3e8845ac8f1cbff637cf8dec7481ac8  cbmc.deb" | sha256sum -c -
           sudo dpkg -i cbmc.deb
           curl -fsSL --retry 5 --retry-all-errors --retry-delay 10 -o bitwuzla.zip https://github.com/bitwuzla/bitwuzla/releases/download/0.9.1/Bitwuzla-Linux-x86_64-static.zip
+          echo "057f1546ae2068df57beb178f3eeab1678f0e5f0c378787a05b7bb294617c9c6  bitwuzla.zip" | sha256sum -c -
           unzip -q bitwuzla.zip
           sudo install Bitwuzla-Linux-x86_64-static/bin/bitwuzla /usr/local/bin/bitwuzla
           bitwuzla --version
@@ -197,7 +208,7 @@ jobs:
         run: |
           title="CBMC proofs failed on $GITHUB_REF_NAME"
           body="The verify job failed on $GITHUB_REF_NAME at $GITHUB_SHA: $RUN_URL"
-          number=$(gh issue list --state open --search "\"$title\" in:title" --json number --jq '.[0].number')
+          number=$(gh issue list --state open --search "\"$title\" in:title" --json number,title --jq "map(select(.title == \"$title\")) | .[0].number // empty")
           if [ -n "$number" ]; then
             gh issue comment "$number" --body "$body"
           else
@@ -208,6 +219,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
 
       # Pinned to match the version the tree was formatted with; clang-format
       # output drifts between releases, so the check and a local `make format`
