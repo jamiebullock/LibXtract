@@ -15,6 +15,7 @@
 #include "fft.h"
 
 #include "xtract/libxtract.h"
+#include "xtract_cqt_private.h"
 #include "xtract_window_private.h"
 #define DEFINE_GLOBALS
 #include "xtract_globals_private.h"
@@ -506,6 +507,168 @@ double *xtract_init_dct(const int N)
 void xtract_free_dct(double *table)
 {
     free(table);
+}
+
+static void exponential_sum(const double alpha, const int length, double *real, double *imag)
+{
+    const double half_sine = sin(0.5 * alpha);
+    double ratio, phase;
+
+    if (half_sine == 0.0)
+    {
+        *real = length;
+        *imag = 0.0;
+        return;
+    }
+    ratio = sin(0.5 * alpha * length) / half_sine;
+    phase = 0.5 * alpha * (length - 1);
+    *real = ratio * cos(phase);
+    *imag = ratio * sin(phase);
+}
+
+static void hann_exponential_sum(const double alpha, const int length, double *real, double *imag)
+{
+    const double beta = 2.0 * M_PI / (length - 1);
+    double centre_real, centre_imag, upper_real, upper_imag, lower_real, lower_imag;
+
+    exponential_sum(alpha, length, &centre_real, &centre_imag);
+    exponential_sum(alpha + beta, length, &upper_real, &upper_imag);
+    exponential_sum(alpha - beta, length, &lower_real, &lower_imag);
+    *real = 0.5 * centre_real - 0.25 * (upper_real + lower_real);
+    *imag = 0.5 * centre_imag - 0.25 * (upper_imag + lower_imag);
+}
+
+static int cqt_append_band(xtract_cqt_kernel *kernel, const int band, const double *real, const double *imag, const int M, const double threshold)
+{
+    const int total = kernel->first[band];
+    double largest = 0.0;
+    double cutoff;
+    int count = 0;
+    int j, e;
+    int *bins;
+    double *reals, *imags;
+
+    for (j = 0; j < M; j++)
+    {
+        const double magnitude = sqrt(real[j] * real[j] + imag[j] * imag[j]);
+        if (magnitude > largest)
+            largest = magnitude;
+    }
+    cutoff = threshold * largest;
+    for (j = 0; j < M; j++)
+    {
+        if (sqrt(real[j] * real[j] + imag[j] * imag[j]) >= cutoff)
+            count++;
+    }
+
+    bins = (int *)realloc(kernel->bin, (size_t)(total + count) * sizeof(int));
+    if (bins == NULL)
+        return XTRACT_MALLOC_FAILED;
+    kernel->bin = bins;
+    reals = (double *)realloc(kernel->real, (size_t)(total + count) * sizeof(double));
+    if (reals == NULL)
+        return XTRACT_MALLOC_FAILED;
+    kernel->real = reals;
+    imags = (double *)realloc(kernel->imag, (size_t)(total + count) * sizeof(double));
+    if (imags == NULL)
+        return XTRACT_MALLOC_FAILED;
+    kernel->imag = imags;
+
+    for (j = 0, e = total; j < M; j++)
+    {
+        if (sqrt(real[j] * real[j] + imag[j] * imag[j]) >= cutoff)
+        {
+            kernel->bin[e] = j;
+            kernel->real[e] = real[j];
+            kernel->imag[e] = imag[j];
+            e++;
+        }
+    }
+    kernel->first[band + 1] = total + count;
+
+    return XTRACT_SUCCESS;
+}
+
+xtract_cqt_kernel *xtract_init_cqt(const int N, const double sr, const double fmin, const int bins_per_octave, const int n_bins, const double threshold)
+{
+    const int M = N >> 1;
+    const double sample_rate = sr == 0.0 ? XTRACT_SR_DEFAULT : sr;
+    xtract_cqt_kernel *kernel;
+    double *real, *imag;
+    double quality, highest, longest;
+    int band, j;
+
+    if (N < 2 || (N & 1) || !isfinite(sr) || sr < 0.0 || !isfinite(fmin) || fmin <= 0.0 ||
+        bins_per_octave < 1 || n_bins < 1 || !(threshold >= 0.0 && threshold <= 1.0))
+        return NULL;
+
+    quality = 1.0 / (pow(2.0, 1.0 / bins_per_octave) - 1.0);
+    highest = fmin * pow(2.0, (double)(n_bins - 1) / bins_per_octave);
+    longest = floor(quality * sample_rate / fmin + 0.5);
+    if (!(highest * (1.0 + 0.5 / quality) < 0.5 * sample_rate) || !(longest <= (double)N))
+        return NULL;
+
+    kernel = (xtract_cqt_kernel *)calloc(1, sizeof(xtract_cqt_kernel));
+    if (kernel == NULL)
+        return NULL;
+    kernel->N = N;
+    kernel->n_bins = n_bins;
+    kernel->first = (int *)malloc((size_t)(n_bins + 1) * sizeof(int));
+    kernel->frequencies = (double *)malloc((size_t)n_bins * sizeof(double));
+    real = (double *)malloc((size_t)N * sizeof(double));
+    if (kernel->first == NULL || kernel->frequencies == NULL || real == NULL)
+    {
+        free(real);
+        xtract_free_cqt(kernel);
+        return NULL;
+    }
+    imag = real + M;
+    kernel->first[0] = 0;
+
+    for (band = 0; band < n_bins; band++)
+    {
+        const double frequency = fmin * pow(2.0, (double)band / bins_per_octave);
+        const int length = (int)floor(quality * sample_rate / frequency + 0.5);
+        const int start = (N - length) / 2;
+        const double omega = 2.0 * M_PI * frequency / sample_rate;
+        double window_sum, unused;
+
+        hann_exponential_sum(0.0, length, &window_sum, &unused);
+        for (j = 0; j < M; j++)
+        {
+            const double shift = -2.0 * M_PI * (double)j * start / N;
+            const double shift_real = cos(shift);
+            const double shift_imag = sin(shift);
+            double sum_real, sum_imag;
+
+            hann_exponential_sum(omega - 2.0 * M_PI * j / N, length, &sum_real, &sum_imag);
+            real[j] = (sum_real * shift_real - sum_imag * shift_imag) / window_sum;
+            imag[j] = (sum_real * shift_imag + sum_imag * shift_real) / window_sum;
+        }
+        kernel->frequencies[band] = frequency;
+        if (cqt_append_band(kernel, band, real, imag, M, threshold) != XTRACT_SUCCESS)
+        {
+            free(real);
+            xtract_free_cqt(kernel);
+            return NULL;
+        }
+    }
+
+    free(real);
+
+    return kernel;
+}
+
+void xtract_free_cqt(xtract_cqt_kernel *kernel)
+{
+    if (kernel == NULL)
+        return;
+    free(kernel->first);
+    free(kernel->bin);
+    free(kernel->real);
+    free(kernel->imag);
+    free(kernel->frequencies);
+    free(kernel);
 }
 
 #ifdef __GNUC__

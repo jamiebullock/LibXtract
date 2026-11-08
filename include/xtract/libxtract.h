@@ -168,6 +168,7 @@ extern "C"
         XTRACT_MODIFIED_KULLBACK_LEIBLER,
         XTRACT_SPECTRAL_CONTRAST,
         XTRACT_CHROMA,
+        XTRACT_CQT,
         XTRACT_FEATURE_COUNT
     };
 
@@ -177,7 +178,8 @@ extern "C"
         XTRACT_INIT_MFCC = 100,
         XTRACT_INIT_BARK,
         XTRACT_INIT_WINDOWED,
-        XTRACT_INIT_GFCC
+        XTRACT_INIT_GFCC,
+        XTRACT_INIT_CQT
     };
 
     /** \brief Enumeration of feature types */
@@ -251,7 +253,8 @@ extern "C"
         XTRACT_FLOAT,
         XTRACT_FLOATARRAY,
         XTRACT_INT,
-        XTRACT_MEL_FILTER
+        XTRACT_MEL_FILTER,
+        XTRACT_CQT_KERNEL
     } xtract_type_t;
 
     /** \brief Enumeration of units*/
@@ -529,6 +532,29 @@ extern "C"
      * \param *table: a pointer to a table as allocated by xtract_init_dct(), or NULL
      */
     void xtract_free_dct(double *table);
+
+    /** \brief The kernel xtract_cqt() applies, built by xtract_init_cqt() and freed by xtract_free_cqt() */
+    typedef struct xtract_cqt_kernel_ xtract_cqt_kernel;
+
+    /** \brief Build a constant-Q kernel for xtract_cqt()
+     *
+     * The kernel has n_bins bands, bins_per_octave to the octave from fmin upward, each analysing Q cycles of its centre frequency through a Hann window, where Q = 1 / (2^(1 / bins_per_octave) - 1). A tone at a band's centre frequency reads half its amplitude, as a tone centred on a bin of xtract_spectrum() does. Building the kernel evaluates every band at every bin of the transform, so it is done once and kept for every frame of the same size.
+     *
+     * \param N: the size of the transform whose spectrum xtract_cqt() will be given, at least 2 and even. The lowest band's window must fit in N samples: Q times the sample rate divided by fmin, which for 12 bands to the octave from 32.7 Hz at 44100 Hz is about 22680, so N must then be at least 22680, and 32768 when the spectrum comes from an FFT of xtract_init_fft(), whose size is a power of two
+     * \param sr: the sample rate in Hz, finite and at least 0, with 0 selecting 44100
+     * \param fmin: the centre frequency of the lowest band in Hz, finite and above 0; 32.7, the C two octaves below middle C, is usual
+     * \param bins_per_octave: the number of bands to the octave, at least 1; 12 is usual
+     * \param n_bins: the number of bands, at least 1. The highest band's passband must stay below half the sample rate: its centre frequency times 1 + 1 / (2 Q); 84 bands at 12 to the octave is usual
+     * \param threshold: the fraction of a band's largest kernel coefficient below which its coefficients are left out, from 0 to 1; 0.01 is usual and 0 keeps every coefficient
+     * \return a pointer to the kernel, or NULL if an argument is out of range or allocation fails
+     */
+    xtract_cqt_kernel *xtract_init_cqt(const int N, const double sr, const double fmin, const int bins_per_octave, const int n_bins, const double threshold);
+
+    /** \brief Free a kernel as allocated by xtract_init_cqt()
+     *
+     * \param *kernel: a pointer to a kernel as allocated by xtract_init_cqt(), or NULL
+     */
+    void xtract_free_cqt(xtract_cqt_kernel *kernel);
 
     /* \brief A function to build an array of function descriptors */
     xtract_function_descriptor_t *xtract_make_descriptors(void);

@@ -8,11 +8,20 @@
 
 #include "xtract/libxtract.h"
 #include "xtract/xtract_vector.h"
+#include "xtract_cqt_private.h"
 
 #include "verify.h"
 
 #ifndef VERIFY_MAX_FILTERS
 #define VERIFY_MAX_FILTERS 8
+#endif
+
+#ifndef VERIFY_MAX_BANDS
+#define VERIFY_MAX_BANDS 2
+#endif
+
+#ifndef VERIFY_MAX_BAND_ENTRIES
+#define VERIFY_MAX_BAND_ENTRIES 1
 #endif
 
 static int at_least_zero(const int n)
@@ -118,6 +127,42 @@ VECTOR_HARNESS(lpc, nondet_length(), XTRACT_MAXARGS, 2 * at_least_zero(N - 1))
 VECTOR_HARNESS(windowed, nondet_length(), N, N)
 VECTOR_HARNESS(smoothed, nondet_length(), XTRACT_MAXARGS, N)
 VECTOR_HARNESS(chroma, nondet_small_length(), XTRACT_MAXARGS, XTRACT_PITCH_CLASSES)
+
+static xtract_cqt_kernel *nondet_cqt_kernel(const int N)
+{
+    xtract_cqt_kernel *kernel = (xtract_cqt_kernel *)malloc(sizeof(xtract_cqt_kernel));
+    int band, e, total;
+
+    __CPROVER_assume(kernel != NULL);
+    kernel->N = nondet_bool() ? N : nondet_length();
+    kernel->n_bins = VERIFY_MAX_BANDS;
+    kernel->first = nondet_ints(kernel->n_bins + 1);
+    kernel->first[0] = 0;
+    for (band = 0; band < kernel->n_bins; band++)
+        kernel->first[band + 1] = kernel->first[band] + nondet_between(0, VERIFY_MAX_BAND_ENTRIES);
+    total = kernel->first[kernel->n_bins];
+    kernel->bin = nondet_ints(total);
+    for (e = 0; e < total; e++)
+        kernel->bin[e] = kernel->N >= 2 ? nondet_between(0, kernel->N / 2 - 1) : 0;
+    kernel->real = nondet_doubles(total);
+    kernel->imag = nondet_doubles(total);
+    kernel->frequencies = nondet_doubles(kernel->n_bins);
+
+    return kernel;
+}
+
+void verify_cqt(void)
+{
+    const int N = nondet_length();
+    double *data = nondet_doubles(N);
+    xtract_cqt_kernel *kernel = nondet_cqt_kernel(N);
+    double *result = nondet_doubles(2 * kernel->n_bins);
+
+    (void)xtract_cqt(data, N, nondet_argv(kernel), result);
+    xtract_free_cqt(kernel);
+    free(data);
+    free(result);
+}
 
 void verify_spectral_contrast(void)
 {

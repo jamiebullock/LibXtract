@@ -85,6 +85,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_GAMMATONE_SPECTROGRAM:
         case XTRACT_MMBSES:
         case XTRACT_SPECTRAL_SUBBAND_CENTROIDS:
+        case XTRACT_CQT:
         case XTRACT_LPC:
             *argv_min = XTRACT_UNBOUNDED_MIN;
             *argv_max = XTRACT_UNBOUNDED_MAX;
@@ -438,6 +439,9 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_GAMMATONE_SPECTROGRAM:
             *argv_donor = XTRACT_INIT_GFCC;
             break;
+        case XTRACT_CQT:
+            *argv_donor = XTRACT_INIT_CQT;
+            break;
             /* argc = 2 */;
         case XTRACT_ROLLOFF:
         case XTRACT_PEAK_SPECTRUM:
@@ -564,6 +568,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *data_format = XTRACT_SPECTRAL;
             break;
         case XTRACT_MMBSES:
+        case XTRACT_CQT:
             *data_format = XTRACT_SPECTRAL_MAGNITUDE_PHASE;
             break;
         case XTRACT_ROLLOFF:
@@ -732,6 +737,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_SUBBANDS:
         case XTRACT_PEAK:
         case XTRACT_MMBSES:
+        case XTRACT_CQT:
         case XTRACT_MOVING_SUM:
         case XTRACT_MOVING_AVERAGE:
         case XTRACT_MOVING_VARIANCE:
@@ -1541,6 +1547,14 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             copy_author(author, "Takuya Fujishima");
             *year = 1999;
             break;
+        case XTRACT_CQT:
+            copy_name(name, "cqt");
+            copy_name(p_name, "Constant-Q Transform");
+            copy_desc(desc, "Extract the constant-Q spectrum of a magnitude/phase spectrum");
+            copy_desc(p_desc, "Extract the magnitude of an audio spectrum in bands spaced evenly in pitch, with the band centre frequencies");
+            copy_author(author, "Judith C. Brown and Miller S. Puckette");
+            *year = 1992;
+            break;
         case XTRACT_DIFFERENCE_VECTOR:
             copy_name(name, "difference_vector");
             copy_name(p_name, "Difference vector");
@@ -1681,6 +1695,10 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_SPECTRAL_SUBBAND_CENTROIDS:
             *argc = 1;
             *argv_type = XTRACT_MEL_FILTER;
+            break;
+        case XTRACT_CQT:
+            *argc = 1;
+            *argv_type = XTRACT_CQT_KERNEL;
             break;
         case XTRACT_LPCC:
         case XTRACT_MOVING_SUM:
@@ -1871,6 +1889,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_CROSS_CORRELATION:
         case XTRACT_SPECTRAL_CONTRAST:
         case XTRACT_CHROMA:
+        case XTRACT_CQT:
             *is_scalar = XTRACT_FALSE;
             break;
         default:
@@ -2205,6 +2224,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             case XTRACT_PEAK_SPECTRUM:
             case XTRACT_SPECTRUM:
             case XTRACT_HARMONIC_SPECTRUM:
+            case XTRACT_CQT:
                 *result_format = XTRACT_SPECTRAL;
                 *result_unit = XTRACT_ANY_AMPLITUDE_HERTZ;
                 break;

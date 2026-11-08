@@ -320,8 +320,19 @@ extern "C"
      * \param N: the size of the array pointed to by *data, at least 2 and even
      * \param *argv: a pointer to an array of three doubles, each finite and at least 0: the frequency of A4 in Hz, with 0 selecting 440; the lowest bin frequency included, with 0 including every bin above 0 Hz; and the highest bin frequency included, with 0 including every bin above the lowest, and otherwise greater than the lowest. The 40 Hz and 5000 Hz range the descriptor gives as defaults is applied only when passed
      * \param *result: a pointer to an array of XTRACT_PITCH_CLASSES doubles, the first for C and the last for B, each from the bins whose frequency rounds to that pitch class in any octave, scaled to a maximum of 1. The array is zeroed with no result when no included bin has a positive coefficient; bins at or below 0 Hz are never included
+     *
+     * \note For pitch classes from constant-Q bands, which resolve the semitones of the low octaves that the bins of xtract_spectrum() merge, pass the *result of xtract_cqt() with N twice its number of bands
      */
     int xtract_chroma(const double *data, const int N, const void *argv, double *result);
+
+    /** \brief Extract the constant-Q spectrum of a magnitude/phase spectrum: the magnitude in each band of a kernel from xtract_init_cqt(), followed by the band centre frequencies
+     *
+     * \param *data: a magnitude/phase spectrum with DC included, the *result of xtract_spectrum() by XTRACT_MAGNITUDE_PHASE_SPECTRUM with the third argument 1: the first N/2 elements are the bin magnitudes from DC upward and the next N/2 their phases
+     * \param N: the number of array elements to be considered, at least 2 and even, and equal to the N the kernel was built for
+     * \param *argv: a pointer to an xtract_cqt_kernel from xtract_init_cqt()
+     * \param *result: a pointer to an array of twice the kernel's n_bins doubles: the n_bins band magnitudes, on the scale of the magnitudes given, followed by the band centre frequencies in Hz. This is the layout of the *result of xtract_spectrum(), so it can be passed on to xtract_chroma(), xtract_spectral_contrast() and the other functions that take a spectrum with its frequencies
+     */
+    int xtract_cqt(const double *data, const int N, const void *argv, double *result);
     /** @} */
 
 #ifdef __cplusplus
