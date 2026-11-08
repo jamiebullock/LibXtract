@@ -401,7 +401,7 @@ extern "C"
     /** \brief Extract the fundamental frequency of an input vector
      *
      * \param *data: a pointer to the first element in an array of doubles representing an audio vector
-     * \param N: the number of elements to be considered, at least 1
+     * \param N: the number of elements to be considered, at least 1. When xtract_f0() finds no result the fallback takes the spectrum of the N values, so the FFT must have been initialised with xtract_init_fft(N, XTRACT_SPECTRUM), which needs N to be a power of two; without it the fallback returns XTRACT_BAD_STATE
      * \param *argv: a pointer to a double representing the audio sample rate, finite and at least 0; 0 selects 44100 Hz
      * \param *result: the pitch of N values from the array pointed to by *data
      *
