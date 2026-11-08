@@ -205,6 +205,20 @@ UTEST(stateful, failsafe_f0_falls_back_to_spectral_estimate)
     ASSERT_TRUE(isfinite(result));
 }
 
+UTEST(stateful, failsafe_f0_leaves_the_result_untouched_when_the_fft_has_another_size)
+{
+    double table[FAILSAFE_N];
+    double samplerate = 44100.0;
+    double frequency = 86.1328125;
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_init_fft(FAILSAFE_N / 2, XTRACT_SPECTRUM), XTRACT_SUCCESS);
+    xttest_gen_sine(table, FAILSAFE_N, samplerate, frequency, 1.0);
+    ASSERT_EQ(xtract_failsafe_f0(table, FAILSAFE_N, &samplerate, &result), XTRACT_BAD_STATE);
+    ASSERT_EQ(result, -1.0);
+    ASSERT_EQ(xtract_init_fft(FAILSAFE_N, XTRACT_SPECTRUM), XTRACT_SUCCESS);
+}
+
 UTEST(stateful, free_fft_releases_fft_state)
 {
     /* The teardown must be safe to call after init, and the library must be
