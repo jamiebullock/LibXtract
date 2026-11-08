@@ -52,6 +52,22 @@ UTEST(helper, features_from_subframes_computes_each_half)
     CHECK_REL(result[2], 15.0, EPSILON);
 }
 
+UTEST(helper, features_from_subframes_accepts_the_scalar_features_of_a_series)
+{
+    double data[] = {2.0, 4.0, 10.0, 20.0};
+    double result[4] = {-1.0, -1.0, -1.0, -1.0};
+
+    ASSERT_EQ(xtract_features_from_subframes(data, 4, XTRACT_MEDIAN, NULL, result), XTRACT_SUCCESS);
+    CHECK_REL(result[0], 3.0, EPSILON);
+    CHECK_REL(result[2], 15.0, EPSILON);
+    ASSERT_EQ(xtract_features_from_subframes(data, 4, XTRACT_HJORTH_ACTIVITY, NULL, result), XTRACT_SUCCESS);
+    CHECK_REL(result[0], 1.0, EPSILON);
+    CHECK_REL(result[2], 25.0, EPSILON);
+    ASSERT_EQ(xtract_features_from_subframes(data, 4, XTRACT_KULLBACK_LEIBLER_DIVERGENCE, NULL, result), XTRACT_SUCCESS);
+    ASSERT_EQ(result[0], 0.0);
+    ASSERT_EQ(result[2], 0.0);
+}
+
 UTEST(helper, features_from_subframes_rejects_out_of_range_feature)
 {
     double data[] = {1.0, 2.0, 3.0, 4.0};
