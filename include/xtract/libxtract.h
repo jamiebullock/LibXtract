@@ -490,7 +490,7 @@ extern "C"
 
     /** \brief An initialisation function for functions using FFT
      *
-     * This function initialises global data structures used by functions requiring FFT functionality. It can be called multiple times with different feature names. Calling it more than once with the same feature name is not a valid operation and will result in a memory leak.
+     * This function initialises global data structures used by functions requiring FFT functionality. It can be called multiple times with different feature names. Calling it again with a feature name already initialised replaces that feature's FFT with one of the new size and leaves the FFTs of the other features unchanged. The data structures belong to the calling thread, so every thread that calls a function using the FFT must call xtract_init_fft() itself, and a thread that ends before the process must call xtract_free_fft() first.
      *
      * \param N: the size of the FFT, a power of two of at least 2
      * \param feature_name: the name of the feature the FFT is being used for,
@@ -501,7 +501,7 @@ extern "C"
 
     /** \brief Free memory used for fft plans
      *
-     * This function should be used to explicitly free memory allocated for ffts by xtract_init_fft(). It is primarily intended for use if a new FFT needs to be taken with a different blocksize. If only one fft size is required then there is no need to call this function since it will be called when the program exits.
+     * This function frees the memory allocated by xtract_init_fft() on the calling thread for every feature. The memory belonging to the thread that exits the process is freed on exit; any other thread must call this function before it ends, since no other thread can free its memory.
      * */
     void xtract_free_fft(void);
 
