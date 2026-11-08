@@ -78,6 +78,7 @@ enum
     FZ_EWMA_VARIANCE,
     FZ_SPECTRAL_CONTRAST,
     FZ_CHROMA,
+    FZ_CQT,
     FZ_N_FEATURES
 };
 
@@ -86,6 +87,7 @@ static const double NYQUIST = 22050.0;
 
 static xtract_mel_filter mel;
 static xtract_mel_filter gammatone;
+static xtract_cqt_kernel *cqt;
 static int bark_limits[XTRACT_BARK_BANDS];
 
 static double **alloc_filterbank(void)
@@ -117,6 +119,7 @@ int LLVMFuzzerInitialize(int *argc, char ***argv)
                      gammatone.filters);
 
     xtract_init_bark(VEC_N, SR, bark_limits);
+    cqt = xtract_init_cqt(VEC_N, SR, 2000.0, 12, 36, 0.01);
 
     xtract_init_fft(VEC_N, XTRACT_SPECTRUM);
     xtract_init_fft(VEC_N, XTRACT_AUTOCORRELATION_FFT);
@@ -250,6 +253,9 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
         xtract_chroma(input, VEC_N, maybe_null(null_argv, a), result);
         break;
     }
+    case FZ_CQT:
+        xtract_cqt(input, VEC_N, maybe_null(null_argv, cqt), result);
+        break;
     case FZ_MFCC:
         xtract_mfcc(input, VEC_N, maybe_null(null_argv, &mel), result);
         break;

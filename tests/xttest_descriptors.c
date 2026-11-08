@@ -454,6 +454,17 @@ UTEST(descriptors, appended_features_are_fully_described)
     ASSERT_EQ(fd[XTRACT_CHROMA].result.vector.format, XTRACT_CHROMA_COEFFS);
     ASSERT_EQ(fd[XTRACT_CHROMA].result.vector.unit, XTRACT_UNIT_NONE);
 
+    ASSERT_EQ(fd[XTRACT_CQT].argc, 1);
+    ASSERT_EQ(fd[XTRACT_CQT].argv.type, XTRACT_CQT_KERNEL);
+    ASSERT_EQ(fd[XTRACT_CQT].argv.donor[0], XTRACT_INIT_CQT);
+    ASSERT_EQ(fd[XTRACT_CQT].data.format, XTRACT_SPECTRAL_MAGNITUDE_PHASE);
+    ASSERT_EQ(fd[XTRACT_CQT].data.unit, XTRACT_UNIT_ANY);
+    ASSERT_EQ(fd[XTRACT_CQT].is_scalar, XTRACT_FALSE);
+    ASSERT_EQ(fd[XTRACT_CQT].is_delta, XTRACT_FALSE);
+    ASSERT_EQ(fd[XTRACT_CQT].result.vector.format, XTRACT_SPECTRAL);
+    ASSERT_EQ(fd[XTRACT_CQT].result.vector.unit, XTRACT_ANY_AMPLITUDE_HERTZ);
+    ASSERT_EQ(fd[XTRACT_CQT].algo.year, 1992);
+
     ASSERT_EQ(xtract_free_descriptors(fd), XTRACT_SUCCESS);
 }
 
@@ -519,6 +530,7 @@ UTEST(dispatch, slots_map_to_the_expected_function)
     ASSERT_TRUE(xtract[XTRACT_MODIFIED_KULLBACK_LEIBLER] == xtract_modified_kullback_leibler);
     ASSERT_TRUE(xtract[XTRACT_SPECTRAL_CONTRAST] == xtract_spectral_contrast);
     ASSERT_TRUE(xtract[XTRACT_CHROMA] == xtract_chroma);
+    ASSERT_TRUE(xtract[XTRACT_CQT] == xtract_cqt);
 }
 
 /* ===== Descriptor conformance ===== */
@@ -577,6 +589,7 @@ static int conf_min_n(const xtract_function_descriptor_t *d)
         return 20;
     case XTRACT_SPECTRUM:
     case XTRACT_AUTOCORRELATION_FFT:
+    case XTRACT_CQT:
         return CONF_N;
     default:
         break;
@@ -643,7 +656,8 @@ static void conf_set(const xtract_function_descriptor_t *d, double *argf, int *a
 }
 
 static const void *conf_argv(const xtract_function_descriptor_t *d, double *argf, int *argi,
-                             const xtract_mel_filter *mel, const int *bark, const double *window)
+                             const xtract_mel_filter *mel, const int *bark, const double *window,
+                             const xtract_cqt_kernel *cqt)
 {
     int i;
 
@@ -651,6 +665,8 @@ static const void *conf_argv(const xtract_function_descriptor_t *d, double *argf
         return NULL;
     if (d->argv.type == XTRACT_MEL_FILTER)
         return mel;
+    if (d->argv.type == XTRACT_CQT_KERNEL)
+        return cqt;
     if (d->id == XTRACT_BARK_COEFFICIENTS)
         return bark;
     if (d->id == XTRACT_WINDOWED)
@@ -684,11 +700,13 @@ UTEST(descriptors, every_feature_conforms_to_its_descriptor)
     double row_store[CONF_FILTERS][CONF_N];
     double *rows[CONF_FILTERS];
     xtract_mel_filter mel;
+    xtract_cqt_kernel *cqt = xtract_init_cqt(CONF_N, 1000.0, 100.0, 1, 2, 0.01);
     int bark[XTRACT_BARK_BANDS];
     int f, i, rv;
     const void *argv;
 
     ASSERT_TRUE(fd != NULL);
+    ASSERT_TRUE(cqt != NULL);
     xtract_init_fft(CONF_N, XTRACT_SPECTRUM);
     xtract_init_fft(CONF_N, XTRACT_AUTOCORRELATION_FFT);
     for (i = 0; i < CONF_FILTERS; i++)
@@ -709,7 +727,7 @@ UTEST(descriptors, every_feature_conforms_to_its_descriptor)
         const int call_n = conf_call_n(d);
 
         conf_fill_data(d, data, call_n);
-        argv = conf_argv(d, argf, argi, &mel, bark, window);
+        argv = conf_argv(d, argf, argi, &mel, bark, window, cqt);
 
         rv = xtract[f](data, call_n, argv, result);
         if (rv == XTRACT_FEATURE_NOT_IMPLEMENTED)
@@ -754,5 +772,6 @@ UTEST(descriptors, every_feature_conforms_to_its_descriptor)
         }
     }
 
+    xtract_free_cqt(cqt);
     ASSERT_EQ(xtract_free_descriptors(fd), XTRACT_SUCCESS);
 }
