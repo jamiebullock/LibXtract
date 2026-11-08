@@ -50,4 +50,4 @@ bench/xtbench_moving
 
 # Bounded model checking (make verify)
 verify/xtract.gb
-verify/.proofs
+verify/.proofs*
