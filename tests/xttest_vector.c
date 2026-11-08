@@ -777,11 +777,11 @@ UTEST(vector, spectrum_log_types_floor_a_silent_signal_at_exactly_zero)
     }
 }
 
-UTEST(vector, spectrum_magnitude_phase_keeps_magnitudes_and_gives_quadrature_phases)
+UTEST(vector, spectrum_magnitude_phase_keeps_magnitudes_and_a_sine_bin_reads_minus_a_quarter_turn)
 {
     /* The cosine bin is purely real, so its phase is 0; the sine bin is
-     * purely imaginary, so its phase is a quarter turn. The second half of
-     * the result holds phases, not frequencies. */
+     * purely imaginary and negative, so its phase is -pi/2. The second half
+     * of the result holds phases, not frequencies. */
     double result[SPEC_N];
     int with_dc, m;
 
@@ -794,7 +794,7 @@ UTEST(vector, spectrum_magnitude_phase_keeps_magnitudes_and_gives_quadrature_pha
         for (m = 0; m < SPEC_M; m++)
             CHECK_NEAR(result[m], spec_bin_magnitude(with_dc ? m : m + 1), 1e-12);
         CHECK_NEAR(result[SPEC_M + cos_m], 0.0, 1e-9);
-        CHECK_NEAR(fabs(result[SPEC_M + sin_m]), M_PI / 2.0, 1e-9);
+        CHECK_NEAR(result[SPEC_M + sin_m], -M_PI / 2.0, 1e-9);
     }
 }
 
