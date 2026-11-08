@@ -1494,11 +1494,12 @@ int xtract_f0(const double *data, const int N, const void *argv, double *result)
 
 int xtract_failsafe_f0(const double *data, const int N, const void *argv, double *result)
 {
-    double *spectrum, argf[4], *peaks, sr, previous;
+    double *spectrum, argf[4], *peaks, sr, f0;
     int rv;
 
-    previous = *result;
-    rv = xtract_f0(data, N, argv, result);
+    rv = xtract_f0(data, N, argv, &f0);
+    if (rv == XTRACT_SUCCESS || rv == XTRACT_ARGUMENT_ERROR)
+        *result = f0;
     if (rv != XTRACT_NO_RESULT)
         return rv;
 
@@ -1541,8 +1542,6 @@ int xtract_failsafe_f0(const double *data, const int N, const void *argv, double
 
     if (rv == XTRACT_NO_RESULT)
         *result = 0.0;
-    else if (rv == XTRACT_BAD_STATE)
-        *result = previous;
 
     return rv;
 }
