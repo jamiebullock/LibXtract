@@ -490,7 +490,7 @@ extern "C"
 
     /** \brief An initialisation function for functions using FFT
      *
-     * This function initialises global data structures used by functions requiring FFT functionality. It can be called multiple times with different feature names. Calling it more than once with the same feature name is not a valid operation and will result in a memory leak.
+     * This function initialises global data structures used by functions requiring FFT functionality. It can be called multiple times with different feature names. Calling it more than once with the same feature name is not a valid operation and will result in a memory leak. The data structures belong to the calling thread, so every thread that calls a function using the FFT must call xtract_init_fft() itself.
      *
      * \param N: the size of the FFT, a power of two of at least 2
      * \param feature_name: the name of the feature the FFT is being used for,
