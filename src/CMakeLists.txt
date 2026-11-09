@@ -71,6 +71,9 @@ endif()
 
 set(XTRACT_MUTATION_PLUGIN "" CACHE FILEPATH "Mull IR frontend plugin to compile the library with")
 if(XTRACT_MUTATION_PLUGIN)
+    if(NOT CMAKE_C_COMPILER_ID MATCHES "Clang")
+        message(FATAL_ERROR "XTRACT_MUTATION_PLUGIN needs a Clang compiler, the C compiler is ${CMAKE_C_COMPILER_ID}")
+    endif()
     target_compile_options(xtract PRIVATE -fpass-plugin=${XTRACT_MUTATION_PLUGIN} -grecord-command-line)
 endif()
 
@@ -95,5 +98,9 @@ install(FILES
     ${PROJECT_BINARY_DIR}/xtractConfigVersion.cmake
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/xtract)
 
+file(RELATIVE_PATH XTRACT_PC_PREFIX ${CMAKE_INSTALL_FULL_LIBDIR}/pkgconfig ${CMAKE_INSTALL_PREFIX})
+string(REGEX REPLACE "/$" "" XTRACT_PC_PREFIX "${XTRACT_PC_PREFIX}")
+file(RELATIVE_PATH XTRACT_PC_LIBDIR ${CMAKE_INSTALL_PREFIX} ${CMAKE_INSTALL_FULL_LIBDIR})
+file(RELATIVE_PATH XTRACT_PC_INCLUDEDIR ${CMAKE_INSTALL_PREFIX} ${CMAKE_INSTALL_FULL_INCLUDEDIR})
 configure_file(${PROJECT_SOURCE_DIR}/cmake/xtract.pc.in ${PROJECT_BINARY_DIR}/xtract.pc @ONLY)
 install(FILES ${PROJECT_BINARY_DIR}/xtract.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)

@@ -1,6 +1,6 @@
-prefix=@CMAKE_INSTALL_PREFIX@
-libdir=@CMAKE_INSTALL_FULL_LIBDIR@
-includedir=@CMAKE_INSTALL_FULL_INCLUDEDIR@
+prefix=${pcfiledir}/@XTRACT_PC_PREFIX@
+libdir=${prefix}/@XTRACT_PC_LIBDIR@
+includedir=${prefix}/@XTRACT_PC_INCLUDEDIR@
 
 Name: xtract
 Description: LibXtract, a library of feature extraction functions
