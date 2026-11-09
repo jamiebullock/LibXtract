@@ -1,0 +1,92 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": { "major": 3, "minor": 21, "patch": 0 },
+  "configurePresets": [
+    {
+      "name": "base",
+      "hidden": true,
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "XTRACT_BUILD_TESTS": "ON",
+        "XTRACT_BUILD_EXAMPLES": "ON",
+        "XTRACT_BUILD_BENCH": "ON"
+      }
+    },
+    {
+      "name": "default",
+      "inherits": "base",
+      "displayName": "Release build of the library, tests, examples and benchmarks"
+    },
+    {
+      "name": "asan",
+      "inherits": "base",
+      "displayName": "Library and tests with AddressSanitizer and UBSan",
+      "cacheVariables": {
+        "XTRACT_BUILD_EXAMPLES": "OFF",
+        "XTRACT_BUILD_BENCH": "OFF",
+        "CMAKE_C_FLAGS": "-O3 -fsanitize=address,undefined -fno-sanitize-recover=all -fno-omit-frame-pointer -g",
+        "CMAKE_EXE_LINKER_FLAGS": "-fsanitize=address,undefined",
+        "CMAKE_SHARED_LINKER_FLAGS": "-fsanitize=address,undefined",
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "coverage",
+      "inherits": "base",
+      "displayName": "Library and tests with gcov instrumentation",
+      "cacheVariables": {
+        "XTRACT_BUILD_EXAMPLES": "OFF",
+        "XTRACT_BUILD_BENCH": "OFF",
+        "CMAKE_C_FLAGS": "-O3 --coverage",
+        "CMAKE_EXE_LINKER_FLAGS": "--coverage",
+        "CMAKE_SHARED_LINKER_FLAGS": "--coverage",
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "fuzz",
+      "inherits": "base",
+      "displayName": "libFuzzer harnesses with AddressSanitizer and UBSan",
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "clang",
+        "CMAKE_BUILD_TYPE": "Debug",
+        "XTRACT_BUILD_TESTS": "OFF",
+        "XTRACT_BUILD_EXAMPLES": "OFF",
+        "XTRACT_BUILD_BENCH": "OFF",
+        "XTRACT_BUILD_FUZZ": "ON",
+        "CMAKE_C_FLAGS": "-fsanitize=address,undefined -fno-sanitize-recover=all -O1",
+        "CMAKE_EXE_LINKER_FLAGS": "-fsanitize=address,undefined"
+      }
+    },
+    {
+      "name": "mutation",
+      "inherits": "asan",
+      "displayName": "Library compiled with the Mull plugin for mutation testing",
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "clang-18",
+        "XTRACT_MUTATION_PLUGIN": "/usr/lib/mull-ir-frontend-18"
+      }
+    }
+  ],
+  "buildPresets": [
+    { "name": "default", "configurePreset": "default", "configuration": "Release" },
+    { "name": "asan", "configurePreset": "asan", "configuration": "Debug" },
+    { "name": "coverage", "configurePreset": "coverage", "configuration": "Debug" },
+    { "name": "fuzz", "configurePreset": "fuzz", "configuration": "Debug" },
+    { "name": "mutation", "configurePreset": "mutation", "configuration": "Debug" }
+  ],
+  "testPresets": [
+    {
+      "name": "base",
+      "hidden": true,
+      "output": { "outputOnFailure": true },
+      "execution": { "noTestsAction": "error" }
+    },
+    { "name": "default", "inherits": "base", "configurePreset": "default", "configuration": "Release" },
+    { "name": "asan", "inherits": "base", "configurePreset": "asan", "configuration": "Debug" },
+    { "name": "coverage", "inherits": "base", "configurePreset": "coverage", "configuration": "Debug" },
+    { "name": "fuzz", "inherits": "base", "configurePreset": "fuzz", "configuration": "Debug" },
+    { "name": "mutation", "inherits": "base", "configurePreset": "mutation", "configuration": "Debug" }
+  ]
+}

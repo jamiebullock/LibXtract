@@ -1,0 +1,10 @@
+# Part of LibXtract
+#
+# SPDX-FileCopyrightText: 2026 Jamie Bullock
+# SPDX-License-Identifier: Zlib
+
+@PACKAGE_INIT@
+
+include("${CMAKE_CURRENT_LIST_DIR}/xtractTargets.cmake")
+
+check_required_components(xtract)

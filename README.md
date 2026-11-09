@@ -34,6 +34,19 @@ make verify    # bounded model checking of the feature functions with CBMC (CI r
 
 For further details on `make verify` see [verify/README.md](verify/README.md).
 
+### Build and test with CMake
+
+CMake 3.21 or later builds the library on every platform, including Windows with Visual Studio and no MSYS2:
+
+```bash
+cmake --preset default           # configure into build/default
+cmake --build --preset default   # build the library, tests, examples and benchmarks
+ctest --preset default           # run the tests
+cmake --install build/default --prefix /somewhere/else
+```
+
+The install step places the library, the headers, a CMake package and a pkg-config file under the prefix, so a downstream CMake project can call `find_package(xtract)` and link `xtract::xtract`. The `asan`, `coverage` and `fuzz` presets build instrumented variants under `build/<preset>`; `BUILD_SHARED_LIBS=ON` builds a shared library.
+
 ### Install
 
 ```bash
