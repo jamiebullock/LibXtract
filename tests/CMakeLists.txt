@@ -24,9 +24,9 @@ add_test(NAME xttest COMMAND xttest)
 if(XTRACT_COVERAGE)
     set(XTRACT_LCOV_IGNORE --ignore-errors unused,inconsistent,format,empty,gcov,unsupported)
     add_custom_target(coverage
-        COMMAND lcov --zerocounters --directory ${PROJECT_BINARY_DIR}/src ${XTRACT_LCOV_IGNORE}
+        COMMAND lcov --zerocounters --directory src ${XTRACT_LCOV_IGNORE}
         COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure
-        COMMAND lcov --capture --directory ${PROJECT_BINARY_DIR}/src
+        COMMAND lcov --capture --directory src
             --output-file coverage.info ${XTRACT_LCOV_IGNORE}
         COMMAND lcov --remove coverage.info */ooura/* */c-ringbuf/* */dywapitchtrack/*
             --output-file coverage.info ${XTRACT_LCOV_IGNORE}
