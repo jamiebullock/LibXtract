@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: Zlib
  */
 
-/* init.c: defines initialisation and free functions. */
-
 #include <math.h>
 #include <stdint.h>
 #include <stdlib.h>
