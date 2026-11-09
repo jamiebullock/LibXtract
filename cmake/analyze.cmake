@@ -7,6 +7,8 @@
 # each of them in COMPILE_COMMANDS and fails on any finding. NDEBUG is
 # dropped so that the asserts state their invariants to the analyzer.
 
+cmake_minimum_required(VERSION 3.21)
+
 file(READ "${COMPILE_COMMANDS}" database)
 string(JSON count LENGTH "${database}")
 math(EXPR last "${count} - 1")
