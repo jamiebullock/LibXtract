@@ -26,6 +26,7 @@ doc/html
 
 # Build files
 .build
+build/
 dist
 
 # Coverage (make coverage)

@@ -1,0 +1,11 @@
+prefix=@CMAKE_INSTALL_PREFIX@
+libdir=@CMAKE_INSTALL_FULL_LIBDIR@
+includedir=@CMAKE_INSTALL_FULL_INCLUDEDIR@
+
+Name: xtract
+Description: LibXtract, a library of feature extraction functions
+URL: https://github.com/jamiebullock/LibXtract
+Version: @PROJECT_VERSION@
+Libs: -L${libdir} -lxtract
+Libs.private: @XTRACT_PC_LIBS_PRIVATE@
+Cflags: -I${includedir}

@@ -114,6 +114,35 @@ jobs:
           export PATH="${JAVA_HOME}/bin:${PATH}"
           PYTHON=python NODE_INCLUDE=/mingw64/include/node make -C swig check
 
+  cmake:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Configure
+        run: cmake --preset default
+
+      - name: Build
+        run: cmake --build --preset default
+
+      - name: Test
+        run: ctest --preset default
+
+      - name: Install
+        run: cmake --install build/default --prefix build/dist --config Release
+
+      - name: Build a consumer against the installed package
+        run: |
+          cmake -S tests/package -B build/package -DCMAKE_PREFIX_PATH="${{ github.workspace }}/build/dist"
+          cmake --build build/package --config Release
+          ctest --test-dir build/package --build-config Release --output-on-failure
+
   fuzz:
     runs-on: ubuntu-latest
     steps:
