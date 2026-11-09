@@ -49,7 +49,7 @@ static void synthetic_prices(double *prices, int N)
 {
     int n;
     prices[0] = START_PRICE;
-    for(n = 1; n < N; ++n)
+    for (n = 1; n < N; ++n)
     {
         double sigma = n < CALM_DAYS ? CALM_DAILY_SIGMA : TURBULENT_DAILY_SIGMA;
         prices[n] = prices[n - 1] * exp(DAILY_DRIFT + sigma * standard_normal());
@@ -72,22 +72,22 @@ static double *read_prices(const char *path, int *N)
     int capacity = 0;
     char line[256];
     *N = 0;
-    if(!file)
+    if (!file)
     {
         fprintf(stderr, "cannot open %s\n", path);
         return NULL;
     }
-    while(fgets(line, sizeof line, file))
+    while (fgets(line, sizeof line, file))
     {
         double value;
-        if(!last_field(line, &value))
+        if (!last_field(line, &value))
             continue;
-        if(*N == capacity)
+        if (*N == capacity)
         {
             double *grown;
             capacity = capacity ? 2 * capacity : 256;
             grown = realloc(prices, capacity * sizeof *prices);
-            if(!grown)
+            if (!grown)
             {
                 free(prices);
                 fclose(file);
@@ -104,7 +104,7 @@ static double *read_prices(const char *path, int *N)
 static void log_returns(const double *prices, int N, double *returns)
 {
     int n;
-    for(n = 1; n < N; ++n)
+    for (n = 1; n < N; ++n)
         returns[n - 1] = log(prices[n] / prices[n - 1]);
 }
 
@@ -113,9 +113,14 @@ static double annualised(double daily_sigma)
     return 100.0 * daily_sigma * sqrt(TRADING_DAYS_PER_YEAR);
 }
 
+static int day_of_return(int r)
+{
+    return r + 2;
+}
+
 static int check(int status, const char *function)
 {
-    if(status != XTRACT_SUCCESS)
+    if (status != XTRACT_SUCCESS)
         fprintf(stderr, "%s failed with status %d\n", function, status);
     return status;
 }
@@ -124,7 +129,7 @@ static int rolling_volatility(const double *returns, int N, int window, double *
 {
     int status = xtract_moving_standard_deviation(returns, N, &window, volatility);
     int n;
-    for(n = 0; n <= N - window; ++n)
+    for (n = 0; n <= N - window; ++n)
         volatility[n] = annualised(volatility[n]);
     return status;
 }
@@ -134,7 +139,7 @@ static int ewma_volatility(const double *returns, int N, double *volatility)
     double weight = EWMA_NEW_WEIGHT;
     int status = xtract_ewma_variance(returns, N, &weight, volatility);
     int n;
-    for(n = 0; n < N; ++n)
+    for (n = 0; n < N; ++n)
         volatility[n] = annualised(sqrt(volatility[n]));
     return status;
 }
@@ -142,10 +147,10 @@ static int ewma_volatility(const double *returns, int N, double *volatility)
 static int first_change(const double *short_volatility, const double *long_volatility, int N)
 {
     int r;
-    for(r = LONG_WINDOW - 1; r < N; ++r)
+    for (r = LONG_WINDOW - 1; r < N; ++r)
     {
         double ratio = short_volatility[r - SHORT_WINDOW + 1] / long_volatility[r - LONG_WINDOW + 1];
-        if(ratio > CHANGE_RATIO)
+        if (ratio > CHANGE_RATIO)
             return r;
     }
     return -1;
@@ -158,12 +163,12 @@ static int summarise_returns(const double *returns, int N)
     double skewness;
     double kurtosis;
     double median;
-    if(check(xtract_mean(returns, N, NULL, &moments[0]), "xtract_mean") ||
-       check(xtract_variance(returns, N, &moments[0], &variance), "xtract_variance") ||
-       check(xtract_standard_deviation(returns, N, &variance, &moments[1]), "xtract_standard_deviation") ||
-       check(xtract_skewness(returns, N, moments, &skewness), "xtract_skewness") ||
-       check(xtract_kurtosis(returns, N, moments, &kurtosis), "xtract_kurtosis") ||
-       check(xtract_median(returns, N, NULL, &median), "xtract_median"))
+    if (check(xtract_mean(returns, N, NULL, &moments[0]), "xtract_mean") ||
+        check(xtract_variance(returns, N, &moments[0], &variance), "xtract_variance") ||
+        check(xtract_standard_deviation(returns, N, &variance, &moments[1]), "xtract_standard_deviation") ||
+        check(xtract_skewness(returns, N, moments, &skewness), "xtract_skewness") ||
+        check(xtract_kurtosis(returns, N, moments, &kurtosis), "xtract_kurtosis") ||
+        check(xtract_median(returns, N, NULL, &median), "xtract_median"))
         return EXIT_FAILURE;
     printf("Daily log returns over %d days\n", N);
     printf("  mean %.5f  median %.5f  standard deviation %.5f (%.1f%% annualised)\n",
@@ -177,8 +182,8 @@ static void report(const double *prices, const double *short_volatility, const d
 {
     int r;
     printf("%6s %10s %12s %12s %12s\n", "day", "price", "vol 21d %", "vol 63d %", "ewma %");
-    for(r = LONG_WINDOW - 1; r < N; r += REPORT_STRIDE)
-        printf("%6d %10.2f %12.1f %12.1f %12.1f\n", r + 1, prices[r + 1],
+    for (r = LONG_WINDOW - 1; r < N; r += REPORT_STRIDE)
+        printf("%6d %10.2f %12.1f %12.1f %12.1f\n", day_of_return(r), prices[r + 1],
                short_volatility[r - SHORT_WINDOW + 1], long_volatility[r - LONG_WINDOW + 1], ewma[r]);
     printf("\n");
 }
@@ -196,18 +201,18 @@ int main(int argc, char **argv)
     int change;
     int status = EXIT_SUCCESS;
 
-    if(argc == 3 && strcmp(argv[1], "--input") == 0)
+    if (argc == 3 && strcmp(argv[1], "--input") == 0)
         input = argv[2];
-    else if(argc != 1)
+    else if (argc != 1)
     {
         fprintf(stderr, "usage: %s [--input prices.csv]\n", argv[0]);
         return EXIT_FAILURE;
     }
 
-    if(input)
+    if (input)
     {
         prices = read_prices(input, &N);
-        if(!prices || N <= LONG_WINDOW)
+        if (!prices || N <= LONG_WINDOW)
         {
             fprintf(stderr, "need more than %d prices, one per line, price in the last comma-separated field\n",
                     LONG_WINDOW);
@@ -220,7 +225,7 @@ int main(int argc, char **argv)
     {
         N = SYNTHETIC_DAYS;
         prices = malloc(N * sizeof *prices);
-        if(!prices)
+        if (!prices)
             return EXIT_FAILURE;
         synthetic_prices(prices, N);
         printf("Synthetic random walk of %d days: daily volatility %.1f%% for %d days, then %.1f%%\n\n", N,
@@ -232,19 +237,19 @@ int main(int argc, char **argv)
     short_volatility = malloc(returns_count * sizeof *short_volatility);
     long_volatility = malloc(returns_count * sizeof *long_volatility);
     ewma = malloc(returns_count * sizeof *ewma);
-    if(!returns || !short_volatility || !long_volatility || !ewma)
+    if (!returns || !short_volatility || !long_volatility || !ewma)
     {
         status = EXIT_FAILURE;
         goto done;
     }
 
     log_returns(prices, N, returns);
-    if(summarise_returns(returns, returns_count) ||
-       check(rolling_volatility(returns, returns_count, SHORT_WINDOW, short_volatility),
-             "xtract_moving_standard_deviation") ||
-       check(rolling_volatility(returns, returns_count, LONG_WINDOW, long_volatility),
-             "xtract_moving_standard_deviation") ||
-       check(ewma_volatility(returns, returns_count, ewma), "xtract_ewma_variance"))
+    if (summarise_returns(returns, returns_count) ||
+        check(rolling_volatility(returns, returns_count, SHORT_WINDOW, short_volatility),
+              "xtract_moving_standard_deviation") ||
+        check(rolling_volatility(returns, returns_count, LONG_WINDOW, long_volatility),
+              "xtract_moving_standard_deviation") ||
+        check(ewma_volatility(returns, returns_count, ewma), "xtract_ewma_variance"))
     {
         status = EXIT_FAILURE;
         goto done;
@@ -253,19 +258,21 @@ int main(int argc, char **argv)
     report(prices, short_volatility, long_volatility, ewma, returns_count);
 
     change = first_change(short_volatility, long_volatility, returns_count);
-    if(change < 0)
+    if (change < 0)
         printf("No day where the 21-day volatility exceeds %.1f times the 63-day volatility\n", CHANGE_RATIO);
     else
-        printf("Volatility regime change on day %d: 21-day volatility %.1f%% against 63-day %.1f%%\n", change + 1,
+        printf("Volatility regime change on day %d: 21-day volatility %.1f%% against 63-day %.1f%%\n",
+               day_of_return(change),
                short_volatility[change - SHORT_WINDOW + 1], long_volatility[change - LONG_WINDOW + 1]);
 
-    if(!input)
+    if (!input)
     {
         int earliest = CALM_DAYS - 1;
         int latest = CALM_DAYS - 1 + SHORT_WINDOW;
-        if(change < earliest || change > latest)
+        if (change < earliest || change > latest)
         {
-            fprintf(stderr, "expected the change between days %d and %d\n", earliest + 1, latest + 1);
+            fprintf(stderr, "expected the change between days %d and %d\n", day_of_return(earliest),
+                    day_of_return(latest));
             status = EXIT_FAILURE;
         }
         else
