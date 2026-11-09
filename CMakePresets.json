@@ -10,13 +10,21 @@
         "CMAKE_BUILD_TYPE": "Release",
         "XTRACT_BUILD_TESTS": "ON",
         "XTRACT_BUILD_EXAMPLES": "ON",
-        "XTRACT_BUILD_BENCH": "ON"
+        "XTRACT_BUILD_BENCH": "ON",
+        "XTRACT_BUILD_PYTHON": "OFF",
+        "XTRACT_BUILD_JAVA": "OFF",
+        "XTRACT_BUILD_NODE": "OFF"
       }
     },
     {
       "name": "default",
       "inherits": "base",
-      "displayName": "Release build of the library, tests, examples and benchmarks"
+      "displayName": "Release build of the library, tests, examples and benchmarks",
+      "cacheVariables": {
+        "XTRACT_BUILD_PYTHON": "AUTO",
+        "XTRACT_BUILD_JAVA": "AUTO",
+        "XTRACT_BUILD_NODE": "AUTO"
+      }
     },
     {
       "name": "asan",
