@@ -3,42 +3,23 @@
 # SPDX-FileCopyrightText: 2014 Jamie Bullock
 # SPDX-License-Identifier: Zlib
 
-LIBRARY ?= static
-PREFIX ?= $(PWD)/dist
-XTRACT_VERSION := $(shell cat VERSION)
+# Aliases for the CMake presets in CMakePresets.json, each of which builds
+# under build/<preset>, plus the CBMC proofs in verify/ and clang-format.
 
-HPATH = include/xtract
-
-export XTRACT_VERSION PREFIX LIBRARY
-
-.PHONY: examples clean install doc src swig bench analyze check-asan cppcheck coverage fuzz mutation verify format format-check
-
-all: src examples
-
-src:
-	@$(MAKE) -C $@
-
-doc:
-	@$(MAKE) -C $@
-
-examples:
-	@$(MAKE) -C $@
-
-# The Python, Java and Node.js bindings; each needs SWIG and its own
-# toolchain (Python with headers; a JDK; node with the Node.js headers and
-# node-addon-api installed under swig/)
-swig:
-	@$(CMAKE) --preset default -DXTRACT_BUILD_PYTHON=ON -DXTRACT_BUILD_JAVA=ON -DXTRACT_BUILD_NODE=ON >/dev/null \
-	&& $(CMAKE) --build --preset default && $(CTEST) --preset default -R bindings
-
-check: src
-	@$(MAKE) -C tests check
-
-# The targets below run from CMake presets, each in its own directory under
-# build/, so an instrumented build never mixes with the normal one and only
-# the changed files are rebuilt
 CMAKE ?= cmake
 CTEST ?= ctest
+# Install prefix; empty installs to CMake's default, /usr/local on Unix
+PREFIX ?=
+
+.PHONY: all check test analyze cppcheck check-asan coverage fuzz mutation swig bench doc verify format format-check install clean
+
+all:
+	@$(CMAKE) --preset default >/dev/null && $(CMAKE) --build --preset default
+
+check: all
+	@$(CTEST) --preset default
+
+test: check
 
 analyze:
 	@$(CMAKE) --preset default >/dev/null && $(CMAKE) --build --preset default --target analyze
@@ -83,11 +64,24 @@ MULL_PLUGIN ?= /usr/lib/mull-ir-frontend-$(MULL_LLVM)
 MULL_RUNNER ?= mull-runner-$(MULL_LLVM)
 MULL_THRESHOLD ?= 84
 MULL_WORKERS ?= 4
-
 mutation:
 	@$(CMAKE) --preset mutation -DCMAKE_C_COMPILER=$(MULL_CC) -DXTRACT_MUTATION_PLUGIN=$(MULL_PLUGIN) \
 		-DXTRACT_MULL_RUNNER=$(MULL_RUNNER) -DXTRACT_MUTATION_THRESHOLD=$(MULL_THRESHOLD) -DXTRACT_MUTATION_WORKERS=$(MULL_WORKERS) >/dev/null \
 	&& $(CMAKE) --build --preset mutation && $(CMAKE) --build --preset mutation --target mutation
+
+# The Python, Java and Node.js bindings; each needs SWIG and its own
+# toolchain (Python with headers; a JDK; node with the Node.js headers and
+# node-addon-api installed under swig/)
+swig:
+	@$(CMAKE) --preset default -DXTRACT_BUILD_PYTHON=ON -DXTRACT_BUILD_JAVA=ON -DXTRACT_BUILD_NODE=ON >/dev/null \
+	&& $(CMAKE) --build --preset default && $(CTEST) --preset default -R bindings
+
+bench:
+	@$(CMAKE) --preset default >/dev/null && $(CMAKE) --build --preset default --target bench
+
+# Requires doxygen; writes doc/html
+doc:
+	@$(CMAKE) --preset default >/dev/null && $(CMAKE) --build --preset default --target doc
 
 # Bounded model checking of every feature function with CBMC: one proof per
 # function over every input of length up to VERIFY_MAX_N (see verify/Makefile).
@@ -112,20 +106,9 @@ format:
 format-check:
 	@$(CLANG_FORMAT) --dry-run --Werror $(FORMAT_FILES)
 
-bench:
-	@$(CMAKE) --preset default >/dev/null && $(CMAKE) --build --preset default --target bench
-
-test: check
-
-install:
-	$(MAKE) -C src install
-	$(MAKE) -C examples install
-	mkdir -p $(PREFIX)/$(HPATH)
-	cp $(HPATH)/* $(PREFIX)/$(HPATH)
+install: all
+	@$(CMAKE) --install build/default $(if $(PREFIX),--prefix $(PREFIX))
 
 clean:
-	@$(MAKE) -C src clean
-	@$(MAKE) -C examples clean
-	@$(MAKE) -C bench clean
+	@$(RM) -r build
 	@$(MAKE) -C verify clean
-	@$(RM) -r dist build
