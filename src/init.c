@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: Zlib
  */
 
-/* init.c: defines initialisation and free functions. Also contains library constructor routine. */
-
 #include <math.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -669,23 +667,4 @@ void xtract_free_cqt(xtract_cqt_kernel *kernel)
     free(kernel->imag);
     free(kernel->frequencies);
     free(kernel);
-}
-
-#ifdef __GNUC__
-__attribute__((constructor)) void init(void)
-#else
-void _init(void)
-#endif
-{
-#ifdef USE_OOURA
-    ooura_data_dct.initialised = false;
-    ooura_data_spectrum.initialised = false;
-    ooura_data_autocorrelation_fft.initialised = false;
-    ooura_data_mfcc.initialised = false;
-#else
-    vdsp_data_dct.initialised = false;
-    vdsp_data_spectrum.initialised = false;
-    vdsp_data_autocorrelation_fft.initialised = false;
-    vdsp_data_mfcc.initialised = false;
-#endif
 }
