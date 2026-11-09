@@ -36,9 +36,13 @@ foreach(index RANGE ${last})
             -Xanalyzer -analyzer-checker=optin.core.EnumCastOutOfRange
             ${arguments} "${file}" -o /dev/null
         WORKING_DIRECTORY "${directory}"
+        RESULT_VARIABLE result
         OUTPUT_VARIABLE output
         ERROR_VARIABLE errors)
     string(APPEND findings "${output}${errors}")
+    if(NOT result EQUAL 0)
+        string(APPEND findings "${CLANG} --analyze ${file}: ${result}\n")
+    endif()
 endforeach()
 
 if(findings)
