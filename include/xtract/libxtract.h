@@ -501,7 +501,7 @@ extern "C"
 
     /** \brief Free memory used for fft plans
      *
-     * This function frees the memory allocated by xtract_init_fft() on the calling thread for every feature. The memory belonging to the thread that exits the process is freed on exit; any other thread must call this function before it ends, since no other thread can free its memory.
+     * This function frees the memory allocated by xtract_init_fft() on the calling thread for every feature. A thread that ends before the process must call this function first, since no other thread can free its memory; the memory of a thread still running when the process exits is reclaimed with the process.
      * */
     void xtract_free_fft(void);
 

@@ -6,6 +6,5 @@ excludePaths:
   - .*/src/dywapitchtrack/.*
   - .*/src/descriptors\.c
   - .*/src/libxtract\.c
-  - .*/src/fini\.c
   - .*/tests/.*
   - /usr/.*
