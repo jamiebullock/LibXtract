@@ -61,7 +61,7 @@ endif()
 find_package(Doxygen)
 if(DOXYGEN_FOUND)
     file(WRITE ${PROJECT_BINARY_DIR}/Doxyfile
-        "@INCLUDE = ${PROJECT_SOURCE_DIR}/doc/Doxyfile\nPROJECT_NUMBER = ${PROJECT_VERSION}\n")
+        "@INCLUDE = \"${PROJECT_SOURCE_DIR}/doc/Doxyfile\"\nPROJECT_NUMBER = ${PROJECT_VERSION}\n")
     add_custom_target(doc
         COMMAND ${DOXYGEN_EXECUTABLE} ${PROJECT_BINARY_DIR}/Doxyfile
         WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/doc
