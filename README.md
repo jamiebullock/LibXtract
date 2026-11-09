@@ -54,13 +54,18 @@ make install                        # install to /usr/local
 make install PREFIX=/somewhere/else # install elsewhere
 ```
 
-## Python bindings
+## Python, Java and Node.js bindings
 
-To build the Python bindings, [SWIG](http://www.swig.org) and Python are required:
+The bindings are generated with [SWIG](http://www.swig.org) 4.2 or later. The CMake options `XTRACT_BUILD_PYTHON`, `XTRACT_BUILD_JAVA` and `XTRACT_BUILD_NODE` are `AUTO` by default, which builds each binding whose toolchain is found: Python with its development headers, a JDK, or `node` with the Node.js headers and `node-addon-api` installed under `swig/` (`npm install --prefix swig node-addon-api`). Set an option to `ON` to fail when the toolchain is missing, or `OFF` to skip it:
 
 ```bash
-make swig
+cmake --preset default -DXTRACT_BUILD_PYTHON=ON -DXTRACT_BUILD_JAVA=OFF -DXTRACT_BUILD_NODE=OFF
+cmake --build --preset default
+ctest --preset default -R bindings
+make swig                        # all three, with every option ON
 ```
+
+The modules are written under `build/default/swig/<language>`.
 
 ## Documentation
 

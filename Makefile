@@ -24,8 +24,12 @@ doc:
 examples:
 	@$(MAKE) -C $@
 
-swig: src
-	@$(MAKE) -C $@
+# The Python, Java and Node.js bindings; each needs SWIG and its own
+# toolchain (Python with headers; a JDK; node with the Node.js headers and
+# node-addon-api installed under swig/)
+swig:
+	@$(CMAKE) --preset default -DXTRACT_BUILD_PYTHON=ON -DXTRACT_BUILD_JAVA=ON -DXTRACT_BUILD_NODE=ON >/dev/null \
+	&& $(CMAKE) --build --preset default && $(CTEST) --preset default -R bindings
 
 check: src
 	@$(MAKE) -C tests check
@@ -122,7 +126,6 @@ install:
 clean:
 	@$(MAKE) -C src clean
 	@$(MAKE) -C examples clean
-	@$(MAKE) -C swig clean
 	@$(MAKE) -C bench clean
 	@$(MAKE) -C verify clean
 	@$(RM) -r dist build
