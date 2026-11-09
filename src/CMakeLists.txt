@@ -98,18 +98,19 @@ install(FILES
     ${PROJECT_BINARY_DIR}/xtractConfigVersion.cmake
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/xtract)
 
-# The pkg-config paths are written relative to the installed .pc file, so
-# they follow an install prefix given at install time and do not depend on
-# the prefix pkg-config infers
+# The pkg-config prefix is written relative to the installed .pc file, so it
+# follows an install prefix given at install time; libdir and includedir are
+# written under ${prefix}, so --define-variable=prefix relocates them. An
+# absolute CMAKE_INSTALL_LIBDIR or CMAKE_INSTALL_INCLUDEDIR is kept verbatim
 set(XTRACT_PC_DIR ${CMAKE_INSTALL_FULL_LIBDIR}/pkgconfig)
 file(RELATIVE_PATH XTRACT_PC_PREFIX ${XTRACT_PC_DIR} ${CMAKE_INSTALL_PREFIX})
 string(REGEX REPLACE "/$" "" XTRACT_PC_PREFIX "${XTRACT_PC_PREFIX}")
-if(IS_ABSOLUTE "${CMAKE_INSTALL_INCLUDEDIR}")
-    set(XTRACT_PC_INCLUDEDIR "${CMAKE_INSTALL_INCLUDEDIR}")
-else()
-    file(RELATIVE_PATH XTRACT_PC_INCLUDEDIR ${XTRACT_PC_DIR} ${CMAKE_INSTALL_FULL_INCLUDEDIR})
-    string(REGEX REPLACE "/$" "" XTRACT_PC_INCLUDEDIR "${XTRACT_PC_INCLUDEDIR}")
-    set(XTRACT_PC_INCLUDEDIR "\${pcfiledir}/${XTRACT_PC_INCLUDEDIR}")
-endif()
+foreach(dir LIBDIR INCLUDEDIR)
+    if(IS_ABSOLUTE "${CMAKE_INSTALL_${dir}}")
+        set(XTRACT_PC_${dir} "${CMAKE_INSTALL_${dir}}")
+    else()
+        set(XTRACT_PC_${dir} "\${prefix}/${CMAKE_INSTALL_${dir}}")
+    endif()
+endforeach()
 configure_file(${PROJECT_SOURCE_DIR}/cmake/xtract.pc.in ${PROJECT_BINARY_DIR}/xtract.pc @ONLY)
 install(FILES ${PROJECT_BINARY_DIR}/xtract.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)

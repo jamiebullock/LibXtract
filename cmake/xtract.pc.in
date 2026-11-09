@@ -1,5 +1,5 @@
 prefix=${pcfiledir}/@XTRACT_PC_PREFIX@
-libdir=${pcfiledir}/..
+libdir=@XTRACT_PC_LIBDIR@
 includedir=@XTRACT_PC_INCLUDEDIR@
 
 Name: xtract
