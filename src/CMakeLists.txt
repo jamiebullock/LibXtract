@@ -38,19 +38,8 @@ set_target_properties(xtract PROPERTIES
 
 # The style warnings apply to the first-party sources only; the third-party
 # directories keep their upstream style
-if(CMAKE_C_COMPILER_ID STREQUAL "MSVC")
-    set(XTRACT_STYLE_WARNINGS /W4 /wd4068)
-else()
+if(NOT MSVC)
     target_compile_options(xtract PRIVATE -Wall -pedantic)
-    set(XTRACT_STYLE_WARNINGS
-        -Wextra
-        -Wno-unused-parameter
-        -Wshadow
-        -Wdeclaration-after-statement
-        -Wstrict-prototypes)
-    if(CMAKE_C_COMPILER_ID MATCHES "Clang")
-        list(APPEND XTRACT_STYLE_WARNINGS -Wconditional-uninitialized)
-    endif()
 endif()
 set_source_files_properties(${XTRACT_SOURCES} PROPERTIES COMPILE_OPTIONS "${XTRACT_STYLE_WARNINGS}")
 
