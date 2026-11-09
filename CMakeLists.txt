@@ -13,6 +13,7 @@ option(XTRACT_BUILD_TESTS "Build the test suite" ${PROJECT_IS_TOP_LEVEL})
 option(XTRACT_BUILD_EXAMPLES "Build the examples" ${PROJECT_IS_TOP_LEVEL})
 option(XTRACT_BUILD_BENCH "Build the benchmarks" OFF)
 option(XTRACT_BUILD_FUZZ "Build the libFuzzer harnesses, which need clang" OFF)
+option(XTRACT_COVERAGE "Instrument the build for gcov and add a coverage report target" OFF)
 
 if(PROJECT_IS_TOP_LEVEL AND NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
@@ -20,6 +21,11 @@ endif()
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 include(GNUInstallDirs)
+
+if(XTRACT_COVERAGE)
+    add_compile_options(--coverage)
+    add_link_options(--coverage)
+endif()
 
 add_subdirectory(src)
 

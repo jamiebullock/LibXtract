@@ -77,6 +77,28 @@ if(XTRACT_MUTATION_PLUGIN)
     target_compile_options(xtract PRIVATE -fpass-plugin=${XTRACT_MUTATION_PLUGIN} -grecord-command-line)
 endif()
 
+list(TRANSFORM XTRACT_SOURCES PREPEND ${CMAKE_CURRENT_SOURCE_DIR}/ OUTPUT_VARIABLE XTRACT_SOURCE_PATHS)
+
+set(XTRACT_CLANG clang CACHE STRING "clang executable for the analyze target")
+add_custom_target(analyze
+    COMMAND ${CMAKE_COMMAND}
+        -DCLANG=${XTRACT_CLANG}
+        -DCOMPILE_COMMANDS=${PROJECT_BINARY_DIR}/compile_commands.json
+        "-DSOURCES=${XTRACT_SOURCE_PATHS}"
+        -P ${PROJECT_SOURCE_DIR}/cmake/analyze.cmake
+    DEPENDS xtract
+    VERBATIM)
+
+# cppcheck checks every preprocessor configuration of the first-party
+# sources, the vDSP and the OOURA branches alike
+add_custom_target(cppcheck
+    COMMAND cppcheck --enable=warning,performance,portability --std=c99
+        --inline-suppr --error-exitcode=1 --quiet
+        -I ${PROJECT_SOURCE_DIR}/include -I ${CMAKE_CURRENT_SOURCE_DIR}
+        ${XTRACT_SOURCE_PATHS}
+    COMMAND ${CMAKE_COMMAND} -E echo "cppcheck clean"
+    VERBATIM)
+
 include(CMakePackageConfigHelpers)
 
 install(TARGETS xtract EXPORT xtractTargets

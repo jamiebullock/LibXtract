@@ -38,10 +38,9 @@
       "cacheVariables": {
         "XTRACT_BUILD_EXAMPLES": "OFF",
         "XTRACT_BUILD_BENCH": "OFF",
-        "CMAKE_C_FLAGS": "-O3 --coverage",
-        "CMAKE_EXE_LINKER_FLAGS": "--coverage",
-        "CMAKE_SHARED_LINKER_FLAGS": "--coverage",
-        "CMAKE_BUILD_TYPE": "Debug"
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_C_FLAGS": "-O3",
+        "XTRACT_COVERAGE": "ON"
       }
     },
     {
@@ -55,8 +54,7 @@
         "XTRACT_BUILD_EXAMPLES": "OFF",
         "XTRACT_BUILD_BENCH": "OFF",
         "XTRACT_BUILD_FUZZ": "ON",
-        "CMAKE_C_FLAGS": "-fsanitize=address,undefined -fno-sanitize-recover=all -O1",
-        "CMAKE_EXE_LINKER_FLAGS": "-fsanitize=address,undefined"
+        "CMAKE_C_FLAGS": "-O1"
       }
     },
     {

@@ -5,6 +5,7 @@ on:
     branches: [main, develop]
   pull_request:
     branches: [main, develop]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -70,17 +71,22 @@ jobs:
 
       - name: Static analysis (Linux/macOS)
         if: runner.os != 'Windows'
-        run: make analyze
+        run: |
+          cmake --preset default
+          cmake --build --preset default --target analyze
 
       - name: Sanitizer tests (Linux/macOS)
         if: runner.os != 'Windows'
-        run: make check-asan
+        run: |
+          cmake --preset asan
+          cmake --build --preset asan
+          ctest --preset asan
 
       - name: cppcheck (Linux)
         if: runner.os == 'Linux'
         run: |
           sudo apt-get install -y cppcheck
-          make cppcheck
+          cmake --build --preset default --target cppcheck
 
       - name: Install Node.js headers (Linux/macOS)
         if: runner.os != 'Windows'
@@ -154,14 +160,17 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y clang
 
       - name: Fuzz feature functions (libFuzzer, ASan + UBSan)
-        run: make fuzz FUZZ_TIME=60
+        run: |
+          cmake --preset fuzz -DXTRACT_FUZZ_TIME=60
+          cmake --build --preset fuzz
+          ctest --preset fuzz
 
       - name: Upload crash reproducer on failure
         if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: fuzz-crash
-          path: fuzz/crash-*
+          path: build/fuzz/fuzz/crash-*
           if-no-files-found: ignore
 
   mutation:
@@ -178,14 +187,17 @@ jobs:
           sudo apt-get update && sudo apt-get install -y clang-18 ./mull.deb
 
       - name: Mutation tests (Mull, ASan + UBSan)
-        run: make mutation
+        run: |
+          cmake --preset mutation
+          cmake --build --preset mutation
+          cmake --build --preset mutation --target mutation
 
       - name: Upload mutation report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: mutation-report
-          path: reports/mutation.json
+          path: build/mutation/reports/mutation.json
           if-no-files-found: error
           retention-days: 7
 
