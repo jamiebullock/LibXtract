@@ -1,0 +1,11 @@
+prefix=${pcfiledir}/@XTRACT_PC_PREFIX@
+libdir=@XTRACT_PC_LIBDIR@
+includedir=@XTRACT_PC_INCLUDEDIR@
+
+Name: xtract
+Description: LibXtract, a library of feature extraction functions
+URL: https://github.com/jamiebullock/LibXtract
+Version: @PROJECT_VERSION@
+Libs: -L${libdir} -lxtract
+Libs.private: @XTRACT_PC_LIBS_PRIVATE@
+Cflags: -I${includedir}
