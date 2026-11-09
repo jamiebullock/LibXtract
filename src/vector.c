@@ -17,10 +17,6 @@
 #include "xtract_macros_private.h"
 #include "xtract_globals_private.h"
 
-#ifndef M_PI
-#define M_PI 3.14159265358979323846264338327
-#endif
-
 int xtract_spectrum(const double *data, const int N, const void *argv, double *result)
 {
     int vector = 0;
