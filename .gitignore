@@ -24,30 +24,8 @@
 doc/latex
 doc/html
 
-# Build files
-.build
+# Build directories
 build/
-dist
-
-# Coverage (make coverage)
-*.gcno
-*.gcda
-coverage.info
-coverage-html
-
-# Fuzzing (make fuzz)
-fuzz/xtfuzz_*
-fuzz/crash-*
-fuzz/*.dSYM
-
-# Mutation testing (make mutation)
-reports/
-
-# Project-specific files
-examples/simpletest/simpletest
-tests/xttest
-bench/xtbench
-bench/xtbench_moving
 
 # Bounded model checking (make verify)
 verify/xtract.gb
