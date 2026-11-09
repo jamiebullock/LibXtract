@@ -16,43 +16,43 @@ A complete list of features can be found by viewing the header files, or reading
 
 ### Prerequisites
 
-- A C99 compiler (gcc, clang, MinGW)
-- make
+- A C99 compiler: gcc, clang, or Visual Studio 2019 or later on Windows
+- [CMake](https://cmake.org) 3.21 or later
+- GNU make, optionally: the top-level Makefile is a set of aliases for the CMake presets and the proofs
 
 On macOS, the library uses Apple's Accelerate framework for FFT. On Linux and Windows, it uses the bundled Ooura FFT.
 
-On Windows, an MSYS2/MinGW environment is required to provide `make` and a POSIX-compatible shell. Install [MSYS2](https://www.msys2.org), then from the MinGW 64-bit shell run `pacman -S mingw-w64-x86_64-gcc make`.
-
 ### Build and test
-
-```bash
-make           # build library and examples
-make check     # build and run tests
-make mutation  # mutation-test the suite with Mull (needs clang-18 and mull-18; CI runs it)
-make verify    # bounded model checking of the feature functions with CBMC (CI runs it on every push to main and develop)
-```
-
-For further details on `make verify` see [verify/README.md](verify/README.md).
-
-### Build and test with CMake
-
-CMake 3.21 or later builds the library on every platform, including Windows with Visual Studio and no MSYS2:
 
 ```bash
 cmake --preset default           # configure into build/default
 cmake --build --preset default   # build the library, tests, examples and benchmarks
 ctest --preset default           # run the tests
-cmake --install build/default --prefix /somewhere/else
 ```
 
-The install step places the library, the headers, a CMake package and a pkg-config file under the prefix, so a downstream CMake project can call `find_package(xtract)` and link `xtract::xtract`. The `asan`, `coverage` and `fuzz` presets build instrumented variants under `build/<preset>`; `BUILD_SHARED_LIBS=ON` builds a shared library.
+On Windows the default preset uses the Visual Studio generator; pass `-G Ninja` from a Developer Command Prompt to use Ninja instead. No MSYS2 or other POSIX layer is needed. With GNU make the same steps are `make` and `make check`.
+
+The other presets each build under their own directory in `build/`:
+
+| Preset | Alias | Purpose |
+| --- | --- | --- |
+| `default` | `make`, `make check`, `make bench` | Release build of the library, tests, examples and benchmarks |
+| `asan` | `make check-asan` | The tests under AddressSanitizer and UBSan |
+| `coverage` | `make coverage` | Line and branch coverage of the test suite (needs lcov) |
+| `fuzz` | `make fuzz` | The libFuzzer harnesses (needs a clang with libFuzzer) |
+| `mutation` | `make mutation` | Mutation testing with Mull (needs clang-18 and mull-18; CI runs it) |
+
+`make analyze` and `make cppcheck` run the clang static analyzer and cppcheck over the first-party sources. `make verify` runs the CBMC proofs of the feature functions, which CI runs on every push to main and develop; see [verify/README.md](verify/README.md).
 
 ### Install
 
 ```bash
-make install                        # install to /usr/local
-make install PREFIX=/somewhere/else # install elsewhere
+cmake --install build/default                      # install to /usr/local
+cmake --install build/default --prefix /somewhere  # install elsewhere
+make install PREFIX=/somewhere                     # the same
 ```
+
+The install places the library, the headers, a CMake package and a pkg-config file under the prefix, so a downstream CMake project can call `find_package(xtract)` and link `xtract::xtract`, and any other build can use `pkg-config --cflags --libs xtract`. `BUILD_SHARED_LIBS=ON` builds a shared library.
 
 ## Python, Java and Node.js bindings
 
@@ -72,7 +72,7 @@ The modules are written under `build/default/swig/<language>`.
 LibXtract headers are documented using [doxygen](https://www.doxygen.nl) comments. If you have doxygen installed:
 
 ```bash
-make doc
+make doc    # or: cmake --build --preset default --target doc
 ```
 
 The generated HTML documentation can then be viewed by opening `doc/html/index.html`.

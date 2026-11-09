@@ -15,8 +15,8 @@ file covers how to get a change accepted and the terms it is accepted under.
 
 ## Building and testing
 
-The README covers prerequisites. Before opening a pull request, run from the
-repository root:
+The README covers prerequisites; the `make` targets are aliases for the CMake
+presets. Before opening a pull request, run from the repository root:
 
 ```
 make

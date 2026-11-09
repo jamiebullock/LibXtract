@@ -27,7 +27,9 @@ jobs:
           sudo apt-get install -y --no-install-recommends doxygen graphviz
 
       - name: Build
-        run: make doc
+        run: |
+          cmake --preset default -DXTRACT_BUILD_TESTS=OFF -DXTRACT_BUILD_EXAMPLES=OFF -DXTRACT_BUILD_BENCH=OFF
+          cmake --build --preset default --target doc
 
       - name: Upload
         if: github.event_name != 'pull_request'
