@@ -36,6 +36,21 @@ if(XTRACT_COVERAGE)
     add_link_options(--coverage)
 endif()
 
+# Warnings for first-party C: the library sources and the C examples
+if(MSVC)
+    set(XTRACT_STYLE_WARNINGS /W4 /wd4068)
+else()
+    set(XTRACT_STYLE_WARNINGS
+        -Wextra
+        -Wno-unused-parameter
+        -Wshadow
+        -Wdeclaration-after-statement
+        -Wstrict-prototypes)
+    if(CMAKE_C_COMPILER_ID MATCHES "Clang")
+        list(APPEND XTRACT_STYLE_WARNINGS -Wconditional-uninitialized)
+    endif()
+endif()
+
 add_subdirectory(src)
 
 if(XTRACT_BUILD_TESTS OR XTRACT_BUILD_EXAMPLES OR XTRACT_BUILD_FUZZ)
@@ -45,7 +60,7 @@ if(XTRACT_BUILD_TESTS)
     add_subdirectory(tests)
 endif()
 if(XTRACT_BUILD_EXAMPLES)
-    add_subdirectory(examples/simpletest)
+    add_subdirectory(examples)
 endif()
 if(XTRACT_BUILD_BENCH)
     add_subdirectory(bench)
