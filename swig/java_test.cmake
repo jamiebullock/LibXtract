@@ -6,6 +6,8 @@
 # Compiles the generated Java package and test.java, then runs the test
 # against the jxtract library in LIBRARY_DIR
 
+cmake_minimum_required(VERSION 3.21)
+
 file(GLOB package_sources ${JAVA_DIR}/xtract/*.java)
 set(classes_dir ${JAVA_DIR}/classes)
 file(MAKE_DIRECTORY ${classes_dir})

@@ -9,7 +9,14 @@
 # generator expression in the output directory keeps free of per-config
 # subdirectories, and its test runs from there.
 
-find_package(SWIG 4.2 REQUIRED)
+find_package(SWIG 4.2)
+if(NOT SWIG_FOUND)
+    if(XTRACT_BUILD_PYTHON STREQUAL "ON" OR XTRACT_BUILD_JAVA STREQUAL "ON" OR XTRACT_BUILD_NODE STREQUAL "ON")
+        message(FATAL_ERROR "A binding is ON but SWIG 4.2 or later was not found")
+    endif()
+    message(STATUS "SWIG not found: no bindings")
+    return()
+endif()
 include(UseSWIG)
 
 set_property(SOURCE xtract.i PROPERTY SWIG_MODULE_NAME xtract)
