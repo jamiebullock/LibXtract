@@ -121,10 +121,9 @@ The output is `doc/html/index.html`.
 ## API stability
 
 LibXtract follows [Semantic Versioning](https://semver.org). The public API
-is the set of headers installed under `include/xtract/`: `libxtract.h` and
-the headers it includes. Symbols declared in `src/`, and the bundled
-third-party code (`ooura`, `c-ringbuf`, `dywapitchtrack`), are internal and
-not part of the public API.
+is the set of headers installed under `include/xtract/`. Symbols declared in
+`src/`, and the bundled third-party code (`ooura`, `c-ringbuf`,
+`dywapitchtrack`), are internal and not part of the public API.
 
 Within the 1.x series the library guarantees **source compatibility**: code
 that compiles against one 1.x release continues to compile against every
@@ -143,10 +142,13 @@ The following are explicitly **not** guaranteed within 1.x:
   1.x shared library. On Linux and macOS the soname of the shared library
   carries the major and minor version, so a program linked against one minor
   release does not load another until it is relinked; patch releases keep
-  the soname. The name of the Windows DLL carries no version, so a program
-  on Windows must be installed with the DLL of the minor release it was
-  built against. A formal ABI policy will be revisited once the
-  context/handle API stabilises the layouts (planned for 2.0).
+  the soname. The 1.0.0, 1.1.0 and 1.2.0 releases built the shared library
+  with no version in its name, so a program linked against one of them loads
+  whichever release is installed under that name. The name of the Windows
+  DLL carries no version, so a program on Windows must be installed with the
+  DLL of the minor release it was built against. A formal ABI policy will be
+  revisited once the context/handle API stabilises the layouts (planned for
+  2.0).
 - **Numerical output.** A feature function may return different values in a
   later release when a correctness fix changes a computation; buggy output is
   not frozen for compatibility. Such changes are called out in the release
