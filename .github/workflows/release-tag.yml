@@ -10,10 +10,6 @@ on:
 permissions:
   contents: write
 
-concurrency:
-  group: release-tag
-  cancel-in-progress: false
-
 jobs:
   tag:
     name: Tag the release
