@@ -29,7 +29,7 @@ The feature functions share one signature:
 int xtract_feature(const double *data, const int N, const void *argv, double *result);
 ```
 
-`data` points to `N` input values, `argv` points to the arguments the feature needs, and the function writes its output to `result` and returns a status code. The one exception is `xtract_last_n`, which keeps the last `N` values it was given: it takes a pointer to its state before these arguments, reads one value from `data` and writes `N` values to `result`.
+`data` points to `N` input values, `argv` points to the arguments the feature needs, and the function writes its output to `result` and returns a status code.
 
 A feature that depends on another takes it as an argument. The variance takes the mean, the skewness takes the mean and the standard deviation, and a spectral feature takes a spectrum from `xtract_spectrum`:
 

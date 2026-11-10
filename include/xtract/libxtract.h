@@ -12,7 +12,7 @@
  *
  * A value is therefore computed once however many features use it, and features can be combined: the irregularity of a set of Mel Frequency Cepstral Coefficients is a valid call.
  *
- * The feature extraction functions follow the same prototype:
+ * All feature extraction functions follow the same prototype:
  *
  * **int xtract_function_name(const double *data, const int N, const void *argv, double *result);**
  *
@@ -21,8 +21,6 @@
  * \param const void *argv represents an arbitrary list of arguments. Used to pass in values required by the feature calculation
  * \param double *result points to an array of doubles, or a single double representing the result of the calculation
  *
- *
- * xtract_last_n() is the one exception: it takes a pointer to its state before these arguments, reads one value from data and writes N values to result.
  *
  * It is up to the calling function to allocate enough memory for the *data, *argv, and *result, and to free it when required. Some feature extraction functions may also require an _init() function to be called in order to perform some initialisation. The struct xtract_function_descriptor_t is used to give an indication of recommended default values, and argc for the *argv array.
  *
