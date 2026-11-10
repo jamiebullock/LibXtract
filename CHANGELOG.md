@@ -50,7 +50,7 @@ All notable changes to LibXtract are documented in this file. The format is base
 ### Changed
 
 - Return codes are part of the API contract (#221)
-- Every feature function returns `XTRACT_ARGUMENT_ERROR` for arguments outside its documented contract (#218, #219)
+- Feature functions return `XTRACT_ARGUMENT_ERROR` for a missing argv and an N below their minimum (#218, #219)
 - `xtract_spectrum`: phase sign on Linux and Windows now matches macOS (#246)
 - `xtract_spectrum` and `xtract_autocorrelation_fft` return `XTRACT_BAD_STATE` when the FFT is not initialised for N (#219)
 - `xtract_mcleod_f0`: no period longer than N / 2 samples is reported (#237)
@@ -58,6 +58,7 @@ All notable changes to LibXtract are documented in this file. The format is base
 - `xtract_bark_coefficients`: documented input is a spectrum with DC included (#213)
 - `xtract_features_from_subframes` accepts every scalar feature (#254)
 - `xtract_failsafe_f0` returns `XTRACT_BAD_STATE` when its fallback FFT is not initialised (#252)
+- `xtract_midicent` returns `XTRACT_NO_RESULT` for a zero fundamental (#218)
 - `xtract_spectral_subband_centroids` takes N as the length of its input array (#220)
 
 ### Deprecated
@@ -101,7 +102,8 @@ All notable changes to LibXtract are documented in this file. The format is base
 - `xtract_mcleod_f0`: selects the key maximum of each NSDF region (#145)
 - `xtract_autocorrelation_fft`: both FFT backends match `xtract_autocorrelation` (#141)
 - `xtract_spectral_subband_centroids`: reads the documented spectrum layout (#142)
-- `xtract_harmonic_spectrum` and `xtract_hps` return `XTRACT_NO_RESULT` for a zero fundamental or an all-zero spectrum (#143)
+- `xtract_harmonic_spectrum` returns `XTRACT_NO_RESULT` for a zero fundamental (#143)
+- `xtract_hps` returns `XTRACT_NO_RESULT` for an all-zero spectrum (#143)
 - `xtract_midicent` returns `XTRACT_ARGUMENT_ERROR` for a non-positive fundamental (#143)
 
 ### Removed
