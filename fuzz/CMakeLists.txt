@@ -6,7 +6,7 @@
 # One libFuzzer harness per feature header, each run by ctest for
 # XTRACT_FUZZ_TIME seconds. The compiler must be a clang with the libFuzzer
 # runtime, which Apple clang lacks: on macOS install LLVM from Homebrew and
-# configure with -DCMAKE_C_COMPILER=/opt/homebrew/opt/llvm/bin/clang.
+# configure with -DCMAKE_C_COMPILER=$(brew --prefix llvm)/bin/clang.
 # AddressSanitizer's runtime deadlocks during initialisation on some macOS
 # toolchains; -DXTRACT_FUZZ_SANITIZERS=undefined fuzzes with UBSan alone
 # there.

@@ -6,9 +6,10 @@
 # Runs clang-format over the first-party C sources that git tracks; the
 # third-party code, the SWIG bindings and the C++ example are excluded. With
 # FIX set the files are rewritten in place, otherwise any file that is not
-# formatted is an error. CLANG_FORMAT is the clang-format command line,
-# clang-format by default. Its version must be the one CI installs, because
-# the output differs between releases.
+# formatted is an error. CLANG_FORMAT is the clang-format command,
+# clang-format by default, and a semicolon-separated list when the command
+# has arguments. Its version must be the one CI installs, because the output
+# differs between releases.
 
 cmake_minimum_required(VERSION 3.21)
 

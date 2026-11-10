@@ -9,7 +9,8 @@
  * window over the block functions.
  *
  * Run with: cmake --build --preset default --target bench
- * Filter with: build/default/bench/xtbench_moving --filter="moving_variance*"
+ * Filter with: xtbench_moving --filter="moving_variance*", built under
+ * build/default/bench
  */
 
 #include "ubench.h"
