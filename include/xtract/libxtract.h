@@ -6,12 +6,11 @@
 
 /** \mainpage
  *
- * LibXtract is a simple, portable, lightweight library of audio feature extraction functions. The purpose of the library is to provide a relatively exhaustive set of feature extraction primitives that are designed to be 'cascaded' to create extraction hierarchies.
- * For example, 'variance', 'average deviation', 'skewness' and 'kurtosis', all require the 'mean' of the input vector to be precomputed. However, rather than compute the 'mean' 'inside' each function, it is expected that the 'mean' will be passed in as an argument. This means that if the user wishes to use all of these features, the mean is calculated only once, and then passed to any functions that require it.
+ * LibXtract is a portable C99 library of feature extraction functions for time series and other numeric data. Each function takes an array of doubles and returns a number or a vector that describes it: a statistic, a measure of spectral shape, a pitch estimate, a measure of complexity. The library has a full set of audio features, and its statistical, complexity and moving-window functions make no assumption about what the numbers represent.
  *
- * This philosophy of 'cascading' features is followed throughout the library, for example with features that operate on the magnitude spectrum of a signal vector (e.g. 'irregularity'), the magnitude spectrum is not calculated 'inside' the respective function, instead, a pointer to the first element in an array containing the magnitude spectrum is passed in as an argument.
+ * A feature that depends on another takes it as an argument. The variance, average deviation, skewness and kurtosis all take the mean of the input vector, so the mean is computed once and passed to each of them. A feature of the magnitude spectrum, such as the irregularity, takes a pointer to a spectrum computed by xtract_spectrum().
  *
- * Hopefully this not only makes the library more efficient when computing large numbers of features, but also makes it more flexible because extraction functions can be combined arbitrarily (one can take the irregularity of the Mel Frequency Cepstral Coefficients for example).
+ * A value is therefore computed once however many features use it, and features can be combined: the irregularity of a set of Mel Frequency Cepstral Coefficients is a valid call.
  *
  * All feature extraction functions follow the same prototype:
  *
