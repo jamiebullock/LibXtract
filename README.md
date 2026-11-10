@@ -23,13 +23,13 @@ The [API reference](https://www.jamiebullock.com/LibXtract/) lists every functio
 
 ## Using the library
 
-Every feature function has the same signature:
+The feature functions share one signature:
 
 ```c
 int xtract_feature(const double *data, const int N, const void *argv, double *result);
 ```
 
-`data` points to `N` input values, `argv` points to the arguments the feature needs, and the function writes its output to `result` and returns a status code.
+`data` points to `N` input values, `argv` points to the arguments the feature needs, and the function writes its output to `result` and returns a status code. The one exception is `xtract_last_n`, which keeps the last `N` values it was given: it takes a pointer to its state before these arguments, reads one value from `data` and writes `N` values to `result`.
 
 A feature that depends on another takes it as an argument. The variance takes the mean, the skewness takes the mean and the standard deviation, and a spectral feature takes a spectrum from `xtract_spectrum`:
 
@@ -140,11 +140,13 @@ The following are explicitly **not** guaranteed within 1.x:
 
 - **Binary (ABI) compatibility.** Struct layouts may change in a minor
   release, so dependent code may need recompiling and relinking against a new
-  1.x shared library. The soname of the shared library carries the major
-  and minor version, so a program linked against one minor release does not
-  load another until it is relinked; patch releases keep the soname. A formal
-  ABI policy will be revisited once the context/handle API stabilises the
-  layouts (planned for 2.0).
+  1.x shared library. On Linux and macOS the soname of the shared library
+  carries the major and minor version, so a program linked against one minor
+  release does not load another until it is relinked; patch releases keep
+  the soname. The name of the Windows DLL carries no version, so a program
+  on Windows must be installed with the DLL of the minor release it was
+  built against. A formal ABI policy will be revisited once the
+  context/handle API stabilises the layouts (planned for 2.0).
 - **Numerical output.** A feature function may return different values in a
   later release when a correctness fix changes a computation; buggy output is
   not frozen for compatibility. Such changes are called out in the release
