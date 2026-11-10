@@ -2,15 +2,47 @@
 
 [![CI](https://github.com/jamiebullock/LibXtract/actions/workflows/ci.yml/badge.svg)](https://github.com/jamiebullock/LibXtract/actions/workflows/ci.yml)
 
-LibXtract is a simple, portable, lightweight library of audio feature extraction functions. The purpose of the library is to provide a relatively exhaustive set of feature extraction primitives that are designed to be 'cascaded' to create extraction hierarchies.
+LibXtract is a portable C99 library of feature extraction functions for time series and other numeric data. Each function takes an array of doubles and returns a number or a vector that describes it: a statistic, a measure of spectral shape, a pitch estimate, a measure of complexity. The library has a full set of audio features, and its statistical, complexity and moving-window functions make no assumption about what the numbers represent, so they apply to prices, sensor readings and physiological signals as they do to audio.
 
-For example, 'variance', 'average deviation', 'skewness' and 'kurtosis', all require the 'mean' of the input vector to be precomputed. However, rather than compute the 'mean' 'inside' each function, it is expected that the 'mean' will be passed in as an argument. This means that if the user wishes to use all of these features, the mean is calculated only once, and then passed to any functions that require it.
+It has no external dependencies.
 
-This philosophy of 'cascading' features is followed throughout the library, for example with features that operate on the magnitude spectrum of a signal vector (e.g. 'irregularity'), the magnitude spectrum is not calculated 'inside' the respective function, instead, a pointer to the first element in an array containing the magnitude spectrum is passed in as an argument.
+## Features
 
-Hopefully this not only makes the library more efficient when computing large numbers of features, but also makes it more flexible because extraction functions can be combined arbitrarily (one can take the irregularity of the Mel Frequency Cepstral Coefficients for example).
+The library has more than 100 features:
 
-A complete list of features can be found by viewing the header files, or reading the doxygen documentation.
+- **Statistics:** mean, variance, standard deviation, average deviation, skewness, kurtosis, median, median absolute deviation, extrema, RMS amplitude, zero-crossing rate
+- **Moving windows:** moving sum, average, variance, standard deviation, maximum and minimum, and the exponentially weighted average and variance
+- **Complexity:** permutation, sample and approximate entropy, Lempel-Ziv complexity, the Petrosian, Katz and Higuchi fractal dimensions, the Hjorth parameters
+- **Spectrum:** magnitude and power spectra, peak and harmonic spectra, and the centroid, spread, flatness, rolloff, slope, contrast and entropy of a spectrum
+- **Periodicity and pitch:** autocorrelation, the average magnitude and squared difference functions, a periodicity measure, and fundamental frequency by the AMDF, wavelet, McLeod and harmonic product spectrum methods
+- **Change:** flux, the Kullback-Leibler and Itakura-Saito divergences between successive frames, and the cross-correlation of two series with its lag
+- **Envelope:** attack time, decay time, decay rate, temporal centroid
+- **Audio:** loudness, sharpness, Bark bands, MFCCs, gammatone cepstral coefficients, linear prediction coefficients, chroma, the constant-Q transform
+
+The [API reference](https://www.jamiebullock.com/LibXtract/) lists every function with its arguments.
+
+## Using the library
+
+The feature functions share one signature:
+
+```c
+int xtract_feature(const double *data, const int N, const void *argv, double *result);
+```
+
+`data` points to `N` input values, `argv` points to the arguments the feature needs, and the function writes its output to `result` and returns a status code.
+
+A feature that depends on another takes it as an argument. The variance takes the mean, the skewness takes the mean and the standard deviation, and a spectral feature takes a spectrum from `xtract_spectrum`:
+
+```c
+double mean, variance;
+
+xtract_mean(data, N, NULL, &mean);
+xtract_variance(data, N, &mean, &variance);
+```
+
+A value is therefore computed once however many features use it, and features can be combined: the irregularity of a set of MFCCs is a valid call. Functions that work from precomputed tables, such as the FFT, the mel filterbank and the constant-Q kernel, have an `xtract_init_` function to call first.
+
+[`examples/`](examples) holds complete programs. [`finance`](examples/finance) computes the rolling and exponentially weighted volatility of a price series and finds a change of volatility regime; [`simpletest`](examples/simpletest) runs pitch tracking, MFCCs and onset detection over an audio file.
 
 ## Building
 
@@ -19,7 +51,7 @@ A complete list of features can be found by viewing the header files, or reading
 - A C99 compiler: gcc, clang, or Visual Studio 2019 or later on Windows
 - [CMake](https://cmake.org) 3.21 or later
 
-On macOS, the library uses Apple's Accelerate framework for FFT. On Linux and Windows, it uses the bundled Ooura FFT.
+On macOS, the library uses Apple's Accelerate framework for the FFT. On Linux and Windows, it uses the bundled Ooura FFT.
 
 ### Build and test
 
@@ -64,7 +96,7 @@ The install places the library, the headers, a CMake package and a pkg-config fi
 
 ## Python, Java and Node.js bindings
 
-The bindings are generated with [SWIG](http://www.swig.org) 4.2 or later. The CMake options `XTRACT_BUILD_PYTHON`, `XTRACT_BUILD_JAVA` and `XTRACT_BUILD_NODE` are `AUTO` by default, which builds each binding whose toolchain is found: Python with its development headers, a JDK, or `node` with the Node.js headers and `node-addon-api` installed under `swig/` (`npm install --prefix swig node-addon-api`). Set an option to `ON` to fail when the toolchain is missing, or `OFF` to skip it:
+The bindings are generated with [SWIG](https://www.swig.org) 4.2 or later. The CMake options `XTRACT_BUILD_PYTHON`, `XTRACT_BUILD_JAVA` and `XTRACT_BUILD_NODE` are `AUTO` by default, which builds each binding whose toolchain is found: Python with its development headers, a JDK, or `node` with the Node.js headers and `node-addon-api` installed under `swig/` (`npm install --prefix swig node-addon-api`). Set an option to `ON` to fail when the toolchain is missing, or `OFF` to skip it:
 
 ```bash
 cmake --preset default -DXTRACT_BUILD_PYTHON=ON -DXTRACT_BUILD_JAVA=OFF -DXTRACT_BUILD_NODE=OFF
@@ -76,91 +108,31 @@ The modules are written under `build/default/swig/<language>`.
 
 ## Documentation
 
-LibXtract headers are documented using [doxygen](https://www.doxygen.nl) comments. If you have doxygen installed:
+The API reference for the current release is published at <https://www.jamiebullock.com/LibXtract/>. It is generated from the [Doxygen](https://www.doxygen.nl) comments in the public headers and rebuilt from `main` by the `Docs` workflow on every push.
+
+To build it locally, with Doxygen installed:
 
 ```bash
 cmake --build --preset default --target doc
 ```
 
-The generated HTML documentation can then be viewed by opening `doc/html/index.html`.
+The output is `doc/html/index.html`.
 
-The documentation for the current release is published at
-<https://www.jamiebullock.com/LibXtract/>. It is rebuilt from `main` by the
-`Docs` workflow on every push.
-
-## Code standard
-
-LibXtract is written in **C99**. Declarations are placed at the top of the
-block (C89 style) as a project convention; both the standard and the
-convention are enforced by the build flags (`-std=c99 -pedantic
--Wdeclaration-after-statement -Wstrict-prototypes`). Thread-local storage
-uses a portability macro that resolves to C11 `_Thread_local`,
-`__declspec(thread)` (MSVC) or `__thread` (GCC/Clang). Bundled third-party
-code (`ooura`, `c-ringbuf`, `dywapitchtrack`) keeps its upstream style.
-
-Initialisation convention: initialise a variable at its declaration when
-the initial value is known and meaningful (accumulators to zero, copies of
-parameters); otherwise declare it uninitialised and assign on every path
-before use. Never defensively zero a variable that is unconditionally
-assigned later — dead stores hide missing-assignment bugs from the
-compiler. This is checked by `-Wconditional-uninitialized` (clang builds)
-and by the `analyze` target, which runs the clang static analyzer over
-the first-party sources and fails on any finding; CI runs it on Linux and
-macOS.
-
-Formatting follows the Allman brace style (the opening brace on its own
-line) with four-space indentation, no tabs, and the pointer asterisk bound
-to the variable (`const double *data`). It is the standard clang-format
-`Microsoft` preset, captured in `.clang-format` (the only deviations are
-disabling include sorting and line reflow). Build the `format-check` target
-(or run `clang-format --dry-run <file>`) to check, and the `format` target
-(or `clang-format -i <file>`) to apply it.
-
-## API stability
+## Versioning
 
 LibXtract follows [Semantic Versioning](https://semver.org). The public API
-is the set of headers installed under `include/xtract/` — `libxtract.h` and
-the headers it includes. Symbols declared in `src/`, and the bundled
-third-party code (`ooura`, `c-ringbuf`, `dywapitchtrack`), are internal and
-not part of the public API.
+is the set of headers installed under `include/xtract/`. Releases within 1.x
+keep source compatibility: functions and `XTRACT_*` values are added, never
+removed or changed, and breaking changes wait for 2.0. Binary compatibility
+is not guaranteed between minor releases, so recompile and relink dependent
+code when moving to a new one. A correctness fix may change a feature's
+numerical output; the release notes say when.
 
-Within the 1.x series the library guarantees **source compatibility**: code
-that compiles against one 1.x release continues to compile against every
-later 1.x release. Concretely, across 1.x:
+## Contributing
 
-- existing public functions are never removed and their signatures never
-  change;
-- existing `XTRACT_*` enum and macro values are never renumbered or removed;
-- changes are additive — new functions, new enum values appended to the end,
-  and new features may be added in a minor release.
-
-The following are explicitly **not** guaranteed within 1.x:
-
-- **Binary (ABI) compatibility.** There is no library-versioning (soname)
-  mechanism yet, and struct layouts may change, so a new minor release may
-  require recompiling and relinking dependent code rather than dropping in a
-  replacement shared library. A formal ABI policy will be revisited once the
-  context/handle API stabilises the layouts (planned for 2.0).
-- **Numerical output.** A feature function may return different values in a
-  later release when a correctness fix changes a computation; buggy output is
-  not frozen for compatibility. Such changes are called out in the release
-  notes.
-
-Breaking changes — removing or renaming a public function, changing a
-signature, or renumbering an enum — are batched into the next major release
-(2.0) so that dependent code has a single migration. Where practical, a
-function to be removed in 2.0 is deprecated in a preceding 1.x release first.
-
-From 1.2 the return code of every feature function is part of the contract.
-`XTRACT_ARGUMENT_ERROR` means the caller broke the function's documented
-argument rules (a vector result is left untouched, a scalar result is set to
-0); `XTRACT_NO_RESULT` means the arguments were valid, but the data has no
-answer; `XTRACT_BAD_STATE` means the initialisation the function needs is
-missing or was done for another size. The argument rules are stated by each
-function's Doxygen and by its descriptor from `xtract_make_descriptors()`,
-and a test keeps the descriptors and the code in step. `XTRACT_BAD_ARGV`,
-`XTRACT_BAD_VECTOR_SIZE` and `XTRACT_DENORMAL_FOUND` are deprecated from
-1.2, are never returned, and will be removed in 2.0.
+[CONTRIBUTING.md](CONTRIBUTING.md) covers how to report a bug or propose a
+change, the code standard, and the terms contributions are accepted under.
+Report a security problem privately, as [SECURITY.md](SECURITY.md) describes.
 
 ## Licence
 
