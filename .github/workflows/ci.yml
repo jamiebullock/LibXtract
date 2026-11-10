@@ -237,3 +237,7 @@ jobs:
 
       - name: Check formatting
         run: cmake -P cmake/format.cmake
+
+      - name: Check the changelog
+        if: ${{ !cancelled() }}
+        run: cmake -P cmake/changelog.cmake
