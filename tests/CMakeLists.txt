@@ -39,6 +39,11 @@ if(XTRACT_COVERAGE)
         VERBATIM)
 endif()
 
+# Mutation testing with Mull (https://github.com/mull-project/mull). The
+# library is compiled with the Mull plugin on top of the sanitizer flags, so
+# a mutant that reads past an array fails the tests, and the test binary is
+# run once per mutant. mull.yml at the root scopes the mutants to the
+# first-party sources.
 if(XTRACT_MUTATION_PLUGIN)
     set(XTRACT_MULL_RUNNER mull-runner-18 CACHE STRING "Mull runner executable")
     set(XTRACT_MUTATION_THRESHOLD 84 CACHE STRING "Minimum mutation score out of 100")

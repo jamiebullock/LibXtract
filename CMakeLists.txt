@@ -73,6 +73,18 @@ if(NOT (XTRACT_BUILD_PYTHON STREQUAL "OFF" AND XTRACT_BUILD_JAVA STREQUAL "OFF" 
     add_subdirectory(swig)
 endif()
 
+if(PROJECT_IS_TOP_LEVEL)
+    set(XTRACT_CLANG_FORMAT clang-format CACHE STRING "clang-format command line for the format and format-check targets")
+    add_custom_target(format
+        COMMAND ${CMAKE_COMMAND} "-DCLANG_FORMAT=${XTRACT_CLANG_FORMAT}" -DFIX=ON
+            -P ${PROJECT_SOURCE_DIR}/cmake/format.cmake
+        VERBATIM)
+    add_custom_target(format-check
+        COMMAND ${CMAKE_COMMAND} "-DCLANG_FORMAT=${XTRACT_CLANG_FORMAT}"
+            -P ${PROJECT_SOURCE_DIR}/cmake/format.cmake
+        VERBATIM)
+endif()
+
 find_package(Doxygen)
 if(DOXYGEN_FOUND)
     file(WRITE ${PROJECT_BINARY_DIR}/Doxyfile

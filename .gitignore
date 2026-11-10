@@ -27,6 +27,6 @@ doc/html
 # Build directories
 build/
 
-# Bounded model checking (make verify)
+# Bounded model checking (make -C verify)
 verify/xtract.gb
 verify/.proofs*
