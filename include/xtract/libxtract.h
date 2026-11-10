@@ -22,7 +22,7 @@
  * \param double *result points to an array of doubles, or a single double representing the result of the calculation
  *
  *
- * xtract_last_n() is the one exception: it takes a pointer to its state before these arguments.
+ * xtract_last_n() is the one exception: it takes a pointer to its state before these arguments, reads one value from data and writes N values to result.
  *
  * It is up to the calling function to allocate enough memory for the *data, *argv, and *result, and to free it when required. Some feature extraction functions may also require an _init() function to be called in order to perform some initialisation. The struct xtract_function_descriptor_t is used to give an indication of recommended default values, and argc for the *argv array.
  *
