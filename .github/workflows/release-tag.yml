@@ -1,0 +1,45 @@
+name: Release tag
+
+# main holds releases only, so every push to main is a release. This workflow
+# tags the pushed commit with the version in the VERSION file.
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  tag:
+    name: Tag the release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Tag the pushed commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version="$(cat VERSION)"
+          if ! [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || ! printf '%s\n' "$version" | cmp -s - VERSION; then
+            echo "VERSION must hold major.minor.patch on one line and nothing else."
+            exit 1
+          fi
+          tag="v$version"
+          if git ls-remote --exit-code --tags origin "refs/tags/$tag" > /dev/null; then
+            git fetch --quiet origin "refs/tags/$tag:refs/tags/$tag"
+            tagged="$(git rev-list -n 1 "$tag")"
+            if [ "$tagged" = "$GITHUB_SHA" ]; then
+              echo "$tag already points at this commit."
+              exit 0
+            fi
+            echo "$tag already points at $tagged and this push is $GITHUB_SHA: VERSION was not raised for this release."
+            exit 1
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "$tag" -m "LibXtract $version"
+          git push "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "$tag"
