@@ -39,6 +39,8 @@ if(XTRACT_COVERAGE)
         VERBATIM)
 endif()
 
+# The mutation preset inherits the sanitizer flags of the asan preset, so a
+# mutant that reads past an array fails the tests.
 if(XTRACT_MUTATION_PLUGIN)
     set(XTRACT_MULL_RUNNER mull-runner-18 CACHE STRING "Mull runner executable")
     set(XTRACT_MUTATION_THRESHOLD 84 CACHE STRING "Minimum mutation score out of 100")

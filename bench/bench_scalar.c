@@ -7,8 +7,8 @@
 /*
  * Benchmarks for scalar feature extraction functions.
  *
- * Run with: make bench
- * Filter with: ./bench/xtbench --filter="mean*"
+ * Run with: cmake --build --preset default --target bench
+ * Filter with: xtbench --filter="mean*", built under build/default/bench
  */
 
 #include "ubench.h"

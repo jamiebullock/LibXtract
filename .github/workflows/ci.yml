@@ -25,13 +25,12 @@ jobs:
 
       - name: Build and test
         run: |
-          make
-          make check
+          cmake --preset default
+          cmake --build --preset default
+          ctest --preset default
 
       - name: Static analysis
-        run: |
-          cmake --preset default
-          cmake --build --preset default --target analyze
+        run: cmake --build --preset default --target analyze
 
       - name: Sanitizer tests
         run: |
@@ -195,7 +194,7 @@ jobs:
           bitwuzla --version
 
       - name: Bounded model checking (CBMC)
-        run: make verify
+        run: make -C verify
 
       - name: Upload proof logs on failure
         if: failure() || cancelled()
@@ -231,10 +230,10 @@ jobs:
           persist-credentials: false
 
       # Pinned to match the version the tree was formatted with; clang-format
-      # output drifts between releases, so the check and a local `make format`
-      # must use the same version.
+      # output drifts between releases, so the check and a local build of the
+      # format target must use the same version.
       - name: Install clang-format 20.1.8
         run: pipx install clang-format==20.1.8
 
       - name: Check formatting
-        run: make format-check CLANG_FORMAT=clang-format
+        run: cmake -P cmake/format.cmake

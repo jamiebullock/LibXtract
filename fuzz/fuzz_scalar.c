@@ -22,7 +22,7 @@
  * at the size its state was built for. Every other feature takes a
  * fuzzer-chosen N.
  *
- * Build/run: make fuzz   (see fuzz/Makefile)
+ * Build/run: the fuzz preset (see fuzz/CMakeLists.txt)
  */
 
 #include <stddef.h>

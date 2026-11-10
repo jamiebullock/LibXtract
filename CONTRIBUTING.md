@@ -15,19 +15,21 @@ file covers how to get a change accepted and the terms it is accepted under.
 
 ## Building and testing
 
-The README covers prerequisites; the `make` targets are aliases for the CMake
-presets. Before opening a pull request, run from the repository root:
+The README covers the prerequisites and the CMake presets. Before opening a
+pull request, run from the repository root:
 
 ```
-make
-make check
-make format-check
-make analyze
+cmake --preset default
+cmake --build --preset default
+ctest --preset default
+cmake --build --preset default --target format-check
+cmake --build --preset default --target analyze
 ```
 
-`make analyze` runs the clang static analyzer and must be clean for any change
-under `src/`. `make format` applies the project's clang-format configuration;
-CI rejects a pull request that `make format-check` fails on.
+The `analyze` target runs the clang static analyzer and must be clean for any
+change under `src/`. The `format` target applies the project's clang-format
+configuration; CI rejects a pull request that the `format-check` target fails
+on.
 
 ## Code
 

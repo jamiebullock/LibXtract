@@ -30,7 +30,7 @@
  * The result buffer is sized to the largest need across all features
  * (peak_spectrum's 2N) plus a margin. Run under AddressSanitizer + UBSan.
  *
- * Build/run: make fuzz   (see fuzz/Makefile)
+ * Build/run: the fuzz preset (see fuzz/CMakeLists.txt)
  */
 
 #include <math.h>
