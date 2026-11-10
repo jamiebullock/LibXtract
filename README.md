@@ -126,7 +126,7 @@ keep source compatibility: functions and `XTRACT_*` values are added, never
 removed or changed, and breaking changes wait for 2.0. Binary compatibility
 is not guaranteed between minor releases, so recompile and relink dependent
 code when moving to a new one. A correctness fix may change a feature's
-numerical output; the release notes say when.
+numerical output; the [changelog](CHANGELOG.md) says when.
 
 ## Contributing
 
