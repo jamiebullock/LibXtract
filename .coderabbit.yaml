@@ -49,6 +49,21 @@ reviews:
         the documented formulae. Flag a test that only pins the current
         output, or a test-only hook added to production code to make a test
         pass.
+    - path: 'CHANGELOG.md'
+      instructions: |
+        The rules are in the Changelog section of CONTRIBUTING.md, and the
+        changelog-check target enforces the format, so do not comment on
+        the format.
+
+        Check each entry against the code and the pull request it cites.
+        When an entry is inaccurate, ask for it to be corrected or narrowed
+        within one line. Do not ask for exceptions, qualifications or
+        explanations to be added to an entry.
+
+        Flag an entry that gives a reason, a mechanism or history, one that
+        restates arguments the header documents, and one that records a
+        change no user of the library can observe (CI, tests, tooling,
+        refactoring).
   pre_merge_checks:
     docstrings:
       mode: off
@@ -57,6 +72,12 @@ reviews:
     drafts: true
     base_branches:
       - main
+
+knowledge_base:
+  code_guidelines:
+    enabled: true
+    filePatterns:
+      - 'CONTRIBUTING.md'
 
 chat:
   auto_reply: true

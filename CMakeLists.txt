@@ -83,6 +83,9 @@ if(PROJECT_IS_TOP_LEVEL)
         COMMAND ${CMAKE_COMMAND} "-DCLANG_FORMAT=${XTRACT_CLANG_FORMAT}"
             -P ${PROJECT_SOURCE_DIR}/cmake/format.cmake
         VERBATIM)
+    add_custom_target(changelog-check
+        COMMAND ${CMAKE_COMMAND} -P ${PROJECT_SOURCE_DIR}/cmake/changelog.cmake
+        VERBATIM)
 endif()
 
 find_package(Doxygen)

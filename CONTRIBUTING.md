@@ -97,6 +97,65 @@ with `-DXTRACT_CLANG_FORMAT=<path>` to run the targets with a chosen binary.
   pull requests.
 - The maintainer merges. Do not merge your own pull request.
 
+## Changelog
+
+`CHANGELOG.md` records what each release changes for someone who uses the
+library. Its entries are written in the pull request that makes the release,
+so no other pull request touches it. The format is
+[Keep a Changelog](https://keepachangelog.com/en/1.1.0/):
+
+- A release is a `## [X.Y.Z] - YYYY-MM-DD` heading, newest first, with a
+  compare link at the foot of the file.
+- Under the heading come `###` sections from Added, Changed, Deprecated,
+  Removed, Fixed and Security, in that order, and nothing else. A release has
+  no introductory paragraph.
+- An entry is one line: a phrase of at most 20 words with no closing full
+  stop.
+- An entry says what changed for the user. The reason, the mechanism and the
+  history are in the pull request; end the entry with its number, `(#123)`,
+  when a reader may want them.
+- Record only what a user can observe: the API, behaviour, results, the
+  build and install, the licence. Leave out CI, tests, tooling and
+  refactoring.
+- List a new function by name. Its arguments are documented in the header.
+- Start an entry about one function with the function name.
+- A fix that changes a result or a return code for a call that already
+  worked goes under Changed, because a caller may depend on the old value.
+  Fixed holds crashes, memory errors and results that were unusable.
+- Correct or narrow an entry that is inaccurate. Do not add exceptions and
+  qualifications to it.
+
+An entry that explains the mechanism:
+
+```
+- Fixed the phase from `xtract_spectrum` having the opposite sign on Linux
+  and Windows, where the FFT returns the complex conjugate of the transform
+  computed on macOS. The imaginary part is now negated there so that every
+  platform agrees.
+```
+
+The same change as it belongs in the file:
+
+```
+- `xtract_spectrum`: phase sign on Linux and Windows now matches macOS (#246)
+```
+
+An entry that restates the header:
+
+```
+- Added `xtract_median(data, N, NULL, result)`, which returns the median of
+  the N values, or the mean of the two middle values when N is even.
+```
+
+The same change as it belongs in the file:
+
+```
+- `xtract_median`
+```
+
+The `changelog-check` target tests the rules that a script can test, and CI
+runs it on every pull request.
+
 ## Licensing of contributions
 
 LibXtract is licensed under the zlib licence (see `LICENSE`). By submitting a
