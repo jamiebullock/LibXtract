@@ -27,9 +27,9 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          version="$(tr -d '[:space:]' < VERSION)"
-          if ! printf '%s\n' "$version" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; then
-            echo "VERSION holds '$version', which is not major.minor.patch."
+          version="$(cat VERSION)"
+          if ! [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "VERSION holds '$version', which is not major.minor.patch on a line of its own."
             exit 1
           fi
           tag="v$version"

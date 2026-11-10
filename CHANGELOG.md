@@ -51,7 +51,7 @@ Statistics and complexity of an arbitrary series (scalar, no sample rate):
 - `xtract_hjorth_activity`, `xtract_hjorth_mobility` and `xtract_hjorth_complexity`.
 - `xtract_time_reversal_asymmetry`, with the lag as an int in argv.
 - `xtract_petrosian_fractal_dimension`, `xtract_katz_fractal_dimension` and `xtract_higuchi_fractal_dimension`, the last taking k_max in argv.
-- `xtract_permutation_entropy` (order 2 to 8 and delay in argv), `xtract_lempel_ziv_complexity` (a threshold in argv, the median by default), `xtract_sample_entropy` and `xtract_approximate_entropy` (template length and tolerance in argv), all normalised so that a random series reads about 1.
+- `xtract_permutation_entropy` (order 2 to 8 and delay in argv) and `xtract_lempel_ziv_complexity` (a threshold in argv, the median by default), both normalised so that a random series reads about 1, and `xtract_sample_entropy` and `xtract_approximate_entropy` (template length and tolerance in argv), in nats.
 - `xtract_periodicity` and `xtract_signal_confidence`, from the normalised square difference function that `xtract_mcleod_f0` computes: how strongly a series repeats, in [0, 1], and the height of the peak the f0 estimate was taken from. Neither takes an argument.
 
 Envelope and transient shape of a series with a single peak:
