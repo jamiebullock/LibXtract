@@ -118,57 +118,15 @@ cmake --build --preset default --target doc
 
 The output is `doc/html/index.html`.
 
-## API stability
+## Versioning
 
 LibXtract follows [Semantic Versioning](https://semver.org). The public API
-is the set of headers installed under `include/xtract/`. Symbols declared in
-`src/`, and the bundled third-party code (`ooura`, `c-ringbuf`,
-`dywapitchtrack`), are internal and not part of the public API.
-
-Within the 1.x series the library guarantees **source compatibility**: code
-that compiles against one 1.x release continues to compile against every
-later 1.x release. Concretely, across 1.x:
-
-- existing public functions are never removed and their signatures never
-  change;
-- existing `XTRACT_*` enum and macro values are never renumbered or removed;
-- changes are additive: new functions, new enum values appended to the end,
-  and new features may be added in a minor release.
-
-The following are explicitly **not** guaranteed within 1.x:
-
-- **Binary (ABI) compatibility.** Struct layouts may change in a minor
-  release, so dependent code may need recompiling and relinking against a new
-  1.x shared library. On Linux and macOS the soname of the shared library
-  carries the major and minor version, so a program linked against one minor
-  release does not load another until it is relinked; patch releases keep
-  the soname. The 1.0.0, 1.1.0 and 1.2.0 releases built the shared library
-  with no version in its name, so a program linked against one of them loads
-  whichever release is installed under that name. The name of the Windows
-  DLL carries no version, so a program on Windows must be installed with the
-  DLL of the minor release it was built against. A formal ABI policy will be
-  revisited once the context/handle API stabilises the layouts (planned for
-  2.0).
-- **Numerical output.** A feature function may return different values in a
-  later release when a correctness fix changes a computation; buggy output is
-  not frozen for compatibility. Such changes are called out in the release
-  notes.
-
-Breaking changes (removing or renaming a public function, changing a
-signature, or renumbering an enum) are batched into the next major release
-(2.0) so that dependent code has a single migration. Where practical, a
-function to be removed in 2.0 is deprecated in a preceding 1.x release first.
-
-From 1.2 the return code of every feature function is part of the contract.
-`XTRACT_ARGUMENT_ERROR` means the caller broke the function's documented
-argument rules (a vector result is left untouched, a scalar result is set to
-0); `XTRACT_NO_RESULT` means the arguments were valid, but the data has no
-answer; `XTRACT_BAD_STATE` means the initialisation the function needs is
-missing or was done for another size. The argument rules are stated by each
-function's Doxygen and by its descriptor from `xtract_make_descriptors()`,
-and a test keeps the descriptors and the code in step. `XTRACT_BAD_ARGV`,
-`XTRACT_BAD_VECTOR_SIZE` and `XTRACT_DENORMAL_FOUND` are deprecated from
-1.2, are never returned, and will be removed in 2.0.
+is the set of headers installed under `include/xtract/`. Releases within 1.x
+keep source compatibility: functions and `XTRACT_*` values are added, never
+removed or changed, and breaking changes wait for 2.0. Binary compatibility
+is not guaranteed between minor releases, so relink when moving to a new one.
+A correctness fix may change a feature's numerical output; the release notes
+say when.
 
 ## Contributing
 
