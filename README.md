@@ -141,9 +141,10 @@ The following are explicitly **not** guaranteed within 1.x:
 - **Binary (ABI) compatibility.** Struct layouts may change in a minor
   release, so dependent code may need recompiling and relinking against a new
   1.x shared library. The soname of the shared library carries the major
-  version only and does not change when a layout does. A formal ABI policy
-  will be revisited once the context/handle API stabilises the layouts
-  (planned for 2.0).
+  and minor version, so a program linked against one minor release does not
+  load another until it is relinked; patch releases keep the soname. A formal
+  ABI policy will be revisited once the context/handle API stabilises the
+  layouts (planned for 2.0).
 - **Numerical output.** A feature function may return different values in a
   later release when a correctness fix changes a computation; buggy output is
   not frozen for compatibility. Such changes are called out in the release
