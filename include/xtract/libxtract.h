@@ -8,7 +8,7 @@
  *
  * LibXtract is a portable C99 library of feature extraction functions for time series and other numeric data. Each function takes an array of doubles and returns a number or a vector that describes it: a statistic, a measure of spectral shape, a pitch estimate, a measure of complexity. The library has a full set of audio features, and its statistical, complexity and moving-window functions make no assumption about what the numbers represent.
  *
- * A feature that depends on another takes it as an argument. The variance, average deviation, skewness and kurtosis all take the mean of the input vector, so the mean is computed once and passed to each of them. A feature of the magnitude spectrum, such as the irregularity, takes a pointer to a spectrum computed by xtract_spectrum().
+ * A feature that depends on another takes it as an argument. The variance and average deviation take the mean of the input vector, and the skewness and kurtosis take the mean and the standard deviation, in that order, so the mean is computed once and passed to each of them. A feature of the magnitude spectrum, such as the irregularity, takes a pointer to a spectrum computed by xtract_spectrum().
  *
  * A value is therefore computed once however many features use it, and features can be combined: the irregularity of a set of Mel Frequency Cepstral Coefficients is a valid call.
  *

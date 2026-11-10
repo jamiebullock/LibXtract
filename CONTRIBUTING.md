@@ -60,8 +60,10 @@ line) with four-space indentation, no tabs, and the pointer asterisk bound
 to the variable (`const double *data`). It is the standard clang-format
 `Microsoft` preset, captured in `.clang-format` (the only deviations are
 disabling include sorting and line reflow). Run `make format-check` (or
-`clang-format --dry-run <file>`) to check, and `make format` (or
-`clang-format -i <file>`) to apply it.
+`clang-format --dry-run --Werror <file>`) to check, and `make format` (or
+`clang-format -i <file>`) to apply it. CI runs clang-format 20.1.8, and other
+versions format some constructs differently; `make format-check
+CLANG_FORMAT=<path>` runs the check with a chosen binary.
 
 ### Conventions
 
