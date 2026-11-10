@@ -50,7 +50,7 @@ All notable changes to LibXtract are documented in this file. The format is base
 ### Changed
 
 - Return codes are part of the API contract (#221)
-- Feature functions return `XTRACT_ARGUMENT_ERROR` for a missing argv and an N below their minimum (#218, #219)
+- Feature functions return `XTRACT_ARGUMENT_ERROR` when a required argv is NULL or N is below their minimum (#218, #219)
 - `xtract_spectrum`: phase sign on Linux and Windows now matches macOS (#246)
 - `xtract_spectrum` and `xtract_autocorrelation_fft` return `XTRACT_BAD_STATE` when the FFT is not initialised for N (#219)
 - `xtract_mcleod_f0`: no period longer than N / 2 samples is reported (#237)
