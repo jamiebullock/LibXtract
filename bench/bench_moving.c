@@ -8,8 +8,9 @@
  * Benchmarks for the moving-window features against a caller-managed
  * window over the block functions.
  *
- * Run with: make bench
- * Filter with: ./bench/xtbench_moving --filter="moving_variance*"
+ * Run with: cmake --build --preset default --target bench
+ * Filter with: xtbench_moving --filter="moving_variance*", built under
+ * build/default/bench
  */
 
 #include "ubench.h"

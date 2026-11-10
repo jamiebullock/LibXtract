@@ -15,7 +15,7 @@
  * fuzzer's bytes become a feature selector, a flag that passes a NULL argv,
  * an argv buffer, and the input vector. Run under AddressSanitizer + UBSan.
  *
- * Build/run: make fuzz   (see fuzz/Makefile)
+ * Build/run: the fuzz preset (see fuzz/CMakeLists.txt)
  */
 
 #include <stddef.h>

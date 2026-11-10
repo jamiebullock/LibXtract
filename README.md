@@ -18,7 +18,6 @@ A complete list of features can be found by viewing the header files, or reading
 
 - A C99 compiler: gcc, clang, or Visual Studio 2019 or later on Windows
 - [CMake](https://cmake.org) 3.21 or later
-- GNU make, optionally: the top-level Makefile is a set of aliases for the CMake presets and the proofs
 
 On macOS, the library uses Apple's Accelerate framework for FFT. On Linux and Windows, it uses the bundled Ooura FFT.
 
@@ -30,26 +29,35 @@ cmake --build --preset default   # build the library, tests, examples and benchm
 ctest --preset default           # run the tests
 ```
 
-On Windows the default preset uses the Visual Studio generator; pass `-G Ninja` from a Developer Command Prompt to use Ninja instead. No MSYS2 or other POSIX layer is needed. With GNU make the same steps are `make` and `make check`.
+On Windows the default preset uses the Visual Studio generator; pass `-G Ninja` from a Developer Command Prompt to use Ninja instead. No MSYS2 or other POSIX layer is needed.
 
-The other presets each build under their own directory in `build/`:
+Each of the other presets builds under its own directory in `build/`. Configure and build one as above with its name in place of `default`, then run it:
 
-| Preset | Alias | Purpose |
+| Preset | Run with | Purpose |
 | --- | --- | --- |
-| `default` | `make`, `make check`, `make bench` | Release build of the library, tests, examples and benchmarks |
-| `asan` | `make check-asan` | The tests under AddressSanitizer and UBSan |
-| `coverage` | `make coverage` | Line and branch coverage of the test suite (needs lcov) |
-| `fuzz` | `make fuzz` | The libFuzzer harnesses (needs a clang with libFuzzer) |
-| `mutation` | `make mutation` | Mutation testing with Mull (needs clang-18 and mull-18; CI runs it) |
+| `default` | `ctest --preset default` | Release build of the library, tests, examples and benchmarks |
+| `asan` | `ctest --preset asan` | The tests under AddressSanitizer and UBSan |
+| `coverage` | `cmake --build --preset coverage --target coverage` | Line and branch coverage of the test suite (needs lcov) |
+| `fuzz` | `ctest --preset fuzz` | The libFuzzer harnesses (needs a clang with libFuzzer) |
+| `mutation` | `cmake --build --preset mutation --target mutation` | Mutation testing with Mull (needs clang-18 and mull-18; CI runs it) |
 
-`make analyze` and `make cppcheck` run the clang static analyzer and cppcheck over the first-party sources. `make verify` runs the CBMC proofs of the feature functions, which CI runs on every push to main and develop; see [verify/README.md](verify/README.md).
+The default preset also has targets that run a tool, each built with `cmake --build --preset default --target <name>`:
+
+| Target | Purpose |
+| --- | --- |
+| `analyze` | The clang static analyzer over the first-party sources |
+| `cppcheck` | cppcheck over the first-party sources |
+| `format`, `format-check` | Apply or check the clang-format style |
+| `bench` | The benchmarks |
+| `doc` | The API reference (needs Doxygen) |
+
+The CBMC proofs of the feature functions have their own GNU make build, `make -C verify`, which CI runs on every push to main and develop; see [verify/README.md](verify/README.md).
 
 ### Install
 
 ```bash
 cmake --install build/default                      # install to /usr/local
 cmake --install build/default --prefix /somewhere  # install elsewhere
-make install PREFIX=/somewhere                     # the same
 ```
 
 The install places the library, the headers, a CMake package and a pkg-config file under the prefix, so a downstream CMake project can call `find_package(xtract)` and link `xtract::xtract`, and any other build can use `pkg-config --cflags --libs xtract`. `BUILD_SHARED_LIBS=ON` builds a shared library.
@@ -62,7 +70,6 @@ The bindings are generated with [SWIG](http://www.swig.org) 4.2 or later. The CM
 cmake --preset default -DXTRACT_BUILD_PYTHON=ON -DXTRACT_BUILD_JAVA=OFF -DXTRACT_BUILD_NODE=OFF
 cmake --build --preset default
 ctest --preset default -R bindings
-make swig                        # all three, with every option ON
 ```
 
 The modules are written under `build/default/swig/<language>`.
@@ -72,7 +79,7 @@ The modules are written under `build/default/swig/<language>`.
 LibXtract headers are documented using [doxygen](https://www.doxygen.nl) comments. If you have doxygen installed:
 
 ```bash
-make doc    # or: cmake --build --preset default --target doc
+cmake --build --preset default --target doc
 ```
 
 The generated HTML documentation can then be viewed by opening `doc/html/index.html`.
@@ -97,17 +104,17 @@ parameters); otherwise declare it uninitialised and assign on every path
 before use. Never defensively zero a variable that is unconditionally
 assigned later — dead stores hide missing-assignment bugs from the
 compiler. This is checked by `-Wconditional-uninitialized` (clang builds)
-and by `make analyze`, which runs the clang static analyzer over the
-first-party sources and fails on any finding; CI runs it on Linux and
+and by the `analyze` target, which runs the clang static analyzer over
+the first-party sources and fails on any finding; CI runs it on Linux and
 macOS.
 
 Formatting follows the Allman brace style (the opening brace on its own
 line) with four-space indentation, no tabs, and the pointer asterisk bound
 to the variable (`const double *data`). It is the standard clang-format
 `Microsoft` preset, captured in `.clang-format` (the only deviations are
-disabling include sorting and line reflow). Run `make format-check` (or
-`clang-format --dry-run <file>`) to check, and `make format` (or
-`clang-format -i <file>`) to apply it.
+disabling include sorting and line reflow). Build the `format-check` target
+(or run `clang-format --dry-run <file>`) to check, and the `format` target
+(or `clang-format -i <file>`) to apply it.
 
 ## API stability
 

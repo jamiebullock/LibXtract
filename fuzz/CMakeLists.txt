@@ -3,6 +3,10 @@
 # SPDX-FileCopyrightText: 2026 Jamie Bullock
 # SPDX-License-Identifier: Zlib
 
+# Apple clang has no libFuzzer runtime: on macOS configure with
+# -DCMAKE_C_COMPILER=$(brew --prefix llvm)/bin/clang. AddressSanitizer
+# deadlocks during initialisation on some macOS toolchains;
+# -DXTRACT_FUZZ_SANITIZERS=undefined fuzzes with UBSan alone there.
 set(XTRACT_FUZZ_TIME 60 CACHE STRING "Seconds each fuzz harness runs for under ctest")
 set(XTRACT_FUZZ_SANITIZERS "address,undefined" CACHE STRING "Sanitizers the fuzz build enables")
 
