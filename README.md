@@ -124,9 +124,9 @@ LibXtract follows [Semantic Versioning](https://semver.org). The public API
 is the set of headers installed under `include/xtract/`. Releases within 1.x
 keep source compatibility: functions and `XTRACT_*` values are added, never
 removed or changed, and breaking changes wait for 2.0. Binary compatibility
-is not guaranteed between minor releases, so relink when moving to a new one.
-A correctness fix may change a feature's numerical output; the release notes
-say when.
+is not guaranteed between minor releases, so recompile and relink dependent
+code when moving to a new one. A correctness fix may change a feature's
+numerical output; the release notes say when.
 
 ## Contributing
 
