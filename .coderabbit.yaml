@@ -24,9 +24,11 @@ reviews:
         unconditionally assigned later: the dead store hides a missing
         assignment from the compiler.
 
-        Production code uses block comments only. A comment must be
-        self-contained and say something the code does not; flag one that
-        restates the code or refers to change history.
+        Vale checks comments in CI (the prose job): block comments only,
+        ASCII, spelling, and no reference to an issue or a pull request. Do
+        not comment on those. A comment must be self-contained and say
+        something the code does not; flag one that restates the code or
+        refers to change history.
 
         Feature functions share the signature
         int xtract_foo(const double *data, const int N, const void *argv, double *result)
@@ -49,6 +51,10 @@ reviews:
         the documented formulae. Flag a test that only pins the current
         output, or a test-only hook added to production code to make a test
         pass.
+    - path: '**/*.md'
+      instructions: |
+        Vale checks spelling, ASCII and banned wording in CI (the prose
+        job). Do not comment on those.
     - path: 'CHANGELOG.md'
       instructions: |
         The rules are in the Changelog section of CONTRIBUTING.md, and the
@@ -72,8 +78,6 @@ reviews:
   auto_review:
     enabled: true
     drafts: true
-    base_branches:
-      - main
 
 knowledge_base:
   code_guidelines:
