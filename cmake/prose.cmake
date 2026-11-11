@@ -23,7 +23,7 @@ if(NOT result EQUAL 0)
 endif()
 
 execute_process(
-    COMMAND git ls-files
+    COMMAND git -c core.quotePath=false ls-files
     WORKING_DIRECTORY "${root}"
     RESULT_VARIABLE result
     OUTPUT_VARIABLE files

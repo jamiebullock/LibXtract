@@ -5,8 +5,6 @@
 ### Changed
 
 - Build the Python, Java and Node.js bindings with CMake, which needs SWIG 4.2 or later ([#258](https://github.com/jamiebullock/LibXtract/pull/258))
-- Move the proofs from `make verify` to `make -C verify` ([#263](https://github.com/jamiebullock/LibXtract/pull/263))
-- Move the code standard from the README to `CONTRIBUTING.md` ([#262](https://github.com/jamiebullock/LibXtract/pull/262))
 
 ### Added
 
@@ -18,7 +16,7 @@
 ### Removed
 
 - Remove the Make build ([#259](https://github.com/jamiebullock/LibXtract/pull/259), [#263](https://github.com/jamiebullock/LibXtract/pull/263))
-- Remove the load-time constructor and exit-time destructor, so a thread that exits early calls `xtract_free_fft()` ([#255](https://github.com/jamiebullock/LibXtract/pull/255))
+- Remove the load-time constructor and exit-time destructor ([#255](https://github.com/jamiebullock/LibXtract/pull/255))
 
 ## [1.2.0] - 2026-11-09
 
@@ -31,7 +29,7 @@
 - Return `XTRACT_BAD_STATE` from `xtract_failsafe_f0` when its fallback FFT is not initialised ([#252](https://github.com/jamiebullock/LibXtract/pull/252))
 - Return `XTRACT_NO_RESULT` from `xtract_midicent` for a zero fundamental ([#218](https://github.com/jamiebullock/LibXtract/pull/218))
 - Limit the period `xtract_mcleod_f0` reports to N / 2 samples ([#237](https://github.com/jamiebullock/LibXtract/pull/237))
-- Keep only negative differences under `XTRACT_NEGATIVE_SLOPE` in `xtract_flux` and `xtract_lnorm`, which ignored it ([#241](https://github.com/jamiebullock/LibXtract/pull/241))
+- Keep only negative differences under `XTRACT_NEGATIVE_SLOPE` in `xtract_flux` and `xtract_lnorm` ([#241](https://github.com/jamiebullock/LibXtract/pull/241))
 - Document the input of `xtract_bark_coefficients` as a spectrum with DC included ([#213](https://github.com/jamiebullock/LibXtract/pull/213))
 - Accept every scalar feature in `xtract_features_from_subframes` ([#254](https://github.com/jamiebullock/LibXtract/pull/254))
 - Take N as the length of the input array in `xtract_spectral_subband_centroids` ([#220](https://github.com/jamiebullock/LibXtract/pull/220))
@@ -46,7 +44,7 @@
 - Add `xtract_permutation_entropy` and `xtract_lempel_ziv_complexity` ([#234](https://github.com/jamiebullock/LibXtract/pull/234), [#235](https://github.com/jamiebullock/LibXtract/pull/235))
 - Add `xtract_sample_entropy` and `xtract_approximate_entropy` ([#236](https://github.com/jamiebullock/LibXtract/pull/236))
 - Add `xtract_periodicity` and `xtract_signal_confidence` ([#237](https://github.com/jamiebullock/LibXtract/pull/237))
-- Implement `xtract_attack_time` and `xtract_decay_time`, declared since 1.0 ([#238](https://github.com/jamiebullock/LibXtract/pull/238))
+- Implement `xtract_attack_time` and `xtract_decay_time` ([#238](https://github.com/jamiebullock/LibXtract/pull/238))
 - Add `xtract_decay_rate` ([#238](https://github.com/jamiebullock/LibXtract/pull/238))
 - Add `xtract_temporal_centroid`, `xtract_max_position`, `xtract_min_position` and `xtract_peak_asymmetry` ([#239](https://github.com/jamiebullock/LibXtract/pull/239))
 - Add `xtract_moving_sum`, `xtract_moving_average`, `xtract_moving_variance` and `xtract_moving_standard_deviation` ([#225](https://github.com/jamiebullock/LibXtract/pull/225))
@@ -58,7 +56,6 @@
 - Add the constant-Q transform as `xtract_init_cqt`, `xtract_free_cqt` and `xtract_cqt` ([#244](https://github.com/jamiebullock/LibXtract/pull/244))
 - Add feature enumeration entries for `xtract_peak`, `xtract_mmbses` and `xtract_spectral_subband_centroids` ([#220](https://github.com/jamiebullock/LibXtract/pull/220))
 - Add the units `XTRACT_SECONDS` and `XTRACT_PER_SECOND` ([#238](https://github.com/jamiebullock/LibXtract/pull/238))
-- Add CBMC proofs of every feature function, run with `make verify` ([#222](https://github.com/jamiebullock/LibXtract/pull/222))
 
 ### Removed
 
@@ -74,14 +71,14 @@
 
 - Change the licence from MIT to zlib ([#189](https://github.com/jamiebullock/LibXtract/pull/189))
 - Build the library as C99 ([#147](https://github.com/jamiebullock/LibXtract/pull/147))
-- Match the absolute scale of `xtract_spectrum` on macOS to Linux and Windows, halving it ([#142](https://github.com/jamiebullock/LibXtract/pull/142))
-- Change every value of `xtract_mfcc` and `xtract_mel_spectrogram` by sampling the mel filterbank at bin frequencies ([#204](https://github.com/jamiebullock/LibXtract/pull/204))
-- Change `xtract_hps` to index harmonics by bin layout and score them in the log domain ([#193](https://github.com/jamiebullock/LibXtract/pull/193))
+- Match the absolute scale of `xtract_spectrum` on macOS to Linux and Windows ([#142](https://github.com/jamiebullock/LibXtract/pull/142))
+- Change the results of `xtract_mfcc` and `xtract_mel_spectrogram` ([#204](https://github.com/jamiebullock/LibXtract/pull/204))
+- Change the results of `xtract_hps` ([#193](https://github.com/jamiebullock/LibXtract/pull/193))
 - Correct the `xtract_lpcc` coefficients beyond the LPC order ([#202](https://github.com/jamiebullock/LibXtract/pull/202))
-- Document the argv of `xtract_lpcc` as an int, as the function reads it ([#142](https://github.com/jamiebullock/LibXtract/pull/142))
+- Document the argv of `xtract_lpcc` as an int ([#142](https://github.com/jamiebullock/LibXtract/pull/142))
 - Take a magnitude/phase spectrum of length N in `xtract_mmbses` ([#174](https://github.com/jamiebullock/LibXtract/pull/174))
 - Make `xtract_sharpness` loudness-invariant and report it in acums ([#146](https://github.com/jamiebullock/LibXtract/pull/146))
-- Exclude sub-fundamental bins from `xtract_odd_even_ratio` ([#146](https://github.com/jamiebullock/LibXtract/pull/146))
+- Exclude bins below half the fundamental from `xtract_odd_even_ratio` ([#146](https://github.com/jamiebullock/LibXtract/pull/146))
 - Change `xtract_init_bark` to round band limits, moving some edges by one bin ([#178](https://github.com/jamiebullock/LibXtract/pull/178))
 - Change `xtract_mcleod_f0` to select the key maximum of each NSDF region ([#145](https://github.com/jamiebullock/LibXtract/pull/145))
 - Match `xtract_autocorrelation_fft` to `xtract_autocorrelation` on both FFT backends ([#141](https://github.com/jamiebullock/LibXtract/pull/141))
@@ -98,7 +95,7 @@
 - Add a result range and unit to every descriptor ([#180](https://github.com/jamiebullock/LibXtract/pull/180))
 - Add the units `XTRACT_UNIT_NONE`, `XTRACT_UNIT_ANY`, `XTRACT_UNIT_UNKNOWN` and `XTRACT_ACUM` ([#180](https://github.com/jamiebullock/LibXtract/pull/180))
 - Add `XTRACT_F0_PEAK_CLIP` and `XTRACT_F0_CENTRE_CLIP` ([#181](https://github.com/jamiebullock/LibXtract/pull/181))
-- Add a harmonic count argument, 2 to 16, to `xtract_hps` ([#193](https://github.com/jamiebullock/LibXtract/pull/193))
+- Add a harmonic count argument to `xtract_hps` ([#193](https://github.com/jamiebullock/LibXtract/pull/193))
 - Add `CONTRIBUTING.md` and `SECURITY.md` ([#191](https://github.com/jamiebullock/LibXtract/pull/191))
 
 ### Removed
