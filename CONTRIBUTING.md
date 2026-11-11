@@ -24,12 +24,14 @@ cmake --build --preset default
 ctest --preset default
 cmake --build --preset default --target format-check
 cmake --build --preset default --target analyze
+cmake --build --preset default --target prose-check
 ```
 
 The `analyze` target runs the clang static analyzer and must be clean for any
 change under `src/`. The `format` target applies the project's clang-format
 configuration; CI rejects a pull request that the `format-check` target fails
-on.
+on. The `prose-check` target needs Vale and is described under
+[Prose checks](#prose-checks).
 
 ## Code
 
@@ -102,33 +104,40 @@ with `-DXTRACT_CLANG_FORMAT=<path>` to run the targets with a chosen binary.
 `CHANGELOG.md` records what each release changes for someone who uses the
 library. Its entries are written in the pull request that makes the release,
 so no other pull request touches it. The format is
-[Keep a Changelog](https://keepachangelog.com/en/1.1.0/):
+[Common Changelog](https://common-changelog.org):
 
 - A release is a `## [X.Y.Z] - YYYY-MM-DD` heading, newest first, with a
   compare link at the foot of the file.
-- Under the heading come `###` sections from Added, Changed, Deprecated,
-  Removed, Fixed and Security, in that order, and nothing else. A release has
-  no introductory paragraph.
+- Under the heading come `###` sections from Changed, Added, Removed and
+  Fixed, in that order. A release may carry one notice, a single line in
+  italics directly under its heading, and has no other introductory text.
 - An entry is one line: a phrase of at most 20 words with no closing full
   stop.
+- An entry opens with a verb in the imperative, such as Add, Change, Fix or
+  Remove. The verbs that the check accepts are listed under
+  [Changelog format](https://github.com/jamiebullock/vale-style#changelog-format)
+  in the vale-style README.
+- An entry ends with a link to its pull request, in parentheses:
+  `([#123](https://github.com/jamiebullock/LibXtract/pull/123))`.
+- A change that breaks a caller's code or build opens with `**Breaking:**`
+  and a lower-case verb, and comes first in its section.
 - An entry says what changed for the user. The reason, the mechanism and the
-  history are in the pull request; end the entry with its number, `(#123)`,
-  when a reader may want them.
+  history are in the pull request.
 - Record only what a user can observe: the API, behaviour, results, the
   build and install, the licence. Leave out CI, tests, tooling and
   refactoring.
 - List a new function by name. Its arguments are documented in the header.
-- Start an entry about one function with the function name.
 - A fix that changes a result or a return code for a call that already
   worked goes under Changed, because a caller may depend on the old value.
   Fixed holds crashes, memory errors and results that were unusable.
+- A deprecation goes under Changed and opens with Deprecate.
 - Correct or narrow an entry that is inaccurate. Do not add exceptions and
   qualifications to it.
 
 An entry that explains the mechanism:
 
 ```
-- Fixed the phase from `xtract_spectrum` having the opposite sign on Linux
+- Fix the phase from `xtract_spectrum` having the opposite sign on Linux
   and Windows, where the FFT returns the complex conjugate of the transform
   computed on macOS. The imaginary part is now negated there so that every
   platform agrees.
@@ -137,24 +146,52 @@ An entry that explains the mechanism:
 The same change as it belongs in the file:
 
 ```
-- `xtract_spectrum`: phase sign on Linux and Windows now matches macOS (#246)
+- Change the phase sign of `xtract_spectrum` on Linux and Windows to match macOS ([#246](https://github.com/jamiebullock/LibXtract/pull/246))
 ```
 
 An entry that restates the header:
 
 ```
-- Added `xtract_median(data, N, NULL, result)`, which returns the median of
+- Add `xtract_median(data, N, NULL, result)`, which returns the median of
   the N values, or the mean of the two middle values when N is even.
 ```
 
 The same change as it belongs in the file:
 
 ```
-- `xtract_median`
+- Add `xtract_median` ([#229](https://github.com/jamiebullock/LibXtract/pull/229))
 ```
 
-The `changelog-check` target tests the rules that a script can test, and CI
-runs it on every pull request.
+The `prose-check` target tests the rules that a script can test, and the
+`version-check` target tests that the newest release is the version in
+`VERSION`. CI runs both on every pull request.
+
+## Prose checks
+
+[Vale](https://vale.sh) checks the prose in the tree: the Markdown files,
+the changelog, the comments in the sources and the licence headers. The
+rules come from the [vale-style](https://github.com/jamiebullock/vale-style)
+package, at the release that `.vale.ini` names, and the package's README
+describes them. `.vale.ini` adds the project's own settings to them:
+
+- `.vale/styles/config/vocabularies/LibXtract/accept.txt` holds the terms of
+  the field and the names of authors that the dictionary does not. Add a
+  word there when Vale reports a correct spelling.
+- `.vale/styles/LibXtract/` holds the rules that apply to this project only.
+- The bundled third-party code is not checked.
+
+The `prose-check` target downloads the package and checks every file that
+git tracks. An error fails the check, and CI rejects a pull request that it
+fails on. A warning is reported and does not fail it. CI runs Vale 3.26.0;
+configure with `-DXTRACT_VALE=<path>` to run the target with a chosen
+binary.
+
+CI also checks the title and the description of a pull request: the title
+as the subject of a commit message, and the description against the
+template. To run the same check before opening the pull request, write the
+title to a file named `COMMIT_EDITMSG` and the description to a file named
+`PR_BODY.md`, both outside the working tree, and pass the two paths to
+`vale` from the repository root.
 
 ## Licensing of contributions
 

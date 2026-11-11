@@ -1,0 +1,20 @@
+name: Install Vale
+description: Download the pinned Vale release, check its checksum and put it on the path
+
+runs:
+  using: composite
+  steps:
+    - name: Install Vale 3.26.0
+      shell: bash
+      env:
+        VALE_VERSION: 3.26.0
+        VALE_SHA256: 22aa69a556558e4a9dfc63c17030777383d8d3c48dcdfad655fa98e839d666ed
+      run: |
+        archive="vale_${VALE_VERSION}_Linux_64-bit.tar.gz"
+        curl --fail --silent --show-error --location --retry 3 \
+          --output "$RUNNER_TEMP/$archive" \
+          "https://github.com/vale-cli/vale/releases/download/v${VALE_VERSION}/$archive"
+        echo "$VALE_SHA256  $RUNNER_TEMP/$archive" | sha256sum --check
+        mkdir -p "$RUNNER_TEMP/vale"
+        tar -xzf "$RUNNER_TEMP/$archive" -C "$RUNNER_TEMP/vale" vale
+        echo "$RUNNER_TEMP/vale" >> "$GITHUB_PATH"

@@ -1,0 +1,6 @@
+extends: existence
+message: "A feature function has no \\return entry. Put a condition that matters in the \\param text."
+level: error
+scope: raw
+raw:
+  - '\\returns?\b'

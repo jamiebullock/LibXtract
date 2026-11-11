@@ -1,0 +1,6 @@
+extends: existence
+message: "The header's first line is 'Part of LibXtract'."
+level: error
+scope: raw
+raw:
+  - '\A(?:#![^\n]*\n)?(?:/\*|#) Part of (?!LibXtract\n)'
