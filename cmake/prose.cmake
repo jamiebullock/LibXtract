@@ -31,6 +31,7 @@ execute_process(
 if(NOT result EQUAL 0)
     message(FATAL_ERROR "git ls-files: ${result}")
 endif()
+string(REPLACE ";" "\\;" files "${files}")
 string(REPLACE "\n" ";" files "${files}")
 
 execute_process(
