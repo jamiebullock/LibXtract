@@ -238,6 +238,18 @@ jobs:
       - name: Check formatting
         run: cmake -P cmake/format.cmake
 
-      - name: Check the changelog
+      - name: Check that VERSION is the newest release in the changelog
         if: ${{ !cancelled() }}
-        run: cmake -P cmake/changelog.cmake
+        run: cmake -P cmake/version.cmake
+
+  prose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - uses: ./.github/actions/install-vale
+
+      - name: Check the prose
+        run: cmake -P cmake/prose.cmake

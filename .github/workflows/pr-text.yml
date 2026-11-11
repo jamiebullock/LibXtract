@@ -1,0 +1,37 @@
+name: PR text
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+    branches: [develop]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr-text-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  pr-text:
+    name: Check the title and description
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - uses: ./.github/actions/install-vale
+
+      - name: Check the title and description
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+          BODY: ${{ github.event.pull_request.body }}
+        run: |
+          vale sync
+          mkdir "$RUNNER_TEMP/pr"
+          printf '%s\n' "$TITLE" > "$RUNNER_TEMP/pr/COMMIT_EDITMSG"
+          printf '%s\n' "$BODY" | tr -d '\r' \
+            | sed '/<!-- This is an auto-generated comment: release notes by coderabbit.ai -->/,/<!-- end of auto-generated comment: release notes by coderabbit.ai -->/d' \
+            > "$RUNNER_TEMP/pr/PR_BODY.md"
+          vale --no-wrap "$RUNNER_TEMP/pr/COMMIT_EDITMSG" "$RUNNER_TEMP/pr/PR_BODY.md"
