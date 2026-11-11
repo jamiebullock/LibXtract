@@ -62,15 +62,15 @@
 #define M_PI 3.14159265358979323846264338327
 #endif
 
-/* DCT-II basis, sused by xtract_init_dct() and xtract_dct() when a precomputed
+/* DCT-II basis, used by xtract_init_dct() and xtract_dct() when a precomputed
  * table is not passed as argv. */
 static inline double xtract_dct_cosine(int n, int m, int N)
 {
     return cos(M_PI * n * (m + 0.5) / N);
 }
 
-/* Safe double->int conversion: out-of-range and NaN inputs yield 0 rather than
- * the undefined behaviour of a direct cast (the >= / < comparisons are both
+/* Safe double->int conversion: out-of-range and NaN inputs yield 0, where a
+ * direct cast is undefined behaviour (the >= / < comparisons are both
  * false for NaN). Used for argv fields and computed harmonic numbers that an
  * adversarial input could push outside int's range. */
 static inline int xtract_argv_int(double v)

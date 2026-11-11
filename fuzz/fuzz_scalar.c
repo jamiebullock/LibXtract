@@ -14,8 +14,8 @@
  *
  * The fuzzer's bytes become a feature selector, a flag that passes a NULL
  * argv, an argv buffer, and the input vector, so NaN, +/-Inf, denormals,
- * N=0, N=1, all-zero, a missing argv, etc. are exercised. Run under
- * AddressSanitizer + UBSan.
+ * N=0, N=1, all-zero input and a missing argv are among the cases exercised.
+ * Run under AddressSanitizer + UBSan.
  *
  * failsafe_f0 computes a spectrum internally, so it runs at a fixed
  * power-of-two N with the FFT initialised once; wavelet_f0 runs its detector

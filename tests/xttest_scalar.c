@@ -22,14 +22,13 @@
  * pitch detectors driven by synthetic sine and sawtooth signals.
  *
  * All expected values are derived mathematically from the input data, not from
- * running the functions, so the tests validate correctness rather than just
- * stability. Tolerance: EPSILON (1e-10) for exact-in-theory results, wider
- * where noted.
+ * running the functions, so the tests validate correctness. Tolerance: EPSILON
+ * (1e-10) for exact-in-theory results, wider where noted.
  */
 
 static const double EPSILON = 1e-10;
 
-/* ===== xtract_f0 — sine wave ===== */
+/* ===== xtract_f0: sine wave ===== */
 
 UTEST(f0, sine_512_44100_86hz_no_result)
 {
@@ -503,7 +502,7 @@ UTEST(f0, sine_2048_44100_344hz_amp1_nearest_cent)
     ASSERT_EQ(xttest_ftom(result), xttest_ftom(frequency));
 }
 
-/* ===== xtract_f0 — sawtooth wave ===== */
+/* ===== xtract_f0: sawtooth wave ===== */
 
 UTEST(f0, saw_512_44100_86hz_no_result)
 {
@@ -1147,7 +1146,7 @@ UTEST(scalar, skewness_of_symmetric_data)
 
 UTEST(scalar, skewness_of_positively_skewed_data)
 {
-    /* [1, 1, 1, 1, 10] — heavily right-skewed */
+    /* [1, 1, 1, 1, 10]: heavily right-skewed */
     double result = 0.0;
     double data[] = {1.0, 1.0, 1.0, 1.0, 10.0};
     double mean = (1.0 + 1.0 + 1.0 + 1.0 + 10.0) / 5.0; /* 2.8 */
@@ -1173,7 +1172,7 @@ UTEST(scalar, kurtosis_of_uniform_like_data)
 
 UTEST(scalar, kurtosis_of_peaked_data)
 {
-    /* [0, 0, 10, 0, 0] — all weight in centre
+    /* [0, 0, 10, 0, 0]: all weight in centre
      * mean=2, sample_var = (4+4+64+4+4)/4 = 20, stddev = sqrt(20)
      * excess kurtosis = (1/N * sum((xi-mean)^4) / stddev^4) - 3
      * 4th moments: 16+16+4096+16+16 = 4160
@@ -1607,12 +1606,9 @@ UTEST(scalar, irregularity_j_constant)
 UTEST(scalar, irregularity_j_known_value)
 {
     /* J = sum((x[n] - x[n+1])^2) / sum(x[n]^2)
-     * num = (1-2)^2 = 1
-     * den = 1^2 + 2^2 = 5
-     * J = 1/5 = 0.2
-     *
-     * BUG: code only sums data[0..N-2] in den, missing data[N-1].
-     * Produces 1/1 = 1.0 instead of 1/5 = 0.2. */
+     * numerator = (1-2)^2 = 1
+     * denominator = 1^2 + 2^2 = 5, which includes the last sample
+     * J = 1/5 = 0.2 */
     double result = 0.0;
     double data[] = {1.0, 2.0};
     xtract_irregularity_j(data, 2, NULL, &result);
@@ -1794,7 +1790,7 @@ UTEST(scalar, spectral_slope_known_value)
     CHECK_REL(result, 1.0 / 600.0, 1e-9);
 }
 
-/* ===== McLeod F0 — sine wave ===== */
+/* ===== McLeod F0: sine wave ===== */
 
 UTEST(mcleod_f0, sine_1024_44100_86hz_nearest_cent)
 {
@@ -2041,8 +2037,8 @@ UTEST(signal_confidence, sine_is_one)
 
 UTEST(signal_confidence, is_the_height_of_the_chosen_peak_not_the_highest)
 {
-    /* A fifth above the fundamental anticorrelates at the fundamental's
-     * period, so that key maximum is lower than the one a full cycle of
+    /* A fifth above the fundamental anticorrelates at the period of the
+     * fundamental, so that key maximum is lower than the one a full cycle of
      * both later, yet it is the first within threshold of the highest and
      * is the peak the f0 estimate comes from */
     double table[1024];

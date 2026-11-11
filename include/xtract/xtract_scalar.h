@@ -15,7 +15,7 @@ extern "C"
 #endif
 
     /**
-     * \defgroup scalar scalar extraction functions
+     * \defgroup scalar Scalar extraction functions
      *
      * Functions that extract a feature as a single value from an input vector
      *
@@ -230,7 +230,7 @@ extern "C"
 
     /** \brief Extract the spectral flatness measure of an input vector, where the flatness measure (SFM) is defined as the ratio of the geometric mean to the arithmetic mean of a magnitude spectrum.
      *
-     * \note The computation method used here is the most efficient by a significant margin, but suffers from precision problems due to the multiplication operationin the geometric mean calculation. This is particularly accute for larger values of N (>=256). However, as noted by Peeters (2003), the SFM should generally be computed on a small number of 'bands' rather than on the complete magnitude spectrum. It is therefore highly recommended that xtract_bands() is used prior to calling xtract_flatness().
+     * \note As noted by Peeters (2003), the SFM should generally be computed on a small number of 'bands', which xtract_bands() provides.
      *
      * \param *data: a pointer to the first element in an array of doubles representing the magnitude coefficients from the spectrum of an audio vector, (e.g. the first half of the array pointed to by *result from xtract_spectrum(). Alternatively the magnitudes from a number of 'subbands' can be used by using *result from xtract_bands().
      * \param N: the number of *data array elements to be considered, at least 1
@@ -264,7 +264,7 @@ extern "C"
      *
      * \param *data: a pointer to NULL
      * \param N:
-     * \param *argv: a pointer to an array containing a double represnting the number of harmonic partials in a spectrum, and a double representing the number of partials in a spectrum
+     * \param *argv: a pointer to an array containing a double representing the number of harmonic partials in a spectrum, and a double representing the number of partials in a spectrum
      * \param *result: the noisiness coefficient as calculated from argv
      */
     int xtract_noisiness(const double *data, const int N, const void *argv, double *result);
@@ -280,7 +280,7 @@ extern "C"
 
     /** \brief Extract the Inharmonicity of an input vector
      *
-     * \param *data: a pointer to the first element in an array of doubles represeting a magnitude peak spectrum of size N/2, and a frequency spectrum of size N/2 (This is the output format of xtract_peak_spectrum())
+     * \param *data: a pointer to the first element in an array of doubles representing a magnitude peak spectrum of size N/2, and a frequency spectrum of size N/2 (This is the output format of xtract_peak_spectrum())
      * \param N: the number of elements to be considered, at least 2 and even
      * \param *argv: a pointer to a double representing the fundamental frequency of the input vector, finite and at least 0; 0 gives no result
      * \param *result: the inharmonicity of N values from the array pointed to by *data

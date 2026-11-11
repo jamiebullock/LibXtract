@@ -55,7 +55,7 @@ static void setup(void)
     /* Magnitude spectrum approximation for spectral benchmarks.
      * Real spectrum data has [magnitudes..., frequencies...] layout,
      * but for benchmarking we only need representative non-negative
-     * values — we are measuring loop throughput, not result correctness. */
+     * values: we are measuring loop throughput, not result correctness. */
     for (i = 0; i < 512; i++)
         spectrum_512[i] = fabs(data_512[i]);
     for (i = 0; i < 4096; i++)

@@ -16,8 +16,9 @@
 #include <float.h>
 
 /*
- * Unit tests for stateful pitch detection (wavelet/dywapitch), the failsafe f0
- * fallback, the subframe/denormal helpers, and the FFT lifecycle teardown.
+ * Unit tests for stateful pitch detection (wavelet/dywapitch), the
+ * xtract_failsafe_f0 fallback, the subframe/denormal helpers, and the FFT
+ * lifecycle teardown.
  */
 
 static const double EPSILON = 1e-10;
@@ -188,8 +189,8 @@ UTEST(stateful, wavelet_f0_silence_yields_no_result)
 
 UTEST(stateful, failsafe_f0_returns_estimate_when_detection_succeeds)
 {
-    /* 344.53125 Hz is exactly 4 cycles in 512 samples — xtract_f0 detects
-     * it, so failsafe returns that estimate directly (no FFT fallback). */
+    /* 344.53125 Hz is exactly 4 cycles in 512 samples. xtract_f0 detects it,
+     * so xtract_failsafe_f0 returns that estimate directly (no FFT fallback). */
     double table[FAILSAFE_N];
     double samplerate = 44100.0;
     double frequency = 344.53125;

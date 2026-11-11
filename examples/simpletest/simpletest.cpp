@@ -280,7 +280,7 @@ int main(void)
         }
     }
 
-    /* cleanup */
+    /* clean up */
     for(n = 0; n < MFCC_FREQ_BANDS; ++n)
     {
         free(mel_filters.filters[n]);
