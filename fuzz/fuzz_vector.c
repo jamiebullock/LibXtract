@@ -12,8 +12,8 @@
  * or bark band limits, plus an argv whose shape differs per feature. The
  * filterbanks, bark limits, and FFT plans are built once at a fixed
  * power-of-two N in LLVMFuzzerInitialize; every call that depends on them
- * runs at that N. The six features with no such dependency (dct,
- * autocorrelation, amdf, asdf, lpc, lpcc) take a fuzzer-chosen N from 0 up
+ * runs at that N. The six features with no such dependency (DCT,
+ * autocorrelation, AMDF, ASDF, LPC, LPCC) take a fuzzer-chosen N from 0 up
  * to it. The input is allocated at exactly the length each call declares,
  * so a read past it is out of bounds to the sanitizer. Features are called
  * by name.
@@ -22,10 +22,11 @@
  * and the plain scalar argv fields (spectrum type, peak/harmonic thresholds,
  * f0), each folded into a range around its valid one so that both accepted
  * and rejected values are reached. What is held valid: the filterbank/bark
- * pointers (we fuzz each feature's maths on adversarial input, not the init
- * routines), and the argv fields that select the result size (subbands'
- * band count, lpcc's order) -- feeding those garbage would overflow the
- * harness's own buffer, which is out of contract rather than a library bug.
+ * pointers (each feature's maths is fuzzed on adversarial input; the init
+ * routines are out of scope), and the argv fields that select the result
+ * size (the band count of subbands, the order of LPCC) -- feeding those
+ * garbage would overflow the harness's own buffer, which the contract makes
+ * the caller's error.
  *
  * The result buffer is sized to the largest need across all features
  * (peak_spectrum's 2N) plus a margin. Run under AddressSanitizer + UBSan.

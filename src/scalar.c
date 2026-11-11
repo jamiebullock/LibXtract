@@ -805,9 +805,9 @@ int xtract_flatness(const double *data, const int N, const void *argv, double *r
     }
 
     /* Use log-domain computation to avoid underflow.
-     * Geometric mean = exp(sum(log(x)) / N) instead of (product(x))^(1/N).
-     * The direct multiplication approach underflows for any spectrum with
-     * more than ~50 bins of typical magnitude values. */
+     * Geometric mean = exp(sum(log(x)) / N). The product form,
+     * (product(x))^(1/N), underflows for any spectrum with more than ~50
+     * bins of typical magnitude values. */
     for (n = 0; n < N; n++)
     {
         if (data[n] > 0.0)
@@ -1066,7 +1066,7 @@ int xtract_odd_even_ratio(const double *data, const int N, const void *argv, dou
 int xtract_sharpness(const double *data, const int N, const void *argv, double *result)
 {
     int n = N, z;
-    double sl, g; /* sl = specific loudness */
+    double sl, g; /* specific loudness and its weighting */
     double temp, total_loudness;
 
     temp = 0.0;
@@ -1241,8 +1241,8 @@ int xtract_nonzero_count(const double *data, const int N, const void *argv, doub
 }
 
 /* Sum of log magnitudes over the first R harmonics of coefficient i, each
- * floored at XTRACT_LOG_LIMIT so that an empty bin lowers a candidate rather
- * than removing it. */
+ * floored at XTRACT_LOG_LIMIT so that an empty bin lowers a candidate's
+ * score by a finite amount. */
 static double hps_score(const double *data, const int i, const int off, const int R)
 {
     double score = 0.0;
@@ -1278,7 +1278,7 @@ int xtract_hps(const double *data, const int N, const void *argv, double *result
     }
 
     /* The comparisons are false for NaN, and a fractional count has no
-     * meaning, so both are rejected here rather than silently truncated */
+     * meaning, so both are rejected here */
     if (!(harmonics >= XTRACT_HPS_HARMONICS_MIN && harmonics <= XTRACT_HPS_HARMONICS_MAX) ||
         harmonics != floor(harmonics))
     {
@@ -1326,7 +1326,7 @@ int xtract_hps(const double *data, const int N, const void *argv, double *result
         }
     }
 
-    /* Candidates are the coefficients whose Rth harmonic is still in range */
+    /* Candidates are the coefficients whose harmonic R is still in range */
     count = (M + off) / R - off;
     if (count - first <= 1)
     {
@@ -1373,9 +1373,9 @@ int xtract_hps(const double *data, const int N, const void *argv, double *result
         peak_index = position1_lwr;
 
     /* Parabolic interpolation over the log magnitude of the chosen
-     * coefficient and its neighbours. The fundamental's own peak is
-     * interpolated rather than the score, whose terms sit at different
-     * fractional offsets and do not share one vertex. */
+     * coefficient and its neighbours. The interpolation is over the peak of
+     * the fundamental. The terms of the score sit at different fractional
+     * offsets and do not share one vertex. */
     *result = freqs[peak_index];
     if (peak_index > first && peak_index + 1 < M)
     {

@@ -56,7 +56,7 @@ extern "C"
 
 #define XTRACT_FEATURES XTRACT_FEATURE_COUNT
 
-    /** \brief Enumeration of features, elements are used as indixes to an array of pointers to feature extracton functions */
+    /** \brief Enumeration of features, elements are used as indices to an array of pointers to feature extraction functions */
     enum xtract_features_
     {
         XTRACT_MEAN,
@@ -189,7 +189,7 @@ extern "C"
         XTRACT_DELTA
     };
 
-    /** \brief Enumeration of mfcc types */
+    /** \brief Enumeration of MFCC types */
     /** \brief Mel filterbank gain styles for xtract_init_mfcc(): XTRACT_EQUAL_GAIN gives every filter a peak gain of 1; XTRACT_EQUAL_AREA scales each filter's height inversely to its bandwidth so that every filter has the same area, with the first filter's peak gain 1 */
     enum xtract_mfcc_types_
     {
@@ -301,18 +301,18 @@ extern "C"
     /** \brief Enumeration of vector format types*/
     typedef enum xtract_vector_
     {
-        /* N/2 magnitude/log-magnitude/power/log-power coeffs and N/2 frequencies */
+        /* N/2 magnitude/log-magnitude/power/log-power coefficients and N/2 frequencies */
         XTRACT_SPECTRAL,
         /* N spectral amplitudes */
         XTRACT_SPECTRAL_MAGNITUDES,
-        /* N/2 magnitude/log-magnitude/power/log-power peak coeffs and N/2
+        /* N/2 magnitude/log-magnitude/power/log-power peak coefficients and N/2
          * frequencies */
         XTRACT_SPECTRAL_PEAKS,
         /* N spectral peak amplitudes */
         XTRACT_SPECTRAL_PEAKS_MAGNITUDES,
         /* N spectral peak frequencies */
         XTRACT_SPECTRAL_PEAKS_FREQUENCIES,
-        /* N/2 magnitude/log-magnitude/power/log-power harmonic peak coeffs and N/2
+        /* N/2 magnitude/log-magnitude/power/log-power harmonic peak coefficients and N/2
          * frequencies */
         XTRACT_SPECTRAL_HARMONICS,
         /* N spectral harmonic amplitudes */
@@ -498,7 +498,7 @@ extern "C"
      */
     int xtract_init_fft(int N, int feature_name);
 
-    /** \brief Free memory used for fft plans
+    /** \brief Free memory used for FFT plans
      *
      * This function frees the memory allocated by xtract_init_fft() on the calling thread for every feature. A thread that ends before the process must call this function first, since no other thread can free its memory; the memory of a thread still running when the process exits is reclaimed with the process.
      * */

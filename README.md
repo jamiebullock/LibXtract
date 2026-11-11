@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/jamiebullock/LibXtract/actions/workflows/ci.yml/badge.svg)](https://github.com/jamiebullock/LibXtract/actions/workflows/ci.yml)
 
-LibXtract is a portable C99 library of feature extraction functions for time series and other numeric data. Each function takes an array of doubles and returns a number or a vector that describes it: a statistic, a measure of spectral shape, a pitch estimate, a measure of complexity. The library has a full set of audio features, and its statistical, complexity and moving-window functions make no assumption about what the numbers represent, so they apply to prices, sensor readings and physiological signals as they do to audio.
+LibXtract is a portable C99 library of feature extraction functions for time series and other numeric data. Each function takes an array of doubles and returns a number or a vector that describes it: a statistic, a measure of spectral shape, a pitch estimate, a measure of complexity. The library has a full set of audio features, and its statistical, complexity and moving-window functions do not assume what the numbers represent, so they apply to prices, sensor readings and physiological signals as they do to audio.
 
 It has no external dependencies.
 
@@ -48,7 +48,7 @@ A value is therefore computed once however many features use it, and features ca
 
 ### Prerequisites
 
-- A C99 compiler: gcc, clang, or Visual Studio 2019 or later on Windows
+- A C99 compiler: GCC, Clang, or Visual Studio 2019 or later on Windows
 - [CMake](https://cmake.org) 3.21 or later
 
 On macOS, the library uses Apple's Accelerate framework for the FFT. On Linux and Windows, it uses the bundled Ooura FFT.
@@ -85,7 +85,7 @@ The default preset also has targets that run a tool, each built with `cmake --bu
 | `bench` | The benchmarks |
 | `doc` | The API reference (needs Doxygen) |
 
-The CBMC proofs of the feature functions have their own GNU make build, `make -C verify`, which CI runs on every push to main and develop; see [verify/README.md](verify/README.md).
+The CBMC proofs of the feature functions have their own GNU make build, `make -C verify`, which CI runs on every push to main and develop. See [verify/README.md](verify/README.md).
 
 ### Install
 
@@ -128,7 +128,7 @@ keep source compatibility: functions and `XTRACT_*` values are added, never
 removed or changed, and breaking changes wait for 2.0. Binary compatibility
 is not guaranteed between minor releases, so recompile and relink dependent
 code when moving to a new one. A correctness fix may change a feature's
-numerical output; the [changelog](CHANGELOG.md) says when.
+numerical output. The [changelog](CHANGELOG.md) says when.
 
 ## Contributing
 

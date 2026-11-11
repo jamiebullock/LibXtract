@@ -98,7 +98,7 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
                 ++n;
             }
 #ifdef USE_OOURA
-            /* OOURA discards the always 0 imaginary of DC and Nyquists */
+            /* OOURA discards the imaginary parts of DC and Nyquist, which are always 0 */
             if (n == M && !withDC)
             {
                 real = fft[1];
@@ -159,7 +159,7 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
                 ++n;
             }
 #ifdef USE_OOURA
-            /* OOURA discards the always 0 imaginary of DC and Nyquists */
+            /* OOURA discards the imaginary parts of DC and Nyquist, which are always 0 */
             if (n == M && !withDC)
             {
                 real = fft[1];
@@ -207,7 +207,7 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
                 ++n;
             }
 #ifdef USE_OOURA
-            /* OOURA discards the always 0 imaginary of DC and Nyquists */
+            /* OOURA discards the imaginary parts of DC and Nyquist, which are always 0 */
             if (n == M && !withDC)
             {
                 real = fft[1];
@@ -262,7 +262,7 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
                 ++n;
             }
 #ifdef USE_OOURA
-            /* OOURA discards the always 0 imaginary of DC and Nyquists */
+            /* OOURA discards the imaginary parts of DC and Nyquist, which are always 0 */
             if (n == M && !withDC)
             {
                 real = fft[1];
@@ -316,7 +316,7 @@ int xtract_spectrum(const double *data, const int N, const void *argv, double *r
                 ++n;
             }
 #ifdef USE_OOURA
-            /* OOURA discards the always 0 imaginary of DC and Nyquists */
+            /* OOURA discards the imaginary parts of DC and Nyquist, which are always 0 */
             if (n == M && !withDC)
             {
                 real = fft[1];
@@ -559,7 +559,7 @@ static double bivariate_gaussian_entropy(double sxx, double syy, double sxy, con
     sxx /= count;
     syy /= count;
     sxy /= count;
-    /* A single passed bin leaves the covariance rank-deficient (det == 0),
+    /* A single passed bin leaves the covariance rank-deficient (determinant 0),
      * so the entropy floors without a dedicated case. */
     det = sxx * syy - XTRACT_SQ(sxy);
 
@@ -595,7 +595,7 @@ int xtract_mmbses(const double *data, const int N, const void *argv, double *res
         double sxx = 0.0, syy = 0.0, sxy = 0.0;
 
         /* Accumulate the zero-mean second moments of the filter-weighted
-         * complex coefficients (real = mag*cos(phase), imag = mag*sin(phase)). */
+         * complex coefficients (real = mag*cos(phase), imaginary = mag*sin(phase)). */
         for (n = 0; n < M; n++)
         {
             double weight = f->filters[filter][n];
@@ -936,8 +936,8 @@ int xtract_lpc(const double *data, const int N, const void *argv, double *result
 
 int xtract_lpcc(const double *data, const int N, const void *argv, double *result)
 {
-    /* Given N lpc coefficients extract an LPC cepstrum of size argv[0] */
-    /* Based on an an algorithm by rabiner and Juang */
+    /* Given N LPC coefficients extract an LPC cepstrum of size argv[0] */
+    /* Based on an algorithm by Rabiner and Juang */
 
     int n, k;
     double sum;

@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: Zlib
  */
 
-// We need a pre-computed uniform distribution because tests need to be reproducible
-// If we use "real" randomness then in certain cases tests will pass or fail depending on the RNG output for that specifc run
+/* We need a pre-computed uniform distribution because tests need to be reproducible
+ * If we use "real" randomness then in certain cases tests will pass or fail depending on the RNG output for that specific run */
 const double xttest_noise1024[1024] =
     {
         -0.926215445821, -0.098017781796, 0.109966880378, 0.820549466690, -0.546435658457, -0.504663461036, 0.793264509872, -0.634431900219,

@@ -87,7 +87,7 @@ UTEST(descriptors, scalar_result_ranges_are_ordered)
 
 UTEST(descriptors, audited_result_ranges_and_units)
 {
-    /* Representative features from the issue #150 range/unit audit. */
+    /* Representative features from the range/unit audit. */
     xtract_function_descriptor_t *fd = xtract_make_descriptors();
     ASSERT_TRUE(fd != NULL);
 

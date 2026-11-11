@@ -80,7 +80,7 @@ UTEST(window, bartlett)
 UTEST(window, triangular)
 {
     /* w[n] = 2/N * (N/2 - |n - M/2|) = 0.4 * (2.5 - |n - 2|); note the
-     * endpoints are non-zero (0.2), which distinguishes it from bartlett */
+     * endpoints are non-zero (0.2), which distinguishes it from Bartlett */
     double *w = xtract_init_window(5, XTRACT_TRIANGULAR);
     ASSERT_TRUE(w != NULL);
     CHECK_REL(w[0], 0.2, EPSILON);

@@ -11,7 +11,7 @@ file covers how to get a change accepted and the terms it is accepted under.
 - For a new feature, open an issue first to discuss it. The library keeps a
   small, uniform API and not every feature belongs in it.
 - Security problems: report them privately through GitHub's vulnerability
-  reporting rather than opening a public issue. See `SECURITY.md`.
+  reporting, and do not open a public issue. See `SECURITY.md`.
 
 ## Building and testing
 
@@ -53,7 +53,7 @@ variable that is unconditionally assigned later: dead stores hide
 missing-assignment bugs from the compiler. This is checked by
 `-Wconditional-uninitialized` (clang builds) and by the `analyze` target,
 which runs the clang static analyzer over the first-party sources and fails
-on any finding; CI runs it on Linux and macOS.
+on any finding. CI runs it on Linux and macOS.
 
 ### Formatting
 
@@ -74,7 +74,7 @@ with `-DXTRACT_CLANG_FORMAT=<path>` to run the targets with a chosen binary.
   and return an `XTRACT_` status code.
 - Public declarations in `include/xtract/` carry a Doxygen block that states
   the contract: what the caller passes, what comes back, and the rules for
-  using it. Document the interface, not the implementation, and match the
+  using it. Leave the implementation out of the block, and match the
   wording of the surrounding blocks.
 - Comments in `.c` files are block comments, and each one says something the
   code does not: a formula, a citation, a hidden constraint. Do not describe
@@ -93,8 +93,9 @@ with `-DXTRACT_CLANG_FORMAT=<path>` to run the targets with a chosen binary.
 - Prefix the pull request title the same way: `fix: ...`, `feat: ...`.
 - If the pull request resolves an issue, put `Closes #N` in the description
   so the issue closes on merge.
-- Fill in the template. The Summary states what the change does and why in
-  plain prose; Changes is one bullet per change.
+- Fill in the template. The Summary opens with "This PR" and a verb in lower
+  case, and states what the change does and why in plain prose. Changes is
+  one bullet per change.
 - Keep a pull request to one change. A fix and an unrelated refactor are two
   pull requests.
 - The maintainer merges. Do not merge your own pull request.

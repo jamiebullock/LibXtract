@@ -2231,7 +2231,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             case XTRACT_AUTOCORRELATION_FFT:
                 break;
             case XTRACT_MFCC:
-                /* DCT of log filterbank energies: dimensionless cepstral coeffs */
+                /* DCT of log filterbank energies: dimensionless cepstral coefficients */
                 *result_format = XTRACT_MEL_COEFFS;
                 *result_unit = XTRACT_UNIT_NONE;
                 break;
@@ -2240,7 +2240,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
                 *result_unit = XTRACT_DBFS;
                 break;
             case XTRACT_GFCC:
-                /* DCT of log gammatone energies: dimensionless cepstral coeffs */
+                /* DCT of log gammatone energies: dimensionless cepstral coefficients */
                 *result_format = XTRACT_MEL_COEFFS;
                 *result_unit = XTRACT_UNIT_NONE;
                 break;

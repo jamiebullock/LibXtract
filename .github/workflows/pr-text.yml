@@ -32,6 +32,6 @@ jobs:
           mkdir "$RUNNER_TEMP/pr"
           printf '%s\n' "$TITLE" > "$RUNNER_TEMP/pr/COMMIT_EDITMSG"
           printf '%s\n' "$BODY" | tr -d '\r' \
-            | sed '/<!-- This is an auto-generated comment: release notes by coderabbit.ai -->/,/<!-- end of auto-generated comment: release notes by coderabbit.ai -->/d' \
+            | awk -f .github/scripts/strip-release-notes.awk \
             > "$RUNNER_TEMP/pr/PR_BODY.md"
           vale --no-wrap "$RUNNER_TEMP/pr/COMMIT_EDITMSG" "$RUNNER_TEMP/pr/PR_BODY.md"
