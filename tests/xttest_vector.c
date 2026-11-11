@@ -2116,12 +2116,10 @@ UTEST(vector, gfcc_equals_dct_of_gammatone_spectrogram)
 
 UTEST(init, fft_dct_does_not_clobber_mfcc)
 {
-    /* The DCT case in xtract_init_fft falls through to MFCC (missing break).
-     * If we init MFCC with size 8, then init DCT with size 4, the fallthrough
-     * will reinitialise MFCC with size 4, corrupting MFCC state.
-     *
-     * We test this by running MFCC after the DCT init and checking it still
-     * works at the original size. This requires MFCC filter bank setup. */
+    /* xtract_init_fft keeps the DCT state apart from the MFCC state. A DCT
+     * init with size 4 after an MFCC init with size 16 must leave the MFCC
+     * state at size 16. A DCT case with no break would reinitialise MFCC
+     * with size 4. */
     double dct_data[] = {1.0, 0.0, 0.0, 0.0};
     double dct_result[4] = {0};
     double spec_data[16] = {0};
@@ -2144,7 +2142,7 @@ UTEST(init, fft_dct_does_not_clobber_mfcc)
      * We can't easily test MFCC without filter banks, but we can
      * test that xtract_spectrum still works at size 16 since MFCC
      * uses the same FFT data on some platforms.
-     * If the fallthrough corrupted it, this may produce wrong results
+     * If the DCT init reinitialised it, this may produce wrong results
      * or crash. */
     spec_data[0] = 1.0;
     xtract_init_fft(16, XTRACT_SPECTRUM);

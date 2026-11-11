@@ -936,7 +936,6 @@ int xtract_lpc(const double *data, const int N, const void *argv, double *result
 
 int xtract_lpcc(const double *data, const int N, const void *argv, double *result)
 {
-    /* Given N LPC coefficients extract an LPC cepstrum of size argv[0] */
     /* Based on an algorithm by Rabiner and Juang */
 
     int n, k;

@@ -230,7 +230,7 @@ extern "C"
 
     /** \brief Extract the spectral flatness measure of an input vector, where the flatness measure (SFM) is defined as the ratio of the geometric mean to the arithmetic mean of a magnitude spectrum.
      *
-     * \note The computation method used here is the most efficient by a significant margin, but suffers from precision problems due to the multiplication operation in the geometric mean calculation. This is particularly acute for larger values of N (>=256). However, as noted by Peeters (2003), the SFM should generally be computed on a small number of 'bands'. It is therefore highly recommended that xtract_bands() is used prior to calling xtract_flatness().
+     * \note As noted by Peeters (2003), the SFM should generally be computed on a small number of 'bands', which xtract_bands() provides.
      *
      * \param *data: a pointer to the first element in an array of doubles representing the magnitude coefficients from the spectrum of an audio vector, (e.g. the first half of the array pointed to by *result from xtract_spectrum(). Alternatively the magnitudes from a number of 'subbands' can be used by using *result from xtract_bands().
      * \param N: the number of *data array elements to be considered, at least 1
