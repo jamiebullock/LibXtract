@@ -193,7 +193,7 @@ UTEST(vector, subbands_last_band_computed_when_linear_bands_tile_exactly)
         data[n] = 1.0;
 
     argv[0] = XTRACT_MEAN;
-    argv[1] = 4; /* nbands: 4 bands of 4 samples tiling N exactly */
+    argv[1] = 4; /* 4 bands of 4 samples tiling N exactly */
     argv[2] = XTRACT_LINEAR_SUBBANDS;
     argv[3] = 0; /* start */
 
@@ -329,7 +329,7 @@ UTEST(vector, lpcc_extrapolates_past_the_lpc_order_by_the_rabiner_juang_recursio
     /* Three LPC coefficients and a six-term cepstrum. The first three terms
      * follow c[n] = a[n] + (1/n) sum_{k=1}^{n-1} k c[k] a[n-k]; the rest
      * have no a[n] and sum only over the last p terms. Both are recomputed
-     * here from the coefficients rather than from the library. */
+     * here from the coefficients. */
     const int p = 3, q = 6;
     double lpc[4] = {1.0, 0.5, -0.25, 0.125};
     double expected[6];
@@ -397,7 +397,7 @@ UTEST(vector, harmonic_spectrum_keeps_partials_within_the_threshold_of_a_harmoni
 UTEST(vector, harmonic_spectrum_zero_fundamental_yields_no_result_and_zeroed_output)
 {
     /* With f0 = 0 no harmonic classification is possible; every bin
-     * must be zeroed rather than passed through as "harmonic". */
+     * must be zeroed. */
     const int N = 8;
     double data[8] = {1.0, 2.0, 3.0, 4.0, 100.0, 200.0, 300.0, 400.0};
     double result[8];
@@ -559,9 +559,9 @@ UTEST(vector, dct_of_impulse)
      * X[k] = sum_{n=0}^{N-1} x[n] * cos(pi * k * (n + 0.5) / N)
      * With x=[1,0,0,0], X[k] = cos(pi * k * 0.5 / 4) = cos(pi*k/8)
      * X[0] = cos(0) = 1
-     * X[1] = cos(pi/8) ≈ 0.9239
-     * X[2] = cos(pi/4) ≈ 0.7071
-     * X[3] = cos(3pi/8) ≈ 0.3827 */
+     * X[1] = cos(pi/8) ~= 0.9239
+     * X[2] = cos(pi/4) ~= 0.7071
+     * X[3] = cos(3pi/8) ~= 0.3827 */
     double data[] = {1.0, 0.0, 0.0, 0.0};
     double result[4] = {0};
 
@@ -759,7 +759,7 @@ UTEST(vector, spectrum_log_magnitude_and_log_power_scale_the_occupied_bins_into_
 
 UTEST(vector, spectrum_log_types_floor_a_silent_signal_at_exactly_zero)
 {
-    /* Silence is the one input whose bins are exactly zero rather than
+    /* Silence is the one input whose bins are exactly zero, with no
      * rounding noise, so every log coefficient sits on the -96 floor,
      * which scales to 0. */
     double data[SPEC_N] = {0};
@@ -845,7 +845,7 @@ UTEST(vector, spectrum_of_single_cosine_peaks_at_cosine_frequency)
     double argv[] = {sr / N, (double)XTRACT_POWER_SPECTRUM, 0.0, 0.0};
     int n;
 
-    /* Generate cos(2*pi*1*n/8) — energy at bin 1 */
+    /* Generate cos(2*pi*1*n/8), with energy at bin 1 */
     for (n = 0; n < N; n++)
         data[n] = cos(2.0 * M_PI * 1.0 * n / N);
 
@@ -1122,7 +1122,7 @@ UTEST(vector, lpc_of_simple_autocorrelation_sequence)
      * N = number of autocorrelation values
      * Result = [N-1 reflection coefficients | N-1 LPC coefficients] */
     double autocorr[] = {1.0, 0.5};
-    double result[2] = {0}; /* 1 ref coeff + 1 LPC coeff */
+    double result[2] = {0}; /* 1 reflection coefficient + 1 LPC coefficient */
     int rv;
 
     rv = xtract_lpc(autocorr, 2, NULL, result);
@@ -1165,14 +1165,9 @@ UTEST(vector, lpc_of_2nd_order)
 UTEST(vector, lpc_3rd_order_coefficients_should_be_correct)
 {
     /* Autocorrelation: r[0]=1, r[1]=0.9, r[2]=0.8, r[3]=0.7
-     * At iteration i=2, the inner loop runs for j=0 with i/2=1.
-     * BUG (line 849): lpc[j] = r * lpc[i-1-j] (should be +=)
-     * This destroys the previous lpc[0] value.
-     *
-     * Correct values (computed via standard Levinson-Durbin):
-     *   lpc = [-0.944444, 0.0, 0.055556]
-     * Buggy:
-     *   lpc[0] = 0.00292... (instead of -0.9444...) */
+     * The standard Levinson-Durbin recursion gives the prediction
+     * coefficients [-0.944444, 0.0, 0.055556]. At iteration i=2 the inner
+     * loop runs for j=0 and must add to lpc[0], keeping its previous value. */
     double autocorr[] = {1.0, 0.9, 0.8, 0.7};
     double result[6] = {0}; /* 3 ref + 3 LPC */
     int rv;
@@ -1355,7 +1350,7 @@ UTEST(scalar, loudness_of_silence_is_0)
 UTEST(scalar, spectral_standard_deviation_is_sqrt_variance)
 {
     /* Reuse spectral_variance test: variance = 7500
-     * stddev = sqrt(7500) ≈ 86.6025 */
+     * stddev = sqrt(7500) ~= 86.6025 */
     double result = 0.0;
     double data[] = {1.0, 3.0, 100.0, 300.0};
     double argv[] = {7500.0}; /* spectral variance as input */
@@ -1560,7 +1555,7 @@ UTEST(scalar, spectral_moments_need_a_nonzero_spread_and_nonzero_amplitudes)
 UTEST(scalar, spectral_skewness_result_should_not_scale_with_total_energy)
 {
     /* Two spectra with identical shape but different total energy.
-     * Spectral skewness is a shape measure — scaling amplitudes
+     * Spectral skewness is a shape measure, so scaling amplitudes
      * uniformly should not change the result. */
     double data1[] = {1.0, 2.0, 100.0, 200.0};
     double data2[] = {10.0, 20.0, 100.0, 200.0};
@@ -1634,7 +1629,7 @@ UTEST(scalar, hps_second_loop_should_not_read_frequency_data_as_amplitudes)
 
 UTEST(scalar, flatness_of_sparse_constant_data_should_be_1)
 {
-    /* [0, 0, 5, 5] — 2 non-zero out of 4.
+    /* [0, 0, 5, 5]: 2 non-zero out of 4.
      * Correct: geo_mean = (5*5)^(1/2) = 5, arith_mean = 10/2 = 5
      * flatness = 1.0 */
     double result = 0.0;
@@ -1856,7 +1851,7 @@ UTEST(vector, spectrum_magnitude_magnitudes_first_half_frequencies_second_half)
     int n;
     int i;
 
-    /* Generate cos(2*pi*4*n/64) — energy at FFT bin 4 */
+    /* Generate cos(2*pi*4*n/64), with energy at FFT bin 4 */
     for (n = 0; n < N; n++)
         data[n] = cos(2.0 * M_PI * 4.0 * n / N);
 
@@ -2054,7 +2049,7 @@ UTEST(vector, mel_spectrogram_produces_log_mel_energies_mfcc_applies_dct_to)
     for (i = 0; i < n_filters; i++)
         CHECK_NEAR(mfcc_result[i], dct_of_mel[i], 1e-10);
 
-    /* Cleanup */
+    /* Clean up */
     for (i = 0; i < n_filters; i++)
         free(mel_filters.filters[i]);
     free(mel_filters.filters);
@@ -2111,7 +2106,7 @@ UTEST(vector, gfcc_equals_dct_of_gammatone_spectrogram)
     for (i = 0; i < n_filters; i++)
         CHECK_NEAR(gfcc_result[i], dct_of_gt[i], 1e-10);
 
-    /* Cleanup */
+    /* Clean up */
     for (i = 0; i < n_filters; i++)
         free(gt_filters.filters[i]);
     free(gt_filters.filters);
@@ -2121,12 +2116,10 @@ UTEST(vector, gfcc_equals_dct_of_gammatone_spectrogram)
 
 UTEST(init, fft_dct_does_not_clobber_mfcc)
 {
-    /* The DCT case in xtract_init_fft falls through to MFCC (missing break).
-     * If we init MFCC with size 8, then init DCT with size 4, the fallthrough
-     * will reinit MFCC with size 4, corrupting MFCC state.
-     *
-     * We test this by running MFCC after the DCT init and checking it still
-     * works at the original size. This requires MFCC filter bank setup. */
+    /* xtract_init_fft keeps the DCT state apart from the MFCC state. A DCT
+     * init with size 4 after an MFCC init with size 16 must leave the MFCC
+     * state at size 16. A DCT case with no break would reinitialise MFCC
+     * with size 4. */
     double dct_data[] = {1.0, 0.0, 0.0, 0.0};
     double dct_result[4] = {0};
     double spec_data[16] = {0};
@@ -2138,7 +2131,7 @@ UTEST(init, fft_dct_does_not_clobber_mfcc)
     /* Init MFCC FFT for size 16 */
     xtract_init_fft(16, XTRACT_MFCC);
 
-    /* Init DCT for smaller size — this should NOT touch MFCC state */
+    /* Init DCT for smaller size. This should NOT touch MFCC state */
     xtract_init_fft(4, XTRACT_DCT);
 
     /* Verify DCT works at size 4 */
@@ -2149,7 +2142,7 @@ UTEST(init, fft_dct_does_not_clobber_mfcc)
      * We can't easily test MFCC without filter banks, but we can
      * test that xtract_spectrum still works at size 16 since MFCC
      * uses the same FFT data on some platforms.
-     * If the fallthrough corrupted it, this may produce wrong results
+     * If the DCT init reinitialised it, this may produce wrong results
      * or crash. */
     spec_data[0] = 1.0;
     xtract_init_fft(16, XTRACT_SPECTRUM);
@@ -2162,7 +2155,7 @@ UTEST(init, fft_dct_does_not_clobber_mfcc)
  * Mel-based Multi-Band Spectral Entropy Signature. The input is a
  * magnitude/phase spectrum: data is {magnitudes (M), phases (M)} with N = 2*M;
  * argv is an xtract_mel_filter. Per band, the filter-weighted complex
- * coefficients (real = mag*cos(phase), imag = mag*sin(phase)) are modelled as a
+ * coefficients (real = mag*cos(phase), imaginary = mag*sin(phase)) are modelled as a
  * zero-mean bivariate Gaussian and the result is its differential entropy
  *     H = ln(2*pi*e) + (1/2)ln(sigma_xx*sigma_yy - sigma_xy^2),
  * with ln(2*pi*e) = ln(2*pi) + 1 (Rincon et al. 2013, Eq. 5). -96.0
@@ -2212,7 +2205,7 @@ UTEST(vector, mmbses_two_collinear_bins_floor_determinant)
     const double LOG_LIMIT_DB = -96.0;
     /* Two passed bins both at phase 0 -> (1, 0) and (2, 0). All imaginary
      * parts are exactly 0, so sigma_yy = 0 and the determinant is 0 (floored).
-     * (phase 0 rather than pi avoids sin(pi) != 0 rounding.) */
+     * (Phase pi would bring in the rounding of sin(pi) != 0.) */
     const int N = 4;
     double data[4] = {1.0, 2.0, 0.0, 0.0};
     double filt[2] = {1.0, 1.0};

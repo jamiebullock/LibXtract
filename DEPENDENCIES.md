@@ -2,7 +2,7 @@
 
 The library depends on nothing outside the C99 standard library, plus the
 Accelerate framework on macOS. Everything below is vendored into the tree and
-keeps its upstream licence and style; none of it is covered by `LICENSE`.
+keeps its upstream licence and style. None of it is covered by `LICENSE`.
 
 | Component | Location | Upstream | Licence | Used for |
 | --- | --- | --- | --- | --- |

@@ -15,7 +15,7 @@ extern "C"
 #endif
 
     /**
-     * \defgroup vector vector extraction functions
+     * \defgroup vector Vector extraction functions
      *
      * Functions that extract a feature as a vector from an input vector
      *
@@ -74,8 +74,9 @@ extern "C"
 
     /** \brief Extract Gammatone Frequency Cepstral Coefficients
      *
-     * GFCCs use a gammatone filter bank instead of a mel filter bank,
-     * offering superior noise robustness compared to MFCCs.
+     * GFCCs are cepstral coefficients computed through a gammatone filter
+     * bank. They are more robust to noise than MFCCs, which use a mel filter
+     * bank.
      *
      * \param *data: a pointer to the first element in an array of spectral coefficients, the first half of the array pointed to by *result from xtract_spectrum() called with DC included (argv[2] == 1), so that element k is bin k as the filterbank expects. the gammatone filterbank is applied to the power spectrum (XTRACT_POWER_SPECTRUM) in the same way; a magnitude spectrum may be passed instead
      * \param N: the number of coefficients, half the transform size the filterbank was initialised with, at least 1
@@ -129,7 +130,7 @@ extern "C"
      * \param *data: a pointer to the first element in an array of doubles representing an audio vector
      * \param N: the number of array elements to be considered, at least 1
      * \param *argv: a pointer to a cosine table as allocated by xtract_init_dct(N), or NULL. Both give the same result but the table avoids the need to recompute the table on each call
-     * \param *result: a pointer to an array of at least N doubles to receive the dct coefficients
+     * \param *result: a pointer to an array of at least N doubles to receive the DCT coefficients
      */
     int xtract_dct(const double *data, const int N, const void *argv, double *result);
 
@@ -181,7 +182,7 @@ extern "C"
     int xtract_peak_spectrum(const double *data, const int N, const void *argv, double *result);
 
     /** \brief Extract the harmonic spectrum of from a of a peak spectrum
-     * \param *data: a pointer to the first element in an array of doubles representing the peak spectrum of an audio vector (e.g. *result from  xtract_peaks). It is expected that the first half of the array pointed to by *data will contain amplitudes for each peak considered, and the the second half will contain the respective frequencies
+     * \param *data: a pointer to the first element in an array of doubles representing the peak spectrum of an audio vector (e.g. *result from  xtract_peaks). It is expected that the first half of the array pointed to by *data will contain amplitudes for each peak considered, and the second half will contain the respective frequencies
      * \param N: the size of the array pointed to by *data, at least 2 and even
      * \param *argv: a pointer to an array containing the fundamental (f0) of the spectrum, finite and at least 0 (0 gives no result), and a threshold (t) where 0<=t<=1.0, and t determines the distance from the nearest harmonic number within which a partial can be considered harmonic.
      * \param *result: a pointer to an array of size N containing N/2 magnitude coefficients and N/2 bin frequencies.
@@ -220,7 +221,7 @@ extern "C"
      * \param *data: a pointer to an array of size N containing N magnitude/power/log magnitude/log power coefficients. (e.g. the first half of the array pointed to by *result from xtract_spectrum().
      * \param N: the number of elements from the array pointed to by *data to be considered, at least 1
      * \param *argv: A pointer to an array containing four integers. The first represents the \a scalar extraction function to applied to each subband e.g. XTRACT_SUM or XTRACT_MEAN, one of the features listed below; the second represents the number of subbands required, at least 1; the third represents the frequency scale to be used for the subband bounds as defined in the enumeration xtract_subband_scales_ (libxtract.h). The fourth integer represent the start point of the subbands as a location in the input array as pointed to by *data (e.g. a value of 5 would start the subband extraction at bin 5), from 0 to N - 1. More linear bands than there are bins after the start, or an octave start of 0, gives a band of no bins and is an argument error
-     * \param *result: A pointer to an array containing the resultant subband values. The calling function is responsible for allocating and freeing memory for *result. xtract_subbands() assumes that at least argv[1] * sizeof(double) bytes have been allocated. If the requested nbands extends the subband range beyond N, then the remaining bands will be set to 0. If the array pointed to by *result has more than argv[1] elements, the superfluous elements will be unchanged.
+     * \param *result: A pointer to an array containing the resultant subband values. The calling function is responsible for allocating and freeing memory for *result. xtract_subbands() assumes that at least argv[1] * sizeof(double) bytes have been allocated. If the requested number of bands extends the subband range beyond N, then the remaining bands will be set to 0. If the array pointed to by *result has more than argv[1] elements, the superfluous elements will be unchanged.
      *
      * xtract_subbands() divides a spectrum into subbands and applies the function given by argv[0] to the values in each subband to give a 'reduced' representation of the spectrum as *result
      *

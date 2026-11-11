@@ -53,7 +53,9 @@ reviews:
       instructions: |
         The rules are in the Changelog section of CONTRIBUTING.md, and the
         prose-check target enforces the format, so do not comment on the
-        format.
+        format. The one exception is the link that ends an entry: the check
+        accepts a link to an issue or a commit, and the rules ask for the
+        pull request, so flag any other link.
 
         Check each entry against the code and the pull request it cites.
         When an entry is inaccurate, ask for it to be corrected or narrowed

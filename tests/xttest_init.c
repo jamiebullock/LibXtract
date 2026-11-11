@@ -22,7 +22,7 @@ static const double FB_MIN = 100.0;
 static const double FB_MAX = 8000.0;
 
 /* A value no coefficient can legitimately take, used to prove that the init
- * functions write every bin rather than relying on zeroed memory. */
+ * functions write every bin. */
 static const double SENTINEL = 12345.0;
 
 static double **fb_alloc(void)
@@ -71,7 +71,7 @@ static void mel_peaks(double *hz)
         hz[n] = n == 0 ? FB_MIN : hz_of_mel(mel_of(FB_MIN) + n * step);
 }
 
-/* The unit triangle through lower, centre and upper, evaluated at hz. */
+/* The unit triangle through lower, centre and upper, evaluated at a frequency in Hz. */
 static double triangle(double lower, double centre, double upper, double hz)
 {
     if (hz <= lower || hz >= upper)

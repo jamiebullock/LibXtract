@@ -25,11 +25,11 @@ extern "C"
 #endif
 
     /**
-     * \defgroup helper helper functions
+     * \defgroup helper Helper functions
      *
      * Declares helper functions, and their parameters.
      *
-     * \note These functions don't necessarily conform to the prototype used in xtract_scalar.h and xtract_vector.h etc, and as such are intended to be called 'directly' rather than via the xtract[] function pointer array (libxtract.h)
+     * \note These functions don't necessarily conform to the prototype used in xtract_scalar.h and xtract_vector.h, and as such are intended to be called directly by name. The xtract[] function pointer array (libxtract.h) contains only functions that conform to it
      *
      * @{
      */
@@ -55,7 +55,7 @@ extern "C"
      * \param *result a pointer to the 'packed' results of the feature calculation. This may be passed in as *data to xtract_features_from_subframes() to calculate further features on the subframes, or xtract_difference_vector(), to get the difference between the subframes. A subframe that yields no result has its N / 2 values set to 0 while the other subframe is still computed, and XTRACT_NO_RESULT is returned; any other failure is returned as soon as a subframe reports it
      *
      *
-     * It is important to ensure that any _init_*() functions that are called in preparation for functions that are called on subframes are given the subframe size as 'N', and not the frame size. i.e. if xtract_features_from_subframes() is called with N=64, and feature=XTRACT_SPECTRUM, then xtract_init_fft() should be called with N=32.
+     * It is important to ensure that any _init_*() functions that are called in preparation for functions that are called on subframes are given the subframe size as 'N', which is half the frame size. i.e. if xtract_features_from_subframes() is called with N=64, and feature=XTRACT_SPECTRUM, then xtract_init_fft() should be called with N=32.
      *
      */
     int xtract_features_from_subframes(const double *data, const int N, const int feature, const void *argv, double *result);
