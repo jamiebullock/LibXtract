@@ -52,8 +52,8 @@ reviews:
     - path: 'CHANGELOG.md'
       instructions: |
         The rules are in the Changelog section of CONTRIBUTING.md, and the
-        changelog-check target enforces the format, so do not comment on
-        the format.
+        prose-check target enforces the format, so do not comment on the
+        format.
 
         Check each entry against the code and the pull request it cites.
         When an entry is inaccurate, ask for it to be corrected or narrowed

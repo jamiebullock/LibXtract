@@ -80,7 +80,8 @@ The default preset also has targets that run a tool, each built with `cmake --bu
 | `analyze` | The clang static analyzer over the first-party sources |
 | `cppcheck` | cppcheck over the first-party sources |
 | `format`, `format-check` | Apply or check the clang-format style |
-| `changelog-check` | Check `CHANGELOG.md` against the rules in [CONTRIBUTING.md](CONTRIBUTING.md#changelog) |
+| `prose-check` | Vale over the Markdown files, the changelog, the comments and the licence headers, as described in [CONTRIBUTING.md](CONTRIBUTING.md#prose-checks) (needs Vale) |
+| `version-check` | Check that `VERSION` is the newest release in `CHANGELOG.md` |
 | `bench` | The benchmarks |
 | `doc` | The API reference (needs Doxygen) |
 

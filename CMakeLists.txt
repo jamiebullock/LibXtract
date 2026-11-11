@@ -83,8 +83,13 @@ if(PROJECT_IS_TOP_LEVEL)
         COMMAND ${CMAKE_COMMAND} "-DCLANG_FORMAT=${XTRACT_CLANG_FORMAT}"
             -P ${PROJECT_SOURCE_DIR}/cmake/format.cmake
         VERBATIM)
-    add_custom_target(changelog-check
-        COMMAND ${CMAKE_COMMAND} -P ${PROJECT_SOURCE_DIR}/cmake/changelog.cmake
+    set(XTRACT_VALE vale CACHE STRING "vale command for the prose-check target")
+    add_custom_target(prose-check
+        COMMAND ${CMAKE_COMMAND} "-DVALE=${XTRACT_VALE}"
+            -P ${PROJECT_SOURCE_DIR}/cmake/prose.cmake
+        VERBATIM)
+    add_custom_target(version-check
+        COMMAND ${CMAKE_COMMAND} -P ${PROJECT_SOURCE_DIR}/cmake/version.cmake
         VERBATIM)
 endif()
 
