@@ -133,12 +133,22 @@ UTEST(cross_correlation_lag, sign_follows_which_series_is_delayed)
 
 UTEST(cross_correlation_lag, nearest_zero_wins_a_tie)
 {
-    /* An alternating series correlates perfectly with itself at every even lag */
-    double data[] = {1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0};
+    /* The impulse of the first series meets the two impulses of the second at lags 1 and -5 with equal coefficients */
+    double data[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0};
     double result = -1.0;
 
+    ASSERT_EQ(xtract_cross_correlation_lag(data, 16, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(result, 1.0);
+}
+
+UTEST(cross_correlation_lag, negative_lag_wins_a_tie_at_equal_distance)
+{
+    /* An alternating series and its negation have equal largest coefficients at lags -1 and 1 */
+    double data[] = {1.0, -1.0, 1.0, -1.0, 1.0, -1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0};
+    double result = 0.0;
+
     ASSERT_EQ(xtract_cross_correlation_lag(data, 12, NULL, &result), XTRACT_SUCCESS);
-    ASSERT_EQ(result, 0.0);
+    ASSERT_EQ(result, -1.0);
 }
 
 UTEST(cross_correlation_lag, no_result_for_a_constant_series)
