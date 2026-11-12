@@ -11,6 +11,10 @@
 
 #include <math.h>
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
 static const double EPSILON = 1e-10;
 
 UTEST(cross_correlation, biased_sum_of_products_at_every_lag)
@@ -742,6 +746,43 @@ UTEST(principal_variances, rejects_a_length_that_is_not_a_square_and_leaves_the_
 
 /* ===== Coherence ===== */
 
+/* The coherence at bin k of two series of M elements from its definition:
+ * a direct Fourier sum over every segment of L elements, each with its mean
+ * removed and weighted by the Hann window, the segments overlapping by half */
+static double coherence_from_definition(const double *x, const double *y, int M, int L, int k)
+{
+    double power_x = 0.0, power_y = 0.0, cross_real = 0.0, cross_imaginary = 0.0;
+    int start, n;
+
+    for (start = 0; start + L <= M; start += L / 2)
+    {
+        double mean_x = 0.0, mean_y = 0.0;
+        double real_x = 0.0, imaginary_x = 0.0, real_y = 0.0, imaginary_y = 0.0;
+
+        for (n = 0; n < L; n++)
+        {
+            mean_x += x[start + n] / L;
+            mean_y += y[start + n] / L;
+        }
+        for (n = 0; n < L; n++)
+        {
+            const double weight = 0.5 - 0.5 * cos(2.0 * M_PI * n / L);
+            const double angle = 2.0 * M_PI * k * n / L;
+
+            real_x += (x[start + n] - mean_x) * weight * cos(angle);
+            imaginary_x -= (x[start + n] - mean_x) * weight * sin(angle);
+            real_y += (y[start + n] - mean_y) * weight * cos(angle);
+            imaginary_y -= (y[start + n] - mean_y) * weight * sin(angle);
+        }
+        power_x += real_x * real_x + imaginary_x * imaginary_x;
+        power_y += real_y * real_y + imaginary_y * imaginary_y;
+        cross_real += real_x * real_y + imaginary_x * imaginary_y;
+        cross_imaginary += imaginary_x * real_y - real_x * imaginary_y;
+    }
+
+    return (cross_real * cross_real + cross_imaginary * cross_imaginary) / (power_x * power_y);
+}
+
 UTEST(coherence, four_half_overlapping_segments_of_four_elements)
 {
     /* With the Hann weights {0, 1/2, 1, 1/2} every sum is rational, and the
@@ -761,13 +802,26 @@ UTEST(coherence, four_half_overlapping_segments_of_eight_elements)
     double data[] = {1.0, 3.0, 2.0, 5.0, 4.0, 1.0, 0.0, 2.0, 6.0, 3.0, 7.0, 1.0, 2.0, 8.0, 5.0, 4.0, 3.0, 6.0, 1.0, 2.0,
                      2.0, 1.0, 4.0, 3.0, 6.0, 2.0, 1.0, 0.0, 3.0, 5.0, 1.0, 7.0, 6.0, 2.0, 4.0, 8.0, 0.0, 3.0, 5.0, 1.0};
     double result[4] = {-1.0, -1.0, -1.0, -1.0};
+    int k;
 
     ASSERT_EQ(xtract_init_fft(8, XTRACT_COHERENCE), XTRACT_SUCCESS);
     ASSERT_EQ(xtract_coherence(data, 40, NULL, result), XTRACT_SUCCESS);
-    CHECK_REL(result[0], 0.3983678340038502, EPSILON);
-    CHECK_REL(result[1], 0.19990245752995625, EPSILON);
-    CHECK_REL(result[2], 0.4271637680220535, EPSILON);
-    CHECK_REL(result[3], 0.057033745912391826, EPSILON);
+    for (k = 1; k <= 4; k++)
+        CHECK_REL(result[k - 1], coherence_from_definition(data, data + 20, 20, 8, k), EPSILON);
+    xtract_free_fft();
+}
+
+UTEST(coherence, a_small_coherence_between_series_of_distant_scales_is_not_zero)
+{
+    /* With segments of two elements the only bin is half the difference of
+     * each pair of neighbours, so the powers are (2e300 + 1e20) / 4 and
+     * 1e-100 / 4 and the cross spectrum is 1e-40 / 4 */
+    double data[] = {0.0, 1e150, 1e150, 0.0, 0.0, 1e10, 0.0, 0.0, 0.0, 0.0, 0.0, 1e-50};
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_init_fft(2, XTRACT_COHERENCE), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_coherence(data, 12, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 1e20 / (2e300 + 1e20), EPSILON);
     xtract_free_fft();
 }
 

@@ -516,15 +516,16 @@ int xtract_coherence(const double *data, const int N, const void *argv, double *
 
     for (k = 0; k < bins; k++)
     {
-        double coherence;
+        double norm_x, norm_y, coherence;
 
         if (power_x[k] == 0.0 || power_y[k] == 0.0)
         {
             result[k] = 0.0;
             continue;
         }
-        coherence = (cross_real[k] / power_x[k]) * (cross_real[k] / power_y[k]) +
-                    (cross_imaginary[k] / power_x[k]) * (cross_imaginary[k] / power_y[k]);
+        norm_x = sqrt(power_x[k]);
+        norm_y = sqrt(power_y[k]);
+        coherence = XTRACT_SQ(cross_real[k] / norm_x / norm_y) + XTRACT_SQ(cross_imaginary[k] / norm_x / norm_y);
         result[k] = coherence > 1.0 ? 1.0 : coherence;
         any_power = 1;
     }
