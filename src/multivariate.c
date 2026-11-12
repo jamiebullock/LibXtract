@@ -12,17 +12,19 @@
 
 #include "xtract_macros_private.h"
 
+/* The mean is taken from each element's offset from the first, so that a
+ * constant series has a mean equal to its elements and a spread of exactly
+ * zero whatever its value */
 static void mean_and_spread(const double *series, const int M, double *mean, double *spread)
 {
-    double sum = 0.0, squares = 0.0;
+    double offset = 0.0, squares = 0.0;
     int n;
 
+    for (n = 1; n < M; n++)
+        offset += series[n] - series[0];
+    *mean = series[0] + offset / M;
     for (n = 0; n < M; n++)
-        sum += series[n];
-    sum /= M;
-    for (n = 0; n < M; n++)
-        squares += XTRACT_SQ(series[n] - sum);
-    *mean = sum;
+        squares += XTRACT_SQ(series[n] - *mean);
     *spread = squares;
 }
 

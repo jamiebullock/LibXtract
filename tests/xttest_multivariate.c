@@ -104,6 +104,18 @@ UTEST(cross_correlation, coefficient_of_a_constant_series_has_no_result)
     ASSERT_EQ(xtract_cross_correlation(data, 6, &biased, result), XTRACT_SUCCESS);
 }
 
+UTEST(cross_correlation, coefficient_of_a_constant_series_whose_sum_is_inexact_has_no_result)
+{
+    double data[] = {1.0, 2.0, 3.0, 0.1, 0.1, 0.1};
+    double coefficient = 1.0;
+    double result[5] = {-1.0, -1.0, -1.0, -1.0, -1.0};
+    int k;
+
+    ASSERT_EQ(xtract_cross_correlation(data, 6, &coefficient, result), XTRACT_NO_RESULT);
+    for (k = 0; k < 5; k++)
+        ASSERT_EQ(result[k], 0.0);
+}
+
 UTEST(cross_correlation, rejects_bad_arguments)
 {
     double data[] = {1.0, 2.0, 3.0, 4.0};
@@ -234,8 +246,8 @@ UTEST(pearson_correlation, stays_within_one_when_rounding_carries_the_quotient_p
 {
     /* In double arithmetic the sum of products of these deviations exceeds
      * the product of the two norms */
-    double same[] = {0.1, 0.4, 0.9, 0.2, 0.8, 1.8};
-    double opposite[] = {0.1, 0.4, 0.9, -0.2, -0.8, -1.8};
+    double same[] = {0.1, 0.3, 0.8, 0.2, 0.6, 1.6};
+    double opposite[] = {0.1, 0.3, 0.8, -0.2, -0.6, -1.6};
     double result = 0.0;
 
     ASSERT_EQ(xtract_pearson_correlation(same, 6, NULL, &result), XTRACT_SUCCESS);
@@ -254,6 +266,17 @@ UTEST(pearson_correlation, no_result_when_either_series_is_constant)
     ASSERT_EQ(result, 0.0);
     result = -2.0;
     ASSERT_EQ(xtract_pearson_correlation(second_constant, 6, NULL, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
+}
+
+UTEST(pearson_correlation, no_result_for_a_constant_series_whose_sum_is_inexact)
+{
+    /* Three times 0.1 is not a double, so the sum of either series divided
+     * by its length differs from 0.1 */
+    double data[] = {0.1, 0.1, 0.1, 0.1, 0.1, 0.1};
+    double result = -2.0;
+
+    ASSERT_EQ(xtract_pearson_correlation(data, 6, NULL, &result), XTRACT_NO_RESULT);
     ASSERT_EQ(result, 0.0);
 }
 
