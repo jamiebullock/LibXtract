@@ -16,7 +16,7 @@ The library has more than 100 features:
 - **Spectrum:** magnitude and power spectra, peak and harmonic spectra, and the centroid, spread, flatness, rolloff, slope, contrast and entropy of a spectrum
 - **Periodicity and pitch:** autocorrelation, the average magnitude and squared difference functions, a periodicity measure, and fundamental frequency by the AMDF, wavelet, McLeod and harmonic product spectrum methods
 - **Change:** flux and the Kullback-Leibler and Itakura-Saito divergences between successive frames
-- **Several series:** the covariance and correlation matrices of a set of series and their average correlation, and for two series the Pearson correlation coefficient and the cross-correlation with the lag of its peak
+- **Several series:** the covariance and correlation matrices of a set of series, their average correlation and the variances of their principal components, and for two series the Pearson correlation coefficient and the cross-correlation with the lag of its peak
 - **Envelope:** attack time, decay time, decay rate, temporal centroid
 - **Audio:** loudness, sharpness, Bark bands, MFCCs, gammatone cepstral coefficients, linear prediction coefficients, chroma, the constant-Q transform
 

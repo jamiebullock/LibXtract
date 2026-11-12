@@ -566,3 +566,176 @@ UTEST(average_correlation, rejects_one_series_and_a_length_that_is_not_a_square)
         ASSERT_EQ(result, 0.0);
     }
 }
+
+/* ===== Principal variances ===== */
+
+UTEST(principal_variances, eigenvalues_of_a_two_by_two_matrix)
+{
+    double equal_diagonal[] = {2.0, 1.0, 1.0, 2.0};
+    double negative_off_diagonal[] = {1.0, -0.9, -0.9, 1.0};
+    /* Trace 7 and determinant 6 */
+    double unequal_diagonal[] = {5.0, 2.0, 2.0, 2.0};
+    double result[2] = {0};
+
+    ASSERT_EQ(xtract_principal_variances(equal_diagonal, 4, NULL, result), XTRACT_SUCCESS);
+    CHECK_REL(result[0], 3.0, EPSILON);
+    CHECK_REL(result[1], 1.0, EPSILON);
+    ASSERT_EQ(xtract_principal_variances(negative_off_diagonal, 4, NULL, result), XTRACT_SUCCESS);
+    CHECK_REL(result[0], 1.9, EPSILON);
+    CHECK_REL(result[1], 0.1, EPSILON);
+    ASSERT_EQ(xtract_principal_variances(unequal_diagonal, 4, NULL, result), XTRACT_SUCCESS);
+    CHECK_REL(result[0], 6.0, EPSILON);
+    CHECK_REL(result[1], 1.0, EPSILON);
+}
+
+UTEST(principal_variances, eigenvalues_near_the_largest_double_stay_finite)
+{
+    /* The eigenvalues of {0, 1, 1, 1} are (1 - sqrt(5)) / 2 and (1 + sqrt(5)) / 2 */
+    double matrix[] = {0.0, 1e308, 1e308, 1e308};
+    double result[2] = {0};
+
+    ASSERT_EQ(xtract_principal_variances(matrix, 4, NULL, result), XTRACT_SUCCESS);
+    ASSERT_TRUE(isfinite(result[0]) && isfinite(result[1]));
+    CHECK_REL(result[0] / 1e308, (1.0 + sqrt(5.0)) / 2.0, EPSILON);
+    CHECK_REL(result[1] / 1e308, (1.0 - sqrt(5.0)) / 2.0, EPSILON);
+}
+
+UTEST(principal_variances, a_diagonal_difference_beyond_the_largest_double_stays_finite)
+{
+    /* The eigenvalues of {-1, 1, 1, 1} are sqrt(2) and -sqrt(2) */
+    double matrix[] = {-1e308, 1e308, 1e308, 1e308};
+    double result[2] = {0};
+
+    ASSERT_EQ(xtract_principal_variances(matrix, 4, NULL, result), XTRACT_SUCCESS);
+    ASSERT_TRUE(isfinite(result[0]) && isfinite(result[1]));
+    CHECK_REL(result[0] / 1e308, sqrt(2.0), EPSILON);
+    CHECK_REL(result[1] / 1e308, -sqrt(2.0), EPSILON);
+}
+
+UTEST(principal_variances, a_rank_one_matrix_of_widely_spaced_scales_has_a_zero_eigenvalue)
+{
+    /* The outer products of {2^510, 2^-10} and of {2^511.5, 2^-512.5} with
+     * themselves */
+    double matrix[4];
+    double result[2] = {-1.0, -1.0};
+
+    matrix[0] = ldexp(1.0, 1020);
+    matrix[1] = ldexp(1.0, 500);
+    matrix[2] = ldexp(1.0, 500);
+    matrix[3] = ldexp(1.0, -20);
+    ASSERT_EQ(xtract_principal_variances(matrix, 4, NULL, result), XTRACT_SUCCESS);
+    ASSERT_EQ(result[0], ldexp(1.0, 1020));
+    ASSERT_EQ(result[1], 0.0);
+
+    matrix[0] = ldexp(1.0, 1023);
+    matrix[1] = 0.5;
+    matrix[2] = 0.5;
+    matrix[3] = ldexp(1.0, -1025);
+    result[1] = -1.0;
+    ASSERT_EQ(xtract_principal_variances(matrix, 4, NULL, result), XTRACT_SUCCESS);
+    ASSERT_EQ(result[0], ldexp(1.0, 1023));
+    ASSERT_EQ(result[1], 0.0);
+}
+
+UTEST(principal_variances, eigenvalues_of_a_tridiagonal_matrix)
+{
+    /* The eigenvalues of this matrix are 2 - sqrt(2), 2 and 2 + sqrt(2) */
+    double matrix[] = {2.0, -1.0, 0.0, -1.0, 2.0, -1.0, 0.0, -1.0, 2.0};
+    double result[3] = {0};
+
+    ASSERT_EQ(xtract_principal_variances(matrix, 9, NULL, result), XTRACT_SUCCESS);
+    CHECK_REL(result[0], 2.0 + sqrt(2.0), EPSILON);
+    CHECK_REL(result[1], 2.0, EPSILON);
+    CHECK_REL(result[2], 2.0 - sqrt(2.0), EPSILON);
+}
+
+UTEST(principal_variances, eigenvalues_of_a_dense_matrix_of_four_rows)
+{
+    /* Three times the identity plus a matrix of ones, whose eigenvalues are 4
+     * and three zeros */
+    double matrix[] = {4.0, 1.0, 1.0, 1.0, 1.0, 4.0, 1.0, 1.0, 1.0, 1.0, 4.0, 1.0, 1.0, 1.0, 1.0, 4.0};
+    double result[4] = {0};
+
+    ASSERT_EQ(xtract_principal_variances(matrix, 16, NULL, result), XTRACT_SUCCESS);
+    CHECK_REL(result[0], 7.0, EPSILON);
+    CHECK_REL(result[1], 3.0, EPSILON);
+    CHECK_REL(result[2], 3.0, EPSILON);
+    CHECK_REL(result[3], 3.0, EPSILON);
+}
+
+UTEST(principal_variances, a_diagonal_matrix_gives_its_diagonal_in_descending_order)
+{
+    double matrix[] = {1.0, 0.0, 0.0, 0.0, 3.0, 0.0, 0.0, 0.0, 2.0};
+    double result[3] = {0};
+
+    ASSERT_EQ(xtract_principal_variances(matrix, 9, NULL, result), XTRACT_SUCCESS);
+    ASSERT_EQ(result[0], 3.0);
+    ASSERT_EQ(result[1], 2.0);
+    ASSERT_EQ(result[2], 1.0);
+}
+
+UTEST(principal_variances, reads_the_values_above_the_diagonal)
+{
+    double matrix[] = {2.0, 1.0, 100.0, 2.0};
+    double result[2] = {0};
+
+    ASSERT_EQ(xtract_principal_variances(matrix, 4, NULL, result), XTRACT_SUCCESS);
+    CHECK_REL(result[0], 3.0, EPSILON);
+    CHECK_REL(result[1], 1.0, EPSILON);
+}
+
+UTEST(principal_variances, identical_series_leave_one_component)
+{
+    double matrix[] = {2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0};
+    double result[3] = {-1.0, -1.0, -1.0};
+
+    ASSERT_EQ(xtract_principal_variances(matrix, 9, NULL, result), XTRACT_SUCCESS);
+    CHECK_REL(result[0], 6.0, EPSILON);
+    CHECK_NEAR(result[1], 0.0, EPSILON);
+    CHECK_NEAR(result[2], 0.0, EPSILON);
+}
+
+UTEST(principal_variances, sum_to_the_total_variance_of_the_series)
+{
+    double data[] = {1.0, 5.0, 2.0, 8.0, 3.0, 7.0, 0.5, 0.25, 4.0, 1.0, 2.0, 2.5, 9.0, 1.0, 6.0};
+    int channels = 3;
+    double covariance[9] = {0};
+    double result[3] = {0};
+
+    ASSERT_EQ(xtract_covariance_matrix(data, 15, &channels, covariance), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_principal_variances(covariance, 9, NULL, result), XTRACT_SUCCESS);
+    CHECK_REL(result[0] + result[1] + result[2], covariance[0] + covariance[4] + covariance[8], EPSILON);
+    ASSERT_GE(result[0], result[1]);
+    ASSERT_GE(result[1], result[2]);
+    ASSERT_GE(result[2], -EPSILON);
+}
+
+UTEST(principal_variances, one_series_gives_its_variance)
+{
+    double matrix = 5.0;
+    double result = 0.0;
+
+    ASSERT_EQ(xtract_principal_variances(&matrix, 1, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(result, 5.0);
+}
+
+UTEST(principal_variances, a_matrix_holding_nan_returns)
+{
+    double matrix[] = {1.0, NAN, NAN, 1.0};
+    double result[2] = {0};
+
+    ASSERT_EQ(xtract_principal_variances(matrix, 4, NULL, result), XTRACT_SUCCESS);
+}
+
+UTEST(principal_variances, rejects_a_length_that_is_not_a_square_and_leaves_the_result)
+{
+    static const int bad[] = {-4, 0, 2, 3, 5, 8};
+    double matrix[] = {2.0, 1.0, 1.0, 2.0, 1.0, 1.0, 1.0, 1.0};
+    double result[2] = {-1.0, -1.0};
+    size_t k;
+
+    for (k = 0; k < sizeof(bad) / sizeof(bad[0]); k++)
+        ASSERT_EQ(xtract_principal_variances(matrix, bad[k], NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result[0], -1.0);
+    ASSERT_EQ(result[1], -1.0);
+}
