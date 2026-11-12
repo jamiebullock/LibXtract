@@ -1,5 +1,27 @@
 # Changelog
 
+## [1.4.0] - 2026-11-12
+
+### Changed
+
+- **Breaking:** move `xtract_cross_correlation` and `xtract_cross_correlation_lag` from `xtract_delta.h` to `xtract_multivariate.h` ([#272](https://github.com/jamiebullock/LibXtract/pull/272))
+- **Breaking:** report `is_delta` as false in the descriptors of `XTRACT_CROSS_CORRELATION` and `XTRACT_CROSS_CORRELATION_LAG` ([#272](https://github.com/jamiebullock/LibXtract/pull/272))
+- Return `XTRACT_NO_RESULT` for every constant series from `xtract_cross_correlation_lag` and the coefficient of `xtract_cross_correlation` ([#275](https://github.com/jamiebullock/LibXtract/pull/275))
+
+### Added
+
+- Add `xtract_pearson_correlation` ([#275](https://github.com/jamiebullock/LibXtract/pull/275))
+- Add `xtract_covariance_matrix` ([#276](https://github.com/jamiebullock/LibXtract/pull/276))
+- Add `xtract_correlation_matrix` ([#277](https://github.com/jamiebullock/LibXtract/pull/277))
+- Add `xtract_average_correlation` ([#278](https://github.com/jamiebullock/LibXtract/pull/278))
+- Add `xtract_principal_variances` ([#279](https://github.com/jamiebullock/LibXtract/pull/279))
+- Add `xtract_coherence` ([#281](https://github.com/jamiebullock/LibXtract/pull/281))
+- Add `XTRACT_CHANNELS` and `XTRACT_SQUARE_MATRIX` to `xtract_vector_t` ([#276](https://github.com/jamiebullock/LibXtract/pull/276))
+
+### Fixed
+
+- Fix `xtract_init_fft` returning `XTRACT_SUCCESS` when an allocation fails ([#283](https://github.com/jamiebullock/LibXtract/pull/283))
+
 ## [1.3.0] - 2026-11-10
 
 ### Changed
@@ -112,6 +134,7 @@
 - Fix the weighting of out-of-range bands in `xtract_sharpness` when N exceeds the Bark band count ([#143](https://github.com/jamiebullock/LibXtract/pull/143))
 - Fix `xtract_lowest_value` to give a result of 0 on `XTRACT_NO_RESULT` ([#143](https://github.com/jamiebullock/LibXtract/pull/143))
 
+[1.4.0]: https://github.com/jamiebullock/LibXtract/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/jamiebullock/LibXtract/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/jamiebullock/LibXtract/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/jamiebullock/LibXtract/compare/v1.0.0...v1.1.0
