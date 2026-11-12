@@ -9,6 +9,7 @@ set(XTRACT_SOURCES
     helper.c
     init.c
     libxtract.c
+    multivariate.c
     scalar.c
     stateful.c
     vector.c

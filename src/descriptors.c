@@ -1904,8 +1904,6 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_FLUX:
         case XTRACT_LNORM:
         case XTRACT_DIFFERENCE_VECTOR:
-        case XTRACT_CROSS_CORRELATION:
-        case XTRACT_CROSS_CORRELATION_LAG:
         case XTRACT_KULLBACK_LEIBLER_DIVERGENCE:
         case XTRACT_ITAKURA_SAITO_DIVERGENCE:
         case XTRACT_MODIFIED_KULLBACK_LEIBLER:

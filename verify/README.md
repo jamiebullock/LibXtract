@@ -4,7 +4,7 @@
 
 ## What a proof covers
 
-Each function named `verify_*` in `verify_scalar.c`, `verify_vector.c`, `verify_delta.c` and `verify_stateful.c` is one proof, run as its own CBMC invocation (`make -j` runs them in parallel). A harness calls one feature function with:
+Each function named `verify_*` in `verify_scalar.c`, `verify_vector.c`, `verify_delta.c`, `verify_multivariate.c` and `verify_stateful.c` is one proof, run as its own CBMC invocation (`make -j` runs them in parallel). A harness calls one feature function with:
 
 - an input vector of any length from 0 to the proof's bound, with any values, allocated at exactly that length so a read past it is out of bounds;
 - an argv that is either NULL or a buffer of any values, so both the missing and the supplied cases are covered; where argv selects the result length (`lpcc`'s order) that field is bounded to the input bound, since the harness must allocate the result;
