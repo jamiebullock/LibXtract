@@ -122,13 +122,14 @@ The output is `doc/html/index.html`.
 
 ## Versioning
 
-LibXtract follows [Semantic Versioning](https://semver.org). The public API
-is the set of headers installed under `include/xtract/`. Releases within 1.x
-keep source compatibility: functions and `XTRACT_*` values are added, never
-removed or changed, and breaking changes wait for 2.0. Binary compatibility
-is not guaranteed between minor releases, so recompile and relink dependent
-code when moving to a new one. A correctness fix may change a feature's
-numerical output. The [changelog](CHANGELOG.md) says when.
+Version numbers take the form major.minor.patch. The public API is the set
+of headers installed under `include/xtract/`. While the 1.x API settles, a
+minor release may make a small breaking change, and the
+[changelog](CHANGELOG.md) marks each one **Breaking:**. Patch releases keep
+source compatibility. Binary compatibility is not guaranteed between minor
+releases, so recompile and relink dependent code when moving to a new one. A
+correctness fix may change a feature's numerical output. The changelog says
+when.
 
 ## Contributing
 
