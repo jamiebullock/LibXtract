@@ -46,6 +46,27 @@ void verify_principal_variances(void)
     free(result);
 }
 
+/* Twelve elements hold two segments of four, the shortest input whose
+ * segments have a bin below the highest */
+void verify_coherence(void)
+{
+    const int N = nondet_between(0, 12);
+    double *data = nondet_doubles(N);
+    double *result;
+    int L = 0;
+
+    if (nondet_bool())
+    {
+        L = nondet_bool() ? 4 : 2;
+        xtract_init_fft(L, XTRACT_COHERENCE);
+    }
+    result = nondet_doubles(L / 2);
+    (void)xtract_coherence(data, N, NULL, result);
+    xtract_free_fft();
+    free(data);
+    free(result);
+}
+
 void verify_covariance_matrix(void)
 {
     const int N = nondet_small_length();

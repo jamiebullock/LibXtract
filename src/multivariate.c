@@ -8,8 +8,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "fft.h"
+
 #include "xtract/libxtract.h"
 
+#include "xtract_globals_private.h"
 #include "xtract_macros_private.h"
 
 /* The largest eigenvalues settle to rounding error within about ten cyclic
@@ -410,4 +413,122 @@ int xtract_principal_variances(const double *data, const int N, const void *argv
     qsort(result, rows, sizeof(double), compare_descending);
 
     return XTRACT_SUCCESS;
+}
+
+/* Bins 1 to L / 2 of the transform of one segment of L elements, which is
+ * overwritten. The scale of the two transform libraries differs and cancels
+ * in the coherence */
+static void segment_bins(double *segment, const int L, double *real, double *imaginary)
+{
+    const int bins = L >> 1;
+    int k;
+#ifdef USE_OOURA
+    rdft(L, 1, segment, ooura_data_coherence.ooura_ip, ooura_data_coherence.ooura_w);
+    for (k = 1; k < bins; k++)
+    {
+        real[k - 1] = segment[2 * k];
+        imaginary[k - 1] = segment[2 * k + 1];
+    }
+    real[bins - 1] = segment[1];
+#else
+    DSPDoubleSplitComplex *fft = &vdsp_data_coherence.fft;
+
+    vDSP_ctozD((DSPDoubleComplex *)segment, 2, fft, 1, bins);
+    vDSP_fft_zripD(vdsp_data_coherence.setup, fft, 1, vdsp_data_coherence.log2N, FFT_FORWARD);
+    for (k = 1; k < bins; k++)
+    {
+        real[k - 1] = fft->realp[k];
+        imaginary[k - 1] = fft->imagp[k];
+    }
+    real[bins - 1] = fft->imagp[0];
+#endif
+    imaginary[bins - 1] = 0.0;
+}
+
+static void windowed_segment(const double *series, const double *window, const int L, double *segment)
+{
+    const double mean = series_mean(series, L);
+    int n;
+
+    for (n = 0; n < L; n++)
+        segment[n] = (series[n] - mean) * window[n];
+}
+
+int xtract_coherence(const double *data, const int N, const void *argv, double *result)
+{
+    const int M = N >> 1;
+    double *work, *window, *segment, *real_x, *imaginary_x, *real_y, *imaginary_y;
+    double *power_x, *power_y, *cross_real, *cross_imaginary;
+    int L, bins, hop, start, n, k;
+    int any_power = 0;
+
+    if (N < 2 || (N & 1))
+        return XTRACT_ARGUMENT_ERROR;
+
+#ifdef USE_OOURA
+    if (!ooura_data_coherence.initialised)
+        return XTRACT_BAD_STATE;
+    L = ooura_data_coherence.N;
+#else
+    if (!vdsp_data_coherence.initialised)
+        return XTRACT_BAD_STATE;
+    L = vdsp_data_coherence.N;
+#endif
+
+    if (N / 3 < L)
+        return XTRACT_ARGUMENT_ERROR;
+
+    bins = L >> 1;
+    hop = bins;
+
+    work = (double *)calloc(6 * (size_t)L, sizeof(double));
+    if (work == NULL)
+        return XTRACT_MALLOC_FAILED;
+    window = work;
+    segment = window + L;
+    real_x = segment + L;
+    imaginary_x = real_x + bins;
+    real_y = imaginary_x + bins;
+    imaginary_y = real_y + bins;
+    power_x = imaginary_y + bins;
+    power_y = power_x + bins;
+    cross_real = power_y + bins;
+    cross_imaginary = cross_real + bins;
+
+    for (n = 0; n < L; n++)
+        window[n] = 0.5 - 0.5 * cos(2.0 * M_PI * n / L);
+
+    for (start = 0; start + L <= M; start += hop)
+    {
+        windowed_segment(data + start, window, L, segment);
+        segment_bins(segment, L, real_x, imaginary_x);
+        windowed_segment(data + M + start, window, L, segment);
+        segment_bins(segment, L, real_y, imaginary_y);
+
+        for (k = 0; k < bins; k++)
+        {
+            power_x[k] += XTRACT_SQ(real_x[k]) + XTRACT_SQ(imaginary_x[k]);
+            power_y[k] += XTRACT_SQ(real_y[k]) + XTRACT_SQ(imaginary_y[k]);
+            cross_real[k] += real_x[k] * real_y[k] + imaginary_x[k] * imaginary_y[k];
+            cross_imaginary[k] += imaginary_x[k] * real_y[k] - real_x[k] * imaginary_y[k];
+        }
+    }
+
+    for (k = 0; k < bins; k++)
+    {
+        double coherence;
+
+        if (power_x[k] == 0.0 || power_y[k] == 0.0)
+        {
+            result[k] = 0.0;
+            continue;
+        }
+        coherence = (cross_real[k] / power_x[k]) * (cross_real[k] / power_y[k]) +
+                    (cross_imaginary[k] / power_x[k]) * (cross_imaginary[k] / power_y[k]);
+        result[k] = coherence > 1.0 ? 1.0 : coherence;
+        any_power = 1;
+    }
+    free(work);
+
+    return any_power ? XTRACT_SUCCESS : XTRACT_NO_RESULT;
 }

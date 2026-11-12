@@ -646,6 +646,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_CROSS_CORRELATION:
         case XTRACT_CROSS_CORRELATION_LAG:
         case XTRACT_PEARSON_CORRELATION:
+        case XTRACT_COHERENCE:
         case XTRACT_KULLBACK_LEIBLER_DIVERGENCE:
         case XTRACT_ITAKURA_SAITO_DIVERGENCE:
         case XTRACT_MODIFIED_KULLBACK_LEIBLER:
@@ -717,6 +718,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_CORRELATION_MATRIX:
         case XTRACT_AVERAGE_CORRELATION:
         case XTRACT_PRINCIPAL_VARIANCES:
+        case XTRACT_COHERENCE:
         case XTRACT_KULLBACK_LEIBLER_DIVERGENCE:
         case XTRACT_ITAKURA_SAITO_DIVERGENCE:
         case XTRACT_MODIFIED_KULLBACK_LEIBLER:
@@ -1562,6 +1564,13 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             copy_desc(p_desc, "Extract how much of the variance of a set of series each principal component explains");
             copy_author(author, "");
             break;
+        case XTRACT_COHERENCE:
+            copy_name(name, "coherence");
+            copy_name(p_name, "Coherence");
+            copy_desc(desc, "Extract the magnitude-squared coherence of two series");
+            copy_desc(p_desc, "Extract how closely two series are related at each frequency");
+            copy_author(author, "");
+            break;
         case XTRACT_KULLBACK_LEIBLER_DIVERGENCE:
             copy_name(name, "kullback_leibler_divergence");
             copy_name(p_name, "Kullback-Leibler Divergence");
@@ -1949,6 +1958,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_COVARIANCE_MATRIX:
         case XTRACT_CORRELATION_MATRIX:
         case XTRACT_PRINCIPAL_VARIANCES:
+        case XTRACT_COHERENCE:
             *is_scalar = XTRACT_FALSE;
             break;
         default:
@@ -2286,6 +2296,10 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             case XTRACT_PRINCIPAL_VARIANCES:
                 *result_format = XTRACT_ARBITRARY_SERIES;
                 *result_unit = XTRACT_UNIT_ANY;
+                break;
+            case XTRACT_COHERENCE:
+                *result_format = XTRACT_ARBITRARY_SERIES;
+                *result_unit = XTRACT_UNIT_NONE;
                 break;
             case XTRACT_CHROMA:
                 *result_format = XTRACT_CHROMA_COEFFS;

@@ -739,3 +739,110 @@ UTEST(principal_variances, rejects_a_length_that_is_not_a_square_and_leaves_the_
     ASSERT_EQ(result[0], -1.0);
     ASSERT_EQ(result[1], -1.0);
 }
+
+/* ===== Coherence ===== */
+
+UTEST(coherence, four_half_overlapping_segments_of_four_elements)
+{
+    /* With the Hann weights {0, 1/2, 1, 1/2} every sum is rational, and the
+     * two values worked in exact arithmetic are 54596/94997 and 25/5148 */
+    double data[] = {1.0, 3.0, 2.0, 5.0, 4.0, 1.0, 0.0, 2.0, 6.0, 3.0, 2.0, 1.0, 4.0, 3.0, 6.0, 2.0, 1.0, 0.0, 3.0, 5.0};
+    double result[2] = {-1.0, -1.0};
+
+    ASSERT_EQ(xtract_init_fft(4, XTRACT_COHERENCE), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_coherence(data, 20, NULL, result), XTRACT_SUCCESS);
+    CHECK_REL(result[0], 54596.0 / 94997.0, EPSILON);
+    CHECK_REL(result[1], 25.0 / 5148.0, EPSILON);
+    xtract_free_fft();
+}
+
+UTEST(coherence, four_half_overlapping_segments_of_eight_elements)
+{
+    double data[] = {1.0, 3.0, 2.0, 5.0, 4.0, 1.0, 0.0, 2.0, 6.0, 3.0, 7.0, 1.0, 2.0, 8.0, 5.0, 4.0, 3.0, 6.0, 1.0, 2.0,
+                     2.0, 1.0, 4.0, 3.0, 6.0, 2.0, 1.0, 0.0, 3.0, 5.0, 1.0, 7.0, 6.0, 2.0, 4.0, 8.0, 0.0, 3.0, 5.0, 1.0};
+    double result[4] = {-1.0, -1.0, -1.0, -1.0};
+
+    ASSERT_EQ(xtract_init_fft(8, XTRACT_COHERENCE), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_coherence(data, 40, NULL, result), XTRACT_SUCCESS);
+    CHECK_REL(result[0], 0.3983678340038502, EPSILON);
+    CHECK_REL(result[1], 0.19990245752995625, EPSILON);
+    CHECK_REL(result[2], 0.4271637680220535, EPSILON);
+    CHECK_REL(result[3], 0.057033745912391826, EPSILON);
+    xtract_free_fft();
+}
+
+UTEST(coherence, one_at_every_frequency_for_a_scaled_and_offset_copy)
+{
+    double data[] = {1.0, 3.0, 2.0, 5.0, 4.0, 1.0, 0.0, 2.0, 6.0, 3.0, 8.0, 14.0, 11.0, 20.0, 17.0, 8.0, 5.0, 11.0, 23.0, 14.0};
+    double result[2] = {0};
+
+    ASSERT_EQ(xtract_init_fft(4, XTRACT_COHERENCE), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_coherence(data, 20, NULL, result), XTRACT_SUCCESS);
+    CHECK_REL(result[0], 1.0, EPSILON);
+    CHECK_REL(result[1], 1.0, EPSILON);
+    ASSERT_LE(result[0], 1.0);
+    ASSERT_LE(result[1], 1.0);
+    xtract_free_fft();
+}
+
+UTEST(coherence, elements_after_the_last_whole_segment_are_not_used)
+{
+    double whole[] = {1.0, 3.0, 2.0, 5.0, 4.0, 1.0, 2.0, 1.0, 4.0, 3.0, 6.0, 2.0};
+    double longer[] = {1.0, 3.0, 2.0, 5.0, 4.0, 1.0, 99.0, 2.0, 1.0, 4.0, 3.0, 6.0, 2.0, -99.0};
+    double expected[2] = {0};
+    double result[2] = {0};
+
+    ASSERT_EQ(xtract_init_fft(4, XTRACT_COHERENCE), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_coherence(whole, 12, NULL, expected), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_coherence(longer, 14, NULL, result), XTRACT_SUCCESS);
+    ASSERT_EQ(result[0], expected[0]);
+    ASSERT_EQ(result[1], expected[1]);
+    xtract_free_fft();
+}
+
+UTEST(coherence, segment_length_follows_the_initialised_size)
+{
+    double data[] = {1.0, 3.0, 2.0, 5.0, 4.0, 1.0, 2.0, 1.0, 4.0, 3.0, 6.0, 2.0};
+    double result[2] = {-1.0, -1.0};
+
+    ASSERT_EQ(xtract_init_fft(2, XTRACT_COHERENCE), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_coherence(data, 12, NULL, result), XTRACT_SUCCESS);
+    ASSERT_GE(result[0], 0.0);
+    ASSERT_LE(result[0], 1.0);
+    ASSERT_EQ(result[1], -1.0);
+    ASSERT_EQ(xtract_init_fft(4, XTRACT_COHERENCE), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_coherence(data, 12, NULL, result), XTRACT_SUCCESS);
+    ASSERT_NE(result[1], -1.0);
+    xtract_free_fft();
+}
+
+UTEST(coherence, no_result_for_a_constant_series)
+{
+    double data[] = {1.0, 3.0, 2.0, 5.0, 4.0, 1.0, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1};
+    double result[2] = {-1.0, -1.0};
+
+    ASSERT_EQ(xtract_init_fft(4, XTRACT_COHERENCE), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_coherence(data, 12, NULL, result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result[0], 0.0);
+    ASSERT_EQ(result[1], 0.0);
+    xtract_free_fft();
+}
+
+UTEST(coherence, needs_an_initialised_transform_and_two_segments)
+{
+    double data[] = {1.0, 3.0, 2.0, 5.0, 4.0, 1.0, 2.0, 1.0, 4.0, 3.0, 6.0, 2.0};
+    double result[2] = {-1.0, -1.0};
+
+    xtract_free_fft();
+    ASSERT_EQ(xtract_coherence(data, 12, NULL, result), XTRACT_BAD_STATE);
+    ASSERT_EQ(xtract_coherence(data, 11, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_coherence(data, 0, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_init_fft(4, XTRACT_COHERENCE), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_coherence(data, 10, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_coherence(data, 11, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result[0], -1.0);
+    ASSERT_EQ(result[1], -1.0);
+    ASSERT_EQ(xtract_coherence(data, 12, NULL, result), XTRACT_SUCCESS);
+    xtract_free_fft();
+    ASSERT_EQ(xtract_coherence(data, 12, NULL, result), XTRACT_BAD_STATE);
+}

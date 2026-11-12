@@ -24,11 +24,13 @@ thread_local struct xtract_ooura_data_ ooura_data_dct;
 thread_local struct xtract_ooura_data_ ooura_data_mfcc;
 thread_local struct xtract_ooura_data_ ooura_data_spectrum;
 thread_local struct xtract_ooura_data_ ooura_data_autocorrelation_fft;
+thread_local struct xtract_ooura_data_ ooura_data_coherence;
 #else
 thread_local xtract_vdsp_data vdsp_data_dct;
 thread_local xtract_vdsp_data vdsp_data_mfcc;
 thread_local xtract_vdsp_data vdsp_data_spectrum;
 thread_local xtract_vdsp_data vdsp_data_autocorrelation_fft;
+thread_local xtract_vdsp_data vdsp_data_coherence;
 #endif
 
 thread_local dywapitchtracker wavelet_f0_state;
@@ -69,6 +71,8 @@ static xtract_ooura_data *ooura_data_for(const int feature_name)
         return &ooura_data_dct;
     case XTRACT_MFCC:
         return &ooura_data_mfcc;
+    case XTRACT_COHERENCE:
+        return &ooura_data_coherence;
     default:
         return NULL;
     }
@@ -110,6 +114,10 @@ void xtract_free_ooura_(void)
     if (ooura_data_mfcc.initialised)
     {
         xtract_free_ooura_data(&ooura_data_mfcc);
+    }
+    if (ooura_data_coherence.initialised)
+    {
+        xtract_free_ooura_data(&ooura_data_coherence);
     }
 }
 
@@ -153,6 +161,8 @@ static xtract_vdsp_data *vdsp_data_for(const int feature_name)
         return &vdsp_data_dct;
     case XTRACT_MFCC:
         return &vdsp_data_mfcc;
+    case XTRACT_COHERENCE:
+        return &vdsp_data_coherence;
     default:
         return NULL;
     }
@@ -194,6 +204,10 @@ void xtract_free_vdsp_(void)
     if (vdsp_data_mfcc.initialised)
     {
         xtract_free_vdsp_data(&vdsp_data_mfcc);
+    }
+    if (vdsp_data_coherence.initialised)
+    {
+        xtract_free_vdsp_data(&vdsp_data_coherence);
     }
 }
 

@@ -124,4 +124,5 @@ int (*xtract[])(const double *, const int, const void *, double *) =
         xtract_covariance_matrix,
         xtract_correlation_matrix,
         xtract_average_correlation,
-        xtract_principal_variances};
+        xtract_principal_variances,
+        xtract_coherence};

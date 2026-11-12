@@ -31,11 +31,13 @@ GLOBAL thread_local struct xtract_ooura_data_ ooura_data_dct;
 GLOBAL thread_local struct xtract_ooura_data_ ooura_data_mfcc;
 GLOBAL thread_local struct xtract_ooura_data_ ooura_data_spectrum;
 GLOBAL thread_local struct xtract_ooura_data_ ooura_data_autocorrelation_fft;
+GLOBAL thread_local struct xtract_ooura_data_ ooura_data_coherence;
 #else
 GLOBAL thread_local xtract_vdsp_data vdsp_data_dct;
 GLOBAL thread_local xtract_vdsp_data vdsp_data_mfcc;
 GLOBAL thread_local xtract_vdsp_data vdsp_data_spectrum;
 GLOBAL thread_local xtract_vdsp_data vdsp_data_autocorrelation_fft;
+GLOBAL thread_local xtract_vdsp_data vdsp_data_coherence;
 #endif
 
 GLOBAL thread_local dywapitchtracker wavelet_f0_state;
