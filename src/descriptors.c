@@ -656,6 +656,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             break;
         case XTRACT_CORRELATION_MATRIX:
         case XTRACT_AVERAGE_CORRELATION:
+        case XTRACT_PRINCIPAL_VARIANCES:
             *data_format = XTRACT_SQUARE_MATRIX;
             break;
         case XTRACT_MIDICENT:
@@ -715,6 +716,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_COVARIANCE_MATRIX:
         case XTRACT_CORRELATION_MATRIX:
         case XTRACT_AVERAGE_CORRELATION:
+        case XTRACT_PRINCIPAL_VARIANCES:
         case XTRACT_KULLBACK_LEIBLER_DIVERGENCE:
         case XTRACT_ITAKURA_SAITO_DIVERGENCE:
         case XTRACT_MODIFIED_KULLBACK_LEIBLER:
@@ -1553,6 +1555,13 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             copy_desc(p_desc, "Extract the mean correlation coefficient of every pair of series in a set");
             copy_author(author, "");
             break;
+        case XTRACT_PRINCIPAL_VARIANCES:
+            copy_name(name, "principal_variances");
+            copy_name(p_name, "Principal Variances");
+            copy_desc(desc, "Extract the variances of the principal components of a set of series from their covariance matrix");
+            copy_desc(p_desc, "Extract how much of the variance of a set of series each principal component explains");
+            copy_author(author, "");
+            break;
         case XTRACT_KULLBACK_LEIBLER_DIVERGENCE:
             copy_name(name, "kullback_leibler_divergence");
             copy_name(p_name, "Kullback-Leibler Divergence");
@@ -1939,6 +1948,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_CQT:
         case XTRACT_COVARIANCE_MATRIX:
         case XTRACT_CORRELATION_MATRIX:
+        case XTRACT_PRINCIPAL_VARIANCES:
             *is_scalar = XTRACT_FALSE;
             break;
         default:
@@ -2272,6 +2282,10 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             case XTRACT_CORRELATION_MATRIX:
                 *result_format = XTRACT_SQUARE_MATRIX;
                 *result_unit = XTRACT_UNIT_NONE;
+                break;
+            case XTRACT_PRINCIPAL_VARIANCES:
+                *result_format = XTRACT_ARBITRARY_SERIES;
+                *result_unit = XTRACT_UNIT_ANY;
                 break;
             case XTRACT_CHROMA:
                 *result_format = XTRACT_CHROMA_COEFFS;

@@ -444,6 +444,15 @@ UTEST(descriptors, appended_features_are_fully_described)
     ASSERT_EQ(fd[XTRACT_AVERAGE_CORRELATION].result.scalar.unit, XTRACT_UNIT_NONE);
     CHECK_REL(fd[XTRACT_AVERAGE_CORRELATION].result.scalar.min, -1.0, EPSILON);
     CHECK_REL(fd[XTRACT_AVERAGE_CORRELATION].result.scalar.max, 1.0, EPSILON);
+
+    ASSERT_STREQ(fd[XTRACT_PRINCIPAL_VARIANCES].algo.name, "principal_variances");
+    ASSERT_EQ(fd[XTRACT_PRINCIPAL_VARIANCES].argc, 0);
+    ASSERT_EQ(fd[XTRACT_PRINCIPAL_VARIANCES].data.format, XTRACT_SQUARE_MATRIX);
+    ASSERT_EQ(fd[XTRACT_PRINCIPAL_VARIANCES].data.unit, XTRACT_UNIT_ANY);
+    ASSERT_EQ(fd[XTRACT_PRINCIPAL_VARIANCES].is_scalar, XTRACT_FALSE);
+    ASSERT_EQ(fd[XTRACT_PRINCIPAL_VARIANCES].is_delta, XTRACT_FALSE);
+    ASSERT_EQ(fd[XTRACT_PRINCIPAL_VARIANCES].result.vector.format, XTRACT_ARBITRARY_SERIES);
+    ASSERT_EQ(fd[XTRACT_PRINCIPAL_VARIANCES].result.vector.unit, XTRACT_UNIT_ANY);
     for (f = XTRACT_KULLBACK_LEIBLER_DIVERGENCE; f <= XTRACT_MODIFIED_KULLBACK_LEIBLER; f++)
         ASSERT_EQ_MSG(fd[f].is_delta, XTRACT_TRUE, fd[f].algo.name);
 
@@ -580,6 +589,7 @@ UTEST(dispatch, slots_map_to_the_expected_function)
     ASSERT_TRUE(xtract[XTRACT_COVARIANCE_MATRIX] == xtract_covariance_matrix);
     ASSERT_TRUE(xtract[XTRACT_CORRELATION_MATRIX] == xtract_correlation_matrix);
     ASSERT_TRUE(xtract[XTRACT_AVERAGE_CORRELATION] == xtract_average_correlation);
+    ASSERT_TRUE(xtract[XTRACT_PRINCIPAL_VARIANCES] == xtract_principal_variances);
 }
 
 /* ===== Descriptor conformance ===== */

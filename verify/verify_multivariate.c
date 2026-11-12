@@ -31,6 +31,19 @@ MULTIVARIATE_HARNESS(pearson_correlation, 1)
 MULTIVARIATE_HARNESS(correlation_matrix, N)
 MULTIVARIATE_HARNESS(average_correlation, 1)
 
+/* Three rows make the smallest matrix in which a rotation changes values
+ * outside the two rows and columns it rotates */
+void verify_principal_variances(void)
+{
+    const int N = nondet_between(0, 9);
+    double *data = nondet_doubles(N);
+    double *result = nondet_doubles(N);
+
+    (void)xtract_principal_variances(data, N, NULL, result);
+    free(data);
+    free(result);
+}
+
 void verify_covariance_matrix(void)
 {
     const int N = nondet_small_length();

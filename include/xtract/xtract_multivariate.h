@@ -76,6 +76,15 @@ extern "C"
      */
     int xtract_average_correlation(const double *data, const int N, const void *argv, double *result);
 
+    /** \brief Extract the variances of the principal components of a set of series: the eigenvalues of their covariance matrix, largest first
+     *
+     * \param *data: a pointer to the first element in an array of doubles comprising the C * C values of a symmetric matrix: a covariance matrix as xtract_covariance_matrix() gives it, or a correlation matrix as xtract_correlation_matrix() gives it for the principal components of the standardised series. The diagonal and the values above it, at index i * C + j with j greater than i, are read
+     * \param N: the number of elements in the array pointed to by *data, a perfect square of at least 1
+     * \param *argv: not used
+     * \param *result: a pointer to an array of C doubles: the eigenvalues of the matrix in descending order. Their sum is the sum of the diagonal of the matrix, so the first divided by xtract_sum() of the array is the share of the total variance that the first principal component explains
+     */
+    int xtract_principal_variances(const double *data, const int N, const void *argv, double *result);
+
     /** @} */
 
 #ifdef __cplusplus

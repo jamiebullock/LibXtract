@@ -12,6 +12,16 @@
 
 #include "xtract_macros_private.h"
 
+/* The largest eigenvalues settle to rounding error within about ten cyclic
+ * Jacobi sweeps. Later sweeps refine the smallest when the rows of the matrix
+ * differ in scale by many orders of magnitude. The limit is the only exit for
+ * a matrix holding NaN, whose off-diagonal values never reach zero. The
+ * proof build in verify/ sets a lower limit, because the model checker's
+ * formula grows with every sweep */
+#ifndef XTRACT_JACOBI_MAX_SWEEPS
+#define XTRACT_JACOBI_MAX_SWEEPS 30
+#endif
+
 /* The mean is taken from each element's offset from the first, so that a
  * constant series has a mean equal to its elements and deviations of exactly
  * zero whatever its value */
@@ -287,6 +297,105 @@ int xtract_average_correlation(const double *data, const int N, const void *argv
         }
     }
     *result = sum / (double)(rows * (rows - 1));
+
+    return XTRACT_SUCCESS;
+}
+
+static int compare_descending(const void *a, const void *b)
+{
+    return xtract_compare_doubles(b, a);
+}
+
+/* Only the diagonal and the values above it are kept up to date, so every
+ * access to the element in row i and column j goes to whichever of the two
+ * positions lies above the diagonal */
+static double *upper_element(double *matrix, const size_t rows, const size_t i, const size_t j)
+{
+    return i < j ? &matrix[i * rows + j] : &matrix[j * rows + i];
+}
+
+static double upper_magnitude(const double *matrix, const size_t rows)
+{
+    double sum = 0.0;
+    size_t i, j;
+
+    for (i = 0; i < rows; i++)
+    {
+        for (j = i + 1; j < rows; j++)
+            sum += fabs(matrix[i * rows + j]);
+    }
+
+    return sum;
+}
+
+/* The Jacobi rotation of rows and columns p and q that makes the element in
+ * row p and column q zero and leaves the eigenvalues as they were */
+static void jacobi_rotate(double *matrix, const size_t rows, const size_t p, const size_t q)
+{
+    const double pivot = matrix[p * rows + q];
+    double theta, tangent, cosine, sine, tau;
+    size_t k;
+
+    if (pivot == 0.0)
+        return;
+
+    theta = (matrix[q * rows + q] - matrix[p * rows + p]) / (2.0 * pivot);
+    tangent = 1.0 / (fabs(theta) + sqrt(theta * theta + 1.0));
+    if (theta < 0.0)
+        tangent = -tangent;
+    cosine = 1.0 / sqrt(tangent * tangent + 1.0);
+    sine = tangent * cosine;
+    tau = sine / (1.0 + cosine);
+
+    matrix[p * rows + p] -= tangent * pivot;
+    matrix[q * rows + q] += tangent * pivot;
+    matrix[p * rows + q] = 0.0;
+
+    for (k = 0; k < rows; k++)
+    {
+        double *in_p, *in_q;
+        double g, h;
+
+        if (k == p || k == q)
+            continue;
+        in_p = upper_element(matrix, rows, k, p);
+        in_q = upper_element(matrix, rows, k, q);
+        g = *in_p;
+        h = *in_q;
+        *in_p = g - sine * (h + g * tau);
+        *in_q = h + sine * (g - h * tau);
+    }
+}
+
+int xtract_principal_variances(const double *data, const int N, const void *argv, double *result)
+{
+    const int C = matrix_rows(N);
+    const size_t rows = (size_t)C;
+    double *matrix;
+    size_t p, q;
+    int sweep;
+
+    if (C == 0)
+        return XTRACT_ARGUMENT_ERROR;
+
+    matrix = (double *)malloc((size_t)N * sizeof(double));
+    if (matrix == NULL)
+        return XTRACT_MALLOC_FAILED;
+    memcpy(matrix, data, (size_t)N * sizeof(double));
+
+    for (sweep = 0; sweep < XTRACT_JACOBI_MAX_SWEEPS && upper_magnitude(matrix, rows) != 0.0; sweep++)
+    {
+        for (p = 0; p < rows; p++)
+        {
+            for (q = p + 1; q < rows; q++)
+                jacobi_rotate(matrix, rows, p, q);
+        }
+    }
+
+    for (p = 0; p < rows; p++)
+        result[p] = matrix[p * rows + p];
+    free(matrix);
+    qsort(result, rows, sizeof(double), compare_descending);
 
     return XTRACT_SUCCESS;
 }

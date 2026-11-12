@@ -50,6 +50,10 @@ SMALL_PROOFS = verify_hps verify_mcleod_f0 verify_sharpness \
 # The filterbank proofs take a filterbank of up to this many filters; the
 # count multiplies the formula, and N is the bound the proofs are about.
 VERIFY_MAX_FILTERS ?= 2
+# principal_variances is built with this sweep limit in place of its own.
+# Every sweep makes the same accesses to a matrix of arbitrary values, so the
+# count multiplies the formula without bearing on what the proof checks.
+VERIFY_MAX_SWEEPS ?= 2
 
 GOTO_BINARY = xtract.gb
 PROOF_DIR = .proofs
@@ -61,7 +65,8 @@ HEADERS := verify.h $(wildcard ../include/xtract/*.h ../src/*.h ../src/ooura/*.h
 	../src/c-ringbuf/*.h ../src/dywapitchtrack/*.h)
 
 CFLAGS = -U__APPLE__ -DUSE_OOURA -DVERIFY_MAX_N=$(VERIFY_MAX_N) -DVERIFY_SMALL_N=$(VERIFY_SMALL_N) \
-	-DVERIFY_MAX_FILTERS=$(VERIFY_MAX_FILTERS) -std=c99 -I../include -I../src
+	-DVERIFY_MAX_FILTERS=$(VERIFY_MAX_FILTERS) -DXTRACT_JACOBI_MAX_SWEEPS=$(VERIFY_MAX_SWEEPS) \
+	-std=c99 -I../include -I../src
 
 # Every loop may run once per input element, and the bark band loop runs
 # XTRACT_BARK_BANDS times whatever N is, so the bound is the larger of the two
@@ -77,6 +82,9 @@ SMALL_UNWIND := $(shell expr $(VERIFY_SMALL_N) + 1)
 $(addprefix $(PROOF_DIR)/, $(addsuffix .proved, $(SMALL_PROOFS))): UNWIND = $(SMALL_UNWIND)
 # chroma's loops over the result run XTRACT_PITCH_CLASSES times whatever N is.
 $(PROOF_DIR)/verify_chroma.proved: UNWIND = $(shell expr $(VERIFY_SMALL_N) + 1 + 12)
+# principal_variances takes a matrix of up to three rows, and its sweep loop
+# runs VERIFY_MAX_SWEEPS times.
+$(PROOF_DIR)/verify_principal_variances.proved: UNWIND = $(shell expr $(VERIFY_MAX_SWEEPS) + 2)
 
 # The feature functions are floating-point loops, and the solver cost is in
 # the doubles. Formula slicing drops the arithmetic that no property depends
