@@ -85,6 +85,19 @@ extern "C"
      */
     int xtract_principal_variances(const double *data, const int N, const void *argv, double *result);
 
+    /** \brief Extract the magnitude-squared coherence of two series: how far each frequency of one is a linear function of the same frequency of the other, from 0 to 1
+     *
+     * The estimate averages over segments of L elements that overlap by half, L being the size given to xtract_init_fft(). Each segment has its mean removed and is weighted by a Hann window. Elements after the last whole segment are not used
+     *
+     * \param *data: a pointer to the first element in an array of doubles comprising two series of equal length: the first series in the first N/2 elements, the second in the second N/2 elements
+     * \param N: the total number of elements in the array pointed to by *data (twice the series length), even and at least 3 * L, so that each series holds two segments
+     * \param *argv: not used
+     * \param *result: a pointer to an array of L/2 doubles: the coherence at the frequencies k * samplerate / L for k from 1 to L/2, the order of the amplitudes xtract_spectrum() gives without the DC component. A frequency at which either series has no power is 0, and when that is so at every frequency there is no result
+     *
+     * \note Before calling xtract_coherence(), the FFT must be initialised by calling xtract_init_fft(L, XTRACT_COHERENCE)
+     */
+    int xtract_coherence(const double *data, const int N, const void *argv, double *result);
+
     /** @} */
 
 #ifdef __cplusplus

@@ -8,13 +8,15 @@
  * libFuzzer harness for the multivariate feature functions
  * (xtract_multivariate.h): cross_correlation, cross_correlation_lag,
  * pearson_correlation, covariance_matrix, correlation_matrix,
- * average_correlation, principal_variances.
+ * average_correlation, principal_variances, coherence.
  *
  * All share the uniform signature and take a plain double, an int or a NULL
- * argv with no setup, so one harness drives them via the xtract[] dispatch
- * table. The fuzzer's bytes become a feature selector, a flag that passes a
- * NULL argv, a small series count that replaces the start of argv for
- * covariance_matrix when it is not zero, an argv buffer, and the input vector. Run under AddressSanitizer + UBSan.
+ * argv, so one harness drives them via the xtract[] dispatch table. The only
+ * setup is the transform coherence needs, initialised once for segments of
+ * COHERENCE_SEGMENT elements. The fuzzer's bytes become a feature selector,
+ * a flag that passes a NULL argv, a small series count that replaces the
+ * start of argv for covariance_matrix when it is not zero, an argv buffer,
+ * and the input vector. Run under AddressSanitizer + UBSan.
  *
  * Build/run: the fuzz preset (see fuzz/CMakeLists.txt)
  */
@@ -29,20 +31,23 @@
 static const int eligible[] = {
     XTRACT_CROSS_CORRELATION, XTRACT_CROSS_CORRELATION_LAG, XTRACT_PEARSON_CORRELATION,
     XTRACT_COVARIANCE_MATRIX, XTRACT_CORRELATION_MATRIX,
-    XTRACT_AVERAGE_CORRELATION, XTRACT_PRINCIPAL_VARIANCES};
+    XTRACT_AVERAGE_CORRELATION, XTRACT_PRINCIPAL_VARIANCES, XTRACT_COHERENCE};
 
 #define N_ELIGIBLE ((int)(sizeof(eligible) / sizeof(eligible[0])))
 #define MAX_N 4096
+#define COHERENCE_SEGMENT 16
 
 /* covariance_matrix writes the square of its series count, which outgrows N.
  * The count is read here as the function reads it, and the result is sized
  * for every count its contract accepts. cross_correlation writes N - 1 values,
- * correlation_matrix N, principal_variances the square root of N and the
- * others one. */
+ * correlation_matrix N, principal_variances the square root of N, coherence
+ * COHERENCE_SEGMENT / 2 and the others one. */
 static size_t result_length(const int feature, const int n, const double *argv)
 {
     int count;
 
+    if (feature == XTRACT_COHERENCE)
+        return COHERENCE_SEGMENT / 2;
     if (feature != XTRACT_COVARIANCE_MATRIX)
         return (size_t)n;
     memcpy(&count, argv, sizeof(count));
@@ -50,6 +55,14 @@ static size_t result_length(const int feature, const int n, const double *argv)
         return 0;
 
     return (size_t)count * (size_t)count;
+}
+
+int LLVMFuzzerInitialize(int *argc, char ***argv)
+{
+    (void)argc;
+    (void)argv;
+    xtract_init_fft(COHERENCE_SEGMENT, XTRACT_COHERENCE);
+    return 0;
 }
 
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)

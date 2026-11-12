@@ -85,6 +85,8 @@ $(PROOF_DIR)/verify_chroma.proved: UNWIND = $(shell expr $(VERIFY_SMALL_N) + 1 +
 # principal_variances takes a matrix of up to three rows, and its sweep loop
 # runs VERIFY_MAX_SWEEPS times.
 $(PROOF_DIR)/verify_principal_variances.proved: UNWIND = $(shell expr $(VERIFY_MAX_SWEEPS) + 2)
+# coherence takes up to twelve elements, the bound its harness sets.
+$(PROOF_DIR)/verify_coherence.proved: UNWIND = 13
 
 # The feature functions are floating-point loops, and the solver cost is in
 # the doubles. Formula slicing drops the arithmetic that no property depends

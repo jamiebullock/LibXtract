@@ -453,6 +453,15 @@ UTEST(descriptors, appended_features_are_fully_described)
     ASSERT_EQ(fd[XTRACT_PRINCIPAL_VARIANCES].is_delta, XTRACT_FALSE);
     ASSERT_EQ(fd[XTRACT_PRINCIPAL_VARIANCES].result.vector.format, XTRACT_ARBITRARY_SERIES);
     ASSERT_EQ(fd[XTRACT_PRINCIPAL_VARIANCES].result.vector.unit, XTRACT_UNIT_ANY);
+
+    ASSERT_STREQ(fd[XTRACT_COHERENCE].algo.name, "coherence");
+    ASSERT_EQ(fd[XTRACT_COHERENCE].argc, 0);
+    ASSERT_EQ(fd[XTRACT_COHERENCE].data.format, XTRACT_SUBFRAMES);
+    ASSERT_EQ(fd[XTRACT_COHERENCE].data.unit, XTRACT_UNIT_ANY);
+    ASSERT_EQ(fd[XTRACT_COHERENCE].is_scalar, XTRACT_FALSE);
+    ASSERT_EQ(fd[XTRACT_COHERENCE].is_delta, XTRACT_FALSE);
+    ASSERT_EQ(fd[XTRACT_COHERENCE].result.vector.format, XTRACT_ARBITRARY_SERIES);
+    ASSERT_EQ(fd[XTRACT_COHERENCE].result.vector.unit, XTRACT_UNIT_NONE);
     for (f = XTRACT_KULLBACK_LEIBLER_DIVERGENCE; f <= XTRACT_MODIFIED_KULLBACK_LEIBLER; f++)
         ASSERT_EQ_MSG(fd[f].is_delta, XTRACT_TRUE, fd[f].algo.name);
 
@@ -590,6 +599,7 @@ UTEST(dispatch, slots_map_to_the_expected_function)
     ASSERT_TRUE(xtract[XTRACT_CORRELATION_MATRIX] == xtract_correlation_matrix);
     ASSERT_TRUE(xtract[XTRACT_AVERAGE_CORRELATION] == xtract_average_correlation);
     ASSERT_TRUE(xtract[XTRACT_PRINCIPAL_VARIANCES] == xtract_principal_variances);
+    ASSERT_TRUE(xtract[XTRACT_COHERENCE] == xtract_coherence);
 }
 
 /* ===== Descriptor conformance ===== */
@@ -597,7 +607,8 @@ UTEST(dispatch, slots_map_to_the_expected_function)
 enum
 {
     CONF_N = 16,
-    CONF_FILTERS = 2
+    CONF_FILTERS = 2,
+    CONF_COHERENCE_SEGMENT = 4
 };
 
 static int conf_two_half(const xtract_function_descriptor_t *d)
@@ -649,6 +660,8 @@ static int conf_min_n(const xtract_function_descriptor_t *d)
         return 2;
     case XTRACT_HIGUCHI_FRACTAL_DIMENSION:
         return 20;
+    case XTRACT_COHERENCE:
+        return 3 * CONF_COHERENCE_SEGMENT;
     case XTRACT_SPECTRUM:
     case XTRACT_AUTOCORRELATION_FFT:
     case XTRACT_CQT:
@@ -771,6 +784,7 @@ UTEST(descriptors, every_feature_conforms_to_its_descriptor)
     ASSERT_TRUE(cqt != NULL);
     xtract_init_fft(CONF_N, XTRACT_SPECTRUM);
     xtract_init_fft(CONF_N, XTRACT_AUTOCORRELATION_FFT);
+    xtract_init_fft(CONF_COHERENCE_SEGMENT, XTRACT_COHERENCE);
     for (i = 0; i < CONF_FILTERS; i++)
         rows[i] = row_store[i];
     xtract_init_mfcc(CONF_N, 22050.0, XTRACT_EQUAL_GAIN, 100.0, 8000.0, CONF_FILTERS, rows);
