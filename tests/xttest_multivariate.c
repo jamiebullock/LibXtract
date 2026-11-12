@@ -595,8 +595,34 @@ UTEST(principal_variances, eigenvalues_near_the_largest_double_stay_finite)
     double result[2] = {0};
 
     ASSERT_EQ(xtract_principal_variances(matrix, 4, NULL, result), XTRACT_SUCCESS);
-    CHECK_REL(result[0], 1e308 * (1.0 + sqrt(5.0)) / 2.0, EPSILON);
-    CHECK_REL(result[1], 1e308 * (1.0 - sqrt(5.0)) / 2.0, EPSILON);
+    CHECK_REL(result[0] / 1e308, (1.0 + sqrt(5.0)) / 2.0, EPSILON);
+    CHECK_REL(result[1] / 1e308, (1.0 - sqrt(5.0)) / 2.0, EPSILON);
+}
+
+UTEST(principal_variances, a_diagonal_difference_beyond_the_largest_double_stays_finite)
+{
+    /* The eigenvalues of {-1, 1, 1, 1} are sqrt(2) and -sqrt(2) */
+    double matrix[] = {-1e308, 1e308, 1e308, 1e308};
+    double result[2] = {0};
+
+    ASSERT_EQ(xtract_principal_variances(matrix, 4, NULL, result), XTRACT_SUCCESS);
+    CHECK_REL(result[0] / 1e308, sqrt(2.0), EPSILON);
+    CHECK_REL(result[1] / 1e308, -sqrt(2.0), EPSILON);
+}
+
+UTEST(principal_variances, a_rank_one_matrix_of_widely_spaced_scales_has_a_zero_eigenvalue)
+{
+    /* The outer product of {2^510, 2^-10} with itself */
+    double matrix[4];
+    double result[2] = {-1.0, -1.0};
+
+    matrix[0] = ldexp(1.0, 1020);
+    matrix[1] = ldexp(1.0, 500);
+    matrix[2] = ldexp(1.0, 500);
+    matrix[3] = ldexp(1.0, -20);
+    ASSERT_EQ(xtract_principal_variances(matrix, 4, NULL, result), XTRACT_SUCCESS);
+    ASSERT_EQ(result[0], ldexp(1.0, 1020));
+    ASSERT_EQ(result[1], 0.0);
 }
 
 UTEST(principal_variances, eigenvalues_of_a_tridiagonal_matrix)

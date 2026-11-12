@@ -13,9 +13,10 @@
 #include "xtract_macros_private.h"
 
 /* The largest eigenvalues settle to rounding error within about ten cyclic
- * Jacobi sweeps. Later sweeps refine the smallest when the rows of the matrix
- * differ in scale by many orders of magnitude. The limit is the only exit for
- * a matrix holding NaN, whose off-diagonal values never reach zero. The
+ * Jacobi sweeps. Later sweeps refine the smallest, and take longest for a
+ * rank-deficient matrix or one whose rows differ in scale by many orders of
+ * magnitude, which can reach the limit. It is the only exit for a matrix
+ * holding NaN, whose off-diagonal values never reach zero. The
  * proof build in verify/ sets a lower limit, because the model checker's
  * formula grows with every sweep */
 #ifndef XTRACT_JACOBI_MAX_SWEEPS
@@ -333,14 +334,20 @@ static double upper_magnitude(const double *matrix, const size_t rows)
 static void jacobi_rotate(double *matrix, const size_t rows, const size_t p, const size_t q)
 {
     const double pivot = matrix[p * rows + q];
-    double theta, tangent, cosine, sine, tau;
+    double theta, magnitude, larger, ratio, tangent, cosine, sine, tau;
     size_t k;
 
     if (pivot == 0.0)
         return;
 
-    theta = 0.5 * (matrix[q * rows + q] - matrix[p * rows + p]) / pivot;
-    tangent = 1.0 / (fabs(theta) + sqrt(theta * theta + 1.0));
+    /* Halving each diagonal value before the subtraction, and taking the
+     * larger of the magnitude of theta and 1 outside the square root, keep
+     * both steps finite for values whose difference or square is not */
+    theta = (0.5 * matrix[q * rows + q] - 0.5 * matrix[p * rows + p]) / pivot;
+    magnitude = fabs(theta);
+    larger = magnitude > 1.0 ? magnitude : 1.0;
+    ratio = magnitude > 1.0 ? 1.0 / magnitude : magnitude;
+    tangent = 1.0 / (magnitude + larger * sqrt(ratio * ratio + 1.0));
     if (theta < 0.0)
         tangent = -tangent;
     cosine = 1.0 / sqrt(tangent * tangent + 1.0);
