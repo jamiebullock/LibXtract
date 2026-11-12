@@ -91,8 +91,10 @@ int xtract_init_ooura_(int N, int feature_name)
     if (ooura_data->initialised)
         xtract_free_ooura_data(ooura_data);
     rv = xtract_init_ooura_data(ooura_data, M);
-    if (rv == XTRACT_SUCCESS)
-        ooura_data->N = N;
+    /* Nothing reads N from a state that is not initialised, so it is set
+     * whether or not the allocation succeeded: a model checker then sees one
+     * value for it on both paths, and the loops N bounds stay constant */
+    ooura_data->N = N;
 
     return rv;
 }
@@ -181,8 +183,8 @@ int xtract_init_vdsp_(int N, int feature_name)
     if (vdsp_data->initialised)
         xtract_free_vdsp_data(vdsp_data);
     rv = xtract_init_vdsp_data(vdsp_data, size);
-    if (rv == XTRACT_SUCCESS)
-        vdsp_data->N = N;
+    /* Set on both paths, as in xtract_init_ooura_() */
+    vdsp_data->N = N;
 
     return rv;
 }
