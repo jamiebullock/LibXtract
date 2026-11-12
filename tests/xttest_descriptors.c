@@ -402,6 +402,16 @@ UTEST(descriptors, appended_features_are_fully_described)
     }
     ASSERT_EQ(fd[XTRACT_CROSS_CORRELATION].is_delta, XTRACT_FALSE);
     ASSERT_EQ(fd[XTRACT_CROSS_CORRELATION_LAG].is_delta, XTRACT_FALSE);
+
+    ASSERT_STREQ(fd[XTRACT_PEARSON_CORRELATION].algo.name, "pearson_correlation");
+    ASSERT_EQ(fd[XTRACT_PEARSON_CORRELATION].argc, 0);
+    ASSERT_EQ(fd[XTRACT_PEARSON_CORRELATION].data.format, XTRACT_SUBFRAMES);
+    ASSERT_EQ(fd[XTRACT_PEARSON_CORRELATION].data.unit, XTRACT_UNIT_ANY);
+    ASSERT_EQ(fd[XTRACT_PEARSON_CORRELATION].is_scalar, XTRACT_TRUE);
+    ASSERT_EQ(fd[XTRACT_PEARSON_CORRELATION].is_delta, XTRACT_FALSE);
+    ASSERT_EQ(fd[XTRACT_PEARSON_CORRELATION].result.scalar.unit, XTRACT_UNIT_NONE);
+    CHECK_REL(fd[XTRACT_PEARSON_CORRELATION].result.scalar.min, -1.0, EPSILON);
+    CHECK_REL(fd[XTRACT_PEARSON_CORRELATION].result.scalar.max, 1.0, EPSILON);
     for (f = XTRACT_KULLBACK_LEIBLER_DIVERGENCE; f <= XTRACT_MODIFIED_KULLBACK_LEIBLER; f++)
         ASSERT_EQ_MSG(fd[f].is_delta, XTRACT_TRUE, fd[f].algo.name);
 
@@ -534,6 +544,7 @@ UTEST(dispatch, slots_map_to_the_expected_function)
     ASSERT_TRUE(xtract[XTRACT_SPECTRAL_CONTRAST] == xtract_spectral_contrast);
     ASSERT_TRUE(xtract[XTRACT_CHROMA] == xtract_chroma);
     ASSERT_TRUE(xtract[XTRACT_CQT] == xtract_cqt);
+    ASSERT_TRUE(xtract[XTRACT_PEARSON_CORRELATION] == xtract_pearson_correlation);
 }
 
 /* ===== Descriptor conformance ===== */
@@ -566,6 +577,7 @@ static int conf_min_n(const xtract_function_descriptor_t *d)
     case XTRACT_HPS:
     case XTRACT_SAMPLE_ENTROPY:
     case XTRACT_APPROXIMATE_ENTROPY:
+    case XTRACT_PEARSON_CORRELATION:
         return 4;
     case XTRACT_IRREGULARITY_K:
     case XTRACT_SMOOTHNESS:

@@ -40,6 +40,15 @@ extern "C"
      */
     int xtract_cross_correlation_lag(const double *data, const int N, const void *argv, double *result);
 
+    /** \brief Extract the Pearson correlation coefficient of two series
+     *
+     * \param *data: a pointer to the first element in an array of doubles comprising two series of equal length: the first series in the first N/2 elements, the second in the second N/2 elements
+     * \param N: the total number of elements in the array pointed to by *data (twice the series length), at least 4 and even
+     * \param *argv: not used
+     * \param *result: the coefficient, from -1 to 1: 1 when the second series is the first scaled by a positive factor and offset, -1 when the factor is negative, or 0 with no result when either series is constant. It is the value xtract_cross_correlation() gives at lag 0 with the coefficient selected
+     */
+    int xtract_pearson_correlation(const double *data, const int N, const void *argv, double *result);
+
     /** @} */
 
 #ifdef __cplusplus

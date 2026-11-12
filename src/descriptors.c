@@ -639,6 +639,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_FLUX:
         case XTRACT_CROSS_CORRELATION:
         case XTRACT_CROSS_CORRELATION_LAG:
+        case XTRACT_PEARSON_CORRELATION:
         case XTRACT_KULLBACK_LEIBLER_DIVERGENCE:
         case XTRACT_ITAKURA_SAITO_DIVERGENCE:
         case XTRACT_MODIFIED_KULLBACK_LEIBLER:
@@ -697,6 +698,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_PEAK_ASYMMETRY:
         case XTRACT_CROSS_CORRELATION:
         case XTRACT_CROSS_CORRELATION_LAG:
+        case XTRACT_PEARSON_CORRELATION:
         case XTRACT_KULLBACK_LEIBLER_DIVERGENCE:
         case XTRACT_ITAKURA_SAITO_DIVERGENCE:
         case XTRACT_MODIFIED_KULLBACK_LEIBLER:
@@ -1507,6 +1509,13 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             copy_desc(p_desc, "Extract the lag at which two series are most correlated");
             copy_author(author, "");
             break;
+        case XTRACT_PEARSON_CORRELATION:
+            copy_name(name, "pearson_correlation");
+            copy_name(p_name, "Pearson Correlation");
+            copy_desc(desc, "Extract the Pearson correlation coefficient of two series");
+            copy_desc(p_desc, "Extract the strength and direction of the linear relationship between two series");
+            copy_author(author, "");
+            break;
         case XTRACT_KULLBACK_LEIBLER_DIVERGENCE:
             copy_name(name, "kullback_leibler_divergence");
             copy_name(p_name, "Kullback-Leibler Divergence");
@@ -2145,6 +2154,11 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
                 *result_unit = XTRACT_UNIT_NONE;
                 *result_min = XTRACT_UNBOUNDED_MIN;
                 *result_max = XTRACT_UNBOUNDED_MAX;
+                break;
+            case XTRACT_PEARSON_CORRELATION:
+                *result_unit = XTRACT_UNIT_NONE;
+                *result_min = -1.0;
+                *result_max = 1.0;
                 break;
             case XTRACT_SHARPNESS:
                 /* loudness-weighted Bark centroid: >= 0, in acums */

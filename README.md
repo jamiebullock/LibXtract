@@ -15,7 +15,8 @@ The library has more than 100 features:
 - **Complexity:** permutation, sample and approximate entropy, Lempel-Ziv complexity, the Petrosian, Katz and Higuchi fractal dimensions, the Hjorth parameters
 - **Spectrum:** magnitude and power spectra, peak and harmonic spectra, and the centroid, spread, flatness, rolloff, slope, contrast and entropy of a spectrum
 - **Periodicity and pitch:** autocorrelation, the average magnitude and squared difference functions, a periodicity measure, and fundamental frequency by the AMDF, wavelet, McLeod and harmonic product spectrum methods
-- **Change:** flux, the Kullback-Leibler and Itakura-Saito divergences between successive frames, and the cross-correlation of two series with its lag
+- **Change:** flux and the Kullback-Leibler and Itakura-Saito divergences between successive frames
+- **Two series:** the Pearson correlation coefficient, and the cross-correlation with the lag of its peak
 - **Envelope:** attack time, decay time, decay rate, temporal centroid
 - **Audio:** loudness, sharpness, Bark bands, MFCCs, gammatone cepstral coefficients, linear prediction coefficients, chroma, the constant-Q transform
 
