@@ -119,4 +119,5 @@ int (*xtract[])(const double *, const int, const void *, double *) =
         xtract_modified_kullback_leibler,
         xtract_spectral_contrast,
         xtract_chroma,
-        xtract_cqt};
+        xtract_cqt,
+        xtract_pearson_correlation};

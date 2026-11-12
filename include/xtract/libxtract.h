@@ -169,6 +169,7 @@ extern "C"
         XTRACT_SPECTRAL_CONTRAST,
         XTRACT_CHROMA,
         XTRACT_CQT,
+        XTRACT_PEARSON_CORRELATION,
         XTRACT_FEATURE_COUNT
     };
 

@@ -12,6 +12,20 @@
 
 #include "xtract_macros_private.h"
 
+static void mean_and_spread(const double *series, const int M, double *mean, double *spread)
+{
+    double sum = 0.0, squares = 0.0;
+    int n;
+
+    for (n = 0; n < M; n++)
+        sum += series[n];
+    sum /= M;
+    for (n = 0; n < M; n++)
+        squares += XTRACT_SQ(series[n] - sum);
+    *mean = sum;
+    *spread = squares;
+}
+
 int xtract_cross_correlation(const double *data, const int N, const void *argv, double *result)
 {
     const int M = N >> 1;
@@ -30,20 +44,10 @@ int xtract_cross_correlation(const double *data, const int N, const void *argv, 
 
     if (scaling == 1.0)
     {
-        double spread_x = 0.0, spread_y = 0.0;
+        double spread_x, spread_y;
 
-        for (n = 0; n < M; n++)
-        {
-            mean_x += x[n];
-            mean_y += y[n];
-        }
-        mean_x /= M;
-        mean_y /= M;
-        for (n = 0; n < M; n++)
-        {
-            spread_x += XTRACT_SQ(x[n] - mean_x);
-            spread_y += XTRACT_SQ(y[n] - mean_y);
-        }
+        mean_and_spread(x, M, &mean_x, &spread_x);
+        mean_and_spread(y, M, &mean_y, &spread_y);
         if (spread_x == 0.0 || spread_y == 0.0)
         {
             memset(result, 0, (N - 1) * sizeof(double));
@@ -105,6 +109,43 @@ int xtract_cross_correlation_lag(const double *data, const int N, const void *ar
     *result = best - (M - 1);
 
     free(correlation);
+
+    return XTRACT_SUCCESS;
+}
+
+int xtract_pearson_correlation(const double *data, const int N, const void *argv, double *result)
+{
+    const int M = N >> 1;
+    const double *x = data;
+    const double *y;
+    double mean_x, mean_y, spread_x, spread_y, coefficient;
+    double sum = 0.0;
+    int n;
+
+    if (N < 4 || (N & 1))
+    {
+        *result = 0.0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
+
+    y = data + M;
+    mean_and_spread(x, M, &mean_x, &spread_x);
+    mean_and_spread(y, M, &mean_y, &spread_y);
+    if (spread_x == 0.0 || spread_y == 0.0)
+    {
+        *result = 0.0;
+        return XTRACT_NO_RESULT;
+    }
+
+    for (n = 0; n < M; n++)
+        sum += (x[n] - mean_x) * (y[n] - mean_y);
+    coefficient = sum / (sqrt(spread_x) * sqrt(spread_y));
+
+    if (coefficient > 1.0)
+        coefficient = 1.0;
+    else if (coefficient < -1.0)
+        coefficient = -1.0;
+    *result = coefficient;
 
     return XTRACT_SUCCESS;
 }

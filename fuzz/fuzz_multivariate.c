@@ -6,9 +6,10 @@
 
 /*
  * libFuzzer harness for the multivariate feature functions
- * (xtract_multivariate.h): cross_correlation, cross_correlation_lag.
+ * (xtract_multivariate.h): cross_correlation, cross_correlation_lag,
+ * pearson_correlation.
  *
- * Both share the uniform signature and take a plain double / NULL argv with no
+ * All share the uniform signature and take a plain double / NULL argv with no
  * setup, so one harness drives them via the xtract[] dispatch table. The
  * fuzzer's bytes become a feature selector, a flag that passes a NULL argv,
  * an argv buffer, and the input vector. Run under AddressSanitizer + UBSan.
@@ -24,7 +25,7 @@
 #include "xtract/libxtract.h"
 
 static const int eligible[] = {
-    XTRACT_CROSS_CORRELATION, XTRACT_CROSS_CORRELATION_LAG};
+    XTRACT_CROSS_CORRELATION, XTRACT_CROSS_CORRELATION_LAG, XTRACT_PEARSON_CORRELATION};
 
 #define N_ELIGIBLE ((int)(sizeof(eligible) / sizeof(eligible[0])))
 #define MAX_N 4096
@@ -61,7 +62,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     /* At N = 0 the allocation holds one element and the call receives the
      * pointer one past it: non-NULL, with nothing that may be read */
     in = (double *)malloc((n > 0 ? (size_t)n : 1) * sizeof(double));
-    /* cross_correlation writes N - 1 values and cross_correlation_lag one.
+    /* cross_correlation writes N - 1 values and the others one.
      * Over-allocate so a harness mis-sizing can't masquerade as an overflow. */
     result = (double *)calloc((size_t)n + 64, sizeof(double));
     if (in == NULL || result == NULL)

@@ -171,3 +171,103 @@ UTEST(cross_correlation_lag, rejects_bad_arguments)
     ASSERT_EQ(xtract_cross_correlation_lag(data, 0, NULL, &result), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(result, 0.0);
 }
+
+/* ===== Pearson correlation ===== */
+
+UTEST(pearson_correlation, coefficient_of_a_worked_example)
+{
+    /* Both means are 3. The deviations {-2, -1, 0, 1, 2} and {-1, -2, 1, 0, 2}
+     * have a sum of products of 8 and a sum of squares of 10 each */
+    double data[] = {1.0, 2.0, 3.0, 4.0, 5.0, 2.0, 1.0, 4.0, 3.0, 5.0};
+    double result = -2.0;
+
+    ASSERT_EQ(xtract_pearson_correlation(data, 10, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 0.8, EPSILON);
+}
+
+UTEST(pearson_correlation, one_for_a_scaled_and_offset_copy_and_minus_one_for_its_negation)
+{
+    double same[] = {1.0, 2.0, 4.0, 3.0, 12.0, 14.0, 18.0, 16.0};
+    double opposite[] = {1.0, 2.0, 4.0, 3.0, -12.0, -14.0, -18.0, -16.0};
+    double result = 0.0;
+
+    ASSERT_EQ(xtract_pearson_correlation(same, 8, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 1.0, EPSILON);
+    ASSERT_EQ(xtract_pearson_correlation(opposite, 8, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, -1.0, EPSILON);
+}
+
+UTEST(pearson_correlation, zero_for_uncorrelated_series)
+{
+    double data[] = {1.0, -1.0, 1.0, -1.0, 1.0, 1.0, -1.0, -1.0};
+    double result = -2.0;
+
+    ASSERT_EQ(xtract_pearson_correlation(data, 8, NULL, &result), XTRACT_SUCCESS);
+    CHECK_NEAR(result, 0.0, EPSILON);
+}
+
+UTEST(pearson_correlation, shortest_series_has_two_elements)
+{
+    double rising[] = {1.0, 2.0, 3.0, 5.0};
+    double falling[] = {1.0, 2.0, 5.0, 3.0};
+    double result = 0.0;
+
+    ASSERT_EQ(xtract_pearson_correlation(rising, 4, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 1.0, EPSILON);
+    ASSERT_EQ(xtract_pearson_correlation(falling, 4, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, -1.0, EPSILON);
+}
+
+UTEST(pearson_correlation, matches_cross_correlation_at_lag_zero)
+{
+    double data[] = {1.0, 2.0, 4.0, 3.0, 0.0, 5.0, 1.0, 2.0};
+    double coefficient = 1.0;
+    double lags[7] = {0};
+    double result = -2.0;
+
+    ASSERT_EQ(xtract_cross_correlation(data, 8, &coefficient, lags), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_pearson_correlation(data, 8, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, lags[3], EPSILON);
+}
+
+UTEST(pearson_correlation, stays_within_one_when_rounding_carries_the_quotient_past_it)
+{
+    /* In double arithmetic the sum of products of these deviations exceeds
+     * the product of the two norms */
+    double same[] = {0.1, 0.4, 0.9, 0.2, 0.8, 1.8};
+    double opposite[] = {0.1, 0.4, 0.9, -0.2, -0.8, -1.8};
+    double result = 0.0;
+
+    ASSERT_EQ(xtract_pearson_correlation(same, 6, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(result, 1.0);
+    ASSERT_EQ(xtract_pearson_correlation(opposite, 6, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(result, -1.0);
+}
+
+UTEST(pearson_correlation, no_result_when_either_series_is_constant)
+{
+    double first_constant[] = {4.0, 4.0, 4.0, 1.0, 2.0, 3.0};
+    double second_constant[] = {1.0, 2.0, 3.0, 4.0, 4.0, 4.0};
+    double result = -2.0;
+
+    ASSERT_EQ(xtract_pearson_correlation(first_constant, 6, NULL, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
+    result = -2.0;
+    ASSERT_EQ(xtract_pearson_correlation(second_constant, 6, NULL, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
+}
+
+UTEST(pearson_correlation, rejects_bad_arguments)
+{
+    double data[] = {1.0, 2.0, 3.0, 5.0, 4.0};
+    double result = -2.0;
+
+    ASSERT_EQ(xtract_pearson_correlation(data, 5, NULL, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    result = -2.0;
+    ASSERT_EQ(xtract_pearson_correlation(data, 2, NULL, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    result = -2.0;
+    ASSERT_EQ(xtract_pearson_correlation(data, 0, NULL, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+}
