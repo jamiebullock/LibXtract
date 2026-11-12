@@ -588,6 +588,17 @@ UTEST(principal_variances, eigenvalues_of_a_two_by_two_matrix)
     CHECK_REL(result[1], 1.0, EPSILON);
 }
 
+UTEST(principal_variances, eigenvalues_near_the_largest_double_stay_finite)
+{
+    /* The eigenvalues of {0, 1, 1, 1} are (1 - sqrt(5)) / 2 and (1 + sqrt(5)) / 2 */
+    double matrix[] = {0.0, 1e308, 1e308, 1e308};
+    double result[2] = {0};
+
+    ASSERT_EQ(xtract_principal_variances(matrix, 4, NULL, result), XTRACT_SUCCESS);
+    CHECK_REL(result[0], 1e308 * (1.0 + sqrt(5.0)) / 2.0, EPSILON);
+    CHECK_REL(result[1], 1e308 * (1.0 - sqrt(5.0)) / 2.0, EPSILON);
+}
+
 UTEST(principal_variances, eigenvalues_of_a_tridiagonal_matrix)
 {
     /* The eigenvalues of this matrix are 2 - sqrt(2), 2 and 2 + sqrt(2) */

@@ -37,7 +37,9 @@ void verify_principal_variances(void)
 {
     const int N = nondet_between(0, 9);
     double *data = nondet_doubles(N);
-    double *result = nondet_doubles(N);
+    double *result = nondet_doubles(N == 9 ? 3 : N == 4 ? 2
+                                             : N == 1   ? 1
+                                                        : 0);
 
     (void)xtract_principal_variances(data, N, NULL, result);
     free(data);

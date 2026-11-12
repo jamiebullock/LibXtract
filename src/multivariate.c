@@ -339,7 +339,7 @@ static void jacobi_rotate(double *matrix, const size_t rows, const size_t p, con
     if (pivot == 0.0)
         return;
 
-    theta = (matrix[q * rows + q] - matrix[p * rows + p]) / (2.0 * pivot);
+    theta = 0.5 * (matrix[q * rows + q] - matrix[p * rows + p]) / pivot;
     tangent = 1.0 / (fabs(theta) + sqrt(theta * theta + 1.0));
     if (theta < 0.0)
         tangent = -tangent;
