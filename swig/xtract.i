@@ -15,6 +15,7 @@
 #include "xtract/xtract_helper.h"
 #include "xtract/xtract_macros.h"
 #include "xtract/xtract_delta.h"
+#include "xtract/xtract_multivariate.h"
 #include "xtract/xtract_stateful.h"
 #include "xtract/libxtract.h"
 %}

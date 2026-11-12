@@ -13,7 +13,7 @@ set(XTRACT_FUZZ_SANITIZERS "address,undefined" CACHE STRING "Sanitizers the fuzz
 target_compile_options(xtract PRIVATE
     -fsanitize=fuzzer-no-link,${XTRACT_FUZZ_SANITIZERS} -fno-sanitize-recover=all)
 
-foreach(harness scalar delta vector)
+foreach(harness scalar delta vector multivariate)
     add_executable(xtfuzz_${harness} fuzz_${harness}.c)
     target_link_libraries(xtfuzz_${harness} PRIVATE xtract::xtract)
     target_compile_options(xtfuzz_${harness} PRIVATE

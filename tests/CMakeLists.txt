@@ -8,6 +8,7 @@ add_executable(xttest
     xttest_delta.c
     xttest_descriptors.c
     xttest_init.c
+    xttest_multivariate.c
     xttest_scalar.c
     xttest_stateful.c
     xttest_util.c

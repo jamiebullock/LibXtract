@@ -399,8 +399,11 @@ UTEST(descriptors, appended_features_are_fully_described)
     {
         ASSERT_EQ_MSG(fd[f].data.format, XTRACT_SUBFRAMES, fd[f].algo.name);
         ASSERT_EQ_MSG(fd[f].data.unit, XTRACT_UNIT_ANY, fd[f].algo.name);
-        ASSERT_EQ_MSG(fd[f].is_delta, XTRACT_TRUE, fd[f].algo.name);
     }
+    ASSERT_EQ(fd[XTRACT_CROSS_CORRELATION].is_delta, XTRACT_FALSE);
+    ASSERT_EQ(fd[XTRACT_CROSS_CORRELATION_LAG].is_delta, XTRACT_FALSE);
+    for (f = XTRACT_KULLBACK_LEIBLER_DIVERGENCE; f <= XTRACT_MODIFIED_KULLBACK_LEIBLER; f++)
+        ASSERT_EQ_MSG(fd[f].is_delta, XTRACT_TRUE, fd[f].algo.name);
 
     for (f = XTRACT_KULLBACK_LEIBLER_DIVERGENCE; f <= XTRACT_MODIFIED_KULLBACK_LEIBLER; f++)
     {
