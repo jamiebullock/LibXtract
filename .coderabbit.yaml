@@ -36,6 +36,20 @@ reviews:
         and edge cases: division by zero, off-by-one, buffer bounds, N <= 0,
         the layout of argv. Look for copy-paste errors between sibling
         functions and for unused code.
+
+        Numeric range: variances, covariances and sums of squares or
+        products are accumulated in double arithmetic without rescaling,
+        as xtract_variance() does, and the functions must agree with each
+        other. Do not report a finding that depends on any of these:
+        such an accumulated quantity overflowing, underflowing to zero or
+        being subnormal, whether the function computes it or receives it
+        as input; input values that differ only in their last unit of
+        precision, so that their mean is not a double; a result that is
+        itself beyond the range of a double. Do report an intermediate
+        expression that overflows or underflows when the accumulated
+        quantities and the result are all representable, and any input
+        of ordinary magnitude that gives NaN, infinity or the wrong
+        status code.
     - path: 'include/**/*.h'
       instructions: |
         Public API. Every declaration carries a Doxygen block (\brief and
@@ -51,6 +65,8 @@ reviews:
         the documented formulae. Flag a test that only pins the current
         output, or a test-only hook added to production code to make a test
         pass.
+        Do not ask for a regression test of an input that the numeric
+        range paragraph of the src instructions excludes.
     - path: '**/*.md'
       instructions: |
         Vale checks spelling, ASCII and banned wording in CI (the prose
