@@ -29,6 +29,7 @@ MULTIVARIATE_HARNESS(cross_correlation, N > 0 ? N - 1 : 0)
 MULTIVARIATE_HARNESS(cross_correlation_lag, 1)
 MULTIVARIATE_HARNESS(pearson_correlation, 1)
 MULTIVARIATE_HARNESS(correlation_matrix, N)
+MULTIVARIATE_HARNESS(average_correlation, 1)
 
 void verify_covariance_matrix(void)
 {
