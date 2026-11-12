@@ -28,3 +28,18 @@
 MULTIVARIATE_HARNESS(cross_correlation, N > 0 ? N - 1 : 0)
 MULTIVARIATE_HARNESS(cross_correlation_lag, 1)
 MULTIVARIATE_HARNESS(pearson_correlation, 1)
+
+void verify_covariance_matrix(void)
+{
+    const int N = nondet_small_length();
+    const int channels = nondet_between(-1, VERIFY_SMALL_N);
+    double *data = nondet_doubles(N);
+    int *argv = nondet_ints(1);
+    double *result = nondet_doubles(channels > 0 && channels <= N / 2 ? channels * channels : 0);
+
+    argv[0] = channels;
+    (void)xtract_covariance_matrix(data, N, nondet_argv(argv), result);
+    free(data);
+    free(argv);
+    free(result);
+}

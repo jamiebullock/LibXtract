@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Zlib
  */
 
-/** \file xtract_multivariate.h: declares functions that extract a scalar or vector value from two or more series */
+/** \file xtract_multivariate.h: declares functions that extract a scalar, a vector or a matrix from two or more series */
 
 #ifndef XTRACT_MULTIVARIATE_H
 #define XTRACT_MULTIVARIATE_H
@@ -17,7 +17,7 @@ extern "C"
     /**
      * \defgroup multivariate Multivariate extraction functions
      *
-     * Functions that extract a scalar or vector value from two or more series
+     * Functions that extract a scalar, a vector or a matrix from two or more series
      *
      * @{
      */
@@ -48,6 +48,15 @@ extern "C"
      * \param *result: the coefficient, from -1 to 1: 1 when the second series is the first scaled by a positive factor and offset, -1 when the factor is negative, or 0 with no result when either series is constant. It is the value xtract_cross_correlation() gives at lag 0 with the coefficient selected
      */
     int xtract_pearson_correlation(const double *data, const int N, const void *argv, double *result);
+
+    /** \brief Extract the covariance matrix of a set of series
+     *
+     * \param *data: a pointer to the first element in an array of doubles comprising C series of equal length, one after another: series i in the N/C elements from index i * N/C
+     * \param N: the total number of elements in the array pointed to by *data, at least 2 and a multiple of C
+     * \param *argv: a pointer to an int, the number of series C, from 1 to N/2, so that every series has at least two elements
+     * \param *result: a pointer to an array of C * C doubles: the covariance of series i and series j at index i * C + j, and at index i * C + i the variance of series i as xtract_variance() gives it. Every sum of products is divided by one less than the series length. The values at i * C + j and j * C + i are equal, and a constant series has zeros throughout its row and column
+     */
+    int xtract_covariance_matrix(const double *data, const int N, const void *argv, double *result);
 
     /** @} */
 

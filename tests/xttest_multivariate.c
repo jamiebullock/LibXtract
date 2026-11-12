@@ -294,3 +294,121 @@ UTEST(pearson_correlation, rejects_bad_arguments)
     ASSERT_EQ(xtract_pearson_correlation(data, 0, NULL, &result), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(result, 0.0);
 }
+
+/* ===== Covariance matrix ===== */
+
+UTEST(covariance_matrix, three_series_of_four_elements)
+{
+    /* Deviations from the means 2.5, 5 and 1: {-1.5, -0.5, 0.5, 1.5},
+     * {-3, -1, 1, 3} and {0, -1, -1, 2}. Their sums of squares are 5, 20 and
+     * 6 and their sums of products 10, 3 and 6, each divided by 3 */
+    double data[] = {1.0, 2.0, 3.0, 4.0, 2.0, 4.0, 6.0, 8.0, 1.0, 0.0, 0.0, 3.0};
+    int channels = 3;
+    double result[9] = {0};
+
+    ASSERT_EQ(xtract_covariance_matrix(data, 12, &channels, result), XTRACT_SUCCESS);
+    CHECK_REL(result[0], 5.0 / 3.0, EPSILON);
+    CHECK_REL(result[1], 10.0 / 3.0, EPSILON);
+    CHECK_REL(result[2], 1.0, EPSILON);
+    CHECK_REL(result[4], 20.0 / 3.0, EPSILON);
+    CHECK_REL(result[5], 2.0, EPSILON);
+    CHECK_REL(result[8], 2.0, EPSILON);
+    ASSERT_EQ(result[3], result[1]);
+    ASSERT_EQ(result[6], result[2]);
+    ASSERT_EQ(result[7], result[5]);
+}
+
+UTEST(covariance_matrix, diagonal_matches_variance)
+{
+    double data[] = {1.0, 5.0, 2.0, 8.0, 3.0, 7.0, 0.5, 0.25, 4.0, 1.0};
+    int channels = 2;
+    double result[4] = {0};
+    double mean = 0.0, variance = 0.0;
+    int i;
+
+    ASSERT_EQ(xtract_covariance_matrix(data, 10, &channels, result), XTRACT_SUCCESS);
+    for (i = 0; i < 2; i++)
+    {
+        ASSERT_EQ(xtract_mean(data + i * 5, 5, NULL, &mean), XTRACT_SUCCESS);
+        ASSERT_EQ(xtract_variance(data + i * 5, 5, &mean, &variance), XTRACT_SUCCESS);
+        CHECK_REL(result[i * 2 + i], variance, EPSILON);
+    }
+}
+
+UTEST(covariance_matrix, off_diagonal_over_the_two_deviations_is_the_pearson_correlation)
+{
+    double data[] = {1.0, 2.0, 4.0, 3.0, 0.0, 5.0, 1.0, 2.0};
+    int channels = 2;
+    double result[4] = {0};
+    double correlation = 0.0;
+
+    ASSERT_EQ(xtract_covariance_matrix(data, 8, &channels, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_pearson_correlation(data, 8, NULL, &correlation), XTRACT_SUCCESS);
+    CHECK_REL(result[1] / sqrt(result[0] * result[3]), correlation, EPSILON);
+}
+
+UTEST(covariance_matrix, one_series_gives_its_variance)
+{
+    double data[] = {1.0, 2.0, 3.0, 4.0};
+    int channels = 1;
+    double result = 0.0;
+
+    ASSERT_EQ(xtract_covariance_matrix(data, 4, &channels, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 5.0 / 3.0, EPSILON);
+}
+
+UTEST(covariance_matrix, shortest_series_has_two_elements)
+{
+    double data[] = {1.0, 2.0, 3.0, 5.0, 4.0, 1.0};
+    int channels = 3;
+    double result[9] = {0};
+
+    ASSERT_EQ(xtract_covariance_matrix(data, 6, &channels, result), XTRACT_SUCCESS);
+    CHECK_REL(result[0], 0.5, EPSILON);
+    CHECK_REL(result[1], 1.0, EPSILON);
+    CHECK_REL(result[2], -1.5, EPSILON);
+    CHECK_REL(result[4], 2.0, EPSILON);
+    CHECK_REL(result[5], -3.0, EPSILON);
+    CHECK_REL(result[8], 4.5, EPSILON);
+}
+
+UTEST(covariance_matrix, constant_series_has_a_zero_row_and_column)
+{
+    double data[] = {1.0, 2.0, 4.0, 0.1, 0.1, 0.1, 3.0, 1.0, 2.0};
+    int channels = 3;
+    double result[9] = {-1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0};
+    int k;
+
+    ASSERT_EQ(xtract_covariance_matrix(data, 9, &channels, result), XTRACT_SUCCESS);
+    for (k = 0; k < 3; k++)
+    {
+        ASSERT_EQ(result[3 + k], 0.0);
+        ASSERT_EQ(result[k * 3 + 1], 0.0);
+    }
+    CHECK_REL(result[0], 7.0 / 3.0, EPSILON);
+    CHECK_REL(result[2], -0.5, EPSILON);
+    CHECK_REL(result[8], 1.0, EPSILON);
+}
+
+UTEST(covariance_matrix, rejects_bad_arguments_and_leaves_the_result)
+{
+    double data[] = {1.0, 2.0, 3.0, 5.0, 4.0, 1.0, 7.0, 2.0};
+    int channels = 2;
+    double result[4] = {-1.0, -1.0, -1.0, -1.0};
+    int k;
+
+    ASSERT_EQ(xtract_covariance_matrix(data, 8, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_covariance_matrix(data, 1, &channels, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_covariance_matrix(data, 0, &channels, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_covariance_matrix(data, 7, &channels, result), XTRACT_ARGUMENT_ERROR);
+    channels = 0;
+    ASSERT_EQ(xtract_covariance_matrix(data, 8, &channels, result), XTRACT_ARGUMENT_ERROR);
+    channels = -2;
+    ASSERT_EQ(xtract_covariance_matrix(data, 8, &channels, result), XTRACT_ARGUMENT_ERROR);
+    channels = 8;
+    ASSERT_EQ(xtract_covariance_matrix(data, 8, &channels, result), XTRACT_ARGUMENT_ERROR);
+    channels = 3;
+    ASSERT_EQ(xtract_covariance_matrix(data, 8, &channels, result), XTRACT_ARGUMENT_ERROR);
+    for (k = 0; k < 4; k++)
+        ASSERT_EQ(result[k], -1.0);
+}
