@@ -34,13 +34,6 @@ thread_local xtract_vdsp_data vdsp_data_autocorrelation_fft;
 thread_local dywapitchtracker wavelet_f0_state;
 
 #ifdef USE_OOURA
-void xtract_init_ooura_data(xtract_ooura_data *ooura_data, unsigned int N)
-{
-    ooura_data->ooura_ip = (int *)calloc(2 + sqrt((double)N), sizeof(int));
-    ooura_data->ooura_w = (double *)calloc(N * 5 / 4, sizeof(double));
-    ooura_data->initialised = true;
-}
-
 void xtract_free_ooura_data(xtract_ooura_data *ooura_data)
 {
     free(ooura_data->ooura_ip);
@@ -50,52 +43,54 @@ void xtract_free_ooura_data(xtract_ooura_data *ooura_data)
     ooura_data->initialised = false;
 }
 
-int xtract_init_ooura_(int N, int feature_name)
+int xtract_init_ooura_data(xtract_ooura_data *ooura_data, unsigned int N)
 {
-    int M = N >> 1;
-
-    if (feature_name == XTRACT_AUTOCORRELATION_FFT)
+    ooura_data->ooura_ip = (int *)calloc(2 + sqrt((double)N), sizeof(int));
+    ooura_data->ooura_w = (double *)calloc(N * 5 / 4, sizeof(double));
+    if (ooura_data->ooura_ip == NULL || ooura_data->ooura_w == NULL)
     {
-        M = N; /* allow for zero padding */
+        xtract_free_ooura_data(ooura_data);
+        return XTRACT_MALLOC_FAILED;
     }
+    ooura_data->initialised = true;
 
+    return XTRACT_SUCCESS;
+}
+
+static xtract_ooura_data *ooura_data_for(const int feature_name)
+{
     switch (feature_name)
     {
     case XTRACT_SPECTRUM:
-        if (ooura_data_spectrum.initialised)
-        {
-            xtract_free_ooura_data(&ooura_data_spectrum);
-        }
-        xtract_init_ooura_data(&ooura_data_spectrum, M);
-        ooura_data_spectrum.N = N;
-        break;
+        return &ooura_data_spectrum;
     case XTRACT_AUTOCORRELATION_FFT:
-        if (ooura_data_autocorrelation_fft.initialised)
-        {
-            xtract_free_ooura_data(&ooura_data_autocorrelation_fft);
-        }
-        xtract_init_ooura_data(&ooura_data_autocorrelation_fft, M);
-        ooura_data_autocorrelation_fft.N = N;
-        break;
+        return &ooura_data_autocorrelation_fft;
     case XTRACT_DCT:
-        if (ooura_data_dct.initialised)
-        {
-            xtract_free_ooura_data(&ooura_data_dct);
-        }
-        xtract_init_ooura_data(&ooura_data_dct, M);
-        ooura_data_dct.N = N;
-        break;
+        return &ooura_data_dct;
     case XTRACT_MFCC:
-        if (ooura_data_mfcc.initialised)
-        {
-            xtract_free_ooura_data(&ooura_data_mfcc);
-        }
-        xtract_init_ooura_data(&ooura_data_mfcc, M);
-        ooura_data_mfcc.N = N;
-        break;
+        return &ooura_data_mfcc;
+    default:
+        return NULL;
     }
+}
 
-    return XTRACT_SUCCESS;
+int xtract_init_ooura_(int N, int feature_name)
+{
+    xtract_ooura_data *ooura_data = ooura_data_for(feature_name);
+    /* The autocorrelation zero pads its input to twice the length */
+    const int M = feature_name == XTRACT_AUTOCORRELATION_FFT ? N : N >> 1;
+    int rv;
+
+    if (ooura_data == NULL)
+        return XTRACT_SUCCESS;
+
+    if (ooura_data->initialised)
+        xtract_free_ooura_data(ooura_data);
+    rv = xtract_init_ooura_data(ooura_data, M);
+    if (rv == XTRACT_SUCCESS)
+        ooura_data->N = N;
+
+    return rv;
 }
 
 void xtract_free_ooura_(void)
@@ -120,62 +115,66 @@ void xtract_free_ooura_(void)
 
 #else
 
-void xtract_init_vdsp_data(xtract_vdsp_data *vdsp_data, unsigned int N)
-{
-    vdsp_data->setup = vDSP_create_fftsetupD(log2f(N), FFT_RADIX2);
-    vdsp_data->fft.realp = (double *)calloc((N >> 1), sizeof(double));
-    vdsp_data->fft.imagp = (double *)calloc((N >> 1), sizeof(double));
-    vdsp_data->log2N = log2f(N);
-    vdsp_data->initialised = true;
-}
-
 void xtract_free_vdsp_data(xtract_vdsp_data *vdsp_data)
 {
     free(vdsp_data->fft.realp);
     free(vdsp_data->fft.imagp);
-    vDSP_destroy_fftsetupD(vdsp_data->setup);
+    if (vdsp_data->setup != NULL)
+        vDSP_destroy_fftsetupD(vdsp_data->setup);
+    vdsp_data->setup = NULL;
     vdsp_data->initialised = false;
 }
 
-int xtract_init_vdsp_(int N, int feature_name)
+int xtract_init_vdsp_data(xtract_vdsp_data *vdsp_data, unsigned int N)
+{
+    vdsp_data->setup = vDSP_create_fftsetupD(log2f(N), FFT_RADIX2);
+    vdsp_data->fft.realp = (double *)calloc((N >> 1), sizeof(double));
+    vdsp_data->fft.imagp = (double *)calloc((N >> 1), sizeof(double));
+    if (vdsp_data->setup == NULL || vdsp_data->fft.realp == NULL || vdsp_data->fft.imagp == NULL)
+    {
+        xtract_free_vdsp_data(vdsp_data);
+        return XTRACT_MALLOC_FAILED;
+    }
+    vdsp_data->log2N = log2f(N);
+    vdsp_data->initialised = true;
+
+    return XTRACT_SUCCESS;
+}
+
+static xtract_vdsp_data *vdsp_data_for(const int feature_name)
 {
     switch (feature_name)
     {
     case XTRACT_SPECTRUM:
-        if (vdsp_data_spectrum.initialised)
-        {
-            xtract_free_vdsp_data(&vdsp_data_spectrum);
-        }
-        xtract_init_vdsp_data(&vdsp_data_spectrum, N);
-        vdsp_data_spectrum.N = N;
-        break;
+        return &vdsp_data_spectrum;
     case XTRACT_AUTOCORRELATION_FFT:
-        if (vdsp_data_autocorrelation_fft.initialised)
-        {
-            xtract_free_vdsp_data(&vdsp_data_autocorrelation_fft);
-        }
-        xtract_init_vdsp_data(&vdsp_data_autocorrelation_fft, N * 2); /* allow for zero padding */
-        vdsp_data_autocorrelation_fft.N = N;
-        break;
+        return &vdsp_data_autocorrelation_fft;
     case XTRACT_DCT:
-        if (vdsp_data_dct.initialised)
-        {
-            xtract_free_vdsp_data(&vdsp_data_dct);
-        }
-        xtract_init_vdsp_data(&vdsp_data_dct, N);
-        vdsp_data_dct.N = N;
-        break;
+        return &vdsp_data_dct;
     case XTRACT_MFCC:
-        if (vdsp_data_mfcc.initialised)
-        {
-            xtract_free_vdsp_data(&vdsp_data_mfcc);
-        }
-        xtract_init_vdsp_data(&vdsp_data_mfcc, N);
-        vdsp_data_mfcc.N = N;
-        break;
+        return &vdsp_data_mfcc;
+    default:
+        return NULL;
     }
+}
 
-    return XTRACT_SUCCESS;
+int xtract_init_vdsp_(int N, int feature_name)
+{
+    xtract_vdsp_data *vdsp_data = vdsp_data_for(feature_name);
+    /* The autocorrelation zero pads its input to twice the length */
+    const int size = feature_name == XTRACT_AUTOCORRELATION_FFT ? N * 2 : N;
+    int rv;
+
+    if (vdsp_data == NULL)
+        return XTRACT_SUCCESS;
+
+    if (vdsp_data->initialised)
+        xtract_free_vdsp_data(vdsp_data);
+    rv = xtract_init_vdsp_data(vdsp_data, size);
+    if (rv == XTRACT_SUCCESS)
+        vdsp_data->N = N;
+
+    return rv;
 }
 
 void xtract_free_vdsp_(void)

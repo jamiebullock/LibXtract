@@ -504,7 +504,7 @@ extern "C"
      * \param N: the size of the FFT, a power of two of at least 2
      * \param feature_name: the name of the feature the FFT is being used for,
      * e.g. XTRACT_DCT
-     *
+     * \return XTRACT_SUCCESS, XTRACT_ARGUMENT_ERROR if N is not a power of two of at least 2, or XTRACT_MALLOC_FAILED if allocation fails, which leaves the FFT of that feature uninitialised
      */
     int xtract_init_fft(int N, int feature_name);
 
