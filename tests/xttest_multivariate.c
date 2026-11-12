@@ -512,3 +512,57 @@ UTEST(correlation_matrix, rejects_a_length_that_is_not_a_square_and_leaves_the_r
     for (k = 0; k < 8; k++)
         ASSERT_EQ(result[k], -1.0);
 }
+
+/* ===== Average correlation ===== */
+
+UTEST(average_correlation, mean_of_a_correlation_matrix_off_its_diagonal)
+{
+    double correlation[] = {1.0, 0.5, -0.5, 0.5, 1.0, 0.75, -0.5, 0.75, 1.0};
+    double result = -2.0;
+
+    ASSERT_EQ(xtract_average_correlation(correlation, 9, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 0.25, EPSILON);
+}
+
+UTEST(average_correlation, counts_every_value_off_the_diagonal_once)
+{
+    double three[] = {9.0, 1.0, 2.0, 3.0, 9.0, 4.0, 5.0, 6.0, 9.0};
+    double four[] = {100.0, 2.0, 2.0, 2.0, 2.0, 100.0, 2.0, 2.0, 2.0, 2.0, 100.0, 2.0, 2.0, 2.0, 2.0, 100.0};
+    double result = 0.0;
+
+    ASSERT_EQ(xtract_average_correlation(three, 9, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 3.5, EPSILON);
+    ASSERT_EQ(xtract_average_correlation(four, 16, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 2.0, EPSILON);
+}
+
+UTEST(average_correlation, two_series_give_their_coefficient)
+{
+    double data[] = {1.0, 2.0, 4.0, 3.0, 0.0, 5.0, 1.0, 2.0};
+    int channels = 2;
+    double covariance[4] = {0};
+    double correlation[4] = {0};
+    double pearson = 0.0;
+    double result = -2.0;
+
+    ASSERT_EQ(xtract_covariance_matrix(data, 8, &channels, covariance), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_correlation_matrix(covariance, 4, NULL, correlation), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_average_correlation(correlation, 4, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_pearson_correlation(data, 8, NULL, &pearson), XTRACT_SUCCESS);
+    CHECK_REL(result, pearson, EPSILON);
+}
+
+UTEST(average_correlation, rejects_one_series_and_a_length_that_is_not_a_square)
+{
+    static const int bad[] = {-4, 0, 1, 2, 3, 5, 8};
+    double correlation[] = {1.0, 0.5, 0.5, 1.0, 1.0, 1.0, 1.0, 1.0};
+    double result;
+    size_t k;
+
+    for (k = 0; k < sizeof(bad) / sizeof(bad[0]); k++)
+    {
+        result = -2.0;
+        ASSERT_EQ(xtract_average_correlation(correlation, bad[k], NULL, &result), XTRACT_ARGUMENT_ERROR);
+        ASSERT_EQ(result, 0.0);
+    }
+}

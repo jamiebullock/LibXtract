@@ -655,6 +655,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *data_format = XTRACT_CHANNELS;
             break;
         case XTRACT_CORRELATION_MATRIX:
+        case XTRACT_AVERAGE_CORRELATION:
             *data_format = XTRACT_SQUARE_MATRIX;
             break;
         case XTRACT_MIDICENT:
@@ -713,6 +714,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_PEARSON_CORRELATION:
         case XTRACT_COVARIANCE_MATRIX:
         case XTRACT_CORRELATION_MATRIX:
+        case XTRACT_AVERAGE_CORRELATION:
         case XTRACT_KULLBACK_LEIBLER_DIVERGENCE:
         case XTRACT_ITAKURA_SAITO_DIVERGENCE:
         case XTRACT_MODIFIED_KULLBACK_LEIBLER:
@@ -1544,6 +1546,13 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             copy_desc(p_desc, "Extract the correlation coefficient of every pair of series in a set");
             copy_author(author, "");
             break;
+        case XTRACT_AVERAGE_CORRELATION:
+            copy_name(name, "average_correlation");
+            copy_name(p_name, "Average Correlation");
+            copy_desc(desc, "Extract the average correlation of a set of series from their correlation matrix");
+            copy_desc(p_desc, "Extract the mean correlation coefficient of every pair of series in a set");
+            copy_author(author, "");
+            break;
         case XTRACT_KULLBACK_LEIBLER_DIVERGENCE:
             copy_name(name, "kullback_leibler_divergence");
             copy_name(p_name, "Kullback-Leibler Divergence");
@@ -2187,6 +2196,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
                 *result_max = XTRACT_UNBOUNDED_MAX;
                 break;
             case XTRACT_PEARSON_CORRELATION:
+            case XTRACT_AVERAGE_CORRELATION:
                 *result_unit = XTRACT_UNIT_NONE;
                 *result_min = -1.0;
                 *result_max = 1.0;

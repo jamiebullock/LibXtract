@@ -264,3 +264,29 @@ int xtract_correlation_matrix(const double *data, const int N, const void *argv,
 
     return XTRACT_SUCCESS;
 }
+
+int xtract_average_correlation(const double *data, const int N, const void *argv, double *result)
+{
+    const int C = matrix_rows(N);
+    const size_t rows = (size_t)C;
+    double sum = 0.0;
+    size_t i, j;
+
+    if (C < 2)
+    {
+        *result = 0.0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
+
+    for (i = 0; i < rows; i++)
+    {
+        for (j = 0; j < rows; j++)
+        {
+            if (i != j)
+                sum += data[i * rows + j];
+        }
+    }
+    *result = sum / (double)(rows * (rows - 1));
+
+    return XTRACT_SUCCESS;
+}

@@ -67,6 +67,15 @@ extern "C"
      */
     int xtract_correlation_matrix(const double *data, const int N, const void *argv, double *result);
 
+    /** \brief Extract the average correlation of a set of series: the mean of the correlation coefficients of every pair, from their correlation matrix
+     *
+     * \param *data: a pointer to the first element in an array of doubles comprising the C * C values of a correlation matrix as xtract_correlation_matrix() gives it
+     * \param N: the number of elements in the array pointed to by *data, a perfect square of at least 4
+     * \param *argv: not used
+     * \param *result: the mean of the values off the diagonal of the matrix, from -1 to 1 for a correlation matrix
+     */
+    int xtract_average_correlation(const double *data, const int N, const void *argv, double *result);
+
     /** @} */
 
 #ifdef __cplusplus
