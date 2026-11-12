@@ -28,7 +28,7 @@ doc/html
 build/
 
 # Bounded model checking (make -C verify)
-verify/xtract.gb
+verify/*.gb
 verify/.proofs*
 
 # Vale styles that vale sync downloads
