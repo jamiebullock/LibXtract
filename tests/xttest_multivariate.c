@@ -412,3 +412,103 @@ UTEST(covariance_matrix, rejects_bad_arguments_and_leaves_the_result)
     for (k = 0; k < 4; k++)
         ASSERT_EQ(result[k], -1.0);
 }
+
+/* ===== Correlation matrix ===== */
+
+UTEST(correlation_matrix, covariance_over_the_two_standard_deviations)
+{
+    /* Standard deviations 1, 2 and 3 */
+    double covariance[] = {1.0, 1.0, -1.5, 1.0, 4.0, 4.5, -1.5, 4.5, 9.0};
+    double result[9] = {0};
+
+    ASSERT_EQ(xtract_correlation_matrix(covariance, 9, NULL, result), XTRACT_SUCCESS);
+    CHECK_REL(result[1], 0.5, EPSILON);
+    CHECK_REL(result[2], -0.5, EPSILON);
+    CHECK_REL(result[5], 0.75, EPSILON);
+    ASSERT_EQ(result[0], 1.0);
+    ASSERT_EQ(result[4], 1.0);
+    ASSERT_EQ(result[8], 1.0);
+    ASSERT_EQ(result[3], result[1]);
+    ASSERT_EQ(result[6], result[2]);
+    ASSERT_EQ(result[7], result[5]);
+}
+
+UTEST(correlation_matrix, reads_the_values_above_the_diagonal)
+{
+    double covariance[] = {4.0, 3.0, 100.0, 9.0};
+    double result[4] = {0};
+
+    ASSERT_EQ(xtract_correlation_matrix(covariance, 4, NULL, result), XTRACT_SUCCESS);
+    CHECK_REL(result[1], 0.5, EPSILON);
+    ASSERT_EQ(result[2], result[1]);
+}
+
+UTEST(correlation_matrix, matches_the_pearson_correlation_of_the_two_series)
+{
+    double data[] = {1.0, 2.0, 4.0, 3.0, 0.0, 5.0, 1.0, 2.0};
+    int channels = 2;
+    double covariance[4] = {0};
+    double result[4] = {0};
+    double correlation = 0.0;
+
+    ASSERT_EQ(xtract_covariance_matrix(data, 8, &channels, covariance), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_correlation_matrix(covariance, 4, NULL, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_pearson_correlation(data, 8, NULL, &correlation), XTRACT_SUCCESS);
+    CHECK_REL(result[1], correlation, EPSILON);
+}
+
+UTEST(correlation_matrix, one_series_gives_one)
+{
+    double covariance = 5.0;
+    double result = 0.0;
+
+    ASSERT_EQ(xtract_correlation_matrix(&covariance, 1, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(result, 1.0);
+}
+
+UTEST(correlation_matrix, coefficients_stay_within_one)
+{
+    double above[] = {1.0, 2.0, 2.0, 1.0};
+    double below[] = {1.0, -2.0, -2.0, 1.0};
+    double result[4] = {0};
+
+    ASSERT_EQ(xtract_correlation_matrix(above, 4, NULL, result), XTRACT_SUCCESS);
+    ASSERT_EQ(result[1], 1.0);
+    ASSERT_EQ(result[2], 1.0);
+    ASSERT_EQ(xtract_correlation_matrix(below, 4, NULL, result), XTRACT_SUCCESS);
+    ASSERT_EQ(result[1], -1.0);
+    ASSERT_EQ(result[2], -1.0);
+}
+
+UTEST(correlation_matrix, no_result_for_a_variance_that_is_not_positive)
+{
+    double zero_last[] = {4.0, 1.0, 0.0, 1.0, 9.0, 0.0, 0.0, 0.0, 0.0};
+    double negative_first[] = {-4.0, 1.0, 1.0, 9.0};
+    double result[9] = {-1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0};
+    int k;
+
+    ASSERT_EQ(xtract_correlation_matrix(zero_last, 9, NULL, result), XTRACT_NO_RESULT);
+    for (k = 0; k < 9; k++)
+        ASSERT_EQ(result[k], 0.0);
+    for (k = 0; k < 4; k++)
+        result[k] = -1.0;
+    ASSERT_EQ(xtract_correlation_matrix(negative_first, 4, NULL, result), XTRACT_NO_RESULT);
+    for (k = 0; k < 4; k++)
+        ASSERT_EQ(result[k], 0.0);
+}
+
+UTEST(correlation_matrix, rejects_a_length_that_is_not_a_square_and_leaves_the_result)
+{
+    double covariance[] = {4.0, 1.0, 1.0, 9.0, 1.0, 1.0, 1.0, 1.0};
+    double result[8] = {-1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0};
+    int k;
+
+    ASSERT_EQ(xtract_correlation_matrix(covariance, 0, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_correlation_matrix(covariance, -4, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_correlation_matrix(covariance, 2, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_correlation_matrix(covariance, 3, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_correlation_matrix(covariance, 5, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_correlation_matrix(covariance, 8, NULL, result), XTRACT_ARGUMENT_ERROR);
+    for (k = 0; k < 8; k++)
+        ASSERT_EQ(result[k], -1.0);
+}

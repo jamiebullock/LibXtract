@@ -425,6 +425,15 @@ UTEST(descriptors, appended_features_are_fully_described)
     ASSERT_EQ(fd[XTRACT_COVARIANCE_MATRIX].is_delta, XTRACT_FALSE);
     ASSERT_EQ(fd[XTRACT_COVARIANCE_MATRIX].result.vector.format, XTRACT_SQUARE_MATRIX);
     ASSERT_EQ(fd[XTRACT_COVARIANCE_MATRIX].result.vector.unit, XTRACT_UNIT_ANY);
+
+    ASSERT_STREQ(fd[XTRACT_CORRELATION_MATRIX].algo.name, "correlation_matrix");
+    ASSERT_EQ(fd[XTRACT_CORRELATION_MATRIX].argc, 0);
+    ASSERT_EQ(fd[XTRACT_CORRELATION_MATRIX].data.format, XTRACT_SQUARE_MATRIX);
+    ASSERT_EQ(fd[XTRACT_CORRELATION_MATRIX].data.unit, XTRACT_UNIT_ANY);
+    ASSERT_EQ(fd[XTRACT_CORRELATION_MATRIX].is_scalar, XTRACT_FALSE);
+    ASSERT_EQ(fd[XTRACT_CORRELATION_MATRIX].is_delta, XTRACT_FALSE);
+    ASSERT_EQ(fd[XTRACT_CORRELATION_MATRIX].result.vector.format, XTRACT_SQUARE_MATRIX);
+    ASSERT_EQ(fd[XTRACT_CORRELATION_MATRIX].result.vector.unit, XTRACT_UNIT_NONE);
     for (f = XTRACT_KULLBACK_LEIBLER_DIVERGENCE; f <= XTRACT_MODIFIED_KULLBACK_LEIBLER; f++)
         ASSERT_EQ_MSG(fd[f].is_delta, XTRACT_TRUE, fd[f].algo.name);
 
@@ -559,6 +568,7 @@ UTEST(dispatch, slots_map_to_the_expected_function)
     ASSERT_TRUE(xtract[XTRACT_CQT] == xtract_cqt);
     ASSERT_TRUE(xtract[XTRACT_PEARSON_CORRELATION] == xtract_pearson_correlation);
     ASSERT_TRUE(xtract[XTRACT_COVARIANCE_MATRIX] == xtract_covariance_matrix);
+    ASSERT_TRUE(xtract[XTRACT_CORRELATION_MATRIX] == xtract_correlation_matrix);
 }
 
 /* ===== Descriptor conformance ===== */
@@ -777,6 +787,8 @@ UTEST(descriptors, every_feature_conforms_to_its_descriptor)
             ASSERT_EQ_MSG(xtract[f](data, min_n - 1, argv, result), conf_below_min_code(d), d->algo.name);
         if (conf_two_half(d))
             ASSERT_EQ_MSG(xtract[f](data, min_n + 1, argv, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
+        if (d->data.format == XTRACT_SQUARE_MATRIX)
+            ASSERT_EQ_MSG(xtract[f](data, 2, argv, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
         if (d->data.format == XTRACT_CHANNELS)
             ASSERT_EQ_MSG(xtract[f](data, call_n + 1, argv, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
         if (d->data.format == XTRACT_BARK_COEFFS)
