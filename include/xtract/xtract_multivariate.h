@@ -17,7 +17,7 @@ extern "C"
     /**
      * \defgroup multivariate Multivariate extraction functions
      *
-     * Functions that extract a scalar, a vector or a matrix from two or more series
+     * Functions that extract a scalar, a vector or a matrix from two or more series, or from a matrix derived from them
      *
      * @{
      */
@@ -57,6 +57,15 @@ extern "C"
      * \param *result: a pointer to an array of C * C doubles: the covariance of series i and series j at index i * C + j, and at index i * C + i the variance of series i as xtract_variance() gives it. Every sum of products is divided by one less than the series length. The values at i * C + j and j * C + i are equal, and a constant series has zeros throughout its row and column
      */
     int xtract_covariance_matrix(const double *data, const int N, const void *argv, double *result);
+
+    /** \brief Extract the correlation matrix of a set of series from their covariance matrix
+     *
+     * \param *data: a pointer to the first element in an array of doubles comprising the C * C values of a covariance matrix as xtract_covariance_matrix() gives it. The diagonal and the values above it, at index i * C + j with j greater than i, are read
+     * \param N: the number of elements in the array pointed to by *data, a perfect square of at least 1
+     * \param *argv: not used
+     * \param *result: a pointer to an array of N doubles: the Pearson correlation coefficient of series i and series j, from -1 to 1, at index i * C + j and at index j * C + i, and 1 at index i * C + i. The array is zeroed with no result when a value on the diagonal of the covariance matrix is zero or negative, as it is for a constant series
+     */
+    int xtract_correlation_matrix(const double *data, const int N, const void *argv, double *result);
 
     /** @} */
 

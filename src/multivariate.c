@@ -37,6 +37,19 @@ static void mean_and_spread(const double *series, const int M, double *mean, dou
     *spread = squares;
 }
 
+/* The number of rows of a square matrix of N elements, or 0 when N is not a
+ * positive perfect square */
+static int matrix_rows(const int N)
+{
+    int C;
+
+    if (N < 1)
+        return 0;
+    C = (int)(sqrt((double)N) + 0.5);
+
+    return (size_t)C * (size_t)C == (size_t)N ? C : 0;
+}
+
 int xtract_cross_correlation(const double *data, const int N, const void *argv, double *result)
 {
     const int M = N >> 1;
@@ -204,6 +217,50 @@ int xtract_covariance_matrix(const double *data, const int N, const void *argv, 
             squares += XTRACT_SQ(x[n] - mean_x);
         result[i * channels + i] = squares / (M - 1);
     }
+
+    return XTRACT_SUCCESS;
+}
+
+int xtract_correlation_matrix(const double *data, const int N, const void *argv, double *result)
+{
+    const int C = matrix_rows(N);
+    const size_t rows = (size_t)C;
+    size_t i, j;
+
+    if (C == 0)
+        return XTRACT_ARGUMENT_ERROR;
+
+    /* Each standard deviation waits on the diagonal until every coefficient
+     * that divides by it is written */
+    for (i = 0; i < rows; i++)
+    {
+        const double variance = data[i * rows + i];
+
+        if (variance <= 0.0)
+        {
+            memset(result, 0, (size_t)N * sizeof(double));
+            return XTRACT_NO_RESULT;
+        }
+        result[i * rows + i] = sqrt(variance);
+    }
+
+    for (i = 0; i < rows; i++)
+    {
+        for (j = i + 1; j < rows; j++)
+        {
+            double coefficient = data[i * rows + j] / (result[i * rows + i] * result[j * rows + j]);
+
+            if (coefficient > 1.0)
+                coefficient = 1.0;
+            else if (coefficient < -1.0)
+                coefficient = -1.0;
+            result[i * rows + j] = coefficient;
+            result[j * rows + i] = coefficient;
+        }
+    }
+
+    for (i = 0; i < rows; i++)
+        result[i * rows + i] = 1.0;
 
     return XTRACT_SUCCESS;
 }

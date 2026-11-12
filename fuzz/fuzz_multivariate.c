@@ -7,7 +7,7 @@
 /*
  * libFuzzer harness for the multivariate feature functions
  * (xtract_multivariate.h): cross_correlation, cross_correlation_lag,
- * pearson_correlation, covariance_matrix.
+ * pearson_correlation, covariance_matrix, correlation_matrix.
  *
  * All share the uniform signature and take a plain double, an int or a NULL
  * argv with no setup, so one harness drives them via the xtract[] dispatch
@@ -27,15 +27,15 @@
 
 static const int eligible[] = {
     XTRACT_CROSS_CORRELATION, XTRACT_CROSS_CORRELATION_LAG, XTRACT_PEARSON_CORRELATION,
-    XTRACT_COVARIANCE_MATRIX};
+    XTRACT_COVARIANCE_MATRIX, XTRACT_CORRELATION_MATRIX};
 
 #define N_ELIGIBLE ((int)(sizeof(eligible) / sizeof(eligible[0])))
 #define MAX_N 4096
 
 /* covariance_matrix writes the square of its series count, which outgrows N.
  * The count is read here as the function reads it, and the result is sized
- * for every count its contract accepts. cross_correlation writes N - 1 values
- * and the others one. */
+ * for every count its contract accepts. cross_correlation writes N - 1 values,
+ * correlation_matrix N and the others one. */
 static size_t result_length(const int feature, const int n, const double *argv)
 {
     int count;
