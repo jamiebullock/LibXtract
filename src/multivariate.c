@@ -16,13 +16,14 @@ int xtract_cross_correlation(const double *data, const int N, const void *argv, 
 {
     const int M = N >> 1;
     const double *x = data;
-    const double *y = data + M;
+    const double *y;
     double scaling, mean_x = 0.0, mean_y = 0.0, scale;
     int lag, n;
 
     if (N < 2 || (N & 1) || argv == NULL)
         return XTRACT_ARGUMENT_ERROR;
 
+    y = data + M;
     scaling = *(const double *)argv;
     if (!(scaling == 0.0 || scaling == 1.0))
         return XTRACT_ARGUMENT_ERROR;
