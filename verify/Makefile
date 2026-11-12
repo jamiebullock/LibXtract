@@ -36,7 +36,8 @@ VERIFY_MAX_N ?= 32
 # band edge test on every bin frequency in spectral_contrast, the range test
 # and pitch class of every bin frequency in chroma), and the
 # solver's cost in those values grows too fast for VERIFY_MAX_N to be
-# reachable.
+# reachable. covariance_matrix is here for its loops: one over the elements
+# of a series inside two over the series, whose unwindings multiply.
 VERIFY_SMALL_N ?= 8
 SMALL_PROOFS = verify_hps verify_mcleod_f0 verify_sharpness \
 	verify_tristimulus_1 verify_tristimulus_2 verify_tristimulus_3 \
@@ -45,7 +46,7 @@ SMALL_PROOFS = verify_hps verify_mcleod_f0 verify_sharpness \
 	verify_moving_max verify_moving_min verify_permutation_entropy \
 	verify_lempel_ziv_complexity verify_sample_entropy verify_approximate_entropy \
 	verify_periodicity verify_signal_confidence verify_spectral_contrast \
-	verify_chroma
+	verify_chroma verify_covariance_matrix
 # The filterbank proofs take a filterbank of up to this many filters; the
 # count multiplies the formula, and N is the bound the proofs are about.
 VERIFY_MAX_FILTERS ?= 2

@@ -170,6 +170,7 @@ extern "C"
         XTRACT_CHROMA,
         XTRACT_CQT,
         XTRACT_PEARSON_CORRELATION,
+        XTRACT_COVARIANCE_MATRIX,
         XTRACT_FEATURE_COUNT
     };
 
@@ -334,7 +335,11 @@ extern "C"
          * XTRACT_MAGNITUDE_PHASE_SPECTRUM */
         XTRACT_SPECTRAL_MAGNITUDE_PHASE,
         /* 12 pitch class values from C to B */
-        XTRACT_CHROMA_COEFFS
+        XTRACT_CHROMA_COEFFS,
+        /* Series of equal length, one after another */
+        XTRACT_CHANNELS,
+        /* The rows of a square matrix, one after another */
+        XTRACT_SQUARE_MATRIX
     } xtract_vector_t;
 
     /** \brief Data structure containing useful information about functions provided by LibXtract. */

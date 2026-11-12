@@ -412,6 +412,19 @@ UTEST(descriptors, appended_features_are_fully_described)
     ASSERT_EQ(fd[XTRACT_PEARSON_CORRELATION].result.scalar.unit, XTRACT_UNIT_NONE);
     CHECK_REL(fd[XTRACT_PEARSON_CORRELATION].result.scalar.min, -1.0, EPSILON);
     CHECK_REL(fd[XTRACT_PEARSON_CORRELATION].result.scalar.max, 1.0, EPSILON);
+
+    ASSERT_STREQ(fd[XTRACT_COVARIANCE_MATRIX].algo.name, "covariance_matrix");
+    ASSERT_EQ(fd[XTRACT_COVARIANCE_MATRIX].argc, 1);
+    ASSERT_EQ(fd[XTRACT_COVARIANCE_MATRIX].argv.type, XTRACT_INT);
+    CHECK_REL(fd[XTRACT_COVARIANCE_MATRIX].argv.min[0], 1.0, EPSILON);
+    ASSERT_EQ(fd[XTRACT_COVARIANCE_MATRIX].argv.max[0], XTRACT_UNBOUNDED_MAX);
+    CHECK_REL(fd[XTRACT_COVARIANCE_MATRIX].argv.def[0], 2.0, EPSILON);
+    ASSERT_EQ(fd[XTRACT_COVARIANCE_MATRIX].data.format, XTRACT_CHANNELS);
+    ASSERT_EQ(fd[XTRACT_COVARIANCE_MATRIX].data.unit, XTRACT_UNIT_ANY);
+    ASSERT_EQ(fd[XTRACT_COVARIANCE_MATRIX].is_scalar, XTRACT_FALSE);
+    ASSERT_EQ(fd[XTRACT_COVARIANCE_MATRIX].is_delta, XTRACT_FALSE);
+    ASSERT_EQ(fd[XTRACT_COVARIANCE_MATRIX].result.vector.format, XTRACT_SQUARE_MATRIX);
+    ASSERT_EQ(fd[XTRACT_COVARIANCE_MATRIX].result.vector.unit, XTRACT_UNIT_ANY);
     for (f = XTRACT_KULLBACK_LEIBLER_DIVERGENCE; f <= XTRACT_MODIFIED_KULLBACK_LEIBLER; f++)
         ASSERT_EQ_MSG(fd[f].is_delta, XTRACT_TRUE, fd[f].algo.name);
 
@@ -545,6 +558,7 @@ UTEST(dispatch, slots_map_to_the_expected_function)
     ASSERT_TRUE(xtract[XTRACT_CHROMA] == xtract_chroma);
     ASSERT_TRUE(xtract[XTRACT_CQT] == xtract_cqt);
     ASSERT_TRUE(xtract[XTRACT_PEARSON_CORRELATION] == xtract_pearson_correlation);
+    ASSERT_TRUE(xtract[XTRACT_COVARIANCE_MATRIX] == xtract_covariance_matrix);
 }
 
 /* ===== Descriptor conformance ===== */
@@ -578,6 +592,7 @@ static int conf_min_n(const xtract_function_descriptor_t *d)
     case XTRACT_SAMPLE_ENTROPY:
     case XTRACT_APPROXIMATE_ENTROPY:
     case XTRACT_PEARSON_CORRELATION:
+    case XTRACT_COVARIANCE_MATRIX:
         return 4;
     case XTRACT_IRREGULARITY_K:
     case XTRACT_SMOOTHNESS:
@@ -762,6 +777,8 @@ UTEST(descriptors, every_feature_conforms_to_its_descriptor)
             ASSERT_EQ_MSG(xtract[f](data, min_n - 1, argv, result), conf_below_min_code(d), d->algo.name);
         if (conf_two_half(d))
             ASSERT_EQ_MSG(xtract[f](data, min_n + 1, argv, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
+        if (d->data.format == XTRACT_CHANNELS)
+            ASSERT_EQ_MSG(xtract[f](data, call_n + 1, argv, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
         if (d->data.format == XTRACT_BARK_COEFFS)
             ASSERT_EQ_MSG(xtract[f](data, XTRACT_BARK_BANDS + 1, argv, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
 

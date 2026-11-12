@@ -13,16 +13,25 @@
 #include "xtract_macros_private.h"
 
 /* The mean is taken from each element's offset from the first, so that a
- * constant series has a mean equal to its elements and a spread of exactly
+ * constant series has a mean equal to its elements and deviations of exactly
  * zero whatever its value */
-static void mean_and_spread(const double *series, const int M, double *mean, double *spread)
+static double series_mean(const double *series, const int M)
 {
-    double offset = 0.0, squares = 0.0;
+    double offset = 0.0;
     int n;
 
     for (n = 1; n < M; n++)
         offset += series[n] - series[0];
-    *mean = series[0] + offset / M;
+
+    return series[0] + offset / M;
+}
+
+static void mean_and_spread(const double *series, const int M, double *mean, double *spread)
+{
+    double squares = 0.0;
+    int n;
+
+    *mean = series_mean(series, M);
     for (n = 0; n < M; n++)
         squares += XTRACT_SQ(series[n] - *mean);
     *spread = squares;
@@ -148,6 +157,53 @@ int xtract_pearson_correlation(const double *data, const int N, const void *argv
     else if (coefficient < -1.0)
         coefficient = -1.0;
     *result = coefficient;
+
+    return XTRACT_SUCCESS;
+}
+
+int xtract_covariance_matrix(const double *data, const int N, const void *argv, double *result)
+{
+    size_t channels;
+    int C, M, i, j, n;
+
+    if (N < 2 || argv == NULL)
+        return XTRACT_ARGUMENT_ERROR;
+
+    C = *(const int *)argv;
+    if (C < 1 || C > N / 2 || N % C != 0)
+        return XTRACT_ARGUMENT_ERROR;
+
+    M = N / C;
+    channels = (size_t)C;
+
+    /* Each mean waits on the diagonal until its row is reached: row i reads
+     * the means of series i and above, then replaces its own with the variance */
+    for (i = 0; i < C; i++)
+        result[i * channels + i] = series_mean(data + i * M, M);
+
+    for (i = 0; i < C; i++)
+    {
+        const double *x = data + i * M;
+        const double mean_x = result[i * channels + i];
+        double squares = 0.0;
+
+        for (j = i + 1; j < C; j++)
+        {
+            const double *y = data + j * M;
+            const double mean_y = result[j * channels + j];
+            double products = 0.0;
+
+            for (n = 0; n < M; n++)
+                products += (x[n] - mean_x) * (y[n] - mean_y);
+            products /= M - 1;
+            result[i * channels + j] = products;
+            result[j * channels + i] = products;
+        }
+
+        for (n = 0; n < M; n++)
+            squares += XTRACT_SQ(x[n] - mean_x);
+        result[i * channels + i] = squares / (M - 1);
+    }
 
     return XTRACT_SUCCESS;
 }

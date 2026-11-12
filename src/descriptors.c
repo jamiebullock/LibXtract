@@ -322,6 +322,12 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *argv_def = XTRACT_NO_DEFAULT;
             *argv_unit = XTRACT_UNIT_ANY;
             break;
+        case XTRACT_COVARIANCE_MATRIX:
+            *argv_min = 1;
+            *argv_max = XTRACT_UNBOUNDED_MAX;
+            *argv_def = 2;
+            *argv_unit = (xtract_unit_t)XTRACT_NONE;
+            break;
         case XTRACT_SPECTRAL_CONTRAST:
             *argv_min = 1.0;
             *argv_max = XTRACT_UNBOUNDED_MAX;
@@ -645,6 +651,9 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_MODIFIED_KULLBACK_LEIBLER:
             *data_format = XTRACT_SUBFRAMES;
             break;
+        case XTRACT_COVARIANCE_MATRIX:
+            *data_format = XTRACT_CHANNELS;
+            break;
         case XTRACT_MIDICENT:
         default:
             *data_format = XTRACT_NO_DATA;
@@ -699,6 +708,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_CROSS_CORRELATION:
         case XTRACT_CROSS_CORRELATION_LAG:
         case XTRACT_PEARSON_CORRELATION:
+        case XTRACT_COVARIANCE_MATRIX:
         case XTRACT_KULLBACK_LEIBLER_DIVERGENCE:
         case XTRACT_ITAKURA_SAITO_DIVERGENCE:
         case XTRACT_MODIFIED_KULLBACK_LEIBLER:
@@ -1516,6 +1526,13 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             copy_desc(p_desc, "Extract the strength and direction of the linear relationship between two series");
             copy_author(author, "");
             break;
+        case XTRACT_COVARIANCE_MATRIX:
+            copy_name(name, "covariance_matrix");
+            copy_name(p_name, "Covariance Matrix");
+            copy_desc(desc, "Extract the covariance matrix of a set of series");
+            copy_desc(p_desc, "Extract the covariance of every pair of series in a set");
+            copy_author(author, "");
+            break;
         case XTRACT_KULLBACK_LEIBLER_DIVERGENCE:
             copy_name(name, "kullback_leibler_divergence");
             copy_name(p_name, "Kullback-Leibler Divergence");
@@ -1718,6 +1735,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_MOVING_MIN:
         case XTRACT_TIME_REVERSAL_ASYMMETRY:
         case XTRACT_HIGUCHI_FRACTAL_DIMENSION:
+        case XTRACT_COVARIANCE_MATRIX:
             *argc = 1;
             *argv_type = XTRACT_INT;
             break;
@@ -1899,6 +1917,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_SPECTRAL_CONTRAST:
         case XTRACT_CHROMA:
         case XTRACT_CQT:
+        case XTRACT_COVARIANCE_MATRIX:
             *is_scalar = XTRACT_FALSE;
             break;
         default:
@@ -2223,6 +2242,10 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             case XTRACT_SPECTRAL_CONTRAST:
                 *result_format = XTRACT_ARBITRARY_SERIES;
                 *result_unit = XTRACT_UNIT_NONE;
+                break;
+            case XTRACT_COVARIANCE_MATRIX:
+                *result_format = XTRACT_SQUARE_MATRIX;
+                *result_unit = XTRACT_UNIT_ANY;
                 break;
             case XTRACT_CHROMA:
                 *result_format = XTRACT_CHROMA_COEFFS;
