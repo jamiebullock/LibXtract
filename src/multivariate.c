@@ -334,20 +334,25 @@ static double upper_magnitude(const double *matrix, const size_t rows)
 static void jacobi_rotate(double *matrix, const size_t rows, const size_t p, const size_t q)
 {
     const double pivot = matrix[p * rows + q];
-    double theta, magnitude, larger, ratio, tangent, cosine, sine, tau;
+    double theta, magnitude, tangent, cosine, sine, tau;
     size_t k;
 
     if (pivot == 0.0)
         return;
 
-    /* Halving each diagonal value before the subtraction, and taking the
-     * larger of the magnitude of theta and 1 outside the square root, keep
-     * both steps finite for values whose difference or square is not */
+    /* Halving each diagonal value before the subtraction, and working from
+     * the reciprocal of a theta above 1, keep every step finite for values
+     * whose difference, square or double is not */
     theta = (0.5 * matrix[q * rows + q] - 0.5 * matrix[p * rows + p]) / pivot;
     magnitude = fabs(theta);
-    larger = magnitude > 1.0 ? magnitude : 1.0;
-    ratio = magnitude > 1.0 ? 1.0 / magnitude : magnitude;
-    tangent = 1.0 / (magnitude + larger * sqrt(ratio * ratio + 1.0));
+    if (magnitude > 1.0)
+    {
+        const double reciprocal = 1.0 / magnitude;
+
+        tangent = reciprocal / (1.0 + sqrt(reciprocal * reciprocal + 1.0));
+    }
+    else
+        tangent = 1.0 / (magnitude + sqrt(magnitude * magnitude + 1.0));
     if (theta < 0.0)
         tangent = -tangent;
     cosine = 1.0 / sqrt(tangent * tangent + 1.0);
