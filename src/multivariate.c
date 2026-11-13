@@ -52,17 +52,22 @@ static void mean_and_spread(const double *series, const int M, double *mean, dou
 }
 
 /* The number of rows of a square matrix of N elements, or 0 when N is not a
- * positive perfect square. A count between 1 and N has a square that fits a
- * size_t, so the answer is right whatever the square root returns */
+ * positive perfect square. The root is tested against the range of N before
+ * its conversion to int, and the count against N / C before it is squared,
+ * which keeps both in range for any value of the root */
 static int matrix_rows(const int N)
 {
+    double root;
     int C;
 
     if (N < 1)
         return 0;
-    C = (int)(sqrt((double)N) + 0.5);
+    root = sqrt((double)N) + 0.5;
+    if (!(root >= 1.0 && root < (double)N + 1.0))
+        return 0;
+    C = (int)root;
 
-    return C >= 1 && C <= N && (size_t)C * (size_t)C == (size_t)N ? C : 0;
+    return C <= N / C && C * C == N ? C : 0;
 }
 
 int xtract_cross_correlation(const double *data, const int N, const void *argv, double *result)
