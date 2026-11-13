@@ -22,6 +22,11 @@ double verify_sqrt(double x)
     return verify_any_sqrt ? nondet_double() : sqrt(x);
 }
 
+double atan2(double y, double x)
+{
+    return nondet_double();
+}
+
 double cbrt(double x)
 {
     return nondet_double();
