@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: Zlib
  */
 
+#undef sqrt
+
 #include <math.h>
 
 #include "verify.h"
@@ -11,6 +13,13 @@
 double pow(double x, double y)
 {
     return nondet_double();
+}
+
+_Bool verify_any_sqrt;
+
+double verify_sqrt(double x)
+{
+    return verify_any_sqrt ? nondet_double() : sqrt(x);
 }
 
 double cbrt(double x)

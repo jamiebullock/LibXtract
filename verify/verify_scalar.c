@@ -95,6 +95,7 @@ void verify_failsafe_f0(void)
     double *argv = nondet_doubles(XTRACT_MAXARGS);
     double result;
 
+    verify_any_sqrt = 1;
     if (nondet_bool())
         xtract_init_fft(nondet_fft_size(), XTRACT_SPECTRUM);
 

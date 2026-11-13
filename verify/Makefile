@@ -20,6 +20,12 @@
 # of: both return any value. stdlib_stub.c does the same for qsort, which
 # CBMC has no model of: it calls the comparator on each adjacent pair and
 # then fills the buffer with arbitrary values.
+# The library is compiled with sqrt renamed to verify_sqrt, which math_stub.c
+# defines. It calls sqrt unless a harness sets verify_any_sqrt, and then it
+# returns any value. CBMC models sqrt with assumptions on two products of
+# doubles, which formula slicing cannot drop, and a proof that takes a
+# spectrum pays for them once per bin and unwinding. A harness sets the flag
+# only where no array index or loop bound depends on a square root.
 # Requires cbmc, goto-cc and goto-instrument, and bitwuzla on the PATH.
 CBMC ?= cbmc
 GOTO_CC ?= goto-cc
@@ -66,7 +72,7 @@ HEADERS := verify.h $(wildcard ../include/xtract/*.h ../src/*.h ../src/ooura/*.h
 
 CFLAGS = -U__APPLE__ -DUSE_OOURA -DVERIFY_MAX_N=$(VERIFY_MAX_N) -DVERIFY_SMALL_N=$(VERIFY_SMALL_N) \
 	-DVERIFY_MAX_FILTERS=$(VERIFY_MAX_FILTERS) -DXTRACT_JACOBI_MAX_SWEEPS=$(VERIFY_MAX_SWEEPS) \
-	-std=c99 -I../include -I../src
+	-Dsqrt=verify_sqrt -std=c99 -I../include -I../src
 
 # Every loop may run once per input element, and the bark band loop runs
 # XTRACT_BARK_BANDS times whatever N is, so the bound is the larger of the two

@@ -24,6 +24,9 @@ extern "C"
 {
 #endif
 
+    /** \brief When set, every sqrt in the library returns any value */
+    extern _Bool verify_any_sqrt;
+
     int nondet_int(void);
     double nondet_double(void);
     _Bool nondet_bool(void);
