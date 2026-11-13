@@ -41,6 +41,7 @@ void verify_principal_variances(void)
                                              : N == 1   ? 1
                                                         : 0);
 
+    verify_any_sqrt = 1;
     (void)xtract_principal_variances(data, N, NULL, result);
     free(data);
     free(result);

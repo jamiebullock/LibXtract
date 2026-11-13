@@ -103,6 +103,23 @@ FILTERBANK_HARNESS(spectral_subband_centroids, nondet_small_length(), N / 2)
 
 FFT_HARNESS(autocorrelation_fft, nondet_length(), XTRACT_AUTOCORRELATION_FFT, N)
 
+void verify_spectrum(void)
+{
+    const int N = nondet_length();
+    double *data = nondet_doubles(N);
+    double *argv = nondet_doubles(XTRACT_MAXARGS);
+    double *result = nondet_doubles(N);
+
+    verify_any_sqrt = 1;
+    if (nondet_bool())
+        xtract_init_fft(nondet_fft_size(), XTRACT_SPECTRUM);
+    (void)xtract_spectrum(data, N, nondet_argv(argv), result);
+    xtract_free_fft();
+    free(data);
+    free(argv);
+    free(result);
+}
+
 #define VECTOR_HARNESS(feature, length, argv_length, result_length) \
     void verify_##feature(void)                                     \
     {                                                               \

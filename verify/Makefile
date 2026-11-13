@@ -16,16 +16,17 @@
 # library's handling of any transform output and say nothing about the
 # transform.
 # math_stub.c does the same for pow, whose CBMC model needs a floating-point
-# remainder the SMT backend cannot encode, and cbrt, which CBMC has no model
-# of: both return any value. stdlib_stub.c does the same for qsort, which
-# CBMC has no model of: it calls the comparator on each adjacent pair and
-# then fills the buffer with arbitrary values.
+# remainder the SMT backend cannot encode, and cbrt and atan2, which CBMC has
+# no model of: all three return any value. stdlib_stub.c does the same for
+# qsort, which CBMC has no model of: it calls the comparator on each adjacent
+# pair and then fills the buffer with arbitrary values.
 # The library is compiled with sqrt renamed to verify_sqrt, which math_stub.c
 # defines. It calls sqrt unless a harness sets verify_any_sqrt, and then it
 # returns any value. CBMC models sqrt with assumptions on two products of
 # doubles, which formula slicing cannot drop, and a proof that takes a
 # spectrum pays for them once per bin and unwinding. A harness sets the flag
-# only where no array index or loop bound depends on a square root.
+# only for code whose array indexes and loop bounds are valid for every value
+# a square root returns.
 # Requires cbmc, goto-cc and goto-instrument, and bitwuzla on the PATH.
 CBMC ?= cbmc
 GOTO_CC ?= goto-cc
