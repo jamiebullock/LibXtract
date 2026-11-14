@@ -550,6 +550,29 @@ UTEST(descriptors, appended_features_are_fully_described)
     ASSERT_EQ(fd[XTRACT_COOCCURRENCE_MATRIX].is_scalar, XTRACT_FALSE);
     ASSERT_EQ(fd[XTRACT_COOCCURRENCE_MATRIX].result.vector.format, XTRACT_SQUARE_MATRIX);
     ASSERT_EQ(fd[XTRACT_COOCCURRENCE_MATRIX].result.vector.unit, XTRACT_UNIT_NONE);
+
+    ASSERT_STREQ(fd[XTRACT_COOCCURRENCE_CONTRAST].algo.name, "cooccurrence_contrast");
+    ASSERT_STREQ(fd[XTRACT_COOCCURRENCE_CORRELATION].algo.name, "cooccurrence_correlation");
+    ASSERT_STREQ(fd[XTRACT_ANGULAR_SECOND_MOMENT].algo.name, "angular_second_moment");
+    ASSERT_STREQ(fd[XTRACT_INVERSE_DIFFERENCE_MOMENT].algo.name, "inverse_difference_moment");
+    for (f = XTRACT_COOCCURRENCE_CONTRAST; f <= XTRACT_INVERSE_DIFFERENCE_MOMENT; f++)
+    {
+        ASSERT_EQ_MSG(fd[f].algo.year, 1973, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].argc, 0, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].data.format, XTRACT_SQUARE_MATRIX, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].data.unit, XTRACT_UNIT_NONE, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].is_scalar, XTRACT_TRUE, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].is_delta, XTRACT_FALSE, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].result.scalar.unit, XTRACT_UNIT_NONE, fd[f].algo.name);
+    }
+    ASSERT_EQ(fd[XTRACT_COOCCURRENCE_CONTRAST].result.scalar.min, 0.0);
+    ASSERT_EQ(fd[XTRACT_COOCCURRENCE_CONTRAST].result.scalar.max, XTRACT_UNBOUNDED_MAX);
+    CHECK_REL(fd[XTRACT_COOCCURRENCE_CORRELATION].result.scalar.min, -1.0, EPSILON);
+    CHECK_REL(fd[XTRACT_COOCCURRENCE_CORRELATION].result.scalar.max, 1.0, EPSILON);
+    ASSERT_EQ(fd[XTRACT_ANGULAR_SECOND_MOMENT].result.scalar.min, 0.0);
+    CHECK_REL(fd[XTRACT_ANGULAR_SECOND_MOMENT].result.scalar.max, 1.0, EPSILON);
+    ASSERT_EQ(fd[XTRACT_INVERSE_DIFFERENCE_MOMENT].result.scalar.min, 0.0);
+    CHECK_REL(fd[XTRACT_INVERSE_DIFFERENCE_MOMENT].result.scalar.max, 1.0, EPSILON);
     for (f = XTRACT_KULLBACK_LEIBLER_DIVERGENCE; f <= XTRACT_MODIFIED_KULLBACK_LEIBLER; f++)
         ASSERT_EQ_MSG(fd[f].is_delta, XTRACT_TRUE, fd[f].algo.name);
 
@@ -695,6 +718,10 @@ UTEST(dispatch, slots_map_to_the_expected_function)
     ASSERT_TRUE(xtract[XTRACT_QUANTISE] == xtract_quantise);
     ASSERT_TRUE(xtract[XTRACT_HISTOGRAM] == xtract_histogram);
     ASSERT_TRUE(xtract[XTRACT_COOCCURRENCE_MATRIX] == xtract_cooccurrence_matrix);
+    ASSERT_TRUE(xtract[XTRACT_COOCCURRENCE_CONTRAST] == xtract_cooccurrence_contrast);
+    ASSERT_TRUE(xtract[XTRACT_COOCCURRENCE_CORRELATION] == xtract_cooccurrence_correlation);
+    ASSERT_TRUE(xtract[XTRACT_ANGULAR_SECOND_MOMENT] == xtract_angular_second_moment);
+    ASSERT_TRUE(xtract[XTRACT_INVERSE_DIFFERENCE_MOMENT] == xtract_inverse_difference_moment);
 }
 
 /* ===== Descriptor conformance ===== */

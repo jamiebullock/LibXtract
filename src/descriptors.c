@@ -727,6 +727,10 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_CORRELATION_MATRIX:
         case XTRACT_AVERAGE_CORRELATION:
         case XTRACT_PRINCIPAL_VARIANCES:
+        case XTRACT_COOCCURRENCE_CONTRAST:
+        case XTRACT_COOCCURRENCE_CORRELATION:
+        case XTRACT_ANGULAR_SECOND_MOMENT:
+        case XTRACT_INVERSE_DIFFERENCE_MOMENT:
             *data_format = XTRACT_SQUARE_MATRIX;
             break;
         case XTRACT_MIDICENT:
@@ -846,6 +850,10 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             break;
         case XTRACT_HISTOGRAM:
         case XTRACT_COOCCURRENCE_MATRIX:
+        case XTRACT_COOCCURRENCE_CONTRAST:
+        case XTRACT_COOCCURRENCE_CORRELATION:
+        case XTRACT_ANGULAR_SECOND_MOMENT:
+        case XTRACT_INVERSE_DIFFERENCE_MOMENT:
             *data_unit = XTRACT_UNIT_NONE;
             break;
         case XTRACT_SPECTRAL_MEAN:
@@ -1700,6 +1708,38 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             copy_author(author, "Robert Haralick");
             *year = 1973;
             break;
+        case XTRACT_COOCCURRENCE_CONTRAST:
+            copy_name(name, "cooccurrence_contrast");
+            copy_name(p_name, "Co-occurrence Contrast");
+            copy_desc(desc, "Extract the contrast of a co-occurrence matrix");
+            copy_desc(p_desc, "Extract how far apart the levels of the paired elements of a grid are");
+            copy_author(author, "Robert Haralick");
+            *year = 1973;
+            break;
+        case XTRACT_COOCCURRENCE_CORRELATION:
+            copy_name(name, "cooccurrence_correlation");
+            copy_name(p_name, "Co-occurrence Correlation");
+            copy_desc(desc, "Extract the correlation of a co-occurrence matrix");
+            copy_desc(p_desc, "Extract how closely the levels of the paired elements of a grid follow each other");
+            copy_author(author, "Robert Haralick");
+            *year = 1973;
+            break;
+        case XTRACT_ANGULAR_SECOND_MOMENT:
+            copy_name(name, "angular_second_moment");
+            copy_name(p_name, "Angular Second Moment");
+            copy_desc(desc, "Extract the angular second moment of a co-occurrence matrix");
+            copy_desc(p_desc, "Extract how far the paired elements of a grid keep to a few pairs of levels");
+            copy_author(author, "Robert Haralick");
+            *year = 1973;
+            break;
+        case XTRACT_INVERSE_DIFFERENCE_MOMENT:
+            copy_name(name, "inverse_difference_moment");
+            copy_name(p_name, "Inverse Difference Moment");
+            copy_desc(desc, "Extract the inverse difference moment of a co-occurrence matrix");
+            copy_desc(p_desc, "Extract how close in level the paired elements of a grid are");
+            copy_author(author, "Robert Haralick");
+            *year = 1973;
+            break;
         case XTRACT_KULLBACK_LEIBLER_DIVERGENCE:
             copy_name(name, "kullback_leibler_divergence");
             copy_name(p_name, "Kullback-Leibler Divergence");
@@ -2361,8 +2401,20 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
                 break;
             case XTRACT_PEARSON_CORRELATION:
             case XTRACT_AVERAGE_CORRELATION:
+            case XTRACT_COOCCURRENCE_CORRELATION:
                 *result_unit = XTRACT_UNIT_NONE;
                 *result_min = -1.0;
+                *result_max = 1.0;
+                break;
+            case XTRACT_COOCCURRENCE_CONTRAST:
+                *result_unit = XTRACT_UNIT_NONE;
+                *result_min = 0.0;
+                *result_max = XTRACT_UNBOUNDED_MAX;
+                break;
+            case XTRACT_ANGULAR_SECOND_MOMENT:
+            case XTRACT_INVERSE_DIFFERENCE_MOMENT:
+                *result_unit = XTRACT_UNIT_NONE;
+                *result_min = 0.0;
                 *result_max = 1.0;
                 break;
             case XTRACT_SHARPNESS:

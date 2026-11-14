@@ -5,6 +5,7 @@
  */
 
 #include "xtract/xtract_grid.h"
+#include "xtract/xtract_scalar.h"
 #include "xtract/xtract_vector.h"
 #include "xtract/libxtract.h"
 
@@ -658,4 +659,202 @@ UTEST(cooccurrence_matrix, rejects_bad_arguments)
     ASSERT_EQ(xtract_cooccurrence_matrix(LEVELS_GRID, 6, argv, result), XTRACT_ARGUMENT_ERROR);
     argv[4] = 1;
     ASSERT_EQ(xtract_cooccurrence_matrix(LEVELS_GRID, 6, argv, result), XTRACT_SUCCESS);
+}
+
+/* Three levels. The first elements of the pairs are at levels 0, 1 and 2 in
+ * the fractions 0.3, 0.5 and 0.2, and so are the second: a mean level of 0.9
+ * and a variance of 0.3 * 0.81 + 0.5 * 0.01 + 0.2 * 1.21 = 0.49 for both */
+static const double PAIRS[] = {0.2, 0.1, 0.0,
+                               0.1, 0.3, 0.1,
+                               0.0, 0.1, 0.1};
+
+UTEST(cooccurrence_contrast, mean_square_difference_of_the_levels)
+{
+    /* Four values of 0.1 are one level off the diagonal, and none two */
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_cooccurrence_contrast(PAIRS, 9, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 0.4, EPSILON);
+}
+
+UTEST(cooccurrence_correlation, covariance_of_the_two_levels_over_their_variance)
+{
+    /* The covariance is 0.162 - 0.018 + 0.003 + 0.022 + 0.121 = 0.29 */
+    double result = -2.0;
+
+    ASSERT_EQ(xtract_cooccurrence_correlation(PAIRS, 9, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 0.29 / 0.49, EPSILON);
+}
+
+UTEST(angular_second_moment, sum_of_the_squares)
+{
+    /* 0.04 + 0.09 + 0.01 on the diagonal and four of 0.01 off it */
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_angular_second_moment(PAIRS, 9, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 0.18, EPSILON);
+}
+
+UTEST(inverse_difference_moment, diagonal_whole_and_one_level_off_halved)
+{
+    /* 0.6 on the diagonal, and 0.4 one level off it divided by 2 */
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_inverse_difference_moment(PAIRS, 9, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 0.8, EPSILON);
+}
+
+typedef int (*statistic)(const double *, const int, const void *, double *);
+
+static const statistic STATISTICS[] = {xtract_cooccurrence_contrast, xtract_cooccurrence_correlation,
+                                       xtract_angular_second_moment, xtract_inverse_difference_moment};
+
+UTEST(cooccurrence_statistics, do_not_change_when_the_matrix_is_scaled)
+{
+    double scaled[9];
+    double a, b;
+    int i, k;
+
+    for (i = 0; i < 9; i++)
+        scaled[i] = 24.0 * PAIRS[i];
+    for (k = 0; k < 4; k++)
+    {
+        ASSERT_EQ(STATISTICS[k](PAIRS, 9, NULL, &a), XTRACT_SUCCESS);
+        ASSERT_EQ(STATISTICS[k](scaled, 9, NULL, &b), XTRACT_SUCCESS);
+        CHECK_REL(a, b, EPSILON);
+    }
+}
+
+UTEST(cooccurrence_statistics, pairs_always_at_the_same_level)
+{
+    double diagonal[] = {0.5, 0.0, 0.0, 0.0, 0.25, 0.0, 0.0, 0.0, 0.25};
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_cooccurrence_contrast(diagonal, 9, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(result, 0.0);
+    ASSERT_EQ(xtract_inverse_difference_moment(diagonal, 9, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 1.0, EPSILON);
+    ASSERT_EQ(xtract_cooccurrence_correlation(diagonal, 9, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 1.0, EPSILON);
+    ASSERT_EQ(xtract_angular_second_moment(diagonal, 9, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 0.25 + 0.0625 + 0.0625, EPSILON);
+}
+
+UTEST(cooccurrence_statistics, pairs_always_at_opposite_levels)
+{
+    double opposite[] = {0.0, 0.5, 0.5, 0.0};
+    double result = 0.0;
+
+    ASSERT_EQ(xtract_cooccurrence_correlation(opposite, 4, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, -1.0, EPSILON);
+    ASSERT_EQ(xtract_cooccurrence_contrast(opposite, 4, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 1.0, EPSILON);
+    ASSERT_EQ(xtract_inverse_difference_moment(opposite, 4, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 0.5, EPSILON);
+}
+
+UTEST(angular_second_moment, from_one_over_n_for_even_pairs_to_one_for_a_single_pair)
+{
+    double even[16];
+    double single[16] = {0};
+    double result = -1.0;
+    int i;
+
+    for (i = 0; i < 16; i++)
+        even[i] = 1.0 / 16.0;
+    single[6] = 1.0;
+    ASSERT_EQ(xtract_angular_second_moment(even, 16, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 1.0 / 16.0, EPSILON);
+    ASSERT_EQ(xtract_angular_second_moment(single, 16, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 1.0, EPSILON);
+}
+
+UTEST(cooccurrence_statistics, spectral_entropy_of_the_matrix_is_the_entropy_of_the_pairs)
+{
+    double even[16];
+    double single[16] = {0};
+    double result = -1.0;
+    int i;
+
+    for (i = 0; i < 16; i++)
+        even[i] = 1.0 / 16.0;
+    single[6] = 1.0;
+    ASSERT_EQ(xtract_spectral_entropy(even, 16, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 1.0, EPSILON);
+    ASSERT_EQ(xtract_spectral_entropy(single, 16, NULL, &result), XTRACT_SUCCESS);
+    CHECK_NEAR(result, 0.0, EPSILON);
+}
+
+UTEST(cooccurrence_statistics, of_a_grid_through_the_matrix)
+{
+    /* The symmetric matrix of LEVELS_GRID at one column to the right holds
+     * 2/8 at (0, 1), (1, 0) and (1, 1) and 1/8 at (1, 2) and (2, 1): every
+     * value but the 2/8 on the diagonal is one level off it */
+    int argv[] = {3, 3, 1, 0, 1};
+    double matrix[9] = {0};
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_cooccurrence_matrix(LEVELS_GRID, 6, argv, matrix), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_cooccurrence_contrast(matrix, 9, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 6.0 / 8.0, EPSILON);
+    ASSERT_EQ(xtract_inverse_difference_moment(matrix, 9, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 2.0 / 8.0 + 3.0 / 8.0, EPSILON);
+    ASSERT_EQ(xtract_angular_second_moment(matrix, 9, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 3.0 * 4.0 / 64.0 + 2.0 / 64.0, EPSILON);
+}
+
+UTEST(cooccurrence_statistics, one_level)
+{
+    double matrix = 1.0;
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_cooccurrence_contrast(&matrix, 1, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(result, 0.0);
+    ASSERT_EQ(xtract_angular_second_moment(&matrix, 1, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 1.0, EPSILON);
+    ASSERT_EQ(xtract_inverse_difference_moment(&matrix, 1, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 1.0, EPSILON);
+    result = -1.0;
+    ASSERT_EQ(xtract_cooccurrence_correlation(&matrix, 1, NULL, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
+}
+
+UTEST(cooccurrence_correlation, no_result_when_one_side_of_the_pairs_is_at_one_level)
+{
+    /* Every first element is at level 0 */
+    double matrix[] = {0.5, 0.5, 0.0, 0.0};
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_cooccurrence_correlation(matrix, 4, NULL, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
+}
+
+UTEST(cooccurrence_statistics, no_result_when_the_matrix_is_empty)
+{
+    double empty[4] = {0};
+    double result;
+    int k;
+
+    for (k = 0; k < 4; k++)
+    {
+        result = -1.0;
+        ASSERT_EQ(STATISTICS[k](empty, 4, NULL, &result), XTRACT_NO_RESULT);
+        ASSERT_EQ(result, 0.0);
+    }
+}
+
+UTEST(cooccurrence_statistics, reject_a_length_that_is_not_a_square)
+{
+    double matrix[8] = {0.5, 0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+    double result;
+    int k;
+
+    for (k = 0; k < 4; k++)
+    {
+        result = -1.0;
+        ASSERT_EQ(STATISTICS[k](matrix, 8, NULL, &result), XTRACT_ARGUMENT_ERROR);
+        ASSERT_EQ(result, 0.0);
+        ASSERT_EQ(STATISTICS[k](matrix, 0, NULL, &result), XTRACT_ARGUMENT_ERROR);
+        ASSERT_EQ(STATISTICS[k](matrix, 4, NULL, &result), k == 1 ? XTRACT_NO_RESULT : XTRACT_SUCCESS);
+    }
 }
