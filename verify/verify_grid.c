@@ -23,3 +23,16 @@ void verify_grid_moments(void)
     free(argv);
     free(result);
 }
+
+void verify_grid_central_moments(void)
+{
+    const int N = nondet_length();
+    double *data = nondet_doubles(N);
+    int *argv = nondet_ints(1);
+    double *result = nondet_doubles(7);
+
+    (void)xtract_grid_central_moments(data, N, nondet_argv(argv), result);
+    free(data);
+    free(argv);
+    free(result);
+}

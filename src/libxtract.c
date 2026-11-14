@@ -126,4 +126,5 @@ int (*xtract[])(const double *, const int, const void *, double *) =
         xtract_average_correlation,
         xtract_principal_variances,
         xtract_coherence,
-        xtract_grid_moments};
+        xtract_grid_moments,
+        xtract_grid_central_moments};

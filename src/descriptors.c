@@ -323,6 +323,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *argv_unit = XTRACT_UNIT_ANY;
             break;
         case XTRACT_GRID_MOMENTS:
+        case XTRACT_GRID_CENTRAL_MOMENTS:
             *argv_min = 1;
             *argv_max = XTRACT_UNBOUNDED_MAX;
             *argv_def = XTRACT_NO_DEFAULT;
@@ -662,6 +663,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *data_format = XTRACT_CHANNELS;
             break;
         case XTRACT_GRID_MOMENTS:
+        case XTRACT_GRID_CENTRAL_MOMENTS:
             *data_format = XTRACT_GRID;
             break;
         case XTRACT_CORRELATION_MATRIX:
@@ -729,6 +731,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_PRINCIPAL_VARIANCES:
         case XTRACT_COHERENCE:
         case XTRACT_GRID_MOMENTS:
+        case XTRACT_GRID_CENTRAL_MOMENTS:
         case XTRACT_KULLBACK_LEIBLER_DIVERGENCE:
         case XTRACT_ITAKURA_SAITO_DIVERGENCE:
         case XTRACT_MODIFIED_KULLBACK_LEIBLER:
@@ -1588,6 +1591,13 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             copy_desc(p_desc, "Extract how the values of a grid are spread over its columns and rows");
             copy_author(author, "");
             break;
+        case XTRACT_GRID_CENTRAL_MOMENTS:
+            copy_name(name, "grid_central_moments");
+            copy_name(p_name, "Grid Central Moments");
+            copy_desc(desc, "Extract the central moments of a grid up to the third order");
+            copy_desc(p_desc, "Extract how the values of a grid are spread about their centroid");
+            copy_author(author, "");
+            break;
         case XTRACT_KULLBACK_LEIBLER_DIVERGENCE:
             copy_name(name, "kullback_leibler_divergence");
             copy_name(p_name, "Kullback-Leibler Divergence");
@@ -1792,6 +1802,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_HIGUCHI_FRACTAL_DIMENSION:
         case XTRACT_COVARIANCE_MATRIX:
         case XTRACT_GRID_MOMENTS:
+        case XTRACT_GRID_CENTRAL_MOMENTS:
             *argc = 1;
             *argv_type = XTRACT_INT;
             break;
@@ -1978,6 +1989,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_PRINCIPAL_VARIANCES:
         case XTRACT_COHERENCE:
         case XTRACT_GRID_MOMENTS:
+        case XTRACT_GRID_CENTRAL_MOMENTS:
             *is_scalar = XTRACT_FALSE;
             break;
         default:
@@ -2321,6 +2333,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
                 *result_unit = XTRACT_UNIT_NONE;
                 break;
             case XTRACT_GRID_MOMENTS:
+            case XTRACT_GRID_CENTRAL_MOMENTS:
                 *result_format = XTRACT_ARBITRARY_SERIES;
                 *result_unit = XTRACT_UNIT_ANY;
                 break;

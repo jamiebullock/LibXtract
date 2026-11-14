@@ -5,6 +5,7 @@
  */
 
 #include <stddef.h>
+#include <string.h>
 
 #include "xtract/libxtract.h"
 
@@ -69,6 +70,74 @@ int xtract_grid_moments(const double *data, const int N, const void *argv, doubl
     result[7] = m21;
     result[8] = m12;
     result[9] = m03;
+
+    return XTRACT_SUCCESS;
+}
+
+int xtract_grid_central_moments(const double *data, const int N, const void *argv, double *result)
+{
+    const int width = grid_width(N, argv);
+    double total = 0.0, total_x = 0.0, total_y = 0.0, centre_x, centre_y;
+    double mu20 = 0.0, mu11 = 0.0, mu02 = 0.0, mu30 = 0.0, mu21 = 0.0, mu12 = 0.0, mu03 = 0.0;
+    int height, x, y, n = 0;
+
+    if (width == 0)
+        return XTRACT_ARGUMENT_ERROR;
+    height = N / width;
+
+    for (y = 0; y < height; y++)
+    {
+        double sum = 0.0, sum_x = 0.0;
+
+        for (x = 0; x < width; x++, n++)
+        {
+            sum += data[n];
+            sum_x += x * data[n];
+        }
+        total += sum;
+        total_x += sum_x;
+        total_y += y * sum;
+    }
+    if (total == 0.0)
+    {
+        memset(result, 0, 7 * sizeof(double));
+        return XTRACT_NO_RESULT;
+    }
+    centre_x = total_x / total;
+    centre_y = total_y / total;
+
+    n = 0;
+    for (y = 0; y < height; y++)
+    {
+        const double dy = y - centre_y;
+        double sum = 0.0, sum_x = 0.0, sum_xx = 0.0, sum_xxx = 0.0;
+
+        for (x = 0; x < width; x++, n++)
+        {
+            const double dx = x - centre_x;
+            const double value = data[n];
+
+            sum += value;
+            sum_x += dx * value;
+            sum_xx += dx * dx * value;
+            sum_xxx += dx * dx * dx * value;
+        }
+        mu20 += sum_xx;
+        mu11 += dy * sum_x;
+        mu02 += dy * dy * sum;
+        mu30 += sum_xxx;
+        mu21 += dy * sum_xx;
+        mu12 += dy * dy * sum_x;
+        mu03 += dy * dy * dy * sum;
+    }
+
+    result[0] = mu20;
+    result[1] = mu11;
+    result[2] = mu02;
+    result[3] = mu30;
+    result[4] = mu21;
+    result[5] = mu12;
+    result[6] = mu03;
 
     return XTRACT_SUCCESS;
 }
