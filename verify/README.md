@@ -36,10 +36,18 @@ The solver cost is in the doubles: every floating-point operation is bit-blasted
 
 ## Running
 
-Requires `cbmc` and `goto-cc` (Homebrew `cbmc`, or on Ubuntu the `.deb` from the CBMC releases page) and `bitwuzla` on the PATH (Homebrew `bitwuzla`, or on Linux the static binary from the Bitwuzla releases page). The proofs of `higuchi_fractal_dimension` and `last_n` need about 7 GB of memory each and every other proof less than 4 GB, so run them one at a time unless the machine has memory for more (`make -C verify -j2`). CI runs those two alone and the rest three at a time:
+Requires `cbmc` and `goto-cc` (Homebrew `cbmc`, or on Ubuntu the `.deb` from the CBMC releases page) and `bitwuzla` on the PATH (Homebrew `bitwuzla`, or on Linux the static binary from the Bitwuzla releases page). The proofs of `higuchi_fractal_dimension` and `last_n` need about 7 GB of memory each. Every other proof needs less than 4 GB. This runs them one at a time:
 
 ```
 make -C verify
+```
+
+On a machine with memory for more, `-j` runs several at once. CI has 16 GB, and runs the two large proofs alone and then the rest three at a time:
+
+```
+make -C verify .proofs/verify_higuchi_fractal_dimension.proved
+make -C verify .proofs/verify_last_n.proved
+make -C verify -j3
 ```
 
 Logs are written to `verify/.proofs/<proof>.log`; a proof that passes leaves `verify/.proofs/<proof>.proved`, and a later `make -C verify` reruns only the proofs whose inputs changed, where a changed bound or solver setting counts as a change to every proof.
