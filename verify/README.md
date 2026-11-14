@@ -12,14 +12,13 @@ Each function named `verify_*` in `verify_scalar.c`, `verify_vector.c`, `verify_
 - for the FFT features, a transform state that is either uninitialised or initialised for any power of two up to the bound;
 - for the filterbank features, a filterbank of up to `VERIFY_MAX_FILTERS` filters whose rows are exactly as wide as the input, with any row, the row table or the DCT table possibly NULL.
 
-Four functions have no proof, each because the formula outgrows both solvers before N reaches 8:
+Three functions have no proof, each because the formula outgrows both solvers before N reaches 8:
 
 - `xtract_subbands` reduces each band by calling through the `xtract[]` table, so its proof is the union of a proof for every permitted feature, once per band. Restricting the call site to the twelve permitted features with `goto-instrument --restrict-function-pointer` and bounding the band count to two was not enough.
 - `xtract_features_from_subframes` dispatches through the same table with nearly every feature permitted.
 - `xtract_wavelet_f0` runs the bundled dywapitchtrack pitch tracker, whose loop counts do not follow N.
-- `xtract_spectrum` tracks the running maximum of every coefficient for its normalisation, a branch on every element that keeps the square roots and logarithms in the formula; `xtract_autocorrelation_fft`, which shares the transform state and the stub, is proved.
 
-The unit tests, built with the address and undefined behaviour sanitizers, remain the evidence for those four, and the fuzz jobs cover the three that are feature functions. `xtract_features_from_subframes` has no fuzz harness.
+The unit tests, built with the address and undefined behaviour sanitizers, remain the evidence for those three, and the fuzz jobs cover the two that are feature functions. `xtract_features_from_subframes` has no fuzz harness.
 
 CBMC then checks every array bound, pointer dereference, integer division, signed overflow and loop bound on every path. `malloc` may return NULL. NaN and infinity are valid inputs, so floating-point results are not checked. A passing proof means the function returns a status code for every such input without reading or writing outside its buffers.
 
@@ -27,7 +26,7 @@ CBMC then checks every array bound, pointer dereference, integer division, signe
 
 The portable `USE_OOURA` code path is checked on every host (`__APPLE__` is undefined for the build, so the vDSP paths are not covered). The OOURA transform itself is replaced by `fft_stub.c`, whose `rdft` fills the buffer with arbitrary values: the spectrum proofs cover the library's handling of any transform output and say nothing about the transform.
 
-CBMC models the C maths library itself, and reports a call to any function it has no model of as a failure. A passing proof therefore depends on no unmodelled code. Three functions are the exception, replaced in `math_stub.c`. `pow` and `cbrt` return any value, because CBMC's own `pow` model needs a floating-point remainder the SMT backend cannot encode and `cbrt` has no model. A stub that returns any value covers every result the real function could give, which keeps the proofs sound, and they say nothing about what `pow` or `cbrt` return. `__builtin_isfinite`, which glibc's `isfinite` expands to, has no model either and is implemented with CBMC's own finiteness test, so it behaves exactly as the real function. `qsort` has no model either and is replaced in `stdlib_stub.c`: the stub calls the comparator on each adjacent pair of elements, so the comparator is checked on arbitrary values, and then fills the buffer with arbitrary values, which covers every order the real sort could leave it in. The proofs of the features that sort say nothing about the sort.
+CBMC models the C maths library itself, and reports a call to any function it has no model of as a failure. A passing proof therefore depends on no unmodelled code. Five functions are the exception, replaced in `math_stub.c`. `pow`, `cbrt` and `atan2` return any value, because CBMC's own `pow` model needs a floating-point remainder the SMT backend cannot encode and `cbrt` and `atan2` have no model. A stub that returns any value covers every result the real function could give, which keeps the proofs sound, and they say nothing about what `pow`, `cbrt` or `atan2` return. `sqrt` has a model, which states its result with assumptions on two products of doubles. Formula slicing cannot drop an assumption, and in a loop that takes a square root per element those products are most of the formula. The library is therefore compiled with `sqrt` renamed to `verify_sqrt`, which calls `sqrt` unless the harness has set `verify_any_sqrt` and returns any value when it has. The proofs of `xtract_spectrum`, `xtract_failsafe_f0` and `xtract_principal_variances` set it: each is valid for every value a square root returns, and the flag cuts its solver memory by a factor of six or more. `__builtin_isfinite`, which glibc's `isfinite` expands to, has no model either and is implemented with CBMC's own finiteness test, so it behaves exactly as the real function. `qsort` has no model either and is replaced in `stdlib_stub.c`: the stub calls the comparator on each adjacent pair of elements, so the comparator is checked on arbitrary values, and then fills the buffer with arbitrary values, which covers every order the real sort could leave it in. The proofs of the features that sort say nothing about the sort.
 
 ## Bounds
 
@@ -37,10 +36,18 @@ The solver cost is in the doubles: every floating-point operation is bit-blasted
 
 ## Running
 
-Requires `cbmc` and `goto-cc` (Homebrew `cbmc`, or on Ubuntu the `.deb` from the CBMC releases page) and `bitwuzla` on the PATH (Homebrew `bitwuzla`, or on Linux the static binary from the Bitwuzla releases page). A proof needs up to 7 GB of memory, so run them one at a time unless the machine has memory for more (`make -C verify -j2`):
+Requires `cbmc` and `goto-cc` (Homebrew `cbmc`, or on Ubuntu the `.deb` from the CBMC releases page) and `bitwuzla` on the PATH (Homebrew `bitwuzla`, or on Linux the static binary from the Bitwuzla releases page). The proofs of `higuchi_fractal_dimension` and `last_n` need about 7 GB of memory each. Every other proof needs less than 4 GB. This runs them one at a time:
 
 ```
 make -C verify
+```
+
+On a machine with memory for more, `-j` runs several at once. CI has 16 GB, and runs the two large proofs alone and then the rest three at a time:
+
+```
+make -C verify .proofs/verify_higuchi_fractal_dimension.proved
+make -C verify .proofs/verify_last_n.proved
+make -C verify -j3
 ```
 
 Logs are written to `verify/.proofs/<proof>.log`; a proof that passes leaves `verify/.proofs/<proof>.proved`, and a later `make -C verify` reruns only the proofs whose inputs changed, where a changed bound or solver setting counts as a change to every proof.
