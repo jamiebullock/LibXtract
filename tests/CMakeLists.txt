@@ -7,6 +7,7 @@ add_executable(xttest
     xttest_main.c
     xttest_delta.c
     xttest_descriptors.c
+    xttest_grid.c
     xttest_init.c
     xttest_multivariate.c
     xttest_scalar.c

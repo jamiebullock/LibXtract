@@ -462,6 +462,18 @@ UTEST(descriptors, appended_features_are_fully_described)
     ASSERT_EQ(fd[XTRACT_COHERENCE].is_delta, XTRACT_FALSE);
     ASSERT_EQ(fd[XTRACT_COHERENCE].result.vector.format, XTRACT_ARBITRARY_SERIES);
     ASSERT_EQ(fd[XTRACT_COHERENCE].result.vector.unit, XTRACT_UNIT_NONE);
+
+    ASSERT_STREQ(fd[XTRACT_GRID_MOMENTS].algo.name, "grid_moments");
+    ASSERT_EQ(fd[XTRACT_GRID_MOMENTS].argc, 1);
+    ASSERT_EQ(fd[XTRACT_GRID_MOMENTS].argv.type, XTRACT_INT);
+    CHECK_REL(fd[XTRACT_GRID_MOMENTS].argv.min[0], 1.0, EPSILON);
+    ASSERT_EQ(fd[XTRACT_GRID_MOMENTS].argv.max[0], XTRACT_UNBOUNDED_MAX);
+    ASSERT_EQ(fd[XTRACT_GRID_MOMENTS].data.format, XTRACT_GRID);
+    ASSERT_EQ(fd[XTRACT_GRID_MOMENTS].data.unit, XTRACT_UNIT_ANY);
+    ASSERT_EQ(fd[XTRACT_GRID_MOMENTS].is_scalar, XTRACT_FALSE);
+    ASSERT_EQ(fd[XTRACT_GRID_MOMENTS].is_delta, XTRACT_FALSE);
+    ASSERT_EQ(fd[XTRACT_GRID_MOMENTS].result.vector.format, XTRACT_ARBITRARY_SERIES);
+    ASSERT_EQ(fd[XTRACT_GRID_MOMENTS].result.vector.unit, XTRACT_UNIT_ANY);
     for (f = XTRACT_KULLBACK_LEIBLER_DIVERGENCE; f <= XTRACT_MODIFIED_KULLBACK_LEIBLER; f++)
         ASSERT_EQ_MSG(fd[f].is_delta, XTRACT_TRUE, fd[f].algo.name);
 
@@ -600,6 +612,7 @@ UTEST(dispatch, slots_map_to_the_expected_function)
     ASSERT_TRUE(xtract[XTRACT_AVERAGE_CORRELATION] == xtract_average_correlation);
     ASSERT_TRUE(xtract[XTRACT_PRINCIPAL_VARIANCES] == xtract_principal_variances);
     ASSERT_TRUE(xtract[XTRACT_COHERENCE] == xtract_coherence);
+    ASSERT_TRUE(xtract[XTRACT_GRID_MOMENTS] == xtract_grid_moments);
 }
 
 /* ===== Descriptor conformance ===== */
@@ -827,6 +840,13 @@ UTEST(descriptors, every_feature_conforms_to_its_descriptor)
             ASSERT_EQ_MSG(xtract[f](data, 2, argv, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
         if (d->data.format == XTRACT_CHANNELS)
             ASSERT_EQ_MSG(xtract[f](data, call_n + 1, argv, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
+        if (d->data.format == XTRACT_GRID)
+        {
+            conf_set(d, argf, argi, 0, 2.0);
+            ASSERT_NE_MSG(xtract[f](data, 4, argv, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
+            ASSERT_EQ_MSG(xtract[f](data, 3, argv, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
+            conf_set(d, argf, argi, 0, conf_default(d, 0));
+        }
         if (d->data.format == XTRACT_BARK_COEFFS)
             ASSERT_EQ_MSG(xtract[f](data, XTRACT_BARK_BANDS + 1, argv, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
 

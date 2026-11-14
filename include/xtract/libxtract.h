@@ -45,6 +45,7 @@ extern "C"
 #include "xtract_vector.h"
 #include "xtract_delta.h"
 #include "xtract_multivariate.h"
+#include "xtract_grid.h"
 #include "xtract_types.h"
 #include "xtract_macros.h"
 #include "xtract_helper.h"
@@ -175,6 +176,7 @@ extern "C"
         XTRACT_AVERAGE_CORRELATION,
         XTRACT_PRINCIPAL_VARIANCES,
         XTRACT_COHERENCE,
+        XTRACT_GRID_MOMENTS,
         XTRACT_FEATURE_COUNT
     };
 
@@ -343,7 +345,9 @@ extern "C"
         /* Series of equal length, one after another */
         XTRACT_CHANNELS,
         /* The rows of a square matrix, one after another */
-        XTRACT_SQUARE_MATRIX
+        XTRACT_SQUARE_MATRIX,
+        /* The rows of a grid of equal width, one after another */
+        XTRACT_GRID
     } xtract_vector_t;
 
     /** \brief Data structure containing useful information about functions provided by LibXtract. */
