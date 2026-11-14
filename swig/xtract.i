@@ -95,11 +95,21 @@
 
 %include "xtract/xtract_scalar.h"
 
-/* We have to put xtract_delta declarations inline because it contains a mixture of vector and scalar functions */
+/* xtract_delta.h and xtract_multivariate.h each hold functions with a scalar
+ * result and functions with a vector result, so their declarations are
+ * repeated here on the side of the %clear that gives each its result type */
 %inline %{
 
     int xtract_flux(const double *data, const int N, const void *argv , double *result);
     int xtract_lnorm(const double *data, const int N, const void *argv , double *result);
+    int xtract_attack_time(const double *data, const int N, const void *argv, double *result);
+    int xtract_decay_time(const double *data, const int N, const void *argv, double *result);
+    int xtract_kullback_leibler_divergence(const double *data, const int N, const void *argv, double *result);
+    int xtract_itakura_saito_divergence(const double *data, const int N, const void *argv, double *result);
+    int xtract_modified_kullback_leibler(const double *data, const int N, const void *argv, double *result);
+    int xtract_cross_correlation_lag(const double *data, const int N, const void *argv, double *result);
+    int xtract_pearson_correlation(const double *data, const int N, const void *argv, double *result);
+    int xtract_average_correlation(const double *data, const int N, const void *argv, double *result);
 
 %}
 
@@ -108,6 +118,11 @@
 %inline %{
 
     int xtract_difference_vector(const double *data, const int N, const void *argv, double *result);
+    int xtract_cross_correlation(const double *data, const int N, const void *argv, double *result);
+    int xtract_covariance_matrix(const double *data, const int N, const void *argv, double *result);
+    int xtract_correlation_matrix(const double *data, const int N, const void *argv, double *result);
+    int xtract_principal_variances(const double *data, const int N, const void *argv, double *result);
+    int xtract_coherence(const double *data, const int N, const void *argv, double *result);
 
 %}
 
