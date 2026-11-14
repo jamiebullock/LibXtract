@@ -536,6 +536,13 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *(argv_donor + 1) = XTRACT_HIGHEST_VALUE;
             *(argv_donor + 2) = XTRACT_ANY;
             break;
+        case XTRACT_COOCCURRENCE_MATRIX:
+            *argv_donor = XTRACT_ANY;
+            *(argv_donor + 1) = XTRACT_ANY;
+            *(argv_donor + 2) = XTRACT_ANY;
+            *(argv_donor + 3) = XTRACT_ANY;
+            *(argv_donor + 4) = XTRACT_ANY;
+            break;
             /* argc = 4 */
         case XTRACT_SPECTRUM:
             *argv_donor = XTRACT_ANY;
