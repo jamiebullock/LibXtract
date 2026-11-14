@@ -64,8 +64,50 @@ extern "C"
      * \param N: the number of elements in the grid, at least 1 and a multiple of the width
      * \param *argv: a pointer to an array of five ints: the width of the grid, from 1 to N; the number of levels, from 1 to 46340; the column offset and the row offset of the second element of a pair from the first, each positive, negative or zero; and 1 to count every pair in both orders, which makes the matrix symmetric, or 0 to count it once
      * \param *result: a pointer to an array of doubles holding a square matrix with one row and one column per level: at index i * levels + j the fraction of the pairs in which the first element is at level i and the second, at the offset from it, is at level j. The matrix sums to 1. It is zeroed with no result when the offset is too large for the grid to hold a pair, and not written when an element is not a whole number or is outside the levels, which is an argument error
+     *
+     * \note xtract_spectral_entropy() with this matrix as its *data gives the entropy of the pairs, from 0 for pairs all at one pair of levels to 1 for pairs spread evenly over every pair
      */
     int xtract_cooccurrence_matrix(const double *data, const int N, const void *argv, double *result);
+
+    /** \brief Extract the contrast of a co-occurrence matrix: the mean square difference between the two levels of a pair (Haralick 1973)
+     *
+     * \param *data: a pointer to the first element in an array of doubles comprising the levels * levels values of a co-occurrence matrix as xtract_cooccurrence_matrix() gives it, or the sum of several such matrices: no value below 0. The values are divided by their sum
+     * \param N: the number of elements in the matrix, a perfect square
+     * \param *argv: a pointer to NULL
+     * \param *result: the contrast, 0 when the two elements of every pair are at the same level, or 0 with no result when the values do not sum to more than 0
+     */
+    int xtract_cooccurrence_contrast(const double *data, const int N, const void *argv, double *result);
+
+    /** \brief Extract the correlation of a co-occurrence matrix: the Pearson correlation coefficient of the level of the first element of a pair with the level of the second (Haralick 1973)
+     *
+     * \param *data: a pointer to the first element in an array of doubles comprising the levels * levels values of a co-occurrence matrix as xtract_cooccurrence_matrix() gives it, or the sum of several such matrices: no value below 0. The values are divided by their sum
+     * \param N: the number of elements in the matrix, a perfect square
+     * \param *argv: a pointer to NULL
+     * \param *result: the correlation, from -1 to 1, or 0 with no result when the first elements or the second elements are all at one level, or when the values do not sum to more than 0
+     */
+    int xtract_cooccurrence_correlation(const double *data, const int N, const void *argv, double *result);
+
+    /** \brief Extract the angular second moment of a co-occurrence matrix: the sum of the squares of its values (Haralick 1973)
+     *
+     * \param *data: a pointer to the first element in an array of doubles comprising the levels * levels values of a co-occurrence matrix as xtract_cooccurrence_matrix() gives it, or the sum of several such matrices: no value below 0. The values are divided by their sum
+     * \param N: the number of elements in the matrix, a perfect square
+     * \param *argv: a pointer to NULL
+     * \param *result: the angular second moment, from 1 / N for pairs spread evenly over every pair of levels to 1 for pairs all at one pair of levels, or 0 with no result when the values do not sum to more than 0
+     *
+     * \note This is the quantity some libraries call energy and others call uniformity. A third group gives the name energy to its square root
+     */
+    int xtract_angular_second_moment(const double *data, const int N, const void *argv, double *result);
+
+    /** \brief Extract the inverse difference moment of a co-occurrence matrix: the mean over the pairs of 1 / (1 + the square of the difference between the two levels) (Haralick 1973)
+     *
+     * \param *data: a pointer to the first element in an array of doubles comprising the levels * levels values of a co-occurrence matrix as xtract_cooccurrence_matrix() gives it, or the sum of several such matrices: no value below 0. The values are divided by their sum
+     * \param N: the number of elements in the matrix, a perfect square
+     * \param *argv: a pointer to NULL
+     * \param *result: the inverse difference moment, 1 when the two elements of every pair are at the same level and nearer 0 the further apart they are, or 0 with no result when the values do not sum to more than 0
+     *
+     * \note This is one of two quantities that libraries call homogeneity. The other divides by 1 plus the difference itself
+     */
+    int xtract_inverse_difference_moment(const double *data, const int N, const void *argv, double *result);
 
     /** @} */
 

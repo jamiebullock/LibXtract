@@ -102,3 +102,29 @@ void verify_cooccurrence_matrix_of_any_width(void)
     cooccurrence_of(nondet_between(0, 4), argv, nondet_argv(argv));
     free(argv);
 }
+
+#define STATISTIC_HARNESS(feature)                      \
+    void verify_##feature(void)                         \
+    {                                                   \
+        const int N = nondet_length();                  \
+        double *data = nondet_doubles(N);               \
+        double result;                                  \
+                                                        \
+        (void)xtract_##feature(data, N, NULL, &result); \
+        free(data);                                     \
+    }
+
+STATISTIC_HARNESS(cooccurrence_contrast)
+STATISTIC_HARNESS(angular_second_moment)
+STATISTIC_HARNESS(inverse_difference_moment)
+
+void verify_cooccurrence_correlation(void)
+{
+    const int N = nondet_length();
+    double *data = nondet_doubles(N);
+    double result;
+
+    verify_any_sqrt = 1;
+    (void)xtract_cooccurrence_correlation(data, N, NULL, &result);
+    free(data);
+}

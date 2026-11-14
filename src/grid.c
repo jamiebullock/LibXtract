@@ -10,6 +10,8 @@
 
 #include "xtract/libxtract.h"
 
+#include "xtract_matrix_private.h"
+
 enum
 {
     CENTRAL_MOMENTS = 8,
@@ -272,6 +274,164 @@ int xtract_cooccurrence_matrix(const double *data, const int N, const void *argv
     pairs = (double)(end_x - first_x) * (double)(end_y - first_y) * (symmetric ? 2.0 : 1.0);
     for (cell = 0; cell < cells; cell++)
         result[cell] /= pairs;
+
+    return XTRACT_SUCCESS;
+}
+
+/* The rows of a co-occurrence matrix of N elements and the sum of its values,
+ * with 0 rows when N is not a perfect square */
+static int cooccurrence_rows(const double *data, const int N, double *total)
+{
+    const int rows = xtract_matrix_rows(N);
+    double sum = 0.0;
+    int n;
+
+    for (n = 0; n < rows * rows; n++)
+        sum += data[n];
+    *total = sum;
+
+    return rows;
+}
+
+int xtract_cooccurrence_contrast(const double *data, const int N, const void *argv, double *result)
+{
+    double total, sum = 0.0;
+    const int rows = cooccurrence_rows(data, N, &total);
+    int i, j, n = 0;
+
+    (void)argv;
+    *result = 0.0;
+    if (rows == 0)
+        return XTRACT_ARGUMENT_ERROR;
+    if (!(total > 0.0))
+        return XTRACT_NO_RESULT;
+
+    for (i = 0; i < rows; i++)
+    {
+        for (j = 0; j < rows; j++, n++)
+        {
+            const double difference = i - j;
+
+            sum += data[n] / total * difference * difference;
+        }
+    }
+    *result = sum;
+
+    return XTRACT_SUCCESS;
+}
+
+int xtract_cooccurrence_correlation(const double *data, const int N, const void *argv, double *result)
+{
+    double total, mean_i = 0.0, mean_j = 0.0, spread_i = 0.0, spread_j = 0.0, products = 0.0;
+    double correlation = 0.0;
+    const int rows = cooccurrence_rows(data, N, &total);
+    int status = XTRACT_NO_RESULT;
+    int first_i = -1, first_j = -1, several_i = 0, several_j = 0;
+    int i, j, n = 0;
+
+    (void)argv;
+    *result = 0.0;
+    if (rows == 0)
+        return XTRACT_ARGUMENT_ERROR;
+    if (!(total > 0.0))
+        return XTRACT_NO_RESULT;
+
+    for (i = 0; i < rows; i++)
+    {
+        for (j = 0; j < rows; j++, n++)
+        {
+            const double p = data[n] / total;
+
+            mean_i += p * i;
+            mean_j += p * j;
+            if (data[n] != 0.0)
+            {
+                if (first_i < 0)
+                {
+                    first_i = i;
+                    first_j = j;
+                }
+                several_i |= i != first_i;
+                several_j |= j != first_j;
+            }
+        }
+    }
+    n = 0;
+    for (i = 0; i < rows; i++)
+    {
+        for (j = 0; j < rows; j++, n++)
+        {
+            const double p = data[n] / total;
+
+            spread_i += p * (i - mean_i) * (i - mean_i);
+            spread_j += p * (j - mean_j) * (j - mean_j);
+            products += p * (i - mean_i) * (j - mean_j);
+        }
+    }
+    /* Whether each side of the pairs is at more than one level is taken from
+     * which rows and columns have a value, since a mean that rounding moves
+     * off its only level gives that level a spread */
+    if (several_i && several_j && spread_i > 0.0 && spread_j > 0.0)
+    {
+        correlation = products / (sqrt(spread_i) * sqrt(spread_j));
+        if (correlation > 1.0)
+            correlation = 1.0;
+        if (correlation < -1.0)
+            correlation = -1.0;
+        status = XTRACT_SUCCESS;
+    }
+    *result = correlation;
+
+    return status;
+}
+
+int xtract_angular_second_moment(const double *data, const int N, const void *argv, double *result)
+{
+    double total, sum = 0.0;
+    const int rows = cooccurrence_rows(data, N, &total);
+    int n;
+
+    (void)argv;
+    *result = 0.0;
+    if (rows == 0)
+        return XTRACT_ARGUMENT_ERROR;
+    if (!(total > 0.0))
+        return XTRACT_NO_RESULT;
+
+    for (n = 0; n < N; n++)
+    {
+        const double p = data[n] / total;
+
+        sum += p * p;
+    }
+    *result = sum;
+
+    return XTRACT_SUCCESS;
+}
+
+int xtract_inverse_difference_moment(const double *data, const int N, const void *argv, double *result)
+{
+    double total, sum = 0.0;
+    const int rows = cooccurrence_rows(data, N, &total);
+    int i, j, n = 0;
+
+    (void)argv;
+    *result = 0.0;
+    if (rows == 0)
+        return XTRACT_ARGUMENT_ERROR;
+    if (!(total > 0.0))
+        return XTRACT_NO_RESULT;
+
+    for (i = 0; i < rows; i++)
+    {
+        for (j = 0; j < rows; j++, n++)
+        {
+            const double difference = i - j;
+
+            sum += data[n] / total / (1.0 + difference * difference);
+        }
+    }
+    *result = sum;
 
     return XTRACT_SUCCESS;
 }

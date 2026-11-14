@@ -14,6 +14,7 @@
 
 #include "xtract_globals_private.h"
 #include "xtract_macros_private.h"
+#include "xtract_matrix_private.h"
 
 /* The largest eigenvalues settle to rounding error within about ten cyclic
  * Jacobi sweeps. Later sweeps refine the smallest, and take longest for a
@@ -55,7 +56,7 @@ static void mean_and_spread(const double *series, const int M, double *mean, dou
  * positive perfect square. The root is tested against the range of N before
  * its conversion to int, and the count against N / C before it is squared,
  * which keeps both in range for any value of the root */
-static int matrix_rows(const int N)
+int xtract_matrix_rows(const int N)
 {
     double root;
     int C;
@@ -243,7 +244,7 @@ int xtract_covariance_matrix(const double *data, const int N, const void *argv, 
 
 int xtract_correlation_matrix(const double *data, const int N, const void *argv, double *result)
 {
-    const int C = matrix_rows(N);
+    const int C = xtract_matrix_rows(N);
     const size_t rows = (size_t)C;
     size_t i, j;
 
@@ -287,7 +288,7 @@ int xtract_correlation_matrix(const double *data, const int N, const void *argv,
 
 int xtract_average_correlation(const double *data, const int N, const void *argv, double *result)
 {
-    const int C = matrix_rows(N);
+    const int C = xtract_matrix_rows(N);
     const size_t rows = (size_t)C;
     double sum = 0.0;
     size_t i, j;
@@ -390,7 +391,7 @@ static void jacobi_rotate(double *matrix, const size_t rows, const size_t p, con
 
 int xtract_principal_variances(const double *data, const int N, const void *argv, double *result)
 {
-    const int C = matrix_rows(N);
+    const int C = xtract_matrix_rows(N);
     const size_t rows = (size_t)C;
     double *matrix;
     size_t p, q;

@@ -132,4 +132,8 @@ int (*xtract[])(const double *, const int, const void *, double *) =
         xtract_hu_moments,
         xtract_quantise,
         xtract_histogram,
-        xtract_cooccurrence_matrix};
+        xtract_cooccurrence_matrix,
+        xtract_cooccurrence_contrast,
+        xtract_cooccurrence_correlation,
+        xtract_angular_second_moment,
+        xtract_inverse_difference_moment};
