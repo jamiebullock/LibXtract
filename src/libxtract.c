@@ -131,4 +131,5 @@ int (*xtract[])(const double *, const int, const void *, double *) =
         xtract_normalised_moments,
         xtract_hu_moments,
         xtract_quantise,
-        xtract_histogram};
+        xtract_histogram,
+        xtract_cooccurrence_matrix};

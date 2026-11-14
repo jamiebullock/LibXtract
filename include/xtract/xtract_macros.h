@@ -27,7 +27,7 @@ extern "C"
 #define XTRACT_UNKNOWN_MIN (-DBL_MAX)   /* lower bound has not been determined */
 #define XTRACT_UNKNOWN_MAX DBL_MAX      /* upper bound has not been determined */
 #define XTRACT_NO_DEFAULT 0             /* no default value defined */
-#define XTRACT_MAXARGS 4
+#define XTRACT_MAXARGS 5
 
 /* Recommended LPC cepstrum order Q for a given LPC order p. Rabiner & Juang
  * recommend Q ~ (3/2)p with Q > p; this rounds (3/2)p to the nearest integer

@@ -212,3 +212,66 @@ int xtract_hu_moments(const double *data, const int N, const void *argv, double 
 
     return XTRACT_SUCCESS;
 }
+
+/* The first and one past the last position, along an axis of the given
+ * length, of an element whose partner at the offset is also on the axis */
+static void paired_span(const int length, const int offset, int *first, int *end)
+{
+    *first = offset < 0 ? -offset : 0;
+    *end = offset > 0 ? length - offset : length;
+}
+
+int xtract_cooccurrence_matrix(const double *data, const int N, const void *argv, double *result)
+{
+    const int width = grid_width(N, argv);
+    const int *args = (const int *)argv;
+    int height, levels, column_offset, row_offset, symmetric;
+    int first_x, end_x, first_y, end_y, x, y, n;
+    size_t cells, cell;
+    double pairs;
+
+    if (width == 0)
+        return XTRACT_ARGUMENT_ERROR;
+    height = N / width;
+    levels = args[1];
+    column_offset = args[2];
+    row_offset = args[3];
+    symmetric = args[4];
+    if (levels < 1 || levels > 46340 || symmetric < 0 || symmetric > 1)
+        return XTRACT_ARGUMENT_ERROR;
+
+    for (n = 0; n < N; n++)
+    {
+        if (!(data[n] >= 0.0 && data[n] < levels) || data[n] != floor(data[n]))
+            return XTRACT_ARGUMENT_ERROR;
+    }
+
+    cells = (size_t)levels * (size_t)levels;
+    memset(result, 0, cells * sizeof(double));
+    if (column_offset <= -width || column_offset >= width || row_offset <= -height || row_offset >= height)
+        return XTRACT_NO_RESULT;
+
+    paired_span(width, column_offset, &first_x, &end_x);
+    paired_span(height, row_offset, &first_y, &end_y);
+    for (y = first_y; y < end_y; y++)
+    {
+        const double *row = data + (size_t)y * (size_t)width;
+        const double *partner_row = data + (size_t)(y + row_offset) * (size_t)width;
+
+        for (x = first_x; x < end_x; x++)
+        {
+            const size_t level = (size_t)row[x];
+            const size_t partner = (size_t)partner_row[x + column_offset];
+
+            result[level * (size_t)levels + partner] += 1.0;
+            if (symmetric)
+                result[partner * (size_t)levels + level] += 1.0;
+        }
+    }
+
+    pairs = (double)(end_x - first_x) * (double)(end_y - first_y) * (symmetric ? 2.0 : 1.0);
+    for (cell = 0; cell < cells; cell++)
+        result[cell] /= pairs;
+
+    return XTRACT_SUCCESS;
+}

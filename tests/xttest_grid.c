@@ -5,6 +5,7 @@
  */
 
 #include "xtract/xtract_grid.h"
+#include "xtract/xtract_vector.h"
 #include "xtract/libxtract.h"
 
 #include "xttest_approx.h"
@@ -453,4 +454,208 @@ UTEST(hu_moments, rejects_any_length_but_seven)
     ASSERT_EQ(xtract_hu_moments(data, 6, NULL, result), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(xtract_hu_moments(data, 8, NULL, result), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(xtract_hu_moments(data, 0, NULL, result), XTRACT_ARGUMENT_ERROR);
+}
+
+/* Two rows of three at three levels:
+ *   0 1 1
+ *   2 1 0 */
+static const double LEVELS_GRID[] = {0.0, 1.0, 1.0, 2.0, 1.0, 0.0};
+
+UTEST(cooccurrence_matrix, each_element_with_its_right_hand_neighbour)
+{
+    /* The pairs are (0, 1) and (1, 1) in row 0 and (2, 1) and (1, 0) in row 1 */
+    int argv[] = {3, 3, 1, 0, 0};
+    double result[9];
+    int i;
+
+    for (i = 0; i < 9; i++)
+        result[i] = -1.0;
+    ASSERT_EQ(xtract_cooccurrence_matrix(LEVELS_GRID, 6, argv, result), XTRACT_SUCCESS);
+    CHECK_REL(result[0 * 3 + 1], 0.25, EPSILON);
+    CHECK_REL(result[1 * 3 + 1], 0.25, EPSILON);
+    CHECK_REL(result[2 * 3 + 1], 0.25, EPSILON);
+    CHECK_REL(result[1 * 3 + 0], 0.25, EPSILON);
+    ASSERT_EQ(result[0 * 3 + 0], 0.0);
+    ASSERT_EQ(result[0 * 3 + 2], 0.0);
+    ASSERT_EQ(result[1 * 3 + 2], 0.0);
+    ASSERT_EQ(result[2 * 3 + 0], 0.0);
+    ASSERT_EQ(result[2 * 3 + 2], 0.0);
+}
+
+UTEST(cooccurrence_matrix, symmetric_counts_every_pair_in_both_orders)
+{
+    /* The four pairs and their reverses: (0, 1) and (1, 0) twice each,
+     * (1, 1) twice, (2, 1) and (1, 2) once each */
+    int argv[] = {3, 3, 1, 0, 1};
+    double result[9] = {0};
+    int i, j;
+
+    ASSERT_EQ(xtract_cooccurrence_matrix(LEVELS_GRID, 6, argv, result), XTRACT_SUCCESS);
+    CHECK_REL(result[0 * 3 + 1], 2.0 / 8.0, EPSILON);
+    CHECK_REL(result[1 * 3 + 0], 2.0 / 8.0, EPSILON);
+    CHECK_REL(result[1 * 3 + 1], 2.0 / 8.0, EPSILON);
+    CHECK_REL(result[2 * 3 + 1], 1.0 / 8.0, EPSILON);
+    CHECK_REL(result[1 * 3 + 2], 1.0 / 8.0, EPSILON);
+    for (i = 0; i < 3; i++)
+    {
+        for (j = 0; j < 3; j++)
+            ASSERT_EQ(result[i * 3 + j], result[j * 3 + i]);
+    }
+}
+
+UTEST(cooccurrence_matrix, each_element_with_the_one_below)
+{
+    /* The pairs are (0, 2), (1, 1) and (1, 0) */
+    int argv[] = {3, 3, 0, 1, 0};
+    double result[9] = {0};
+
+    ASSERT_EQ(xtract_cooccurrence_matrix(LEVELS_GRID, 6, argv, result), XTRACT_SUCCESS);
+    CHECK_REL(result[0 * 3 + 2], 1.0 / 3.0, EPSILON);
+    CHECK_REL(result[1 * 3 + 1], 1.0 / 3.0, EPSILON);
+    CHECK_REL(result[1 * 3 + 0], 1.0 / 3.0, EPSILON);
+    ASSERT_EQ(result[0 * 3 + 1], 0.0);
+}
+
+UTEST(cooccurrence_matrix, each_element_with_the_one_below_and_to_the_right)
+{
+    /* The pairs are (0, 1) and (1, 0) */
+    int argv[] = {3, 3, 1, 1, 0};
+    double result[9] = {0};
+
+    ASSERT_EQ(xtract_cooccurrence_matrix(LEVELS_GRID, 6, argv, result), XTRACT_SUCCESS);
+    CHECK_REL(result[0 * 3 + 1], 0.5, EPSILON);
+    CHECK_REL(result[1 * 3 + 0], 0.5, EPSILON);
+    ASSERT_EQ(result[1 * 3 + 1], 0.0);
+}
+
+UTEST(cooccurrence_matrix, the_opposite_offset_swaps_rows_and_columns)
+{
+    int forward[] = {3, 3, 1, 0, 0};
+    int backward[] = {3, 3, -1, 0, 0};
+    double a[9] = {0};
+    double b[9] = {0};
+    int i, j;
+
+    ASSERT_EQ(xtract_cooccurrence_matrix(LEVELS_GRID, 6, forward, a), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_cooccurrence_matrix(LEVELS_GRID, 6, backward, b), XTRACT_SUCCESS);
+    for (i = 0; i < 3; i++)
+    {
+        for (j = 0; j < 3; j++)
+            ASSERT_EQ(a[i * 3 + j], b[j * 3 + i]);
+    }
+    CHECK_REL(a[0 * 3 + 1], 0.25, EPSILON);
+}
+
+UTEST(cooccurrence_matrix, no_offset_puts_the_histogram_on_the_diagonal)
+{
+    int argv[] = {3, 3, 0, 0, 0};
+    int levels = 3;
+    double matrix[9] = {0};
+    double histogram[3] = {0};
+    int i, j;
+
+    ASSERT_EQ(xtract_cooccurrence_matrix(LEVELS_GRID, 6, argv, matrix), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_histogram(LEVELS_GRID, 6, &levels, histogram), XTRACT_SUCCESS);
+    for (i = 0; i < 3; i++)
+    {
+        for (j = 0; j < 3; j++)
+        {
+            if (i == j)
+                CHECK_REL(matrix[i * 3 + j], histogram[i], EPSILON);
+            else
+                ASSERT_EQ(matrix[i * 3 + j], 0.0);
+        }
+    }
+}
+
+UTEST(cooccurrence_matrix, of_a_quantised_grid_sums_to_one)
+{
+    double grid[] = {0.2, 9.5, 3.3, 7.1,
+                     5.5, 5.4, 0.0, 10.0,
+                     2.2, 8.8, 4.4, 6.6};
+    double bounds[] = {0.0, 10.0, 4.0};
+    int argv[] = {4, 4, 1, 0, 1};
+    double levels[12];
+    double result[16] = {0};
+    double sum = 0.0;
+    int i;
+
+    ASSERT_EQ(xtract_quantise(grid, 12, bounds, levels), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_cooccurrence_matrix(levels, 12, argv, result), XTRACT_SUCCESS);
+    for (i = 0; i < 16; i++)
+    {
+        ASSERT_TRUE(result[i] >= 0.0);
+        sum += result[i];
+    }
+    CHECK_REL(sum, 1.0, EPSILON);
+}
+
+UTEST(cooccurrence_matrix, no_result_when_the_offset_leaves_no_pair)
+{
+    int argv[] = {3, 3, 3, 0, 0};
+    double result[9];
+    int i, k;
+    const int offsets[4][2] = {{3, 0}, {-3, 0}, {0, 2}, {0, -2}};
+
+    for (k = 0; k < 4; k++)
+    {
+        argv[2] = offsets[k][0];
+        argv[3] = offsets[k][1];
+        for (i = 0; i < 9; i++)
+            result[i] = -1.0;
+        ASSERT_EQ(xtract_cooccurrence_matrix(LEVELS_GRID, 6, argv, result), XTRACT_NO_RESULT);
+        for (i = 0; i < 9; i++)
+            ASSERT_EQ(result[i], 0.0);
+    }
+    argv[2] = 2147483647;
+    argv[3] = -2147483647 - 1;
+    ASSERT_EQ(xtract_cooccurrence_matrix(LEVELS_GRID, 6, argv, result), XTRACT_NO_RESULT);
+    argv[2] = 2;
+    argv[3] = -1;
+    ASSERT_EQ(xtract_cooccurrence_matrix(LEVELS_GRID, 6, argv, result), XTRACT_SUCCESS);
+}
+
+UTEST(cooccurrence_matrix, rejects_an_element_that_is_not_a_level_and_leaves_the_result)
+{
+    double grid[] = {0.0, 1.0, 1.0, 2.0, 1.0, 0.0};
+    int argv[] = {3, 3, 1, 0, 0};
+    double result[9];
+    double bad[] = {0.37, 3.0, -1.0, NAN, INFINITY};
+    int i, k;
+
+    for (i = 0; i < 9; i++)
+        result[i] = -1.0;
+    for (k = 0; k < 5; k++)
+    {
+        /* The last element of row 0 is the first of no pair at this offset */
+        grid[2] = bad[k];
+        ASSERT_EQ(xtract_cooccurrence_matrix(grid, 6, argv, result), XTRACT_ARGUMENT_ERROR);
+        for (i = 0; i < 9; i++)
+            ASSERT_EQ(result[i], -1.0);
+    }
+}
+
+UTEST(cooccurrence_matrix, rejects_bad_arguments)
+{
+    int argv[] = {3, 3, 1, 0, 0};
+    double result[9] = {0};
+
+    ASSERT_EQ(xtract_cooccurrence_matrix(LEVELS_GRID, 6, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_cooccurrence_matrix(LEVELS_GRID, 0, argv, result), XTRACT_ARGUMENT_ERROR);
+    argv[0] = 4;
+    ASSERT_EQ(xtract_cooccurrence_matrix(LEVELS_GRID, 6, argv, result), XTRACT_ARGUMENT_ERROR);
+    argv[0] = 3;
+    argv[1] = 0;
+    ASSERT_EQ(xtract_cooccurrence_matrix(LEVELS_GRID, 6, argv, result), XTRACT_ARGUMENT_ERROR);
+    argv[1] = 46341;
+    ASSERT_EQ(xtract_cooccurrence_matrix(LEVELS_GRID, 6, argv, result), XTRACT_ARGUMENT_ERROR);
+    argv[1] = 2;
+    ASSERT_EQ(xtract_cooccurrence_matrix(LEVELS_GRID, 6, argv, result), XTRACT_ARGUMENT_ERROR);
+    argv[1] = 3;
+    argv[4] = 2;
+    ASSERT_EQ(xtract_cooccurrence_matrix(LEVELS_GRID, 6, argv, result), XTRACT_ARGUMENT_ERROR);
+    argv[4] = -1;
+    ASSERT_EQ(xtract_cooccurrence_matrix(LEVELS_GRID, 6, argv, result), XTRACT_ARGUMENT_ERROR);
+    argv[4] = 1;
+    ASSERT_EQ(xtract_cooccurrence_matrix(LEVELS_GRID, 6, argv, result), XTRACT_SUCCESS);
 }

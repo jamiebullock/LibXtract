@@ -531,6 +531,23 @@ UTEST(descriptors, appended_features_are_fully_described)
     ASSERT_EQ(fd[XTRACT_HISTOGRAM].is_scalar, XTRACT_FALSE);
     ASSERT_EQ(fd[XTRACT_HISTOGRAM].result.vector.format, XTRACT_ARBITRARY_SERIES);
     ASSERT_EQ(fd[XTRACT_HISTOGRAM].result.vector.unit, XTRACT_UNIT_NONE);
+
+    ASSERT_STREQ(fd[XTRACT_COOCCURRENCE_MATRIX].algo.name, "cooccurrence_matrix");
+    ASSERT_EQ(fd[XTRACT_COOCCURRENCE_MATRIX].algo.year, 1973);
+    ASSERT_EQ(fd[XTRACT_COOCCURRENCE_MATRIX].argc, 5);
+    ASSERT_EQ(fd[XTRACT_COOCCURRENCE_MATRIX].argv.type, XTRACT_INT);
+    CHECK_REL(fd[XTRACT_COOCCURRENCE_MATRIX].argv.min[0], 1.0, EPSILON);
+    CHECK_REL(fd[XTRACT_COOCCURRENCE_MATRIX].argv.min[1], 1.0, EPSILON);
+    CHECK_REL(fd[XTRACT_COOCCURRENCE_MATRIX].argv.max[1], 46340.0, EPSILON);
+    ASSERT_EQ(fd[XTRACT_COOCCURRENCE_MATRIX].argv.min[2], XTRACT_UNBOUNDED_MIN);
+    ASSERT_EQ(fd[XTRACT_COOCCURRENCE_MATRIX].argv.max[3], XTRACT_UNBOUNDED_MAX);
+    ASSERT_EQ(fd[XTRACT_COOCCURRENCE_MATRIX].argv.min[4], 0.0);
+    CHECK_REL(fd[XTRACT_COOCCURRENCE_MATRIX].argv.max[4], 1.0, EPSILON);
+    ASSERT_EQ(fd[XTRACT_COOCCURRENCE_MATRIX].data.format, XTRACT_GRID);
+    ASSERT_EQ(fd[XTRACT_COOCCURRENCE_MATRIX].data.unit, XTRACT_UNIT_NONE);
+    ASSERT_EQ(fd[XTRACT_COOCCURRENCE_MATRIX].is_scalar, XTRACT_FALSE);
+    ASSERT_EQ(fd[XTRACT_COOCCURRENCE_MATRIX].result.vector.format, XTRACT_SQUARE_MATRIX);
+    ASSERT_EQ(fd[XTRACT_COOCCURRENCE_MATRIX].result.vector.unit, XTRACT_UNIT_NONE);
     for (f = XTRACT_KULLBACK_LEIBLER_DIVERGENCE; f <= XTRACT_MODIFIED_KULLBACK_LEIBLER; f++)
         ASSERT_EQ_MSG(fd[f].is_delta, XTRACT_TRUE, fd[f].algo.name);
 
@@ -675,6 +692,7 @@ UTEST(dispatch, slots_map_to_the_expected_function)
     ASSERT_TRUE(xtract[XTRACT_HU_MOMENTS] == xtract_hu_moments);
     ASSERT_TRUE(xtract[XTRACT_QUANTISE] == xtract_quantise);
     ASSERT_TRUE(xtract[XTRACT_HISTOGRAM] == xtract_histogram);
+    ASSERT_TRUE(xtract[XTRACT_COOCCURRENCE_MATRIX] == xtract_cooccurrence_matrix);
 }
 
 /* ===== Descriptor conformance ===== */
@@ -787,7 +805,7 @@ static int conf_bounds_checkable(const xtract_function_descriptor_t *d, int i)
         return 0;
     if (d->argv.type != XTRACT_FLOAT && d->argv.type != XTRACT_INT)
         return 0;
-    return !(d->id == XTRACT_SUBBANDS && i == 0);
+    return !(d->id == XTRACT_SUBBANDS && i == 0) && !(d->id == XTRACT_COOCCURRENCE_MATRIX && i == 1);
 }
 
 static double conf_default(const xtract_function_descriptor_t *d, int i)
@@ -835,7 +853,7 @@ static void conf_fill_data(const xtract_function_descriptor_t *d, double *data, 
     int i;
 
     for (i = 0; i < n; i++)
-        data[i] = d->id == XTRACT_HISTOGRAM ? 0.0 : 1.0;
+        data[i] = d->id == XTRACT_HISTOGRAM || d->id == XTRACT_COOCCURRENCE_MATRIX ? 0.0 : 1.0;
     if (conf_two_half(d))
     {
         for (i = n / 2; i < n; i++)
