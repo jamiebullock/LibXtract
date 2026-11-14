@@ -322,6 +322,28 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *argv_def = XTRACT_NO_DEFAULT;
             *argv_unit = XTRACT_UNIT_ANY;
             break;
+        case XTRACT_COOCCURRENCE_MATRIX:
+            *argv_min = 1;
+            *argv_max = XTRACT_UNBOUNDED_MAX;
+            *argv_def = XTRACT_NO_DEFAULT;
+            *argv_unit = (xtract_unit_t)XTRACT_NONE;
+            *(argv_min + 1) = 1;
+            *(argv_max + 1) = 46340;
+            *(argv_def + 1) = 8;
+            *(argv_unit + 1) = (xtract_unit_t)XTRACT_NONE;
+            *(argv_min + 2) = XTRACT_UNBOUNDED_MIN;
+            *(argv_max + 2) = XTRACT_UNBOUNDED_MAX;
+            *(argv_def + 2) = 1;
+            *(argv_unit + 2) = (xtract_unit_t)XTRACT_NONE;
+            *(argv_min + 3) = XTRACT_UNBOUNDED_MIN;
+            *(argv_max + 3) = XTRACT_UNBOUNDED_MAX;
+            *(argv_def + 3) = 0;
+            *(argv_unit + 3) = (xtract_unit_t)XTRACT_NONE;
+            *(argv_min + 4) = 0;
+            *(argv_max + 4) = 1;
+            *(argv_def + 4) = 0;
+            *(argv_unit + 4) = (xtract_unit_t)XTRACT_NONE;
+            break;
         case XTRACT_QUANTISE:
             *argv_min = XTRACT_UNBOUNDED_MIN;
             *argv_max = XTRACT_UNBOUNDED_MAX;
@@ -514,6 +536,13 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *(argv_donor + 1) = XTRACT_HIGHEST_VALUE;
             *(argv_donor + 2) = XTRACT_ANY;
             break;
+        case XTRACT_COOCCURRENCE_MATRIX:
+            *argv_donor = XTRACT_ANY;
+            *(argv_donor + 1) = XTRACT_ANY;
+            *(argv_donor + 2) = XTRACT_ANY;
+            *(argv_donor + 3) = XTRACT_ANY;
+            *(argv_donor + 4) = XTRACT_ANY;
+            break;
             /* argc = 4 */
         case XTRACT_SPECTRUM:
             *argv_donor = XTRACT_ANY;
@@ -686,6 +715,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             break;
         case XTRACT_GRID_MOMENTS:
         case XTRACT_GRID_CENTRAL_MOMENTS:
+        case XTRACT_COOCCURRENCE_MATRIX:
             *data_format = XTRACT_GRID;
             break;
         case XTRACT_NORMALISED_MOMENTS:
@@ -815,6 +845,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *data_unit = XTRACT_UNIT_ANY;
             break;
         case XTRACT_HISTOGRAM:
+        case XTRACT_COOCCURRENCE_MATRIX:
             *data_unit = XTRACT_UNIT_NONE;
             break;
         case XTRACT_SPECTRAL_MEAN:
@@ -1661,6 +1692,14 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             copy_desc(p_desc, "Extract how a range of values is distributed over its levels");
             copy_author(author, "");
             break;
+        case XTRACT_COOCCURRENCE_MATRIX:
+            copy_name(name, "cooccurrence_matrix");
+            copy_name(p_name, "Co-occurrence Matrix");
+            copy_desc(desc, "Extract the co-occurrence matrix of the levels of a grid at an offset");
+            copy_desc(p_desc, "Extract how often each pair of levels occurs a given step apart in a grid");
+            copy_author(author, "Robert Haralick");
+            *year = 1973;
+            break;
         case XTRACT_KULLBACK_LEIBLER_DIVERGENCE:
             copy_name(name, "kullback_leibler_divergence");
             copy_name(p_name, "Kullback-Leibler Divergence");
@@ -1840,6 +1879,10 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             break;
         case XTRACT_SUBBANDS:
             *argc = 4;
+            *argv_type = XTRACT_INT;
+            break;
+        case XTRACT_COOCCURRENCE_MATRIX:
+            *argc = 5;
             *argv_type = XTRACT_INT;
             break;
         case XTRACT_MFCC:
@@ -2059,6 +2102,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_HU_MOMENTS:
         case XTRACT_QUANTISE:
         case XTRACT_HISTOGRAM:
+        case XTRACT_COOCCURRENCE_MATRIX:
             *is_scalar = XTRACT_FALSE;
             break;
         default:
@@ -2417,6 +2461,10 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             case XTRACT_QUANTISE:
             case XTRACT_HISTOGRAM:
                 *result_format = XTRACT_ARBITRARY_SERIES;
+                *result_unit = XTRACT_UNIT_NONE;
+                break;
+            case XTRACT_COOCCURRENCE_MATRIX:
+                *result_format = XTRACT_SQUARE_MATRIX;
                 *result_unit = XTRACT_UNIT_NONE;
                 break;
             case XTRACT_CHROMA:

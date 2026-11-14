@@ -58,6 +58,15 @@ extern "C"
      */
     int xtract_hu_moments(const double *data, const int N, const void *argv, double *result);
 
+    /** \brief Extract the co-occurrence matrix of the levels of a grid: how often each pair of levels occurs a given step apart (Haralick 1973)
+     *
+     * \param *data: a pointer to the first element in an array of doubles comprising the rows of a grid, one after another, each element a whole number from 0 to one less than the number of levels, as xtract_quantise() gives them
+     * \param N: the number of elements in the grid, at least 1 and a multiple of the width
+     * \param *argv: a pointer to an array of five ints: the width of the grid, from 1 to N; the number of levels, from 1 to 46340; the column offset and the row offset of the second element of a pair from the first, each positive, negative or zero; and 1 to count every pair in both orders, which makes the matrix symmetric, or 0 to count it once
+     * \param *result: a pointer to an array of doubles holding a square matrix with one row and one column per level: at index i * levels + j the fraction of the pairs in which the first element is at level i and the second, at the offset from it, is at level j. The matrix sums to 1. It is zeroed with no result when the offset is too large for the grid to hold a pair, and not written when an element is not a whole number or is outside the levels, which is an argument error
+     */
+    int xtract_cooccurrence_matrix(const double *data, const int N, const void *argv, double *result);
+
     /** @} */
 
 #ifdef __cplusplus
