@@ -6,6 +6,7 @@
 set(XTRACT_SOURCES
     delta.c
     descriptors.c
+    grid.c
     helper.c
     init.c
     libxtract.c
