@@ -14,6 +14,22 @@ except ImportError as e:
 
 print('\nRunning libxtract Python bindings test...\n')
 
+# The interface declares some headers function by function, so a function
+# added to one of them is missing from the module until it is declared there
+if len(sys.argv) > 1:
+    import glob
+    import re
+
+    declared = set()
+    for header in glob.glob(sys.argv[1] + '/*.h'):
+        with open(header) as f:
+            declared.update(re.findall(r'^\s+(?!\*)[\w \*]*?\b(xtract_\w+)\(.*\);', f.read(), re.MULTILINE))
+    missing = sorted(name for name in declared if not hasattr(xtract, name))
+    if missing:
+        print('The module has no ' + ', '.join(missing))
+        sys.exit(1)
+    print('The module has all %d functions the headers declare' % len(declared))
+
 len = 8
 
 a = xtract.doubleArray(len)
@@ -63,6 +79,29 @@ xtract.xtract_features_from_subframes(a, len, xtract.XTRACT_WINDOWED, window, re
 
 for i in range(len):
     print(result[i])
+
+print('Computing the correlation of two series...')
+
+pair = xtract.doubleArray(8)
+for i, value in enumerate([1.0, 2.0, 3.0, 4.0, 2.0, 4.0, 6.0, 8.0]):
+    pair[i] = value
+
+correlation = xtract.xtract_pearson_correlation(pair, 8, None)[1]
+
+print('The Pearson correlation is %.2f' % correlation)
+
+if abs(correlation - 1.0) > 1e-12:
+    sys.exit(1)
+
+channels = xtract.intArray(1)
+channels[0] = 2
+covariance = xtract.doubleArray(4)
+xtract.xtract_covariance_matrix(pair, 8, channels, covariance)
+
+print('The covariance matrix is %.2f, %.2f, %.2f, %.2f' % tuple(covariance[i] for i in range(4)))
+
+if abs(covariance[1] - 10.0 / 3.0) > 1e-12:
+    sys.exit(1)
 
 print('Testing stateful functions...')
 

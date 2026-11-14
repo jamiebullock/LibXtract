@@ -52,7 +52,7 @@ if(python_found)
     add_custom_command(TARGET xtract_python POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/test.py ${python_dir}/test.py)
     add_test(NAME python_bindings
-        COMMAND Python::Interpreter ${python_dir}/test.py
+        COMMAND Python::Interpreter ${python_dir}/test.py ${PROJECT_SOURCE_DIR}/include/xtract
         WORKING_DIRECTORY ${python_dir})
     message(STATUS "Python bindings: ${Python_EXECUTABLE}")
 endif()
