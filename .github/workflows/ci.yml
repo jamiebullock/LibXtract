@@ -193,8 +193,13 @@ jobs:
           sudo install Bitwuzla-Linux-x86_64-static/bin/bitwuzla /usr/local/bin/bitwuzla
           bitwuzla --version
 
+      # The runner has 16 GB. Two proofs need about 7 GB each and run alone;
+      # every other proof needs less than 4 GB.
       - name: Bounded model checking (CBMC)
-        run: make -C verify
+        run: |
+          make -C verify .proofs/verify_higuchi_fractal_dimension.proved
+          make -C verify .proofs/verify_last_n.proved
+          make -C verify -j3
 
       - name: Upload proof logs on failure
         if: failure() || cancelled()
