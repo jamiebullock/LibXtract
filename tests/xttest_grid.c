@@ -265,3 +265,173 @@ UTEST(grid_central_moments, rejects_a_width_that_does_not_divide_the_grid_into_r
     width = 2;
     ASSERT_EQ(xtract_grid_central_moments(data, 6, &width, result), XTRACT_SUCCESS);
 }
+
+enum
+{
+    NORMALISED_MOMENTS = 7,
+    HU_MOMENTS = 7
+};
+
+UTEST(normalised_moments, second_order_over_the_square_of_the_sum_and_third_over_its_power_of_five_halves)
+{
+    /* The sum is 4, whose square is 16 and whose power of 5/2 is 32 */
+    double data[] = {4.0, 8.0, -4.0, 12.0, 16.0, 0.0, 32.0, -64.0};
+    double result[NORMALISED_MOMENTS] = {0};
+
+    ASSERT_EQ(xtract_normalised_moments(data, 8, NULL, result), XTRACT_SUCCESS);
+    CHECK_REL(result[0], 0.5, EPSILON);
+    CHECK_REL(result[1], -0.25, EPSILON);
+    CHECK_REL(result[2], 0.75, EPSILON);
+    CHECK_REL(result[3], 0.5, EPSILON);
+    ASSERT_EQ(result[4], 0.0);
+    CHECK_REL(result[5], 1.0, EPSILON);
+    CHECK_REL(result[6], -2.0, EPSILON);
+}
+
+UTEST(normalised_moments, no_result_when_the_sum_is_not_above_zero)
+{
+    double data[] = {0.0, 8.0, -4.0, 12.0, 16.0, 0.0, 32.0, -64.0};
+    double result[NORMALISED_MOMENTS];
+    int i;
+
+    for (i = 0; i < NORMALISED_MOMENTS; i++)
+        result[i] = -1.0;
+    ASSERT_EQ(xtract_normalised_moments(data, 8, NULL, result), XTRACT_NO_RESULT);
+    for (i = 0; i < NORMALISED_MOMENTS; i++)
+        ASSERT_EQ(result[i], 0.0);
+
+    data[0] = -4.0;
+    result[0] = -1.0;
+    ASSERT_EQ(xtract_normalised_moments(data, 8, NULL, result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result[0], 0.0);
+}
+
+UTEST(normalised_moments, rejects_any_length_but_eight)
+{
+    double data[9] = {4.0, 8.0, -4.0, 12.0, 16.0, 0.0, 32.0, -64.0, 1.0};
+    double result[NORMALISED_MOMENTS] = {0};
+
+    ASSERT_EQ(xtract_normalised_moments(data, 7, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_normalised_moments(data, 9, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_normalised_moments(data, 0, NULL, result), XTRACT_ARGUMENT_ERROR);
+}
+
+UTEST(hu_moments, second_order_alone_gives_the_first_two)
+{
+    /* nu20 = 3 and nu02 = 1: their sum, then the square of their difference */
+    double data[] = {3.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0};
+    double result[HU_MOMENTS];
+    int i;
+
+    for (i = 0; i < HU_MOMENTS; i++)
+        result[i] = -1.0;
+    ASSERT_EQ(xtract_hu_moments(data, 7, NULL, result), XTRACT_SUCCESS);
+    CHECK_REL(result[0], 4.0, EPSILON);
+    CHECK_REL(result[1], 4.0, EPSILON);
+    for (i = 2; i < HU_MOMENTS; i++)
+        ASSERT_EQ(result[i], 0.0);
+}
+
+UTEST(hu_moments, one_third_order_moment)
+{
+    /* nu30 = 2 alone: the third and fourth are its square, and the fifth
+     * its fourth power */
+    double data[] = {0.0, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0};
+    double result[HU_MOMENTS] = {0};
+
+    ASSERT_EQ(xtract_hu_moments(data, 7, NULL, result), XTRACT_SUCCESS);
+    ASSERT_EQ(result[0], 0.0);
+    ASSERT_EQ(result[1], 0.0);
+    CHECK_REL(result[2], 4.0, EPSILON);
+    CHECK_REL(result[3], 4.0, EPSILON);
+    CHECK_REL(result[4], 16.0, EPSILON);
+    ASSERT_EQ(result[5], 0.0);
+    ASSERT_EQ(result[6], 0.0);
+}
+
+static void hu_of_grid(const double *grid, const int N, int width, double *hu)
+{
+    double central[CENTRAL_MOMENTS];
+    double normalised[NORMALISED_MOMENTS];
+
+    xtract_grid_central_moments(grid, N, &width, central);
+    xtract_normalised_moments(central, CENTRAL_MOMENTS, NULL, normalised);
+    xtract_hu_moments(normalised, NORMALISED_MOMENTS, NULL, hu);
+}
+
+UTEST(hu_moments, do_not_change_when_the_grid_is_turned_a_quarter)
+{
+    /* The second grid is the first turned a quarter clockwise: its row y
+     * is column y of the first, read from the bottom row up */
+    double upright[] = {1.0, 2.0, 0.0, 4.0,
+                        0.0, 5.0, 3.0, 0.0,
+                        7.0, 0.0, 0.0, 1.0};
+    double turned[12];
+    double a[HU_MOMENTS] = {0};
+    double b[HU_MOMENTS] = {0};
+    int x, y, i;
+
+    for (y = 0; y < 4; y++)
+    {
+        for (x = 0; x < 3; x++)
+            turned[y * 3 + x] = upright[(2 - x) * 4 + y];
+    }
+    hu_of_grid(upright, 12, 4, a);
+    hu_of_grid(turned, 12, 3, b);
+    for (i = 0; i < HU_MOMENTS; i++)
+        CHECK_REL(a[i], b[i], 1e-9);
+    ASSERT_TRUE(a[0] > 0.0);
+}
+
+UTEST(hu_moments, the_seventh_changes_sign_for_the_mirror_image)
+{
+    double grid[] = {1.0, 2.0, 0.0, 4.0,
+                     0.0, 5.0, 3.0, 0.0,
+                     7.0, 0.0, 0.0, 1.0};
+    double mirrored[12];
+    double a[HU_MOMENTS] = {0};
+    double b[HU_MOMENTS] = {0};
+    int x, y, i;
+
+    for (y = 0; y < 3; y++)
+    {
+        for (x = 0; x < 4; x++)
+            mirrored[y * 4 + x] = grid[y * 4 + (3 - x)];
+    }
+    hu_of_grid(grid, 12, 4, a);
+    hu_of_grid(mirrored, 12, 4, b);
+    for (i = 0; i < 6; i++)
+        CHECK_REL(a[i], b[i], 1e-9);
+    CHECK_REL(a[6], -b[6], 1e-9);
+    ASSERT_TRUE(a[6] != 0.0);
+}
+
+UTEST(hu_moments, scale_with_the_values_as_the_normalised_moments_do)
+{
+    double grid[] = {1.0, 2.0, 0.0, 4.0,
+                     0.0, 5.0, 3.0, 0.0,
+                     7.0, 0.0, 0.0, 1.0};
+    double louder[12];
+    double a[HU_MOMENTS] = {0};
+    double b[HU_MOMENTS] = {0};
+    int i;
+
+    for (i = 0; i < 12; i++)
+        louder[i] = 8.0 * grid[i];
+    hu_of_grid(grid, 12, 4, a);
+    hu_of_grid(louder, 12, 4, b);
+    /* Scaling the values by k divides the normalised moments of the second
+     * order by k and of the third by k to the power 3/2 */
+    CHECK_REL(a[0], 8.0 * b[0], 1e-9);
+    CHECK_REL(a[1], 64.0 * b[1], 1e-9);
+}
+
+UTEST(hu_moments, rejects_any_length_but_seven)
+{
+    double data[8] = {3.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+    double result[HU_MOMENTS] = {0};
+
+    ASSERT_EQ(xtract_hu_moments(data, 6, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_hu_moments(data, 8, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_hu_moments(data, 0, NULL, result), XTRACT_ARGUMENT_ERROR);
+}

@@ -484,8 +484,27 @@ UTEST(descriptors, appended_features_are_fully_described)
     ASSERT_EQ(fd[XTRACT_GRID_CENTRAL_MOMENTS].data.unit, XTRACT_UNIT_ANY);
     ASSERT_EQ(fd[XTRACT_GRID_CENTRAL_MOMENTS].is_scalar, XTRACT_FALSE);
     ASSERT_EQ(fd[XTRACT_GRID_CENTRAL_MOMENTS].is_delta, XTRACT_FALSE);
-    ASSERT_EQ(fd[XTRACT_GRID_CENTRAL_MOMENTS].result.vector.format, XTRACT_ARBITRARY_SERIES);
+    ASSERT_EQ(fd[XTRACT_GRID_CENTRAL_MOMENTS].result.vector.format, XTRACT_CENTRAL_MOMENT_COEFFS);
     ASSERT_EQ(fd[XTRACT_GRID_CENTRAL_MOMENTS].result.vector.unit, XTRACT_UNIT_ANY);
+
+    ASSERT_STREQ(fd[XTRACT_NORMALISED_MOMENTS].algo.name, "normalised_moments");
+    ASSERT_EQ(fd[XTRACT_NORMALISED_MOMENTS].argc, 0);
+    ASSERT_EQ(fd[XTRACT_NORMALISED_MOMENTS].data.format, XTRACT_CENTRAL_MOMENT_COEFFS);
+    ASSERT_EQ(fd[XTRACT_NORMALISED_MOMENTS].data.unit, XTRACT_UNIT_ANY);
+    ASSERT_EQ(fd[XTRACT_NORMALISED_MOMENTS].is_scalar, XTRACT_FALSE);
+    ASSERT_EQ(fd[XTRACT_NORMALISED_MOMENTS].is_delta, XTRACT_FALSE);
+    ASSERT_EQ(fd[XTRACT_NORMALISED_MOMENTS].result.vector.format, XTRACT_NORMALISED_MOMENT_COEFFS);
+    ASSERT_EQ(fd[XTRACT_NORMALISED_MOMENTS].result.vector.unit, XTRACT_UNIT_NONE);
+
+    ASSERT_STREQ(fd[XTRACT_HU_MOMENTS].algo.name, "hu_moments");
+    ASSERT_EQ(fd[XTRACT_HU_MOMENTS].algo.year, 1962);
+    ASSERT_EQ(fd[XTRACT_HU_MOMENTS].argc, 0);
+    ASSERT_EQ(fd[XTRACT_HU_MOMENTS].data.format, XTRACT_NORMALISED_MOMENT_COEFFS);
+    ASSERT_EQ(fd[XTRACT_HU_MOMENTS].data.unit, XTRACT_UNIT_ANY);
+    ASSERT_EQ(fd[XTRACT_HU_MOMENTS].is_scalar, XTRACT_FALSE);
+    ASSERT_EQ(fd[XTRACT_HU_MOMENTS].is_delta, XTRACT_FALSE);
+    ASSERT_EQ(fd[XTRACT_HU_MOMENTS].result.vector.format, XTRACT_ARBITRARY_SERIES);
+    ASSERT_EQ(fd[XTRACT_HU_MOMENTS].result.vector.unit, XTRACT_UNIT_NONE);
     for (f = XTRACT_KULLBACK_LEIBLER_DIVERGENCE; f <= XTRACT_MODIFIED_KULLBACK_LEIBLER; f++)
         ASSERT_EQ_MSG(fd[f].is_delta, XTRACT_TRUE, fd[f].algo.name);
 
@@ -626,6 +645,8 @@ UTEST(dispatch, slots_map_to_the_expected_function)
     ASSERT_TRUE(xtract[XTRACT_COHERENCE] == xtract_coherence);
     ASSERT_TRUE(xtract[XTRACT_GRID_MOMENTS] == xtract_grid_moments);
     ASSERT_TRUE(xtract[XTRACT_GRID_CENTRAL_MOMENTS] == xtract_grid_central_moments);
+    ASSERT_TRUE(xtract[XTRACT_NORMALISED_MOMENTS] == xtract_normalised_moments);
+    ASSERT_TRUE(xtract[XTRACT_HU_MOMENTS] == xtract_hu_moments);
 }
 
 /* ===== Descriptor conformance ===== */
@@ -686,6 +707,10 @@ static int conf_min_n(const xtract_function_descriptor_t *d)
         return 2;
     case XTRACT_HIGUCHI_FRACTAL_DIMENSION:
         return 20;
+    case XTRACT_NORMALISED_MOMENTS:
+        return 8;
+    case XTRACT_HU_MOMENTS:
+        return 7;
     case XTRACT_COHERENCE:
         return 3 * CONF_COHERENCE_SEGMENT;
     case XTRACT_SPECTRUM:
@@ -862,6 +887,8 @@ UTEST(descriptors, every_feature_conforms_to_its_descriptor)
         }
         if (d->data.format == XTRACT_BARK_COEFFS)
             ASSERT_EQ_MSG(xtract[f](data, XTRACT_BARK_BANDS + 1, argv, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
+        if (d->data.format == XTRACT_CENTRAL_MOMENT_COEFFS || d->data.format == XTRACT_NORMALISED_MOMENT_COEFFS)
+            ASSERT_EQ_MSG(xtract[f](data, min_n + 1, argv, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
 
         for (i = 0; i < d->argc && i < XTRACT_MAXARGS; i++)
         {

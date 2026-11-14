@@ -40,6 +40,24 @@ extern "C"
      */
     int xtract_grid_central_moments(const double *data, const int N, const void *argv, double *result);
 
+    /** \brief Extract the normalised moments of a grid from its central moments: the central moments in a form that does not change when the grid is made larger or smaller
+     *
+     * \param *data: a pointer to the first element in an array of 8 doubles: the central moments of a grid as xtract_grid_central_moments() gives them
+     * \param N: the number of elements in the array pointed to by *data, which must be 8
+     * \param *argv: a pointer to NULL
+     * \param *result: a pointer to an array of 7 doubles: the normalised moments nu20, nu11, nu02, nu30, nu21, nu12 and nu03 in that order, each the central moment of the same digits divided by mu00 to the power of 1 plus half the sum of the digits. The array is zeroed with no result when mu00 is not above zero
+     */
+    int xtract_normalised_moments(const double *data, const int N, const void *argv, double *result);
+
+    /** \brief Extract the seven Hu moments of a grid from its normalised moments: values that do not change when the grid is moved, made larger or smaller, or rotated
+     *
+     * \param *data: a pointer to the first element in an array of 7 doubles: the normalised moments of a grid as xtract_normalised_moments() gives them
+     * \param N: the number of elements in the array pointed to by *data, which must be 7
+     * \param *argv: a pointer to NULL
+     * \param *result: a pointer to an array of 7 doubles: the moments in the order of Hu (1962). The first six are the same for a grid and its mirror image, and the seventh changes sign
+     */
+    int xtract_hu_moments(const double *data, const int N, const void *argv, double *result);
+
     /** @} */
 
 #ifdef __cplusplus

@@ -178,6 +178,8 @@ extern "C"
         XTRACT_COHERENCE,
         XTRACT_GRID_MOMENTS,
         XTRACT_GRID_CENTRAL_MOMENTS,
+        XTRACT_NORMALISED_MOMENTS,
+        XTRACT_HU_MOMENTS,
         XTRACT_FEATURE_COUNT
     };
 
@@ -348,7 +350,11 @@ extern "C"
         /* The rows of a square matrix, one after another */
         XTRACT_SQUARE_MATRIX,
         /* The rows of a grid of equal width, one after another */
-        XTRACT_GRID
+        XTRACT_GRID,
+        /* The sum of a grid and its 7 central moments of the second and third orders */
+        XTRACT_CENTRAL_MOMENT_COEFFS,
+        /* The 7 normalised moments of a grid of the second and third orders */
+        XTRACT_NORMALISED_MOMENT_COEFFS
     } xtract_vector_t;
 
     /** \brief Data structure containing useful information about functions provided by LibXtract. */
