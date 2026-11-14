@@ -6,7 +6,7 @@
 
 /*
  * libFuzzer harness for the grid feature functions (xtract_grid.h):
- * grid_moments.
+ * grid_moments, grid_central_moments.
  *
  * All share the uniform signature and take an argv of ints that starts with
  * the width of the grid, so one harness drives them via the xtract[] dispatch
@@ -26,7 +26,7 @@
 
 #include "xtract/libxtract.h"
 
-static const int eligible[] = {XTRACT_GRID_MOMENTS};
+static const int eligible[] = {XTRACT_GRID_MOMENTS, XTRACT_GRID_CENTRAL_MOMENTS};
 
 #define N_ELIGIBLE ((int)(sizeof(eligible) / sizeof(eligible[0])))
 #define MAX_N 4096
