@@ -505,6 +505,32 @@ UTEST(descriptors, appended_features_are_fully_described)
     ASSERT_EQ(fd[XTRACT_HU_MOMENTS].is_delta, XTRACT_FALSE);
     ASSERT_EQ(fd[XTRACT_HU_MOMENTS].result.vector.format, XTRACT_ARBITRARY_SERIES);
     ASSERT_EQ(fd[XTRACT_HU_MOMENTS].result.vector.unit, XTRACT_UNIT_NONE);
+
+    ASSERT_STREQ(fd[XTRACT_QUANTISE].algo.name, "quantise");
+    ASSERT_EQ(fd[XTRACT_QUANTISE].argc, 3);
+    ASSERT_EQ(fd[XTRACT_QUANTISE].argv.type, XTRACT_FLOAT);
+    ASSERT_EQ(fd[XTRACT_QUANTISE].argv.min[0], XTRACT_UNBOUNDED_MIN);
+    ASSERT_EQ(fd[XTRACT_QUANTISE].argv.max[1], XTRACT_UNBOUNDED_MAX);
+    CHECK_REL(fd[XTRACT_QUANTISE].argv.min[2], 1.0, EPSILON);
+    CHECK_REL(fd[XTRACT_QUANTISE].argv.max[2], 2147483647.0, EPSILON);
+    ASSERT_EQ(fd[XTRACT_QUANTISE].argv.donor[0], XTRACT_LOWEST_VALUE);
+    ASSERT_EQ(fd[XTRACT_QUANTISE].argv.donor[1], XTRACT_HIGHEST_VALUE);
+    ASSERT_EQ(fd[XTRACT_QUANTISE].data.format, XTRACT_ARBITRARY_SERIES);
+    ASSERT_EQ(fd[XTRACT_QUANTISE].data.unit, XTRACT_UNIT_ANY);
+    ASSERT_EQ(fd[XTRACT_QUANTISE].is_scalar, XTRACT_FALSE);
+    ASSERT_EQ(fd[XTRACT_QUANTISE].result.vector.format, XTRACT_ARBITRARY_SERIES);
+    ASSERT_EQ(fd[XTRACT_QUANTISE].result.vector.unit, XTRACT_UNIT_NONE);
+
+    ASSERT_STREQ(fd[XTRACT_HISTOGRAM].algo.name, "histogram");
+    ASSERT_EQ(fd[XTRACT_HISTOGRAM].argc, 1);
+    ASSERT_EQ(fd[XTRACT_HISTOGRAM].argv.type, XTRACT_INT);
+    CHECK_REL(fd[XTRACT_HISTOGRAM].argv.min[0], 1.0, EPSILON);
+    ASSERT_EQ(fd[XTRACT_HISTOGRAM].argv.max[0], XTRACT_UNBOUNDED_MAX);
+    ASSERT_EQ(fd[XTRACT_HISTOGRAM].data.format, XTRACT_ARBITRARY_SERIES);
+    ASSERT_EQ(fd[XTRACT_HISTOGRAM].data.unit, XTRACT_UNIT_NONE);
+    ASSERT_EQ(fd[XTRACT_HISTOGRAM].is_scalar, XTRACT_FALSE);
+    ASSERT_EQ(fd[XTRACT_HISTOGRAM].result.vector.format, XTRACT_ARBITRARY_SERIES);
+    ASSERT_EQ(fd[XTRACT_HISTOGRAM].result.vector.unit, XTRACT_UNIT_NONE);
     for (f = XTRACT_KULLBACK_LEIBLER_DIVERGENCE; f <= XTRACT_MODIFIED_KULLBACK_LEIBLER; f++)
         ASSERT_EQ_MSG(fd[f].is_delta, XTRACT_TRUE, fd[f].algo.name);
 
@@ -647,6 +673,8 @@ UTEST(dispatch, slots_map_to_the_expected_function)
     ASSERT_TRUE(xtract[XTRACT_GRID_CENTRAL_MOMENTS] == xtract_grid_central_moments);
     ASSERT_TRUE(xtract[XTRACT_NORMALISED_MOMENTS] == xtract_normalised_moments);
     ASSERT_TRUE(xtract[XTRACT_HU_MOMENTS] == xtract_hu_moments);
+    ASSERT_TRUE(xtract[XTRACT_QUANTISE] == xtract_quantise);
+    ASSERT_TRUE(xtract[XTRACT_HISTOGRAM] == xtract_histogram);
 }
 
 /* ===== Descriptor conformance ===== */
@@ -807,7 +835,7 @@ static void conf_fill_data(const xtract_function_descriptor_t *d, double *data, 
     int i;
 
     for (i = 0; i < n; i++)
-        data[i] = 1.0;
+        data[i] = d->id == XTRACT_HISTOGRAM ? 0.0 : 1.0;
     if (conf_two_half(d))
     {
         for (i = n / 2; i < n; i++)

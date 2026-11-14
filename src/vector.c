@@ -1432,3 +1432,76 @@ int xtract_cqt(const double *data, const int N, const void *argv, double *result
 
     return XTRACT_SUCCESS;
 }
+
+int xtract_quantise(const double *data, const int N, const void *argv, double *result)
+{
+    double lower, upper, levels, top, range;
+    double scale = 1.0;
+    int n;
+
+    if (N < 1 || argv == NULL)
+        return XTRACT_ARGUMENT_ERROR;
+
+    lower = ((const double *)argv)[0];
+    upper = ((const double *)argv)[1];
+    levels = ((const double *)argv)[2];
+    if (!isfinite(lower) || !isfinite(upper) || upper < lower ||
+        !(levels >= 1.0 && levels <= 2147483647.0) || levels != floor(levels))
+        return XTRACT_ARGUMENT_ERROR;
+
+    top = levels - 1.0;
+    range = upper - lower;
+    if (isinf(range))
+    {
+        /* Bounds of opposite sign near the largest double: half of each
+         * keeps the range finite */
+        scale = 0.5;
+        range = 0.5 * upper - 0.5 * lower;
+    }
+
+    for (n = 0; n < N; n++)
+    {
+        const double value = data[n];
+        double level;
+
+        if (value <= lower)
+            level = 0.0;
+        else if (value >= upper)
+            level = top;
+        else
+        {
+            level = floor((scale * value - scale * lower) / range * levels);
+            if (level > top)
+                level = top;
+        }
+        result[n] = level;
+    }
+
+    return XTRACT_SUCCESS;
+}
+
+int xtract_histogram(const double *data, const int N, const void *argv, double *result)
+{
+    int levels, n;
+
+    if (N < 1 || argv == NULL)
+        return XTRACT_ARGUMENT_ERROR;
+
+    levels = *(const int *)argv;
+    if (levels < 1)
+        return XTRACT_ARGUMENT_ERROR;
+
+    for (n = 0; n < N; n++)
+    {
+        if (!(data[n] >= 0.0 && data[n] < levels) || data[n] != floor(data[n]))
+            return XTRACT_ARGUMENT_ERROR;
+    }
+
+    memset(result, 0, (size_t)levels * sizeof(double));
+    for (n = 0; n < N; n++)
+        result[(int)data[n]] += 1.0;
+    for (n = 0; n < levels; n++)
+        result[n] /= N;
+
+    return XTRACT_SUCCESS;
+}

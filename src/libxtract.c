@@ -129,4 +129,6 @@ int (*xtract[])(const double *, const int, const void *, double *) =
         xtract_grid_moments,
         xtract_grid_central_moments,
         xtract_normalised_moments,
-        xtract_hu_moments};
+        xtract_hu_moments,
+        xtract_quantise,
+        xtract_histogram};
