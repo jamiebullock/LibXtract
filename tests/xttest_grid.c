@@ -829,6 +829,21 @@ UTEST(cooccurrence_correlation, no_result_when_one_side_of_the_pairs_is_at_one_l
     ASSERT_EQ(result, 0.0);
 }
 
+UTEST(cooccurrence_correlation, no_result_when_rounding_moves_the_mean_off_the_only_level)
+{
+    /* Every first element is at level 1. The fractions 1/6, 4/6 and 1/6 sum
+     * to just under 1 in a double, which puts the mean just under level 1 */
+    double rows_at_one_level[] = {0.0, 0.0, 0.0, 1.0, 4.0, 1.0, 0.0, 0.0, 0.0};
+    double columns_at_one_level[] = {0.0, 1.0, 0.0, 0.0, 4.0, 0.0, 0.0, 1.0, 0.0};
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_cooccurrence_correlation(rows_at_one_level, 9, NULL, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
+    result = -1.0;
+    ASSERT_EQ(xtract_cooccurrence_correlation(columns_at_one_level, 9, NULL, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
+}
+
 UTEST(cooccurrence_statistics, no_result_when_the_matrix_is_empty)
 {
     double empty[4] = {0};

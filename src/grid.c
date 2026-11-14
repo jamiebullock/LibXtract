@@ -326,6 +326,7 @@ int xtract_cooccurrence_correlation(const double *data, const int N, const void 
     double correlation = 0.0;
     const int rows = cooccurrence_rows(data, N, &total);
     int status = XTRACT_NO_RESULT;
+    int first_i = -1, first_j = -1, several_i = 0, several_j = 0;
     int i, j, n = 0;
 
     (void)argv;
@@ -343,6 +344,16 @@ int xtract_cooccurrence_correlation(const double *data, const int N, const void 
 
             mean_i += p * i;
             mean_j += p * j;
+            if (data[n] != 0.0)
+            {
+                if (first_i < 0)
+                {
+                    first_i = i;
+                    first_j = j;
+                }
+                several_i |= i != first_i;
+                several_j |= j != first_j;
+            }
         }
     }
     n = 0;
@@ -357,7 +368,10 @@ int xtract_cooccurrence_correlation(const double *data, const int N, const void 
             products += p * (i - mean_i) * (j - mean_j);
         }
     }
-    if (spread_i > 0.0 && spread_j > 0.0)
+    /* Whether each side of the pairs is at more than one level is taken from
+     * which rows and columns have a value, since a mean that rounding moves
+     * off its only level gives that level a spread */
+    if (several_i && several_j && spread_i > 0.0 && spread_j > 0.0)
     {
         correlation = products / (sqrt(spread_i) * sqrt(spread_j));
         if (correlation > 1.0)
