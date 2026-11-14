@@ -3711,6 +3711,19 @@ UTEST(quantise, bounds_at_the_ends_of_the_double_range)
     ASSERT_EQ(result[3], 1.0);
 }
 
+UTEST(quantise, bounds_one_step_either_side_of_zero)
+{
+    /* The smallest numbers above and below zero. Half of either is zero */
+    double data[] = {-0x0.0000000000001p-1022, 0.0, 0x0.0000000000001p-1022};
+    double argv[] = {-0x0.0000000000001p-1022, 0x0.0000000000001p-1022, 2.0};
+    double result[3] = {-1.0, -1.0, -1.0};
+
+    ASSERT_EQ(xtract_quantise(data, 3, argv, result), XTRACT_SUCCESS);
+    ASSERT_EQ(result[0], 0.0);
+    ASSERT_EQ(result[1], 1.0);
+    ASSERT_EQ(result[2], 1.0);
+}
+
 UTEST(quantise, rejects_bad_arguments)
 {
     double data[] = {1.0, 2.0};

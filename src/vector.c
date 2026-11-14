@@ -1435,7 +1435,8 @@ int xtract_cqt(const double *data, const int N, const void *argv, double *result
 
 int xtract_quantise(const double *data, const int N, const void *argv, double *result)
 {
-    double lower, upper, levels, top, half_range;
+    double lower, upper, levels, top, range;
+    double scale = 1.0;
     int n;
 
     if (N < 1 || argv == NULL)
@@ -1449,9 +1450,14 @@ int xtract_quantise(const double *data, const int N, const void *argv, double *r
         return XTRACT_ARGUMENT_ERROR;
 
     top = levels - 1.0;
-    /* Half of each bound keeps the range finite when the bounds are of
-     * opposite sign and near the largest double */
-    half_range = 0.5 * upper - 0.5 * lower;
+    range = upper - lower;
+    if (isinf(range))
+    {
+        /* Bounds of opposite sign near the largest double: half of each
+         * keeps the range finite */
+        scale = 0.5;
+        range = 0.5 * upper - 0.5 * lower;
+    }
 
     for (n = 0; n < N; n++)
     {
@@ -1464,7 +1470,7 @@ int xtract_quantise(const double *data, const int N, const void *argv, double *r
             level = top;
         else
         {
-            level = floor((0.5 * value - 0.5 * lower) / half_range * levels);
+            level = floor((scale * value - scale * lower) / range * levels);
             if (level > top)
                 level = top;
         }
