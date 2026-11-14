@@ -4,10 +4,17 @@
  * SPDX-License-Identifier: Zlib
  */
 
+#include <math.h>
 #include <stddef.h>
 #include <string.h>
 
 #include "xtract/libxtract.h"
+
+enum
+{
+    CENTRAL_MOMENTS = 8,
+    NORMALISED_MOMENTS = 7
+};
 
 /* The width that argv gives for a grid of N elements, or 0 when argv is
  * missing or the width does not divide N into whole rows */
@@ -100,7 +107,7 @@ int xtract_grid_central_moments(const double *data, const int N, const void *arg
     }
     if (total == 0.0)
     {
-        memset(result, 0, 8 * sizeof(double));
+        memset(result, 0, CENTRAL_MOMENTS * sizeof(double));
         return XTRACT_NO_RESULT;
     }
     centre_x = total_x / total;
@@ -139,6 +146,69 @@ int xtract_grid_central_moments(const double *data, const int N, const void *arg
     result[5] = mu21;
     result[6] = mu12;
     result[7] = mu03;
+
+    return XTRACT_SUCCESS;
+}
+
+int xtract_normalised_moments(const double *data, const int N, const void *argv, double *result)
+{
+    double sum, root;
+    int n;
+
+    (void)argv;
+    if (N != CENTRAL_MOMENTS)
+        return XTRACT_ARGUMENT_ERROR;
+
+    sum = data[0];
+    if (!(sum > 0.0))
+    {
+        memset(result, 0, NORMALISED_MOMENTS * sizeof(double));
+        return XTRACT_NO_RESULT;
+    }
+    root = sqrt(sum);
+
+    /* One division at a time: a power of the sum can be beyond the range of
+     * a double when the moment divided by it is not */
+    for (n = 0; n < 3; n++)
+        result[n] = data[n + 1] / sum / sum;
+    for (n = 3; n < NORMALISED_MOMENTS; n++)
+        result[n] = data[n + 1] / sum / sum / root;
+
+    return XTRACT_SUCCESS;
+}
+
+int xtract_hu_moments(const double *data, const int N, const void *argv, double *result)
+{
+    double nu20, nu11, nu02, nu30, nu21, nu12, nu03;
+    double spread, sum_x, sum_y, difference_x, difference_y;
+
+    (void)argv;
+    if (N != NORMALISED_MOMENTS)
+        return XTRACT_ARGUMENT_ERROR;
+
+    nu20 = data[0];
+    nu11 = data[1];
+    nu02 = data[2];
+    nu30 = data[3];
+    nu21 = data[4];
+    nu12 = data[5];
+    nu03 = data[6];
+
+    spread = nu20 - nu02;
+    sum_x = nu30 + nu12;
+    sum_y = nu21 + nu03;
+    difference_x = nu30 - 3.0 * nu12;
+    difference_y = 3.0 * nu21 - nu03;
+
+    result[0] = nu20 + nu02;
+    result[1] = spread * spread + 4.0 * nu11 * nu11;
+    result[2] = difference_x * difference_x + difference_y * difference_y;
+    result[3] = sum_x * sum_x + sum_y * sum_y;
+    result[4] = difference_x * sum_x * (sum_x * sum_x - 3.0 * sum_y * sum_y) +
+                difference_y * sum_y * (3.0 * sum_x * sum_x - sum_y * sum_y);
+    result[5] = spread * (sum_x * sum_x - sum_y * sum_y) + 4.0 * nu11 * sum_x * sum_y;
+    result[6] = difference_y * sum_x * (sum_x * sum_x - 3.0 * sum_y * sum_y) -
+                difference_x * sum_y * (3.0 * sum_x * sum_x - sum_y * sum_y);
 
     return XTRACT_SUCCESS;
 }

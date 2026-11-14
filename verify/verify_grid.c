@@ -36,3 +36,25 @@ void verify_grid_central_moments(void)
     free(argv);
     free(result);
 }
+
+void verify_normalised_moments(void)
+{
+    const int N = nondet_length();
+    double *data = nondet_doubles(N);
+    double *result = nondet_doubles(7);
+
+    (void)xtract_normalised_moments(data, N, NULL, result);
+    free(data);
+    free(result);
+}
+
+void verify_hu_moments(void)
+{
+    const int N = nondet_length();
+    double *data = nondet_doubles(N);
+    double *result = nondet_doubles(7);
+
+    (void)xtract_hu_moments(data, N, NULL, result);
+    free(data);
+    free(result);
+}

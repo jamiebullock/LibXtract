@@ -666,6 +666,12 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_GRID_CENTRAL_MOMENTS:
             *data_format = XTRACT_GRID;
             break;
+        case XTRACT_NORMALISED_MOMENTS:
+            *data_format = XTRACT_CENTRAL_MOMENT_COEFFS;
+            break;
+        case XTRACT_HU_MOMENTS:
+            *data_format = XTRACT_NORMALISED_MOMENT_COEFFS;
+            break;
         case XTRACT_CORRELATION_MATRIX:
         case XTRACT_AVERAGE_CORRELATION:
         case XTRACT_PRINCIPAL_VARIANCES:
@@ -732,6 +738,8 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_COHERENCE:
         case XTRACT_GRID_MOMENTS:
         case XTRACT_GRID_CENTRAL_MOMENTS:
+        case XTRACT_NORMALISED_MOMENTS:
+        case XTRACT_HU_MOMENTS:
         case XTRACT_KULLBACK_LEIBLER_DIVERGENCE:
         case XTRACT_ITAKURA_SAITO_DIVERGENCE:
         case XTRACT_MODIFIED_KULLBACK_LEIBLER:
@@ -1598,6 +1606,21 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             copy_desc(p_desc, "Extract how the values of a grid are spread about their centroid");
             copy_author(author, "");
             break;
+        case XTRACT_NORMALISED_MOMENTS:
+            copy_name(name, "normalised_moments");
+            copy_name(p_name, "Normalised Moments");
+            copy_desc(desc, "Extract the normalised moments of a grid from its central moments");
+            copy_desc(p_desc, "Extract the central moments of a grid in a form that does not change with its scale");
+            copy_author(author, "");
+            break;
+        case XTRACT_HU_MOMENTS:
+            copy_name(name, "hu_moments");
+            copy_name(p_name, "Hu Moments");
+            copy_desc(desc, "Extract the seven Hu moments of a grid from its normalised moments");
+            copy_desc(p_desc, "Extract seven values that do not change when a grid is moved, scaled or rotated");
+            copy_author(author, "Ming-Kuei Hu");
+            *year = 1962;
+            break;
         case XTRACT_KULLBACK_LEIBLER_DIVERGENCE:
             copy_name(name, "kullback_leibler_divergence");
             copy_name(p_name, "Kullback-Leibler Divergence");
@@ -1990,6 +2013,8 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_COHERENCE:
         case XTRACT_GRID_MOMENTS:
         case XTRACT_GRID_CENTRAL_MOMENTS:
+        case XTRACT_NORMALISED_MOMENTS:
+        case XTRACT_HU_MOMENTS:
             *is_scalar = XTRACT_FALSE;
             break;
         default:
@@ -2333,9 +2358,20 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
                 *result_unit = XTRACT_UNIT_NONE;
                 break;
             case XTRACT_GRID_MOMENTS:
-            case XTRACT_GRID_CENTRAL_MOMENTS:
                 *result_format = XTRACT_ARBITRARY_SERIES;
                 *result_unit = XTRACT_UNIT_ANY;
+                break;
+            case XTRACT_GRID_CENTRAL_MOMENTS:
+                *result_format = XTRACT_CENTRAL_MOMENT_COEFFS;
+                *result_unit = XTRACT_UNIT_ANY;
+                break;
+            case XTRACT_NORMALISED_MOMENTS:
+                *result_format = XTRACT_NORMALISED_MOMENT_COEFFS;
+                *result_unit = XTRACT_UNIT_NONE;
+                break;
+            case XTRACT_HU_MOMENTS:
+                *result_format = XTRACT_ARBITRARY_SERIES;
+                *result_unit = XTRACT_UNIT_NONE;
                 break;
             case XTRACT_CHROMA:
                 *result_format = XTRACT_CHROMA_COEFFS;
