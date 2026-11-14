@@ -113,6 +113,7 @@
 
 
 %include "xtract/xtract_vector.h"
+%include "xtract/xtract_grid.h"
 %include "xtract/xtract_stateful.h"
 %include "xtract/xtract_helper.h"
 %include "xtract/xtract_macros.h"
