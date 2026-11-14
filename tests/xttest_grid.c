@@ -288,6 +288,25 @@ UTEST(normalised_moments, second_order_over_the_square_of_the_sum_and_third_over
     CHECK_REL(result[6], -2.0, EPSILON);
 }
 
+UTEST(normalised_moments, finite_when_a_power_of_the_sum_is_not)
+{
+    /* The square of 1e-200 is below the smallest double and the square of
+     * 1e200 above the largest. The moments over them are neither:
+     * 2.5e-201 / 1e-400 and 2.5e199 / 1e400 */
+    double small[] = {1e-200, 2.5e-201, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+    double large[] = {1e200, 2.5e199, 0.0, 0.0, 1e260, 0.0, 0.0, 0.0};
+    double result[NORMALISED_MOMENTS] = {0};
+
+    ASSERT_EQ(xtract_normalised_moments(small, 8, NULL, result), XTRACT_SUCCESS);
+    CHECK_REL(result[0], 2.5e199, EPSILON);
+    ASSERT_EQ(result[1], 0.0);
+    ASSERT_EQ(result[3], 0.0);
+    ASSERT_EQ(xtract_normalised_moments(large, 8, NULL, result), XTRACT_SUCCESS);
+    CHECK_REL(result[0], 2.5e-201, EPSILON);
+    /* 1e260 / 1e500 */
+    CHECK_REL(result[3], 1e-240, EPSILON);
+}
+
 UTEST(normalised_moments, no_result_when_the_sum_is_not_above_zero)
 {
     double data[] = {0.0, 8.0, -4.0, 12.0, 16.0, 0.0, 32.0, -64.0};

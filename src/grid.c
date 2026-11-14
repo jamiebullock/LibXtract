@@ -152,7 +152,7 @@ int xtract_grid_central_moments(const double *data, const int N, const void *arg
 
 int xtract_normalised_moments(const double *data, const int N, const void *argv, double *result)
 {
-    double sum, second_order, third_order;
+    double sum, root;
     int n;
 
     (void)argv;
@@ -165,13 +165,14 @@ int xtract_normalised_moments(const double *data, const int N, const void *argv,
         memset(result, 0, NORMALISED_MOMENTS * sizeof(double));
         return XTRACT_NO_RESULT;
     }
-    second_order = sum * sum;
-    third_order = second_order * sqrt(sum);
+    root = sqrt(sum);
 
+    /* One division at a time: a power of the sum can be beyond the range of
+     * a double when the moment divided by it is not */
     for (n = 0; n < 3; n++)
-        result[n] = data[n + 1] / second_order;
+        result[n] = data[n + 1] / sum / sum;
     for (n = 3; n < NORMALISED_MOMENTS; n++)
-        result[n] = data[n + 1] / third_order;
+        result[n] = data[n + 1] / sum / sum / root;
 
     return XTRACT_SUCCESS;
 }
