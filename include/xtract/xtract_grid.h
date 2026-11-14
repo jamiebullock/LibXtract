@@ -109,6 +109,15 @@ extern "C"
      */
     int xtract_inverse_difference_moment(const double *data, const int N, const void *argv, double *result);
 
+    /** \brief Extract the histogram of the rotation-invariant uniform local binary patterns of a grid: how its elements compare with the eight around them (Ojala 2002)
+     *
+     * \param *data: a pointer to the first element in an array of doubles comprising the rows of a grid, one after another: the element in column x of row y at index y * width + x
+     * \param N: the number of elements in the grid, at least 1 and a multiple of the width
+     * \param *argv: a pointer to an int, the width of the grid: the number of elements in each row, from 1 to N
+     * \param *result: a pointer to an array of 10 doubles that sum to 1: the fraction of the elements with a neighbour on every side that fall in each class. An element is compared with its eight neighbours in the order they lie around it. When the neighbours at or above the element form one unbroken run, or are none or all of the eight, its class is their number, from 0 to 8. Every other element is in class 9. The classes do not change when the grid is turned a quarter or mirrored. The array is zeroed with no result when the grid has fewer than three columns or three rows, which leaves no element with a neighbour on every side
+     */
+    int xtract_local_binary_patterns(const double *data, const int N, const void *argv, double *result);
+
     /** @} */
 
 #ifdef __cplusplus

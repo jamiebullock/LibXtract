@@ -136,4 +136,5 @@ int (*xtract[])(const double *, const int, const void *, double *) =
         xtract_cooccurrence_contrast,
         xtract_cooccurrence_correlation,
         xtract_angular_second_moment,
-        xtract_inverse_difference_moment};
+        xtract_inverse_difference_moment,
+        xtract_local_binary_patterns};

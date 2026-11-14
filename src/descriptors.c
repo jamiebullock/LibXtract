@@ -361,6 +361,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_HISTOGRAM:
         case XTRACT_GRID_MOMENTS:
         case XTRACT_GRID_CENTRAL_MOMENTS:
+        case XTRACT_LOCAL_BINARY_PATTERNS:
             *argv_min = 1;
             *argv_max = XTRACT_UNBOUNDED_MAX;
             *argv_def = XTRACT_NO_DEFAULT;
@@ -716,6 +717,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_GRID_MOMENTS:
         case XTRACT_GRID_CENTRAL_MOMENTS:
         case XTRACT_COOCCURRENCE_MATRIX:
+        case XTRACT_LOCAL_BINARY_PATTERNS:
             *data_format = XTRACT_GRID;
             break;
         case XTRACT_NORMALISED_MOMENTS:
@@ -796,6 +798,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_GRID_CENTRAL_MOMENTS:
         case XTRACT_NORMALISED_MOMENTS:
         case XTRACT_HU_MOMENTS:
+        case XTRACT_LOCAL_BINARY_PATTERNS:
         case XTRACT_KULLBACK_LEIBLER_DIVERGENCE:
         case XTRACT_ITAKURA_SAITO_DIVERGENCE:
         case XTRACT_MODIFIED_KULLBACK_LEIBLER:
@@ -1740,6 +1743,14 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             copy_author(author, "Robert Haralick");
             *year = 1973;
             break;
+        case XTRACT_LOCAL_BINARY_PATTERNS:
+            copy_name(name, "local_binary_patterns");
+            copy_name(p_name, "Local Binary Patterns");
+            copy_desc(desc, "Extract the histogram of the rotation-invariant uniform local binary patterns of a grid");
+            copy_desc(p_desc, "Extract how the elements of a grid compare with the eight around them");
+            copy_author(author, "Timo Ojala");
+            *year = 2002;
+            break;
         case XTRACT_KULLBACK_LEIBLER_DIVERGENCE:
             copy_name(name, "kullback_leibler_divergence");
             copy_name(p_name, "Kullback-Leibler Divergence");
@@ -1951,6 +1962,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_GRID_MOMENTS:
         case XTRACT_GRID_CENTRAL_MOMENTS:
         case XTRACT_HISTOGRAM:
+        case XTRACT_LOCAL_BINARY_PATTERNS:
             *argc = 1;
             *argv_type = XTRACT_INT;
             break;
@@ -2143,6 +2155,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_QUANTISE:
         case XTRACT_HISTOGRAM:
         case XTRACT_COOCCURRENCE_MATRIX:
+        case XTRACT_LOCAL_BINARY_PATTERNS:
             *is_scalar = XTRACT_FALSE;
             break;
         default:
@@ -2512,6 +2525,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             case XTRACT_HU_MOMENTS:
             case XTRACT_QUANTISE:
             case XTRACT_HISTOGRAM:
+            case XTRACT_LOCAL_BINARY_PATTERNS:
                 *result_format = XTRACT_ARBITRARY_SERIES;
                 *result_unit = XTRACT_UNIT_NONE;
                 break;

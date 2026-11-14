@@ -873,3 +873,149 @@ UTEST(cooccurrence_statistics, reject_a_length_that_is_not_a_square)
         ASSERT_EQ(STATISTICS[k](matrix, 4, NULL, &result), k == 1 ? XTRACT_NO_RESULT : XTRACT_SUCCESS);
     }
 }
+
+enum
+{
+    PATTERN_CLASSES = 10
+};
+
+static void expect_one_class(const double *grid, const int expected, int *utest_result)
+{
+    int width = 3;
+    double result[PATTERN_CLASSES];
+    int k;
+
+    for (k = 0; k < PATTERN_CLASSES; k++)
+        result[k] = -1.0;
+    ASSERT_EQ(xtract_local_binary_patterns(grid, 9, &width, result), XTRACT_SUCCESS);
+    for (k = 0; k < PATTERN_CLASSES; k++)
+        ASSERT_EQ(result[k], k == expected ? 1.0 : 0.0);
+}
+
+UTEST(local_binary_patterns, an_element_above_all_its_neighbours_is_in_class_0)
+{
+    const double grid[] = {1.0, 1.0, 1.0, 1.0, 5.0, 1.0, 1.0, 1.0, 1.0};
+
+    expect_one_class(grid, 0, utest_result);
+}
+
+UTEST(local_binary_patterns, an_element_equal_to_all_its_neighbours_is_in_class_8)
+{
+    const double grid[] = {5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0};
+
+    expect_one_class(grid, 8, utest_result);
+}
+
+UTEST(local_binary_patterns, a_run_of_three_neighbours_at_or_above_is_class_3)
+{
+    /* The row above is higher than the centre and the rest lower */
+    const double grid[] = {9.0, 9.0, 9.0, 1.0, 5.0, 1.0, 1.0, 1.0, 1.0};
+
+    expect_one_class(grid, 3, utest_result);
+}
+
+UTEST(local_binary_patterns, a_run_that_passes_the_first_neighbour_is_still_one_run)
+{
+    /* The left column: the last neighbour, the first and the one before last */
+    const double grid[] = {9.0, 1.0, 1.0, 9.0, 5.0, 1.0, 9.0, 1.0, 1.0};
+
+    expect_one_class(grid, 3, utest_result);
+}
+
+UTEST(local_binary_patterns, neighbours_in_more_than_one_run_are_class_9)
+{
+    /* The four corners are higher than the centre and the four sides lower */
+    const double grid[] = {9.0, 1.0, 9.0, 1.0, 5.0, 1.0, 9.0, 1.0, 9.0};
+
+    expect_one_class(grid, 9, utest_result);
+}
+
+UTEST(local_binary_patterns, fraction_of_the_elements_with_a_neighbour_on_every_side)
+{
+    /* Four columns and three rows leave two such elements. The 5 is above
+     * all its neighbours but the 7, and the 7 is above all of its own */
+    double grid[] = {1.0, 1.0, 1.0, 1.0,
+                     1.0, 5.0, 7.0, 1.0,
+                     1.0, 1.0, 1.0, 1.0};
+    int width = 4;
+    double result[PATTERN_CLASSES] = {0};
+    double sum = 0.0;
+    int k;
+
+    ASSERT_EQ(xtract_local_binary_patterns(grid, 12, &width, result), XTRACT_SUCCESS);
+    CHECK_REL(result[0], 0.5, EPSILON);
+    CHECK_REL(result[1], 0.5, EPSILON);
+    for (k = 0; k < PATTERN_CLASSES; k++)
+        sum += result[k];
+    CHECK_REL(sum, 1.0, EPSILON);
+}
+
+UTEST(local_binary_patterns, do_not_change_when_the_grid_is_turned_or_mirrored)
+{
+    double upright[] = {3.0, 1.0, 4.0, 1.0, 5.0,
+                        9.0, 2.0, 6.0, 5.0, 3.0,
+                        5.0, 8.0, 9.0, 7.0, 9.0,
+                        3.0, 2.0, 3.0, 8.0, 4.0};
+    double turned[20];
+    double mirrored[20];
+    int width = 5;
+    int turned_width = 4;
+    double a[PATTERN_CLASSES] = {0};
+    double b[PATTERN_CLASSES] = {0};
+    double c[PATTERN_CLASSES] = {0};
+    int x, y, k, classes_seen = 0;
+
+    for (y = 0; y < 5; y++)
+    {
+        for (x = 0; x < 4; x++)
+            turned[y * 4 + x] = upright[(3 - x) * 5 + y];
+    }
+    for (y = 0; y < 4; y++)
+    {
+        for (x = 0; x < 5; x++)
+            mirrored[y * 5 + x] = upright[y * 5 + (4 - x)];
+    }
+    ASSERT_EQ(xtract_local_binary_patterns(upright, 20, &width, a), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_local_binary_patterns(turned, 20, &turned_width, b), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_local_binary_patterns(mirrored, 20, &width, c), XTRACT_SUCCESS);
+    for (k = 0; k < PATTERN_CLASSES; k++)
+    {
+        ASSERT_EQ(a[k], b[k]);
+        ASSERT_EQ(a[k], c[k]);
+        classes_seen += a[k] > 0.0;
+    }
+    ASSERT_TRUE(classes_seen >= 3);
+}
+
+UTEST(local_binary_patterns, no_result_when_no_element_has_a_neighbour_on_every_side)
+{
+    double grid[12] = {1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 1.0, 2.0, 3.0};
+    double result[PATTERN_CLASSES];
+    int widths[] = {12, 6, 2, 1};
+    int i, k;
+
+    for (i = 0; i < 4; i++)
+    {
+        for (k = 0; k < PATTERN_CLASSES; k++)
+            result[k] = -1.0;
+        ASSERT_EQ(xtract_local_binary_patterns(grid, 12, &widths[i], result), XTRACT_NO_RESULT);
+        for (k = 0; k < PATTERN_CLASSES; k++)
+            ASSERT_EQ(result[k], 0.0);
+    }
+}
+
+UTEST(local_binary_patterns, rejects_a_width_that_does_not_divide_the_grid_into_rows)
+{
+    double grid[9] = {1.0, 1.0, 1.0, 1.0, 5.0, 1.0, 1.0, 1.0, 1.0};
+    double result[PATTERN_CLASSES] = {0};
+    int width = 3;
+
+    ASSERT_EQ(xtract_local_binary_patterns(grid, 9, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_local_binary_patterns(grid, 0, &width, result), XTRACT_ARGUMENT_ERROR);
+    width = 0;
+    ASSERT_EQ(xtract_local_binary_patterns(grid, 9, &width, result), XTRACT_ARGUMENT_ERROR);
+    width = 4;
+    ASSERT_EQ(xtract_local_binary_patterns(grid, 9, &width, result), XTRACT_ARGUMENT_ERROR);
+    width = 3;
+    ASSERT_EQ(xtract_local_binary_patterns(grid, 9, &width, result), XTRACT_SUCCESS);
+}

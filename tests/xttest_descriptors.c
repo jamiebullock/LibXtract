@@ -573,6 +573,18 @@ UTEST(descriptors, appended_features_are_fully_described)
     CHECK_REL(fd[XTRACT_ANGULAR_SECOND_MOMENT].result.scalar.max, 1.0, EPSILON);
     ASSERT_EQ(fd[XTRACT_INVERSE_DIFFERENCE_MOMENT].result.scalar.min, 0.0);
     CHECK_REL(fd[XTRACT_INVERSE_DIFFERENCE_MOMENT].result.scalar.max, 1.0, EPSILON);
+
+    ASSERT_STREQ(fd[XTRACT_LOCAL_BINARY_PATTERNS].algo.name, "local_binary_patterns");
+    ASSERT_EQ(fd[XTRACT_LOCAL_BINARY_PATTERNS].algo.year, 2002);
+    ASSERT_EQ(fd[XTRACT_LOCAL_BINARY_PATTERNS].argc, 1);
+    ASSERT_EQ(fd[XTRACT_LOCAL_BINARY_PATTERNS].argv.type, XTRACT_INT);
+    CHECK_REL(fd[XTRACT_LOCAL_BINARY_PATTERNS].argv.min[0], 1.0, EPSILON);
+    ASSERT_EQ(fd[XTRACT_LOCAL_BINARY_PATTERNS].data.format, XTRACT_GRID);
+    ASSERT_EQ(fd[XTRACT_LOCAL_BINARY_PATTERNS].data.unit, XTRACT_UNIT_ANY);
+    ASSERT_EQ(fd[XTRACT_LOCAL_BINARY_PATTERNS].is_scalar, XTRACT_FALSE);
+    ASSERT_EQ(fd[XTRACT_LOCAL_BINARY_PATTERNS].is_delta, XTRACT_FALSE);
+    ASSERT_EQ(fd[XTRACT_LOCAL_BINARY_PATTERNS].result.vector.format, XTRACT_ARBITRARY_SERIES);
+    ASSERT_EQ(fd[XTRACT_LOCAL_BINARY_PATTERNS].result.vector.unit, XTRACT_UNIT_NONE);
     for (f = XTRACT_KULLBACK_LEIBLER_DIVERGENCE; f <= XTRACT_MODIFIED_KULLBACK_LEIBLER; f++)
         ASSERT_EQ_MSG(fd[f].is_delta, XTRACT_TRUE, fd[f].algo.name);
 
@@ -722,6 +734,7 @@ UTEST(dispatch, slots_map_to_the_expected_function)
     ASSERT_TRUE(xtract[XTRACT_COOCCURRENCE_CORRELATION] == xtract_cooccurrence_correlation);
     ASSERT_TRUE(xtract[XTRACT_ANGULAR_SECOND_MOMENT] == xtract_angular_second_moment);
     ASSERT_TRUE(xtract[XTRACT_INVERSE_DIFFERENCE_MOMENT] == xtract_inverse_difference_moment);
+    ASSERT_TRUE(xtract[XTRACT_LOCAL_BINARY_PATTERNS] == xtract_local_binary_patterns);
 }
 
 /* ===== Descriptor conformance ===== */

@@ -15,7 +15,9 @@
 enum
 {
     CENTRAL_MOMENTS = 8,
-    NORMALISED_MOMENTS = 7
+    NORMALISED_MOMENTS = 7,
+    NEIGHBOURS = 8,
+    PATTERN_CLASSES = 10
 };
 
 /* The width that argv gives for a grid of N elements, or 0 when argv is
@@ -432,6 +434,59 @@ int xtract_inverse_difference_moment(const double *data, const int N, const void
         }
     }
     *result = sum;
+
+    return XTRACT_SUCCESS;
+}
+
+/* The class of the element at the centre of the three rows given: the number
+ * of its neighbours at or above it when they form one unbroken run around
+ * it, and the last class otherwise. A run has at most two places where a
+ * neighbour at or above the centre lies next to one below it */
+static int pattern_class(const double *above, const double *row, const double *below)
+{
+    const double centre = row[0];
+    const double around[NEIGHBOURS] = {above[-1], above[0], above[1], row[1],
+                                       below[1], below[0], below[-1], row[-1]};
+    int k, at_or_above = 0, changes = 0;
+
+    for (k = 0; k < NEIGHBOURS; k++)
+    {
+        const int here = around[k] >= centre;
+        const int next = around[(k + 1) % NEIGHBOURS] >= centre;
+
+        at_or_above += here;
+        changes += here != next;
+    }
+
+    return changes <= 2 ? at_or_above : PATTERN_CLASSES - 1;
+}
+
+int xtract_local_binary_patterns(const double *data, const int N, const void *argv, double *result)
+{
+    const int width = grid_width(N, argv);
+    int counts[PATTERN_CLASSES] = {0};
+    int height, x, y, k;
+    double interior;
+
+    if (width == 0)
+        return XTRACT_ARGUMENT_ERROR;
+    height = N / width;
+
+    memset(result, 0, PATTERN_CLASSES * sizeof(double));
+    if (width < 3 || height < 3)
+        return XTRACT_NO_RESULT;
+
+    for (y = 1; y < height - 1; y++)
+    {
+        const double *row = data + (size_t)y * (size_t)width;
+
+        for (x = 1; x < width - 1; x++)
+            counts[pattern_class(row - width + x, row + x, row + width + x)]++;
+    }
+
+    interior = (double)(width - 2) * (double)(height - 2);
+    for (k = 0; k < PATTERN_CLASSES; k++)
+        result[k] = counts[k] / interior;
 
     return XTRACT_SUCCESS;
 }

@@ -18,7 +18,7 @@ The library has more than 100 features:
 - **Periodicity and pitch:** autocorrelation, the average magnitude and squared difference functions, a periodicity measure, and fundamental frequency by the AMDF, wavelet, McLeod and harmonic product spectrum methods
 - **Change:** flux and the Kullback-Leibler and Itakura-Saito divergences between successive frames
 - **Several series:** the covariance and correlation matrices of a set of series, their average correlation and the variances of their principal components, and for two series the Pearson correlation coefficient, the cross-correlation with the lag of its peak and the coherence at each frequency
-- **Grids:** the moments of a grid of values up to the third order, about its origin and about its centroid, their normalised form and the seven Hu moments, and the co-occurrence matrix of its levels with its contrast, correlation, angular second moment and inverse difference moment
+- **Grids:** the moments of a grid of values up to the third order, about its origin and about its centroid, their normalised form and the seven Hu moments, and the co-occurrence matrix of its levels with its contrast, correlation, angular second moment and inverse difference moment, and its local binary patterns
 - **Envelope:** attack time, decay time, decay rate, temporal centroid
 - **Audio:** loudness, sharpness, Bark bands, MFCCs, gammatone cepstral coefficients, linear prediction coefficients, chroma, the constant-Q transform
 
