@@ -128,3 +128,49 @@ void verify_cooccurrence_correlation(void)
     (void)xtract_cooccurrence_correlation(data, N, NULL, &result);
     free(data);
 }
+
+static void local_binary_patterns_of(const int N, const void *argv)
+{
+    double *data = nondet_doubles(N);
+    double *result = nondet_doubles(10);
+
+    (void)xtract_local_binary_patterns(data, N, argv, result);
+    free(data);
+    free(result);
+}
+
+/* Each shape has a call of its own so that its width is a constant in the
+ * loops it bounds: three rows of three, with one element that has a
+ * neighbour on every side, and three rows of four and four rows of three,
+ * with two */
+void verify_local_binary_patterns(void)
+{
+    int width;
+
+    if (nondet_bool())
+    {
+        width = 3;
+        local_binary_patterns_of(9, &width);
+    }
+    else if (nondet_bool())
+    {
+        width = 4;
+        local_binary_patterns_of(12, &width);
+    }
+    else
+    {
+        width = 3;
+        local_binary_patterns_of(12, &width);
+    }
+}
+
+/* Any width, valid or not, and a missing argv, for grids of up to eight
+ * elements: too few for an element with a neighbour on every side, which
+ * the shapes of the other proof have */
+void verify_local_binary_patterns_of_any_width(void)
+{
+    int *argv = nondet_ints(1);
+
+    local_binary_patterns_of(nondet_between(0, 8), nondet_argv(argv));
+    free(argv);
+}

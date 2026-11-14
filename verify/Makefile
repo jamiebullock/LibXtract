@@ -98,6 +98,11 @@ $(PROOF_DIR)/verify_coherence.proved: UNWIND = 13
 # other, the bounds its harnesses set.
 $(PROOF_DIR)/verify_cooccurrence_matrix.proved: UNWIND = 7
 $(PROOF_DIR)/verify_cooccurrence_matrix_of_any_width.proved: UNWIND = 5
+# local_binary_patterns takes up to twelve elements in one proof and eight in
+# the other, and compares each with its eight neighbours, then fills ten
+# classes.
+$(PROOF_DIR)/verify_local_binary_patterns.proved: UNWIND = 11
+$(PROOF_DIR)/verify_local_binary_patterns_of_any_width.proved: UNWIND = 11
 
 # The feature functions are floating-point loops, and the solver cost is in
 # the doubles. Formula slicing drops the arithmetic that no property depends

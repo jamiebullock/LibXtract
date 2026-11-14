@@ -8,7 +8,7 @@
  * libFuzzer harness for the grid feature functions (xtract_grid.h):
  * grid_moments, grid_central_moments, normalised_moments, hu_moments,
  * cooccurrence_matrix, cooccurrence_contrast, cooccurrence_correlation,
- * angular_second_moment, inverse_difference_moment.
+ * angular_second_moment, inverse_difference_moment, local_binary_patterns.
  *
  * All share the uniform signature, and those that take a grid take an argv
  * of ints that starts with its width, so one harness drives them via the
@@ -37,7 +37,7 @@ static const int eligible[] = {XTRACT_GRID_MOMENTS, XTRACT_GRID_CENTRAL_MOMENTS,
                                XTRACT_NORMALISED_MOMENTS, XTRACT_HU_MOMENTS,
                                XTRACT_COOCCURRENCE_MATRIX, XTRACT_COOCCURRENCE_CONTRAST,
                                XTRACT_COOCCURRENCE_CORRELATION, XTRACT_ANGULAR_SECOND_MOMENT,
-                               XTRACT_INVERSE_DIFFERENCE_MOMENT};
+                               XTRACT_INVERSE_DIFFERENCE_MOMENT, XTRACT_LOCAL_BINARY_PATTERNS};
 
 #define N_ELIGIBLE ((int)(sizeof(eligible) / sizeof(eligible[0])))
 #define MAX_N 4096
