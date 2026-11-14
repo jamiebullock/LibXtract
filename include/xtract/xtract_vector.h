@@ -334,6 +334,24 @@ extern "C"
      * \param *result: a pointer to an array of twice the kernel's n_bins doubles: the n_bins band magnitudes, on the scale of the magnitudes given, followed by the band centre frequencies in Hz. This is the layout of the *result of xtract_spectrum(), so it can be passed on to xtract_chroma(), xtract_spectral_contrast() and the other functions that take a spectrum with its frequencies
      */
     int xtract_cqt(const double *data, const int N, const void *argv, double *result);
+
+    /** \brief Extract the level of each element of an input vector on a scale of equal steps between two bounds
+     *
+     * \param *data: a pointer to the first element in an array of doubles
+     * \param N: the number of elements to be considered, at least 1
+     * \param *argv: a pointer to an array of three doubles: the lower bound and the upper bound, each finite and the upper not below the lower, as xtract_lowest_value() and xtract_highest_value() give them for the whole range of a vector; and the number of levels, a whole number from 1 to 2147483647
+     * \param *result: a pointer to an array of N doubles: for each element the whole number of its level, from 0 to one less than the number of levels. The range between the bounds is divided into that many steps of equal width, and an element takes the number of the step it falls in. An element at or below the lower bound is at level 0 and one at or above the upper bound is at the highest level. An element that is NaN gives NaN
+     */
+    int xtract_quantise(const double *data, const int N, const void *argv, double *result);
+
+    /** \brief Extract the fraction of the elements of an input vector at each level
+     *
+     * \param *data: a pointer to the first element in an array of doubles, each a whole number from 0 to one less than the number of levels, as xtract_quantise() gives them
+     * \param N: the number of elements to be considered, at least 1
+     * \param *argv: a pointer to an int, the number of levels, at least 1
+     * \param *result: a pointer to an array of doubles, one per level: the number of elements at that level divided by N, so that the array sums to 1. It is not written when an element is not a whole number or is outside the levels, which is an argument error
+     */
+    int xtract_histogram(const double *data, const int N, const void *argv, double *result);
     /** @} */
 
 #ifdef __cplusplus

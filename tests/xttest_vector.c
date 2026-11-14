@@ -3598,3 +3598,235 @@ UTEST(cqt, rejects_a_spectrum_of_another_size_a_missing_kernel_and_an_odd_length
     ASSERT_EQ(xtract_cqt(spectrum, 16, kernel, result), XTRACT_SUCCESS);
     xtract_free_cqt(kernel);
 }
+
+UTEST(quantise, four_levels_between_zero_and_eight)
+{
+    /* Each level is 2 wide: [0, 2) is level 0, [2, 4) level 1, [4, 6) level
+     * 2 and [6, 8] level 3 */
+    double data[] = {0.0, 1.9, 2.0, 3.5, 4.0, 5.99, 6.0, 8.0};
+    double argv[] = {0.0, 8.0, 4.0};
+    double expected[] = {0.0, 0.0, 1.0, 1.0, 2.0, 2.0, 3.0, 3.0};
+    double result[8];
+    int i;
+
+    for (i = 0; i < 8; i++)
+        result[i] = -1.0;
+    ASSERT_EQ(xtract_quantise(data, 8, argv, result), XTRACT_SUCCESS);
+    for (i = 0; i < 8; i++)
+        ASSERT_EQ(result[i], expected[i]);
+}
+
+UTEST(quantise, bounds_from_the_lowest_and_highest_value_use_every_level)
+{
+    double data[] = {-3.0, 12.0, 4.5, 0.0, 7.0, -1.0, 9.5, 2.0};
+    double argv[3];
+    double threshold = -DBL_MAX;
+    double result[8];
+    int i, lowest_seen = 0, highest_seen = 0;
+
+    ASSERT_EQ(xtract_lowest_value(data, 8, &threshold, &argv[0]), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_highest_value(data, 8, NULL, &argv[1]), XTRACT_SUCCESS);
+    argv[2] = 5.0;
+    ASSERT_EQ(xtract_quantise(data, 8, argv, result), XTRACT_SUCCESS);
+    for (i = 0; i < 8; i++)
+    {
+        ASSERT_TRUE(result[i] >= 0.0 && result[i] <= 4.0);
+        ASSERT_EQ(result[i], floor(result[i]));
+        lowest_seen |= result[i] == 0.0;
+        highest_seen |= result[i] == 4.0;
+    }
+    ASSERT_TRUE(lowest_seen);
+    ASSERT_TRUE(highest_seen);
+    ASSERT_EQ(result[0], 0.0);
+    ASSERT_EQ(result[1], 4.0);
+}
+
+UTEST(quantise, values_outside_the_bounds_take_the_end_levels)
+{
+    double data[] = {-100.0, -0.001, 10.001, 1e300, -INFINITY, INFINITY};
+    double argv[] = {0.0, 10.0, 10.0};
+    double result[6];
+
+    ASSERT_EQ(xtract_quantise(data, 6, argv, result), XTRACT_SUCCESS);
+    ASSERT_EQ(result[0], 0.0);
+    ASSERT_EQ(result[1], 0.0);
+    ASSERT_EQ(result[2], 9.0);
+    ASSERT_EQ(result[3], 9.0);
+    ASSERT_EQ(result[4], 0.0);
+    ASSERT_EQ(result[5], 9.0);
+}
+
+UTEST(quantise, nan_stays_nan)
+{
+    double data[] = {1.0, NAN, 3.0};
+    double argv[] = {0.0, 4.0, 4.0};
+    double result[3] = {0};
+
+    ASSERT_EQ(xtract_quantise(data, 3, argv, result), XTRACT_SUCCESS);
+    ASSERT_EQ(result[0], 1.0);
+    ASSERT_TRUE(isnan(result[1]));
+    ASSERT_EQ(result[2], 3.0);
+}
+
+UTEST(quantise, one_level_puts_everything_at_zero)
+{
+    double data[] = {-5.0, 0.0, 2.5, 5.0, 50.0};
+    double argv[] = {0.0, 5.0, 1.0};
+    double result[5];
+    int i;
+
+    for (i = 0; i < 5; i++)
+        result[i] = -1.0;
+    ASSERT_EQ(xtract_quantise(data, 5, argv, result), XTRACT_SUCCESS);
+    for (i = 0; i < 5; i++)
+        ASSERT_EQ(result[i], 0.0);
+}
+
+UTEST(quantise, equal_bounds_split_the_values_at_the_bound)
+{
+    /* A constant series gives equal bounds from its lowest and highest
+     * value, and sits at level 0 */
+    double data[] = {2.0, 2.0, 1.0, 3.0};
+    double argv[] = {2.0, 2.0, 4.0};
+    double result[4];
+
+    ASSERT_EQ(xtract_quantise(data, 4, argv, result), XTRACT_SUCCESS);
+    ASSERT_EQ(result[0], 0.0);
+    ASSERT_EQ(result[1], 0.0);
+    ASSERT_EQ(result[2], 0.0);
+    ASSERT_EQ(result[3], 3.0);
+}
+
+UTEST(quantise, bounds_at_the_ends_of_the_double_range)
+{
+    /* The difference of these bounds is beyond the range of a double */
+    double data[] = {-DBL_MAX, -1e300, 1e300, DBL_MAX};
+    double argv[] = {-DBL_MAX, DBL_MAX, 2.0};
+    double result[4];
+
+    ASSERT_EQ(xtract_quantise(data, 4, argv, result), XTRACT_SUCCESS);
+    ASSERT_EQ(result[0], 0.0);
+    ASSERT_EQ(result[1], 0.0);
+    ASSERT_EQ(result[2], 1.0);
+    ASSERT_EQ(result[3], 1.0);
+}
+
+UTEST(quantise, rejects_bad_arguments)
+{
+    double data[] = {1.0, 2.0};
+    double result[2] = {0};
+    double argv[3];
+
+    ASSERT_EQ(xtract_quantise(data, 2, NULL, result), XTRACT_ARGUMENT_ERROR);
+    argv[0] = 0.0;
+    argv[1] = 1.0;
+    argv[2] = 4.0;
+    ASSERT_EQ(xtract_quantise(data, 0, argv, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_quantise(data, 2, argv, result), XTRACT_SUCCESS);
+    argv[2] = 0.0;
+    ASSERT_EQ(xtract_quantise(data, 2, argv, result), XTRACT_ARGUMENT_ERROR);
+    argv[2] = 2.5;
+    ASSERT_EQ(xtract_quantise(data, 2, argv, result), XTRACT_ARGUMENT_ERROR);
+    argv[2] = 2147483648.0;
+    ASSERT_EQ(xtract_quantise(data, 2, argv, result), XTRACT_ARGUMENT_ERROR);
+    argv[2] = NAN;
+    ASSERT_EQ(xtract_quantise(data, 2, argv, result), XTRACT_ARGUMENT_ERROR);
+    argv[2] = 4.0;
+    argv[0] = 2.0;
+    ASSERT_EQ(xtract_quantise(data, 2, argv, result), XTRACT_ARGUMENT_ERROR);
+    argv[0] = NAN;
+    ASSERT_EQ(xtract_quantise(data, 2, argv, result), XTRACT_ARGUMENT_ERROR);
+    argv[0] = 0.0;
+    argv[1] = INFINITY;
+    ASSERT_EQ(xtract_quantise(data, 2, argv, result), XTRACT_ARGUMENT_ERROR);
+}
+
+UTEST(histogram, fraction_of_the_elements_at_each_level)
+{
+    double data[] = {0.0, 2.0, 2.0, 3.0, 2.0, 0.0, 3.0, 2.0};
+    int levels = 5;
+    double result[5];
+    int i;
+
+    for (i = 0; i < 5; i++)
+        result[i] = -1.0;
+    ASSERT_EQ(xtract_histogram(data, 8, &levels, result), XTRACT_SUCCESS);
+    CHECK_REL(result[0], 2.0 / 8.0, EPSILON);
+    ASSERT_EQ(result[1], 0.0);
+    CHECK_REL(result[2], 4.0 / 8.0, EPSILON);
+    CHECK_REL(result[3], 2.0 / 8.0, EPSILON);
+    ASSERT_EQ(result[4], 0.0);
+}
+
+UTEST(histogram, of_a_quantised_vector_sums_to_one)
+{
+    double data[] = {0.3, 7.1, 2.2, 9.9, 4.4, 4.5, 0.0, 10.0, 6.6, 1.0};
+    double bounds[] = {0.0, 10.0, 4.0};
+    int levels = 4;
+    double quantised[10];
+    double result[4] = {0};
+
+    ASSERT_EQ(xtract_quantise(data, 10, bounds, quantised), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_histogram(quantised, 10, &levels, result), XTRACT_SUCCESS);
+    /* [0, 2.5) holds 0.3, 2.2, 0.0 and 1.0; [2.5, 5) holds 4.4 and 4.5;
+     * [5, 7.5) holds 7.1 and 6.6; [7.5, 10] holds 9.9 and 10.0 */
+    CHECK_REL(result[0], 0.4, EPSILON);
+    CHECK_REL(result[1], 0.2, EPSILON);
+    CHECK_REL(result[2], 0.2, EPSILON);
+    CHECK_REL(result[3], 0.2, EPSILON);
+    CHECK_REL(result[0] + result[1] + result[2] + result[3], 1.0, EPSILON);
+}
+
+UTEST(histogram, with_spectral_entropy_gives_the_entropy_of_the_distribution)
+{
+    /* Four levels equally filled have the highest entropy, 1, and one level
+     * alone the lowest, 0 */
+    double even[] = {0.0, 1.0, 2.0, 3.0, 3.0, 2.0, 1.0, 0.0};
+    double single[] = {2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0};
+    int levels = 4;
+    double histogram[4] = {0};
+    double entropy = -1.0;
+
+    ASSERT_EQ(xtract_histogram(even, 8, &levels, histogram), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_spectral_entropy(histogram, 4, NULL, &entropy), XTRACT_SUCCESS);
+    CHECK_REL(entropy, 1.0, EPSILON);
+    ASSERT_EQ(xtract_histogram(single, 8, &levels, histogram), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_spectral_entropy(histogram, 4, NULL, &entropy), XTRACT_SUCCESS);
+    CHECK_NEAR(entropy, 0.0, EPSILON);
+}
+
+UTEST(histogram, rejects_an_element_that_is_not_a_level_and_leaves_the_result)
+{
+    double data[] = {0.0, 1.0, 2.0, 1.0};
+    int levels = 3;
+    double result[3] = {-1.0, -1.0, -1.0};
+    double bad[] = {0.37, 3.0, -1.0, NAN, INFINITY, 1.5};
+    int i;
+
+    for (i = 0; i < 6; i++)
+    {
+        data[3] = bad[i];
+        ASSERT_EQ(xtract_histogram(data, 4, &levels, result), XTRACT_ARGUMENT_ERROR);
+        ASSERT_EQ(result[0], -1.0);
+        ASSERT_EQ(result[1], -1.0);
+        ASSERT_EQ(result[2], -1.0);
+    }
+    data[3] = 2.0;
+    ASSERT_EQ(xtract_histogram(data, 4, &levels, result), XTRACT_SUCCESS);
+}
+
+UTEST(histogram, rejects_bad_arguments)
+{
+    double data[] = {0.0, 0.0};
+    double result[2] = {0};
+    int levels = 1;
+
+    ASSERT_EQ(xtract_histogram(data, 2, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_histogram(data, 0, &levels, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_histogram(data, 2, &levels, result), XTRACT_SUCCESS);
+    CHECK_REL(result[0], 1.0, EPSILON);
+    levels = 0;
+    ASSERT_EQ(xtract_histogram(data, 2, &levels, result), XTRACT_ARGUMENT_ERROR);
+    levels = -3;
+    ASSERT_EQ(xtract_histogram(data, 2, &levels, result), XTRACT_ARGUMENT_ERROR);
+}

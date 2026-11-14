@@ -11,6 +11,7 @@ It has no external dependencies.
 The library has more than 100 features:
 
 - **Statistics:** mean, variance, standard deviation, average deviation, skewness, kurtosis, median, median absolute deviation, extrema, RMS amplitude, zero-crossing rate
+- **Distribution:** the levels of a vector on a scale of equal steps, and the fraction of its elements at each level
 - **Moving windows:** moving sum, average, variance, standard deviation, maximum and minimum, and the exponentially weighted average and variance
 - **Complexity:** permutation, sample and approximate entropy, Lempel-Ziv complexity, the Petrosian, Katz and Higuchi fractal dimensions, the Hjorth parameters
 - **Spectrum:** magnitude and power spectra, peak and harmonic spectra, and the centroid, spread, flatness, rolloff, slope, contrast and entropy of a spectrum

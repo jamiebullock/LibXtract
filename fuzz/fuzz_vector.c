@@ -12,9 +12,9 @@
  * or bark band limits, plus an argv whose shape differs per feature. The
  * filterbanks, bark limits, and FFT plans are built once at a fixed
  * power-of-two N in LLVMFuzzerInitialize; every call that depends on them
- * runs at that N. The six features with no such dependency (DCT,
- * autocorrelation, AMDF, ASDF, LPC, LPCC) take a fuzzer-chosen N from 0 up
- * to it. The input is allocated at exactly the length each call declares,
+ * runs at that N. The features with no such dependency (DCT,
+ * autocorrelation, AMDF, ASDF, LPC, LPCC, the moving-window features,
+ * quantise and histogram) take a fuzzer-chosen N from 0 up to it. The input is allocated at exactly the length each call declares,
  * so a read past it is out of bounds to the sanitizer. Features are called
  * by name.
  *
@@ -80,6 +80,8 @@ enum
     FZ_SPECTRAL_CONTRAST,
     FZ_CHROMA,
     FZ_CQT,
+    FZ_QUANTISE,
+    FZ_HISTOGRAM,
     FZ_N_FEATURES
 };
 
@@ -146,6 +148,8 @@ static int input_length(int feature, int n)
     case FZ_MOVING_MIN:
     case FZ_EWMA_AVERAGE:
     case FZ_EWMA_VARIANCE:
+    case FZ_QUANTISE:
+    case FZ_HISTOGRAM:
         return n;
     default:
         return VEC_N;
@@ -362,6 +366,29 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     {
         double alpha = fold(fz[0], 1.5) - 0.25;
         xtract_ewma_variance(input, n, maybe_null(null_argv, &alpha), result);
+        break;
+    }
+    case FZ_QUANTISE:
+    {
+        /* The bounds are taken as the fuzzer gives them; the level count is
+         * folded around its valid range */
+        double a[3];
+        a[0] = fz[0];
+        a[1] = fz[1];
+        a[2] = fold(fz[2], 40.0) - 2.0;
+        xtract_quantise(input, n, maybe_null(null_argv, a), result);
+        break;
+    }
+    case FZ_HISTOGRAM:
+    {
+        /* argv = the level count, which is also the result length. The
+         * input is folded onto whole numbers around the levels, since raw
+         * doubles are almost never whole and would stop at the first check */
+        int levels = clamp_int(fz[0], -1, VEC_N);
+        int i;
+        for (i = 0; i < in_len; i++)
+            in[i] = isfinite(in[i]) ? floor(fold(in[i], (double)VEC_N + 2.0)) - 1.0 : in[i];
+        xtract_histogram(input, n, maybe_null(null_argv, &levels), result);
         break;
     }
     default:

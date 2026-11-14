@@ -322,6 +322,21 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *argv_def = XTRACT_NO_DEFAULT;
             *argv_unit = XTRACT_UNIT_ANY;
             break;
+        case XTRACT_QUANTISE:
+            *argv_min = XTRACT_UNBOUNDED_MIN;
+            *argv_max = XTRACT_UNBOUNDED_MAX;
+            *argv_def = XTRACT_NO_DEFAULT;
+            *argv_unit = XTRACT_UNIT_ANY;
+            *(argv_min + 1) = XTRACT_UNBOUNDED_MIN;
+            *(argv_max + 1) = XTRACT_UNBOUNDED_MAX;
+            *(argv_def + 1) = XTRACT_NO_DEFAULT;
+            *(argv_unit + 1) = XTRACT_UNIT_ANY;
+            *(argv_min + 2) = 1.0;
+            *(argv_max + 2) = 2147483647.0;
+            *(argv_def + 2) = 256.0;
+            *(argv_unit + 2) = XTRACT_UNIT_NONE;
+            break;
+        case XTRACT_HISTOGRAM:
         case XTRACT_GRID_MOMENTS:
         case XTRACT_GRID_CENTRAL_MOMENTS:
             *argv_min = 1;
@@ -494,6 +509,11 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *(argv_donor + 1) = XTRACT_ANY;
             *(argv_donor + 2) = XTRACT_ANY;
             break;
+        case XTRACT_QUANTISE:
+            *argv_donor = XTRACT_LOWEST_VALUE;
+            *(argv_donor + 1) = XTRACT_HIGHEST_VALUE;
+            *(argv_donor + 2) = XTRACT_ANY;
+            break;
             /* argc = 4 */
         case XTRACT_SPECTRUM:
             *argv_donor = XTRACT_ANY;
@@ -564,6 +584,8 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_MOVING_MIN:
         case XTRACT_EWMA_AVERAGE:
         case XTRACT_EWMA_VARIANCE:
+        case XTRACT_QUANTISE:
+        case XTRACT_HISTOGRAM:
             *data_format = XTRACT_ARBITRARY_SERIES;
             break;
         case XTRACT_SPECTRAL_MEAN:
@@ -789,7 +811,11 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_MOVING_MIN:
         case XTRACT_EWMA_AVERAGE:
         case XTRACT_EWMA_VARIANCE:
+        case XTRACT_QUANTISE:
             *data_unit = XTRACT_UNIT_ANY;
+            break;
+        case XTRACT_HISTOGRAM:
+            *data_unit = XTRACT_UNIT_NONE;
             break;
         case XTRACT_SPECTRAL_MEAN:
         case XTRACT_SPECTRAL_VARIANCE:
@@ -1621,6 +1647,20 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             copy_author(author, "Ming-Kuei Hu");
             *year = 1962;
             break;
+        case XTRACT_QUANTISE:
+            copy_name(name, "quantise");
+            copy_name(p_name, "Quantise");
+            copy_desc(desc, "Extract the level of each element of an input vector on a scale of equal steps");
+            copy_desc(p_desc, "Extract a version of a range of values reduced to a number of levels");
+            copy_author(author, "");
+            break;
+        case XTRACT_HISTOGRAM:
+            copy_name(name, "histogram");
+            copy_name(p_name, "Histogram");
+            copy_desc(desc, "Extract the fraction of the elements of an input vector at each level");
+            copy_desc(p_desc, "Extract how a range of values is distributed over its levels");
+            copy_author(author, "");
+            break;
         case XTRACT_KULLBACK_LEIBLER_DIVERGENCE:
             copy_name(name, "kullback_leibler_divergence");
             copy_name(p_name, "Kullback-Leibler Divergence");
@@ -1790,6 +1830,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_SPECTRAL_CONTRAST:
         case XTRACT_FLUX:
         case XTRACT_LNORM:
+        case XTRACT_QUANTISE:
             *argc = 3;
             *argv_type = XTRACT_FLOAT;
             break;
@@ -1826,6 +1867,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_COVARIANCE_MATRIX:
         case XTRACT_GRID_MOMENTS:
         case XTRACT_GRID_CENTRAL_MOMENTS:
+        case XTRACT_HISTOGRAM:
             *argc = 1;
             *argv_type = XTRACT_INT;
             break;
@@ -2015,6 +2057,8 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_GRID_CENTRAL_MOMENTS:
         case XTRACT_NORMALISED_MOMENTS:
         case XTRACT_HU_MOMENTS:
+        case XTRACT_QUANTISE:
+        case XTRACT_HISTOGRAM:
             *is_scalar = XTRACT_FALSE;
             break;
         default:
@@ -2370,6 +2414,8 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
                 *result_unit = XTRACT_UNIT_NONE;
                 break;
             case XTRACT_HU_MOMENTS:
+            case XTRACT_QUANTISE:
+            case XTRACT_HISTOGRAM:
                 *result_format = XTRACT_ARBITRARY_SERIES;
                 *result_unit = XTRACT_UNIT_NONE;
                 break;

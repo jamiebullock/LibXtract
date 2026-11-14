@@ -247,6 +247,32 @@ MOVING_HARNESS(moving_min, nondet_small_length(), VERIFY_SMALL_N)
 EWMA_HARNESS(ewma_average)
 EWMA_HARNESS(ewma_variance)
 
+void verify_quantise(void)
+{
+    const int N = nondet_length();
+    double *data = nondet_doubles(N);
+    double *argv = nondet_doubles(XTRACT_MAXARGS);
+    double *result = nondet_doubles(N);
+
+    (void)xtract_quantise(data, N, nondet_argv(argv), result);
+    free(data);
+    free(argv);
+    free(result);
+}
+
+void verify_histogram(void)
+{
+    const int N = nondet_length();
+    double *data = nondet_doubles(N);
+    const int levels = nondet_between(-1, VERIFY_MAX_N);
+    const void *argv = nondet_argv(&levels);
+    double *result = nondet_doubles(at_least_zero(levels));
+
+    (void)xtract_histogram(data, N, argv, result);
+    free(data);
+    free(result);
+}
+
 void verify_lpcc(void)
 {
     const int N = nondet_length();
