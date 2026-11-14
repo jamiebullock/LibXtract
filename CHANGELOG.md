@@ -1,5 +1,32 @@
 # Changelog
 
+## [1.5.0] - 2026-11-14
+
+### Changed
+
+- Raise `XTRACT_MAXARGS` from 4 to 5, which lengthens the argument arrays of `xtract_function_descriptor_t` ([#294](https://github.com/jamiebullock/LibXtract/pull/294))
+
+### Added
+
+- Add `xtract_grid_moments` ([#288](https://github.com/jamiebullock/LibXtract/pull/288))
+- Add `xtract_grid_central_moments` ([#291](https://github.com/jamiebullock/LibXtract/pull/291))
+- Add `xtract_normalised_moments` ([#292](https://github.com/jamiebullock/LibXtract/pull/292))
+- Add `xtract_hu_moments` ([#292](https://github.com/jamiebullock/LibXtract/pull/292))
+- Add `xtract_quantise` ([#293](https://github.com/jamiebullock/LibXtract/pull/293))
+- Add `xtract_histogram` ([#293](https://github.com/jamiebullock/LibXtract/pull/293))
+- Add `xtract_cooccurrence_matrix` ([#294](https://github.com/jamiebullock/LibXtract/pull/294))
+- Add `xtract_cooccurrence_contrast` ([#295](https://github.com/jamiebullock/LibXtract/pull/295))
+- Add `xtract_cooccurrence_correlation` ([#295](https://github.com/jamiebullock/LibXtract/pull/295))
+- Add `xtract_angular_second_moment` ([#295](https://github.com/jamiebullock/LibXtract/pull/295))
+- Add `xtract_inverse_difference_moment` ([#295](https://github.com/jamiebullock/LibXtract/pull/295))
+- Add `xtract_local_binary_patterns` ([#296](https://github.com/jamiebullock/LibXtract/pull/296))
+- Add `XTRACT_GRID` to `xtract_vector_t` ([#288](https://github.com/jamiebullock/LibXtract/pull/288))
+- Add `XTRACT_CENTRAL_MOMENT_COEFFS` and `XTRACT_NORMALISED_MOMENT_COEFFS` to `xtract_vector_t` ([#292](https://github.com/jamiebullock/LibXtract/pull/292))
+
+### Fixed
+
+- Fix the Python, Java and Node.js modules lacking the functions of `xtract_multivariate.h` and five of `xtract_delta.h` ([#290](https://github.com/jamiebullock/LibXtract/pull/290))
+
 ## [1.4.0] - 2026-11-12
 
 ### Changed
@@ -134,6 +161,7 @@
 - Fix the weighting of out-of-range bands in `xtract_sharpness` when N exceeds the Bark band count ([#143](https://github.com/jamiebullock/LibXtract/pull/143))
 - Fix `xtract_lowest_value` to give a result of 0 on `XTRACT_NO_RESULT` ([#143](https://github.com/jamiebullock/LibXtract/pull/143))
 
+[1.5.0]: https://github.com/jamiebullock/LibXtract/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/jamiebullock/LibXtract/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/jamiebullock/LibXtract/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/jamiebullock/LibXtract/compare/v1.1.0...v1.2.0
