@@ -36,7 +36,7 @@ extern "C"
      * \param *data: a pointer to the first element in an array of doubles comprising the rows of a grid, one after another: the element in column x of row y at index y * width + x
      * \param N: the number of elements in the grid, at least 1 and a multiple of the width
      * \param *argv: a pointer to an int, the width of the grid: the number of elements in each row, from 1 to N
-     * \param *result: a pointer to an array of 7 doubles: the central moments mu20, mu11, mu02, mu30, mu21, mu12 and mu03 in that order. Each is the sum over the grid of every element multiplied by its column distance from the centroid to the power of the first digit and its row distance to the power of the second. They do not change when the values move to another place in the grid. The array is zeroed with no result when the elements sum to zero, which leaves the centroid undefined
+     * \param *result: a pointer to an array of 8 doubles: the central moments mu00, mu20, mu11, mu02, mu30, mu21, mu12 and mu03 in that order. Each is the sum over the grid of every element multiplied by its column distance from the centroid to the power of the first digit and its row distance to the power of the second, which makes mu00 the sum of the elements. They do not change when the values move to another place in the grid. The array is zeroed with no result when the elements sum to zero, which leaves the centroid undefined
      */
     int xtract_grid_central_moments(const double *data, const int N, const void *argv, double *result);
 

@@ -143,6 +143,7 @@ UTEST(grid_moments, rejects_a_width_that_does_not_divide_the_grid_into_rows)
 
 enum
 {
+    MU00,
     MU20,
     MU11,
     MU02,
@@ -164,6 +165,7 @@ UTEST(grid_central_moments, two_rows_of_three)
     double result[CENTRAL_MOMENTS] = {0};
 
     ASSERT_EQ(xtract_grid_central_moments(data, 6, &width, result), XTRACT_SUCCESS);
+    CHECK_REL(result[MU00], 21.0, EPSILON);
     CHECK_REL(result[MU20], 278.0 / 21.0, EPSILON);
     CHECK_REL(result[MU11], -6.0 / 7.0, EPSILON);
     CHECK_REL(result[MU02], 30.0 / 7.0, EPSILON);
@@ -173,7 +175,7 @@ UTEST(grid_central_moments, two_rows_of_three)
     CHECK_REL(result[MU03], -90.0 / 49.0, EPSILON);
 }
 
-UTEST(grid_central_moments, second_order_follows_from_the_moments)
+UTEST(grid_central_moments, sum_and_second_order_follow_from_the_moments)
 {
     double data[] = {0.5, 3.0, 1.0, 0.0, 2.0, 2.0, 4.0, 1.0, 0.0, 6.0, 1.5, 2.5};
     int width = 4;
@@ -182,6 +184,7 @@ UTEST(grid_central_moments, second_order_follows_from_the_moments)
 
     ASSERT_EQ(xtract_grid_moments(data, 12, &width, m), XTRACT_SUCCESS);
     ASSERT_EQ(xtract_grid_central_moments(data, 12, &width, mu), XTRACT_SUCCESS);
+    CHECK_REL(mu[MU00], m[M00], EPSILON);
     CHECK_REL(mu[MU20], m[M20] - m[M10] * m[M10] / m[M00], EPSILON);
     CHECK_REL(mu[MU11], m[M11] - m[M10] * m[M01] / m[M00], EPSILON);
     CHECK_REL(mu[MU02], m[M02] - m[M01] * m[M01] / m[M00], EPSILON);

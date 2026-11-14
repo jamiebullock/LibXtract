@@ -100,7 +100,7 @@ int xtract_grid_central_moments(const double *data, const int N, const void *arg
     }
     if (total == 0.0)
     {
-        memset(result, 0, 7 * sizeof(double));
+        memset(result, 0, 8 * sizeof(double));
         return XTRACT_NO_RESULT;
     }
     centre_x = total_x / total;
@@ -131,13 +131,14 @@ int xtract_grid_central_moments(const double *data, const int N, const void *arg
         mu03 += dy * dy * dy * sum;
     }
 
-    result[0] = mu20;
-    result[1] = mu11;
-    result[2] = mu02;
-    result[3] = mu30;
-    result[4] = mu21;
-    result[5] = mu12;
-    result[6] = mu03;
+    result[0] = total;
+    result[1] = mu20;
+    result[2] = mu11;
+    result[3] = mu02;
+    result[4] = mu30;
+    result[5] = mu21;
+    result[6] = mu12;
+    result[7] = mu03;
 
     return XTRACT_SUCCESS;
 }
