@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: Zlib
 
 set(XTRACT_SOURCES
+    context.c
     delta.c
     descriptors.c
     grid.c
@@ -82,10 +83,11 @@ add_custom_target(analyze
     VERBATIM)
 
 # cppcheck checks every preprocessor configuration of the first-party
-# sources, the vDSP and the OOURA branches alike
+# sources, the vDSP and the OOURA branches alike. It cannot evaluate Clang's
+# __has_feature(), so the configurations that define it are left out
 add_custom_target(cppcheck
     COMMAND cppcheck --enable=warning,performance,portability --std=c99
-        --inline-suppr --error-exitcode=1 --quiet
+        --inline-suppr --error-exitcode=1 --quiet -U__has_feature
         -I ${PROJECT_SOURCE_DIR}/include -I ${CMAKE_CURRENT_SOURCE_DIR}
         ${XTRACT_SOURCE_PATHS}
     COMMAND ${CMAKE_COMMAND} -E echo "cppcheck clean"

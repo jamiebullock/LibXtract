@@ -41,6 +41,7 @@ extern "C"
      * \brief main header file and API definition
      */
 
+#include "xtract_context.h"
 #include "xtract_scalar.h"
 #include "xtract_vector.h"
 #include "xtract_delta.h"
