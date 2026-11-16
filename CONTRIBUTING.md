@@ -164,8 +164,8 @@ The same change as it belongs in the file:
 ```
 
 The `prose-check` target tests the rules that a script can test, and the
-`version-check` target tests that the newest release is the version in
-`VERSION`. CI runs both on every pull request.
+`version-check` target tests that `VERSION` is the newest release or a later
+version, the one in development. CI runs both on every pull request.
 
 ## Prose checks
 

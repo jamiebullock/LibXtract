@@ -30,6 +30,11 @@ if(NOT APPLE)
 endif()
 
 add_test(NAME xttest COMMAND xttest)
+add_test(NAME version_check
+    COMMAND ${CMAKE_COMMAND}
+        -DSCRIPT=${PROJECT_SOURCE_DIR}/cmake/version.cmake
+        -DWORK=${CMAKE_CURRENT_BINARY_DIR}/version_check
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/version_check.cmake)
 
 if(XTRACT_COVERAGE)
     set(XTRACT_LCOV_IGNORE --ignore-errors unused,inconsistent,format,empty,gcov,unsupported)
