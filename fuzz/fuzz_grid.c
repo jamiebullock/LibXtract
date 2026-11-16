@@ -104,7 +104,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     }
     input = n > 0 ? in : in + 1;
 
-    (void)xtract[feature](input, n, null_argv ? NULL : argv, result);
+    (void)xtract[feature](NULL, input, n, null_argv ? NULL : argv, result);
 
     free(in);
     free(result);

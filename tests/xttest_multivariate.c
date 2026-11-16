@@ -26,7 +26,7 @@ UTEST(cross_correlation, biased_sum_of_products_at_every_lag)
     double biased = 0.0;
     double result[5] = {-1.0, -1.0, -1.0, -1.0, -1.0};
 
-    ASSERT_EQ(xtract_cross_correlation(data, 6, &biased, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_cross_correlation(NULL, data, 6, &biased, result), XTRACT_SUCCESS);
     CHECK_NEAR(result[0], 0.0, EPSILON);
     CHECK_NEAR(result[1], 0.0, EPSILON);
     CHECK_REL(result[2], 1.0 / 3.0, EPSILON);
@@ -40,7 +40,7 @@ UTEST(cross_correlation, biased_lag_zero_of_a_series_with_itself_matches_autocor
     double biased = 0.0;
     double result[7] = {0};
 
-    ASSERT_EQ(xtract_cross_correlation(data, 8, &biased, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_cross_correlation(NULL, data, 8, &biased, result), XTRACT_SUCCESS);
     CHECK_REL(result[3], 9.0, EPSILON);
     CHECK_REL(result[2], -27.0 / 4.0, EPSILON);
     CHECK_REL(result[4], -27.0 / 4.0, EPSILON);
@@ -56,7 +56,7 @@ UTEST(cross_correlation, a_delayed_first_series_peaks_at_a_positive_lag)
     double result[15] = {0};
     int k, best = 0;
 
-    ASSERT_EQ(xtract_cross_correlation(data, 16, &coefficient, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_cross_correlation(NULL, data, 16, &coefficient, result), XTRACT_SUCCESS);
     for (k = 1; k < 15; k++)
         if (result[k] > result[best])
             best = k;
@@ -72,11 +72,11 @@ UTEST(cross_correlation, coefficient_is_one_for_identical_series_and_minus_one_f
     double result[7] = {0};
     int k;
 
-    ASSERT_EQ(xtract_cross_correlation(same, 8, &coefficient, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_cross_correlation(NULL, same, 8, &coefficient, result), XTRACT_SUCCESS);
     CHECK_REL(result[3], 1.0, EPSILON);
     for (k = 0; k < 7; k++)
         ASSERT_LE(fabs(result[k]), 1.0 + EPSILON);
-    ASSERT_EQ(xtract_cross_correlation(opposite, 8, &coefficient, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_cross_correlation(NULL, opposite, 8, &coefficient, result), XTRACT_SUCCESS);
     CHECK_REL(result[3], -1.0, EPSILON);
 }
 
@@ -89,8 +89,8 @@ UTEST(cross_correlation, coefficient_ignores_offset_and_scale)
     double scaled[7] = {0};
     int k;
 
-    ASSERT_EQ(xtract_cross_correlation(data, 8, &coefficient, plain), XTRACT_SUCCESS);
-    ASSERT_EQ(xtract_cross_correlation(shifted, 8, &coefficient, scaled), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_cross_correlation(NULL, data, 8, &coefficient, plain), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_cross_correlation(NULL, shifted, 8, &coefficient, scaled), XTRACT_SUCCESS);
     for (k = 0; k < 7; k++)
         CHECK_NEAR(scaled[k], plain[k], EPSILON);
 }
@@ -103,10 +103,10 @@ UTEST(cross_correlation, coefficient_of_a_constant_series_has_no_result)
     double result[5] = {-1.0, -1.0, -1.0, -1.0, -1.0};
     int k;
 
-    ASSERT_EQ(xtract_cross_correlation(data, 6, &coefficient, result), XTRACT_NO_RESULT);
+    ASSERT_EQ(xtract_cross_correlation(NULL, data, 6, &coefficient, result), XTRACT_NO_RESULT);
     for (k = 0; k < 5; k++)
         ASSERT_EQ(result[k], 0.0);
-    ASSERT_EQ(xtract_cross_correlation(data, 6, &biased, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_cross_correlation(NULL, data, 6, &biased, result), XTRACT_SUCCESS);
 }
 
 UTEST(cross_correlation, coefficient_of_a_constant_series_whose_sum_is_inexact_has_no_result)
@@ -116,7 +116,7 @@ UTEST(cross_correlation, coefficient_of_a_constant_series_whose_sum_is_inexact_h
     double result[5] = {-1.0, -1.0, -1.0, -1.0, -1.0};
     int k;
 
-    ASSERT_EQ(xtract_cross_correlation(data, 6, &coefficient, result), XTRACT_NO_RESULT);
+    ASSERT_EQ(xtract_cross_correlation(NULL, data, 6, &coefficient, result), XTRACT_NO_RESULT);
     for (k = 0; k < 5; k++)
         ASSERT_EQ(result[k], 0.0);
 }
@@ -128,10 +128,10 @@ UTEST(cross_correlation, rejects_bad_arguments)
     double half = 0.5;
     double result[3] = {0};
 
-    ASSERT_EQ(xtract_cross_correlation(data, 3, &biased, result), XTRACT_ARGUMENT_ERROR);
-    ASSERT_EQ(xtract_cross_correlation(data, 0, &biased, result), XTRACT_ARGUMENT_ERROR);
-    ASSERT_EQ(xtract_cross_correlation(data, 4, NULL, result), XTRACT_ARGUMENT_ERROR);
-    ASSERT_EQ(xtract_cross_correlation(data, 4, &half, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_cross_correlation(NULL, data, 3, &biased, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_cross_correlation(NULL, data, 0, &biased, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_cross_correlation(NULL, data, 4, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_cross_correlation(NULL, data, 4, &half, result), XTRACT_ARGUMENT_ERROR);
 }
 
 /* ===== Cross-correlation lag ===== */
@@ -142,9 +142,9 @@ UTEST(cross_correlation_lag, sign_follows_which_series_is_delayed)
     double second_delayed[] = {0.0, 1.0, 2.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 2.0, 1.0, 0.0, 0.0};
     double result = -1.0;
 
-    ASSERT_EQ(xtract_cross_correlation_lag(first_delayed, 16, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_cross_correlation_lag(NULL, first_delayed, 16, NULL, &result), XTRACT_SUCCESS);
     ASSERT_EQ(result, 2.0);
-    ASSERT_EQ(xtract_cross_correlation_lag(second_delayed, 16, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_cross_correlation_lag(NULL, second_delayed, 16, NULL, &result), XTRACT_SUCCESS);
     ASSERT_EQ(result, -2.0);
 }
 
@@ -154,7 +154,7 @@ UTEST(cross_correlation_lag, nearest_zero_wins_a_tie)
     double data[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0};
     double result = -1.0;
 
-    ASSERT_EQ(xtract_cross_correlation_lag(data, 16, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_cross_correlation_lag(NULL, data, 16, NULL, &result), XTRACT_SUCCESS);
     ASSERT_EQ(result, 1.0);
 }
 
@@ -164,7 +164,7 @@ UTEST(cross_correlation_lag, negative_lag_wins_a_tie_at_equal_distance)
     double data[] = {1.0, -1.0, 1.0, -1.0, 1.0, -1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0};
     double result = 0.0;
 
-    ASSERT_EQ(xtract_cross_correlation_lag(data, 12, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_cross_correlation_lag(NULL, data, 12, NULL, &result), XTRACT_SUCCESS);
     ASSERT_EQ(result, -1.0);
 }
 
@@ -173,7 +173,7 @@ UTEST(cross_correlation_lag, no_result_for_a_constant_series)
     double data[] = {1.0, 2.0, 3.0, 4.0, 4.0, 4.0};
     double result = -1.0;
 
-    ASSERT_EQ(xtract_cross_correlation_lag(data, 6, NULL, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(xtract_cross_correlation_lag(NULL, data, 6, NULL, &result), XTRACT_NO_RESULT);
     ASSERT_EQ(result, 0.0);
 }
 
@@ -182,10 +182,10 @@ UTEST(cross_correlation_lag, rejects_bad_arguments)
     double data[] = {1.0, 2.0, 3.0};
     double result = -1.0;
 
-    ASSERT_EQ(xtract_cross_correlation_lag(data, 3, NULL, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_cross_correlation_lag(NULL, data, 3, NULL, &result), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(result, 0.0);
     result = -1.0;
-    ASSERT_EQ(xtract_cross_correlation_lag(data, 0, NULL, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_cross_correlation_lag(NULL, data, 0, NULL, &result), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(result, 0.0);
 }
 
@@ -198,7 +198,7 @@ UTEST(pearson_correlation, coefficient_of_a_worked_example)
     double data[] = {1.0, 2.0, 3.0, 4.0, 5.0, 2.0, 1.0, 4.0, 3.0, 5.0};
     double result = -2.0;
 
-    ASSERT_EQ(xtract_pearson_correlation(data, 10, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_pearson_correlation(NULL, data, 10, NULL, &result), XTRACT_SUCCESS);
     CHECK_REL(result, 0.8, EPSILON);
 }
 
@@ -208,9 +208,9 @@ UTEST(pearson_correlation, one_for_a_scaled_and_offset_copy_and_minus_one_for_it
     double opposite[] = {1.0, 2.0, 4.0, 3.0, -12.0, -14.0, -18.0, -16.0};
     double result = 0.0;
 
-    ASSERT_EQ(xtract_pearson_correlation(same, 8, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_pearson_correlation(NULL, same, 8, NULL, &result), XTRACT_SUCCESS);
     CHECK_REL(result, 1.0, EPSILON);
-    ASSERT_EQ(xtract_pearson_correlation(opposite, 8, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_pearson_correlation(NULL, opposite, 8, NULL, &result), XTRACT_SUCCESS);
     CHECK_REL(result, -1.0, EPSILON);
 }
 
@@ -219,7 +219,7 @@ UTEST(pearson_correlation, zero_for_uncorrelated_series)
     double data[] = {1.0, -1.0, 1.0, -1.0, 1.0, 1.0, -1.0, -1.0};
     double result = -2.0;
 
-    ASSERT_EQ(xtract_pearson_correlation(data, 8, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_pearson_correlation(NULL, data, 8, NULL, &result), XTRACT_SUCCESS);
     CHECK_NEAR(result, 0.0, EPSILON);
 }
 
@@ -229,9 +229,9 @@ UTEST(pearson_correlation, shortest_series_has_two_elements)
     double falling[] = {1.0, 2.0, 5.0, 3.0};
     double result = 0.0;
 
-    ASSERT_EQ(xtract_pearson_correlation(rising, 4, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_pearson_correlation(NULL, rising, 4, NULL, &result), XTRACT_SUCCESS);
     CHECK_REL(result, 1.0, EPSILON);
-    ASSERT_EQ(xtract_pearson_correlation(falling, 4, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_pearson_correlation(NULL, falling, 4, NULL, &result), XTRACT_SUCCESS);
     CHECK_REL(result, -1.0, EPSILON);
 }
 
@@ -242,8 +242,8 @@ UTEST(pearson_correlation, matches_cross_correlation_at_lag_zero)
     double lags[7] = {0};
     double result = -2.0;
 
-    ASSERT_EQ(xtract_cross_correlation(data, 8, &coefficient, lags), XTRACT_SUCCESS);
-    ASSERT_EQ(xtract_pearson_correlation(data, 8, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_cross_correlation(NULL, data, 8, &coefficient, lags), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_pearson_correlation(NULL, data, 8, NULL, &result), XTRACT_SUCCESS);
     CHECK_REL(result, lags[3], EPSILON);
 }
 
@@ -255,9 +255,9 @@ UTEST(pearson_correlation, stays_within_one_when_rounding_carries_the_quotient_p
     double opposite[] = {0.1, 0.3, 0.8, -0.2, -0.6, -1.6};
     double result = 0.0;
 
-    ASSERT_EQ(xtract_pearson_correlation(same, 6, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_pearson_correlation(NULL, same, 6, NULL, &result), XTRACT_SUCCESS);
     ASSERT_EQ(result, 1.0);
-    ASSERT_EQ(xtract_pearson_correlation(opposite, 6, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_pearson_correlation(NULL, opposite, 6, NULL, &result), XTRACT_SUCCESS);
     ASSERT_EQ(result, -1.0);
 }
 
@@ -267,10 +267,10 @@ UTEST(pearson_correlation, no_result_when_either_series_is_constant)
     double second_constant[] = {1.0, 2.0, 3.0, 4.0, 4.0, 4.0};
     double result = -2.0;
 
-    ASSERT_EQ(xtract_pearson_correlation(first_constant, 6, NULL, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(xtract_pearson_correlation(NULL, first_constant, 6, NULL, &result), XTRACT_NO_RESULT);
     ASSERT_EQ(result, 0.0);
     result = -2.0;
-    ASSERT_EQ(xtract_pearson_correlation(second_constant, 6, NULL, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(xtract_pearson_correlation(NULL, second_constant, 6, NULL, &result), XTRACT_NO_RESULT);
     ASSERT_EQ(result, 0.0);
 }
 
@@ -281,7 +281,7 @@ UTEST(pearson_correlation, no_result_for_a_constant_series_whose_sum_is_inexact)
     double data[] = {0.1, 0.1, 0.1, 0.1, 0.1, 0.1};
     double result = -2.0;
 
-    ASSERT_EQ(xtract_pearson_correlation(data, 6, NULL, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(xtract_pearson_correlation(NULL, data, 6, NULL, &result), XTRACT_NO_RESULT);
     ASSERT_EQ(result, 0.0);
 }
 
@@ -290,13 +290,13 @@ UTEST(pearson_correlation, rejects_bad_arguments)
     double data[] = {1.0, 2.0, 3.0, 5.0, 4.0};
     double result = -2.0;
 
-    ASSERT_EQ(xtract_pearson_correlation(data, 5, NULL, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_pearson_correlation(NULL, data, 5, NULL, &result), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(result, 0.0);
     result = -2.0;
-    ASSERT_EQ(xtract_pearson_correlation(data, 2, NULL, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_pearson_correlation(NULL, data, 2, NULL, &result), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(result, 0.0);
     result = -2.0;
-    ASSERT_EQ(xtract_pearson_correlation(data, 0, NULL, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_pearson_correlation(NULL, data, 0, NULL, &result), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(result, 0.0);
 }
 
@@ -311,7 +311,7 @@ UTEST(covariance_matrix, three_series_of_four_elements)
     int channels = 3;
     double result[9] = {0};
 
-    ASSERT_EQ(xtract_covariance_matrix(data, 12, &channels, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_covariance_matrix(NULL, data, 12, &channels, result), XTRACT_SUCCESS);
     CHECK_REL(result[0], 5.0 / 3.0, EPSILON);
     CHECK_REL(result[1], 10.0 / 3.0, EPSILON);
     CHECK_REL(result[2], 1.0, EPSILON);
@@ -331,11 +331,11 @@ UTEST(covariance_matrix, diagonal_matches_variance)
     double mean = 0.0, variance = 0.0;
     int i;
 
-    ASSERT_EQ(xtract_covariance_matrix(data, 10, &channels, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_covariance_matrix(NULL, data, 10, &channels, result), XTRACT_SUCCESS);
     for (i = 0; i < 2; i++)
     {
-        ASSERT_EQ(xtract_mean(data + i * 5, 5, NULL, &mean), XTRACT_SUCCESS);
-        ASSERT_EQ(xtract_variance(data + i * 5, 5, &mean, &variance), XTRACT_SUCCESS);
+        ASSERT_EQ(xtract_mean(NULL, data + i * 5, 5, NULL, &mean), XTRACT_SUCCESS);
+        ASSERT_EQ(xtract_variance(NULL, data + i * 5, 5, &mean, &variance), XTRACT_SUCCESS);
         CHECK_REL(result[i * 2 + i], variance, EPSILON);
     }
 }
@@ -347,8 +347,8 @@ UTEST(covariance_matrix, off_diagonal_over_the_two_deviations_is_the_pearson_cor
     double result[4] = {0};
     double correlation = 0.0;
 
-    ASSERT_EQ(xtract_covariance_matrix(data, 8, &channels, result), XTRACT_SUCCESS);
-    ASSERT_EQ(xtract_pearson_correlation(data, 8, NULL, &correlation), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_covariance_matrix(NULL, data, 8, &channels, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_pearson_correlation(NULL, data, 8, NULL, &correlation), XTRACT_SUCCESS);
     CHECK_REL(result[1] / sqrt(result[0] * result[3]), correlation, EPSILON);
 }
 
@@ -358,7 +358,7 @@ UTEST(covariance_matrix, one_series_gives_its_variance)
     int channels = 1;
     double result = 0.0;
 
-    ASSERT_EQ(xtract_covariance_matrix(data, 4, &channels, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_covariance_matrix(NULL, data, 4, &channels, &result), XTRACT_SUCCESS);
     CHECK_REL(result, 5.0 / 3.0, EPSILON);
 }
 
@@ -368,7 +368,7 @@ UTEST(covariance_matrix, shortest_series_has_two_elements)
     int channels = 3;
     double result[9] = {0};
 
-    ASSERT_EQ(xtract_covariance_matrix(data, 6, &channels, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_covariance_matrix(NULL, data, 6, &channels, result), XTRACT_SUCCESS);
     CHECK_REL(result[0], 0.5, EPSILON);
     CHECK_REL(result[1], 1.0, EPSILON);
     CHECK_REL(result[2], -1.5, EPSILON);
@@ -384,7 +384,7 @@ UTEST(covariance_matrix, constant_series_has_a_zero_row_and_column)
     double result[9] = {-1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0};
     int k;
 
-    ASSERT_EQ(xtract_covariance_matrix(data, 9, &channels, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_covariance_matrix(NULL, data, 9, &channels, result), XTRACT_SUCCESS);
     for (k = 0; k < 3; k++)
     {
         ASSERT_EQ(result[3 + k], 0.0);
@@ -402,18 +402,18 @@ UTEST(covariance_matrix, rejects_bad_arguments_and_leaves_the_result)
     double result[4] = {-1.0, -1.0, -1.0, -1.0};
     int k;
 
-    ASSERT_EQ(xtract_covariance_matrix(data, 8, NULL, result), XTRACT_ARGUMENT_ERROR);
-    ASSERT_EQ(xtract_covariance_matrix(data, 1, &channels, result), XTRACT_ARGUMENT_ERROR);
-    ASSERT_EQ(xtract_covariance_matrix(data, 0, &channels, result), XTRACT_ARGUMENT_ERROR);
-    ASSERT_EQ(xtract_covariance_matrix(data, 7, &channels, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_covariance_matrix(NULL, data, 8, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_covariance_matrix(NULL, data, 1, &channels, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_covariance_matrix(NULL, data, 0, &channels, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_covariance_matrix(NULL, data, 7, &channels, result), XTRACT_ARGUMENT_ERROR);
     channels = 0;
-    ASSERT_EQ(xtract_covariance_matrix(data, 8, &channels, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_covariance_matrix(NULL, data, 8, &channels, result), XTRACT_ARGUMENT_ERROR);
     channels = -2;
-    ASSERT_EQ(xtract_covariance_matrix(data, 8, &channels, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_covariance_matrix(NULL, data, 8, &channels, result), XTRACT_ARGUMENT_ERROR);
     channels = 8;
-    ASSERT_EQ(xtract_covariance_matrix(data, 8, &channels, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_covariance_matrix(NULL, data, 8, &channels, result), XTRACT_ARGUMENT_ERROR);
     channels = 3;
-    ASSERT_EQ(xtract_covariance_matrix(data, 8, &channels, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_covariance_matrix(NULL, data, 8, &channels, result), XTRACT_ARGUMENT_ERROR);
     for (k = 0; k < 4; k++)
         ASSERT_EQ(result[k], -1.0);
 }
@@ -426,7 +426,7 @@ UTEST(correlation_matrix, covariance_over_the_two_standard_deviations)
     double covariance[] = {1.0, 1.0, -1.5, 1.0, 4.0, 4.5, -1.5, 4.5, 9.0};
     double result[9] = {0};
 
-    ASSERT_EQ(xtract_correlation_matrix(covariance, 9, NULL, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_correlation_matrix(NULL, covariance, 9, NULL, result), XTRACT_SUCCESS);
     CHECK_REL(result[1], 0.5, EPSILON);
     CHECK_REL(result[2], -0.5, EPSILON);
     CHECK_REL(result[5], 0.75, EPSILON);
@@ -443,7 +443,7 @@ UTEST(correlation_matrix, reads_the_values_above_the_diagonal)
     double covariance[] = {4.0, 3.0, 100.0, 9.0};
     double result[4] = {0};
 
-    ASSERT_EQ(xtract_correlation_matrix(covariance, 4, NULL, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_correlation_matrix(NULL, covariance, 4, NULL, result), XTRACT_SUCCESS);
     CHECK_REL(result[1], 0.5, EPSILON);
     ASSERT_EQ(result[2], result[1]);
 }
@@ -456,9 +456,9 @@ UTEST(correlation_matrix, matches_the_pearson_correlation_of_the_two_series)
     double result[4] = {0};
     double correlation = 0.0;
 
-    ASSERT_EQ(xtract_covariance_matrix(data, 8, &channels, covariance), XTRACT_SUCCESS);
-    ASSERT_EQ(xtract_correlation_matrix(covariance, 4, NULL, result), XTRACT_SUCCESS);
-    ASSERT_EQ(xtract_pearson_correlation(data, 8, NULL, &correlation), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_covariance_matrix(NULL, data, 8, &channels, covariance), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_correlation_matrix(NULL, covariance, 4, NULL, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_pearson_correlation(NULL, data, 8, NULL, &correlation), XTRACT_SUCCESS);
     CHECK_REL(result[1], correlation, EPSILON);
 }
 
@@ -467,7 +467,7 @@ UTEST(correlation_matrix, one_series_gives_one)
     double covariance = 5.0;
     double result = 0.0;
 
-    ASSERT_EQ(xtract_correlation_matrix(&covariance, 1, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_correlation_matrix(NULL, &covariance, 1, NULL, &result), XTRACT_SUCCESS);
     ASSERT_EQ(result, 1.0);
 }
 
@@ -477,10 +477,10 @@ UTEST(correlation_matrix, coefficients_stay_within_one)
     double below[] = {1.0, -2.0, -2.0, 1.0};
     double result[4] = {0};
 
-    ASSERT_EQ(xtract_correlation_matrix(above, 4, NULL, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_correlation_matrix(NULL, above, 4, NULL, result), XTRACT_SUCCESS);
     ASSERT_EQ(result[1], 1.0);
     ASSERT_EQ(result[2], 1.0);
-    ASSERT_EQ(xtract_correlation_matrix(below, 4, NULL, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_correlation_matrix(NULL, below, 4, NULL, result), XTRACT_SUCCESS);
     ASSERT_EQ(result[1], -1.0);
     ASSERT_EQ(result[2], -1.0);
 }
@@ -492,12 +492,12 @@ UTEST(correlation_matrix, no_result_for_a_variance_that_is_not_positive)
     double result[9] = {-1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0};
     int k;
 
-    ASSERT_EQ(xtract_correlation_matrix(zero_last, 9, NULL, result), XTRACT_NO_RESULT);
+    ASSERT_EQ(xtract_correlation_matrix(NULL, zero_last, 9, NULL, result), XTRACT_NO_RESULT);
     for (k = 0; k < 9; k++)
         ASSERT_EQ(result[k], 0.0);
     for (k = 0; k < 4; k++)
         result[k] = -1.0;
-    ASSERT_EQ(xtract_correlation_matrix(negative_first, 4, NULL, result), XTRACT_NO_RESULT);
+    ASSERT_EQ(xtract_correlation_matrix(NULL, negative_first, 4, NULL, result), XTRACT_NO_RESULT);
     for (k = 0; k < 4; k++)
         ASSERT_EQ(result[k], 0.0);
 }
@@ -508,12 +508,12 @@ UTEST(correlation_matrix, rejects_a_length_that_is_not_a_square_and_leaves_the_r
     double result[8] = {-1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0};
     int k;
 
-    ASSERT_EQ(xtract_correlation_matrix(covariance, 0, NULL, result), XTRACT_ARGUMENT_ERROR);
-    ASSERT_EQ(xtract_correlation_matrix(covariance, -4, NULL, result), XTRACT_ARGUMENT_ERROR);
-    ASSERT_EQ(xtract_correlation_matrix(covariance, 2, NULL, result), XTRACT_ARGUMENT_ERROR);
-    ASSERT_EQ(xtract_correlation_matrix(covariance, 3, NULL, result), XTRACT_ARGUMENT_ERROR);
-    ASSERT_EQ(xtract_correlation_matrix(covariance, 5, NULL, result), XTRACT_ARGUMENT_ERROR);
-    ASSERT_EQ(xtract_correlation_matrix(covariance, 8, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_correlation_matrix(NULL, covariance, 0, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_correlation_matrix(NULL, covariance, -4, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_correlation_matrix(NULL, covariance, 2, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_correlation_matrix(NULL, covariance, 3, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_correlation_matrix(NULL, covariance, 5, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_correlation_matrix(NULL, covariance, 8, NULL, result), XTRACT_ARGUMENT_ERROR);
     for (k = 0; k < 8; k++)
         ASSERT_EQ(result[k], -1.0);
 }
@@ -525,7 +525,7 @@ UTEST(average_correlation, mean_of_a_correlation_matrix_off_its_diagonal)
     double correlation[] = {1.0, 0.5, -0.5, 0.5, 1.0, 0.75, -0.5, 0.75, 1.0};
     double result = -2.0;
 
-    ASSERT_EQ(xtract_average_correlation(correlation, 9, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_average_correlation(NULL, correlation, 9, NULL, &result), XTRACT_SUCCESS);
     CHECK_REL(result, 0.25, EPSILON);
 }
 
@@ -535,9 +535,9 @@ UTEST(average_correlation, counts_every_value_off_the_diagonal_once)
     double four[] = {100.0, 2.0, 2.0, 2.0, 2.0, 100.0, 2.0, 2.0, 2.0, 2.0, 100.0, 2.0, 2.0, 2.0, 2.0, 100.0};
     double result = 0.0;
 
-    ASSERT_EQ(xtract_average_correlation(three, 9, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_average_correlation(NULL, three, 9, NULL, &result), XTRACT_SUCCESS);
     CHECK_REL(result, 3.5, EPSILON);
-    ASSERT_EQ(xtract_average_correlation(four, 16, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_average_correlation(NULL, four, 16, NULL, &result), XTRACT_SUCCESS);
     CHECK_REL(result, 2.0, EPSILON);
 }
 
@@ -550,10 +550,10 @@ UTEST(average_correlation, two_series_give_their_coefficient)
     double pearson = 0.0;
     double result = -2.0;
 
-    ASSERT_EQ(xtract_covariance_matrix(data, 8, &channels, covariance), XTRACT_SUCCESS);
-    ASSERT_EQ(xtract_correlation_matrix(covariance, 4, NULL, correlation), XTRACT_SUCCESS);
-    ASSERT_EQ(xtract_average_correlation(correlation, 4, NULL, &result), XTRACT_SUCCESS);
-    ASSERT_EQ(xtract_pearson_correlation(data, 8, NULL, &pearson), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_covariance_matrix(NULL, data, 8, &channels, covariance), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_correlation_matrix(NULL, covariance, 4, NULL, correlation), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_average_correlation(NULL, correlation, 4, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_pearson_correlation(NULL, data, 8, NULL, &pearson), XTRACT_SUCCESS);
     CHECK_REL(result, pearson, EPSILON);
 }
 
@@ -567,7 +567,7 @@ UTEST(average_correlation, rejects_one_series_and_a_length_that_is_not_a_square)
     for (k = 0; k < sizeof(bad) / sizeof(bad[0]); k++)
     {
         result = -2.0;
-        ASSERT_EQ(xtract_average_correlation(correlation, bad[k], NULL, &result), XTRACT_ARGUMENT_ERROR);
+        ASSERT_EQ(xtract_average_correlation(NULL, correlation, bad[k], NULL, &result), XTRACT_ARGUMENT_ERROR);
         ASSERT_EQ(result, 0.0);
     }
 }
@@ -582,13 +582,13 @@ UTEST(principal_variances, eigenvalues_of_a_two_by_two_matrix)
     double unequal_diagonal[] = {5.0, 2.0, 2.0, 2.0};
     double result[2] = {0};
 
-    ASSERT_EQ(xtract_principal_variances(equal_diagonal, 4, NULL, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_principal_variances(NULL, equal_diagonal, 4, NULL, result), XTRACT_SUCCESS);
     CHECK_REL(result[0], 3.0, EPSILON);
     CHECK_REL(result[1], 1.0, EPSILON);
-    ASSERT_EQ(xtract_principal_variances(negative_off_diagonal, 4, NULL, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_principal_variances(NULL, negative_off_diagonal, 4, NULL, result), XTRACT_SUCCESS);
     CHECK_REL(result[0], 1.9, EPSILON);
     CHECK_REL(result[1], 0.1, EPSILON);
-    ASSERT_EQ(xtract_principal_variances(unequal_diagonal, 4, NULL, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_principal_variances(NULL, unequal_diagonal, 4, NULL, result), XTRACT_SUCCESS);
     CHECK_REL(result[0], 6.0, EPSILON);
     CHECK_REL(result[1], 1.0, EPSILON);
 }
@@ -599,7 +599,7 @@ UTEST(principal_variances, eigenvalues_near_the_largest_double_stay_finite)
     double matrix[] = {0.0, 1e308, 1e308, 1e308};
     double result[2] = {0};
 
-    ASSERT_EQ(xtract_principal_variances(matrix, 4, NULL, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_principal_variances(NULL, matrix, 4, NULL, result), XTRACT_SUCCESS);
     ASSERT_TRUE(isfinite(result[0]) && isfinite(result[1]));
     CHECK_REL(result[0] / 1e308, (1.0 + sqrt(5.0)) / 2.0, EPSILON);
     CHECK_REL(result[1] / 1e308, (1.0 - sqrt(5.0)) / 2.0, EPSILON);
@@ -611,7 +611,7 @@ UTEST(principal_variances, a_diagonal_difference_beyond_the_largest_double_stays
     double matrix[] = {-1e308, 1e308, 1e308, 1e308};
     double result[2] = {0};
 
-    ASSERT_EQ(xtract_principal_variances(matrix, 4, NULL, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_principal_variances(NULL, matrix, 4, NULL, result), XTRACT_SUCCESS);
     ASSERT_TRUE(isfinite(result[0]) && isfinite(result[1]));
     CHECK_REL(result[0] / 1e308, sqrt(2.0), EPSILON);
     CHECK_REL(result[1] / 1e308, -sqrt(2.0), EPSILON);
@@ -628,7 +628,7 @@ UTEST(principal_variances, a_rank_one_matrix_of_widely_spaced_scales_has_a_zero_
     matrix[1] = ldexp(1.0, 500);
     matrix[2] = ldexp(1.0, 500);
     matrix[3] = ldexp(1.0, -20);
-    ASSERT_EQ(xtract_principal_variances(matrix, 4, NULL, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_principal_variances(NULL, matrix, 4, NULL, result), XTRACT_SUCCESS);
     ASSERT_EQ(result[0], ldexp(1.0, 1020));
     ASSERT_EQ(result[1], 0.0);
 
@@ -637,7 +637,7 @@ UTEST(principal_variances, a_rank_one_matrix_of_widely_spaced_scales_has_a_zero_
     matrix[2] = 0.5;
     matrix[3] = ldexp(1.0, -1025);
     result[1] = -1.0;
-    ASSERT_EQ(xtract_principal_variances(matrix, 4, NULL, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_principal_variances(NULL, matrix, 4, NULL, result), XTRACT_SUCCESS);
     ASSERT_EQ(result[0], ldexp(1.0, 1023));
     ASSERT_EQ(result[1], 0.0);
 }
@@ -648,7 +648,7 @@ UTEST(principal_variances, eigenvalues_of_a_tridiagonal_matrix)
     double matrix[] = {2.0, -1.0, 0.0, -1.0, 2.0, -1.0, 0.0, -1.0, 2.0};
     double result[3] = {0};
 
-    ASSERT_EQ(xtract_principal_variances(matrix, 9, NULL, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_principal_variances(NULL, matrix, 9, NULL, result), XTRACT_SUCCESS);
     CHECK_REL(result[0], 2.0 + sqrt(2.0), EPSILON);
     CHECK_REL(result[1], 2.0, EPSILON);
     CHECK_REL(result[2], 2.0 - sqrt(2.0), EPSILON);
@@ -661,7 +661,7 @@ UTEST(principal_variances, eigenvalues_of_a_dense_matrix_of_four_rows)
     double matrix[] = {4.0, 1.0, 1.0, 1.0, 1.0, 4.0, 1.0, 1.0, 1.0, 1.0, 4.0, 1.0, 1.0, 1.0, 1.0, 4.0};
     double result[4] = {0};
 
-    ASSERT_EQ(xtract_principal_variances(matrix, 16, NULL, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_principal_variances(NULL, matrix, 16, NULL, result), XTRACT_SUCCESS);
     CHECK_REL(result[0], 7.0, EPSILON);
     CHECK_REL(result[1], 3.0, EPSILON);
     CHECK_REL(result[2], 3.0, EPSILON);
@@ -673,7 +673,7 @@ UTEST(principal_variances, a_diagonal_matrix_gives_its_diagonal_in_descending_or
     double matrix[] = {1.0, 0.0, 0.0, 0.0, 3.0, 0.0, 0.0, 0.0, 2.0};
     double result[3] = {0};
 
-    ASSERT_EQ(xtract_principal_variances(matrix, 9, NULL, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_principal_variances(NULL, matrix, 9, NULL, result), XTRACT_SUCCESS);
     ASSERT_EQ(result[0], 3.0);
     ASSERT_EQ(result[1], 2.0);
     ASSERT_EQ(result[2], 1.0);
@@ -751,7 +751,7 @@ UTEST(principal_variances, a_diagonal_of_any_length_and_order_comes_back_sorted)
             for (n = 0; n < rows; n++)
                 matrix[n * rows + n] = diagonal[n];
 
-            ASSERT_EQ(xtract_principal_variances(matrix, rows * rows, NULL, result), XTRACT_SUCCESS);
+            ASSERT_EQ(xtract_principal_variances(NULL, matrix, rows * rows, NULL, result), XTRACT_SUCCESS);
             for (n = 1; n < rows; n++)
                 ASSERT_GE(result[n - 1], result[n]);
             for (n = 0; n < rows; n++)
@@ -765,7 +765,7 @@ UTEST(principal_variances, reads_the_values_above_the_diagonal)
     double matrix[] = {2.0, 1.0, 100.0, 2.0};
     double result[2] = {0};
 
-    ASSERT_EQ(xtract_principal_variances(matrix, 4, NULL, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_principal_variances(NULL, matrix, 4, NULL, result), XTRACT_SUCCESS);
     CHECK_REL(result[0], 3.0, EPSILON);
     CHECK_REL(result[1], 1.0, EPSILON);
 }
@@ -775,7 +775,7 @@ UTEST(principal_variances, identical_series_leave_one_component)
     double matrix[] = {2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0};
     double result[3] = {-1.0, -1.0, -1.0};
 
-    ASSERT_EQ(xtract_principal_variances(matrix, 9, NULL, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_principal_variances(NULL, matrix, 9, NULL, result), XTRACT_SUCCESS);
     CHECK_REL(result[0], 6.0, EPSILON);
     CHECK_NEAR(result[1], 0.0, EPSILON);
     CHECK_NEAR(result[2], 0.0, EPSILON);
@@ -788,8 +788,8 @@ UTEST(principal_variances, sum_to_the_total_variance_of_the_series)
     double covariance[9] = {0};
     double result[3] = {0};
 
-    ASSERT_EQ(xtract_covariance_matrix(data, 15, &channels, covariance), XTRACT_SUCCESS);
-    ASSERT_EQ(xtract_principal_variances(covariance, 9, NULL, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_covariance_matrix(NULL, data, 15, &channels, covariance), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_principal_variances(NULL, covariance, 9, NULL, result), XTRACT_SUCCESS);
     CHECK_REL(result[0] + result[1] + result[2], covariance[0] + covariance[4] + covariance[8], EPSILON);
     ASSERT_GE(result[0], result[1]);
     ASSERT_GE(result[1], result[2]);
@@ -801,7 +801,7 @@ UTEST(principal_variances, one_series_gives_its_variance)
     double matrix = 5.0;
     double result = 0.0;
 
-    ASSERT_EQ(xtract_principal_variances(&matrix, 1, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_principal_variances(NULL, &matrix, 1, NULL, &result), XTRACT_SUCCESS);
     ASSERT_EQ(result, 5.0);
 }
 
@@ -810,7 +810,7 @@ UTEST(principal_variances, a_matrix_holding_nan_returns)
     double matrix[] = {1.0, NAN, NAN, 1.0};
     double result[2] = {0};
 
-    ASSERT_EQ(xtract_principal_variances(matrix, 4, NULL, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_principal_variances(NULL, matrix, 4, NULL, result), XTRACT_SUCCESS);
 }
 
 UTEST(principal_variances, rejects_a_length_that_is_not_a_square_and_leaves_the_result)
@@ -821,7 +821,7 @@ UTEST(principal_variances, rejects_a_length_that_is_not_a_square_and_leaves_the_
     size_t k;
 
     for (k = 0; k < sizeof(bad) / sizeof(bad[0]); k++)
-        ASSERT_EQ(xtract_principal_variances(matrix, bad[k], NULL, result), XTRACT_ARGUMENT_ERROR);
+        ASSERT_EQ(xtract_principal_variances(NULL, matrix, bad[k], NULL, result), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(result[0], -1.0);
     ASSERT_EQ(result[1], -1.0);
 }
@@ -873,7 +873,7 @@ UTEST(coherence, four_half_overlapping_segments_of_four_elements)
     double result[2] = {-1.0, -1.0};
 
     ASSERT_EQ(xtract_init_fft(4, XTRACT_COHERENCE), XTRACT_SUCCESS);
-    ASSERT_EQ(xtract_coherence(data, 20, NULL, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_coherence(NULL, data, 20, NULL, result), XTRACT_SUCCESS);
     CHECK_REL(result[0], 54596.0 / 94997.0, EPSILON);
     CHECK_REL(result[1], 25.0 / 5148.0, EPSILON);
     xtract_free_fft();
@@ -887,7 +887,7 @@ UTEST(coherence, four_half_overlapping_segments_of_eight_elements)
     int k;
 
     ASSERT_EQ(xtract_init_fft(8, XTRACT_COHERENCE), XTRACT_SUCCESS);
-    ASSERT_EQ(xtract_coherence(data, 40, NULL, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_coherence(NULL, data, 40, NULL, result), XTRACT_SUCCESS);
     for (k = 1; k <= 4; k++)
         CHECK_REL(result[k - 1], coherence_from_definition(data, data + 20, 20, 8, k), EPSILON);
     xtract_free_fft();
@@ -902,7 +902,7 @@ UTEST(coherence, a_small_coherence_between_series_of_distant_scales_is_not_zero)
     double result = -1.0;
 
     ASSERT_EQ(xtract_init_fft(2, XTRACT_COHERENCE), XTRACT_SUCCESS);
-    ASSERT_EQ(xtract_coherence(data, 12, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_coherence(NULL, data, 12, NULL, &result), XTRACT_SUCCESS);
     CHECK_REL(result, 1e20 / (2e300 + 1e20), EPSILON);
     xtract_free_fft();
 }
@@ -913,7 +913,7 @@ UTEST(coherence, one_at_every_frequency_for_a_scaled_and_offset_copy)
     double result[2] = {0};
 
     ASSERT_EQ(xtract_init_fft(4, XTRACT_COHERENCE), XTRACT_SUCCESS);
-    ASSERT_EQ(xtract_coherence(data, 20, NULL, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_coherence(NULL, data, 20, NULL, result), XTRACT_SUCCESS);
     CHECK_REL(result[0], 1.0, EPSILON);
     CHECK_REL(result[1], 1.0, EPSILON);
     ASSERT_LE(result[0], 1.0);
@@ -929,8 +929,8 @@ UTEST(coherence, elements_after_the_last_whole_segment_are_not_used)
     double result[2] = {0};
 
     ASSERT_EQ(xtract_init_fft(4, XTRACT_COHERENCE), XTRACT_SUCCESS);
-    ASSERT_EQ(xtract_coherence(whole, 12, NULL, expected), XTRACT_SUCCESS);
-    ASSERT_EQ(xtract_coherence(longer, 14, NULL, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_coherence(NULL, whole, 12, NULL, expected), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_coherence(NULL, longer, 14, NULL, result), XTRACT_SUCCESS);
     ASSERT_EQ(result[0], expected[0]);
     ASSERT_EQ(result[1], expected[1]);
     xtract_free_fft();
@@ -942,12 +942,12 @@ UTEST(coherence, segment_length_follows_the_initialised_size)
     double result[2] = {-1.0, -1.0};
 
     ASSERT_EQ(xtract_init_fft(2, XTRACT_COHERENCE), XTRACT_SUCCESS);
-    ASSERT_EQ(xtract_coherence(data, 12, NULL, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_coherence(NULL, data, 12, NULL, result), XTRACT_SUCCESS);
     ASSERT_GE(result[0], 0.0);
     ASSERT_LE(result[0], 1.0);
     ASSERT_EQ(result[1], -1.0);
     ASSERT_EQ(xtract_init_fft(4, XTRACT_COHERENCE), XTRACT_SUCCESS);
-    ASSERT_EQ(xtract_coherence(data, 12, NULL, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_coherence(NULL, data, 12, NULL, result), XTRACT_SUCCESS);
     ASSERT_NE(result[1], -1.0);
     xtract_free_fft();
 }
@@ -958,7 +958,7 @@ UTEST(coherence, no_result_for_a_constant_series)
     double result[2] = {-1.0, -1.0};
 
     ASSERT_EQ(xtract_init_fft(4, XTRACT_COHERENCE), XTRACT_SUCCESS);
-    ASSERT_EQ(xtract_coherence(data, 12, NULL, result), XTRACT_NO_RESULT);
+    ASSERT_EQ(xtract_coherence(NULL, data, 12, NULL, result), XTRACT_NO_RESULT);
     ASSERT_EQ(result[0], 0.0);
     ASSERT_EQ(result[1], 0.0);
     xtract_free_fft();
@@ -970,15 +970,15 @@ UTEST(coherence, needs_an_initialised_transform_and_two_segments)
     double result[2] = {-1.0, -1.0};
 
     xtract_free_fft();
-    ASSERT_EQ(xtract_coherence(data, 12, NULL, result), XTRACT_BAD_STATE);
-    ASSERT_EQ(xtract_coherence(data, 11, NULL, result), XTRACT_ARGUMENT_ERROR);
-    ASSERT_EQ(xtract_coherence(data, 0, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_coherence(NULL, data, 12, NULL, result), XTRACT_BAD_STATE);
+    ASSERT_EQ(xtract_coherence(NULL, data, 11, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_coherence(NULL, data, 0, NULL, result), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(xtract_init_fft(4, XTRACT_COHERENCE), XTRACT_SUCCESS);
-    ASSERT_EQ(xtract_coherence(data, 10, NULL, result), XTRACT_ARGUMENT_ERROR);
-    ASSERT_EQ(xtract_coherence(data, 11, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_coherence(NULL, data, 10, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_coherence(NULL, data, 11, NULL, result), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(result[0], -1.0);
     ASSERT_EQ(result[1], -1.0);
-    ASSERT_EQ(xtract_coherence(data, 12, NULL, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_coherence(NULL, data, 12, NULL, result), XTRACT_SUCCESS);
     xtract_free_fft();
-    ASSERT_EQ(xtract_coherence(data, 12, NULL, result), XTRACT_BAD_STATE);
+    ASSERT_EQ(xtract_coherence(NULL, data, 12, NULL, result), XTRACT_BAD_STATE);
 }

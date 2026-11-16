@@ -127,7 +127,7 @@ static int check(int status, const char *function)
 
 static int rolling_volatility(const double *returns, int N, int window, double *volatility)
 {
-    int status = xtract_moving_standard_deviation(returns, N, &window, volatility);
+    int status = xtract_moving_standard_deviation(NULL, returns, N, &window, volatility);
     int n;
     for (n = 0; n <= N - window; ++n)
         volatility[n] = annualised(volatility[n]);
@@ -137,7 +137,7 @@ static int rolling_volatility(const double *returns, int N, int window, double *
 static int ewma_volatility(const double *returns, int N, double *volatility)
 {
     double weight = EWMA_NEW_WEIGHT;
-    int status = xtract_ewma_variance(returns, N, &weight, volatility);
+    int status = xtract_ewma_variance(NULL, returns, N, &weight, volatility);
     int n;
     for (n = 0; n < N; ++n)
         volatility[n] = annualised(sqrt(volatility[n]));
@@ -163,12 +163,12 @@ static int summarise_returns(const double *returns, int N)
     double skewness;
     double kurtosis;
     double median;
-    if (check(xtract_mean(returns, N, NULL, &moments[0]), "xtract_mean") ||
-        check(xtract_variance(returns, N, &moments[0], &variance), "xtract_variance") ||
-        check(xtract_standard_deviation(returns, N, &variance, &moments[1]), "xtract_standard_deviation") ||
-        check(xtract_skewness(returns, N, moments, &skewness), "xtract_skewness") ||
-        check(xtract_kurtosis(returns, N, moments, &kurtosis), "xtract_kurtosis") ||
-        check(xtract_median(returns, N, NULL, &median), "xtract_median"))
+    if (check(xtract_mean(NULL, returns, N, NULL, &moments[0]), "xtract_mean") ||
+        check(xtract_variance(NULL, returns, N, &moments[0], &variance), "xtract_variance") ||
+        check(xtract_standard_deviation(NULL, returns, N, &variance, &moments[1]), "xtract_standard_deviation") ||
+        check(xtract_skewness(NULL, returns, N, moments, &skewness), "xtract_skewness") ||
+        check(xtract_kurtosis(NULL, returns, N, moments, &kurtosis), "xtract_kurtosis") ||
+        check(xtract_median(NULL, returns, N, NULL, &median), "xtract_median"))
         return EXIT_FAILURE;
     printf("Daily log returns over %d days\n", N);
     printf("  mean %.5f  median %.5f  standard deviation %.5f (%.1f%% annualised)\n",

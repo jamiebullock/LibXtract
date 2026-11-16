@@ -11,18 +11,18 @@
 
 #include "verify.h"
 
-#define DELTA_HARNESS(feature, result_length)                       \
-    void verify_##feature(void)                                     \
-    {                                                               \
-        const int N = nondet_length();                              \
-        double *data = nondet_doubles(N);                           \
-        double *argv = nondet_doubles(XTRACT_MAXARGS);              \
-        double *result = nondet_doubles(result_length);             \
-                                                                    \
-        (void)xtract_##feature(data, N, nondet_argv(argv), result); \
-        free(data);                                                 \
-        free(argv);                                                 \
-        free(result);                                               \
+#define DELTA_HARNESS(feature, result_length)                             \
+    void verify_##feature(void)                                           \
+    {                                                                     \
+        const int N = nondet_length();                                    \
+        double *data = nondet_doubles(N);                                 \
+        double *argv = nondet_doubles(XTRACT_MAXARGS);                    \
+        double *result = nondet_doubles(result_length);                   \
+                                                                          \
+        (void)xtract_##feature(NULL, data, N, nondet_argv(argv), result); \
+        free(data);                                                       \
+        free(argv);                                                       \
+        free(result);                                                     \
     }
 
 DELTA_HARNESS(flux, 1)

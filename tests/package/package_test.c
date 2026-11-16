@@ -13,7 +13,7 @@ int main(void)
     const double data[4] = {1.0, 2.0, 3.0, 4.0};
     double result = 0.0;
 
-    if (xtract_mean(data, 4, NULL, &result) != XTRACT_SUCCESS || result != 2.5)
+    if (xtract_mean(NULL, data, 4, NULL, &result) != XTRACT_SUCCESS || result != 2.5)
     {
         printf("xtract_mean returned %f\n", result);
         return 1;

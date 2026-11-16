@@ -50,8 +50,8 @@ static void setup(void)
     int i;
     fill_data(data_512, 512);
     fill_data(data_4096, 4096);
-    xtract_mean(data_512, 512, NULL, &mean_512);
-    xtract_mean(data_4096, 4096, NULL, &mean_4096);
+    xtract_mean(NULL, data_512, 512, NULL, &mean_512);
+    xtract_mean(NULL, data_4096, 4096, NULL, &mean_4096);
     /* Magnitude spectrum approximation for spectral benchmarks.
      * Real spectrum data has [magnitudes..., frequencies...] layout,
      * but for benchmarking we only need representative non-negative
@@ -60,10 +60,10 @@ static void setup(void)
         spectrum_512[i] = fabs(data_512[i]);
     for (i = 0; i < 4096; i++)
         spectrum_4096[i] = fabs(data_4096[i]);
-    xtract_spectral_centroid(spectrum_512, 512, NULL, &centroid_512);
-    xtract_spectral_centroid(spectrum_4096, 4096, NULL, &centroid_4096);
-    xtract_spectral_variance(spectrum_512, 512, &centroid_512, &variance_512);
-    xtract_spectral_variance(spectrum_4096, 4096, &centroid_4096, &variance_4096);
+    xtract_spectral_centroid(NULL, spectrum_512, 512, NULL, &centroid_512);
+    xtract_spectral_centroid(NULL, spectrum_4096, 4096, NULL, &centroid_4096);
+    xtract_spectral_variance(NULL, spectrum_512, 512, &centroid_512, &variance_512);
+    xtract_spectral_variance(NULL, spectrum_4096, 4096, &centroid_4096, &variance_4096);
     moment_argv_512[0] = centroid_512;
     moment_argv_512[1] = sqrt(variance_512);
     moment_argv_4096[0] = centroid_4096;
@@ -75,14 +75,14 @@ static void setup(void)
 UBENCH(mean, N512)
 {
     double result;
-    xtract_mean(data_512, 512, NULL, &result);
+    xtract_mean(NULL, data_512, 512, NULL, &result);
     UBENCH_DO_NOTHING(&result);
 }
 
 UBENCH(mean, N4096)
 {
     double result;
-    xtract_mean(data_4096, 4096, NULL, &result);
+    xtract_mean(NULL, data_4096, 4096, NULL, &result);
     UBENCH_DO_NOTHING(&result);
 }
 
@@ -91,14 +91,14 @@ UBENCH(mean, N4096)
 UBENCH(sum, N512)
 {
     double result;
-    xtract_sum(data_512, 512, NULL, &result);
+    xtract_sum(NULL, data_512, 512, NULL, &result);
     UBENCH_DO_NOTHING(&result);
 }
 
 UBENCH(sum, N4096)
 {
     double result;
-    xtract_sum(data_4096, 4096, NULL, &result);
+    xtract_sum(NULL, data_4096, 4096, NULL, &result);
     UBENCH_DO_NOTHING(&result);
 }
 
@@ -107,14 +107,14 @@ UBENCH(sum, N4096)
 UBENCH(rms_amplitude, N512)
 {
     double result;
-    xtract_rms_amplitude(data_512, 512, NULL, &result);
+    xtract_rms_amplitude(NULL, data_512, 512, NULL, &result);
     UBENCH_DO_NOTHING(&result);
 }
 
 UBENCH(rms_amplitude, N4096)
 {
     double result;
-    xtract_rms_amplitude(data_4096, 4096, NULL, &result);
+    xtract_rms_amplitude(NULL, data_4096, 4096, NULL, &result);
     UBENCH_DO_NOTHING(&result);
 }
 
@@ -123,14 +123,14 @@ UBENCH(rms_amplitude, N4096)
 UBENCH(variance, N512)
 {
     double result;
-    xtract_variance(data_512, 512, &mean_512, &result);
+    xtract_variance(NULL, data_512, 512, &mean_512, &result);
     UBENCH_DO_NOTHING(&result);
 }
 
 UBENCH(variance, N4096)
 {
     double result;
-    xtract_variance(data_4096, 4096, &mean_4096, &result);
+    xtract_variance(NULL, data_4096, 4096, &mean_4096, &result);
     UBENCH_DO_NOTHING(&result);
 }
 
@@ -139,14 +139,14 @@ UBENCH(variance, N4096)
 UBENCH(average_deviation, N512)
 {
     double result;
-    xtract_average_deviation(data_512, 512, &mean_512, &result);
+    xtract_average_deviation(NULL, data_512, 512, &mean_512, &result);
     UBENCH_DO_NOTHING(&result);
 }
 
 UBENCH(average_deviation, N4096)
 {
     double result;
-    xtract_average_deviation(data_4096, 4096, &mean_4096, &result);
+    xtract_average_deviation(NULL, data_4096, 4096, &mean_4096, &result);
     UBENCH_DO_NOTHING(&result);
 }
 
@@ -155,14 +155,14 @@ UBENCH(average_deviation, N4096)
 UBENCH(highest_value, N512)
 {
     double result;
-    xtract_highest_value(data_512, 512, NULL, &result);
+    xtract_highest_value(NULL, data_512, 512, NULL, &result);
     UBENCH_DO_NOTHING(&result);
 }
 
 UBENCH(highest_value, N4096)
 {
     double result;
-    xtract_highest_value(data_4096, 4096, NULL, &result);
+    xtract_highest_value(NULL, data_4096, 4096, NULL, &result);
     UBENCH_DO_NOTHING(&result);
 }
 
@@ -171,14 +171,14 @@ UBENCH(highest_value, N4096)
 UBENCH(lowest_value, N512)
 {
     double result, threshold = -2.0;
-    xtract_lowest_value(data_512, 512, &threshold, &result);
+    xtract_lowest_value(NULL, data_512, 512, &threshold, &result);
     UBENCH_DO_NOTHING(&result);
 }
 
 UBENCH(lowest_value, N4096)
 {
     double result, threshold = -2.0;
-    xtract_lowest_value(data_4096, 4096, &threshold, &result);
+    xtract_lowest_value(NULL, data_4096, 4096, &threshold, &result);
     UBENCH_DO_NOTHING(&result);
 }
 
@@ -187,14 +187,14 @@ UBENCH(lowest_value, N4096)
 UBENCH(spectral_centroid, N512)
 {
     double result;
-    xtract_spectral_centroid(spectrum_512, 512, NULL, &result);
+    xtract_spectral_centroid(NULL, spectrum_512, 512, NULL, &result);
     UBENCH_DO_NOTHING(&result);
 }
 
 UBENCH(spectral_centroid, N4096)
 {
     double result;
-    xtract_spectral_centroid(spectrum_4096, 4096, NULL, &result);
+    xtract_spectral_centroid(NULL, spectrum_4096, 4096, NULL, &result);
     UBENCH_DO_NOTHING(&result);
 }
 
@@ -203,14 +203,14 @@ UBENCH(spectral_centroid, N4096)
 UBENCH(spectral_variance, N512)
 {
     double result;
-    xtract_spectral_variance(spectrum_512, 512, &centroid_512, &result);
+    xtract_spectral_variance(NULL, spectrum_512, 512, &centroid_512, &result);
     UBENCH_DO_NOTHING(&result);
 }
 
 UBENCH(spectral_variance, N4096)
 {
     double result;
-    xtract_spectral_variance(spectrum_4096, 4096, &centroid_4096, &result);
+    xtract_spectral_variance(NULL, spectrum_4096, 4096, &centroid_4096, &result);
     UBENCH_DO_NOTHING(&result);
 }
 
@@ -219,14 +219,14 @@ UBENCH(spectral_variance, N4096)
 UBENCH(spectral_skewness, N512)
 {
     double result;
-    xtract_spectral_skewness(spectrum_512, 512, moment_argv_512, &result);
+    xtract_spectral_skewness(NULL, spectrum_512, 512, moment_argv_512, &result);
     UBENCH_DO_NOTHING(&result);
 }
 
 UBENCH(spectral_skewness, N4096)
 {
     double result;
-    xtract_spectral_skewness(spectrum_4096, 4096, moment_argv_4096, &result);
+    xtract_spectral_skewness(NULL, spectrum_4096, 4096, moment_argv_4096, &result);
     UBENCH_DO_NOTHING(&result);
 }
 
@@ -235,14 +235,14 @@ UBENCH(spectral_skewness, N4096)
 UBENCH(spectral_kurtosis, N512)
 {
     double result;
-    xtract_spectral_kurtosis(spectrum_512, 512, moment_argv_512, &result);
+    xtract_spectral_kurtosis(NULL, spectrum_512, 512, moment_argv_512, &result);
     UBENCH_DO_NOTHING(&result);
 }
 
 UBENCH(spectral_kurtosis, N4096)
 {
     double result;
-    xtract_spectral_kurtosis(spectrum_4096, 4096, moment_argv_4096, &result);
+    xtract_spectral_kurtosis(NULL, spectrum_4096, 4096, moment_argv_4096, &result);
     UBENCH_DO_NOTHING(&result);
 }
 
@@ -252,7 +252,7 @@ UBENCH(lnorm, N512)
 {
     double result;
     double argv[3] = {2.0, (double)XTRACT_NO_LNORM_FILTER, 0.0};
-    xtract_lnorm(data_512, 512, argv, &result);
+    xtract_lnorm(NULL, data_512, 512, argv, &result);
     UBENCH_DO_NOTHING(&result);
 }
 
@@ -260,7 +260,7 @@ UBENCH(lnorm, N4096)
 {
     double result;
     double argv[3] = {2.0, (double)XTRACT_NO_LNORM_FILTER, 0.0};
-    xtract_lnorm(data_4096, 4096, argv, &result);
+    xtract_lnorm(NULL, data_4096, 4096, argv, &result);
     UBENCH_DO_NOTHING(&result);
 }
 

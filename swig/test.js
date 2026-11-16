@@ -18,13 +18,13 @@ for (let i = 0; i < len; i++) {
     temp.push(2.0 * i);
 }
 
-const mean = xtract.xtract_mean(a.cast(), len, null)[1];
+const mean = xtract.xtract_mean(null, a.cast(), len, null)[1];
 console.log('The mean of ' + temp.join(', ') + ' is: ' + mean.toFixed(2));
 
 const argv = new xtract.doubleArray(1);
 argv.setitem(0, mean);
 
-const variance = xtract.xtract_variance(a.cast(), len, xtract.doublea_to_voidp(argv.cast()))[1];
+const variance = xtract.xtract_variance(null, a.cast(), len, xtract.doublea_to_voidp(argv.cast()))[1];
 console.log('The variance is ' + variance.toFixed(2));
 
 console.log('Computing spectrum...');
@@ -38,7 +38,7 @@ specArgv.setitem(3, 0.0);
 xtract.xtract_init_fft(len, xtract.XTRACT_SPECTRUM);
 
 const result = new xtract.doubleArray(len);
-xtract.xtract_spectrum(a.cast(), len, xtract.doublea_to_voidp(specArgv.cast()), result.cast());
+xtract.xtract_spectrum(null, a.cast(), len, xtract.doublea_to_voidp(specArgv.cast()), result.cast());
 
 for (let i = 0; i < len; i++) {
     console.log(result.getitem(i));

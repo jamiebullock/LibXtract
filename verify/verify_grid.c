@@ -18,7 +18,7 @@ void verify_grid_moments(void)
     int *argv = nondet_ints(1);
     double *result = nondet_doubles(10);
 
-    (void)xtract_grid_moments(data, N, nondet_argv(argv), result);
+    (void)xtract_grid_moments(NULL, data, N, nondet_argv(argv), result);
     free(data);
     free(argv);
     free(result);
@@ -31,7 +31,7 @@ void verify_grid_central_moments(void)
     int *argv = nondet_ints(1);
     double *result = nondet_doubles(8);
 
-    (void)xtract_grid_central_moments(data, N, nondet_argv(argv), result);
+    (void)xtract_grid_central_moments(NULL, data, N, nondet_argv(argv), result);
     free(data);
     free(argv);
     free(result);
@@ -43,7 +43,7 @@ void verify_normalised_moments(void)
     double *data = nondet_doubles(N);
     double *result = nondet_doubles(7);
 
-    (void)xtract_normalised_moments(data, N, NULL, result);
+    (void)xtract_normalised_moments(NULL, data, N, NULL, result);
     free(data);
     free(result);
 }
@@ -54,7 +54,7 @@ void verify_hu_moments(void)
     double *data = nondet_doubles(N);
     double *result = nondet_doubles(7);
 
-    (void)xtract_hu_moments(data, N, NULL, result);
+    (void)xtract_hu_moments(NULL, data, N, NULL, result);
     free(data);
     free(result);
 }
@@ -68,7 +68,7 @@ static void cooccurrence_of(const int N, int *argv, const void *argv_or_null)
     double *result = nondet_doubles(levels > 0 ? levels * levels : 0);
 
     argv[1] = levels;
-    (void)xtract_cooccurrence_matrix(data, N, argv_or_null, result);
+    (void)xtract_cooccurrence_matrix(NULL, data, N, argv_or_null, result);
     free(data);
     free(result);
 }
@@ -103,15 +103,15 @@ void verify_cooccurrence_matrix_of_any_width(void)
     free(argv);
 }
 
-#define STATISTIC_HARNESS(feature)                      \
-    void verify_##feature(void)                         \
-    {                                                   \
-        const int N = nondet_length();                  \
-        double *data = nondet_doubles(N);               \
-        double result;                                  \
-                                                        \
-        (void)xtract_##feature(data, N, NULL, &result); \
-        free(data);                                     \
+#define STATISTIC_HARNESS(feature)                            \
+    void verify_##feature(void)                               \
+    {                                                         \
+        const int N = nondet_length();                        \
+        double *data = nondet_doubles(N);                     \
+        double result;                                        \
+                                                              \
+        (void)xtract_##feature(NULL, data, N, NULL, &result); \
+        free(data);                                           \
     }
 
 STATISTIC_HARNESS(cooccurrence_contrast)
@@ -125,7 +125,7 @@ void verify_cooccurrence_correlation(void)
     double result;
 
     verify_any_sqrt = 1;
-    (void)xtract_cooccurrence_correlation(data, N, NULL, &result);
+    (void)xtract_cooccurrence_correlation(NULL, data, N, NULL, &result);
     free(data);
 }
 
@@ -134,7 +134,7 @@ static void local_binary_patterns_of(const int N, const void *argv)
     double *data = nondet_doubles(N);
     double *result = nondet_doubles(10);
 
-    (void)xtract_local_binary_patterns(data, N, argv, result);
+    (void)xtract_local_binary_patterns(NULL, data, N, argv, result);
     free(data);
     free(result);
 }

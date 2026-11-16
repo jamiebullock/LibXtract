@@ -72,7 +72,7 @@ int xtract_matrix_rows(const int N)
     return C <= N / C && C * C == N ? C : 0;
 }
 
-int xtract_cross_correlation(const double *data, const int N, const void *argv, double *result)
+int xtract_cross_correlation(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
     const int M = N >> 1;
     const double *x = data;
@@ -118,7 +118,7 @@ int xtract_cross_correlation(const double *data, const int N, const void *argv, 
     return XTRACT_SUCCESS;
 }
 
-int xtract_cross_correlation_lag(const double *data, const int N, const void *argv, double *result)
+int xtract_cross_correlation_lag(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
     const double coefficient = 1.0;
     double *correlation;
@@ -134,7 +134,7 @@ int xtract_cross_correlation_lag(const double *data, const int N, const void *ar
     if (correlation == NULL)
         return XTRACT_MALLOC_FAILED;
 
-    rv = xtract_cross_correlation(data, N, &coefficient, correlation);
+    rv = xtract_cross_correlation(ctx, data, N, &coefficient, correlation);
     if (rv != XTRACT_SUCCESS)
     {
         *result = 0.0;
@@ -159,7 +159,7 @@ int xtract_cross_correlation_lag(const double *data, const int N, const void *ar
     return XTRACT_SUCCESS;
 }
 
-int xtract_pearson_correlation(const double *data, const int N, const void *argv, double *result)
+int xtract_pearson_correlation(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
     const int M = N >> 1;
     const double *x = data;
@@ -196,7 +196,7 @@ int xtract_pearson_correlation(const double *data, const int N, const void *argv
     return XTRACT_SUCCESS;
 }
 
-int xtract_covariance_matrix(const double *data, const int N, const void *argv, double *result)
+int xtract_covariance_matrix(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
     size_t channels;
     int C, M, i, j, n;
@@ -243,7 +243,7 @@ int xtract_covariance_matrix(const double *data, const int N, const void *argv, 
     return XTRACT_SUCCESS;
 }
 
-int xtract_correlation_matrix(const double *data, const int N, const void *argv, double *result)
+int xtract_correlation_matrix(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
     const int C = xtract_matrix_rows(N);
     const size_t rows = (size_t)C;
@@ -287,7 +287,7 @@ int xtract_correlation_matrix(const double *data, const int N, const void *argv,
     return XTRACT_SUCCESS;
 }
 
-int xtract_average_correlation(const double *data, const int N, const void *argv, double *result)
+int xtract_average_correlation(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
     const int C = xtract_matrix_rows(N);
     const size_t rows = (size_t)C;
@@ -398,7 +398,7 @@ static void jacobi_rotate(double *matrix, const size_t rows, const size_t p, con
     }
 }
 
-int xtract_principal_variances(const double *data, const int N, const void *argv, double *result)
+int xtract_principal_variances(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
     const int C = xtract_matrix_rows(N);
     const size_t rows = (size_t)C;
@@ -471,7 +471,7 @@ static void windowed_segment(const double *series, const double *window, const i
         segment[n] = (series[n] - mean) * window[n];
 }
 
-int xtract_coherence(const double *data, const int N, const void *argv, double *result)
+int xtract_coherence(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
     const int M = N >> 1;
     double *work, *window, *segment, *real_x, *imaginary_x, *real_y, *imaginary_y;

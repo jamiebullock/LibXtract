@@ -32,7 +32,7 @@ public class test {
         }
 
         double[] meanResult = new double[1];
-        xtract.xtract_mean(a.cast(), len, null, meanResult);
+        xtract.xtract_mean(null, a.cast(), len, null, meanResult);
         double mean = meanResult[0];
         System.out.printf("The mean of %s is: %.2f%n", temp, mean);
 
@@ -40,7 +40,7 @@ public class test {
         argv.setitem(0, mean);
 
         double[] varianceResult = new double[1];
-        xtract.xtract_variance(a.cast(), len,
+        xtract.xtract_variance(null, a.cast(), len,
                 xtract.doublea_to_voidp(argv.cast()), varianceResult);
         System.out.printf("The variance is %.2f%n", varianceResult[0]);
 
@@ -55,7 +55,7 @@ public class test {
         xtract.xtract_init_fft(len, xtract_features_.XTRACT_SPECTRUM.swigValue());
 
         doubleArray result = new doubleArray(len);
-        xtract.xtract_spectrum(a.cast(), len,
+        xtract.xtract_spectrum(null, a.cast(), len,
                 xtract.doublea_to_voidp(specArgv.cast()), result.cast());
 
         for (int i = 0; i < len; i++) {

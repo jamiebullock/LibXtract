@@ -47,7 +47,7 @@ UTEST(helper, features_from_subframes_computes_each_half)
      * frame2 = {10, 20} -> mean 15 at result[N/2] = result[2]. */
     double data[] = {2.0, 4.0, 10.0, 20.0};
     double result[4] = {-1.0, -1.0, -1.0, -1.0};
-    int rv = xtract_features_from_subframes(data, 4, XTRACT_MEAN, NULL, result);
+    int rv = xtract_features_from_subframes(NULL, data, 4, XTRACT_MEAN, NULL, result);
     ASSERT_EQ(rv, XTRACT_SUCCESS);
     CHECK_REL(result[0], 3.0, EPSILON);
     CHECK_REL(result[2], 15.0, EPSILON);
@@ -58,13 +58,13 @@ UTEST(helper, features_from_subframes_accepts_the_scalar_features_of_a_series)
     double data[] = {2.0, 4.0, 10.0, 20.0};
     double result[4] = {-1.0, -1.0, -1.0, -1.0};
 
-    ASSERT_EQ(xtract_features_from_subframes(data, 4, XTRACT_MEDIAN, NULL, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_features_from_subframes(NULL, data, 4, XTRACT_MEDIAN, NULL, result), XTRACT_SUCCESS);
     CHECK_REL(result[0], 3.0, EPSILON);
     CHECK_REL(result[2], 15.0, EPSILON);
-    ASSERT_EQ(xtract_features_from_subframes(data, 4, XTRACT_HJORTH_ACTIVITY, NULL, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_features_from_subframes(NULL, data, 4, XTRACT_HJORTH_ACTIVITY, NULL, result), XTRACT_SUCCESS);
     CHECK_REL(result[0], 1.0, EPSILON);
     CHECK_REL(result[2], 25.0, EPSILON);
-    ASSERT_EQ(xtract_features_from_subframes(data, 4, XTRACT_KULLBACK_LEIBLER_DIVERGENCE, NULL, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_features_from_subframes(NULL, data, 4, XTRACT_KULLBACK_LEIBLER_DIVERGENCE, NULL, result), XTRACT_SUCCESS);
     ASSERT_EQ(result[0], 0.0);
     ASSERT_EQ(result[2], 0.0);
 }
@@ -73,8 +73,8 @@ UTEST(helper, features_from_subframes_rejects_out_of_range_feature)
 {
     double data[] = {1.0, 2.0, 3.0, 4.0};
     double result[4] = {0};
-    ASSERT_EQ(xtract_features_from_subframes(data, 4, -1, NULL, result), XTRACT_ARGUMENT_ERROR);
-    ASSERT_EQ(xtract_features_from_subframes(data, 4, XTRACT_FEATURES, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_features_from_subframes(NULL, data, 4, -1, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_features_from_subframes(NULL, data, 4, XTRACT_FEATURES, NULL, result), XTRACT_ARGUMENT_ERROR);
 }
 
 UTEST(helper, features_from_subframes_rejects_an_odd_or_short_input_and_a_feature_that_outgrows_its_input)
@@ -88,17 +88,17 @@ UTEST(helper, features_from_subframes_rejects_an_odd_or_short_input_and_a_featur
     double threshold = 0.0;
     size_t i;
 
-    ASSERT_EQ(xtract_features_from_subframes(data, 3, XTRACT_MEAN, NULL, result), XTRACT_ARGUMENT_ERROR);
-    ASSERT_EQ(xtract_features_from_subframes(data, 0, XTRACT_MEAN, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_features_from_subframes(NULL, data, 3, XTRACT_MEAN, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_features_from_subframes(NULL, data, 0, XTRACT_MEAN, NULL, result), XTRACT_ARGUMENT_ERROR);
     for (i = 0; i < sizeof(outgrowing) / sizeof(outgrowing[0]); i++)
-        ASSERT_EQ(xtract_features_from_subframes(data, 4, outgrowing[i], NULL, result), XTRACT_ARGUMENT_ERROR);
+        ASSERT_EQ(xtract_features_from_subframes(NULL, data, 4, outgrowing[i], NULL, result), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(result[0], -1.0);
 
-    ASSERT_EQ(xtract_features_from_subframes(data, 4, XTRACT_DCT, NULL, result), XTRACT_SUCCESS);
-    ASSERT_EQ(xtract_features_from_subframes(data, 4, XTRACT_DIFFERENCE_VECTOR, NULL, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_features_from_subframes(NULL, data, 4, XTRACT_DCT, NULL, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_features_from_subframes(NULL, data, 4, XTRACT_DIFFERENCE_VECTOR, NULL, result), XTRACT_SUCCESS);
     CHECK_REL(result[0], -1.0, EPSILON);
     CHECK_REL(result[2], -1.0, EPSILON);
-    ASSERT_EQ(xtract_features_from_subframes(data, 4, XTRACT_PEAK, &threshold, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_features_from_subframes(NULL, data, 4, XTRACT_PEAK, &threshold, result), XTRACT_SUCCESS);
     CHECK_REL(result[0], 2.0, EPSILON);
     CHECK_REL(result[2], 4.0, EPSILON);
 }
@@ -109,7 +109,7 @@ UTEST(helper, features_from_subframes_still_computes_the_second_subframe_when_th
     double result[4] = {-1.0, -1.0, -1.0, -1.0};
     double threshold = 0.0;
 
-    ASSERT_EQ(xtract_features_from_subframes(data, 4, XTRACT_PEAK, &threshold, result), XTRACT_NO_RESULT);
+    ASSERT_EQ(xtract_features_from_subframes(NULL, data, 4, XTRACT_PEAK, &threshold, result), XTRACT_NO_RESULT);
     ASSERT_EQ(result[0], 0.0);
     ASSERT_EQ(result[1], 0.0);
     CHECK_REL(result[2], 3.0, EPSILON);
@@ -117,7 +117,7 @@ UTEST(helper, features_from_subframes_still_computes_the_second_subframe_when_th
     data[1] = 3.0;
     data[3] = 0.5;
     result[3] = -1.0;
-    ASSERT_EQ(xtract_features_from_subframes(data, 4, XTRACT_PEAK, &threshold, result), XTRACT_NO_RESULT);
+    ASSERT_EQ(xtract_features_from_subframes(NULL, data, 4, XTRACT_PEAK, &threshold, result), XTRACT_NO_RESULT);
     CHECK_REL(result[0], 3.0, EPSILON);
     ASSERT_EQ(result[2], 0.0);
     ASSERT_EQ(result[3], 0.0);
@@ -133,10 +133,10 @@ UTEST(stateful, wavelet_f0_rejects_null_argv_and_an_empty_input)
     double table[WAVELET_N];
     double samplerate = 44100.0;
     double result = -1.0;
-    ASSERT_EQ(xtract_wavelet_f0(table, WAVELET_N, NULL, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_wavelet_f0(NULL, table, WAVELET_N, NULL, &result), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(result, 0.0);
     result = -1.0;
-    ASSERT_EQ(xtract_wavelet_f0(table, 0, &samplerate, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_wavelet_f0(NULL, table, 0, &samplerate, &result), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(result, 0.0);
 }
 
@@ -154,7 +154,7 @@ UTEST(stateful, wavelet_f0_detects_sine_pitch)
 
     xtract_init_wavelet_f0_state();
     xttest_gen_sine(table, WAVELET_N, samplerate, frequency, 1.0);
-    rv = xtract_wavelet_f0(table, WAVELET_N, &samplerate, &result);
+    rv = xtract_wavelet_f0(NULL, table, WAVELET_N, &samplerate, &result);
     ASSERT_EQ(rv, XTRACT_SUCCESS);
     CHECK_REL(result, frequency, 0.01);
 }
@@ -169,8 +169,8 @@ UTEST(stateful, wavelet_f0_zero_sample_rate_means_44100)
 
     xtract_init_wavelet_f0_state();
     xttest_gen_sine(table, WAVELET_N, samplerate, 440.0, 1.0);
-    ASSERT_EQ(xtract_wavelet_f0(table, WAVELET_N, &samplerate, &at_44100), XTRACT_SUCCESS);
-    ASSERT_EQ(xtract_wavelet_f0(table, WAVELET_N, &zero, &at_zero), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_wavelet_f0(NULL, table, WAVELET_N, &samplerate, &at_44100), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_wavelet_f0(NULL, table, WAVELET_N, &zero, &at_zero), XTRACT_SUCCESS);
     CHECK_REL(at_zero, at_44100, EPSILON);
 }
 
@@ -184,7 +184,7 @@ UTEST(stateful, wavelet_f0_silence_yields_no_result)
     xtract_init_wavelet_f0_state();
     for (n = 0; n < WAVELET_N; n++)
         table[n] = 0.0;
-    ASSERT_EQ(xtract_wavelet_f0(table, WAVELET_N, &samplerate, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(xtract_wavelet_f0(NULL, table, WAVELET_N, &samplerate, &result), XTRACT_NO_RESULT);
 }
 
 UTEST(stateful, failsafe_f0_returns_estimate_when_detection_succeeds)
@@ -198,7 +198,7 @@ UTEST(stateful, failsafe_f0_returns_estimate_when_detection_succeeds)
     int rv;
 
     xttest_gen_sine(table, FAILSAFE_N, samplerate, frequency, 1.0);
-    rv = xtract_failsafe_f0(table, FAILSAFE_N, &samplerate, &result);
+    rv = xtract_failsafe_f0(NULL, table, FAILSAFE_N, &samplerate, &result);
     ASSERT_EQ(rv, XTRACT_SUCCESS);
     ASSERT_EQ(xttest_ftom(result), xttest_ftom(frequency));
 }
@@ -216,7 +216,7 @@ UTEST(stateful, failsafe_f0_falls_back_to_spectral_estimate)
 
     xtract_init_fft(FAILSAFE_N, XTRACT_SPECTRUM);
     xttest_gen_sine(table, FAILSAFE_N, samplerate, frequency, 1.0);
-    rv = xtract_failsafe_f0(table, FAILSAFE_N, &samplerate, &result);
+    rv = xtract_failsafe_f0(NULL, table, FAILSAFE_N, &samplerate, &result);
     ASSERT_EQ(rv, XTRACT_SUCCESS);
     ASSERT_TRUE(result > 0.0);
     ASSERT_TRUE(isfinite(result));
@@ -231,7 +231,7 @@ UTEST(stateful, failsafe_f0_leaves_the_result_untouched_when_the_fft_has_another
 
     ASSERT_EQ(xtract_init_fft(FAILSAFE_N / 2, XTRACT_SPECTRUM), XTRACT_SUCCESS);
     xttest_gen_sine(table, FAILSAFE_N, samplerate, frequency, 1.0);
-    ASSERT_EQ(xtract_failsafe_f0(table, FAILSAFE_N, &samplerate, &result), XTRACT_BAD_STATE);
+    ASSERT_EQ(xtract_failsafe_f0(NULL, table, FAILSAFE_N, &samplerate, &result), XTRACT_BAD_STATE);
     ASSERT_EQ(result, -1.0);
     ASSERT_EQ(xtract_init_fft(FAILSAFE_N, XTRACT_SPECTRUM), XTRACT_SUCCESS);
 }

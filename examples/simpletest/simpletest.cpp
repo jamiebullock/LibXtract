@@ -32,8 +32,7 @@ typedef enum waveform_type_
     SAWTOOTH,
     SQUARE,
     NOISE
-} 
-waveform_type;
+} waveform_type;
 
 #define BLOCKSIZE 512
 #define MAVG_COUNT 10
@@ -43,7 +42,6 @@ waveform_type;
 #define MFCC_FREQ_BANDS 13
 #define MFCC_FREQ_MIN 20
 #define MFCC_FREQ_MAX 20000
-
 
 double wavetable[BLOCKSIZE];
 
@@ -58,25 +56,25 @@ void fill_wavetable(const float frequency, waveform_type type)
 
         switch (type)
         {
-            case SINE:
-                wavetable[i] = sin((phase / (double)PERIOD) * 2 * M_PI);
-                break;
-            case SQUARE:
-                if (phase < (samples_per_period / 2.f))     
-                {
-                    wavetable[i] = -1.0;
-                }
-                else
-                {
-                    wavetable[i] = 1.0;
-                }
-                break;
-            case SAWTOOTH:
-                wavetable[i] = ((phase / (double)PERIOD) * 2) - 1.;
-                break;
-            case NOISE:
-                wavetable[i] = ((rand() % 1000) / 500.0) - 1;
-                break; 
+        case SINE:
+            wavetable[i] = sin((phase / (double)PERIOD) * 2 * M_PI);
+            break;
+        case SQUARE:
+            if (phase < (samples_per_period / 2.f))
+            {
+                wavetable[i] = -1.0;
+            }
+            else
+            {
+                wavetable[i] = 1.0;
+            }
+            break;
+        case SAWTOOTH:
+            wavetable[i] = ((phase / (double)PERIOD) * 2) - 1.;
+            break;
+        case NOISE:
+            wavetable[i] = ((rand() % 1000) / 500.0) - 1;
+            break;
         }
     }
 }
@@ -91,7 +89,7 @@ void print_wavetable(void)
 
 int main(void)
 {
-    double mean = 0.0; 
+    double mean = 0.0;
     double f0 = 0.0;
     double midicents = 0.0;
     double flux = 0.0;
@@ -140,24 +138,24 @@ int main(void)
 
     /* Allocate Mel filters */
     mel_filters.n_filters = MFCC_FREQ_BANDS;
-    mel_filters.filters   = (double **)malloc(MFCC_FREQ_BANDS * sizeof(double *));
-    for(uint8_t k = 0; k < MFCC_FREQ_BANDS; ++k)
+    mel_filters.filters = (double **)malloc(MFCC_FREQ_BANDS * sizeof(double *));
+    for (uint8_t k = 0; k < MFCC_FREQ_BANDS; ++k)
     {
         mel_filters.filters[k] = (double *)malloc(BLOCKSIZE * sizeof(double));
     }
-    
+
     xtract_init_mfcc(BLOCKSIZE, SAMPLERATE >> 1, XTRACT_EQUAL_GAIN, MFCC_FREQ_MIN, MFCC_FREQ_MAX, mel_filters.n_filters, mel_filters.filters);
     mel_filters.dct_table = xtract_init_dct(MFCC_FREQ_BANDS);
-    
+
     /* create the window functions */
     window = xtract_init_window(BLOCKSIZE, XTRACT_HANN);
     window_subframe = xtract_init_window(HALF_BLOCKSIZE, XTRACT_HANN);
     xtract_init_wavelet_f0_state();
-    
+
     // fill_wavetable(344.53125f, NOISE); // 344.53125f = 128 samples @ 44100 Hz
     // fill_wavetable(344.53125f, SINE); // 344.53125f = 128 samples @ 44100 Hz
 
-    /* 
+    /*
     print_wavetable();
     */
     std::cout << "File has " << wavSamples << " samples" << std::endl;
@@ -166,12 +164,12 @@ int main(void)
     for (uint64_t n = 0; (n + BLOCKSIZE) < wavSamples; n += HALF_BLOCKSIZE) // Overlap by HALF_BLOCKSIZE
     {
         /* get the F0 */
-        xtract[XTRACT_WAVELET_F0](&data[n], BLOCKSIZE, &samplerate, &f0);
-        
+        xtract[XTRACT_WAVELET_F0](NULL, &data[n], BLOCKSIZE, &samplerate, &f0);
+
         /* get the F0 as a MIDI note */
         if (f0 != 0.0)
         {
-            xtract[XTRACT_MIDICENT](NULL, 0, &f0, &midicents);
+            xtract[XTRACT_MIDICENT](NULL, NULL, 0, &f0, &midicents);
             int note = (int)round(midicents / 100);
             if (note != prev_note)
             {
@@ -179,8 +177,8 @@ int main(void)
             }
             prev_note = note;
         }
-        
-        xtract_windowed(&data[n], BLOCKSIZE, window, windowed);
+
+        xtract_windowed(NULL, &data[n], BLOCKSIZE, window, windowed);
 
         /* get the spectrum */
         argd[0] = SAMPLERATE / (double)BLOCKSIZE;
@@ -189,86 +187,86 @@ int main(void)
         argd[3] = 0.f; /* No Normalisation */
 
         xtract_init_fft(BLOCKSIZE, XTRACT_SPECTRUM);
-        xtract[XTRACT_SPECTRUM](windowed, BLOCKSIZE, &argd[0], spectrum);
+        xtract[XTRACT_SPECTRUM](NULL, windowed, BLOCKSIZE, &argd[0], spectrum);
 
         /* The mel filterbank is defined on the power spectrum with DC
          * included, so that bin k of the spectrum meets coefficient k */
         argd[1] = XTRACT_POWER_SPECTRUM;
         argd[2] = 1.0;
-        xtract[XTRACT_SPECTRUM](windowed, BLOCKSIZE, &argd[0], power_spectrum);
+        xtract[XTRACT_SPECTRUM](NULL, windowed, BLOCKSIZE, &argd[0], power_spectrum);
         xtract_free_fft();
 
-        xtract[XTRACT_SPECTRAL_CENTROID](spectrum, BLOCKSIZE, NULL, &centroid);
+        xtract[XTRACT_SPECTRAL_CENTROID](NULL, spectrum, BLOCKSIZE, NULL, &centroid);
 
         argd[1] = 10.0; /* peak threshold as %  of maximum peak */
-        xtract[XTRACT_PEAK_SPECTRUM](spectrum, BLOCKSIZE / 2, argd, peaks);
+        xtract[XTRACT_PEAK_SPECTRUM](NULL, spectrum, BLOCKSIZE / 2, argd, peaks);
 
         argd[0] = f0;
         argd[1] = .3; /* harmonic threshold */
-        xtract[XTRACT_HARMONIC_SPECTRUM](peaks, BLOCKSIZE, argd, harmonics);
+        xtract[XTRACT_HARMONIC_SPECTRUM](NULL, peaks, BLOCKSIZE, argd, harmonics);
 
         /* compute the MFCCs from the power spectrum taken above */
-        xtract_mfcc(power_spectrum, BLOCKSIZE >> 1, &mel_filters, mfccs);
+        xtract_mfcc(NULL, power_spectrum, BLOCKSIZE >> 1, &mel_filters, mfccs);
 
         double gated[BLOCKSIZE] = {0};
         double block_max = 0.0;
-        
+
         /* crude noise gate */
         for (uint16_t k = 0; k < BLOCKSIZE; ++k)
         {
-            if (fabs(data[n+k]) > block_max)
+            if (fabs(data[n + k]) > block_max)
             {
-                block_max = fabs(data[n+k]);
+                block_max = fabs(data[n + k]);
             }
-            
-            if (data[n+k] > .1)
+
+            if (data[n + k] > .1)
             {
-                gated[k] = data[n+k];
+                gated[k] = data[n + k];
             }
         }
-        
+
         /* normalise */
         double norm_factor = block_max > 0.0 ? 1.0 / block_max : 0.0;
-        
+
         for (uint16_t k = 0; k < BLOCKSIZE; ++k)
         {
             gated[k] *= norm_factor;
         }
-        
+
         /* compute Spectral Flux */
         argd[0] = SAMPLERATE / HALF_BLOCKSIZE;
         argd[1] = XTRACT_LOG_POWER_SPECTRUM;
         argd[2] = 0.f; /* DC component */
         argd[3] = 1.f; /* Yes Normalisation */
-        
-        xtract_features_from_subframes(gated, BLOCKSIZE, XTRACT_WINDOWED, window_subframe, subframes_windowed);
+
+        xtract_features_from_subframes(NULL, gated, BLOCKSIZE, XTRACT_WINDOWED, window_subframe, subframes_windowed);
         xtract_init_fft(HALF_BLOCKSIZE, XTRACT_SPECTRUM);
-        xtract_features_from_subframes(subframes_windowed, BLOCKSIZE, XTRACT_SPECTRUM, argd, subframes_spectrum);
+        xtract_features_from_subframes(NULL, subframes_windowed, BLOCKSIZE, XTRACT_SPECTRUM, argd, subframes_spectrum);
         xtract_free_fft();
-        
+
         argd[0] = 0.5; /* smoothing factor */
-        
+
         /* smooth the amplitude components of the first and second spectra */
-        xtract_smoothed(subframes_spectrum, HALF_BLOCKSIZE >> 1, argd, subframes_spectrum);
-        xtract_smoothed(subframes_spectrum + HALF_BLOCKSIZE, HALF_BLOCKSIZE >> 1, argd, subframes_spectrum + HALF_BLOCKSIZE);
-        
+        xtract_smoothed(NULL, subframes_spectrum, HALF_BLOCKSIZE >> 1, argd, subframes_spectrum);
+        xtract_smoothed(NULL, subframes_spectrum + HALF_BLOCKSIZE, HALF_BLOCKSIZE >> 1, argd, subframes_spectrum + HALF_BLOCKSIZE);
+
         /* difference between the two spectra */
-        xtract_difference_vector(subframes_spectrum, BLOCKSIZE, NULL, difference);
-        
-        argd[0] = .25; /* norm order */
+        xtract_difference_vector(NULL, subframes_spectrum, BLOCKSIZE, NULL, difference);
+
+        argd[0] = .25;                   /* norm order */
         argd[1] = XTRACT_POSITIVE_SLOPE; /* positive slope */
-        argd[2] = 1; /* normalise */
-        
+        argd[2] = 1;                     /* normalise */
+
         /* Right shift HALF_BLOCKSIZE because we only want amplitudes not frequencies */
-        xtract_flux(difference, HALF_BLOCKSIZE >> 1, argd, &flux);
-        
+        xtract_flux(NULL, difference, HALF_BLOCKSIZE >> 1, argd, &flux);
+
         xtract_last_n(last_n_state, &flux, MAVG_COUNT, NULL, lastn);
 
         argd[0] = 10; /* flux threshold */
         double flux_current = 0.0;
-        
-        peak_found = xtract_peak(lastn, MAVG_COUNT, argd, &flux_current);
-        
+
+        peak_found = xtract_peak(NULL, lastn, MAVG_COUNT, argd, &flux_current);
+
         if (peak_found == XTRACT_SUCCESS)
         {
             double peak_time = n / (float)SAMPLERATE;
@@ -281,7 +279,7 @@ int main(void)
     }
 
     /* clean up */
-    for(n = 0; n < MFCC_FREQ_BANDS; ++n)
+    for (n = 0; n < MFCC_FREQ_BANDS; ++n)
     {
         free(mel_filters.filters[n]);
     }
@@ -290,7 +288,6 @@ int main(void)
 
     xtract_free_window(window);
     xtract_free_window(window_subframe);
-    
-    return 0;
 
+    return 0;
 }

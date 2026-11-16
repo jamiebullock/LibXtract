@@ -14,8 +14,9 @@
  *
  * All feature extraction functions follow the same prototype:
  *
- * **int xtract_function_name(const double *data, const int N, const void *argv, double *result);**
+ * **int xtract_function_name(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);**
  *
+ * \param xtract_context *ctx points to a context, or is NULL
  * \param const double *data points to an array of doubles representing the input data
  * \param const int N represents the number of elements from *data to be considered in the calculation
  * \param const void *argv represents an arbitrary list of arguments. Used to pass in values required by the feature calculation
@@ -427,8 +428,9 @@ extern "C"
      *
      * \brief An array of pointers to functions that perform the extraction
      *
-     * Every function takes the same four arguments:
+     * Every function takes the same five arguments:
      *
+     * - *ctx: a pointer to a context, or NULL
      * - *data: a pointer to the start of the input data (usually the first element in an array)
      * - N: the number of elements to be processed
      * - *argv: an arbitrary number of additional arguments, used to pass additional parameters to the function being called. All arguments are compulsory!
@@ -457,7 +459,7 @@ extern "C"
     int N = 5;
     double mean;
 
-    xtract[XTRACT_MEAN](values, N, NULL, &mean);
+    xtract[XTRACT_MEAN](NULL, values, N, NULL, &mean);
 
     printf("Mean = %.2f\n", mean);
     }
@@ -465,7 +467,7 @@ extern "C"
      * The calling function may additionally make some tests against the value returned by xtract
      *
      */
-    extern int (*xtract[XTRACT_FEATURES])(const double *data, const int N, const void *argv, double *result);
+    extern int (*xtract[XTRACT_FEATURES])(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief A function to initialise wavelet f0 detector state */
     int xtract_init_wavelet_f0_state(void);

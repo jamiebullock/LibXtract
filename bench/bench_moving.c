@@ -47,14 +47,14 @@ static void caller_moving_average(const double *data, int N, int window, double 
 {
     int i;
     for (i = 0; i <= N - window; i++)
-        xtract_mean(data + i, window, NULL, &result[i]);
+        xtract_mean(NULL, data + i, window, NULL, &result[i]);
 }
 
 static void caller_moving_max(const double *data, int N, int window, double *result)
 {
     int i;
     for (i = 0; i <= N - window; i++)
-        xtract_highest_value(data + i, window, NULL, &result[i]);
+        xtract_highest_value(NULL, data + i, window, NULL, &result[i]);
 }
 
 static void caller_moving_variance(const double *data, int N, int window, double *result)
@@ -63,22 +63,22 @@ static void caller_moving_variance(const double *data, int N, int window, double
     double mean;
     for (i = 0; i <= N - window; i++)
     {
-        xtract_mean(data + i, window, NULL, &mean);
-        xtract_variance(data + i, window, &mean, &result[i]);
+        xtract_mean(NULL, data + i, window, NULL, &mean);
+        xtract_variance(NULL, data + i, window, &mean, &result[i]);
     }
 }
 
-#define MOVING_BENCH(feature, n, w)                          \
-    UBENCH(feature##_library, N##n##_W##w)                   \
-    {                                                        \
-        int window = w;                                      \
-        xtract_##feature(input_##n, n, &window, result_##n); \
-        UBENCH_DO_NOTHING(result_##n);                       \
-    }                                                        \
-    UBENCH(feature##_caller, N##n##_W##w)                    \
-    {                                                        \
-        caller_##feature(input_##n, n, w, result_##n);       \
-        UBENCH_DO_NOTHING(result_##n);                       \
+#define MOVING_BENCH(feature, n, w)                                \
+    UBENCH(feature##_library, N##n##_W##w)                         \
+    {                                                              \
+        int window = w;                                            \
+        xtract_##feature(NULL, input_##n, n, &window, result_##n); \
+        UBENCH_DO_NOTHING(result_##n);                             \
+    }                                                              \
+    UBENCH(feature##_caller, N##n##_W##w)                          \
+    {                                                              \
+        caller_##feature(input_##n, n, w, result_##n);             \
+        UBENCH_DO_NOTHING(result_##n);                             \
     }
 
 MOVING_BENCH(moving_average, 4096, 64)

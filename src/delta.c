@@ -29,7 +29,7 @@ static double xtract_pow_order(const double base, const double order)
     return pow(base, order);
 }
 
-int xtract_flux(const double *data, const int N, const void *argv, double *result)
+int xtract_flux(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
     int n, M, rv;
     double *diff;
@@ -50,14 +50,14 @@ int xtract_flux(const double *data, const int N, const void *argv, double *resul
     for (n = 0; n < M; n++)
         diff[n] = data[n] - data[M + n];
 
-    rv = xtract_lnorm(diff, M, argv, result);
+    rv = xtract_lnorm(ctx, diff, M, argv, result);
 
     free(diff);
 
     return rv;
 }
 
-int xtract_lnorm(const double *data, const int N, const void *argv, double *result)
+int xtract_lnorm(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
     int n,
         type,
@@ -135,7 +135,7 @@ int xtract_lnorm(const double *data, const int N, const void *argv, double *resu
     return XTRACT_SUCCESS;
 }
 
-int xtract_difference_vector(const double *data, const int N, const void *argv, double *result)
+int xtract_difference_vector(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
     const double *frame1,
         *frame2;
@@ -154,7 +154,7 @@ int xtract_difference_vector(const double *data, const int N, const void *argv, 
     return XTRACT_SUCCESS;
 }
 
-int xtract_kullback_leibler_divergence(const double *data, const int N, const void *argv, double *result)
+int xtract_kullback_leibler_divergence(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
     int n, M;
     const double *current = data;
@@ -201,7 +201,7 @@ int xtract_kullback_leibler_divergence(const double *data, const int N, const vo
     return XTRACT_SUCCESS;
 }
 
-int xtract_itakura_saito_divergence(const double *data, const int N, const void *argv, double *result)
+int xtract_itakura_saito_divergence(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
     int n, M;
     double ratio;
@@ -231,7 +231,7 @@ int xtract_itakura_saito_divergence(const double *data, const int N, const void 
     return XTRACT_SUCCESS;
 }
 
-int xtract_modified_kullback_leibler(const double *data, const int N, const void *argv, double *result)
+int xtract_modified_kullback_leibler(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
     int n, M;
     double epsilon, current, previous;
