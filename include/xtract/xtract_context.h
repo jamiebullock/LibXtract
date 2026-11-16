@@ -28,7 +28,7 @@ extern "C"
      * This function allocates. One thread may use a context at a time, and separate contexts are independent.
      *
      * \param max_N: the largest N the context will be used with, which need not be a power of two. 0 gives a context that holds no working memory
-     * \return a pointer to the context, or NULL if max_N is negative or the memory could not be allocated
+     * \return a pointer to the context, or NULL if max_N is negative or above half the largest int, or the memory could not be allocated
      */
     xtract_context *xtract_context_new(int max_N);
 
