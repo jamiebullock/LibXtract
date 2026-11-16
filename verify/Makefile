@@ -11,10 +11,9 @@
 # bounds access, invalid pointer, integer division by zero, signed overflow,
 # or loop that the bound cannot unwind. NaN and infinity are valid inputs and
 # are not checked for. The portable (USE_OOURA) code path is checked on every
-# host; the OOURA transform itself is replaced by fft_stub.c, which fills the
-# buffer with arbitrary values, so the transform-based proofs cover the
-# library's handling of any transform output and say nothing about the
-# transform.
+# host; the transform is replaced by a stub that fills the buffer with
+# arbitrary values, so the transform-based proofs cover the library's handling
+# of any transform output and say nothing about the transform.
 # math_stub.c does the same for pow, whose CBMC model needs a floating-point
 # remainder the SMT backend cannot encode, and cbrt and atan2, which CBMC has
 # no model of: all three return any value.

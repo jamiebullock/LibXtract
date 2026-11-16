@@ -12,7 +12,7 @@
 
 #include "xtract/libxtract.h"
 
-#include "xtract_globals_private.h"
+#include "xtract_context_private.h"
 #include "xtract_macros_private.h"
 #include "xtract_matrix_private.h"
 #include "xtract_sort_private.h"
@@ -432,15 +432,24 @@ int xtract_principal_variances(xtract_context *ctx, const double *data, const in
     return XTRACT_SUCCESS;
 }
 
+/* Scratch in segment lengths: the window, a segment and eight arrays of half
+ * a segment, and on Accelerate the split form of the segment as well */
+#define COHERENCE_WORK_SEGMENTS 6
+#ifdef USE_OOURA
+#define COHERENCE_SCRATCH_SEGMENTS COHERENCE_WORK_SEGMENTS
+#else
+#define COHERENCE_SCRATCH_SEGMENTS (COHERENCE_WORK_SEGMENTS + 1)
+#endif
+
 /* Bins 1 to L / 2 of the transform of one segment of L elements, which is
  * overwritten. The scale of the two transform libraries differs and cancels
  * in the coherence */
-static void segment_bins(double *segment, const int L, double *real, double *imaginary)
+static void segment_bins(xtract_context *ctx, double *segment, const int L, double *real, double *imaginary, double *split)
 {
     const int bins = L >> 1;
     int k;
 #ifdef USE_OOURA
-    rdft(L, 1, segment, ooura_data_coherence.ooura_ip, ooura_data_coherence.ooura_w);
+    xtract_transform(ctx, L, 1, segment);
     for (k = 1; k < bins; k++)
     {
         real[k - 1] = segment[2 * k];
@@ -448,16 +457,18 @@ static void segment_bins(double *segment, const int L, double *real, double *ima
     }
     real[bins - 1] = segment[1];
 #else
-    DSPDoubleSplitComplex *fft = &vdsp_data_coherence.fft;
+    DSPDoubleSplitComplex fft;
 
-    vDSP_ctozD((DSPDoubleComplex *)segment, 2, fft, 1, bins);
-    vDSP_fft_zripD(vdsp_data_coherence.setup, fft, 1, vdsp_data_coherence.log2N, FFT_FORWARD);
+    fft.realp = split;
+    fft.imagp = split + bins;
+    vDSP_ctozD((DSPDoubleComplex *)segment, 2, &fft, 1, bins);
+    xtract_transform(ctx, L, FFT_FORWARD, &fft);
     for (k = 1; k < bins; k++)
     {
-        real[k - 1] = fft->realp[k];
-        imaginary[k - 1] = fft->imagp[k];
+        real[k - 1] = fft.realp[k];
+        imaginary[k - 1] = fft.imagp[k];
     }
-    real[bins - 1] = fft->imagp[0];
+    real[bins - 1] = fft.imagp[0];
 #endif
     imaginary[bins - 1] = 0.0;
 }
@@ -479,28 +490,20 @@ int xtract_coherence(xtract_context *ctx, const double *data, const int N, const
     int L, bins, hop, start, n, k;
     int any_power = 0;
 
-    if (N < 2 || (N & 1))
+    if (N < 2 || (N & 1) || argv == NULL)
         return XTRACT_ARGUMENT_ERROR;
 
-#ifdef USE_OOURA
-    if (!ooura_data_coherence.initialised)
-        return XTRACT_BAD_STATE;
-    L = ooura_data_coherence.N;
-#else
-    if (!vdsp_data_coherence.initialised)
-        return XTRACT_BAD_STATE;
-    L = vdsp_data_coherence.N;
-#endif
-
-    if (N / 3 < L)
+    L = *(const int *)argv;
+    if (L < 2 || !xtract_is_poweroftwo((unsigned int)L) || N / 3 < L)
         return XTRACT_ARGUMENT_ERROR;
 
     bins = L >> 1;
     hop = bins;
 
-    work = (double *)calloc(6 * (size_t)L, sizeof(double));
+    work = xtract_scratch_take(ctx, N, COHERENCE_SCRATCH_SEGMENTS * (size_t)L);
     if (work == NULL)
-        return XTRACT_MALLOC_FAILED;
+        return XTRACT_BAD_STATE;
+    memset(work, 0, COHERENCE_WORK_SEGMENTS * (size_t)L * sizeof(double));
     window = work;
     segment = window + L;
     real_x = segment + L;
@@ -518,9 +521,9 @@ int xtract_coherence(xtract_context *ctx, const double *data, const int N, const
     for (start = 0; start + L <= M; start += hop)
     {
         windowed_segment(data + start, window, L, segment);
-        segment_bins(segment, L, real_x, imaginary_x);
+        segment_bins(ctx, segment, L, real_x, imaginary_x, work + COHERENCE_WORK_SEGMENTS * (size_t)L);
         windowed_segment(data + M + start, window, L, segment);
-        segment_bins(segment, L, real_y, imaginary_y);
+        segment_bins(ctx, segment, L, real_y, imaginary_y, work + COHERENCE_WORK_SEGMENTS * (size_t)L);
 
         for (k = 0; k < bins; k++)
         {
@@ -546,7 +549,7 @@ int xtract_coherence(xtract_context *ctx, const double *data, const int N, const
         result[k] = coherence > 1.0 ? 1.0 : coherence;
         any_power = 1;
     }
-    free(work);
+    xtract_scratch_return(ctx, work, COHERENCE_SCRATCH_SEGMENTS * (size_t)L);
 
     return any_power ? XTRACT_SUCCESS : XTRACT_NO_RESULT;
 }

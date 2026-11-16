@@ -84,25 +84,6 @@ FILTERBANK_HARNESS(gfcc, nondet_small_length(), N)
 FILTERBANK_HARNESS(mmbses, nondet_small_length(), N / 2)
 FILTERBANK_HARNESS(spectral_subband_centroids, nondet_small_length(), N / 2)
 
-#define FFT_HARNESS(feature, length, plan, result_length)                 \
-    void verify_##feature(void)                                           \
-    {                                                                     \
-        const int N = length;                                             \
-        double *data = nondet_doubles(N);                                 \
-        double *argv = nondet_doubles(XTRACT_MAXARGS);                    \
-        double *result = nondet_doubles(result_length);                   \
-                                                                          \
-        if (nondet_bool())                                                \
-            xtract_init_fft(nondet_fft_size(), plan);                     \
-        (void)xtract_##feature(NULL, data, N, nondet_argv(argv), result); \
-        xtract_free_fft();                                                \
-        free(data);                                                       \
-        free(argv);                                                       \
-        free(result);                                                     \
-    }
-
-FFT_HARNESS(autocorrelation_fft, nondet_length(), XTRACT_AUTOCORRELATION_FFT, N)
-
 void verify_spectrum(void)
 {
     const int N = nondet_length();
@@ -111,10 +92,7 @@ void verify_spectrum(void)
     double *result = nondet_doubles(N);
 
     verify_any_sqrt = 1;
-    if (nondet_bool())
-        xtract_init_fft(nondet_fft_size(), XTRACT_SPECTRUM);
     (void)xtract_spectrum(NULL, data, N, nondet_argv(argv), result);
-    xtract_free_fft();
     free(data);
     free(argv);
     free(result);
@@ -136,6 +114,7 @@ void verify_spectrum(void)
 
 VECTOR_HARNESS(dct, nondet_length(), N *N, N)
 VECTOR_HARNESS(autocorrelation, nondet_length(), XTRACT_MAXARGS, N)
+VECTOR_HARNESS(autocorrelation_fft, nondet_length(), XTRACT_MAXARGS, N)
 VECTOR_HARNESS(amdf, nondet_length(), XTRACT_MAXARGS, N)
 VECTOR_HARNESS(asdf, nondet_length(), XTRACT_MAXARGS, N)
 VECTOR_HARNESS(peak_spectrum, nondet_length(), XTRACT_MAXARGS, 2 * N)

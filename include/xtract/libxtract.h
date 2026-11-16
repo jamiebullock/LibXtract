@@ -234,7 +234,7 @@ extern "C"
      *
      * XTRACT_NO_RESULT: the arguments are valid but the data has no answer, such as a zero amplitude sum, a zero denominator or no periodicity. The result is set to 0.
      *
-     * XTRACT_BAD_STATE: the initialisation the function needs is missing or was done for a different size. The result is left untouched.
+     * XTRACT_BAD_STATE: the context the function needs is missing or was created for fewer elements, or the state it needs was created for a different size. The result is left untouched.
      *
      * XTRACT_BAD_ARGV, XTRACT_BAD_VECTOR_SIZE and XTRACT_DENORMAL_FOUND are deprecated: XTRACT_ARGUMENT_ERROR is returned in their place, and they will be removed in 2.0.
      */
@@ -520,23 +520,6 @@ extern "C"
      */
     int xtract_init_bark(int N, double sr, int *band_limits);
 
-    /** \brief An initialisation function for functions using FFT
-     *
-     * This function initialises global data structures used by functions requiring FFT functionality. It can be called multiple times with different feature names. Calling it again with a feature name already initialised replaces that feature's FFT with one of the new size and leaves the FFTs of the other features unchanged. The data structures belong to the calling thread, so every thread that calls a function using the FFT must call xtract_init_fft() itself, and a thread that ends before the process must call xtract_free_fft() first.
-     *
-     * \param N: the size of the FFT, a power of two of at least 2
-     * \param feature_name: the name of the feature the FFT is being used for,
-     * e.g. XTRACT_DCT
-     * \return XTRACT_SUCCESS, XTRACT_ARGUMENT_ERROR if N is not a power of two of at least 2, or XTRACT_MALLOC_FAILED if allocation fails, which leaves the FFT of that feature uninitialised
-     */
-    int xtract_init_fft(int N, int feature_name);
-
-    /** \brief Free memory used for FFT plans
-     *
-     * This function frees the memory allocated by xtract_init_fft() on the calling thread for every feature. A thread that ends before the process must call this function first, since no other thread can free its memory; the memory of a thread still running when the process exits is reclaimed with the process.
-     * */
-    void xtract_free_fft(void);
-
     /** \brief Make a window of a given type and return a pointer to it
      *
      * \param N: the size of the window
@@ -572,7 +555,7 @@ extern "C"
      *
      * The kernel has n_bins bands, bins_per_octave to the octave from fmin upward, each analysing Q cycles of its centre frequency through a Hann window, where Q = 1 / (2^(1 / bins_per_octave) - 1). A tone at a band's centre frequency reads half its amplitude, as a tone centred on a bin of xtract_spectrum() does. Building the kernel evaluates every band at every bin of the transform, so it is done once and kept for every frame of the same size.
      *
-     * \param N: the size of the transform whose spectrum xtract_cqt() will be given, at least 2 and even. The lowest band's window must fit in N samples: Q times the sample rate divided by fmin, which for 12 bands to the octave from 32.7 Hz at 44100 Hz is about 22680, so N must then be at least 22680, and 32768 when the spectrum comes from an FFT of xtract_init_fft(), whose size is a power of two
+     * \param N: the size of the transform whose spectrum xtract_cqt() will be given, at least 2 and even. The lowest band's window must fit in N samples: Q times the sample rate divided by fmin, which for 12 bands to the octave from 32.7 Hz at 44100 Hz is about 22680, so N must then be at least 22680, and 32768 when the spectrum comes from xtract_spectrum(), whose N is a power of two
      * \param sr: the sample rate in Hz, finite and at least 0, with 0 selecting 44100
      * \param fmin: the centre frequency of the lowest band in Hz, finite and above 0; 32.7, the C two octaves below middle C, is usual
      * \param bins_per_octave: the number of bands to the octave, at least 1; 12 is usual

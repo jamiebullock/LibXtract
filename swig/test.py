@@ -58,11 +58,12 @@ argv[1] = float(xtract.XTRACT_MAGNITUDE_SPECTRUM)
 argv[2] = 0.0
 argv[3] = 0.0
 
-xtract.xtract_init_fft(len, xtract.XTRACT_SPECTRUM);
+ctx = xtract.xtract_context_new(len)
 
 result = xtract.doubleArray(len)
 
-xtract.xtract_spectrum(None, a,len,argv, result)
+xtract.xtract_spectrum(ctx, a,len,argv, result)
+xtract.xtract_context_delete(ctx)
 
 
 for i in range(len):

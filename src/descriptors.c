@@ -373,6 +373,12 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *argv_def = 2;
             *argv_unit = (xtract_unit_t)XTRACT_NONE;
             break;
+        case XTRACT_COHERENCE:
+            *argv_min = 2;
+            *argv_max = XTRACT_UNBOUNDED_MAX;
+            *argv_def = 256;
+            *argv_unit = (xtract_unit_t)XTRACT_NONE;
+            break;
         case XTRACT_SPECTRAL_CONTRAST:
             *argv_min = 1.0;
             *argv_max = XTRACT_UNBOUNDED_MAX;
@@ -1959,6 +1965,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_TIME_REVERSAL_ASYMMETRY:
         case XTRACT_HIGUCHI_FRACTAL_DIMENSION:
         case XTRACT_COVARIANCE_MATRIX:
+        case XTRACT_COHERENCE:
         case XTRACT_GRID_MOMENTS:
         case XTRACT_GRID_CENTRAL_MOMENTS:
         case XTRACT_HISTOGRAM:

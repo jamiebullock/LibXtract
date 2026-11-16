@@ -25,6 +25,7 @@
 
 #include "xtract/libxtract.h"
 #include "xtract/xtract_helper.h"
+#include "xtract_context_private.h"
 #include "xtract_macros_private.h"
 #include "xtract_globals_private.h"
 #include "xtract_sort_private.h"
@@ -1424,15 +1425,17 @@ int xtract_failsafe_f0(xtract_context *ctx, const double *data, const int N, con
     }
     if (sr == 0)
         sr = 44100.0;
-    spectrum = (double *)calloc(N, sizeof(double));
-    peaks = (double *)calloc(N, sizeof(double));
-
-    if (spectrum == NULL || peaks == NULL)
+    if (N < 2 || !xtract_is_poweroftwo((unsigned int)N))
     {
-        free(spectrum);
-        free(peaks);
-        return XTRACT_MALLOC_FAILED;
+        *result = 0.0;
+        return XTRACT_ARGUMENT_ERROR;
     }
+
+    spectrum = xtract_scratch_take(ctx, N, 2 * (size_t)N);
+    if (spectrum == NULL)
+        return XTRACT_BAD_STATE;
+    memset(spectrum, 0, 2 * (size_t)N * sizeof(double));
+    peaks = spectrum + N;
 
     argf[0] = sr / N;
     argf[1] = XTRACT_MAGNITUDE_SPECTRUM;
@@ -1450,8 +1453,7 @@ int xtract_failsafe_f0(xtract_context *ctx, const double *data, const int N, con
         rv = xtract_lowest_value(ctx, peaks + (N >> 1), N >> 1, argf, result);
     }
 
-    free(spectrum);
-    free(peaks);
+    xtract_scratch_return(ctx, spectrum, 2 * (size_t)N);
 
     if (rv == XTRACT_NO_RESULT)
         *result = 0.0;

@@ -17,8 +17,7 @@
 
 /*
  * Unit tests for stateful pitch detection (wavelet/dywapitch), the
- * xtract_failsafe_f0 fallback, the subframe/denormal helpers, and the FFT
- * lifecycle teardown.
+ * xtract_failsafe_f0 fallback and the subframe/denormal helpers.
  */
 
 static const double EPSILON = 1e-10;
@@ -123,6 +122,22 @@ UTEST(helper, features_from_subframes_still_computes_the_second_subframe_when_th
     ASSERT_EQ(result[3], 0.0);
 }
 
+UTEST(helper, features_from_subframes_passes_its_context_to_the_feature)
+{
+    /* Each subframe of 8 elements alternates in sign, so its spectrum is 1
+     * in the last of its 4 coefficients */
+    double data[] = {1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0};
+    double result[16] = {0};
+    double argv[4] = {0.0, XTRACT_MAGNITUDE_SPECTRUM, 0.0, 0.0};
+    xtract_context *ctx = xtract_context_new(8);
+
+    ASSERT_EQ(xtract_features_from_subframes(NULL, data, 16, XTRACT_SPECTRUM, argv, result), XTRACT_BAD_STATE);
+    ASSERT_EQ(xtract_features_from_subframes(ctx, data, 16, XTRACT_SPECTRUM, argv, result), XTRACT_SUCCESS);
+    CHECK_REL(result[3], 1.0, EPSILON);
+    CHECK_REL(result[8 + 3], 1.0, EPSILON);
+    xtract_context_delete(ctx);
+}
+
 UTEST(stateful, init_wavelet_f0_state)
 {
     ASSERT_EQ(xtract_init_wavelet_f0_state(), XTRACT_SUCCESS);
@@ -195,54 +210,76 @@ UTEST(stateful, failsafe_f0_returns_estimate_when_detection_succeeds)
     double samplerate = 44100.0;
     double frequency = 344.53125;
     double result = -1.0;
+    xtract_context *ctx = xtract_context_new(FAILSAFE_N);
     int rv;
 
     xttest_gen_sine(table, FAILSAFE_N, samplerate, frequency, 1.0);
-    rv = xtract_failsafe_f0(NULL, table, FAILSAFE_N, &samplerate, &result);
+    rv = xtract_failsafe_f0(ctx, table, FAILSAFE_N, &samplerate, &result);
     ASSERT_EQ(rv, XTRACT_SUCCESS);
     ASSERT_EQ(xttest_ftom(result), xttest_ftom(frequency));
+    xtract_context_delete(ctx);
 }
 
 UTEST(stateful, failsafe_f0_falls_back_to_spectral_estimate)
 {
     /* 86.1328125 Hz (one cycle in 512 samples) makes xtract_f0 return
-     * NO_RESULT, exercising the spectrum/peak/lowest-value fallback. The
-     * fallback drives xtract_spectrum, so the FFT must be initialised. */
+     * NO_RESULT, exercising the spectrum/peak/lowest-value fallback. */
     double table[FAILSAFE_N];
     double samplerate = 44100.0;
     double frequency = 86.1328125;
     double result = -1.0;
+    xtract_context *ctx = xtract_context_new(FAILSAFE_N);
     int rv;
 
-    xtract_init_fft(FAILSAFE_N, XTRACT_SPECTRUM);
     xttest_gen_sine(table, FAILSAFE_N, samplerate, frequency, 1.0);
-    rv = xtract_failsafe_f0(NULL, table, FAILSAFE_N, &samplerate, &result);
+    rv = xtract_failsafe_f0(ctx, table, FAILSAFE_N, &samplerate, &result);
     ASSERT_EQ(rv, XTRACT_SUCCESS);
     ASSERT_TRUE(result > 0.0);
     ASSERT_TRUE(isfinite(result));
+    xtract_context_delete(ctx);
 }
 
-UTEST(stateful, failsafe_f0_leaves_the_result_untouched_when_the_fft_has_another_size)
+UTEST(stateful, failsafe_f0_fallback_leaves_the_result_untouched_without_a_context)
 {
     double table[FAILSAFE_N];
     double samplerate = 44100.0;
     double frequency = 86.1328125;
     double result = -1.0;
 
-    ASSERT_EQ(xtract_init_fft(FAILSAFE_N / 2, XTRACT_SPECTRUM), XTRACT_SUCCESS);
     xttest_gen_sine(table, FAILSAFE_N, samplerate, frequency, 1.0);
     ASSERT_EQ(xtract_failsafe_f0(NULL, table, FAILSAFE_N, &samplerate, &result), XTRACT_BAD_STATE);
     ASSERT_EQ(result, -1.0);
-    ASSERT_EQ(xtract_init_fft(FAILSAFE_N, XTRACT_SPECTRUM), XTRACT_SUCCESS);
 }
 
-UTEST(stateful, free_fft_releases_fft_state)
+UTEST(stateful, failsafe_f0_fallback_leaves_the_result_untouched_when_the_context_was_created_for_fewer_elements)
 {
-    /* The teardown must be safe to call after init, and the library must be
-     * usable again afterwards (re-init succeeds). */
-    ASSERT_EQ(xtract_init_fft(512, XTRACT_SPECTRUM), XTRACT_SUCCESS);
-    xtract_free_fft();
-    ASSERT_EQ(xtract_init_fft(512, XTRACT_SPECTRUM), XTRACT_SUCCESS);
+    double table[FAILSAFE_N];
+    double samplerate = 44100.0;
+    double frequency = 86.1328125;
+    double result = -1.0;
+    xtract_context *ctx = xtract_context_new(FAILSAFE_N - 1);
+
+    xttest_gen_sine(table, FAILSAFE_N, samplerate, frequency, 1.0);
+    ASSERT_EQ(xtract_failsafe_f0(ctx, table, FAILSAFE_N, &samplerate, &result), XTRACT_BAD_STATE);
+    ASSERT_EQ(result, -1.0);
+    xtract_context_delete(ctx);
+}
+
+UTEST(stateful, failsafe_f0_fallback_rejects_a_length_that_is_not_a_power_of_two_of_at_least_2)
+{
+    double table[FAILSAFE_N];
+    double samplerate = 44100.0;
+    double frequency = 86.1328125;
+    double result = -1.0;
+    xtract_context *ctx = xtract_context_new(FAILSAFE_N);
+
+    xttest_gen_sine(table, FAILSAFE_N, samplerate, frequency, 1.0);
+    ASSERT_EQ(xtract_failsafe_f0(ctx, table, FAILSAFE_N - 1, &samplerate, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    result = -1.0;
+    ASSERT_EQ(xtract_failsafe_f0(ctx, table, 1, &samplerate, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    xtract_context_delete(ctx);
 }
 
 UTEST(stateful, last_n_rejects_a_null_state_or_an_empty_input_and_reports_a_size_mismatch)

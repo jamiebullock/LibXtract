@@ -51,7 +51,7 @@ extern "C"
 
     /** \brief Divides the array pointed to by *data into two subframes, and applies a given feature to each subframe, returning them in a single array pointed to by result
      *
-     * \param *ctx: a pointer to a context, or NULL
+     * \param *ctx: a pointer to the context given to the feature, created for at least N / 2 elements when the feature needs one, or NULL
      * \param *data an array of doubles
      * \param N the number of elements in the array pointed by *data, at least 2 and even
      * \param feature an integer representing the feature to be applied to each subframe in data, a value as given in the enumeration xtract_features_ (libxtract.h) whose result is no longer than its input: every scalar feature, and XTRACT_DCT, XTRACT_AUTOCORRELATION, XTRACT_AMDF, XTRACT_ASDF, XTRACT_AUTOCORRELATION_FFT, XTRACT_SPECTRUM, XTRACT_HARMONIC_SPECTRUM, XTRACT_DIFFERENCE_VECTOR, XTRACT_WINDOWED and XTRACT_SMOOTHED. Any other feature is an argument error, as the two results of N / 2 values could not both fit in *result
@@ -59,7 +59,7 @@ extern "C"
      * \param *result a pointer to the 'packed' results of the feature calculation. This may be passed in as *data to xtract_features_from_subframes() to calculate further features on the subframes, or xtract_difference_vector(), to get the difference between the subframes. A subframe that yields no result has its N / 2 values set to 0 while the other subframe is still computed, and XTRACT_NO_RESULT is returned; any other failure is returned as soon as a subframe reports it
      *
      *
-     * It is important to ensure that any _init_*() functions that are called in preparation for functions that are called on subframes are given the subframe size as 'N', which is half the frame size. i.e. if xtract_features_from_subframes() is called with N=64, and feature=XTRACT_SPECTRUM, then xtract_init_fft() should be called with N=32.
+     * It is important to ensure that any _init_*() functions that are called in preparation for functions that are called on subframes are given the subframe size as 'N', which is half the frame size. i.e. if xtract_features_from_subframes() is called with N=64, a table that the feature takes is made for N=32.
      *
      */
     int xtract_features_from_subframes(xtract_context *ctx, const double *data, const int N, const int feature, const void *argv, double *result);
