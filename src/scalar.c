@@ -2110,12 +2110,35 @@ static int ordinal_pattern(const double *window, const int order, const int dela
     return code;
 }
 
+/* Each run of equal codes is one pattern, and its length is the number of
+ * windows that have it */
+static double entropy_of_sorted_codes(const double *codes, const int windows)
+{
+    double entropy = 0.0;
+    double share;
+    int run = 1;
+    int n;
+
+    for (n = 1; n <= windows; n++)
+    {
+        if (n < windows && codes[n] == codes[n - 1])
+        {
+            run++;
+            continue;
+        }
+        share = (double)run / windows;
+        entropy -= share * log(share);
+        run = 1;
+    }
+
+    return entropy;
+}
+
 int xtract_permutation_entropy(const double *data, const int N, const void *argv, double *result)
 {
     const int *args;
     int order, delay, windows, patterns, n, i;
-    int *counts;
-    double entropy = 0.0;
+    double *codes;
 
     if (argv == NULL)
     {
@@ -2135,18 +2158,20 @@ int xtract_permutation_entropy(const double *data, const int N, const void *argv
     patterns = 1;
     for (i = 2; i <= order; i++)
         patterns *= i;
-    counts = (int *)calloc((size_t)patterns, sizeof(int));
-    if (counts == NULL)
+
+    /* A code is a whole number below 8!, which a double holds exactly, so
+     * the codes are kept as doubles for the library's one sort */
+    windows = N - (order - 1) * delay;
+    codes = (double *)malloc((size_t)windows * sizeof(double));
+    if (codes == NULL)
         return XTRACT_MALLOC_FAILED;
 
-    windows = N - (order - 1) * delay;
     for (n = 0; n < windows; n++)
-        counts[ordinal_pattern(data + n, order, delay)]++;
-    for (n = 0; n < windows; n++)
-        entropy -= log((double)counts[ordinal_pattern(data + n, order, delay)] / windows) / windows;
-    free(counts);
+        codes[n] = ordinal_pattern(data + n, order, delay);
+    xtract_sort_ascending(codes, windows);
+    *result = entropy_of_sorted_codes(codes, windows) / log((double)patterns);
+    free(codes);
 
-    *result = entropy / log((double)patterns);
     if (*result < 0.0)
         *result = 0.0;
     if (*result > 1.0)
