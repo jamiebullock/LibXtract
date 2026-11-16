@@ -3642,6 +3642,100 @@ UTEST(scalar, permutation_entropy_of_a_noise_series_is_close_to_1_at_every_order
     }
 }
 
+UTEST(scalar, permutation_entropy_of_equally_frequent_patterns_is_1)
+{
+    double data[5] = {1.0, 2.0, 1.0, 2.0, 1.0};
+    double result = -1.0;
+    int args[2] = {2, 1};
+
+    ASSERT_EQ(xtract_permutation_entropy(data, 5, args, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 1.0, EPSILON);
+    ASSERT_LE(result, 1.0);
+}
+
+UTEST(scalar, permutation_entropy_at_order_8_of_fewer_windows_than_patterns)
+{
+    /* Five windows: the first two rise throughout, and the drops at 0.0 and -1.0 give each of the other three a pattern of its own */
+    double data[12] = {1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 0.0, 10.0, -1.0};
+    double result = -1.0;
+    int args[2] = {8, 1};
+    double expected = -(0.4 * log(0.4) + 3.0 * 0.2 * log(0.2)) / log(40320.0);
+
+    ASSERT_EQ(xtract_permutation_entropy(data, 12, args, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, expected, EPSILON);
+}
+
+static int rank_in_window(const double *window, const int order, const int delay, const int k)
+{
+    int rank = 0;
+    int j;
+
+    for (j = 0; j < order; j++)
+    {
+        if (window[j * delay] < window[k * delay] || (window[j * delay] == window[k * delay] && j < k))
+            rank++;
+    }
+
+    return rank;
+}
+
+static int same_pattern(const double *a, const double *b, const int order, const int delay)
+{
+    int k;
+
+    for (k = 0; k < order; k++)
+    {
+        if (rank_in_window(a, order, delay, k) != rank_in_window(b, order, delay, k))
+            return 0;
+    }
+
+    return 1;
+}
+
+static double permutation_entropy_by_comparing_every_pair_of_windows(const double *data, const int N, const int order, const int delay)
+{
+    const int windows = N - (order - 1) * delay;
+    double entropy = 0.0;
+    double patterns = 1.0;
+    int i, j, alike;
+
+    for (i = 2; i <= order; i++)
+        patterns *= i;
+    for (i = 0; i < windows; i++)
+    {
+        alike = 0;
+        for (j = 0; j < windows; j++)
+            alike += same_pattern(data + i, data + j, order, delay);
+        entropy -= log((double)alike / windows) / windows;
+    }
+
+    return entropy / log(patterns);
+}
+
+UTEST(scalar, permutation_entropy_matches_a_count_of_alike_windows_at_every_order_and_delay)
+{
+    double data[97];
+    double result;
+    int args[2];
+    unsigned int state = 97u;
+    int i, N;
+
+    for (i = 0; i < 97; i++)
+        data[i] = floor(8.0 * pseudo_random(&state));
+
+    for (N = 50; N <= 97; N += 47)
+    {
+        for (args[0] = 2; args[0] <= 8; args[0]++)
+        {
+            for (args[1] = 1; args[1] <= 3; args[1]++)
+            {
+                ASSERT_EQ(xtract_permutation_entropy(data, N, args, &result), XTRACT_SUCCESS);
+                CHECK_NEAR(result, permutation_entropy_by_comparing_every_pair_of_windows(data, N, args[0], args[1]), 1e-12);
+            }
+        }
+    }
+}
+
 UTEST(scalar, permutation_entropy_rejects_a_missing_or_out_of_range_argument_and_sets_the_result_to_zero)
 {
     double data[8] = {3.0, -1.5, 4.25, 0.0, 2.0, 9.5, -6.0, 1.0};
