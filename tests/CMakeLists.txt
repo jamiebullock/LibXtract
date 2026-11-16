@@ -5,6 +5,7 @@
 
 add_executable(xttest
     xttest_main.c
+    xttest_context.c
     xttest_delta.c
     xttest_descriptors.c
     xttest_grid.c
@@ -20,6 +21,13 @@ set_target_properties(xttest PROPERTIES
     C_STANDARD 99
     C_STANDARD_REQUIRED ON
     C_EXTENSIONS OFF)
+
+# xttest_context.c tests the scratch and the transform through the library's
+# private header, which selects the transform library as the library build does
+set_source_files_properties(xttest_context.c PROPERTIES INCLUDE_DIRECTORIES ${PROJECT_SOURCE_DIR}/src)
+if(NOT APPLE)
+    set_source_files_properties(xttest_context.c PROPERTIES COMPILE_DEFINITIONS USE_OOURA)
+endif()
 
 add_test(NAME xttest COMMAND xttest)
 

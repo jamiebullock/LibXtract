@@ -18,6 +18,7 @@
 #include "xtract/xtract_multivariate.h"
 #include "xtract/xtract_grid.h"
 #include "xtract/xtract_stateful.h"
+#include "xtract/xtract_context.h"
 #include "xtract/libxtract.h"
 %}
 
@@ -130,6 +131,7 @@
 %include "xtract/xtract_vector.h"
 %include "xtract/xtract_grid.h"
 %include "xtract/xtract_stateful.h"
+%include "xtract/xtract_context.h"
 %include "xtract/xtract_helper.h"
 %include "xtract/xtract_macros.h"
 %include "xtract/libxtract.h"

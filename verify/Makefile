@@ -22,6 +22,10 @@
 # another name. The proofs of the functions that call it take sort_stub.c in
 # its place, which fills the buffer with arbitrary values, so that the cost of
 # the sort is not paid again in each of them.
+# The context is proved the same way, in verify_context.c. In context_stub.c
+# a take of scratch is an allocation of exactly the size asked for, which may
+# fail, so that a proof reports a function that writes one element past what
+# it took, and covers the context refusing.
 # The library is compiled with sqrt renamed to verify_sqrt, which math_stub.c
 # defines. It calls sqrt unless a harness sets verify_any_sqrt, and then it
 # returns any value. CBMC models sqrt with assumptions on two products of
@@ -68,9 +72,10 @@ GOTO_BINARY = xtract.gb
 PROOF_DIR = .proofs
 
 SORT_SRC := ../src/sort.c
-LIB_SRC := $(filter-out ../src/ooura/fftsg.c $(SORT_SRC), \
+CONTEXT_SRC := ../src/context.c
+LIB_SRC := $(filter-out ../src/ooura/fftsg.c $(SORT_SRC) $(CONTEXT_SRC), \
 	$(wildcard ../src/*.c ../src/ooura/*.c ../src/c-ringbuf/*.c ../src/dywapitchtrack/*.c))
-HARNESS_SRC := $(wildcard verify_*.c) fft_stub.c math_stub.c sort_stub.c
+HARNESS_SRC := $(wildcard verify_*.c) context_stub.c fft_stub.c math_stub.c sort_stub.c
 HEADERS := verify.h $(wildcard ../include/xtract/*.h ../src/*.h ../src/ooura/*.h \
 	../src/c-ringbuf/*.h ../src/dywapitchtrack/*.h)
 
@@ -142,7 +147,7 @@ $(CBMC_FLAGS_STAMP): force
 	@echo '$(UNWIND) $(SMALL_UNWIND) $(CBMC_FLAGS)' > $@.new
 	@if cmp -s $@ $@.new; then $(RM) $@.new; else mv $@.new $@; fi
 
-$(GOTO_BINARY): $(LIB_SRC) $(SORT_SRC) $(HARNESS_SRC) $(HEADERS) $(CFLAGS_STAMP)
+$(GOTO_BINARY): $(LIB_SRC) $(SORT_SRC) $(CONTEXT_SRC) $(HARNESS_SRC) $(HEADERS) $(CFLAGS_STAMP)
 	$(GOTO_CC) $(CFLAGS) -o $@ $(LIB_SRC) $(HARNESS_SRC)
 
 $(HARNESS_LIST): $(GOTO_BINARY)
