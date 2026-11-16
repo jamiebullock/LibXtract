@@ -84,7 +84,7 @@ The default preset also has targets that run a tool, each built with `cmake --bu
 | `cppcheck` | cppcheck over the first-party sources |
 | `format`, `format-check` | Apply or check the clang-format style |
 | `prose-check` | Vale over the Markdown files, the changelog, the comments and the licence headers, as described in [CONTRIBUTING.md](CONTRIBUTING.md#prose-checks) (needs Vale) |
-| `version-check` | Check that `VERSION` is the newest release in `CHANGELOG.md` |
+| `version-check` | Check that `VERSION` is the newest release in `CHANGELOG.md` or a later version |
 | `bench` | The benchmarks |
 | `doc` | The API reference (needs Doxygen) |
 
@@ -132,6 +132,9 @@ added, never removed or changed, and breaking changes wait for 2.0. Binary
 compatibility is not guaranteed between minor releases, so recompile and
 relink dependent code when moving to a new one. A correctness fix may change a
 feature's numerical output. The [changelog](CHANGELOG.md) says when.
+
+The `main` branch is the newest release, and `develop` is the work towards the
+next one.
 
 ## Contributing
 

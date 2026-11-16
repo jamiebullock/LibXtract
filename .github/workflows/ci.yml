@@ -243,7 +243,7 @@ jobs:
       - name: Check formatting
         run: cmake -P cmake/format.cmake
 
-      - name: Check that VERSION is the newest release in the changelog
+      - name: Check that VERSION is not behind the newest release in the changelog
         if: ${{ !cancelled() }}
         run: cmake -P cmake/version.cmake
 
