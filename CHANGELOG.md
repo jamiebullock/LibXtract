@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.6.0] - 2026-11-16
+
+_From this release, 1.x releases keep source compatibility, and breaking changes wait for 2.0._
+
+### Changed
+
+- Change the last digits of `xtract_variance`, `xtract_average_deviation`, `xtract_spectral_variance`, `xtract_spectral_skewness` and `xtract_spectral_kurtosis` on macOS ([#298](https://github.com/jamiebullock/LibXtract/pull/298))
+- Change the last digits of `xtract_permutation_entropy` ([#300](https://github.com/jamiebullock/LibXtract/pull/300))
+
 ## [1.5.0] - 2026-11-15
 
 ### Changed
@@ -161,6 +170,7 @@
 - Fix the weighting of out-of-range bands in `xtract_sharpness` when N exceeds the Bark band count ([#143](https://github.com/jamiebullock/LibXtract/pull/143))
 - Fix `xtract_lowest_value` to give a result of 0 on `XTRACT_NO_RESULT` ([#143](https://github.com/jamiebullock/LibXtract/pull/143))
 
+[1.6.0]: https://github.com/jamiebullock/LibXtract/compare/v1.5.0...v1.6.0
 [1.5.0]: https://github.com/jamiebullock/LibXtract/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/jamiebullock/LibXtract/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/jamiebullock/LibXtract/compare/v1.2.0...v1.3.0
