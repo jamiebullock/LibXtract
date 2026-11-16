@@ -106,11 +106,12 @@ $(PROOF_DIR)/verify_cooccurrence_matrix_of_any_width.proved: UNWIND = 5
 # classes.
 $(PROOF_DIR)/verify_local_binary_patterns.proved: UNWIND = 11
 $(PROOF_DIR)/verify_local_binary_patterns_of_any_width.proved: UNWIND = 11
-# The sort's sift loop descends one level of the heap for each time round,
-# five levels at most for the 32 values of VERIFY_MAX_N, and the sort calls it
-# once for every value. Unwound to the general bound, its copies are most of
-# the formula.
-$(PROOF_DIR)/verify_sort_ascending.proved: CBMC_FLAGS += --unwindset sift_down.0:6
+# The sort's sift loop descends one level of the heap for each time round, so
+# it runs at most log2(VERIFY_MAX_N) times, and the sort calls it once for
+# every value. Unwound to the general bound, its copies are most of the
+# formula.
+SIFT_UNWIND := $(shell n=$(VERIFY_MAX_N); u=1; while [ $$n -gt 1 ]; do n=$$((n / 2)); u=$$((u + 1)); done; echo $$u)
+$(PROOF_DIR)/verify_sort_ascending.proved: CBMC_FLAGS += --unwindset sift_down.0:$(SIFT_UNWIND)
 
 # The feature functions are floating-point loops, and the solver cost is in
 # the doubles. Formula slicing drops the arithmetic that no property depends
