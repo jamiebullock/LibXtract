@@ -8,7 +8,7 @@
  * libFuzzer harness for the scalar feature functions (xtract_scalar.h).
  *
  * Every scalar feature has the uniform signature
- *     int xtract_f(const double *data, int N, const void *argv, double *result)
+ *     int xtract_f(xtract_context *ctx, const double *data, int N, const void *argv, double *result)
  * and writes a single scalar to result[0]. This harness drives all of them
  * through the xtract[] dispatch table.
  *
@@ -83,7 +83,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     int feature;
     int n;
     int null_argv;
-    int (*fn)(const double *, const int, const void *, double *);
+    int (*fn)(xtract_context *, const double *, const int, const void *, double *);
     double argv[XTRACT_MAXARGS];
     int int_args[XTRACT_MAXARGS];
     int i;
@@ -144,10 +144,10 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     {
         for (i = 0; i < XTRACT_MAXARGS; i++)
             int_args[i] = argv[i] >= -1.0 && argv[i] <= (double)MAX_N ? (int)argv[i] : -1;
-        (void)fn(input, n, null_argv ? NULL : int_args, result);
+        (void)fn(NULL, input, n, null_argv ? NULL : int_args, result);
     }
     else
-        (void)fn(input, n, null_argv ? NULL : argv, result);
+        (void)fn(NULL, input, n, null_argv ? NULL : argv, result);
 
     free(in);
     free(result);

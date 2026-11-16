@@ -63,18 +63,18 @@ static void free_filterbank(xtract_mel_filter *f)
     free(f);
 }
 
-#define FILTERBANK_HARNESS(feature, length, width)                             \
-    void verify_##feature(void)                                                \
-    {                                                                          \
-        const int N = length;                                                  \
-        double *data = nondet_doubles(N);                                      \
-        xtract_mel_filter *filterbank = nondet_filterbank(width);              \
-        double *result = nondet_doubles(at_least_zero(filterbank->n_filters)); \
-                                                                               \
-        (void)xtract_##feature(data, N, nondet_argv(filterbank), result);      \
-        free_filterbank(filterbank);                                           \
-        free(data);                                                            \
-        free(result);                                                          \
+#define FILTERBANK_HARNESS(feature, length, width)                              \
+    void verify_##feature(void)                                                 \
+    {                                                                           \
+        const int N = length;                                                   \
+        double *data = nondet_doubles(N);                                       \
+        xtract_mel_filter *filterbank = nondet_filterbank(width);               \
+        double *result = nondet_doubles(at_least_zero(filterbank->n_filters));  \
+                                                                                \
+        (void)xtract_##feature(NULL, data, N, nondet_argv(filterbank), result); \
+        free_filterbank(filterbank);                                            \
+        free(data);                                                             \
+        free(result);                                                           \
     }
 
 FILTERBANK_HARNESS(mel_spectrogram, nondet_small_length(), N)
@@ -84,21 +84,21 @@ FILTERBANK_HARNESS(gfcc, nondet_small_length(), N)
 FILTERBANK_HARNESS(mmbses, nondet_small_length(), N / 2)
 FILTERBANK_HARNESS(spectral_subband_centroids, nondet_small_length(), N / 2)
 
-#define FFT_HARNESS(feature, length, plan, result_length)           \
-    void verify_##feature(void)                                     \
-    {                                                               \
-        const int N = length;                                       \
-        double *data = nondet_doubles(N);                           \
-        double *argv = nondet_doubles(XTRACT_MAXARGS);              \
-        double *result = nondet_doubles(result_length);             \
-                                                                    \
-        if (nondet_bool())                                          \
-            xtract_init_fft(nondet_fft_size(), plan);               \
-        (void)xtract_##feature(data, N, nondet_argv(argv), result); \
-        xtract_free_fft();                                          \
-        free(data);                                                 \
-        free(argv);                                                 \
-        free(result);                                               \
+#define FFT_HARNESS(feature, length, plan, result_length)                 \
+    void verify_##feature(void)                                           \
+    {                                                                     \
+        const int N = length;                                             \
+        double *data = nondet_doubles(N);                                 \
+        double *argv = nondet_doubles(XTRACT_MAXARGS);                    \
+        double *result = nondet_doubles(result_length);                   \
+                                                                          \
+        if (nondet_bool())                                                \
+            xtract_init_fft(nondet_fft_size(), plan);                     \
+        (void)xtract_##feature(NULL, data, N, nondet_argv(argv), result); \
+        xtract_free_fft();                                                \
+        free(data);                                                       \
+        free(argv);                                                       \
+        free(result);                                                     \
     }
 
 FFT_HARNESS(autocorrelation_fft, nondet_length(), XTRACT_AUTOCORRELATION_FFT, N)
@@ -113,25 +113,25 @@ void verify_spectrum(void)
     verify_any_sqrt = 1;
     if (nondet_bool())
         xtract_init_fft(nondet_fft_size(), XTRACT_SPECTRUM);
-    (void)xtract_spectrum(data, N, nondet_argv(argv), result);
+    (void)xtract_spectrum(NULL, data, N, nondet_argv(argv), result);
     xtract_free_fft();
     free(data);
     free(argv);
     free(result);
 }
 
-#define VECTOR_HARNESS(feature, length, argv_length, result_length) \
-    void verify_##feature(void)                                     \
-    {                                                               \
-        const int N = length;                                       \
-        double *data = nondet_doubles(N);                           \
-        double *argv = nondet_doubles(argv_length);                 \
-        double *result = nondet_doubles(result_length);             \
-                                                                    \
-        (void)xtract_##feature(data, N, nondet_argv(argv), result); \
-        free(data);                                                 \
-        free(argv);                                                 \
-        free(result);                                               \
+#define VECTOR_HARNESS(feature, length, argv_length, result_length)       \
+    void verify_##feature(void)                                           \
+    {                                                                     \
+        const int N = length;                                             \
+        double *data = nondet_doubles(N);                                 \
+        double *argv = nondet_doubles(argv_length);                       \
+        double *result = nondet_doubles(result_length);                   \
+                                                                          \
+        (void)xtract_##feature(NULL, data, N, nondet_argv(argv), result); \
+        free(data);                                                       \
+        free(argv);                                                       \
+        free(result);                                                     \
     }
 
 VECTOR_HARNESS(dct, nondet_length(), N *N, N)
@@ -175,7 +175,7 @@ void verify_cqt(void)
     xtract_cqt_kernel *kernel = nondet_cqt_kernel(N);
     double *result = nondet_doubles(2 * kernel->n_bins);
 
-    (void)xtract_cqt(data, N, nondet_argv(kernel), result);
+    (void)xtract_cqt(NULL, data, N, nondet_argv(kernel), result);
     xtract_free_cqt(kernel);
     free(data);
     free(result);
@@ -190,7 +190,7 @@ void verify_spectral_contrast(void)
     double *result = nondet_doubles(bands + 1);
 
     argv[0] = bands;
-    (void)xtract_spectral_contrast(data, N, nondet_argv(argv), result);
+    (void)xtract_spectral_contrast(NULL, data, N, nondet_argv(argv), result);
     free(data);
     free(argv);
     free(result);
@@ -203,7 +203,7 @@ void verify_bark_coefficients(void)
     int *limits = nondet_ints(XTRACT_BARK_BANDS);
     double *result = nondet_doubles(XTRACT_BARK_BANDS);
 
-    (void)xtract_bark_coefficients(data, N, nondet_argv(limits), result);
+    (void)xtract_bark_coefficients(NULL, data, N, nondet_argv(limits), result);
     free(data);
     free(limits);
     free(result);
@@ -218,7 +218,7 @@ void verify_bark_coefficients(void)
         const void *argv = nondet_argv(&window);                        \
         double *result = nondet_doubles(at_least_zero(N - window + 1)); \
                                                                         \
-        (void)xtract_##feature(data, N, argv, result);                  \
+        (void)xtract_##feature(NULL, data, N, argv, result);            \
         free(data);                                                     \
         free(result);                                                   \
     }
@@ -230,18 +230,18 @@ MOVING_HARNESS(moving_standard_deviation, nondet_length(), VERIFY_MAX_N)
 MOVING_HARNESS(moving_max, nondet_small_length(), VERIFY_SMALL_N)
 MOVING_HARNESS(moving_min, nondet_small_length(), VERIFY_SMALL_N)
 
-#define EWMA_HARNESS(feature)                          \
-    void verify_##feature(void)                        \
-    {                                                  \
-        const int N = nondet_length();                 \
-        double *data = nondet_doubles(N);              \
-        const double alpha = nondet_double();          \
-        const void *argv = nondet_argv(&alpha);        \
-        double *result = nondet_doubles(N);            \
-                                                       \
-        (void)xtract_##feature(data, N, argv, result); \
-        free(data);                                    \
-        free(result);                                  \
+#define EWMA_HARNESS(feature)                                \
+    void verify_##feature(void)                              \
+    {                                                        \
+        const int N = nondet_length();                       \
+        double *data = nondet_doubles(N);                    \
+        const double alpha = nondet_double();                \
+        const void *argv = nondet_argv(&alpha);              \
+        double *result = nondet_doubles(N);                  \
+                                                             \
+        (void)xtract_##feature(NULL, data, N, argv, result); \
+        free(data);                                          \
+        free(result);                                        \
     }
 
 EWMA_HARNESS(ewma_average)
@@ -254,7 +254,7 @@ void verify_quantise(void)
     double *argv = nondet_doubles(XTRACT_MAXARGS);
     double *result = nondet_doubles(N);
 
-    (void)xtract_quantise(data, N, nondet_argv(argv), result);
+    (void)xtract_quantise(NULL, data, N, nondet_argv(argv), result);
     free(data);
     free(argv);
     free(result);
@@ -268,7 +268,7 @@ void verify_histogram(void)
     const void *argv = nondet_argv(&levels);
     double *result = nondet_doubles(at_least_zero(levels));
 
-    (void)xtract_histogram(data, N, argv, result);
+    (void)xtract_histogram(NULL, data, N, argv, result);
     free(data);
     free(result);
 }
@@ -281,7 +281,7 @@ void verify_lpcc(void)
     const void *argv = nondet_argv(&order);
     double *result = nondet_doubles(argv == NULL ? at_least_zero(N - 1) : at_least_zero(order));
 
-    (void)xtract_lpcc(data, N, argv, result);
+    (void)xtract_lpcc(NULL, data, N, argv, result);
     free(data);
     free(result);
 }

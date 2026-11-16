@@ -38,7 +38,7 @@ UTEST(grid_moments, two_rows_of_three)
     int width = 3;
     double result[MOMENTS] = {0};
 
-    ASSERT_EQ(xtract_grid_moments(data, 6, &width, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_grid_moments(NULL, data, 6, &width, result), XTRACT_SUCCESS);
     CHECK_REL(result[M00], 21.0, EPSILON);
     CHECK_REL(result[M10], 25.0, EPSILON);
     CHECK_REL(result[M01], 15.0, EPSILON);
@@ -60,7 +60,7 @@ UTEST(grid_moments, one_element_has_only_a_sum)
 
     for (i = 0; i < MOMENTS; i++)
         result[i] = -1.0;
-    ASSERT_EQ(xtract_grid_moments(&data, 1, &width, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_grid_moments(NULL, &data, 1, &width, result), XTRACT_SUCCESS);
     CHECK_REL(result[M00], 5.0, EPSILON);
     for (i = M10; i < MOMENTS; i++)
         ASSERT_EQ(result[i], 0.0);
@@ -72,7 +72,7 @@ UTEST(grid_moments, one_row_has_no_row_moments)
     int width = 4;
     double result[MOMENTS] = {0};
 
-    ASSERT_EQ(xtract_grid_moments(data, 4, &width, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_grid_moments(NULL, data, 4, &width, result), XTRACT_SUCCESS);
     CHECK_REL(result[M00], 6.0, EPSILON);
     CHECK_REL(result[M10], 2.0 + 9.0, EPSILON);
     CHECK_REL(result[M20], 4.0 + 27.0, EPSILON);
@@ -95,8 +95,8 @@ UTEST(grid_moments, turning_rows_into_columns_swaps_the_two_powers)
     double a[MOMENTS] = {0};
     double b[MOMENTS] = {0};
 
-    ASSERT_EQ(xtract_grid_moments(rows, 8, &width_of_rows, a), XTRACT_SUCCESS);
-    ASSERT_EQ(xtract_grid_moments(columns, 8, &width_of_columns, b), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_grid_moments(NULL, rows, 8, &width_of_rows, a), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_grid_moments(NULL, columns, 8, &width_of_columns, b), XTRACT_SUCCESS);
     CHECK_REL(a[M00], b[M00], EPSILON);
     CHECK_REL(a[M10], b[M01], EPSILON);
     CHECK_REL(a[M01], b[M10], EPSILON);
@@ -117,7 +117,7 @@ UTEST(grid_moments, first_moments_over_the_sum_locate_a_single_value)
     double result[MOMENTS] = {0};
 
     data[1 * 4 + 2] = 7.0;
-    ASSERT_EQ(xtract_grid_moments(data, 12, &width, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_grid_moments(NULL, data, 12, &width, result), XTRACT_SUCCESS);
     CHECK_REL(result[M10] / result[M00], 2.0, EPSILON);
     CHECK_REL(result[M01] / result[M00], 1.0, EPSILON);
 }
@@ -128,19 +128,19 @@ UTEST(grid_moments, rejects_a_width_that_does_not_divide_the_grid_into_rows)
     double result[MOMENTS] = {0};
     int width;
 
-    ASSERT_EQ(xtract_grid_moments(data, 6, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_grid_moments(NULL, data, 6, NULL, result), XTRACT_ARGUMENT_ERROR);
     width = 0;
-    ASSERT_EQ(xtract_grid_moments(data, 6, &width, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_grid_moments(NULL, data, 6, &width, result), XTRACT_ARGUMENT_ERROR);
     width = -2;
-    ASSERT_EQ(xtract_grid_moments(data, 6, &width, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_grid_moments(NULL, data, 6, &width, result), XTRACT_ARGUMENT_ERROR);
     width = 4;
-    ASSERT_EQ(xtract_grid_moments(data, 6, &width, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_grid_moments(NULL, data, 6, &width, result), XTRACT_ARGUMENT_ERROR);
     width = 7;
-    ASSERT_EQ(xtract_grid_moments(data, 6, &width, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_grid_moments(NULL, data, 6, &width, result), XTRACT_ARGUMENT_ERROR);
     width = 1;
-    ASSERT_EQ(xtract_grid_moments(data, 0, &width, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_grid_moments(NULL, data, 0, &width, result), XTRACT_ARGUMENT_ERROR);
     width = 6;
-    ASSERT_EQ(xtract_grid_moments(data, 6, &width, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_grid_moments(NULL, data, 6, &width, result), XTRACT_SUCCESS);
 }
 
 enum
@@ -166,7 +166,7 @@ UTEST(grid_central_moments, two_rows_of_three)
     int width = 3;
     double result[CENTRAL_MOMENTS] = {0};
 
-    ASSERT_EQ(xtract_grid_central_moments(data, 6, &width, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_grid_central_moments(NULL, data, 6, &width, result), XTRACT_SUCCESS);
     CHECK_REL(result[MU00], 21.0, EPSILON);
     CHECK_REL(result[MU20], 278.0 / 21.0, EPSILON);
     CHECK_REL(result[MU11], -6.0 / 7.0, EPSILON);
@@ -184,8 +184,8 @@ UTEST(grid_central_moments, sum_and_second_order_follow_from_the_moments)
     double m[MOMENTS] = {0};
     double mu[CENTRAL_MOMENTS] = {0};
 
-    ASSERT_EQ(xtract_grid_moments(data, 12, &width, m), XTRACT_SUCCESS);
-    ASSERT_EQ(xtract_grid_central_moments(data, 12, &width, mu), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_grid_moments(NULL, data, 12, &width, m), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_grid_central_moments(NULL, data, 12, &width, mu), XTRACT_SUCCESS);
     CHECK_REL(mu[MU00], m[M00], EPSILON);
     CHECK_REL(mu[MU20], m[M20] - m[M10] * m[M10] / m[M00], EPSILON);
     CHECK_REL(mu[MU11], m[M11] - m[M10] * m[M01] / m[M00], EPSILON);
@@ -211,8 +211,8 @@ UTEST(grid_central_moments, do_not_change_when_the_values_move)
             far[(y + 2) * 5 + x + 1] = 1.0 + y * 3 + x;
         }
     }
-    ASSERT_EQ(xtract_grid_central_moments(near, 20, &width, a), XTRACT_SUCCESS);
-    ASSERT_EQ(xtract_grid_central_moments(far, 20, &width, b), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_grid_central_moments(NULL, near, 20, &width, a), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_grid_central_moments(NULL, far, 20, &width, b), XTRACT_SUCCESS);
     for (i = 0; i < CENTRAL_MOMENTS; i++)
         CHECK_REL(a[i], b[i], 1e-10);
     CHECK_REL(a[MU20], 278.0 / 21.0, 1e-10);
@@ -227,7 +227,7 @@ UTEST(grid_central_moments, a_grid_that_mirrors_itself_has_no_odd_moments)
     int width = 3;
     double result[CENTRAL_MOMENTS] = {0};
 
-    ASSERT_EQ(xtract_grid_central_moments(data, 9, &width, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_grid_central_moments(NULL, data, 9, &width, result), XTRACT_SUCCESS);
     CHECK_REL(result[MU20], 10.0, EPSILON);
     CHECK_REL(result[MU02], 8.0, EPSILON);
     CHECK_NEAR(result[MU11], 0.0, EPSILON);
@@ -246,7 +246,7 @@ UTEST(grid_central_moments, no_result_when_the_elements_sum_to_zero)
 
     for (i = 0; i < CENTRAL_MOMENTS; i++)
         result[i] = -1.0;
-    ASSERT_EQ(xtract_grid_central_moments(data, 4, &width, result), XTRACT_NO_RESULT);
+    ASSERT_EQ(xtract_grid_central_moments(NULL, data, 4, &width, result), XTRACT_NO_RESULT);
     for (i = 0; i < CENTRAL_MOMENTS; i++)
         ASSERT_EQ(result[i], 0.0);
 }
@@ -257,15 +257,15 @@ UTEST(grid_central_moments, rejects_a_width_that_does_not_divide_the_grid_into_r
     double result[CENTRAL_MOMENTS] = {0};
     int width;
 
-    ASSERT_EQ(xtract_grid_central_moments(data, 6, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_grid_central_moments(NULL, data, 6, NULL, result), XTRACT_ARGUMENT_ERROR);
     width = 0;
-    ASSERT_EQ(xtract_grid_central_moments(data, 6, &width, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_grid_central_moments(NULL, data, 6, &width, result), XTRACT_ARGUMENT_ERROR);
     width = 4;
-    ASSERT_EQ(xtract_grid_central_moments(data, 6, &width, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_grid_central_moments(NULL, data, 6, &width, result), XTRACT_ARGUMENT_ERROR);
     width = 1;
-    ASSERT_EQ(xtract_grid_central_moments(data, 0, &width, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_grid_central_moments(NULL, data, 0, &width, result), XTRACT_ARGUMENT_ERROR);
     width = 2;
-    ASSERT_EQ(xtract_grid_central_moments(data, 6, &width, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_grid_central_moments(NULL, data, 6, &width, result), XTRACT_SUCCESS);
 }
 
 enum
@@ -280,7 +280,7 @@ UTEST(normalised_moments, second_order_over_the_square_of_the_sum_and_third_over
     double data[] = {4.0, 8.0, -4.0, 12.0, 16.0, 0.0, 32.0, -64.0};
     double result[NORMALISED_MOMENTS] = {0};
 
-    ASSERT_EQ(xtract_normalised_moments(data, 8, NULL, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_normalised_moments(NULL, data, 8, NULL, result), XTRACT_SUCCESS);
     CHECK_REL(result[0], 0.5, EPSILON);
     CHECK_REL(result[1], -0.25, EPSILON);
     CHECK_REL(result[2], 0.75, EPSILON);
@@ -299,11 +299,11 @@ UTEST(normalised_moments, finite_when_a_power_of_the_sum_is_not)
     double large[] = {1e200, 2.5e199, 0.0, 0.0, 1e260, 0.0, 0.0, 0.0};
     double result[NORMALISED_MOMENTS] = {0};
 
-    ASSERT_EQ(xtract_normalised_moments(small, 8, NULL, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_normalised_moments(NULL, small, 8, NULL, result), XTRACT_SUCCESS);
     CHECK_REL(result[0], 2.5e199, EPSILON);
     ASSERT_EQ(result[1], 0.0);
     ASSERT_EQ(result[3], 0.0);
-    ASSERT_EQ(xtract_normalised_moments(large, 8, NULL, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_normalised_moments(NULL, large, 8, NULL, result), XTRACT_SUCCESS);
     CHECK_REL(result[0], 2.5e-201, EPSILON);
     /* 1e260 / 1e500 */
     CHECK_REL(result[3], 1e-240, EPSILON);
@@ -317,13 +317,13 @@ UTEST(normalised_moments, no_result_when_the_sum_is_not_above_zero)
 
     for (i = 0; i < NORMALISED_MOMENTS; i++)
         result[i] = -1.0;
-    ASSERT_EQ(xtract_normalised_moments(data, 8, NULL, result), XTRACT_NO_RESULT);
+    ASSERT_EQ(xtract_normalised_moments(NULL, data, 8, NULL, result), XTRACT_NO_RESULT);
     for (i = 0; i < NORMALISED_MOMENTS; i++)
         ASSERT_EQ(result[i], 0.0);
 
     data[0] = -4.0;
     result[0] = -1.0;
-    ASSERT_EQ(xtract_normalised_moments(data, 8, NULL, result), XTRACT_NO_RESULT);
+    ASSERT_EQ(xtract_normalised_moments(NULL, data, 8, NULL, result), XTRACT_NO_RESULT);
     ASSERT_EQ(result[0], 0.0);
 }
 
@@ -332,9 +332,9 @@ UTEST(normalised_moments, rejects_any_length_but_eight)
     double data[9] = {4.0, 8.0, -4.0, 12.0, 16.0, 0.0, 32.0, -64.0, 1.0};
     double result[NORMALISED_MOMENTS] = {0};
 
-    ASSERT_EQ(xtract_normalised_moments(data, 7, NULL, result), XTRACT_ARGUMENT_ERROR);
-    ASSERT_EQ(xtract_normalised_moments(data, 9, NULL, result), XTRACT_ARGUMENT_ERROR);
-    ASSERT_EQ(xtract_normalised_moments(data, 0, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_normalised_moments(NULL, data, 7, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_normalised_moments(NULL, data, 9, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_normalised_moments(NULL, data, 0, NULL, result), XTRACT_ARGUMENT_ERROR);
 }
 
 UTEST(hu_moments, second_order_alone_gives_the_first_two)
@@ -346,7 +346,7 @@ UTEST(hu_moments, second_order_alone_gives_the_first_two)
 
     for (i = 0; i < HU_MOMENTS; i++)
         result[i] = -1.0;
-    ASSERT_EQ(xtract_hu_moments(data, 7, NULL, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_hu_moments(NULL, data, 7, NULL, result), XTRACT_SUCCESS);
     CHECK_REL(result[0], 4.0, EPSILON);
     CHECK_REL(result[1], 4.0, EPSILON);
     for (i = 2; i < HU_MOMENTS; i++)
@@ -360,7 +360,7 @@ UTEST(hu_moments, one_third_order_moment)
     double data[] = {0.0, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0};
     double result[HU_MOMENTS] = {0};
 
-    ASSERT_EQ(xtract_hu_moments(data, 7, NULL, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_hu_moments(NULL, data, 7, NULL, result), XTRACT_SUCCESS);
     ASSERT_EQ(result[0], 0.0);
     ASSERT_EQ(result[1], 0.0);
     CHECK_REL(result[2], 4.0, EPSILON);
@@ -375,9 +375,9 @@ static void hu_of_grid(const double *grid, const int N, int width, double *hu)
     double central[CENTRAL_MOMENTS];
     double normalised[NORMALISED_MOMENTS];
 
-    xtract_grid_central_moments(grid, N, &width, central);
-    xtract_normalised_moments(central, CENTRAL_MOMENTS, NULL, normalised);
-    xtract_hu_moments(normalised, NORMALISED_MOMENTS, NULL, hu);
+    xtract_grid_central_moments(NULL, grid, N, &width, central);
+    xtract_normalised_moments(NULL, central, CENTRAL_MOMENTS, NULL, normalised);
+    xtract_hu_moments(NULL, normalised, NORMALISED_MOMENTS, NULL, hu);
 }
 
 UTEST(hu_moments, do_not_change_when_the_grid_is_turned_a_quarter)
@@ -452,9 +452,9 @@ UTEST(hu_moments, rejects_any_length_but_seven)
     double data[8] = {3.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0};
     double result[HU_MOMENTS] = {0};
 
-    ASSERT_EQ(xtract_hu_moments(data, 6, NULL, result), XTRACT_ARGUMENT_ERROR);
-    ASSERT_EQ(xtract_hu_moments(data, 8, NULL, result), XTRACT_ARGUMENT_ERROR);
-    ASSERT_EQ(xtract_hu_moments(data, 0, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_hu_moments(NULL, data, 6, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_hu_moments(NULL, data, 8, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_hu_moments(NULL, data, 0, NULL, result), XTRACT_ARGUMENT_ERROR);
 }
 
 /* Two rows of three at three levels:
@@ -471,7 +471,7 @@ UTEST(cooccurrence_matrix, each_element_with_its_right_hand_neighbour)
 
     for (i = 0; i < 9; i++)
         result[i] = -1.0;
-    ASSERT_EQ(xtract_cooccurrence_matrix(LEVELS_GRID, 6, argv, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_cooccurrence_matrix(NULL, LEVELS_GRID, 6, argv, result), XTRACT_SUCCESS);
     CHECK_REL(result[0 * 3 + 1], 0.25, EPSILON);
     CHECK_REL(result[1 * 3 + 1], 0.25, EPSILON);
     CHECK_REL(result[2 * 3 + 1], 0.25, EPSILON);
@@ -491,7 +491,7 @@ UTEST(cooccurrence_matrix, symmetric_counts_every_pair_in_both_orders)
     double result[9] = {0};
     int i, j;
 
-    ASSERT_EQ(xtract_cooccurrence_matrix(LEVELS_GRID, 6, argv, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_cooccurrence_matrix(NULL, LEVELS_GRID, 6, argv, result), XTRACT_SUCCESS);
     CHECK_REL(result[0 * 3 + 1], 2.0 / 8.0, EPSILON);
     CHECK_REL(result[1 * 3 + 0], 2.0 / 8.0, EPSILON);
     CHECK_REL(result[1 * 3 + 1], 2.0 / 8.0, EPSILON);
@@ -510,7 +510,7 @@ UTEST(cooccurrence_matrix, each_element_with_the_one_below)
     int argv[] = {3, 3, 0, 1, 0};
     double result[9] = {0};
 
-    ASSERT_EQ(xtract_cooccurrence_matrix(LEVELS_GRID, 6, argv, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_cooccurrence_matrix(NULL, LEVELS_GRID, 6, argv, result), XTRACT_SUCCESS);
     CHECK_REL(result[0 * 3 + 2], 1.0 / 3.0, EPSILON);
     CHECK_REL(result[1 * 3 + 1], 1.0 / 3.0, EPSILON);
     CHECK_REL(result[1 * 3 + 0], 1.0 / 3.0, EPSILON);
@@ -523,7 +523,7 @@ UTEST(cooccurrence_matrix, each_element_with_the_one_below_and_to_the_right)
     int argv[] = {3, 3, 1, 1, 0};
     double result[9] = {0};
 
-    ASSERT_EQ(xtract_cooccurrence_matrix(LEVELS_GRID, 6, argv, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_cooccurrence_matrix(NULL, LEVELS_GRID, 6, argv, result), XTRACT_SUCCESS);
     CHECK_REL(result[0 * 3 + 1], 0.5, EPSILON);
     CHECK_REL(result[1 * 3 + 0], 0.5, EPSILON);
     ASSERT_EQ(result[1 * 3 + 1], 0.0);
@@ -537,8 +537,8 @@ UTEST(cooccurrence_matrix, the_opposite_offset_swaps_rows_and_columns)
     double b[9] = {0};
     int i, j;
 
-    ASSERT_EQ(xtract_cooccurrence_matrix(LEVELS_GRID, 6, forward, a), XTRACT_SUCCESS);
-    ASSERT_EQ(xtract_cooccurrence_matrix(LEVELS_GRID, 6, backward, b), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_cooccurrence_matrix(NULL, LEVELS_GRID, 6, forward, a), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_cooccurrence_matrix(NULL, LEVELS_GRID, 6, backward, b), XTRACT_SUCCESS);
     for (i = 0; i < 3; i++)
     {
         for (j = 0; j < 3; j++)
@@ -555,8 +555,8 @@ UTEST(cooccurrence_matrix, no_offset_puts_the_histogram_on_the_diagonal)
     double histogram[3] = {0};
     int i, j;
 
-    ASSERT_EQ(xtract_cooccurrence_matrix(LEVELS_GRID, 6, argv, matrix), XTRACT_SUCCESS);
-    ASSERT_EQ(xtract_histogram(LEVELS_GRID, 6, &levels, histogram), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_cooccurrence_matrix(NULL, LEVELS_GRID, 6, argv, matrix), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_histogram(NULL, LEVELS_GRID, 6, &levels, histogram), XTRACT_SUCCESS);
     for (i = 0; i < 3; i++)
     {
         for (j = 0; j < 3; j++)
@@ -581,8 +581,8 @@ UTEST(cooccurrence_matrix, of_a_quantised_grid_sums_to_one)
     double sum = 0.0;
     int i;
 
-    ASSERT_EQ(xtract_quantise(grid, 12, bounds, levels), XTRACT_SUCCESS);
-    ASSERT_EQ(xtract_cooccurrence_matrix(levels, 12, argv, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_quantise(NULL, grid, 12, bounds, levels), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_cooccurrence_matrix(NULL, levels, 12, argv, result), XTRACT_SUCCESS);
     for (i = 0; i < 16; i++)
     {
         ASSERT_TRUE(result[i] >= 0.0);
@@ -604,16 +604,16 @@ UTEST(cooccurrence_matrix, no_result_when_the_offset_leaves_no_pair)
         argv[3] = offsets[k][1];
         for (i = 0; i < 9; i++)
             result[i] = -1.0;
-        ASSERT_EQ(xtract_cooccurrence_matrix(LEVELS_GRID, 6, argv, result), XTRACT_NO_RESULT);
+        ASSERT_EQ(xtract_cooccurrence_matrix(NULL, LEVELS_GRID, 6, argv, result), XTRACT_NO_RESULT);
         for (i = 0; i < 9; i++)
             ASSERT_EQ(result[i], 0.0);
     }
     argv[2] = 2147483647;
     argv[3] = -2147483647 - 1;
-    ASSERT_EQ(xtract_cooccurrence_matrix(LEVELS_GRID, 6, argv, result), XTRACT_NO_RESULT);
+    ASSERT_EQ(xtract_cooccurrence_matrix(NULL, LEVELS_GRID, 6, argv, result), XTRACT_NO_RESULT);
     argv[2] = 2;
     argv[3] = -1;
-    ASSERT_EQ(xtract_cooccurrence_matrix(LEVELS_GRID, 6, argv, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_cooccurrence_matrix(NULL, LEVELS_GRID, 6, argv, result), XTRACT_SUCCESS);
 }
 
 UTEST(cooccurrence_matrix, rejects_an_element_that_is_not_a_level_and_leaves_the_result)
@@ -630,7 +630,7 @@ UTEST(cooccurrence_matrix, rejects_an_element_that_is_not_a_level_and_leaves_the
     {
         /* The last element of row 0 is the first of no pair at this offset */
         grid[2] = bad[k];
-        ASSERT_EQ(xtract_cooccurrence_matrix(grid, 6, argv, result), XTRACT_ARGUMENT_ERROR);
+        ASSERT_EQ(xtract_cooccurrence_matrix(NULL, grid, 6, argv, result), XTRACT_ARGUMENT_ERROR);
         for (i = 0; i < 9; i++)
             ASSERT_EQ(result[i], -1.0);
     }
@@ -641,24 +641,24 @@ UTEST(cooccurrence_matrix, rejects_bad_arguments)
     int argv[] = {3, 3, 1, 0, 0};
     double result[9] = {0};
 
-    ASSERT_EQ(xtract_cooccurrence_matrix(LEVELS_GRID, 6, NULL, result), XTRACT_ARGUMENT_ERROR);
-    ASSERT_EQ(xtract_cooccurrence_matrix(LEVELS_GRID, 0, argv, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_cooccurrence_matrix(NULL, LEVELS_GRID, 6, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_cooccurrence_matrix(NULL, LEVELS_GRID, 0, argv, result), XTRACT_ARGUMENT_ERROR);
     argv[0] = 4;
-    ASSERT_EQ(xtract_cooccurrence_matrix(LEVELS_GRID, 6, argv, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_cooccurrence_matrix(NULL, LEVELS_GRID, 6, argv, result), XTRACT_ARGUMENT_ERROR);
     argv[0] = 3;
     argv[1] = 0;
-    ASSERT_EQ(xtract_cooccurrence_matrix(LEVELS_GRID, 6, argv, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_cooccurrence_matrix(NULL, LEVELS_GRID, 6, argv, result), XTRACT_ARGUMENT_ERROR);
     argv[1] = 46341;
-    ASSERT_EQ(xtract_cooccurrence_matrix(LEVELS_GRID, 6, argv, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_cooccurrence_matrix(NULL, LEVELS_GRID, 6, argv, result), XTRACT_ARGUMENT_ERROR);
     argv[1] = 2;
-    ASSERT_EQ(xtract_cooccurrence_matrix(LEVELS_GRID, 6, argv, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_cooccurrence_matrix(NULL, LEVELS_GRID, 6, argv, result), XTRACT_ARGUMENT_ERROR);
     argv[1] = 3;
     argv[4] = 2;
-    ASSERT_EQ(xtract_cooccurrence_matrix(LEVELS_GRID, 6, argv, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_cooccurrence_matrix(NULL, LEVELS_GRID, 6, argv, result), XTRACT_ARGUMENT_ERROR);
     argv[4] = -1;
-    ASSERT_EQ(xtract_cooccurrence_matrix(LEVELS_GRID, 6, argv, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_cooccurrence_matrix(NULL, LEVELS_GRID, 6, argv, result), XTRACT_ARGUMENT_ERROR);
     argv[4] = 1;
-    ASSERT_EQ(xtract_cooccurrence_matrix(LEVELS_GRID, 6, argv, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_cooccurrence_matrix(NULL, LEVELS_GRID, 6, argv, result), XTRACT_SUCCESS);
 }
 
 /* Three levels. The first elements of the pairs are at levels 0, 1 and 2 in
@@ -673,7 +673,7 @@ UTEST(cooccurrence_contrast, mean_square_difference_of_the_levels)
     /* Four values of 0.1 are one level off the diagonal, and none two */
     double result = -1.0;
 
-    ASSERT_EQ(xtract_cooccurrence_contrast(PAIRS, 9, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_cooccurrence_contrast(NULL, PAIRS, 9, NULL, &result), XTRACT_SUCCESS);
     CHECK_REL(result, 0.4, EPSILON);
 }
 
@@ -682,7 +682,7 @@ UTEST(cooccurrence_correlation, covariance_of_the_two_levels_over_their_variance
     /* The covariance is 0.162 - 0.018 + 0.003 + 0.022 + 0.121 = 0.29 */
     double result = -2.0;
 
-    ASSERT_EQ(xtract_cooccurrence_correlation(PAIRS, 9, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_cooccurrence_correlation(NULL, PAIRS, 9, NULL, &result), XTRACT_SUCCESS);
     CHECK_REL(result, 0.29 / 0.49, EPSILON);
 }
 
@@ -691,7 +691,7 @@ UTEST(angular_second_moment, sum_of_the_squares)
     /* 0.04 + 0.09 + 0.01 on the diagonal and four of 0.01 off it */
     double result = -1.0;
 
-    ASSERT_EQ(xtract_angular_second_moment(PAIRS, 9, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_angular_second_moment(NULL, PAIRS, 9, NULL, &result), XTRACT_SUCCESS);
     CHECK_REL(result, 0.18, EPSILON);
 }
 
@@ -700,11 +700,11 @@ UTEST(inverse_difference_moment, diagonal_whole_and_one_level_off_halved)
     /* 0.6 on the diagonal, and 0.4 one level off it divided by 2 */
     double result = -1.0;
 
-    ASSERT_EQ(xtract_inverse_difference_moment(PAIRS, 9, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_inverse_difference_moment(NULL, PAIRS, 9, NULL, &result), XTRACT_SUCCESS);
     CHECK_REL(result, 0.8, EPSILON);
 }
 
-typedef int (*statistic)(const double *, const int, const void *, double *);
+typedef int (*statistic)(xtract_context *, const double *, const int, const void *, double *);
 
 static const statistic STATISTICS[] = {xtract_cooccurrence_contrast, xtract_cooccurrence_correlation,
                                        xtract_angular_second_moment, xtract_inverse_difference_moment};
@@ -719,8 +719,8 @@ UTEST(cooccurrence_statistics, do_not_change_when_the_matrix_is_scaled)
         scaled[i] = 24.0 * PAIRS[i];
     for (k = 0; k < 4; k++)
     {
-        ASSERT_EQ(STATISTICS[k](PAIRS, 9, NULL, &a), XTRACT_SUCCESS);
-        ASSERT_EQ(STATISTICS[k](scaled, 9, NULL, &b), XTRACT_SUCCESS);
+        ASSERT_EQ(STATISTICS[k](NULL, PAIRS, 9, NULL, &a), XTRACT_SUCCESS);
+        ASSERT_EQ(STATISTICS[k](NULL, scaled, 9, NULL, &b), XTRACT_SUCCESS);
         CHECK_REL(a, b, EPSILON);
     }
 }
@@ -730,13 +730,13 @@ UTEST(cooccurrence_statistics, pairs_always_at_the_same_level)
     double diagonal[] = {0.5, 0.0, 0.0, 0.0, 0.25, 0.0, 0.0, 0.0, 0.25};
     double result = -1.0;
 
-    ASSERT_EQ(xtract_cooccurrence_contrast(diagonal, 9, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_cooccurrence_contrast(NULL, diagonal, 9, NULL, &result), XTRACT_SUCCESS);
     ASSERT_EQ(result, 0.0);
-    ASSERT_EQ(xtract_inverse_difference_moment(diagonal, 9, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_inverse_difference_moment(NULL, diagonal, 9, NULL, &result), XTRACT_SUCCESS);
     CHECK_REL(result, 1.0, EPSILON);
-    ASSERT_EQ(xtract_cooccurrence_correlation(diagonal, 9, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_cooccurrence_correlation(NULL, diagonal, 9, NULL, &result), XTRACT_SUCCESS);
     CHECK_REL(result, 1.0, EPSILON);
-    ASSERT_EQ(xtract_angular_second_moment(diagonal, 9, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_angular_second_moment(NULL, diagonal, 9, NULL, &result), XTRACT_SUCCESS);
     CHECK_REL(result, 0.25 + 0.0625 + 0.0625, EPSILON);
 }
 
@@ -745,11 +745,11 @@ UTEST(cooccurrence_statistics, pairs_always_at_opposite_levels)
     double opposite[] = {0.0, 0.5, 0.5, 0.0};
     double result = 0.0;
 
-    ASSERT_EQ(xtract_cooccurrence_correlation(opposite, 4, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_cooccurrence_correlation(NULL, opposite, 4, NULL, &result), XTRACT_SUCCESS);
     CHECK_REL(result, -1.0, EPSILON);
-    ASSERT_EQ(xtract_cooccurrence_contrast(opposite, 4, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_cooccurrence_contrast(NULL, opposite, 4, NULL, &result), XTRACT_SUCCESS);
     CHECK_REL(result, 1.0, EPSILON);
-    ASSERT_EQ(xtract_inverse_difference_moment(opposite, 4, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_inverse_difference_moment(NULL, opposite, 4, NULL, &result), XTRACT_SUCCESS);
     CHECK_REL(result, 0.5, EPSILON);
 }
 
@@ -763,9 +763,9 @@ UTEST(angular_second_moment, from_one_over_n_for_even_pairs_to_one_for_a_single_
     for (i = 0; i < 16; i++)
         even[i] = 1.0 / 16.0;
     single[6] = 1.0;
-    ASSERT_EQ(xtract_angular_second_moment(even, 16, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_angular_second_moment(NULL, even, 16, NULL, &result), XTRACT_SUCCESS);
     CHECK_REL(result, 1.0 / 16.0, EPSILON);
-    ASSERT_EQ(xtract_angular_second_moment(single, 16, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_angular_second_moment(NULL, single, 16, NULL, &result), XTRACT_SUCCESS);
     CHECK_REL(result, 1.0, EPSILON);
 }
 
@@ -779,9 +779,9 @@ UTEST(cooccurrence_statistics, spectral_entropy_of_the_matrix_is_the_entropy_of_
     for (i = 0; i < 16; i++)
         even[i] = 1.0 / 16.0;
     single[6] = 1.0;
-    ASSERT_EQ(xtract_spectral_entropy(even, 16, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_spectral_entropy(NULL, even, 16, NULL, &result), XTRACT_SUCCESS);
     CHECK_REL(result, 1.0, EPSILON);
-    ASSERT_EQ(xtract_spectral_entropy(single, 16, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_spectral_entropy(NULL, single, 16, NULL, &result), XTRACT_SUCCESS);
     CHECK_NEAR(result, 0.0, EPSILON);
 }
 
@@ -794,12 +794,12 @@ UTEST(cooccurrence_statistics, of_a_grid_through_the_matrix)
     double matrix[9] = {0};
     double result = -1.0;
 
-    ASSERT_EQ(xtract_cooccurrence_matrix(LEVELS_GRID, 6, argv, matrix), XTRACT_SUCCESS);
-    ASSERT_EQ(xtract_cooccurrence_contrast(matrix, 9, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_cooccurrence_matrix(NULL, LEVELS_GRID, 6, argv, matrix), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_cooccurrence_contrast(NULL, matrix, 9, NULL, &result), XTRACT_SUCCESS);
     CHECK_REL(result, 6.0 / 8.0, EPSILON);
-    ASSERT_EQ(xtract_inverse_difference_moment(matrix, 9, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_inverse_difference_moment(NULL, matrix, 9, NULL, &result), XTRACT_SUCCESS);
     CHECK_REL(result, 2.0 / 8.0 + 3.0 / 8.0, EPSILON);
-    ASSERT_EQ(xtract_angular_second_moment(matrix, 9, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_angular_second_moment(NULL, matrix, 9, NULL, &result), XTRACT_SUCCESS);
     CHECK_REL(result, 3.0 * 4.0 / 64.0 + 2.0 / 64.0, EPSILON);
 }
 
@@ -808,14 +808,14 @@ UTEST(cooccurrence_statistics, one_level)
     double matrix = 1.0;
     double result = -1.0;
 
-    ASSERT_EQ(xtract_cooccurrence_contrast(&matrix, 1, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_cooccurrence_contrast(NULL, &matrix, 1, NULL, &result), XTRACT_SUCCESS);
     ASSERT_EQ(result, 0.0);
-    ASSERT_EQ(xtract_angular_second_moment(&matrix, 1, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_angular_second_moment(NULL, &matrix, 1, NULL, &result), XTRACT_SUCCESS);
     CHECK_REL(result, 1.0, EPSILON);
-    ASSERT_EQ(xtract_inverse_difference_moment(&matrix, 1, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_inverse_difference_moment(NULL, &matrix, 1, NULL, &result), XTRACT_SUCCESS);
     CHECK_REL(result, 1.0, EPSILON);
     result = -1.0;
-    ASSERT_EQ(xtract_cooccurrence_correlation(&matrix, 1, NULL, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(xtract_cooccurrence_correlation(NULL, &matrix, 1, NULL, &result), XTRACT_NO_RESULT);
     ASSERT_EQ(result, 0.0);
 }
 
@@ -825,7 +825,7 @@ UTEST(cooccurrence_correlation, no_result_when_one_side_of_the_pairs_is_at_one_l
     double matrix[] = {0.5, 0.5, 0.0, 0.0};
     double result = -1.0;
 
-    ASSERT_EQ(xtract_cooccurrence_correlation(matrix, 4, NULL, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(xtract_cooccurrence_correlation(NULL, matrix, 4, NULL, &result), XTRACT_NO_RESULT);
     ASSERT_EQ(result, 0.0);
 }
 
@@ -837,10 +837,10 @@ UTEST(cooccurrence_correlation, no_result_when_rounding_moves_the_mean_off_the_o
     double columns_at_one_level[] = {0.0, 1.0, 0.0, 0.0, 4.0, 0.0, 0.0, 1.0, 0.0};
     double result = -1.0;
 
-    ASSERT_EQ(xtract_cooccurrence_correlation(rows_at_one_level, 9, NULL, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(xtract_cooccurrence_correlation(NULL, rows_at_one_level, 9, NULL, &result), XTRACT_NO_RESULT);
     ASSERT_EQ(result, 0.0);
     result = -1.0;
-    ASSERT_EQ(xtract_cooccurrence_correlation(columns_at_one_level, 9, NULL, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(xtract_cooccurrence_correlation(NULL, columns_at_one_level, 9, NULL, &result), XTRACT_NO_RESULT);
     ASSERT_EQ(result, 0.0);
 }
 
@@ -853,7 +853,7 @@ UTEST(cooccurrence_statistics, no_result_when_the_matrix_is_empty)
     for (k = 0; k < 4; k++)
     {
         result = -1.0;
-        ASSERT_EQ(STATISTICS[k](empty, 4, NULL, &result), XTRACT_NO_RESULT);
+        ASSERT_EQ(STATISTICS[k](NULL, empty, 4, NULL, &result), XTRACT_NO_RESULT);
         ASSERT_EQ(result, 0.0);
     }
 }
@@ -867,10 +867,10 @@ UTEST(cooccurrence_statistics, reject_a_length_that_is_not_a_square)
     for (k = 0; k < 4; k++)
     {
         result = -1.0;
-        ASSERT_EQ(STATISTICS[k](matrix, 8, NULL, &result), XTRACT_ARGUMENT_ERROR);
+        ASSERT_EQ(STATISTICS[k](NULL, matrix, 8, NULL, &result), XTRACT_ARGUMENT_ERROR);
         ASSERT_EQ(result, 0.0);
-        ASSERT_EQ(STATISTICS[k](matrix, 0, NULL, &result), XTRACT_ARGUMENT_ERROR);
-        ASSERT_EQ(STATISTICS[k](matrix, 4, NULL, &result), k == 1 ? XTRACT_NO_RESULT : XTRACT_SUCCESS);
+        ASSERT_EQ(STATISTICS[k](NULL, matrix, 0, NULL, &result), XTRACT_ARGUMENT_ERROR);
+        ASSERT_EQ(STATISTICS[k](NULL, matrix, 4, NULL, &result), k == 1 ? XTRACT_NO_RESULT : XTRACT_SUCCESS);
     }
 }
 
@@ -887,7 +887,7 @@ static void expect_one_class(const double *grid, const int expected, int *utest_
 
     for (k = 0; k < PATTERN_CLASSES; k++)
         result[k] = -1.0;
-    ASSERT_EQ(xtract_local_binary_patterns(grid, 9, &width, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_local_binary_patterns(NULL, grid, 9, &width, result), XTRACT_SUCCESS);
     for (k = 0; k < PATTERN_CLASSES; k++)
         ASSERT_EQ(result[k], k == expected ? 1.0 : 0.0);
 }
@@ -942,7 +942,7 @@ UTEST(local_binary_patterns, fraction_of_the_elements_with_a_neighbour_on_every_
     double sum = 0.0;
     int k;
 
-    ASSERT_EQ(xtract_local_binary_patterns(grid, 12, &width, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_local_binary_patterns(NULL, grid, 12, &width, result), XTRACT_SUCCESS);
     CHECK_REL(result[0], 0.5, EPSILON);
     CHECK_REL(result[1], 0.5, EPSILON);
     for (k = 0; k < PATTERN_CLASSES; k++)
@@ -975,9 +975,9 @@ UTEST(local_binary_patterns, do_not_change_when_the_grid_is_turned_or_mirrored)
         for (x = 0; x < 5; x++)
             mirrored[y * 5 + x] = upright[y * 5 + (4 - x)];
     }
-    ASSERT_EQ(xtract_local_binary_patterns(upright, 20, &width, a), XTRACT_SUCCESS);
-    ASSERT_EQ(xtract_local_binary_patterns(turned, 20, &turned_width, b), XTRACT_SUCCESS);
-    ASSERT_EQ(xtract_local_binary_patterns(mirrored, 20, &width, c), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_local_binary_patterns(NULL, upright, 20, &width, a), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_local_binary_patterns(NULL, turned, 20, &turned_width, b), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_local_binary_patterns(NULL, mirrored, 20, &width, c), XTRACT_SUCCESS);
     for (k = 0; k < PATTERN_CLASSES; k++)
     {
         ASSERT_EQ(a[k], b[k]);
@@ -998,7 +998,7 @@ UTEST(local_binary_patterns, no_result_when_no_element_has_a_neighbour_on_every_
     {
         for (k = 0; k < PATTERN_CLASSES; k++)
             result[k] = -1.0;
-        ASSERT_EQ(xtract_local_binary_patterns(grid, 12, &widths[i], result), XTRACT_NO_RESULT);
+        ASSERT_EQ(xtract_local_binary_patterns(NULL, grid, 12, &widths[i], result), XTRACT_NO_RESULT);
         for (k = 0; k < PATTERN_CLASSES; k++)
             ASSERT_EQ(result[k], 0.0);
     }
@@ -1010,12 +1010,12 @@ UTEST(local_binary_patterns, rejects_a_width_that_does_not_divide_the_grid_into_
     double result[PATTERN_CLASSES] = {0};
     int width = 3;
 
-    ASSERT_EQ(xtract_local_binary_patterns(grid, 9, NULL, result), XTRACT_ARGUMENT_ERROR);
-    ASSERT_EQ(xtract_local_binary_patterns(grid, 0, &width, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_local_binary_patterns(NULL, grid, 9, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_local_binary_patterns(NULL, grid, 0, &width, result), XTRACT_ARGUMENT_ERROR);
     width = 0;
-    ASSERT_EQ(xtract_local_binary_patterns(grid, 9, &width, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_local_binary_patterns(NULL, grid, 9, &width, result), XTRACT_ARGUMENT_ERROR);
     width = 4;
-    ASSERT_EQ(xtract_local_binary_patterns(grid, 9, &width, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_local_binary_patterns(NULL, grid, 9, &width, result), XTRACT_ARGUMENT_ERROR);
     width = 3;
-    ASSERT_EQ(xtract_local_binary_patterns(grid, 9, &width, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_local_binary_patterns(NULL, grid, 9, &width, result), XTRACT_SUCCESS);
 }

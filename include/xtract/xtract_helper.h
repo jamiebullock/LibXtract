@@ -9,6 +9,8 @@
 #ifndef XTRACT_HELPER_H
 #define XTRACT_HELPER_H
 
+#include "xtract_context.h"
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -36,6 +38,7 @@ extern "C"
 
     /** \brief Apply a window function to an array of length N
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data a pointer to an array of doubles
      * \param N the number of elements in the array pointed to by *data, at least 1
      * \param *argv a pointer to a window function of at least N elements as returned by xtract_make_window(); NULL is an argument error
@@ -44,10 +47,11 @@ extern "C"
      * It is up to the caller to generate and free the array containing the window, and to allocate and free memory of size N to hold the data pointed to by *result
      *
      */
-    int xtract_windowed(const double *data, const int N, const void *argv, double *result);
+    int xtract_windowed(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief Divides the array pointed to by *data into two subframes, and applies a given feature to each subframe, returning them in a single array pointed to by result
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data an array of doubles
      * \param N the number of elements in the array pointed by *data, at least 2 and even
      * \param feature an integer representing the feature to be applied to each subframe in data, a value as given in the enumeration xtract_features_ (libxtract.h) whose result is no longer than its input: every scalar feature, and XTRACT_DCT, XTRACT_AUTOCORRELATION, XTRACT_AMDF, XTRACT_ASDF, XTRACT_AUTOCORRELATION_FFT, XTRACT_SPECTRUM, XTRACT_HARMONIC_SPECTRUM, XTRACT_DIFFERENCE_VECTOR, XTRACT_WINDOWED and XTRACT_SMOOTHED. Any other feature is an argument error, as the two results of N / 2 values could not both fit in *result
@@ -58,7 +62,7 @@ extern "C"
      * It is important to ensure that any _init_*() functions that are called in preparation for functions that are called on subframes are given the subframe size as 'N', which is half the frame size. i.e. if xtract_features_from_subframes() is called with N=64, and feature=XTRACT_SPECTRUM, then xtract_init_fft() should be called with N=32.
      *
      */
-    int xtract_features_from_subframes(const double *data, const int N, const int feature, const void *argv, double *result);
+    int xtract_features_from_subframes(xtract_context *ctx, const double *data, const int N, const int feature, const void *argv, double *result);
 
     /** \brief Test whether a number is denormal */
     int xtract_is_denormal(double const d);
@@ -68,6 +72,7 @@ extern "C"
 
     /** \brief Smooth a vector
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data a pointer to an array of doubles
      * \param N the number of elements in the array pointed to by *data to be smoothed, at least 1
      * \param *argv a pointer to a double giving the smoothing gain; NULL is an argument error
@@ -76,7 +81,7 @@ extern "C"
      * \note if passing in a spectrum e.g. *result from xtract_spectrum(), then N for xtract_smoothed() should be N / 2 with respect to the N for xtract_spectrum() so only amplitude components are smoothed, not frequencies!
      *
      */
-    int xtract_smoothed(const double *data, const int N, const void *argv, double *result);
+    int xtract_smoothed(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** @} */
 

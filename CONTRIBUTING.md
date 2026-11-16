@@ -70,7 +70,7 @@ with `-DXTRACT_CLANG_FORMAT=<path>` to run the targets with a chosen binary.
 ### Conventions
 
 - Feature functions share the signature
-  `int xtract_foo(const double *data, const int N, const void *argv, double *result)`
+  `int xtract_foo(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)`
   and return an `XTRACT_` status code.
 - Public declarations in `include/xtract/` carry a Doxygen block that states
   the contract: what the caller passes, what comes back, and the rules for

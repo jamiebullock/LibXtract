@@ -101,16 +101,16 @@
  * repeated here on the side of the %clear that gives each its result type */
 %inline %{
 
-    int xtract_flux(const double *data, const int N, const void *argv , double *result);
-    int xtract_lnorm(const double *data, const int N, const void *argv , double *result);
-    int xtract_attack_time(const double *data, const int N, const void *argv, double *result);
-    int xtract_decay_time(const double *data, const int N, const void *argv, double *result);
-    int xtract_kullback_leibler_divergence(const double *data, const int N, const void *argv, double *result);
-    int xtract_itakura_saito_divergence(const double *data, const int N, const void *argv, double *result);
-    int xtract_modified_kullback_leibler(const double *data, const int N, const void *argv, double *result);
-    int xtract_cross_correlation_lag(const double *data, const int N, const void *argv, double *result);
-    int xtract_pearson_correlation(const double *data, const int N, const void *argv, double *result);
-    int xtract_average_correlation(const double *data, const int N, const void *argv, double *result);
+    int xtract_flux(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
+    int xtract_lnorm(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
+    int xtract_attack_time(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
+    int xtract_decay_time(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
+    int xtract_kullback_leibler_divergence(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
+    int xtract_itakura_saito_divergence(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
+    int xtract_modified_kullback_leibler(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
+    int xtract_cross_correlation_lag(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
+    int xtract_pearson_correlation(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
+    int xtract_average_correlation(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
 %}
 
@@ -118,12 +118,12 @@
 
 %inline %{
 
-    int xtract_difference_vector(const double *data, const int N, const void *argv, double *result);
-    int xtract_cross_correlation(const double *data, const int N, const void *argv, double *result);
-    int xtract_covariance_matrix(const double *data, const int N, const void *argv, double *result);
-    int xtract_correlation_matrix(const double *data, const int N, const void *argv, double *result);
-    int xtract_principal_variances(const double *data, const int N, const void *argv, double *result);
-    int xtract_coherence(const double *data, const int N, const void *argv, double *result);
+    int xtract_difference_vector(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
+    int xtract_cross_correlation(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
+    int xtract_covariance_matrix(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
+    int xtract_correlation_matrix(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
+    int xtract_principal_variances(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
+    int xtract_coherence(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
 %}
 

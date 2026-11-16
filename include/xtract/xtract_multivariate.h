@@ -9,6 +9,8 @@
 #ifndef XTRACT_MULTIVARIATE_H
 #define XTRACT_MULTIVARIATE_H
 
+#include "xtract_context.h"
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -24,71 +26,79 @@ extern "C"
 
     /** \brief Extract the cross-correlation of two series at every lag
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles comprising two series of equal length: the first series in the first N/2 elements, the second in the second N/2 elements
      * \param N: the total number of elements in the array pointed to by *data (twice the series length), at least 2 and even
      * \param *argv: a pointer to a double selecting the scaling: 0 for the sum of products divided by the series length, as xtract_autocorrelation() scales its result, or 1 for the correlation coefficient: each series has its mean removed and the sum at every lag is divided by the product of the Euclidean norms of the two resulting series, so that the value at lag 0 is the Pearson correlation coefficient of the two series and every value lies between -1 and 1
      * \param *result: a pointer to an array of N - 1 doubles, one per lag from -(N/2 - 1) to N/2 - 1 in order, lag 0 at index N/2 - 1. The value at lag k pairs element n + k of the first series with element n of the second, so a peak at a positive lag means the first series is delayed by that many elements relative to the second. With the coefficient selected the array is zeroed with no result when either series is constant
      */
-    int xtract_cross_correlation(const double *data, const int N, const void *argv, double *result);
+    int xtract_cross_correlation(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief Extract the lag at which two series are most correlated: the lag of the largest correlation coefficient from xtract_cross_correlation(), taking the one nearest zero on a tie and the negative one before the positive
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles comprising two series of equal length: the first series in the first N/2 elements, the second in the second N/2 elements
      * \param N: the total number of elements in the array pointed to by *data (twice the series length), at least 2 and even
      * \param *argv: not used
      * \param *result: the lag in elements, from -(N/2 - 1) to N/2 - 1, positive when the first series is delayed relative to the second, or 0 with no result when either series is constant
      */
-    int xtract_cross_correlation_lag(const double *data, const int N, const void *argv, double *result);
+    int xtract_cross_correlation_lag(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief Extract the Pearson correlation coefficient of two series
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles comprising two series of equal length: the first series in the first N/2 elements, the second in the second N/2 elements
      * \param N: the total number of elements in the array pointed to by *data (twice the series length), at least 4 and even
      * \param *argv: not used
      * \param *result: the coefficient, from -1 to 1: 1 when the second series is the first scaled by a positive factor and offset, -1 when the factor is negative, or 0 with no result when either series is constant. It is the value xtract_cross_correlation() gives at lag 0 with the coefficient selected
      */
-    int xtract_pearson_correlation(const double *data, const int N, const void *argv, double *result);
+    int xtract_pearson_correlation(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief Extract the covariance matrix of a set of series
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles comprising C series of equal length, one after another: series i in the N/C elements from index i * N/C
      * \param N: the total number of elements in the array pointed to by *data, at least 2 and a multiple of C
      * \param *argv: a pointer to an int, the number of series C, from 1 to N/2, so that every series has at least two elements
      * \param *result: a pointer to an array of C * C doubles: the covariance of series i and series j at index i * C + j, and at index i * C + i the variance of series i as xtract_variance() gives it. Every sum of products is divided by one less than the series length. The values at i * C + j and j * C + i are equal, and a constant series has zeros throughout its row and column
      */
-    int xtract_covariance_matrix(const double *data, const int N, const void *argv, double *result);
+    int xtract_covariance_matrix(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief Extract the correlation matrix of a set of series from their covariance matrix
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles comprising the C * C values of a covariance matrix as xtract_covariance_matrix() gives it. The diagonal and the values above it, at index i * C + j with j greater than i, are read
      * \param N: the number of elements in the array pointed to by *data, a perfect square of at least 1
      * \param *argv: not used
      * \param *result: a pointer to an array of N doubles: the Pearson correlation coefficient of series i and series j, from -1 to 1, at index i * C + j and at index j * C + i, and 1 at index i * C + i. The array is zeroed with no result when a value on the diagonal of the covariance matrix is zero or negative, as it is for a constant series
      */
-    int xtract_correlation_matrix(const double *data, const int N, const void *argv, double *result);
+    int xtract_correlation_matrix(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief Extract the average correlation of a set of series: the mean of the correlation coefficients of every pair, from their correlation matrix
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles comprising the C * C values of a correlation matrix as xtract_correlation_matrix() gives it
      * \param N: the number of elements in the array pointed to by *data, a perfect square of at least 4
      * \param *argv: not used
      * \param *result: the mean of the values off the diagonal of the matrix, from -1 to 1 for a correlation matrix
      */
-    int xtract_average_correlation(const double *data, const int N, const void *argv, double *result);
+    int xtract_average_correlation(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief Extract the variances of the principal components of a set of series: the eigenvalues of their covariance matrix, largest first
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles comprising the C * C values of a symmetric matrix: a covariance matrix as xtract_covariance_matrix() gives it, or a correlation matrix as xtract_correlation_matrix() gives it for the principal components of the standardised series. The diagonal and the values above it, at index i * C + j with j greater than i, are read
      * \param N: the number of elements in the array pointed to by *data, a perfect square of at least 1
      * \param *argv: not used
      * \param *result: a pointer to an array of C doubles: the eigenvalues of the matrix in descending order. Their sum is the sum of the diagonal of the matrix, so the first divided by xtract_sum() of the array is the share of the total variance that the first principal component explains
      */
-    int xtract_principal_variances(const double *data, const int N, const void *argv, double *result);
+    int xtract_principal_variances(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief Extract the magnitude-squared coherence of two series: how far each frequency of one is a linear function of the same frequency of the other, from 0 to 1
      *
      * The estimate averages over segments of L elements that overlap by half, L being the size given to xtract_init_fft(). Each segment has its mean removed and is weighted by a Hann window. Elements after the last whole segment are not used
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles comprising two series of equal length: the first series in the first N/2 elements, the second in the second N/2 elements
      * \param N: the total number of elements in the array pointed to by *data (twice the series length), even and at least 3 * L, so that each series holds two segments
      * \param *argv: not used
@@ -96,7 +106,7 @@ extern "C"
      *
      * \note Before calling xtract_coherence(), the FFT must be initialised by calling xtract_init_fft(L, XTRACT_COHERENCE)
      */
-    int xtract_coherence(const double *data, const int N, const void *argv, double *result);
+    int xtract_coherence(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** @} */
 

@@ -9,6 +9,8 @@
 #ifndef XTRACT_SCALAR_H
 #define XTRACT_SCALAR_H
 
+#include "xtract_context.h"
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -24,105 +26,117 @@ extern "C"
 
     /** \brief Extract the mean of an input vector
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element
      * \param N: the number of array elements to be considered, at least 1
      * \param *argv: a pointer to NULL
      * \param *result: the mean of N values from the array pointed to by *data
      */
-    int xtract_mean(const double *data, const int N, const void *argv, double *result);
+    int xtract_mean(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief Extract the variance of an input vector
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles
      * \param N: the number of elements to be considered, at least 2
      * \param *argv: a pointer to a double representing the mean of the input vector
      * \param *result: the variance of N values from the array pointed to by *data
      */
-    int xtract_variance(const double *data, const int N, const void *argv, double *result);
+    int xtract_variance(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief Extract the deviation of an input vector
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles
      * \param N: the number of elements to be considered
      * \param *argv: a pointer to a double representing the variance of the input vector, at least 0
      * \param *result: the deviation of N values from the array pointed to by *data
      */
-    int xtract_standard_deviation(const double *data, const int N, const void *argv, double *result);
+    int xtract_standard_deviation(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief Extract the average deviation of an input vector
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles
      * \param N: the number of elements to be considered, at least 1
      * \param *argv: a pointer to a double representing the mean of the input vector
      * \param *result: the  average deviation of N values from the array pointed to by *data
      */
-    int xtract_average_deviation(const double *data, const int N, const void *argv, double *result);
+    int xtract_average_deviation(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief Extract the skewness of an input vector
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles
      * \param N: the number of elements to be considered, at least 1
      * \param *argv: a pointer to an array of doubles representing the mean and standard deviation of the input vector
      * \param *result: the skewness of N values from the array pointed to by *data
      */
-    int xtract_skewness(const double *data, const int N, const void *argv, double *result);
+    int xtract_skewness(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief Extract the kurtosis of an input vector
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles
      * \param N: the number of elements to be considered, at least 1
      * \param *argv: a pointer to an array of values representing the mean and standard deviation of the input vector
      * \param *result: the kurtosis of N values from the array pointed to by *data
      */
-    int xtract_kurtosis(const double *data, const int N, const void *argv, double *result);
+    int xtract_kurtosis(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief Extract the mean of an input spectrum
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector, (e.g. the array pointed to by *result from xtract_spectrum(), xtract_peak_spectrum() or xtract_harmonic_spectrum()).
      * \param N: the size of the array pointed to by *data, at least 2 and even
      * \param *argv: a pointer to NULL
      * \param *result: the mean of the spectrum pointed to by *data
      */
-    int xtract_spectral_mean(const double *data, const int N, const void *argv, double *result);
+    int xtract_spectral_mean(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief Extract the variance of an input spectrum
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector, (e.g. the array pointed to by *result from xtract_spectrum(), xtract_peak_spectrum() or xtract_harmonic_spectrum()).
      * \param N: the size of the array pointed to by *data, at least 2 and even
      * \param *argv: a pointer to a double representing the spectral mean of the input spectrum
      * \param *result: the variance of the spectrum pointed to by *data
      */
-    int xtract_spectral_variance(const double *data, const int N, const void *argv, double *result);
+    int xtract_spectral_variance(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief Extract the deviation of an input spectrum
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector, (e.g. the array pointed to by *result from xtract_spectrum(), xtract_peak_spectrum() or xtract_harmonic_spectrum()).
      * \param N: the size of the array pointed to by *data
      * \param *argv: a pointer to a double representing the spectral variance of the input spectrum, at least 0
      * \param *result: the deviation of the spectrum pointed to by *data
      */
-    int xtract_spectral_standard_deviation(const double *data, const int N, const void *argv, double *result);
+    int xtract_spectral_standard_deviation(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief Extract the skewness of an input spectrum
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector, (e.g. the array pointed to by *result from xtract_spectrum(), xtract_peak_spectrum() or xtract_harmonic_spectrum()).
      * \param N: the size of the array pointed to by *data, at least 2 and even
      * \param *argv: a pointer to an array of doubles representing the spectral mean and spectral standard deviation of the input spectrum
      * \param *result: the skewness of the spectrum pointed to by *data
      */
-    int xtract_spectral_skewness(const double *data, const int N, const void *argv, double *result);
+    int xtract_spectral_skewness(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief Extract the kurtosis of an input spectrum
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector, (e.g. the array pointed to by *result from xtract_spectrum(), xtract_peak_spectrum() or xtract_harmonic_spectrum()).
      * \param N: the size of the array pointed to by *data, at least 2 and even
      * \param *argv: a pointer to an array of values representing the spectral mean and spectral standard deviation of the input spectrum
      * \param *result: the kurtosis of the spectrum pointed to by *data
      */
-    int xtract_spectral_kurtosis(const double *data, const int N, const void *argv, double *result);
+    int xtract_spectral_kurtosis(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief Extract the centroid of an input vector
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector, (e.g. the array pointed to by *result from xtract_spectrum(), xtract_peak_spectrum() or xtract_harmonic_spectrum()).
      * \param N: the size of the array pointed to by *data, at least 2 and even
      * \param *argv: a pointer to NULL
@@ -131,93 +145,103 @@ extern "C"
      * Note: for a more 'accurate' result *result from xtract_peak_spectrum() can be passed in. This gives the interpolated peak frequency locations.
      *
      */
-    int xtract_spectral_centroid(const double *data, const int N, const void *argv, double *result);
+    int xtract_spectral_centroid(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief Calculate the Irregularity of an input vector using a method described by Krimphoff (1994)
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles representing the magnitude coefficients from the spectrum of an audio vector, (e.g. the first half of the array pointed to by *result from xtract_spectrum().
      * \param N: the number of elements to be considered, at least 3
      * \param *argv: a pointer to NULL
      * \param *result: the irregularity of N values from the array pointed to by *data
      */
-    int xtract_irregularity_k(const double *data, const int N, const void *argv, double *result);
+    int xtract_irregularity_k(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief Calculate the Irregularity of an input vector using a method described by Jensen (1999)
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles representing the magnitude coefficients from the spectrum of an audio vector, (e.g. the first half of the array pointed to by *result from xtract_spectrum().
      * \param N: the number of elements to be considered, at least 2
      * \param *argv: a pointer to NULL
      * \param *result: the irregularity of N values from the array pointed to by *data
      */
-    int xtract_irregularity_j(const double *data, const int N, const void *argv, double *result);
+    int xtract_irregularity_j(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief Calculate the first order Tristimulus of an input vector using a method described by Pollard and Jansson (1982)
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles representing a harmonic spectrum of size N/2, and a frequency spectrum of size N/2 (This is the output format of xtract_harmonic_spectrum())
      * \param N: the number of elements to be considered, at least 2 and even
      * \param *argv: a pointer to a double representing the fundamental frequency of the input vector, finite and at least 0; 0 gives no result
      * \param *result: the coefficient at the fundamental as a fraction of the sum of all coefficients, in whatever unit the coefficients are given: magnitudes give an amplitude ratio, power coefficients an energy ratio
      */
-    int xtract_tristimulus_1(const double *data, const int N, const void *argv, double *result);
+    int xtract_tristimulus_1(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief Calculate the second order Tristimulus of an input vector using a method described by Pollard and Jansson (1982)
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles representing a harmonic spectrum of size N/2, and a frequency spectrum of size N/2 (This is the output format of xtract_harmonic_spectrum())
      * \param N: the number of elements to be considered, at least 2 and even
      * \param *argv: a pointer to a double representing the fundamental frequency of the input vector, finite and at least 0; 0 gives no result
      * \param *result: the sum of the coefficients at the second, third and fourth harmonics as a fraction of the sum of all coefficients, in whatever unit the coefficients are given
      */
-    int xtract_tristimulus_2(const double *data, const int N, const void *argv, double *result);
+    int xtract_tristimulus_2(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief Calculate the third order Tristimulus of an input vector using a method described by Pollard and Jansson (1982)
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles representing a harmonic spectrum of size N/2, and a frequency spectrum of size N/2 (This is the output format of xtract_harmonic_spectrum())
      * \param N: the number of elements to be considered, at least 2 and even
      * \param *argv: a pointer to a double representing the fundamental frequency of the input vector, finite and at least 0; 0 gives no result
      * \param *result: the sum of the coefficients at the fifth and higher harmonics as a fraction of the sum of all coefficients, in whatever unit the coefficients are given
      */
-    int xtract_tristimulus_3(const double *data, const int N, const void *argv, double *result);
+    int xtract_tristimulus_3(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief Extract the smoothness of an input vector using a method described by McAdams (1999)
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles representing the magnitude coefficients from the spectrum of an audio vector, (e.g. the first half of the array pointed to by *result from xtract_spectrum().
      * \param N: the number of elements to be considered, at least 3
      * \param *argv: a pointer to NULL
      * \param *result: the smoothness of N values from the array pointed to by *data
      */
-    int xtract_smoothness(const double *data, const int N, const void *argv, double *result);
+    int xtract_smoothness(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief Extract the spectral spread of an input vector using a method described by Casagrande(2005)
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector, (e.g. the array pointed to by *result from xtract_spectrum(), xtract_peak_spectrum() or xtract_harmonic_spectrum()).
      * \param N: the size of the array pointed to by *data, at least 2 and even
      * \param *argv: a pointer to a double corresponding to the spectral centroid
      * \param *result: the spectral spread of N values from the array pointed to by *data
      */
-    int xtract_spread(const double *data, const int N, const void *argv, double *result);
+    int xtract_spread(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /* Zero crossing rate */
 
     /** \brief Extract the zero crossing rate of an input vector
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles
      * \param N: the number of elements to be considered, at least 1
      * \param *argv: a pointer to NULL
      * \param *result: the zero crossing rate of N values from the array pointed to by *data
      */
-    int xtract_zcr(const double *data, const int N, const void *argv, double *result);
+    int xtract_zcr(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief Extract the spectral rolloff of an input vector using a method described by Bee Suan Ong (2005)
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles representing the magnitude coefficients from the spectrum of an audio vector, (e.g. the first half of the array pointed to by *result from xtract_spectrum().
      * \param N: the number of elements to be considered, at least 1
      * \param *argv: a pointer to an array of two doubles: argv[0] is the bin spacing in Hz, the sample rate divided by the transform length (twice N for the first half of an xtract_spectrum() output), finite and at least 0, and argv[1] is the rolloff threshold as a percentage from 0 to 100 (e.g. 95.0 for the 95th percentile).
      * \param *result: the spectral rolloff in Hz of N values from the array pointed to by *data. This is the point in the spectrum below which argv[1] percent of the energy is distributed.
      */
-    int xtract_rolloff(const double *data, const int N, const void *argv, double *result);
+    int xtract_rolloff(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief Extract the 'total loudness' of an input vector using a method described by Moore, Glasberg et al (2005)
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles representing a set of BARK_BANDS bark coefficients
      * \param N: the number of coefficients to be considered, from 1 to XTRACT_BARK_BANDS
      * \param *argv: a pointer to NULL
@@ -226,21 +250,23 @@ extern "C"
      * Note: if N = 1, the 'specific loudness' of the bark band pointed to by *data will be given by *result
      *
      */
-    int xtract_loudness(const double *data, const int N, const void *argv, double *result);
+    int xtract_loudness(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief Extract the spectral flatness measure of an input vector, where the flatness measure (SFM) is defined as the ratio of the geometric mean to the arithmetic mean of a magnitude spectrum.
      *
      * \note As noted by Peeters (2003), the SFM should generally be computed on a small number of 'bands', which xtract_bands() provides.
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles representing the magnitude coefficients from the spectrum of an audio vector, (e.g. the first half of the array pointed to by *result from xtract_spectrum(). Alternatively the magnitudes from a number of 'subbands' can be used by using *result from xtract_bands().
      * \param N: the number of *data array elements to be considered, at least 1
      * \param *argv: a pointer to NULL
      * \param *result: the flatness of N values from the array pointed to by *data
      */
-    int xtract_flatness(const double *data, const int N, const void *argv, double *result);
+    int xtract_flatness(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief Extract the LOG spectral flatness measure of an input vector
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to NULL.
      * \param N: not used - can safely be set to 0.
      * \param *argv: a pointer to a double representing spectral flatness, from 0 to 1
@@ -249,65 +275,72 @@ extern "C"
      *  flatness_db = 10 * log10(flatness)
      *
      */
-    int xtract_flatness_db(const double *data, const int N, const void *argv, double *result);
+    int xtract_flatness_db(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief Extract the tonality factor of an input vector using a method described by Peeters 2003
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to NULL.
      * \param N: not used - can safely be set to 0.
      * \param *argv: a pointer to the LOG spectral flatness measure of an audio vector (e.g. the output from xtract_flatness_db)
      * \param *result: the tonality factor of N values from the array pointed to by *data
      */
-    int xtract_tonality(const double *data, const int N, const void *argv, double *result);
+    int xtract_tonality(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief Extract the noisiness of an input vector using a method described by Tae Hong Park (2000)
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to NULL
      * \param N:
      * \param *argv: a pointer to an array containing a double representing the number of harmonic partials in a spectrum, and a double representing the number of partials in a spectrum
      * \param *result: the noisiness coefficient as calculated from argv
      */
-    int xtract_noisiness(const double *data, const int N, const void *argv, double *result);
+    int xtract_noisiness(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief Extract the RMS amplitude of an input vector using a method described by Tae Hong Park (2000)
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles
      * \param N: the number of elements to be considered, at least 1
      * \param *argv: a pointer to NULL
      * \param *result: the RMS amplitude of N values from the array pointed to by *data
      */
-    int xtract_rms_amplitude(const double *data, const int N, const void *argv, double *result);
+    int xtract_rms_amplitude(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief Extract the Inharmonicity of an input vector
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles representing a magnitude peak spectrum of size N/2, and a frequency spectrum of size N/2 (This is the output format of xtract_peak_spectrum())
      * \param N: the number of elements to be considered, at least 2 and even
      * \param *argv: a pointer to a double representing the fundamental frequency of the input vector, finite and at least 0; 0 gives no result
      * \param *result: the inharmonicity of N values from the array pointed to by *data
      */
-    int xtract_spectral_inharmonicity(const double *data, const int N, const void *argv, double *result);
+    int xtract_spectral_inharmonicity(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief Extract the spectral crest of an input vector using a method described by Peeters (2003)
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to NULL
      * \param N: not used
      * \param *argv: a pointer to an array containing a double representing the maximum value in a spectrum, and a double representing the mean value of a spectrum
      * \param *result: the spectral crest of N values from the array pointed to by *data
      */
-    int xtract_crest(const double *data, const int N, const void *argv, double *result);
+    int xtract_crest(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief Extract the Spectral Power of an input vector using a method described by Bee Suan Ong (2005)
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles representing the magnitude coefficients from the spectrum of an audio vector, (e.g. the first half of the array pointed to by *result from xtract_spectrum().
      * \param N: the number of elements to be considered
      * \param *argv: a pointer to NULL
      * \param *result: the spectral power of N values from the array pointed to by *data
      */
-    int xtract_power(const double *data, const int N, const void *argv, double *result);
+    int xtract_power(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /* Odd to even harmonic ratio */
     /** \brief Extract the Odd to even harmonic ratio of an input vector
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles representing a harmonic spectrum of size N/2, and a frequency spectrum of size N/2 (This is the output format of xtract_harmonic_spectrum())
      * \param N: the number of elements to be considered, at least 2 and even
      * \param *argv: a pointer to a double representing the fundamental frequency of the input vector, finite and at least 0; 0 gives no result
@@ -320,10 +353,11 @@ extern "C"
      * XTRACT_POWER_SPECTRUM give the odd-to-even harmonic energy ratio of
      * Peeters (2004).
      */
-    int xtract_odd_even_ratio(const double *data, const int N, const void *argv, double *result);
+    int xtract_odd_even_ratio(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief Extract the Sharpness of an input vector
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles representing Bark band coefficients (e.g. the result of xtract_bark_coefficients())
      * \param N: the number of Bark bands to be considered, from 1 to XTRACT_BARK_BANDS
      * \param *argv: a pointer to NULL
@@ -334,58 +368,64 @@ extern "C"
      * g-weighted centroid of specific loudness normalised by total loudness,
      * where the specific loudness of Bark band z is N'(z) = E(z)^0.23.
      */
-    int xtract_sharpness(const double *data, const int N, const void *argv, double *result);
+    int xtract_sharpness(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief Extract the Slope of an input vector using a method described by Peeters(2003)
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector, (e.g. the array pointed to by *result from xtract_spectrum(), xtract_peak_spectrum() or xtract_harmonic_spectrum()).
      * \param N: the number of elements to be considered, at least 2 and even
      * \param *argv: a pointer to NULL
      * \param *result: the Slope of N values from the array pointed to by *data
      */
-    int xtract_spectral_slope(const double *data, const int N, const void *argv, double *result);
+    int xtract_spectral_slope(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief Extract the value of the lowest value in an input vector
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles
      * \param N: the number of elements to be considered, at least 1
      * \param *argv: a pointer to a double representing the lower limit for the search. All values in the array pointed to by *data that are below or equal to this threshold will be ignored.
      * \param *result: a pointer to a value representing the lowest component in *data that falls above the threshold; 0 with no result when every value is at or below it
      *
      */
-    int xtract_lowest_value(const double *data, const int N, const void *argv, double *result);
+    int xtract_lowest_value(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief Extract the value of the highest value in an input vector
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles
      * \param N: the number of elements to be considered, at least 1
      * \param *argv: a pointer to NULL.
      * \param *result: a pointer to a value representing the highest component in *data.
      *
      */
-    int xtract_highest_value(const double *data, const int N, const void *argv, double *result);
+    int xtract_highest_value(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief Extract the sum of the values in an input vector
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles
      * \param N: the number of elements to be considered, at least 1
      * \param *argv: a pointer to NULL.
      * \param *result: a pointer to a value representing the sum of all of the values pointed to by *data.
      *
      */
-    int xtract_sum(const double *data, const int N, const void *argv, double *result);
+    int xtract_sum(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief Extract the Pitch of an input vector using Harmonic Product Spectrum (HPS) analysis
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector, as produced by xtract_spectrum() in either of its layouts. The first half of the array holds the magnitude of each frequency bin and the second half the bin frequencies, which must be an ascending grid starting at zero or at one bin; any other grid is an argument error
      * \param N: The length of the vector pointed to by *data, at least 4 and even.
      * \param *argv: a pointer to a double giving the number of harmonics to multiply, from 2 to 16 (any other value is an argument error), or NULL for 3. More harmonics make the estimate robust to a weak or missing low harmonic at the cost of a smaller range of fundamentals that fit below the Nyquist bin
      * \param *result: the fundamental frequency in Hertz, interpolated between bins, or 0 when the spectrum is silent or too short for the number of harmonics and no result is returned
      */
-    int xtract_hps(const double *data, const int N, const void *argv, double *result);
+    int xtract_hps(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief Extract the fundamental frequency of an input vector
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles representing an audio vector
      * \param N: the number of elements to be considered, at least 1
      * \param *argv: a pointer to a double representing the audio sample rate, finite and at least 0; 0 selects 44100 Hz
@@ -396,10 +436,11 @@ extern "C"
      * It is based on suggestion by Robert Bristow-Johnson in a discussion on the comp.dsp mailing list, subject "Reference implementation of pitch detection"
      *
      */
-    int xtract_f0(const double *data, const int N, const void *argv, double *result);
+    int xtract_f0(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief Extract the fundamental frequency of an input vector
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles representing an audio vector
      * \param N: the number of elements to be considered, at least 1. When xtract_f0() finds no result the fallback takes the spectrum of the N values, so the FFT must have been initialised on the calling thread with xtract_init_fft(N, XTRACT_SPECTRUM), which needs N to be a power of two of at least 2; without it the fallback returns XTRACT_BAD_STATE
      * \param *argv: a pointer to a double representing the audio sample rate, finite and at least 0; 0 selects 44100 Hz
@@ -408,10 +449,11 @@ extern "C"
      * This function wraps xtract_f0, but provides the frequency of the lowest partial in the peak spectrum if f0 can't be found.
      *
      */
-    int xtract_failsafe_f0(const double *data, const int N, const void *argv, double *result);
+    int xtract_failsafe_f0(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief Extract the fundamental frequency of an input vector using wavelet-based method
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles representing an audio vector
      * \param N: the number of elements to be considered, at least 1
      * \param *argv: a pointer to a double representing the audio sample rate, finite and at least 0; 0 selects 44100 Hz
@@ -423,7 +465,7 @@ extern "C"
      * xtract_init_wavelet_f0_state() must be called exactly once prior to calling xtract_wavelet_f0()
      *
      */
-    int xtract_wavelet_f0(const double *data, const int N, const void *argv, double *result);
+    int xtract_wavelet_f0(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief Extract the fundamental frequency using the McLeod Pitch Method
      *
@@ -431,231 +473,256 @@ extern "C"
      * interpolation for sub-sample accuracy. Based on McLeod and Wyvill (2005)
      * "A Smarter Way to Find Pitch".
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles representing an audio vector
      * \param N: the number of elements to be considered, at least 1; a period longer than N / 2 samples is not found, so N must span at least two periods of the lowest frequency expected
      * \param *argv: a pointer to a double representing the audio sample rate, finite and at least 0; 0 selects 44100 Hz
      * \param *result: the pitch of N values from the array pointed to by *data, or 0 with no result when no period of at most N / 2 samples is found
      */
-    int xtract_mcleod_f0(const double *data, const int N, const void *argv, double *result);
+    int xtract_mcleod_f0(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief Convenience function to convert a frequency in Hertz to a "pitch" value in MIDI cents
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data: not used
      * \param N: not used
      * \param *argv: a pointer to a double-precision floating point value representing a frequency in Hertz, at least 0; 0 gives no result
      * \param *result: a pointer to a double-precision floating point value representing a "pitch" in MIDI cents, from 0 to 12700; a frequency whose pitch falls outside that range gives no result
      *
      */
-    int xtract_midicent(const double *data, const int N, const void *argv, double *result);
+    int xtract_midicent(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief Extract the number of non-zero elements in an input vector
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles
      * \param N: the number of elements to be considered, at least 1
      * \param *argv: not used
      * \param *result: the number of non-zero elements in the array pointed to by *data
      *
      */
-    int xtract_nonzero_count(const double *data, const int N, const void *argv, double *result);
+    int xtract_nonzero_count(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /**
      * \brief Report whether the 'current' value is a peak
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to an array containing a time series as provided by *result from xtract_last_n(), where the Nth value is the 'current' value
      * \param N: the number of elements in the time series, at least 1
      * \param *argv: a pointer to a double representing the threshold: the current value is a peak if it is the maximum of the series and exceeds the average of the N values by at least the threshold
      * \param *result: a pointer to a copy of the current value if it is a peak, or 0 with no result if it is not
      */
-    int xtract_peak(const double *data, const int N, const void *argv, double *result);
+    int xtract_peak(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief Extract the median of an input vector
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles
      * \param N: the number of elements to be considered, at least 1
      * \param *argv: not used
      * \param *result: the median of N values from the array pointed to by *data; for an even N, the mean of the two middle values. A NaN element orders after every number
      */
-    int xtract_median(const double *data, const int N, const void *argv, double *result);
+    int xtract_median(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief Extract the median absolute deviation of an input vector
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles
      * \param N: the number of elements to be considered, at least 1
      * \param *argv: a pointer to a double representing the median of the input vector
      * \param *result: the median of the absolute deviations of N values from the array pointed to by *data from the given median. A NaN deviation orders after every number
      */
-    int xtract_median_absolute_deviation(const double *data, const int N, const void *argv, double *result);
+    int xtract_median_absolute_deviation(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief Extract the Hjorth activity of an input vector: its variance, with N as the divisor
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles
      * \param N: the number of elements to be considered, at least 1
      * \param *argv: not used
      * \param *result: the activity of N values from the array pointed to by *data
      */
-    int xtract_hjorth_activity(const double *data, const int N, const void *argv, double *result);
+    int xtract_hjorth_activity(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief Extract the Hjorth mobility of an input vector: the square root of the ratio of the activity of its first difference to its own activity
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles
      * \param N: the number of elements to be considered, at least 2
      * \param *argv: not used
      * \param *result: the mobility of N values from the array pointed to by *data, or 0 with no result if the values are all equal
      */
-    int xtract_hjorth_mobility(const double *data, const int N, const void *argv, double *result);
+    int xtract_hjorth_mobility(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief Extract the Hjorth complexity of an input vector: the ratio of the mobility of its first difference to its own mobility
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles
      * \param N: the number of elements to be considered, at least 3
      * \param *argv: not used
      * \param *result: the complexity of N values from the array pointed to by *data, or 0 with no result if the values or their first differences are all equal
      */
-    int xtract_hjorth_complexity(const double *data, const int N, const void *argv, double *result);
+    int xtract_hjorth_complexity(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief Extract the time reversal asymmetry statistic of an input vector: the mean over every position of the product of the value one lag ahead with the difference between the squares of the values two lags ahead and at the position
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles
      * \param N: the number of elements to be considered, at least twice the lag plus 1
      * \param *argv: a pointer to an int holding the lag, at least 1
      * \param *result: the statistic of N values from the array pointed to by *data; 0 for a series that reads the same in both directions, and the negative of the statistic of the series reversed
      */
-    int xtract_time_reversal_asymmetry(const double *data, const int N, const void *argv, double *result);
+    int xtract_time_reversal_asymmetry(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief Extract the spectral entropy of a spectrum: the Shannon entropy of the spectrum normalised to sum to 1, divided by the entropy of a flat spectrum of the same length
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles representing the coefficients of a spectrum, such as the first half of the array pointed to by *result from xtract_spectrum(); a power spectrum gives the usual definition, and a bin that is not positive counts as empty
      * \param N: the number of *data array elements to be considered, at least 2
      * \param *argv: not used
      * \param *result: the spectral entropy of N values from the array pointed to by *data, between 0 for a single occupied bin and 1 for a flat spectrum, or 0 with no result if no bin is positive
      */
-    int xtract_spectral_entropy(const double *data, const int N, const void *argv, double *result);
+    int xtract_spectral_entropy(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief Extract the Petrosian fractal dimension of an input vector, from the number of sign changes in its first difference
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles
      * \param N: the number of elements to be considered, at least 2
      * \param *argv: not used
      * \param *result: the Petrosian fractal dimension of N values from the array pointed to by *data, 1 for a series whose difference never changes sign
      */
-    int xtract_petrosian_fractal_dimension(const double *data, const int N, const void *argv, double *result);
+    int xtract_petrosian_fractal_dimension(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief Extract the Katz fractal dimension of an input vector, from the length of its path and its greatest distance from the first element
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles
      * \param N: the number of elements to be considered, at least 2
      * \param *argv: not used
      * \param *result: the Katz fractal dimension of N values from the array pointed to by *data, or 0 with no result if the values are all equal or the greatest distance from the first element equals the mean step
      */
-    int xtract_katz_fractal_dimension(const double *data, const int N, const void *argv, double *result);
+    int xtract_katz_fractal_dimension(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief Extract the Higuchi fractal dimension of an input vector: the slope of the log of its curve length against the log of the scale, over scales 1 to k_max
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles
      * \param N: the number of elements to be considered, at least twice k_max
      * \param *argv: a pointer to an int holding k_max, the largest scale, at least 2
      * \param *result: the Higuchi fractal dimension of N values from the array pointed to by *data, or 0 with no result if the curve length at some scale is 0
      */
-    int xtract_higuchi_fractal_dimension(const double *data, const int N, const void *argv, double *result);
+    int xtract_higuchi_fractal_dimension(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief Extract the permutation entropy of an input vector: the Shannon entropy of the ordinal patterns of its windows, divided by the entropy of every pattern being equally likely
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles
      * \param N: the number of elements to be considered, at least (order - 1) * delay + 1
      * \param *argv: a pointer to an array of two ints: the order, the number of elements in a pattern, from 2 to 8; and the delay, the distance between consecutive elements of a pattern, at least 1
      * \param *result: the permutation entropy of N values from the array pointed to by *data, between 0 when every window has the same pattern and 1 when every pattern is equally frequent; equal values within a window take the order of their positions
      */
-    int xtract_permutation_entropy(const double *data, const int N, const void *argv, double *result);
+    int xtract_permutation_entropy(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief Extract the Lempel-Ziv complexity of an input vector: the number of distinct phrases in its exhaustive parse once each element is reduced to whether it exceeds a threshold, normalised by N over log2 N so that a random series scores about 1
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles
      * \param N: the number of elements to be considered, at least 2
      * \param *argv: a pointer to a double holding the threshold, typically the median of the input vector; an element counts as 1 when it is greater than the threshold and 0 otherwise
      * \param *result: the normalised Lempel-Ziv complexity of N values from the array pointed to by *data
      */
-    int xtract_lempel_ziv_complexity(const double *data, const int N, const void *argv, double *result);
+    int xtract_lempel_ziv_complexity(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief Extract the sample entropy of an input vector: the negative log of the fraction of its pairs of matching templates of a given length that still match when extended by one element, where two templates match when no pair of corresponding elements differs by more than the tolerance
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles
      * \param N: the number of elements to be considered, at least the template length plus 2
      * \param *argv: a pointer to an array of two doubles: the template length, a whole number at least 1; and the tolerance in the units of the input, at least 0, typically 0.2 times the standard deviation of the input vector
      * \param *result: the sample entropy of N values from the array pointed to by *data, in nats, or 0 with no result if no pair of templates matches at either length
      */
-    int xtract_sample_entropy(const double *data, const int N, const void *argv, double *result);
+    int xtract_sample_entropy(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief Extract the approximate entropy of an input vector: the difference between the mean log fraction of templates matching each template of a given length and the same for templates one element longer, where each template matches itself and two templates match when no pair of corresponding elements differs by more than the tolerance
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles
      * \param N: the number of elements to be considered, at least the template length plus 2
      * \param *argv: a pointer to an array of two doubles: the template length, a whole number at least 1; and the tolerance in the units of the input, at least 0, typically 0.2 times the standard deviation of the input vector
      * \param *result: the approximate entropy of N values from the array pointed to by *data, in nats
      */
-    int xtract_approximate_entropy(const double *data, const int N, const void *argv, double *result);
+    int xtract_approximate_entropy(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief Extract the periodicity of an input vector: the height of the highest key maximum of its normalised square difference function, the measure the McLeod pitch method selects its pitch peak from
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles
      * \param N: the number of elements to be considered, at least 1
      * \param *argv: not used
      * \param *result: the periodicity of N values from the array pointed to by *data, from 0 for a signal that never repeats to 1 for one that repeats exactly, or 0 with no result when the function has no maximum between its first zero crossing and lag N / 2, as for silence or for a series with an offset that never crosses zero, whose mean should be removed first
      */
-    int xtract_periodicity(const double *data, const int N, const void *argv, double *result);
+    int xtract_periodicity(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief Extract the confidence of the McLeod pitch method's fundamental frequency estimate for an input vector: the height of the key maximum of its normalised square difference function that xtract_mcleod_f0() takes as the pitch peak
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles representing an audio vector
      * \param N: the number of elements to be considered, at least 1
      * \param *argv: not used
      * \param *result: the confidence in the fundamental frequency xtract_mcleod_f0() reports for the same N values, from 0 for a signal with no clear period to 1 for a perfectly periodic one, or 0 with no result exactly when xtract_mcleod_f0() gives no result
      */
-    int xtract_signal_confidence(const double *data, const int N, const void *argv, double *result);
+    int xtract_signal_confidence(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief Extract the decay rate of an envelope: the least-squares slope of the natural log of its elements against time, over the elements from its maximum onwards that exceed the threshold fraction of the maximum
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles representing an amplitude envelope or any segment with a single peak
      * \param N: the number of elements to be considered, at least 1
      * \param *argv: a pointer to an array of two doubles: the sample rate, finite and at least 0, with 0 selecting 44100 Hz; and the threshold fraction of the maximum, from 0 to 1
      * \param *result: the decay rate of N values from the array pointed to by *data in units of 1 per second, negative for an envelope that decays, or 0 with no result when the maximum is not positive or fewer than two elements exceed the threshold
      */
-    int xtract_decay_rate(const double *data, const int N, const void *argv, double *result);
+    int xtract_decay_rate(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief Extract the temporal centroid of an envelope: the position of its centre of gravity, with each element weighting its own position, as a fraction of the length
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles representing an amplitude envelope or any non-negative series
      * \param N: the number of elements to be considered, at least 2
      * \param *argv: not used
      * \param *result: the temporal centroid of N values from the array pointed to by *data, from 0 at the first element to 1 at the last, or 0 with no result when the elements do not sum to a positive value
      */
-    int xtract_temporal_centroid(const double *data, const int N, const void *argv, double *result);
+    int xtract_temporal_centroid(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief Extract the position of the largest value in an input vector as a fraction of the length
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles
      * \param N: the number of elements to be considered, at least 2
      * \param *argv: not used
      * \param *result: the position of the first occurrence of the largest of N values from the array pointed to by *data, from 0 at the first element to 1 at the last
      */
-    int xtract_max_position(const double *data, const int N, const void *argv, double *result);
+    int xtract_max_position(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief Extract the position of the smallest value in an input vector as a fraction of the length
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles
      * \param N: the number of elements to be considered, at least 2
      * \param *argv: not used
      * \param *result: the position of the first occurrence of the smallest of N values from the array pointed to by *data, from 0 at the first element to 1 at the last
      */
-    int xtract_min_position(const double *data, const int N, const void *argv, double *result);
+    int xtract_min_position(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief Extract the peak asymmetry of an envelope: the energy from its maximum to the end over the energy from the start to its maximum, the maximum counting in both, so that a shape symmetric about its peak gives 1
      *
+     * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles representing an amplitude envelope or any segment with a single peak
      * \param N: the number of elements to be considered, at least 1
      * \param *argv: not used
      * \param *result: the peak asymmetry of N values from the array pointed to by *data, below 1 when the energy lies before the peak and above 1 when it lies after, or 0 with no result when the energy from the start to the maximum is 0
      */
-    int xtract_peak_asymmetry(const double *data, const int N, const void *argv, double *result);
+    int xtract_peak_asymmetry(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** @} */
 

@@ -39,14 +39,14 @@ for i in range(0, len):
     a[i] = 2 * i
     temp.append(str(a[i]))
 
-mean = xtract.xtract_mean(a,len,None)[1]
+mean = xtract.xtract_mean(None, a,len,None)[1]
 
 print('The mean of ' + ', '.join(temp) + ' is: %.2f' % mean)
 
 argv = xtract.doubleArray(1)
 argv[0] = mean
 
-variance = xtract.xtract_variance(a, len, argv)[1]
+variance = xtract.xtract_variance(None, a, len, argv)[1]
 
 print('The variance is %.2f' % variance)
 
@@ -62,7 +62,7 @@ xtract.xtract_init_fft(len, xtract.XTRACT_SPECTRUM);
 
 result = xtract.doubleArray(len)
 
-xtract.xtract_spectrum(a,len,argv, result)
+xtract.xtract_spectrum(None, a,len,argv, result)
 
 
 for i in range(len):
@@ -75,7 +75,7 @@ for i in range(0, len):
     a[i] = 1.0
 
 window = xtract.xtract_init_window(len // 2, xtract.XTRACT_HANN)
-xtract.xtract_features_from_subframes(a, len, xtract.XTRACT_WINDOWED, window, result)
+xtract.xtract_features_from_subframes(None, a, len, xtract.XTRACT_WINDOWED, window, result)
 
 for i in range(len):
     print(result[i])
@@ -86,7 +86,7 @@ pair = xtract.doubleArray(8)
 for i, value in enumerate([1.0, 2.0, 3.0, 4.0, 2.0, 4.0, 6.0, 8.0]):
     pair[i] = value
 
-correlation = xtract.xtract_pearson_correlation(pair, 8, None)[1]
+correlation = xtract.xtract_pearson_correlation(None, pair, 8, None)[1]
 
 print('The Pearson correlation is %.2f' % correlation)
 
@@ -96,7 +96,7 @@ if abs(correlation - 1.0) > 1e-12:
 channels = xtract.intArray(1)
 channels[0] = 2
 covariance = xtract.doubleArray(4)
-xtract.xtract_covariance_matrix(pair, 8, channels, covariance)
+xtract.xtract_covariance_matrix(None, pair, 8, channels, covariance)
 
 print('The covariance matrix is %.2f, %.2f, %.2f, %.2f' % tuple(covariance[i] for i in range(4)))
 

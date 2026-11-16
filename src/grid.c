@@ -33,7 +33,7 @@ static int grid_width(const int N, const void *argv)
     return width >= 1 && width <= N && N % width == 0 ? width : 0;
 }
 
-int xtract_grid_moments(const double *data, const int N, const void *argv, double *result)
+int xtract_grid_moments(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
     const int width = grid_width(N, argv);
     double m00 = 0.0, m10 = 0.0, m01 = 0.0, m20 = 0.0, m11 = 0.0, m02 = 0.0;
@@ -85,7 +85,7 @@ int xtract_grid_moments(const double *data, const int N, const void *argv, doubl
     return XTRACT_SUCCESS;
 }
 
-int xtract_grid_central_moments(const double *data, const int N, const void *argv, double *result)
+int xtract_grid_central_moments(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
     const int width = grid_width(N, argv);
     double total = 0.0, total_x = 0.0, total_y = 0.0, centre_x, centre_y;
@@ -154,7 +154,7 @@ int xtract_grid_central_moments(const double *data, const int N, const void *arg
     return XTRACT_SUCCESS;
 }
 
-int xtract_normalised_moments(const double *data, const int N, const void *argv, double *result)
+int xtract_normalised_moments(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
     double sum, root;
     int n;
@@ -181,7 +181,7 @@ int xtract_normalised_moments(const double *data, const int N, const void *argv,
     return XTRACT_SUCCESS;
 }
 
-int xtract_hu_moments(const double *data, const int N, const void *argv, double *result)
+int xtract_hu_moments(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
     double nu20, nu11, nu02, nu30, nu21, nu12, nu03;
     double spread, sum_x, sum_y, difference_x, difference_y;
@@ -225,7 +225,7 @@ static void paired_span(const int length, const int offset, int *first, int *end
     *end = offset > 0 ? length - offset : length;
 }
 
-int xtract_cooccurrence_matrix(const double *data, const int N, const void *argv, double *result)
+int xtract_cooccurrence_matrix(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
     const int width = grid_width(N, argv);
     const int *args = (const int *)argv;
@@ -295,7 +295,7 @@ static int cooccurrence_rows(const double *data, const int N, double *total)
     return rows;
 }
 
-int xtract_cooccurrence_contrast(const double *data, const int N, const void *argv, double *result)
+int xtract_cooccurrence_contrast(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
     double total, sum = 0.0;
     const int rows = cooccurrence_rows(data, N, &total);
@@ -322,7 +322,7 @@ int xtract_cooccurrence_contrast(const double *data, const int N, const void *ar
     return XTRACT_SUCCESS;
 }
 
-int xtract_cooccurrence_correlation(const double *data, const int N, const void *argv, double *result)
+int xtract_cooccurrence_correlation(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
     double total, mean_i = 0.0, mean_j = 0.0, spread_i = 0.0, spread_j = 0.0, products = 0.0;
     double correlation = 0.0;
@@ -387,7 +387,7 @@ int xtract_cooccurrence_correlation(const double *data, const int N, const void 
     return status;
 }
 
-int xtract_angular_second_moment(const double *data, const int N, const void *argv, double *result)
+int xtract_angular_second_moment(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
     double total, sum = 0.0;
     const int rows = cooccurrence_rows(data, N, &total);
@@ -411,7 +411,7 @@ int xtract_angular_second_moment(const double *data, const int N, const void *ar
     return XTRACT_SUCCESS;
 }
 
-int xtract_inverse_difference_moment(const double *data, const int N, const void *argv, double *result)
+int xtract_inverse_difference_moment(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
     double total, sum = 0.0;
     const int rows = cooccurrence_rows(data, N, &total);
@@ -461,7 +461,7 @@ static int pattern_class(const double *above, const double *row, const double *b
     return changes <= 2 ? at_or_above : PATTERN_CLASSES - 1;
 }
 
-int xtract_local_binary_patterns(const double *data, const int N, const void *argv, double *result)
+int xtract_local_binary_patterns(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
     const int width = grid_width(N, argv);
     int counts[PATTERN_CLASSES] = {0};

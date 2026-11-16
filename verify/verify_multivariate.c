@@ -11,18 +11,18 @@
 
 #include "verify.h"
 
-#define MULTIVARIATE_HARNESS(feature, result_length)                \
-    void verify_##feature(void)                                     \
-    {                                                               \
-        const int N = nondet_length();                              \
-        double *data = nondet_doubles(N);                           \
-        double *argv = nondet_doubles(XTRACT_MAXARGS);              \
-        double *result = nondet_doubles(result_length);             \
-                                                                    \
-        (void)xtract_##feature(data, N, nondet_argv(argv), result); \
-        free(data);                                                 \
-        free(argv);                                                 \
-        free(result);                                               \
+#define MULTIVARIATE_HARNESS(feature, result_length)                      \
+    void verify_##feature(void)                                           \
+    {                                                                     \
+        const int N = nondet_length();                                    \
+        double *data = nondet_doubles(N);                                 \
+        double *argv = nondet_doubles(XTRACT_MAXARGS);                    \
+        double *result = nondet_doubles(result_length);                   \
+                                                                          \
+        (void)xtract_##feature(NULL, data, N, nondet_argv(argv), result); \
+        free(data);                                                       \
+        free(argv);                                                       \
+        free(result);                                                     \
     }
 
 MULTIVARIATE_HARNESS(cross_correlation, N > 0 ? N - 1 : 0)
@@ -42,7 +42,7 @@ void verify_principal_variances(void)
                                                         : 0);
 
     verify_any_sqrt = 1;
-    (void)xtract_principal_variances(data, N, NULL, result);
+    (void)xtract_principal_variances(NULL, data, N, NULL, result);
     free(data);
     free(result);
 }
@@ -58,7 +58,7 @@ static void coherence_with_segment(const int L)
 
     if (L > 0)
         xtract_init_fft(L, XTRACT_COHERENCE);
-    (void)xtract_coherence(data, N, NULL, result);
+    (void)xtract_coherence(NULL, data, N, NULL, result);
     xtract_free_fft();
     free(data);
     free(result);
@@ -83,7 +83,7 @@ void verify_covariance_matrix(void)
     double *result = nondet_doubles(channels > 0 && channels <= N / 2 ? channels * channels : 0);
 
     argv[0] = channels;
-    (void)xtract_covariance_matrix(data, N, nondet_argv(argv), result);
+    (void)xtract_covariance_matrix(NULL, data, N, nondet_argv(argv), result);
     free(data);
     free(argv);
     free(result);

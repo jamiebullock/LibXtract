@@ -12,7 +12,7 @@
 
 #include "xtract/libxtract.h"
 
-int xtract_windowed(const double *data, const int N, const void *argv, double *result)
+int xtract_windowed(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
     int n;
     const double *window;
@@ -71,7 +71,7 @@ static int is_subframe_feature(const int feature)
     return 0;
 }
 
-int xtract_features_from_subframes(const double *data, const int N, const int feature, const void *argv, double *result)
+int xtract_features_from_subframes(xtract_context *ctx, const double *data, const int N, const int feature, const void *argv, double *result)
 {
     const double *frame1,
         *frame2;
@@ -90,13 +90,13 @@ int xtract_features_from_subframes(const double *data, const int N, const int fe
     result1 = result;
     result2 = result + n;
 
-    rv = xtract[feature](frame1, n, argv, result1);
+    rv = xtract[feature](ctx, frame1, n, argv, result1);
     if (rv == XTRACT_NO_RESULT)
         memset(result1, 0, n * sizeof(double));
     else if (rv != XTRACT_SUCCESS)
         return rv;
 
-    rv2 = xtract[feature](frame2, n, argv, result2);
+    rv2 = xtract[feature](ctx, frame2, n, argv, result2);
     if (rv2 == XTRACT_NO_RESULT)
         memset(result2, 0, n * sizeof(double));
 
@@ -106,7 +106,7 @@ int xtract_features_from_subframes(const double *data, const int N, const int fe
 /*
  * Implements y[n] = k * x[n] + (1-k) * y[n-1]
  */
-int xtract_smoothed(const double *data, const int N, const void *argv, double *result)
+int xtract_smoothed(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
     double gain;
     double oneminusgain;

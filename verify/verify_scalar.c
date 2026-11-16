@@ -11,17 +11,17 @@
 
 #include "verify.h"
 
-#define SCALAR_HARNESS(feature, length)                              \
-    void verify_##feature(void)                                      \
-    {                                                                \
-        const int N = length;                                        \
-        double *data = nondet_doubles(N);                            \
-        double *argv = nondet_doubles(XTRACT_MAXARGS);               \
-        double result;                                               \
-                                                                     \
-        (void)xtract_##feature(data, N, nondet_argv(argv), &result); \
-        free(data);                                                  \
-        free(argv);                                                  \
+#define SCALAR_HARNESS(feature, length)                                    \
+    void verify_##feature(void)                                            \
+    {                                                                      \
+        const int N = length;                                              \
+        double *data = nondet_doubles(N);                                  \
+        double *argv = nondet_doubles(XTRACT_MAXARGS);                     \
+        double result;                                                     \
+                                                                           \
+        (void)xtract_##feature(NULL, data, N, nondet_argv(argv), &result); \
+        free(data);                                                        \
+        free(argv);                                                        \
     }
 
 SCALAR_HARNESS(mean, nondet_length())
@@ -99,7 +99,7 @@ void verify_failsafe_f0(void)
     if (nondet_bool())
         xtract_init_fft(nondet_fft_size(), XTRACT_SPECTRUM);
 
-    (void)xtract_failsafe_f0(data, N, nondet_argv(argv), &result);
+    (void)xtract_failsafe_f0(NULL, data, N, nondet_argv(argv), &result);
     xtract_free_fft();
     free(data);
     free(argv);

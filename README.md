@@ -29,18 +29,18 @@ The [API reference](https://www.jamiebullock.com/LibXtract/) lists every functio
 The feature functions share one signature:
 
 ```c
-int xtract_feature(const double *data, const int N, const void *argv, double *result);
+int xtract_feature(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 ```
 
-`data` points to `N` input values, `argv` points to the arguments the feature needs, and the function writes its output to `result` and returns a status code.
+`ctx` is a context made by `xtract_context_new`, or NULL. `data` points to `N` input values, `argv` points to the arguments the feature needs, and the function writes its output to `result` and returns a status code.
 
 A feature that depends on another takes it as an argument. The variance takes the mean, the skewness takes the mean and the standard deviation, and a spectral feature takes a spectrum from `xtract_spectrum`:
 
 ```c
 double mean, variance;
 
-xtract_mean(data, N, NULL, &mean);
-xtract_variance(data, N, &mean, &variance);
+xtract_mean(NULL, data, N, NULL, &mean);
+xtract_variance(NULL, data, N, &mean, &variance);
 ```
 
 A value is therefore computed once however many features use it, and features can be combined: the irregularity of a set of MFCCs is a valid call. Functions that work from precomputed tables, such as the FFT, the mel filterbank and the constant-Q kernel, have an `xtract_init_` function to call first.

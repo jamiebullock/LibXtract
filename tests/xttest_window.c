@@ -174,7 +174,7 @@ UTEST(window, windowed_applies_element_wise)
     const double window[] = {0.5, 1.0, 1.0, 0.5};
     double result[4] = {0};
 
-    int rv = xtract_windowed(data, 4, window, result);
+    int rv = xtract_windowed(NULL, data, 4, window, result);
 
     ASSERT_EQ(rv, XTRACT_SUCCESS);
     CHECK_REL(result[0], 0.5, EPSILON);
