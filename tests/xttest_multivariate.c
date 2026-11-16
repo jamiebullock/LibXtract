@@ -10,6 +10,7 @@
 #include "xttest_approx.h"
 
 #include <math.h>
+#include <string.h>
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -676,6 +677,87 @@ UTEST(principal_variances, a_diagonal_matrix_gives_its_diagonal_in_descending_or
     ASSERT_EQ(result[0], 3.0);
     ASSERT_EQ(result[1], 2.0);
     ASSERT_EQ(result[2], 1.0);
+}
+
+static double pseudo_random(unsigned int *state)
+{
+    *state = *state * 1664525u + 1013904223u;
+
+    return (double)(*state >> 8) / 16777216.0;
+}
+
+enum
+{
+    SHUFFLED,
+    ASCENDING,
+    DESCENDING,
+    FEW_DISTINCT,
+    CONSTANT,
+    ORDERS
+};
+
+static void fill_in_order(double *values, const int count, const int order)
+{
+    unsigned int state = 12345u + (unsigned int)count;
+    int n;
+
+    for (n = 0; n < count; n++)
+    {
+        if (order == SHUFFLED)
+            values[n] = pseudo_random(&state) - 0.5;
+        else if (order == ASCENDING)
+            values[n] = (double)n;
+        else if (order == DESCENDING)
+            values[n] = (double)(count - n);
+        else if (order == FEW_DISTINCT)
+            values[n] = floor(4.0 * pseudo_random(&state));
+        else
+            values[n] = 2.5;
+    }
+}
+
+static int count_of(const double *values, const int count, const double value)
+{
+    int found = 0;
+    int n;
+
+    for (n = 0; n < count; n++)
+    {
+        if (values[n] == value)
+            found++;
+    }
+
+    return found;
+}
+
+/* No rotation is applied to a diagonal matrix, so the result is its diagonal after the sort */
+UTEST(principal_variances, a_diagonal_of_any_length_and_order_comes_back_sorted)
+{
+    enum
+    {
+        MAX_ROWS = 40
+    };
+    static double matrix[MAX_ROWS * MAX_ROWS];
+    double diagonal[MAX_ROWS];
+    double result[MAX_ROWS];
+    int rows, order, n;
+
+    for (order = 0; order < ORDERS; order++)
+    {
+        for (rows = 1; rows <= MAX_ROWS; rows++)
+        {
+            fill_in_order(diagonal, rows, order);
+            memset(matrix, 0, sizeof(matrix));
+            for (n = 0; n < rows; n++)
+                matrix[n * rows + n] = diagonal[n];
+
+            ASSERT_EQ(xtract_principal_variances(matrix, rows * rows, NULL, result), XTRACT_SUCCESS);
+            for (n = 1; n < rows; n++)
+                ASSERT_GE(result[n - 1], result[n]);
+            for (n = 0; n < rows; n++)
+                ASSERT_EQ(count_of(result, rows, diagonal[n]), count_of(diagonal, rows, diagonal[n]));
+        }
+    }
 }
 
 UTEST(principal_variances, reads_the_values_above_the_diagonal)

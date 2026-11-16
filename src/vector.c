@@ -16,6 +16,7 @@
 #include "xtract_cqt_private.h"
 #include "xtract_macros_private.h"
 #include "xtract_globals_private.h"
+#include "xtract_sort_private.h"
 
 int xtract_spectrum(const double *data, const int N, const void *argv, double *result)
 {
@@ -1317,7 +1318,7 @@ int xtract_spectral_contrast(const double *data, const int N, const void *argv, 
         if (count == 0)
             return contrast_no_result(sorted, result, bands);
 
-        qsort(sorted, (size_t)count, sizeof(double), xtract_compare_doubles);
+        xtract_sort_ascending(sorted, count);
         averaged = (int)(fraction * count + 0.5);
         if (averaged < 1)
             averaged = 1;
