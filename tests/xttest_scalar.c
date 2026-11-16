@@ -3012,6 +3012,50 @@ UTEST(scalar, median_matches_a_sorted_copy_at_every_length)
     }
 }
 
+static double pseudo_random(unsigned int *state)
+{
+    *state = *state * 1664525u + 1013904223u;
+
+    return (double)(*state >> 8) / 16777216.0;
+}
+
+UTEST(scalar, median_matches_a_sorted_copy_of_long_series_in_any_order)
+{
+    enum
+    {
+        MAX_LENGTH = 150,
+        ORDERS = 4
+    };
+    double data[MAX_LENGTH];
+    double sorted[MAX_LENGTH];
+    double result, expected;
+    unsigned int state = 2026u;
+    int order, n, i;
+
+    for (order = 0; order < ORDERS; order++)
+    {
+        for (n = 1; n <= MAX_LENGTH; n++)
+        {
+            for (i = 0; i < n; i++)
+            {
+                if (order == 0)
+                    data[i] = pseudo_random(&state) - 0.5;
+                else if (order == 1)
+                    data[i] = (double)i;
+                else if (order == 2)
+                    data[i] = (double)(n - i);
+                else
+                    data[i] = floor(4.0 * pseudo_random(&state));
+            }
+            memcpy(sorted, data, n * sizeof(double));
+            insertion_sort(sorted, n);
+            expected = n & 1 ? sorted[n / 2] : 0.5 * sorted[n / 2 - 1] + 0.5 * sorted[n / 2];
+            ASSERT_EQ(xtract_median(data, n, NULL, &result), XTRACT_SUCCESS);
+            ASSERT_EQ(result, expected);
+        }
+    }
+}
+
 UTEST(scalar, median_rejects_an_empty_series_and_sets_the_result_to_zero)
 {
     double data[1] = {1.0};

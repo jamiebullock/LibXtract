@@ -15,6 +15,7 @@
 #include "xtract_globals_private.h"
 #include "xtract_macros_private.h"
 #include "xtract_matrix_private.h"
+#include "xtract_sort_private.h"
 
 /* The largest eigenvalues settle to rounding error within about ten cyclic
  * Jacobi sweeps. Later sweeps refine the smallest, and take longest for a
@@ -312,9 +313,17 @@ int xtract_average_correlation(const double *data, const int N, const void *argv
     return XTRACT_SUCCESS;
 }
 
-static int compare_descending(const void *a, const void *b)
+static void reverse(double *values, const int count)
 {
-    return xtract_compare_doubles(b, a);
+    double swapped;
+    int low, high;
+
+    for (low = 0, high = count - 1; low < high; low++, high--)
+    {
+        swapped = values[low];
+        values[low] = values[high];
+        values[high] = swapped;
+    }
 }
 
 /* Only the diagonal and the values above it are kept up to date, so every
@@ -417,7 +426,8 @@ int xtract_principal_variances(const double *data, const int N, const void *argv
     for (p = 0; p < rows; p++)
         result[p] = matrix[p * rows + p];
     free(matrix);
-    qsort(result, rows, sizeof(double), compare_descending);
+    xtract_sort_ascending(result, C);
+    reverse(result, C);
 
     return XTRACT_SUCCESS;
 }

@@ -27,6 +27,7 @@
 #include "xtract/xtract_helper.h"
 #include "xtract_macros_private.h"
 #include "xtract_globals_private.h"
+#include "xtract_sort_private.h"
 
 int xtract_mean(const double *data, const int N, const void *argv, double *result)
 {
@@ -1846,7 +1847,7 @@ static double median_of_values(double *values, const int N)
     }
     for (n = numbers; n < N; n++)
         values[n] = NAN;
-    qsort(values, (size_t)numbers, sizeof(double), xtract_compare_doubles);
+    xtract_sort_ascending(values, numbers);
 
     return middle_of_sorted(values, N);
 }

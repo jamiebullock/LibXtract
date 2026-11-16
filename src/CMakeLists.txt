@@ -12,6 +12,7 @@ set(XTRACT_SOURCES
     libxtract.c
     multivariate.c
     scalar.c
+    sort.c
     stateful.c
     vector.c
     window.c)

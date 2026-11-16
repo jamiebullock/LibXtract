@@ -17,9 +17,11 @@
 # transform.
 # math_stub.c does the same for pow, whose CBMC model needs a floating-point
 # remainder the SMT backend cannot encode, and cbrt and atan2, which CBMC has
-# no model of: all three return any value. stdlib_stub.c does the same for
-# qsort, which CBMC has no model of: it calls the comparator on each adjacent
-# pair and then fills the buffer with arbitrary values.
+# no model of: all three return any value.
+# The library's sort is proved once, in verify_sort.c, which compiles it under
+# another name. The proofs of the functions that call it take sort_stub.c in
+# its place, which fills the buffer with arbitrary values, so that the cost of
+# the sort is not paid again in each of them.
 # The library is compiled with sqrt renamed to verify_sqrt, which math_stub.c
 # defines. It calls sqrt unless a harness sets verify_any_sqrt, and then it
 # returns any value. CBMC models sqrt with assumptions on two products of
@@ -65,9 +67,10 @@ VERIFY_MAX_SWEEPS ?= 2
 GOTO_BINARY = xtract.gb
 PROOF_DIR = .proofs
 
-LIB_SRC := $(filter-out ../src/ooura/fftsg.c, \
+SORT_SRC := ../src/sort.c
+LIB_SRC := $(filter-out ../src/ooura/fftsg.c $(SORT_SRC), \
 	$(wildcard ../src/*.c ../src/ooura/*.c ../src/c-ringbuf/*.c ../src/dywapitchtrack/*.c))
-HARNESS_SRC := $(wildcard verify_*.c) fft_stub.c math_stub.c stdlib_stub.c
+HARNESS_SRC := $(wildcard verify_*.c) fft_stub.c math_stub.c sort_stub.c
 HEADERS := verify.h $(wildcard ../include/xtract/*.h ../src/*.h ../src/ooura/*.h \
 	../src/c-ringbuf/*.h ../src/dywapitchtrack/*.h)
 
@@ -103,6 +106,11 @@ $(PROOF_DIR)/verify_cooccurrence_matrix_of_any_width.proved: UNWIND = 5
 # classes.
 $(PROOF_DIR)/verify_local_binary_patterns.proved: UNWIND = 11
 $(PROOF_DIR)/verify_local_binary_patterns_of_any_width.proved: UNWIND = 11
+# The sort's sift loop descends one level of the heap for each time round,
+# five levels at most for the 32 values of VERIFY_MAX_N, and the sort calls it
+# once for every value. Unwound to the general bound, its copies are most of
+# the formula.
+$(PROOF_DIR)/verify_sort_ascending.proved: CBMC_FLAGS += --unwindset sift_down.0:6
 
 # The feature functions are floating-point loops, and the solver cost is in
 # the doubles. Formula slicing drops the arithmetic that no property depends
@@ -133,7 +141,7 @@ $(CBMC_FLAGS_STAMP): force
 	@echo '$(UNWIND) $(SMALL_UNWIND) $(CBMC_FLAGS)' > $@.new
 	@if cmp -s $@ $@.new; then $(RM) $@.new; else mv $@.new $@; fi
 
-$(GOTO_BINARY): $(LIB_SRC) $(HARNESS_SRC) $(HEADERS) $(CFLAGS_STAMP)
+$(GOTO_BINARY): $(LIB_SRC) $(SORT_SRC) $(HARNESS_SRC) $(HEADERS) $(CFLAGS_STAMP)
 	$(GOTO_CC) $(CFLAGS) -o $@ $(LIB_SRC) $(HARNESS_SRC)
 
 $(HARNESS_LIST): $(GOTO_BINARY)
