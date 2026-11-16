@@ -56,12 +56,8 @@ int xtract_mean(const double *data, const int N, const void *argv, double *resul
 
 int xtract_variance(const double *data, const int N, const void *argv, double *result)
 {
-#ifdef __APPLE__
-    double *shifted, neg_mean;
-#else
     int n;
     double sum = 0.0;
-#endif
     double mean;
 
     if (N < 2 || argv == NULL)
@@ -72,23 +68,11 @@ int xtract_variance(const double *data, const int N, const void *argv, double *r
 
     mean = *(double *)argv;
 
-#ifdef __APPLE__
-    shifted = (double *)malloc(N * sizeof(double));
-    if (shifted == NULL)
-        return XTRACT_MALLOC_FAILED;
-
-    neg_mean = -mean;
-    vDSP_vsaddD(data, 1, &neg_mean, shifted, 1, N);
-    vDSP_measqvD(shifted, 1, result, N);
-    *result *= (double)N / (N - 1); /* Bessel correction */
-    free(shifted);
-#else
 #pragma omp simd reduction(+ : sum)
     for (n = 0; n < N; n++)
         sum += XTRACT_SQ(data[n] - mean);
 
     *result = sum / (N - 1);
-#endif
 
     return XTRACT_SUCCESS;
 }
@@ -108,13 +92,8 @@ int xtract_standard_deviation(const double *data, const int N, const void *argv,
 
 int xtract_average_deviation(const double *data, const int N, const void *argv, double *result)
 {
-#ifdef __APPLE__
-    double *temp;
-    double neg_mean;
-#else
     int n;
     double sum = 0.0;
-#endif
     double mean;
 
     if (N < 1 || argv == NULL)
@@ -125,23 +104,11 @@ int xtract_average_deviation(const double *data, const int N, const void *argv, 
 
     mean = *(double *)argv;
 
-#ifdef __APPLE__
-    temp = (double *)malloc(N * sizeof(double));
-    if (temp == NULL)
-        return XTRACT_MALLOC_FAILED;
-
-    neg_mean = -mean;
-    vDSP_vsaddD(data, 1, &neg_mean, temp, 1, N);
-    vDSP_vabsD(temp, 1, temp, 1, N);
-    vDSP_meanvD(temp, 1, result, N);
-    free(temp);
-#else
 #pragma omp simd reduction(+ : sum)
     for (n = 0; n < N; n++)
         sum += fabs(data[n] - mean);
 
     *result = sum / N;
-#endif
 
     return XTRACT_SUCCESS;
 }
@@ -265,13 +232,8 @@ int xtract_spectral_variance(const double *data, const int N, const void *argv, 
     const double *amps = data;
     const double *freqs = data + m;
     double arg0;
-#ifdef __APPLE__
-    double neg_c;
-    double *d;
-#else
     int mm;
     double sum = 0.0;
-#endif
 
     if (N < 2 || (N & 1) || argv == NULL)
     {
@@ -281,18 +243,6 @@ int xtract_spectral_variance(const double *data, const int N, const void *argv, 
 
     arg0 = *(double *)argv;
 
-#ifdef __APPLE__
-    neg_c = -arg0;
-    d = (double *)malloc(m * sizeof(double));
-    if (d == NULL)
-        return XTRACT_MALLOC_FAILED;
-
-    vDSP_vsaddD(freqs, 1, &neg_c, d, 1, m); /* d = freqs - centroid */
-    vDSP_vsqD(d, 1, d, 1, m);               /* d = (freqs - centroid)^2 */
-    vDSP_dotprD(d, 1, amps, 1, result, m);  /* sum(d * amps) */
-    vDSP_sveD(amps, 1, &A, m);              /* sum(amps) */
-    free(d);
-#else
 #pragma omp simd reduction(+ : A, sum)
     for (mm = 0; mm < m; mm++)
     {
@@ -301,7 +251,6 @@ int xtract_spectral_variance(const double *data, const int N, const void *argv, 
     }
 
     *result = sum;
-#endif
 
     if (A == 0.0)
     {
@@ -333,13 +282,8 @@ int xtract_spectral_skewness(const double *data, const int N, const void *argv, 
     const double *freqs = data + m;
     double arg0, arg1;
     double sum_amps = 0.0;
-#ifdef __APPLE__
-    double neg_c;
-    double *d, *t;
-#else
     int mm;
     double sum = 0.0;
-#endif
 
     if (N < 2 || (N & 1) || argv == NULL)
     {
@@ -357,19 +301,6 @@ int xtract_spectral_skewness(const double *data, const int N, const void *argv, 
         return XTRACT_NO_RESULT;
     }
 
-#ifdef __APPLE__
-    neg_c = -arg0;
-    d = (double *)malloc(2 * (size_t)m * sizeof(double));
-    if (d == NULL)
-        return XTRACT_MALLOC_FAILED;
-    t = d + m;
-    vDSP_vsaddD(freqs, 1, &neg_c, d, 1, m); /* d = freqs - centroid */
-    vDSP_vmulD(d, 1, d, 1, t, 1, m);        /* t = d^2 */
-    vDSP_vmulD(t, 1, d, 1, t, 1, m);        /* t = d^3 */
-    vDSP_dotprD(t, 1, amps, 1, result, m);  /* sum(d^3 * amps) */
-    vDSP_sveD(amps, 1, &sum_amps, m);
-    free(d);
-#else
 #pragma omp simd reduction(+ : sum, sum_amps)
     for (mm = 0; mm < m; mm++)
     {
@@ -378,7 +309,6 @@ int xtract_spectral_skewness(const double *data, const int N, const void *argv, 
     }
 
     *result = sum;
-#endif
 
     if (sum_amps == 0.0)
     {
@@ -398,13 +328,8 @@ int xtract_spectral_kurtosis(const double *data, const int N, const void *argv, 
     const double *freqs = data + m;
     double arg0, arg1;
     double sum_amps = 0.0;
-#ifdef __APPLE__
-    double neg_c;
-    double *d;
-#else
     int mm;
     double sum = 0.0;
-#endif
 
     if (N < 2 || (N & 1) || argv == NULL)
     {
@@ -423,18 +348,6 @@ int xtract_spectral_kurtosis(const double *data, const int N, const void *argv, 
 
     *result = 0.0;
 
-#ifdef __APPLE__
-    neg_c = -arg0;
-    d = (double *)malloc((size_t)m * sizeof(double));
-    if (d == NULL)
-        return XTRACT_MALLOC_FAILED;
-    vDSP_vsaddD(freqs, 1, &neg_c, d, 1, m); /* d = freqs - centroid */
-    vDSP_vsqD(d, 1, d, 1, m);               /* d = d^2 */
-    vDSP_vsqD(d, 1, d, 1, m);               /* d = d^4 */
-    vDSP_dotprD(d, 1, amps, 1, result, m);  /* sum(d^4 * amps) */
-    vDSP_sveD(amps, 1, &sum_amps, m);
-    free(d);
-#else
 #pragma omp simd reduction(+ : sum, sum_amps)
     for (mm = 0; mm < m; mm++)
     {
@@ -443,7 +356,6 @@ int xtract_spectral_kurtosis(const double *data, const int N, const void *argv, 
     }
 
     *result = sum;
-#endif
 
     if (sum_amps == 0.0)
     {
