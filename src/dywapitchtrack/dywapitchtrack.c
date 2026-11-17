@@ -102,7 +102,7 @@ typedef struct _minmax {
 	struct _minmax *next;
 } minmax;
 
-double _dywapitch_computeWaveletPitch(const double * samples, int startsample, int samplecount) {
+double _dywapitch_computeWaveletPitch(const double * samples, int startsample, int samplecount, double *sam, int *work) {
 	double pitchF = 0.0;
 	
 	int i, j;
@@ -111,13 +111,12 @@ double _dywapitch_computeWaveletPitch(const double * samples, int startsample, i
 	// must be a power of 2
 	samplecount = _floor_power2(samplecount);
 	
-	double *sam = (double *)malloc(sizeof(double)*samplecount);
 	memcpy(sam, samples + startsample, sizeof(double)*samplecount);
 	int curSamNb = samplecount;
 	
-	int *distances = (int *)malloc(sizeof(int)*samplecount);
-	int *mins = (int *)malloc(sizeof(int)*samplecount);
-	int *maxs = (int *)malloc(sizeof(int)*samplecount);
+	int *distances = work;
+	int *mins = work + samplecount;
+	int *maxs = work + 2*samplecount;
 	int nbMins, nbMaxs;
 	
 	// algorithm parameters
@@ -328,11 +327,6 @@ double _dywapitch_computeWaveletPitch(const double * samples, int startsample, i
 	
 	///
 cleanup:
-	free(distances);
-	free(mins);
-	free(maxs);
-	free(sam);
-	
 	return pitchF;
 }
 
@@ -439,8 +433,8 @@ void dywapitch_inittracking(dywapitchtracker *pitchtracker) {
 	pitchtracker->_pitchConfidence = -1;
 }
 
-double dywapitch_computepitch(dywapitchtracker *pitchtracker, const double * samples, int startsample, int samplecount) {
-	double raw_pitch = _dywapitch_computeWaveletPitch(samples, startsample, samplecount);
+double dywapitch_computepitch(dywapitchtracker *pitchtracker, const double * samples, int startsample, int samplecount, double *sam, int *work) {
+	double raw_pitch = _dywapitch_computeWaveletPitch(samples, startsample, samplecount, sam, work);
 	return _dywapitch_dynamicprocess(pitchtracker, raw_pitch);
 }
 

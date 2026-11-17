@@ -69,8 +69,9 @@
  dywapitchtracker pitchtracker;
  dywapitch_inittracking(&pitchtracker);
  
- // For each available audio buffer, call 'dywapitch_computepitch'
- double thepitch = dywapitch_computepitch(&pitchtracker, samples, start, count);
+ // For each available audio buffer, call 'dywapitch_computepitch',
+ // passing two buffers for it to work in: 'count' doubles and 3 * 'count' ints
+ double thepitch = dywapitch_computepitch(&pitchtracker, samples, start, count, sam, work);
  
 */
 
@@ -99,8 +100,10 @@ void dywapitch_inittracking(dywapitchtracker *pitchtracker);
 // samples : a pointer to the sample buffer
 // startsample : the index of teh first sample to use in teh sample buffer
 // samplecount : the number of samples to use to compte the pitch
+// sam : a buffer of samplecount doubles for the function to work in
+// work : a buffer of 3 * samplecount ints for the function to work in
 // return 0.0 if no pitch was found (sound too low, noise, etc..)
-double dywapitch_computepitch(dywapitchtracker *pitchtracker, const double * samples, int startsample, int samplecount);
+double dywapitch_computepitch(dywapitchtracker *pitchtracker, const double * samples, int startsample, int samplecount, double *sam, int *work);
 
 #ifdef __cplusplus
 } // extern "C"

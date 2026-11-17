@@ -30,8 +30,9 @@ and keep their upstream licence and style. None of them is covered by
   The files do not give an address
 - Version: none recorded in the files
 - Revision: none recorded. The copy differs from the one first vendored in
-  three ways: the sample buffer parameters are `const`, `abs` is `fabs`, and
-  one product is cast to `double`
+  four ways: the sample buffer parameters are `const`, `abs` is `fabs`, one
+  product is cast to `double`, and `dywapitch_computepitch` works in two
+  buffers that its caller passes and does not allocate
 - Licence: MIT
 - Copyright: Copyright (c) 2010 Antoine Schmitt
 - Used for: `xtract_wavelet_f0`

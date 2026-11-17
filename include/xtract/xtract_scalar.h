@@ -453,7 +453,7 @@ extern "C"
 
     /** \brief Extract the fundamental frequency of an input vector using wavelet-based method
      *
-     * \param *ctx: a pointer to a context, or NULL
+     * \param *ctx: a pointer to a context created for at least N elements
      * \param *data: a pointer to the first element in an array of doubles representing an audio vector
      * \param N: the number of elements to be considered, at least 1
      * \param *argv: a pointer to the xtract_wavelet_f0_state of the stream the frame belongs to, as allocated by xtract_wavelet_f0_state_new()
