@@ -929,19 +929,13 @@ int xtract_lpcc(xtract_context *ctx, const double *data, const int N, const void
     int order; /* LPC order p (data[0] is the gain term) */
     int cep_length;
 
-    if (N < 2)
+    if (N < 2 || argv == NULL)
         return XTRACT_ARGUMENT_ERROR;
 
     order = N - 1;
-
-    if (argv == NULL)
-        cep_length = order; /* default keeps the output no longer than the input */
-    else
-    {
-        cep_length = *(int *)argv;
-        if (cep_length <= 0)
-            return XTRACT_ARGUMENT_ERROR;
-    }
+    cep_length = *(const int *)argv;
+    if (cep_length <= 0)
+        return XTRACT_ARGUMENT_ERROR;
 
     memset(result, 0, cep_length * sizeof(double));
 
@@ -1335,12 +1329,9 @@ int xtract_chroma(xtract_context *ctx, const double *data, const int N, const vo
     reference = ((const double *)argv)[0];
     lowest = ((const double *)argv)[1];
     highest = ((const double *)argv)[2];
-    if (!isfinite(reference) || reference < 0.0 || !isfinite(lowest) || lowest < 0.0 ||
+    if (!isfinite(reference) || reference <= 0.0 || !isfinite(lowest) || lowest < 0.0 ||
         !isfinite(highest) || highest < 0.0 || (highest > 0.0 && highest <= lowest))
         return XTRACT_ARGUMENT_ERROR;
-
-    if (reference == 0.0)
-        reference = XTRACT_CHROMA_REFERENCE_DEFAULT;
 
     M = N >> 1;
     freqs = data + M;

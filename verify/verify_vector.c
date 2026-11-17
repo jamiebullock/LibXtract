@@ -258,7 +258,7 @@ void verify_lpcc(void)
     double *data = nondet_doubles(N);
     const int order = nondet_between(-1, VERIFY_MAX_N);
     const void *argv = nondet_argv(&order);
-    double *result = nondet_doubles(argv == NULL ? at_least_zero(N - 1) : at_least_zero(order));
+    double *result = nondet_doubles(at_least_zero(order));
 
     (void)xtract_lpcc(NULL, data, N, argv, result);
     free(data);

@@ -630,9 +630,11 @@ UTEST(descriptors, appended_features_are_fully_described)
     CHECK_REL(fd[XTRACT_CHROMA].argv.def[0], 440.0, EPSILON);
     CHECK_REL(fd[XTRACT_CHROMA].argv.def[1], 40.0, EPSILON);
     CHECK_REL(fd[XTRACT_CHROMA].argv.def[2], 5000.0, EPSILON);
+    ASSERT_EQ(fd[XTRACT_CHROMA].argv.min[0], DBL_MIN);
+    ASSERT_EQ(fd[XTRACT_CHROMA].argv.min[1], 0.0);
+    ASSERT_EQ(fd[XTRACT_CHROMA].argv.min[2], 0.0);
     for (i = 0; i < 3; i++)
     {
-        CHECK_NEAR(fd[XTRACT_CHROMA].argv.min[i], 0.0, EPSILON);
         ASSERT_EQ(fd[XTRACT_CHROMA].argv.max[i], XTRACT_UNBOUNDED_MAX);
         ASSERT_EQ(fd[XTRACT_CHROMA].argv.unit[i], XTRACT_HERTZ);
         ASSERT_EQ(fd[XTRACT_CHROMA].argv.donor[i], XTRACT_ANY);
@@ -858,7 +860,7 @@ static int conf_call_n(const xtract_function_descriptor_t *d)
 
 static int conf_null_argv_allowed(const xtract_function_descriptor_t *d)
 {
-    return d->argc == 0 || d->id == XTRACT_LPCC || d->id == XTRACT_HPS;
+    return d->argc == 0;
 }
 
 static int conf_bounds_checkable(const xtract_function_descriptor_t *d, int i)

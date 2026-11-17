@@ -2851,6 +2851,7 @@ UTEST(scalar, spectral_features_reject_an_odd_or_too_short_input_and_a_null_argv
     double data[4] = {1.0, 2.0, 100.0, 200.0};
     double moments[2] = {150.0, 50.0};
     double f0 = 100.0;
+    double harmonics = 3.0;
     double result;
 
     ASSERT_REJECTED(xtract_spectral_centroid(NULL, data, 3, NULL, &result));
@@ -2874,8 +2875,9 @@ UTEST(scalar, spectral_features_reject_an_odd_or_too_short_input_and_a_null_argv
     ASSERT_REJECTED(xtract_spectral_inharmonicity(NULL, data, 4, NULL, &result));
     ASSERT_REJECTED(xtract_odd_even_ratio(NULL, data, 3, &f0, &result));
     ASSERT_REJECTED(xtract_odd_even_ratio(NULL, data, 4, NULL, &result));
-    ASSERT_REJECTED(xtract_hps(NULL, data, 3, NULL, &result));
-    ASSERT_REJECTED(xtract_hps(NULL, data, 2, NULL, &result));
+    ASSERT_REJECTED(xtract_hps(NULL, data, 3, &harmonics, &result));
+    ASSERT_REJECTED(xtract_hps(NULL, data, 2, &harmonics, &result));
+    ASSERT_REJECTED(xtract_hps(NULL, data, 4, NULL, &result));
 
     ASSERT_EQ(xtract_spectral_centroid(NULL, data, 2, NULL, &result), XTRACT_SUCCESS);
     CHECK_REL(result, 2.0, EPSILON);

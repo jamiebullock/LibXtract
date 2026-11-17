@@ -222,10 +222,10 @@ extern "C"
      * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to an array of N doubles: a gain term followed by the p LPC coefficients a[1] to a[p], e.g. one element followed by the second half of the array pointed to by *result from xtract_lpc(). The gain term is not read
      * \param N: the size of the array pointed to by *data, one more than the number of LPC coefficients p, at least 2
-     * \param *argv: a pointer to an int representing the order (Q) of the result vector. Must be greater than 0. According to Rabiner and Juang the recommended ratio is Q ~ (3/2)p where p is the number of LPC coefficients and Q > p; XTRACT_LPCC_CEPSTRUM_ORDER(p) computes this value. If argv is NULL, Q defaults to p (the result is then no longer than the input).
+     * \param *argv: a pointer to an int representing the order (Q) of the result vector. Must be greater than 0. According to Rabiner and Juang the recommended ratio is Q ~ (3/2)p where p is the number of LPC coefficients and Q > p; XTRACT_LPCC_CEPSTRUM_ORDER(p) computes this value.
      * \param *result: a pointer to an array containing the resultant LPCC.
      *
-     * An array of size Q must be allocated, and *result must point to its first element. With an explicit argv, Q is argv[0]; with argv == NULL, Q is the number of LPC coefficients.
+     * An array of size Q must be allocated, and *result must point to its first element.
      *
      */
     int xtract_lpcc(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
@@ -344,7 +344,7 @@ extern "C"
      * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles containing N/2 magnitude/power coefficients followed by N/2 bin frequencies in Hz, e.g. the *result from xtract_spectrum(). The coefficients are summed as given, so a power spectrum gives the energy in each class
      * \param N: the size of the array pointed to by *data, at least 2 and even
-     * \param *argv: a pointer to an array of three doubles, each finite and at least 0: the frequency of A4 in Hz, with 0 selecting 440; the lowest bin frequency included, with 0 including every bin above 0 Hz; and the highest bin frequency included, with 0 including every bin above the lowest, and otherwise greater than the lowest. The 40 Hz and 5000 Hz range the descriptor gives as defaults is applied only when passed
+     * \param *argv: a pointer to an array of three finite doubles: the frequency of A4 in Hz, above 0; the lowest bin frequency included, at least 0, with 0 including every bin above 0 Hz; and the highest bin frequency included, with 0 including every bin above the lowest, and otherwise greater than the lowest. The 440 Hz, 40 Hz and 5000 Hz the descriptor gives as defaults are applied only when passed
      * \param *result: a pointer to an array of XTRACT_PITCH_CLASSES doubles, the first for C and the last for B, each from the bins whose frequency rounds to that pitch class in any octave, scaled to a maximum of 1. The array is zeroed with no result when no included bin has a positive coefficient; bins at or below 0 Hz are never included
      *
      * \note For pitch classes from constant-Q bands, which resolve the semitones of the low octaves that the bins of xtract_spectrum() merge, pass the *result of xtract_cqt() with N twice its number of bands

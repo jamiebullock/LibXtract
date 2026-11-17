@@ -1181,15 +1181,15 @@ int xtract_hps(xtract_context *ctx, const double *data, const int N, const void 
      * r * (i + off) - off, and a DC coefficient is never a candidate. */
     const int M = N / 2;
     const double *freqs = data + M;
-    const double harmonics = argv == NULL ? XTRACT_HPS_HARMONICS_DEF : *(const double *)argv;
     int R, i, off, first, count, peak_index, position1_lwr;
-    double q, score, peak, largest1_lwr, ratio1, below, above, denominator, delta;
+    double harmonics, q, score, peak, largest1_lwr, ratio1, below, above, denominator, delta;
 
-    if (N < 4 || (N & 1))
+    if (N < 4 || (N & 1) || argv == NULL)
     {
         *result = 0;
         return XTRACT_ARGUMENT_ERROR;
     }
+    harmonics = *(const double *)argv;
 
     /* The comparisons are false for NaN, and a fractional count has no
      * meaning, so both are rejected here */

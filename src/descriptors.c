@@ -157,9 +157,9 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *argv_unit = XTRACT_DBFS;
             break;
         case XTRACT_LPCC:
-            /* argv[0] is the cepstrum length (Q); when omitted xtract_lpcc
-             * defaults it to the LPC order p, so no static default applies.
-             * XTRACT_LPCC_CEPSTRUM_ORDER(p) gives the recommended Q. */
+            /* argv[0] is the cepstrum length (Q). The recommended value,
+             * XTRACT_LPCC_CEPSTRUM_ORDER(p), follows the LPC order p, so no
+             * static default applies. */
             *argv_min = 1;
             *argv_max = XTRACT_UNBOUNDED_MAX;
             *argv_def = XTRACT_NO_DEFAULT;
@@ -400,7 +400,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *(argv_unit + 2) = XTRACT_UNIT_NONE;
             break;
         case XTRACT_CHROMA:
-            *argv_min = 0.0;
+            *argv_min = DBL_MIN;
             *argv_max = XTRACT_UNBOUNDED_MAX;
             *argv_def = 440.0;
             *argv_unit = XTRACT_HERTZ;

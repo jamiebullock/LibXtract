@@ -274,7 +274,7 @@ UTEST(vector, lpcc_rejects_fewer_than_two_coefficients)
     int cep_length = 3;
 
     ASSERT_EQ(xtract_lpcc(NULL, lpc, 1, &cep_length, result), XTRACT_ARGUMENT_ERROR);
-    ASSERT_EQ(xtract_lpcc(NULL, lpc, 0, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_lpcc(NULL, lpc, 0, &cep_length, result), XTRACT_ARGUMENT_ERROR);
     CHECK_REL(result[0], -1.0, EPSILON);
     ASSERT_EQ(xtract_lpcc(NULL, lpc, 2, &cep_length, result), XTRACT_SUCCESS);
 }
@@ -302,20 +302,14 @@ UTEST(vector, lpcc_computes_cepstral_recursion_for_int_argv)
     CHECK_REL(result[1], 0.375, EPSILON);
 }
 
-UTEST(vector, lpcc_null_argv_defaults_to_lpc_order)
+UTEST(vector, lpcc_rejects_a_null_argv)
 {
-    /* With argv == NULL the cepstrum length defaults to the LPC order p, so
-     * the output is no longer than the input. Here p = N - 1 = 2:
-     * c[1] = a[1] = 0.5
-     * c[2] = a[2] + (1 * c[1] * a[1]) / 2 = 0.375
-     * The recursion never reaches c[3], so result[2] is left untouched. */
     double lpc[3] = {0.0, 0.5, 0.25};
-    double result[3] = {-1.0, -1.0, -1.0};
+    double result[2] = {-1.0, -1.0};
 
-    ASSERT_EQ(xtract_lpcc(NULL, lpc, 3, NULL, result), XTRACT_SUCCESS);
-    CHECK_REL(result[0], 0.5, EPSILON);
-    CHECK_REL(result[1], 0.375, EPSILON);
-    ASSERT_EQ(result[2], -1.0);
+    ASSERT_EQ(xtract_lpcc(NULL, lpc, 3, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result[0], -1.0);
+    ASSERT_EQ(result[1], -1.0);
 }
 
 UTEST(vector, lpcc_cepstrum_order_macro_rounds_three_halves_p)
@@ -850,6 +844,8 @@ UTEST(vector, spectrum_of_single_cosine_peaks_at_cosine_frequency)
 
 /* ===== xtract_hps ===== */
 
+static const double HPS_HARMONICS = 3.0;
+
 UTEST(scalar, hps_finds_fundamental_of_harmonic_signal)
 {
     /* Create a synthetic spectrum with harmonics at bins 10, 20, 30.
@@ -875,7 +871,7 @@ UTEST(scalar, hps_finds_fundamental_of_harmonic_signal)
     for (i = 0; i < M; i++)
         data[M + i] = (i + 1) * freq_res;
 
-    xtract_hps(NULL, data, N, NULL, &result);
+    xtract_hps(NULL, data, N, &HPS_HARMONICS, &result);
 
     CHECK_REL(result, 10.0 * freq_res, 1e-3);
 }
@@ -899,7 +895,7 @@ UTEST(scalar, hps_finds_fundamental_in_dc_included_layout)
     for (i = 0; i < M; i++)
         data[M + i] = i * freq_res;
 
-    xtract_hps(NULL, data, N, NULL, &result);
+    xtract_hps(NULL, data, N, &HPS_HARMONICS, &result);
 
     CHECK_REL(result, 10.0 * freq_res, 1e-3);
 }
@@ -930,7 +926,7 @@ UTEST(scalar, hps_through_default_spectrum_finds_the_correct_bin)
     xtract_windowed(NULL, signal, N, window, windowed);
     xtract_spectrum(ctx, windowed, N, argv, spectrum);
 
-    rv = xtract_hps(NULL, spectrum, N, NULL, &result);
+    rv = xtract_hps(NULL, spectrum, N, &HPS_HARMONICS, &result);
 
     ASSERT_EQ(rv, XTRACT_SUCCESS);
     ASSERT_TRUE(fabs(result - f0) < 0.01 * q);
@@ -965,7 +961,7 @@ UTEST(scalar, hps_interpolates_a_fundamental_between_bins)
     xtract_windowed(NULL, signal, N, window, windowed);
     xtract_spectrum(ctx, windowed, N, argv, spectrum);
 
-    rv = xtract_hps(NULL, spectrum, N, NULL, &result);
+    rv = xtract_hps(NULL, spectrum, N, &HPS_HARMONICS, &result);
 
     ASSERT_EQ(rv, XTRACT_SUCCESS);
     ASSERT_TRUE(fabs(result - f0) < 0.05 * q);
@@ -998,7 +994,8 @@ UTEST(scalar, hps_harmonic_count_recovers_a_tone_with_a_missing_second_harmonic)
     for (i = 0; i < M; i++)
         data[M + i] = (i + 1) * 100.0;
 
-    ASSERT_EQ(xtract_hps(NULL, data, N, NULL, &result), XTRACT_SUCCESS);
+    harmonics = 3.0;
+    ASSERT_EQ(xtract_hps(NULL, data, N, &harmonics, &result), XTRACT_SUCCESS);
     CHECK_REL(result, 2000.0, 1e-3);
 
     harmonics = 5.0;
@@ -1021,7 +1018,7 @@ UTEST(scalar, hps_rejects_a_non_uniform_frequency_grid)
     data[32] = 100.0;
     data[33] = 100.0;
 
-    ASSERT_EQ(xtract_hps(NULL, data, 64, NULL, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_hps(NULL, data, 64, &HPS_HARMONICS, &result), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(result, 0.0);
 }
 
@@ -1035,13 +1032,13 @@ UTEST(scalar, hps_rejects_a_grid_that_starts_at_neither_zero_nor_one_bin)
     /* A grid starting two bins up matches neither spectrum layout */
     for (i = 0; i < 32; i++)
         data[32 + i] = (i + 2) * 100.0;
-    ASSERT_EQ(xtract_hps(NULL, data, 64, NULL, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_hps(NULL, data, 64, &HPS_HARMONICS, &result), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(result, 0.0);
 
     /* Nor does one that starts below zero */
     for (i = 0; i < 32; i++)
         data[32 + i] = (i - 1) * 100.0;
-    ASSERT_EQ(xtract_hps(NULL, data, 64, NULL, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_hps(NULL, data, 64, &HPS_HARMONICS, &result), XTRACT_ARGUMENT_ERROR);
 }
 
 UTEST(scalar, hps_rejects_a_grid_that_changes_spacing_after_the_first_two_bins)
@@ -1056,7 +1053,7 @@ UTEST(scalar, hps_rejects_a_grid_that_changes_spacing_after_the_first_two_bins)
     /* Valid so far; break the spacing further along */
     data[32 + 20] = 2150.0;
 
-    ASSERT_EQ(xtract_hps(NULL, data, 64, NULL, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_hps(NULL, data, 64, &HPS_HARMONICS, &result), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(result, 0.0);
 }
 
@@ -1082,6 +1079,22 @@ UTEST(scalar, hps_rejects_a_fractional_or_non_finite_harmonic_count)
     harmonics = 3.0;
     ASSERT_EQ(xtract_hps(NULL, data, 64, &harmonics, &result), XTRACT_SUCCESS);
     CHECK_REL(result, 5000.0, 1e-3);
+}
+
+UTEST(scalar, hps_rejects_a_null_argv)
+{
+    double data[64] = {0};
+    double result = 999.0;
+    int i;
+
+    data[4] = 1.0;
+    data[9] = 0.8;
+    data[14] = 0.5;
+    for (i = 0; i < 32; i++)
+        data[32 + i] = (i + 1) * 1000.0;
+
+    ASSERT_EQ(xtract_hps(NULL, data, 64, NULL, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
 }
 
 /* ===== xtract_lpc known values ===== */
@@ -1587,7 +1600,7 @@ UTEST(scalar, hps_all_zero_spectrum_yields_no_result_rather_than_nan)
     double result = 999.0;
     int rv;
 
-    rv = xtract_hps(NULL, data, N, NULL, &result);
+    rv = xtract_hps(NULL, data, N, &HPS_HARMONICS, &result);
 
     ASSERT_EQ(rv, XTRACT_NO_RESULT);
     ASSERT_EQ(result, 0.0);
@@ -1611,7 +1624,7 @@ UTEST(scalar, hps_second_loop_should_not_read_frequency_data_as_amplitudes)
     for (i = 0; i < M; i++)
         data[M + i] = (i + 1) * freq_res;
 
-    xtract_hps(NULL, data, N, NULL, &result);
+    xtract_hps(NULL, data, N, &HPS_HARMONICS, &result);
 
     CHECK_REL(result, 5.0 * freq_res, 1e-3);
 }
@@ -3285,10 +3298,10 @@ UTEST(chroma, a_bin_rounds_to_the_nearest_pitch_class_and_the_largest_class_is_o
     CHECK_NEAR(result[PC_C], 0.0, EPSILON);
 }
 
-UTEST(chroma, the_reference_moves_every_class_and_zero_selects_440)
+UTEST(chroma, the_reference_moves_every_class)
 {
     double data[] = {1.0, 1.0, 440.0, 660.0};
-    double argv[] = {0.0, 0.0, 0.0};
+    double argv[] = {440.0, 0.0, 0.0};
     double result[XTRACT_PITCH_CLASSES];
     ASSERT_EQ(xtract_chroma(NULL, data, 4, argv, result), XTRACT_SUCCESS);
     CHECK_REL(result[PC_A], 1.0, EPSILON);
@@ -3374,6 +3387,8 @@ UTEST(chroma, rejects_bad_arguments)
     ASSERT_EQ(xtract_chroma(NULL, data, 3, argv, result), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(xtract_chroma(NULL, data, 0, argv, result), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(xtract_chroma(NULL, data, 4, NULL, result), XTRACT_ARGUMENT_ERROR);
+    argv[0] = 0.0;
+    ASSERT_EQ(xtract_chroma(NULL, data, 4, argv, result), XTRACT_ARGUMENT_ERROR);
     argv[0] = -1.0;
     ASSERT_EQ(xtract_chroma(NULL, data, 4, argv, result), XTRACT_ARGUMENT_ERROR);
     argv[0] = NAN;
