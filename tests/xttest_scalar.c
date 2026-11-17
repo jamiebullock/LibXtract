@@ -2188,6 +2188,7 @@ UTEST(decay_rate, rejects_bad_arguments)
 {
     double data[] = {1.0, 0.5};
     double negative_rate[] = {-1.0, 0.4};
+    double zero_rate[] = {0.0, 0.4};
     double threshold_above_one[] = {1.0, 2.0};
     double good[] = {1.0, 0.4};
     double result = 1.0;
@@ -2196,6 +2197,9 @@ UTEST(decay_rate, rejects_bad_arguments)
     ASSERT_EQ(result, 0.0);
     result = 1.0;
     ASSERT_EQ(xtract_decay_rate(NULL, data, 2, negative_rate, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    result = 1.0;
+    ASSERT_EQ(xtract_decay_rate(NULL, data, 2, zero_rate, &result), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(result, 0.0);
     result = 1.0;
     ASSERT_EQ(xtract_decay_rate(NULL, data, 2, threshold_above_one, &result), XTRACT_ARGUMENT_ERROR);
@@ -2274,19 +2278,28 @@ UTEST(mcleod_f0, interpolates_a_period_that_falls_between_lags)
     CHECK_REL(result, sr / period, 2e-3);
 }
 
-UTEST(mcleod_f0, zero_sample_rate_means_44100)
+UTEST(scalar, pitch_functions_reject_a_sample_rate_that_is_not_finite_and_above_zero)
 {
-    const int N = 512;
-    const double zero = 0.0;
-    double data[512];
-    double result = 0.0;
-    int n;
+    const double rates[4] = {0.0, -44100.0, NAN, INFINITY};
+    double data[64];
+    double result;
+    int n, r;
 
-    for (n = 0; n < N; n++)
+    for (n = 0; n < 64; n++)
         data[n] = sin(2.0 * M_PI * n / 16.0);
 
-    ASSERT_EQ(xtract_mcleod_f0(xttest_context(), data, N, &zero, &result), XTRACT_SUCCESS);
-    CHECK_REL(result, 44100.0 / 16.0, 1e-3);
+    for (r = 0; r < 4; r++)
+    {
+        result = -1.0;
+        ASSERT_EQ(xtract_f0(xttest_context(), data, 64, &rates[r], &result), XTRACT_ARGUMENT_ERROR);
+        ASSERT_EQ(result, 0.0);
+        result = -1.0;
+        ASSERT_EQ(xtract_failsafe_f0(xttest_context(), data, 64, &rates[r], &result), XTRACT_ARGUMENT_ERROR);
+        ASSERT_EQ(result, 0.0);
+        result = -1.0;
+        ASSERT_EQ(xtract_mcleod_f0(xttest_context(), data, 64, &rates[r], &result), XTRACT_ARGUMENT_ERROR);
+        ASSERT_EQ(result, 0.0);
+    }
 }
 
 UTEST(mcleod_f0, rejects_a_null_argv)

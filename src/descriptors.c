@@ -179,7 +179,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_FAILSAFE_F0:
         case XTRACT_WAVELET_F0:
         case XTRACT_MCLEOD_F0:
-            *argv_min = 0.0;
+            *argv_min = DBL_MIN;
             *argv_max = XTRACT_UNBOUNDED_MAX;
             *argv_def = XTRACT_SR_DEFAULT;
             *argv_unit = XTRACT_HERTZ;
@@ -208,7 +208,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *(argv_unit + 1) = XTRACT_PERCENT;
             break;
         case XTRACT_PEAK_SPECTRUM:
-            *argv_min = 0.0;
+            *argv_min = DBL_MIN;
             *argv_max = XTRACT_UNBOUNDED_MAX;
             *argv_def = XTRACT_SR_DEFAULT / 2.0;
             *argv_unit = XTRACT_HERTZ;
@@ -244,7 +244,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             break;
             /* argc = 4 */
         case XTRACT_SPECTRUM:
-            *argv_min = 0.0;
+            *argv_min = DBL_MIN;
             *argv_max = XTRACT_UNBOUNDED_MAX;
             *argv_def = XTRACT_SR_DEFAULT / XTRACT_FFT_BANDS_DEF;
             *argv_unit = XTRACT_HERTZ;
@@ -286,7 +286,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *argv_unit = XTRACT_UNIT_NONE;
             break;
         case XTRACT_ATTACK_TIME:
-            *argv_min = 0.0;
+            *argv_min = DBL_MIN;
             *argv_max = XTRACT_UNBOUNDED_MAX;
             *argv_def = XTRACT_SR_DEFAULT;
             *argv_unit = XTRACT_HERTZ;
@@ -301,7 +301,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             break;
         case XTRACT_DECAY_TIME:
         case XTRACT_DECAY_RATE:
-            *argv_min = 0.0;
+            *argv_min = DBL_MIN;
             *argv_max = XTRACT_UNBOUNDED_MAX;
             *argv_def = XTRACT_SR_DEFAULT;
             *argv_unit = XTRACT_HERTZ;

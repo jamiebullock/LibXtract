@@ -382,20 +382,19 @@ static int cqt_append_band(xtract_cqt_kernel *kernel, const int band, const doub
 xtract_cqt_kernel *xtract_init_cqt(const int N, const double sr, const double fmin, const int bins_per_octave, const int n_bins, const double threshold)
 {
     const int M = N >> 1;
-    const double sample_rate = sr == 0.0 ? XTRACT_SR_DEFAULT : sr;
     xtract_cqt_kernel *kernel;
     double *real, *imag;
     double quality, highest, longest;
     int band, j;
 
-    if (N < 2 || (N & 1) || !isfinite(sr) || sr < 0.0 || !isfinite(fmin) || fmin <= 0.0 ||
+    if (N < 2 || (N & 1) || !isfinite(sr) || sr <= 0.0 || !isfinite(fmin) || fmin <= 0.0 ||
         bins_per_octave < 1 || n_bins < 1 || !(threshold >= 0.0 && threshold <= 1.0))
         return NULL;
 
     quality = 1.0 / (pow(2.0, 1.0 / bins_per_octave) - 1.0);
     highest = fmin * pow(2.0, (double)(n_bins - 1) / bins_per_octave);
-    longest = floor(quality * sample_rate / fmin + 0.5);
-    if (!(highest * (1.0 + 0.5 / quality) < 0.5 * sample_rate) || !(longest <= (double)N))
+    longest = floor(quality * sr / fmin + 0.5);
+    if (!(highest * (1.0 + 0.5 / quality) < 0.5 * sr) || !(longest <= (double)N))
         return NULL;
 
     kernel = (xtract_cqt_kernel *)calloc(1, sizeof(xtract_cqt_kernel));
@@ -418,9 +417,9 @@ xtract_cqt_kernel *xtract_init_cqt(const int N, const double sr, const double fm
     for (band = 0; band < n_bins; band++)
     {
         const double frequency = fmin * pow(2.0, (double)band / bins_per_octave);
-        const int length = (int)floor(quality * sample_rate / frequency + 0.5);
+        const int length = (int)floor(quality * sr / frequency + 0.5);
         const int start = (N - length) / 2;
-        const double omega = 2.0 * M_PI * frequency / sample_rate;
+        const double omega = 2.0 * M_PI * frequency / sr;
         double window_sum, unused;
 
         hann_exponential_sum(0.0, length, &window_sum, &unused);

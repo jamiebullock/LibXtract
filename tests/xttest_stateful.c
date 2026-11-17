@@ -128,7 +128,7 @@ UTEST(helper, features_from_subframes_passes_its_context_to_the_feature)
      * in the last of its 4 coefficients */
     double data[] = {1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0};
     double result[16] = {0};
-    double argv[4] = {0.0, XTRACT_MAGNITUDE_SPECTRUM, 0.0, 0.0};
+    double argv[4] = {1.0, XTRACT_MAGNITUDE_SPECTRUM, 0.0, 0.0};
     xtract_context *ctx = xtract_context_new(8);
 
     ASSERT_EQ(xtract_features_from_subframes(NULL, data, 16, XTRACT_SPECTRUM, argv, result), XTRACT_BAD_STATE);
@@ -174,19 +174,20 @@ UTEST(stateful, wavelet_f0_detects_sine_pitch)
     CHECK_REL(result, frequency, 0.01);
 }
 
-UTEST(stateful, wavelet_f0_zero_sample_rate_means_44100)
+UTEST(stateful, wavelet_f0_rejects_a_sample_rate_that_is_not_finite_and_above_zero)
 {
+    const double rates[4] = {0.0, -44100.0, NAN, INFINITY};
     double table[WAVELET_N];
-    double samplerate = 44100.0;
-    double zero = 0.0;
-    double at_44100 = -1.0;
-    double at_zero = -1.0;
+    double result;
+    int r;
 
-    xtract_init_wavelet_f0_state();
-    xttest_gen_sine(table, WAVELET_N, samplerate, 440.0, 1.0);
-    ASSERT_EQ(xtract_wavelet_f0(NULL, table, WAVELET_N, &samplerate, &at_44100), XTRACT_SUCCESS);
-    ASSERT_EQ(xtract_wavelet_f0(NULL, table, WAVELET_N, &zero, &at_zero), XTRACT_SUCCESS);
-    CHECK_REL(at_zero, at_44100, EPSILON);
+    xttest_gen_sine(table, WAVELET_N, 44100.0, 440.0, 1.0);
+    for (r = 0; r < 4; r++)
+    {
+        result = -1.0;
+        ASSERT_EQ(xtract_wavelet_f0(NULL, table, WAVELET_N, &rates[r], &result), XTRACT_ARGUMENT_ERROR);
+        ASSERT_EQ(result, 0.0);
+    }
 }
 
 UTEST(stateful, wavelet_f0_silence_yields_no_result)
@@ -262,6 +263,21 @@ UTEST(stateful, failsafe_f0_fallback_leaves_the_result_untouched_when_the_contex
     xttest_gen_sine(table, FAILSAFE_N, samplerate, frequency, 1.0);
     ASSERT_EQ(xtract_failsafe_f0(ctx, table, FAILSAFE_N, &samplerate, &result), XTRACT_BAD_STATE);
     ASSERT_EQ(result, -1.0);
+    xtract_context_delete(ctx);
+}
+
+UTEST(stateful, failsafe_f0_fallback_rejects_a_rate_that_gives_a_bin_spacing_of_zero)
+{
+    /* The smallest positive double, which is 0 once divided by the length */
+    double table[FAILSAFE_N];
+    double samplerate = DBL_MIN * DBL_EPSILON;
+    double result = -1.0;
+    xtract_context *ctx = xtract_context_new(FAILSAFE_N);
+
+    xttest_gen_sine(table, FAILSAFE_N, 44100.0, 86.1328125, 1.0);
+    ASSERT_TRUE(samplerate > 0.0);
+    ASSERT_EQ(xtract_failsafe_f0(ctx, table, FAILSAFE_N, &samplerate, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
     xtract_context_delete(ctx);
 }
 
