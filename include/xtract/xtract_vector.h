@@ -26,7 +26,7 @@ extern "C"
 
     /** \brief Extract frequency domain spectrum from time domain signal
      *
-     * \param *ctx: a pointer to a context created for at least N elements. With none, or with one created for fewer, the function returns XTRACT_BAD_STATE
+     * \param *ctx: a pointer to a context created for at least N elements
      * \param *data: a pointer to the first element in an array of doubles representing an audio vector
      * \param N: the number of array elements to be considered, a power of two of at least 2
      * \param *argv: a pointer to an array of doubles, the first representing (samplerate / N), finite and at least 0 (0 selects 44100 / N), the second will be cast to an integer and determines the spectrum type, a value of the enumeration xtract_spectrum_ (e.g. XTRACT_MAGNITUDE_SPECTRUM, XTRACT_LOG_POWER_SPECTRUM). The third argument determines whether or not the DC component is included in the output. If argv[2] == 0 (the default), the N/2 coefficients are bins 1 to N/2, so the Nyquist bin is included, DC is not, and the frequency of coefficient m is (m + 1) * samplerate / N. If argv[2] == 1, the N/2 coefficients are bins 0 to N/2 - 1, so DC is included, the Nyquist bin is not, and the frequency of coefficient m is m * samplerate / N. The output is N elements in either case. The fourth argument determines whether the magnitude/power coefficients are to be normalised. If argv[3] == 1, then the coefficients are normalised. Both flags must be 0 or 1.
@@ -38,7 +38,7 @@ extern "C"
 
     /** \brief Extract autocorrelation from time domain signal using FFT based method
      *
-     * \param *ctx: a pointer to a context created for at least N elements. With none, or with one created for fewer, the function returns XTRACT_BAD_STATE
+     * \param *ctx: a pointer to a context created for at least N elements
      * \param *data: a pointer to the first element in an array of doubles representing an audio vector
      * \param N: the number of array elements to be considered, a power of two of at least 2
      * \param *argv: a pointer to NULL

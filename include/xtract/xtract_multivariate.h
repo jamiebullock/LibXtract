@@ -98,7 +98,7 @@ extern "C"
      *
      * The estimate averages over segments of L elements that overlap by half, L being the length given in argv. Each segment has its mean removed and is weighted by a Hann window. Elements after the last whole segment are not used
      *
-     * \param *ctx: a pointer to a context created for at least N elements. With none, or with one created for fewer, the function returns XTRACT_BAD_STATE
+     * \param *ctx: a pointer to a context created for at least N elements
      * \param *data: a pointer to the first element in an array of doubles comprising two series of equal length: the first series in the first N/2 elements, the second in the second N/2 elements
      * \param N: the total number of elements in the array pointed to by *data (twice the series length), even and at least 3 * L, so that each series holds two segments
      * \param *argv: a pointer to an int: the segment length L, a power of two of at least 2

@@ -440,7 +440,7 @@ extern "C"
 
     /** \brief Extract the fundamental frequency of an input vector
      *
-     * \param *ctx: a pointer to a context created for at least N elements, which the fallback needs: with none, or with one created for fewer, the fallback returns XTRACT_BAD_STATE
+     * \param *ctx: a pointer to a context created for at least N elements, which the fallback needs
      * \param *data: a pointer to the first element in an array of doubles representing an audio vector
      * \param N: the number of elements to be considered, at least 1. When xtract_f0() finds no result the fallback takes the spectrum of the N values, which needs N to be a power of two of at least 2
      * \param *argv: a pointer to a double representing the audio sample rate, finite and at least 0; 0 selects 44100 Hz
