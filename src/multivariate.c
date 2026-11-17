@@ -130,15 +130,15 @@ int xtract_cross_correlation_lag(xtract_context *ctx, const double *data, const 
         return XTRACT_ARGUMENT_ERROR;
     }
 
-    correlation = (double *)malloc((size_t)(N - 1) * sizeof(double));
+    correlation = xtract_scratch_take(ctx, N, (size_t)(N - 1));
     if (correlation == NULL)
-        return XTRACT_MALLOC_FAILED;
+        return XTRACT_BAD_STATE;
 
     rv = xtract_cross_correlation(ctx, data, N, &coefficient, correlation);
     if (rv != XTRACT_SUCCESS)
     {
         *result = 0.0;
-        free(correlation);
+        xtract_scratch_return(ctx, correlation, (size_t)(N - 1));
         return rv;
     }
 
@@ -154,7 +154,7 @@ int xtract_cross_correlation_lag(xtract_context *ctx, const double *data, const 
 
     *result = best - (M - 1);
 
-    free(correlation);
+    xtract_scratch_return(ctx, correlation, (size_t)(N - 1));
 
     return XTRACT_SUCCESS;
 }
@@ -409,9 +409,9 @@ int xtract_principal_variances(xtract_context *ctx, const double *data, const in
     if (C == 0)
         return XTRACT_ARGUMENT_ERROR;
 
-    matrix = (double *)malloc((size_t)N * sizeof(double));
+    matrix = xtract_scratch_take(ctx, N, (size_t)N);
     if (matrix == NULL)
-        return XTRACT_MALLOC_FAILED;
+        return XTRACT_BAD_STATE;
     memcpy(matrix, data, (size_t)N * sizeof(double));
 
     for (sweep = 0; sweep < XTRACT_JACOBI_MAX_SWEEPS && upper_magnitude(matrix, rows) != 0.0; sweep++)
@@ -425,7 +425,7 @@ int xtract_principal_variances(xtract_context *ctx, const double *data, const in
 
     for (p = 0; p < rows; p++)
         result[p] = matrix[p * rows + p];
-    free(matrix);
+    xtract_scratch_return(ctx, matrix, (size_t)N);
     xtract_sort_ascending(result, C);
     reverse(result, C);
 
