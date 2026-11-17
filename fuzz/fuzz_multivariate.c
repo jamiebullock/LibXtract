@@ -12,11 +12,11 @@
  *
  * All share the uniform signature and take a plain double, an int or a NULL
  * argv, so one harness drives them via the xtract[] dispatch table. The only
- * setup is the transform coherence needs, initialised once for segments of
- * COHERENCE_SEGMENT elements. The fuzzer's bytes become a feature selector,
- * a flag that passes a NULL argv, a small series count that replaces the
- * start of argv for covariance_matrix when it is not zero, an argv buffer,
- * and the input vector. Run under AddressSanitizer + UBSan.
+ * setup is a context for the longest input. The fuzzer's bytes become a
+ * feature selector, a flag that passes a NULL argv, a small count that, when
+ * it is not zero, replaces the start of argv with a series count for
+ * covariance_matrix and a segment length for coherence, an argv buffer, and
+ * the input vector. Run under AddressSanitizer + UBSan.
  *
  * Build/run: the fuzz preset (see fuzz/CMakeLists.txt)
  */
@@ -35,22 +35,23 @@ static const int eligible[] = {
 
 #define N_ELIGIBLE ((int)(sizeof(eligible) / sizeof(eligible[0])))
 #define MAX_N 4096
-#define COHERENCE_SEGMENT 16
+
+static xtract_context *ctx;
 
 /* covariance_matrix writes the square of its series count, which outgrows N.
  * The count is read here as the function reads it, and the result is sized
  * for every count its contract accepts. cross_correlation writes N - 1 values,
  * correlation_matrix N, principal_variances the square root of N, coherence
- * COHERENCE_SEGMENT / 2 and the others one. */
+ * half its segment length and the others one. */
 static size_t result_length(const int feature, const int n, const double *argv)
 {
     int count;
 
-    if (feature == XTRACT_COHERENCE)
-        return COHERENCE_SEGMENT / 2;
-    if (feature != XTRACT_COVARIANCE_MATRIX)
+    if (feature != XTRACT_COVARIANCE_MATRIX && feature != XTRACT_COHERENCE)
         return (size_t)n;
     memcpy(&count, argv, sizeof(count));
+    if (feature == XTRACT_COHERENCE)
+        return count > 0 && count <= n ? (size_t)count / 2 : 0;
     if (count < 1 || count > n / 2)
         return 0;
 
@@ -61,7 +62,7 @@ int LLVMFuzzerInitialize(int *argc, char ***argv)
 {
     (void)argc;
     (void)argv;
-    xtract_init_fft(COHERENCE_SEGMENT, XTRACT_COHERENCE);
+    ctx = xtract_context_new(MAX_N);
     return 0;
 }
 
@@ -70,6 +71,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     int feature;
     int null_argv;
     int small_count;
+    int segment;
     int n;
     double argv[XTRACT_MAXARGS];
     double *in;
@@ -91,6 +93,11 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     memcpy(argv, data, argv_bytes);
     if (feature == XTRACT_COVARIANCE_MATRIX && small_count > 0)
         memcpy(argv, &small_count, sizeof(small_count));
+    if (feature == XTRACT_COHERENCE && small_count > 0)
+    {
+        segment = 1 << (small_count % 12);
+        memcpy(argv, &segment, sizeof(segment));
+    }
     data += argv_bytes;
     size -= argv_bytes;
 
@@ -112,7 +119,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     memcpy(in, data, (size_t)n * sizeof(double));
     input = n > 0 ? in : in + 1;
 
-    (void)xtract[feature](NULL, input, n, null_argv ? NULL : argv, result);
+    (void)xtract[feature](ctx, input, n, null_argv ? NULL : argv, result);
 
     free(in);
     free(result);

@@ -53,17 +53,6 @@ extern "C"
         return nondet_between(0, VERIFY_SMALL_N);
     }
 
-    /** \brief A power of two in [2, VERIFY_MAX_N], the sizes xtract_init_fft() accepts */
-    static inline int nondet_fft_size(void)
-    {
-        int size = 2;
-
-        while (nondet_bool() && size * 2 <= VERIFY_MAX_N)
-            size *= 2;
-
-        return size;
-    }
-
     /** \brief A non-NULL buffer of n doubles, each of any value; n may be 0, giving a buffer nothing may be read from */
     static inline double *nondet_doubles(const int n)
     {

@@ -455,7 +455,11 @@ UTEST(descriptors, appended_features_are_fully_described)
     ASSERT_EQ(fd[XTRACT_PRINCIPAL_VARIANCES].result.vector.unit, XTRACT_UNIT_ANY);
 
     ASSERT_STREQ(fd[XTRACT_COHERENCE].algo.name, "coherence");
-    ASSERT_EQ(fd[XTRACT_COHERENCE].argc, 0);
+    ASSERT_EQ(fd[XTRACT_COHERENCE].argc, 1);
+    ASSERT_EQ(fd[XTRACT_COHERENCE].argv.type, XTRACT_INT);
+    CHECK_REL(fd[XTRACT_COHERENCE].argv.min[0], 2.0, EPSILON);
+    ASSERT_EQ(fd[XTRACT_COHERENCE].argv.max[0], XTRACT_UNBOUNDED_MAX);
+    CHECK_REL(fd[XTRACT_COHERENCE].argv.def[0], 256.0, EPSILON);
     ASSERT_EQ(fd[XTRACT_COHERENCE].data.format, XTRACT_SUBFRAMES);
     ASSERT_EQ(fd[XTRACT_COHERENCE].data.unit, XTRACT_UNIT_ANY);
     ASSERT_EQ(fd[XTRACT_COHERENCE].is_scalar, XTRACT_FALSE);
@@ -743,7 +747,8 @@ enum
 {
     CONF_N = 16,
     CONF_FILTERS = 2,
-    CONF_COHERENCE_SEGMENT = 4
+    CONF_COHERENCE_SEGMENT = 256,
+    CONF_LONGEST = 3 * CONF_COHERENCE_SEGMENT + 1
 };
 
 static int conf_two_half(const xtract_function_descriptor_t *d)
@@ -792,6 +797,8 @@ static int conf_min_n(const xtract_function_descriptor_t *d)
     case XTRACT_PETROSIAN_FRACTAL_DIMENSION:
     case XTRACT_KATZ_FRACTAL_DIMENSION:
     case XTRACT_LEMPEL_ZIV_COMPLEXITY:
+    case XTRACT_SPECTRUM:
+    case XTRACT_AUTOCORRELATION_FFT:
         return 2;
     case XTRACT_HIGUCHI_FRACTAL_DIMENSION:
         return 20;
@@ -801,8 +808,6 @@ static int conf_min_n(const xtract_function_descriptor_t *d)
         return 7;
     case XTRACT_COHERENCE:
         return 3 * CONF_COHERENCE_SEGMENT;
-    case XTRACT_SPECTRUM:
-    case XTRACT_AUTOCORRELATION_FFT:
     case XTRACT_CQT:
         return CONF_N;
     default:
@@ -827,13 +832,6 @@ static int conf_call_n(const xtract_function_descriptor_t *d)
     default:
         return conf_min_n(d);
     }
-}
-
-static int conf_below_min_code(const xtract_function_descriptor_t *d)
-{
-    if (d->id == XTRACT_SPECTRUM || d->id == XTRACT_AUTOCORRELATION_FFT)
-        return XTRACT_BAD_STATE;
-    return XTRACT_ARGUMENT_ERROR;
 }
 
 static int conf_null_argv_allowed(const xtract_function_descriptor_t *d)
@@ -906,8 +904,8 @@ static void conf_fill_data(const xtract_function_descriptor_t *d, double *data, 
 UTEST(descriptors, every_feature_conforms_to_its_descriptor)
 {
     xtract_function_descriptor_t *fd = xtract_make_descriptors();
-    double data[2 * CONF_N + 64];
-    double result[2 * CONF_N + 64];
+    double data[CONF_LONGEST];
+    double result[CONF_LONGEST];
     double argf[XTRACT_MAXARGS];
     int argi[XTRACT_MAXARGS];
     double window[XTRACT_WINDOW_SIZE];
@@ -915,15 +913,14 @@ UTEST(descriptors, every_feature_conforms_to_its_descriptor)
     double *rows[CONF_FILTERS];
     xtract_mel_filter mel;
     xtract_cqt_kernel *cqt = xtract_init_cqt(CONF_N, 1000.0, 100.0, 1, 2, 0.01);
+    xtract_context *ctx = xtract_context_new(CONF_LONGEST);
     int bark[XTRACT_BARK_BANDS];
     int f, i, rv;
     const void *argv;
 
     ASSERT_TRUE(fd != NULL);
     ASSERT_TRUE(cqt != NULL);
-    xtract_init_fft(CONF_N, XTRACT_SPECTRUM);
-    xtract_init_fft(CONF_N, XTRACT_AUTOCORRELATION_FFT);
-    xtract_init_fft(CONF_COHERENCE_SEGMENT, XTRACT_COHERENCE);
+    ASSERT_TRUE(ctx != NULL);
     for (i = 0; i < CONF_FILTERS; i++)
         rows[i] = row_store[i];
     xtract_init_mfcc(CONF_N, 22050.0, XTRACT_EQUAL_GAIN, 100.0, 8000.0, CONF_FILTERS, rows);
@@ -944,7 +941,7 @@ UTEST(descriptors, every_feature_conforms_to_its_descriptor)
         conf_fill_data(d, data, call_n);
         argv = conf_argv(d, argf, argi, &mel, bark, window, cqt);
 
-        rv = xtract[f](NULL, data, call_n, argv, result);
+        rv = xtract[f](ctx, data, call_n, argv, result);
         if (rv == XTRACT_FEATURE_NOT_IMPLEMENTED)
         {
             ASSERT_TRUE_MSG(f == XTRACT_POWER, d->algo.name);
@@ -954,29 +951,29 @@ UTEST(descriptors, every_feature_conforms_to_its_descriptor)
         ASSERT_NE_MSG(rv, XTRACT_BAD_STATE, d->algo.name);
 
         if (conf_null_argv_allowed(d))
-            ASSERT_NE_MSG(xtract[f](NULL, data, call_n, NULL, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
+            ASSERT_NE_MSG(xtract[f](ctx, data, call_n, NULL, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
         else
-            ASSERT_EQ_MSG(xtract[f](NULL, data, call_n, NULL, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
+            ASSERT_EQ_MSG(xtract[f](ctx, data, call_n, NULL, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
 
         if (min_n > 0)
-            ASSERT_EQ_MSG(xtract[f](NULL, data, min_n - 1, argv, result), conf_below_min_code(d), d->algo.name);
+            ASSERT_EQ_MSG(xtract[f](ctx, data, min_n - 1, argv, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
         if (conf_two_half(d))
-            ASSERT_EQ_MSG(xtract[f](NULL, data, min_n + 1, argv, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
+            ASSERT_EQ_MSG(xtract[f](ctx, data, min_n + 1, argv, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
         if (d->data.format == XTRACT_SQUARE_MATRIX)
-            ASSERT_EQ_MSG(xtract[f](NULL, data, 2, argv, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
+            ASSERT_EQ_MSG(xtract[f](ctx, data, 2, argv, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
         if (d->data.format == XTRACT_CHANNELS)
-            ASSERT_EQ_MSG(xtract[f](NULL, data, call_n + 1, argv, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
+            ASSERT_EQ_MSG(xtract[f](ctx, data, call_n + 1, argv, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
         if (d->data.format == XTRACT_GRID)
         {
             conf_set(d, argf, argi, 0, 2.0);
-            ASSERT_NE_MSG(xtract[f](NULL, data, 4, argv, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
-            ASSERT_EQ_MSG(xtract[f](NULL, data, 3, argv, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
+            ASSERT_NE_MSG(xtract[f](ctx, data, 4, argv, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
+            ASSERT_EQ_MSG(xtract[f](ctx, data, 3, argv, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
             conf_set(d, argf, argi, 0, conf_default(d, 0));
         }
         if (d->data.format == XTRACT_BARK_COEFFS)
-            ASSERT_EQ_MSG(xtract[f](NULL, data, XTRACT_BARK_BANDS + 1, argv, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
+            ASSERT_EQ_MSG(xtract[f](ctx, data, XTRACT_BARK_BANDS + 1, argv, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
         if (d->data.format == XTRACT_CENTRAL_MOMENT_COEFFS || d->data.format == XTRACT_NORMALISED_MOMENT_COEFFS)
-            ASSERT_EQ_MSG(xtract[f](NULL, data, min_n + 1, argv, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
+            ASSERT_EQ_MSG(xtract[f](ctx, data, min_n + 1, argv, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
 
         for (i = 0; i < d->argc && i < XTRACT_MAXARGS; i++)
         {
@@ -985,21 +982,22 @@ UTEST(descriptors, every_feature_conforms_to_its_descriptor)
             if (d->argv.min[i] != XTRACT_UNBOUNDED_MIN)
             {
                 conf_set(d, argf, argi, i, d->argv.min[i] - 1.0);
-                ASSERT_EQ_MSG(xtract[f](NULL, data, call_n, argv, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
+                ASSERT_EQ_MSG(xtract[f](ctx, data, call_n, argv, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
                 conf_set(d, argf, argi, i, d->argv.min[i]);
-                ASSERT_NE_MSG(xtract[f](NULL, data, call_n, argv, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
+                ASSERT_NE_MSG(xtract[f](ctx, data, call_n, argv, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
             }
             if (d->argv.max[i] != XTRACT_UNBOUNDED_MAX)
             {
                 conf_set(d, argf, argi, i, d->argv.max[i] + 1.0);
-                ASSERT_EQ_MSG(xtract[f](NULL, data, call_n, argv, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
+                ASSERT_EQ_MSG(xtract[f](ctx, data, call_n, argv, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
                 conf_set(d, argf, argi, i, d->argv.max[i]);
-                ASSERT_NE_MSG(xtract[f](NULL, data, call_n, argv, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
+                ASSERT_NE_MSG(xtract[f](ctx, data, call_n, argv, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
             }
             conf_set(d, argf, argi, i, conf_default(d, i));
         }
     }
 
+    xtract_context_delete(ctx);
     xtract_free_cqt(cqt);
     ASSERT_EQ(xtract_free_descriptors(fd), XTRACT_SUCCESS);
 }

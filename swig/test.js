@@ -35,10 +35,11 @@ specArgv.setitem(1, xtract.XTRACT_MAGNITUDE_SPECTRUM);
 specArgv.setitem(2, 0.0);
 specArgv.setitem(3, 0.0);
 
-xtract.xtract_init_fft(len, xtract.XTRACT_SPECTRUM);
+const ctx = xtract.xtract_context_new(len);
 
 const result = new xtract.doubleArray(len);
-xtract.xtract_spectrum(null, a.cast(), len, xtract.doublea_to_voidp(specArgv.cast()), result.cast());
+xtract.xtract_spectrum(ctx, a.cast(), len, xtract.doublea_to_voidp(specArgv.cast()), result.cast());
+xtract.xtract_context_delete(ctx);
 
 for (let i = 0; i < len; i++) {
     console.log(result.getitem(i));

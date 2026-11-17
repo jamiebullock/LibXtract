@@ -96,11 +96,7 @@ void verify_failsafe_f0(void)
     double result;
 
     verify_any_sqrt = 1;
-    if (nondet_bool())
-        xtract_init_fft(nondet_fft_size(), XTRACT_SPECTRUM);
-
     (void)xtract_failsafe_f0(NULL, data, N, nondet_argv(argv), &result);
-    xtract_free_fft();
     free(data);
     free(argv);
 }

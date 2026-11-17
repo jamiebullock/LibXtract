@@ -68,6 +68,7 @@ UTEST(vector, autocorrelation_fft_does_not_write_past_result_buffer)
     double padded_input[2 * 16];
     double guarded_result[2 * 16];
     double reference[16];
+    xtract_context *ctx = xtract_context_new(N);
     int n;
 
     for (n = 0; n < N; n++)
@@ -78,12 +79,12 @@ UTEST(vector, autocorrelation_fft_does_not_write_past_result_buffer)
     for (n = 0; n < 2 * N; n++)
         guarded_result[n] = 12345.0;
 
-    xtract_init_fft(N, XTRACT_AUTOCORRELATION_FFT);
     xtract_autocorrelation(NULL, padded_input, N, NULL, reference);
-    xtract_autocorrelation_fft(NULL, padded_input, N, NULL, guarded_result);
+    xtract_autocorrelation_fft(ctx, padded_input, N, NULL, guarded_result);
 
     for (n = N; n < 2 * N; n++)
         ASSERT_EQ(guarded_result[n], 12345.0);
+    xtract_context_delete(ctx);
 }
 
 UTEST(vector, autocorrelation_fft_matches_time_domain_regardless_of_adjacent_input)
@@ -93,6 +94,7 @@ UTEST(vector, autocorrelation_fft_matches_time_domain_regardless_of_adjacent_inp
     double padded_input[2 * 16];
     double guarded_result[2 * 16];
     double reference[16];
+    xtract_context *ctx = xtract_context_new(N);
     int n;
 
     for (n = 0; n < N; n++)
@@ -103,12 +105,12 @@ UTEST(vector, autocorrelation_fft_matches_time_domain_regardless_of_adjacent_inp
     for (n = 0; n < 2 * N; n++)
         guarded_result[n] = 12345.0;
 
-    xtract_init_fft(N, XTRACT_AUTOCORRELATION_FFT);
     xtract_autocorrelation(NULL, padded_input, N, NULL, reference);
-    xtract_autocorrelation_fft(NULL, padded_input, N, NULL, guarded_result);
+    xtract_autocorrelation_fft(ctx, padded_input, N, NULL, guarded_result);
 
     for (n = 0; n < N; n++)
         CHECK_NEAR(guarded_result[n], reference[n], 1e-9);
+    xtract_context_delete(ctx);
 }
 
 /* ===== xtract_smoothed ===== */
@@ -535,24 +537,6 @@ UTEST(vector, dct_alternates_between_two_table_sizes)
     xtract_free_dct(table8);
 }
 
-UTEST(vector, free_fft_leaves_dct_table_usable)
-{
-    double data[] = {1.0, 2.0, 3.0, 4.0};
-    double before[4], after[4];
-    double *table = xtract_init_dct(4);
-    int n;
-
-    ASSERT_TRUE(table != NULL);
-    xtract_dct(NULL, data, 4, table, before);
-    xtract_free_fft();
-    xtract_dct(NULL, data, 4, table, after);
-
-    for (n = 0; n < 4; ++n)
-        ASSERT_EQ(before[n], after[n]);
-
-    xtract_free_dct(table);
-}
-
 UTEST(vector, dct_of_impulse)
 {
     /* DCT-II of impulse at index 0:
@@ -565,7 +549,6 @@ UTEST(vector, dct_of_impulse)
     double data[] = {1.0, 0.0, 0.0, 0.0};
     double result[4] = {0};
 
-    xtract_init_fft(4, XTRACT_DCT);
     xtract_dct(NULL, data, 4, NULL, result);
 
     CHECK_REL(result[0], 1.0, 1e-6);
@@ -583,7 +566,6 @@ UTEST(vector, dct_of_constant_signal_energy_in_dc_only)
     double data[] = {3.0, 3.0, 3.0, 3.0};
     double result[4] = {0};
 
-    xtract_init_fft(4, XTRACT_DCT);
     xtract_dct(NULL, data, 4, NULL, result);
 
     CHECK_REL(result[0], 12.0, 1e-6);
@@ -679,7 +661,8 @@ static int spec_run(const int type, const int with_dc, const int normalise, doub
 {
     double data[SPEC_N];
     double argv[4];
-    int n;
+    xtract_context *ctx = xtract_context_new(SPEC_N);
+    int n, rv;
 
     argv[0] = SPEC_Q;
     argv[1] = type;
@@ -688,8 +671,10 @@ static int spec_run(const int type, const int with_dc, const int normalise, doub
     spec_signal(data);
     for (n = 0; n < SPEC_N; n++)
         result[n] = 12345.0;
-    xtract_init_fft(SPEC_N, XTRACT_SPECTRUM);
-    return xtract_spectrum(NULL, data, SPEC_N, argv, result);
+    rv = xtract_spectrum(ctx, data, SPEC_N, argv, result);
+    xtract_context_delete(ctx);
+
+    return rv;
 }
 
 UTEST(vector, spectrum_magnitude_and_power_match_the_dft_in_both_layouts)
@@ -765,16 +750,17 @@ UTEST(vector, spectrum_log_types_floor_a_silent_signal_at_exactly_zero)
     double data[SPEC_N] = {0};
     double result[SPEC_N];
     double argv[4] = {1000.0, 0, 0, 0};
+    xtract_context *ctx = xtract_context_new(SPEC_N);
     int type, m;
 
-    xtract_init_fft(SPEC_N, XTRACT_SPECTRUM);
     for (type = 0; type < 2; type++)
     {
         argv[1] = type ? XTRACT_LOG_POWER_SPECTRUM : XTRACT_LOG_MAGNITUDE_SPECTRUM;
-        ASSERT_EQ(xtract_spectrum(NULL, data, SPEC_N, argv, result), XTRACT_SUCCESS);
+        ASSERT_EQ(xtract_spectrum(ctx, data, SPEC_N, argv, result), XTRACT_SUCCESS);
         for (m = 0; m < SPEC_M; m++)
             ASSERT_EQ(result[m], 0.0);
     }
+    xtract_context_delete(ctx);
 }
 
 UTEST(vector, spectrum_magnitude_phase_keeps_magnitudes_and_a_sine_bin_reads_minus_a_quarter_turn)
@@ -823,17 +809,17 @@ UTEST(vector, spectrum_of_dc_signal_without_dc_all_bins_zero)
     double result[8] = {0};
     double sr = 8000.0;
     double argv[] = {sr / N, (double)XTRACT_POWER_SPECTRUM, 0.0, 0.0};
-
-    xtract_init_fft(N, XTRACT_SPECTRUM);
+    xtract_context *ctx = xtract_context_new(N);
 
     /* DC signal has no energy above DC. With withDC=0 (default),
      * the DC bin is discarded, so all output bins should be ~0. */
-    xtract_spectrum(NULL, data, N, argv, result);
+    xtract_spectrum(ctx, data, N, argv, result);
 
     /* First 3 amplitude bins (Nyquist may have residual) */
     CHECK_NEAR(result[0], 0.0, 1e-4);
     CHECK_NEAR(result[1], 0.0, 1e-4);
     CHECK_NEAR(result[2], 0.0, 1e-4);
+    xtract_context_delete(ctx);
 }
 
 UTEST(vector, spectrum_of_single_cosine_peaks_at_cosine_frequency)
@@ -843,15 +829,14 @@ UTEST(vector, spectrum_of_single_cosine_peaks_at_cosine_frequency)
     double result[8] = {0};
     double sr = 8000.0;
     double argv[] = {sr / N, (double)XTRACT_POWER_SPECTRUM, 0.0, 0.0};
+    xtract_context *ctx = xtract_context_new(N);
     int n;
 
     /* Generate cos(2*pi*1*n/8), with energy at bin 1 */
     for (n = 0; n < N; n++)
         data[n] = cos(2.0 * M_PI * 1.0 * n / N);
 
-    xtract_init_fft(N, XTRACT_SPECTRUM);
-
-    xtract_spectrum(NULL, data, N, argv, result);
+    xtract_spectrum(ctx, data, N, argv, result);
 
     /* Bin 0 (FFT bin 1) should have the most energy.
      * Exact value is platform-dependent (Accelerate vs OOURA scaling),
@@ -859,6 +844,7 @@ UTEST(vector, spectrum_of_single_cosine_peaks_at_cosine_frequency)
     ASSERT_GT(result[0], 0.0);
     ASSERT_GT(result[0], result[1]);
     ASSERT_GT(result[0], result[2]);
+    xtract_context_delete(ctx);
 }
 
 /* ===== xtract_hps ===== */
@@ -928,6 +914,7 @@ UTEST(scalar, hps_through_default_spectrum_finds_the_correct_bin)
     const double f0 = 20.0 * q;
     double signal[512], windowed[512], spectrum[512];
     double *window = xtract_init_window(N, XTRACT_HANN);
+    xtract_context *ctx = xtract_context_new(N);
     double argv[4] = {q, XTRACT_MAGNITUDE_SPECTRUM, 0, 0};
     double result = 0.0;
     int n, k, rv;
@@ -940,14 +927,14 @@ UTEST(scalar, hps_through_default_spectrum_finds_the_correct_bin)
             signal[n] += sin(2.0 * M_PI * k * f0 * n / sr + 0.3 * k) / k;
     }
     xtract_windowed(NULL, signal, N, window, windowed);
-    xtract_init_fft(N, XTRACT_SPECTRUM);
-    xtract_spectrum(NULL, windowed, N, argv, spectrum);
+    xtract_spectrum(ctx, windowed, N, argv, spectrum);
 
     rv = xtract_hps(NULL, spectrum, N, NULL, &result);
 
     ASSERT_EQ(rv, XTRACT_SUCCESS);
     ASSERT_TRUE(fabs(result - f0) < 0.01 * q);
     (void)M;
+    xtract_context_delete(ctx);
     xtract_free_window(window);
 }
 
@@ -962,6 +949,7 @@ UTEST(scalar, hps_interpolates_a_fundamental_between_bins)
     const double f0 = 20.3 * q;
     double signal[512], windowed[512], spectrum[512];
     double *window = xtract_init_window(N, XTRACT_HANN);
+    xtract_context *ctx = xtract_context_new(N);
     double argv[4] = {q, XTRACT_MAGNITUDE_SPECTRUM, 0, 0};
     double result = 0.0;
     int n, k, rv;
@@ -974,13 +962,13 @@ UTEST(scalar, hps_interpolates_a_fundamental_between_bins)
             signal[n] += sin(2.0 * M_PI * k * f0 * n / sr + 0.7 * k) / k;
     }
     xtract_windowed(NULL, signal, N, window, windowed);
-    xtract_init_fft(N, XTRACT_SPECTRUM);
-    xtract_spectrum(NULL, windowed, N, argv, spectrum);
+    xtract_spectrum(ctx, windowed, N, argv, spectrum);
 
     rv = xtract_hps(NULL, spectrum, N, NULL, &result);
 
     ASSERT_EQ(rv, XTRACT_SUCCESS);
     ASSERT_TRUE(fabs(result - f0) < 0.05 * q);
+    xtract_context_delete(ctx);
     xtract_free_window(window);
 }
 
@@ -1274,6 +1262,7 @@ UTEST(vector, bark_coefficients_sum_the_bins_of_a_dc_included_spectrum)
     int band_limits[XTRACT_BARK_BANDS];
     double result[XTRACT_BARK_BANDS];
     double expected[XTRACT_BARK_BANDS] = {0.0};
+    xtract_context *ctx = xtract_context_new(BARK_N);
     int n, i;
 
     for (n = 0; n < BARK_N; n++)
@@ -1290,9 +1279,8 @@ UTEST(vector, bark_coefficients_sum_the_bins_of_a_dc_included_spectrum)
     argv[1] = XTRACT_MAGNITUDE_SPECTRUM;
     argv[2] = 1;
     argv[3] = 0;
-    xtract_init_fft(BARK_N, XTRACT_SPECTRUM);
-    ASSERT_EQ(xtract_spectrum(NULL, signal, BARK_N, argv, spectrum), XTRACT_SUCCESS);
-    xtract_free_fft();
+    ASSERT_EQ(xtract_spectrum(ctx, signal, BARK_N, argv, spectrum), XTRACT_SUCCESS);
+    xtract_context_delete(ctx);
 
     ASSERT_EQ(xtract_init_bark(BARK_N, BARK_SR, band_limits), XTRACT_SUCCESS);
     ASSERT_EQ(xtract_bark_coefficients(NULL, spectrum, BARK_M, band_limits, result), XTRACT_SUCCESS);
@@ -1776,11 +1764,9 @@ UTEST(vector, dct_changing_size_should_not_crash)
     double data8[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
     double result8[8] = {0};
 
-    xtract_init_fft(4, XTRACT_DCT);
     xtract_dct(NULL, data4, 4, NULL, result4);
     CHECK_REL(result4[0], 1.0, 1e-6);
 
-    xtract_init_fft(8, XTRACT_DCT);
     xtract_dct(NULL, data8, 8, NULL, result8);
     CHECK_REL(result8[0], 1.0, 1e-6);
 }
@@ -1819,21 +1805,21 @@ UTEST(vector, spectrum_power_normalisation_max_bin_is_1)
     double sr = 8000.0;
     double argv[] = {sr / 8, (double)XTRACT_POWER_SPECTRUM, 0.0, 1.0};
     double max_val = 0.0;
+    xtract_context *ctx = xtract_context_new(N);
     int n;
     int i;
 
     for (n = 0; n < N; n++)
         data[n] = cos(2.0 * M_PI * 1.0 * n / N);
 
-    xtract_init_fft(N, XTRACT_SPECTRUM);
-
-    xtract_spectrum(NULL, data, N, argv, result);
+    xtract_spectrum(ctx, data, N, argv, result);
 
     for (i = 0; i < N / 2; i++)
         if (result[i] > max_val)
             max_val = result[i];
 
     CHECK_REL(max_val, 1.0, 1e-6);
+    xtract_context_delete(ctx);
 }
 
 /* ===== xtract_spectrum MAGNITUDE_SPECTRUM ===== */
@@ -1847,6 +1833,7 @@ UTEST(vector, spectrum_magnitude_magnitudes_first_half_frequencies_second_half)
     double sr = 8000.0;
     double argv[] = {sr / 64, (double)XTRACT_MAGNITUDE_SPECTRUM, 0.0, 0.0};
     double peak_val = 0.0;
+    xtract_context *ctx = xtract_context_new(N);
     int peak_idx = -1;
     int n;
     int i;
@@ -1855,9 +1842,7 @@ UTEST(vector, spectrum_magnitude_magnitudes_first_half_frequencies_second_half)
     for (n = 0; n < N; n++)
         data[n] = cos(2.0 * M_PI * 4.0 * n / N);
 
-    xtract_init_fft(N, XTRACT_SPECTRUM);
-
-    xtract_spectrum(NULL, data, N, argv, result);
+    xtract_spectrum(ctx, data, N, argv, result);
 
     /* result[0..M-1] should be scalar magnitudes (non-negative).
      * A cosine at bin 4 with withDC=0 means bin 4 maps to output
@@ -1883,6 +1868,7 @@ UTEST(vector, spectrum_magnitude_magnitudes_first_half_frequencies_second_half)
         double expected_freq = (i + 1) * (sr / N);
         CHECK_REL(result[M + i], expected_freq, 1e-6);
     }
+    xtract_context_delete(ctx);
 }
 
 UTEST(vector, spectrum_magnitude_no_collision_between_magnitudes_and_frequencies)
@@ -1893,18 +1879,17 @@ UTEST(vector, spectrum_magnitude_no_collision_between_magnitudes_and_frequencies
     double result[64] = {0};
     double sr = 8000.0;
     double argv[] = {sr / 64, (double)XTRACT_MAGNITUDE_SPECTRUM, 0.0, 0.0};
+    xtract_context *ctx = xtract_context_new(N);
     int n;
     int i;
 
     for (n = 0; n < N; n++)
         data[n] = cos(2.0 * M_PI * 4.0 * n / N);
 
-    xtract_init_fft(N, XTRACT_SPECTRUM);
-
     /* For larger N, the interleaved bug causes result[m*2] to
      * overwrite result[M+m] when m >= M/2. Verify that frequency
      * values in the second half are not corrupted. */
-    xtract_spectrum(NULL, data, N, argv, result);
+    xtract_spectrum(ctx, data, N, argv, result);
 
     /* Check frequencies in the upper half of the second region
      * (these are the ones corrupted by the interleaved bug) */
@@ -1913,6 +1898,7 @@ UTEST(vector, spectrum_magnitude_no_collision_between_magnitudes_and_frequencies
         double expected_freq = (i + 1) * (sr / N);
         CHECK_REL(result[M + i], expected_freq, 1e-6);
     }
+    xtract_context_delete(ctx);
 }
 
 UTEST(vector, spectrum_magnitude_phase_first_half_matches_magnitude_phase_zero_at_cosine_peak)
@@ -1925,6 +1911,7 @@ UTEST(vector, spectrum_magnitude_phase_first_half_matches_magnitude_phase_zero_a
     double sr = 8000.0;
     double argv_mp[] = {sr / 64, (double)XTRACT_MAGNITUDE_PHASE_SPECTRUM, 0.0, 0.0};
     double argv_mag[] = {sr / 64, (double)XTRACT_MAGNITUDE_SPECTRUM, 0.0, 0.0};
+    xtract_context *ctx = xtract_context_new(N);
     int n;
     int i;
     int peak = 0;
@@ -1932,10 +1919,8 @@ UTEST(vector, spectrum_magnitude_phase_first_half_matches_magnitude_phase_zero_a
     for (n = 0; n < N; n++)
         data[n] = cos(2.0 * M_PI * 4.0 * n / N);
 
-    xtract_init_fft(N, XTRACT_SPECTRUM);
-
-    xtract_spectrum(NULL, data, N, argv_mp, mp);
-    xtract_spectrum(NULL, data, N, argv_mag, mag);
+    xtract_spectrum(ctx, data, N, argv_mp, mp);
+    xtract_spectrum(ctx, data, N, argv_mag, mag);
 
     /* The first half of a magnitude/phase spectrum is the magnitude spectrum. */
     for (i = 0; i < M; i++)
@@ -1947,6 +1932,7 @@ UTEST(vector, spectrum_magnitude_phase_first_half_matches_magnitude_phase_zero_a
         if (mp[i] > mp[peak])
             peak = i;
     CHECK_NEAR(mp[M + peak], 0.0, 1e-6);
+    xtract_context_delete(ctx);
 }
 
 UTEST(vector, spectrum_magnitude_unit_cosine_canonical_magnitude_0_5)
@@ -1956,18 +1942,18 @@ UTEST(vector, spectrum_magnitude_unit_cosine_canonical_magnitude_0_5)
     double result[64] = {0};
     double sr = 8000.0;
     double argv[] = {sr / 64, (double)XTRACT_MAGNITUDE_SPECTRUM, 0.0, 0.0};
+    xtract_context *ctx = xtract_context_new(N);
     int n;
 
     for (n = 0; n < N; n++)
         data[n] = cos(2.0 * M_PI * 4.0 * n / N);
 
-    xtract_init_fft(N, XTRACT_SPECTRUM);
-
     /* The DFT of cos(2*pi*k*n/N) has |X[k]| = N/2, so the canonical
      * magnitude |X[k]| / N is 0.5 regardless of FFT backend. */
-    xtract_spectrum(NULL, data, N, argv, result);
+    xtract_spectrum(ctx, data, N, argv, result);
 
     CHECK_NEAR(result[3], 0.5, 1e-9);
+    xtract_context_delete(ctx);
 }
 
 UTEST(vector, spectrum_magnitude_normalised_has_max_of_1)
@@ -1979,21 +1965,21 @@ UTEST(vector, spectrum_magnitude_normalised_has_max_of_1)
     double sr = 8000.0;
     double argv[] = {sr / 64, (double)XTRACT_MAGNITUDE_SPECTRUM, 0.0, 1.0};
     double max_val = 0.0;
+    xtract_context *ctx = xtract_context_new(N);
     int n;
     int i;
 
     for (n = 0; n < N; n++)
         data[n] = cos(2.0 * M_PI * 4.0 * n / N);
 
-    xtract_init_fft(N, XTRACT_SPECTRUM);
-
-    xtract_spectrum(NULL, data, N, argv, result);
+    xtract_spectrum(ctx, data, N, argv, result);
 
     for (i = 0; i < M; i++)
         if (result[i] > max_val)
             max_val = result[i];
 
     CHECK_REL(max_val, 1.0, 1e-6);
+    xtract_context_delete(ctx);
 }
 
 /* ===== xtract_mel_spectrogram ===== */
@@ -2041,7 +2027,6 @@ UTEST(vector, mel_spectrogram_produces_log_mel_energies_mfcc_applies_dct_to)
     ASSERT_GT(max_energy, -96.0);
 
     /* MFCC should equal DCT of mel spectrogram */
-    xtract_init_fft(n_filters, XTRACT_DCT);
     xtract_dct(NULL, mel_result, n_filters, NULL, dct_of_mel);
 
     xtract_mfcc(NULL, data, N, &mel_filters, mfcc_result);
@@ -2098,7 +2083,6 @@ UTEST(vector, gfcc_equals_dct_of_gammatone_spectrogram)
     ASSERT_GT(max_energy, -96.0);
 
     /* GFCC should equal DCT of gammatone spectrogram */
-    xtract_init_fft(n_filters, XTRACT_DCT);
     xtract_dct(NULL, gt_result, n_filters, NULL, dct_of_gt);
 
     xtract_gfcc(NULL, data, N, &gt_filters, gfcc_result);
@@ -2110,44 +2094,6 @@ UTEST(vector, gfcc_equals_dct_of_gammatone_spectrogram)
     for (i = 0; i < n_filters; i++)
         free(gt_filters.filters[i]);
     free(gt_filters.filters);
-}
-
-/* ===== xtract_init_fft DCT does not clobber MFCC ===== */
-
-UTEST(init, fft_dct_does_not_clobber_mfcc)
-{
-    /* xtract_init_fft keeps the DCT state apart from the MFCC state. A DCT
-     * init with size 4 after an MFCC init with size 16 must leave the MFCC
-     * state at size 16. A DCT case with no break would reinitialise MFCC
-     * with size 4. */
-    double dct_data[] = {1.0, 0.0, 0.0, 0.0};
-    double dct_result[4] = {0};
-    double spec_data[16] = {0};
-    double spec_result[16] = {0};
-    double sr = 8000.0;
-    double argv[] = {sr / 16.0, (double)XTRACT_POWER_SPECTRUM, 0.0, 0.0};
-    int rv;
-
-    /* Init MFCC FFT for size 16 */
-    xtract_init_fft(16, XTRACT_MFCC);
-
-    /* Init DCT for smaller size. This should NOT touch MFCC state */
-    xtract_init_fft(4, XTRACT_DCT);
-
-    /* Verify DCT works at size 4 */
-    xtract_dct(NULL, dct_data, 4, NULL, dct_result);
-    CHECK_REL(dct_result[0], 1.0, 1e-6);
-
-    /* The MFCC FFT should still be initialised for size 16.
-     * We can't easily test MFCC without filter banks, but we can
-     * test that xtract_spectrum still works at size 16 since MFCC
-     * uses the same FFT data on some platforms.
-     * If the DCT init reinitialised it, this may produce wrong results
-     * or crash. */
-    spec_data[0] = 1.0;
-    xtract_init_fft(16, XTRACT_SPECTRUM);
-    rv = xtract_spectrum(NULL, spec_data, 16, argv, spec_result);
-    ASSERT_EQ(rv, XTRACT_SUCCESS);
 }
 
 /* ===== xtract_mmbses =====
@@ -2335,14 +2281,6 @@ UTEST(vector, mfcc_and_gfcc_with_dct_table_match_table_less_path)
     free(mf.filters);
 }
 
-UTEST(init, fft_rejects_sizes_with_no_bins)
-{
-    ASSERT_EQ(xtract_init_fft(1, XTRACT_SPECTRUM), XTRACT_ARGUMENT_ERROR);
-    ASSERT_EQ(xtract_init_fft(0, XTRACT_SPECTRUM), XTRACT_ARGUMENT_ERROR);
-    ASSERT_EQ(xtract_init_fft(3, XTRACT_SPECTRUM), XTRACT_ARGUMENT_ERROR);
-    ASSERT_EQ(xtract_init_fft(2, XTRACT_SPECTRUM), XTRACT_SUCCESS);
-}
-
 /* ===== Argument contract ===== */
 
 UTEST(vector, spectrum_rejects_a_null_argv_and_a_type_outside_the_enumeration)
@@ -2350,34 +2288,159 @@ UTEST(vector, spectrum_rejects_a_null_argv_and_a_type_outside_the_enumeration)
     double data[8] = {0};
     double result[8] = {0};
     double argv[4] = {0.0, 5.0, 0.0, 0.0};
+    xtract_context *ctx = xtract_context_new(8);
 
-    xtract_init_fft(8, XTRACT_SPECTRUM);
-    ASSERT_EQ(xtract_spectrum(NULL, data, 8, NULL, result), XTRACT_ARGUMENT_ERROR);
-    ASSERT_EQ(xtract_spectrum(NULL, data, 8, argv, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_spectrum(ctx, data, 8, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_spectrum(ctx, data, 8, argv, result), XTRACT_ARGUMENT_ERROR);
     argv[1] = -1.0;
-    ASSERT_EQ(xtract_spectrum(NULL, data, 8, argv, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_spectrum(ctx, data, 8, argv, result), XTRACT_ARGUMENT_ERROR);
     argv[1] = NAN;
-    ASSERT_EQ(xtract_spectrum(NULL, data, 8, argv, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_spectrum(ctx, data, 8, argv, result), XTRACT_ARGUMENT_ERROR);
     argv[1] = XTRACT_MAGNITUDE_PHASE_SPECTRUM;
-    ASSERT_EQ(xtract_spectrum(NULL, data, 8, argv, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_spectrum(ctx, data, 8, argv, result), XTRACT_SUCCESS);
+    xtract_context_delete(ctx);
 }
 
-UTEST(vector, fft_features_report_a_bad_state_without_a_matching_initialisation)
+UTEST(spectrum, rejects_a_length_that_is_not_a_power_of_two_of_at_least_2)
 {
-    double data[16] = {0};
-    double result[32] = {0};
-    double argv[4] = {0.0, 0.0, 0.0, 0.0};
+    double data[8] = {1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0};
+    double result[8] = {-1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0};
+    double argv[4] = {0.0, XTRACT_MAGNITUDE_SPECTRUM, 0.0, 0.0};
+    xtract_context *ctx = xtract_context_new(8);
 
-    xtract_free_fft();
-    ASSERT_EQ(xtract_spectrum(NULL, data, 8, argv, result), XTRACT_BAD_STATE);
-    ASSERT_EQ(xtract_autocorrelation_fft(NULL, data, 8, NULL, result), XTRACT_BAD_STATE);
+    ASSERT_EQ(xtract_spectrum(ctx, data, 0, argv, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_spectrum(ctx, data, 1, argv, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_spectrum(ctx, data, 3, argv, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_spectrum(ctx, data, 6, argv, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result[0], -1.0);
 
-    xtract_init_fft(16, XTRACT_SPECTRUM);
-    xtract_init_fft(16, XTRACT_AUTOCORRELATION_FFT);
+    ASSERT_EQ(xtract_spectrum(ctx, data, 2, argv, result), XTRACT_SUCCESS);
+    CHECK_REL(result[0], 1.0, EPSILON);
+    xtract_context_delete(ctx);
+}
+
+UTEST(autocorrelation_fft, rejects_a_length_that_is_not_a_power_of_two_of_at_least_2)
+{
+    double data[8] = {1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0};
+    double result[8] = {-1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0};
+    xtract_context *ctx = xtract_context_new(8);
+
+    ASSERT_EQ(xtract_autocorrelation_fft(ctx, data, 0, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_autocorrelation_fft(ctx, data, 1, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_autocorrelation_fft(ctx, data, 3, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_autocorrelation_fft(ctx, data, 6, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result[0], -1.0);
+
+    ASSERT_EQ(xtract_autocorrelation_fft(ctx, data, 2, NULL, result), XTRACT_SUCCESS);
+    CHECK_REL(result[0], 1.0, EPSILON);
+    CHECK_REL(result[1], -0.5, EPSILON);
+    xtract_context_delete(ctx);
+}
+
+UTEST(spectrum, no_context_is_a_bad_state)
+{
+    double data[8] = {0};
+    double result[8];
+    double argv[4] = {0.0, XTRACT_MAGNITUDE_SPECTRUM, 0.0, 0.0};
+    int n;
+
+    for (n = 0; n < 8; n++)
+        result[n] = -1.0;
     ASSERT_EQ(xtract_spectrum(NULL, data, 8, argv, result), XTRACT_BAD_STATE);
+    for (n = 0; n < 8; n++)
+        ASSERT_EQ(result[n], -1.0);
+}
+
+UTEST(spectrum, a_context_created_for_fewer_elements_is_a_bad_state)
+{
+    double data[8] = {0};
+    double result[8];
+    double argv[4] = {0.0, XTRACT_MAGNITUDE_SPECTRUM, 0.0, 0.0};
+    xtract_context *ctx = xtract_context_new(7);
+    int n;
+
+    for (n = 0; n < 8; n++)
+        result[n] = -1.0;
+    ASSERT_EQ(xtract_spectrum(ctx, data, 8, argv, result), XTRACT_BAD_STATE);
+    for (n = 0; n < 8; n++)
+        ASSERT_EQ(result[n], -1.0);
+    ASSERT_EQ(xtract_spectrum(ctx, data, 4, argv, result), XTRACT_SUCCESS);
+    xtract_context_delete(ctx);
+}
+
+UTEST(autocorrelation_fft, no_context_is_a_bad_state)
+{
+    double data[8] = {0};
+    double result[8];
+    int n;
+
+    for (n = 0; n < 8; n++)
+        result[n] = -1.0;
     ASSERT_EQ(xtract_autocorrelation_fft(NULL, data, 8, NULL, result), XTRACT_BAD_STATE);
-    ASSERT_EQ(xtract_spectrum(NULL, data, 16, argv, result), XTRACT_SUCCESS);
-    ASSERT_EQ(xtract_autocorrelation_fft(NULL, data, 16, NULL, result), XTRACT_SUCCESS);
+    for (n = 0; n < 8; n++)
+        ASSERT_EQ(result[n], -1.0);
+}
+
+UTEST(autocorrelation_fft, a_context_created_for_fewer_elements_is_a_bad_state)
+{
+    double data[8] = {0};
+    double result[8];
+    xtract_context *ctx = xtract_context_new(7);
+    int n;
+
+    for (n = 0; n < 8; n++)
+        result[n] = -1.0;
+    ASSERT_EQ(xtract_autocorrelation_fft(ctx, data, 8, NULL, result), XTRACT_BAD_STATE);
+    for (n = 0; n < 8; n++)
+        ASSERT_EQ(result[n], -1.0);
+    ASSERT_EQ(xtract_autocorrelation_fft(ctx, data, 4, NULL, result), XTRACT_SUCCESS);
+    xtract_context_delete(ctx);
+}
+
+UTEST(spectrum, one_context_serves_spectra_of_two_different_sizes)
+{
+    /* The data is a cosine with one cycle in 8 elements, which is bin 1 of 8
+     * points and bin 2 of 16, and coefficient m holds bin m + 1 */
+    double data[16];
+    double of_8[8], of_16[16], of_8_again[8];
+    double argv[4] = {0.0, XTRACT_MAGNITUDE_SPECTRUM, 0.0, 0.0};
+    xtract_context *ctx = xtract_context_new(16);
+    int n;
+
+    for (n = 0; n < 16; n++)
+        data[n] = cos(2.0 * M_PI * n / 8.0);
+
+    ASSERT_EQ(xtract_spectrum(ctx, data, 8, argv, of_8), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_spectrum(ctx, data, 16, argv, of_16), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_spectrum(ctx, data, 8, argv, of_8_again), XTRACT_SUCCESS);
+    CHECK_NEAR(of_8[0], 0.5, 1e-12);
+    CHECK_NEAR(of_16[1], 0.5, 1e-12);
+    for (n = 0; n < 8; n++)
+        ASSERT_EQ(of_8_again[n], of_8[n]);
+    xtract_context_delete(ctx);
+}
+
+UTEST(autocorrelation_fft, shares_a_context_with_the_spectrum)
+{
+    double data[16];
+    double spectrum[16], spectrum_again[16], autocorrelation[16], reference[16];
+    double argv[4] = {0.0, XTRACT_MAGNITUDE_SPECTRUM, 0.0, 0.0};
+    xtract_context *ctx = xtract_context_new(16);
+    int n;
+
+    for (n = 0; n < 16; n++)
+        data[n] = cos(2.0 * M_PI * n / 8.0);
+    xtract_autocorrelation(NULL, data, 16, NULL, reference);
+
+    ASSERT_EQ(xtract_spectrum(ctx, data, 16, argv, spectrum), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_autocorrelation_fft(ctx, data, 16, NULL, autocorrelation), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_spectrum(ctx, data, 16, argv, spectrum_again), XTRACT_SUCCESS);
+    for (n = 0; n < 16; n++)
+    {
+        CHECK_NEAR(autocorrelation[n], reference[n], 1e-9);
+        ASSERT_EQ(spectrum_again[n], spectrum[n]);
+    }
+    xtract_context_delete(ctx);
 }
 
 UTEST(vector, filterbank_features_reject_a_short_input_and_an_unusable_filterbank)
@@ -3343,13 +3406,17 @@ static double cqt_band_frequency(const double fmin, const int bins_per_octave, c
 static int cqt_spectrum(const double *signal, const int n, double *spectrum)
 {
     double argv[4];
+    xtract_context *ctx = xtract_context_new(n);
+    int rv;
 
     argv[0] = CQT_SR / n;
     argv[1] = XTRACT_MAGNITUDE_PHASE_SPECTRUM;
     argv[2] = 1.0;
     argv[3] = 0.0;
-    xtract_init_fft(n, XTRACT_SPECTRUM);
-    return xtract_spectrum(NULL, signal, n, argv, spectrum);
+    rv = xtract_spectrum(ctx, signal, n, argv, spectrum);
+    xtract_context_delete(ctx);
+
+    return rv;
 }
 
 static void cqt_tone(double *signal, const int n, const double amplitude, const double frequency, const double phase)

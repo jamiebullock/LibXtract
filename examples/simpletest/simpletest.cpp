@@ -151,6 +151,7 @@ int main(void)
     window = xtract_init_window(BLOCKSIZE, XTRACT_HANN);
     window_subframe = xtract_init_window(HALF_BLOCKSIZE, XTRACT_HANN);
     xtract_init_wavelet_f0_state();
+    xtract_context *ctx = xtract_context_new(BLOCKSIZE);
 
     // fill_wavetable(344.53125f, NOISE); // 344.53125f = 128 samples @ 44100 Hz
     // fill_wavetable(344.53125f, SINE); // 344.53125f = 128 samples @ 44100 Hz
@@ -186,15 +187,13 @@ int main(void)
         argd[2] = 0.f; /* DC component - we expect this to zero for square wave */
         argd[3] = 0.f; /* No Normalisation */
 
-        xtract_init_fft(BLOCKSIZE, XTRACT_SPECTRUM);
-        xtract[XTRACT_SPECTRUM](NULL, windowed, BLOCKSIZE, &argd[0], spectrum);
+        xtract[XTRACT_SPECTRUM](ctx, windowed, BLOCKSIZE, &argd[0], spectrum);
 
         /* The mel filterbank is defined on the power spectrum with DC
          * included, so that bin k of the spectrum meets coefficient k */
         argd[1] = XTRACT_POWER_SPECTRUM;
         argd[2] = 1.0;
-        xtract[XTRACT_SPECTRUM](NULL, windowed, BLOCKSIZE, &argd[0], power_spectrum);
-        xtract_free_fft();
+        xtract[XTRACT_SPECTRUM](ctx, windowed, BLOCKSIZE, &argd[0], power_spectrum);
 
         xtract[XTRACT_SPECTRAL_CENTROID](NULL, spectrum, BLOCKSIZE, NULL, &centroid);
 
@@ -240,9 +239,7 @@ int main(void)
         argd[3] = 1.f; /* Yes Normalisation */
 
         xtract_features_from_subframes(NULL, gated, BLOCKSIZE, XTRACT_WINDOWED, window_subframe, subframes_windowed);
-        xtract_init_fft(HALF_BLOCKSIZE, XTRACT_SPECTRUM);
-        xtract_features_from_subframes(NULL, subframes_windowed, BLOCKSIZE, XTRACT_SPECTRUM, argd, subframes_spectrum);
-        xtract_free_fft();
+        xtract_features_from_subframes(ctx, subframes_windowed, BLOCKSIZE, XTRACT_SPECTRUM, argd, subframes_spectrum);
 
         argd[0] = 0.5; /* smoothing factor */
 
@@ -288,6 +285,7 @@ int main(void)
 
     xtract_free_window(window);
     xtract_free_window(window_subframe);
+    xtract_context_delete(ctx);
 
     return 0;
 }

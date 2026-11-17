@@ -49,17 +49,15 @@ void verify_principal_variances(void)
 
 /* Twelve elements hold two segments of four, the shortest input whose
  * segments have a bin below the highest. Each segment length has a call of
- * its own, so that the length is a constant in the loops it bounds */
+ * its own, so that the length is a constant in the loops it bounds. The
+ * lengths below 2 and the one that is not a power of two are refused */
 static void coherence_with_segment(const int L)
 {
     const int N = nondet_between(0, 12);
     double *data = nondet_doubles(N);
-    double *result = nondet_doubles(L / 2);
+    double *result = nondet_doubles(L == 2 || L == 4 ? L / 2 : 0);
 
-    if (L > 0)
-        xtract_init_fft(L, XTRACT_COHERENCE);
-    (void)xtract_coherence(NULL, data, N, NULL, result);
-    xtract_free_fft();
+    (void)xtract_coherence(NULL, data, N, nondet_argv(&L), result);
     free(data);
     free(result);
 }
@@ -67,11 +65,17 @@ static void coherence_with_segment(const int L)
 void verify_coherence(void)
 {
     if (nondet_bool())
-        coherence_with_segment(0);
-    else if (nondet_bool())
         coherence_with_segment(2);
-    else
+    else if (nondet_bool())
         coherence_with_segment(4);
+    else if (nondet_bool())
+        coherence_with_segment(3);
+    else if (nondet_bool())
+        coherence_with_segment(1);
+    else if (nondet_bool())
+        coherence_with_segment(0);
+    else
+        coherence_with_segment(-2);
 }
 
 void verify_covariance_matrix(void)

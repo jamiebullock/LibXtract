@@ -871,12 +871,13 @@ UTEST(coherence, four_half_overlapping_segments_of_four_elements)
      * two values worked in exact arithmetic are 54596/94997 and 25/5148 */
     double data[] = {1.0, 3.0, 2.0, 5.0, 4.0, 1.0, 0.0, 2.0, 6.0, 3.0, 2.0, 1.0, 4.0, 3.0, 6.0, 2.0, 1.0, 0.0, 3.0, 5.0};
     double result[2] = {-1.0, -1.0};
+    int L = 4;
+    xtract_context *ctx = xtract_context_new(20);
 
-    ASSERT_EQ(xtract_init_fft(4, XTRACT_COHERENCE), XTRACT_SUCCESS);
-    ASSERT_EQ(xtract_coherence(NULL, data, 20, NULL, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_coherence(ctx, data, 20, &L, result), XTRACT_SUCCESS);
     CHECK_REL(result[0], 54596.0 / 94997.0, EPSILON);
     CHECK_REL(result[1], 25.0 / 5148.0, EPSILON);
-    xtract_free_fft();
+    xtract_context_delete(ctx);
 }
 
 UTEST(coherence, four_half_overlapping_segments_of_eight_elements)
@@ -884,13 +885,14 @@ UTEST(coherence, four_half_overlapping_segments_of_eight_elements)
     double data[] = {1.0, 3.0, 2.0, 5.0, 4.0, 1.0, 0.0, 2.0, 6.0, 3.0, 7.0, 1.0, 2.0, 8.0, 5.0, 4.0, 3.0, 6.0, 1.0, 2.0,
                      2.0, 1.0, 4.0, 3.0, 6.0, 2.0, 1.0, 0.0, 3.0, 5.0, 1.0, 7.0, 6.0, 2.0, 4.0, 8.0, 0.0, 3.0, 5.0, 1.0};
     double result[4] = {-1.0, -1.0, -1.0, -1.0};
+    int L = 8;
+    xtract_context *ctx = xtract_context_new(40);
     int k;
 
-    ASSERT_EQ(xtract_init_fft(8, XTRACT_COHERENCE), XTRACT_SUCCESS);
-    ASSERT_EQ(xtract_coherence(NULL, data, 40, NULL, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_coherence(ctx, data, 40, &L, result), XTRACT_SUCCESS);
     for (k = 1; k <= 4; k++)
-        CHECK_REL(result[k - 1], coherence_from_definition(data, data + 20, 20, 8, k), EPSILON);
-    xtract_free_fft();
+        CHECK_REL(result[k - 1], coherence_from_definition(data, data + 20, 20, L, k), EPSILON);
+    xtract_context_delete(ctx);
 }
 
 UTEST(coherence, a_small_coherence_between_series_of_distant_scales_is_not_zero)
@@ -900,25 +902,27 @@ UTEST(coherence, a_small_coherence_between_series_of_distant_scales_is_not_zero)
      * 1e-100 / 4 and the cross spectrum is 1e-40 / 4 */
     double data[] = {0.0, 1e150, 1e150, 0.0, 0.0, 1e10, 0.0, 0.0, 0.0, 0.0, 0.0, 1e-50};
     double result = -1.0;
+    int L = 2;
+    xtract_context *ctx = xtract_context_new(12);
 
-    ASSERT_EQ(xtract_init_fft(2, XTRACT_COHERENCE), XTRACT_SUCCESS);
-    ASSERT_EQ(xtract_coherence(NULL, data, 12, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_coherence(ctx, data, 12, &L, &result), XTRACT_SUCCESS);
     CHECK_REL(result, 1e20 / (2e300 + 1e20), EPSILON);
-    xtract_free_fft();
+    xtract_context_delete(ctx);
 }
 
 UTEST(coherence, one_at_every_frequency_for_a_scaled_and_offset_copy)
 {
     double data[] = {1.0, 3.0, 2.0, 5.0, 4.0, 1.0, 0.0, 2.0, 6.0, 3.0, 8.0, 14.0, 11.0, 20.0, 17.0, 8.0, 5.0, 11.0, 23.0, 14.0};
     double result[2] = {0};
+    int L = 4;
+    xtract_context *ctx = xtract_context_new(20);
 
-    ASSERT_EQ(xtract_init_fft(4, XTRACT_COHERENCE), XTRACT_SUCCESS);
-    ASSERT_EQ(xtract_coherence(NULL, data, 20, NULL, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_coherence(ctx, data, 20, &L, result), XTRACT_SUCCESS);
     CHECK_REL(result[0], 1.0, EPSILON);
     CHECK_REL(result[1], 1.0, EPSILON);
     ASSERT_LE(result[0], 1.0);
     ASSERT_LE(result[1], 1.0);
-    xtract_free_fft();
+    xtract_context_delete(ctx);
 }
 
 UTEST(coherence, elements_after_the_last_whole_segment_are_not_used)
@@ -927,58 +931,92 @@ UTEST(coherence, elements_after_the_last_whole_segment_are_not_used)
     double longer[] = {1.0, 3.0, 2.0, 5.0, 4.0, 1.0, 99.0, 2.0, 1.0, 4.0, 3.0, 6.0, 2.0, -99.0};
     double expected[2] = {0};
     double result[2] = {0};
+    int L = 4;
+    xtract_context *ctx = xtract_context_new(14);
 
-    ASSERT_EQ(xtract_init_fft(4, XTRACT_COHERENCE), XTRACT_SUCCESS);
-    ASSERT_EQ(xtract_coherence(NULL, whole, 12, NULL, expected), XTRACT_SUCCESS);
-    ASSERT_EQ(xtract_coherence(NULL, longer, 14, NULL, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_coherence(ctx, whole, 12, &L, expected), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_coherence(ctx, longer, 14, &L, result), XTRACT_SUCCESS);
     ASSERT_EQ(result[0], expected[0]);
     ASSERT_EQ(result[1], expected[1]);
-    xtract_free_fft();
+    xtract_context_delete(ctx);
 }
 
-UTEST(coherence, segment_length_follows_the_initialised_size)
+UTEST(coherence, segment_length_is_given_in_argv)
 {
     double data[] = {1.0, 3.0, 2.0, 5.0, 4.0, 1.0, 2.0, 1.0, 4.0, 3.0, 6.0, 2.0};
     double result[2] = {-1.0, -1.0};
+    int L = 2;
+    xtract_context *ctx = xtract_context_new(12);
 
-    ASSERT_EQ(xtract_init_fft(2, XTRACT_COHERENCE), XTRACT_SUCCESS);
-    ASSERT_EQ(xtract_coherence(NULL, data, 12, NULL, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_coherence(ctx, data, 12, &L, result), XTRACT_SUCCESS);
     ASSERT_GE(result[0], 0.0);
     ASSERT_LE(result[0], 1.0);
     ASSERT_EQ(result[1], -1.0);
-    ASSERT_EQ(xtract_init_fft(4, XTRACT_COHERENCE), XTRACT_SUCCESS);
-    ASSERT_EQ(xtract_coherence(NULL, data, 12, NULL, result), XTRACT_SUCCESS);
+    L = 4;
+    ASSERT_EQ(xtract_coherence(ctx, data, 12, &L, result), XTRACT_SUCCESS);
     ASSERT_NE(result[1], -1.0);
-    xtract_free_fft();
+    xtract_context_delete(ctx);
 }
 
 UTEST(coherence, no_result_for_a_constant_series)
 {
     double data[] = {1.0, 3.0, 2.0, 5.0, 4.0, 1.0, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1};
     double result[2] = {-1.0, -1.0};
+    int L = 4;
+    xtract_context *ctx = xtract_context_new(12);
 
-    ASSERT_EQ(xtract_init_fft(4, XTRACT_COHERENCE), XTRACT_SUCCESS);
-    ASSERT_EQ(xtract_coherence(NULL, data, 12, NULL, result), XTRACT_NO_RESULT);
+    ASSERT_EQ(xtract_coherence(ctx, data, 12, &L, result), XTRACT_NO_RESULT);
     ASSERT_EQ(result[0], 0.0);
     ASSERT_EQ(result[1], 0.0);
-    xtract_free_fft();
+    xtract_context_delete(ctx);
 }
 
-UTEST(coherence, needs_an_initialised_transform_and_two_segments)
+UTEST(coherence, needs_a_segment_length_that_is_a_power_of_two_and_two_segments)
 {
     double data[] = {1.0, 3.0, 2.0, 5.0, 4.0, 1.0, 2.0, 1.0, 4.0, 3.0, 6.0, 2.0};
     double result[2] = {-1.0, -1.0};
+    int L = 4;
+    xtract_context *ctx = xtract_context_new(12);
 
-    xtract_free_fft();
-    ASSERT_EQ(xtract_coherence(NULL, data, 12, NULL, result), XTRACT_BAD_STATE);
-    ASSERT_EQ(xtract_coherence(NULL, data, 11, NULL, result), XTRACT_ARGUMENT_ERROR);
-    ASSERT_EQ(xtract_coherence(NULL, data, 0, NULL, result), XTRACT_ARGUMENT_ERROR);
-    ASSERT_EQ(xtract_init_fft(4, XTRACT_COHERENCE), XTRACT_SUCCESS);
-    ASSERT_EQ(xtract_coherence(NULL, data, 10, NULL, result), XTRACT_ARGUMENT_ERROR);
-    ASSERT_EQ(xtract_coherence(NULL, data, 11, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_coherence(ctx, data, 12, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_coherence(ctx, data, 0, &L, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_coherence(ctx, data, 10, &L, result), XTRACT_ARGUMENT_ERROR);
+    L = 3;
+    ASSERT_EQ(xtract_coherence(ctx, data, 12, &L, result), XTRACT_ARGUMENT_ERROR);
+    L = 1;
+    ASSERT_EQ(xtract_coherence(ctx, data, 12, &L, result), XTRACT_ARGUMENT_ERROR);
+    L = 0;
+    ASSERT_EQ(xtract_coherence(ctx, data, 12, &L, result), XTRACT_ARGUMENT_ERROR);
+    L = 2;
+    ASSERT_EQ(xtract_coherence(ctx, data, 11, &L, result), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(result[0], -1.0);
     ASSERT_EQ(result[1], -1.0);
-    ASSERT_EQ(xtract_coherence(NULL, data, 12, NULL, result), XTRACT_SUCCESS);
-    xtract_free_fft();
-    ASSERT_EQ(xtract_coherence(NULL, data, 12, NULL, result), XTRACT_BAD_STATE);
+    L = 4;
+    ASSERT_EQ(xtract_coherence(ctx, data, 12, &L, result), XTRACT_SUCCESS);
+    xtract_context_delete(ctx);
+}
+
+UTEST(coherence, no_context_is_a_bad_state)
+{
+    double data[] = {1.0, 3.0, 2.0, 5.0, 4.0, 1.0, 2.0, 1.0, 4.0, 3.0, 6.0, 2.0};
+    double result[2] = {-1.0, -1.0};
+    int L = 4;
+
+    ASSERT_EQ(xtract_coherence(NULL, data, 12, &L, result), XTRACT_BAD_STATE);
+    ASSERT_EQ(result[0], -1.0);
+    ASSERT_EQ(result[1], -1.0);
+}
+
+UTEST(coherence, a_context_created_for_fewer_elements_is_a_bad_state)
+{
+    double data[] = {1.0, 3.0, 2.0, 5.0, 4.0, 1.0, 2.0, 1.0, 4.0, 3.0, 6.0, 2.0};
+    double result[2] = {-1.0, -1.0};
+    int L = 2;
+    xtract_context *ctx = xtract_context_new(11);
+
+    ASSERT_EQ(xtract_coherence(ctx, data, 12, &L, result), XTRACT_BAD_STATE);
+    ASSERT_EQ(result[0], -1.0);
+    ASSERT_EQ(result[1], -1.0);
+    ASSERT_EQ(xtract_coherence(ctx, data, 10, &L, result), XTRACT_SUCCESS);
+    xtract_context_delete(ctx);
 }

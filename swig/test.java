@@ -52,11 +52,12 @@ public class test {
         specArgv.setitem(2, 0.0);
         specArgv.setitem(3, 0.0);
 
-        xtract.xtract_init_fft(len, xtract_features_.XTRACT_SPECTRUM.swigValue());
+        SWIGTYPE_p_xtract_context_ ctx = xtract.xtract_context_new(len);
 
         doubleArray result = new doubleArray(len);
-        xtract.xtract_spectrum(null, a.cast(), len,
+        xtract.xtract_spectrum(ctx, a.cast(), len,
                 xtract.doublea_to_voidp(specArgv.cast()), result.cast());
+        xtract.xtract_context_delete(ctx);
 
         for (int i = 0; i < len; i++) {
             System.out.println(result.getitem(i));

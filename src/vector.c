@@ -13,9 +13,9 @@
 #include "fft.h"
 
 #include "xtract/libxtract.h"
+#include "xtract_context_private.h"
 #include "xtract_cqt_private.h"
 #include "xtract_macros_private.h"
-#include "xtract_globals_private.h"
 #include "xtract_sort_private.h"
 
 int xtract_spectrum(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
@@ -33,14 +33,16 @@ int xtract_spectrum(xtract_context *ctx, const double *data, const int N, const 
     unsigned int n = 0;
     unsigned int m = 0;
     unsigned int M = N >> 1;
+    double *scratch;
 #ifdef USE_OOURA
     double *fft = NULL;
 #else
-    DSPDoubleSplitComplex *fft = NULL;
+    DSPDoubleSplitComplex split;
+    DSPDoubleSplitComplex *fft = &split;
     double half = 0.5;
 #endif
 
-    if (argv == NULL)
+    if (argv == NULL || N < 2 || !xtract_is_poweroftwo((unsigned int)N))
         return XTRACT_ARGUMENT_ERROR;
 
     q = *(double *)argv;
@@ -55,32 +57,26 @@ int xtract_spectrum(xtract_context *ctx, const double *data, const int N, const 
     withDC = (int)dc;
     normalise = (int)norm;
 
-#ifdef USE_OOURA
-    if (!ooura_data_spectrum.initialised || ooura_data_spectrum.N != N)
-#else
-    if (!vdsp_data_spectrum.initialised || vdsp_data_spectrum.N != N)
-#endif
-        return XTRACT_BAD_STATE;
-
     XTRACT_CHECK_q;
+
+    scratch = xtract_scratch_take(ctx, N, (size_t)N);
+    if (scratch == NULL)
+        return XTRACT_BAD_STATE;
 
 #ifdef USE_OOURA
     /* ooura is in-place
      * the output format is
      * a[0] - DC, a[1] - nyquist, a[2...N-1] - remaining bins
      */
-    fft = (double *)malloc(N * sizeof(double));
-    if (fft == NULL)
-        return XTRACT_MALLOC_FAILED;
+    fft = scratch;
     memcpy(fft, data, N * sizeof(double));
 
-    rdft(N, 1, fft, ooura_data_spectrum.ooura_ip,
-         ooura_data_spectrum.ooura_w);
+    xtract_transform(ctx, N, 1, fft);
 #else
-    fft = &vdsp_data_spectrum.fft;
+    split.realp = scratch;
+    split.imagp = scratch + M;
     vDSP_ctozD((DSPDoubleComplex *)data, 2, fft, 1, N >> 1);
-    vDSP_fft_zripD(vdsp_data_spectrum.setup, fft, 1,
-                   vdsp_data_spectrum.log2N, FFT_FORWARD);
+    xtract_transform(ctx, N, FFT_FORWARD, fft);
 
     /* The vDSP forward real FFT is scaled by 2 relative to the DFT; halve
      * it to the canonical DFT convention shared with the OOURA backend so
@@ -365,43 +361,41 @@ int xtract_spectrum(xtract_context *ctx, const double *data, const int N, const 
             result[n] /= max;
     }
 
-#ifdef USE_OOURA
-    free(fft);
-#endif
+    xtract_scratch_return(ctx, scratch, (size_t)N);
 
     return XTRACT_SUCCESS;
 }
 
 int xtract_autocorrelation_fft(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
+    double *scratch;
     int n = 0;
-
 #ifdef USE_OOURA
-    int M = N << 1;
+    int M;
     double *rfft = NULL;
 #else
-    DSPDoubleSplitComplex *fft = NULL;
+    DSPDoubleSplitComplex split;
+    DSPDoubleSplitComplex *fft = &split;
     double dc = 0.0;
     double nyquist = 0.0;
     double norm = 0.0;
 #endif
 
-#ifdef USE_OOURA
-    if (!ooura_data_autocorrelation_fft.initialised || ooura_data_autocorrelation_fft.N != N)
-#else
-    if (!vdsp_data_autocorrelation_fft.initialised || vdsp_data_autocorrelation_fft.N != N)
-#endif
+    if (N < 2 || !xtract_is_poweroftwo((unsigned int)N))
+        return XTRACT_ARGUMENT_ERROR;
+
+    scratch = xtract_scratch_take(ctx, N, 2 * (size_t)N);
+    if (scratch == NULL)
         return XTRACT_BAD_STATE;
 
 #ifdef USE_OOURA
     /* Zero pad the input vector */
-    rfft = (double *)calloc(M, sizeof(double));
-    if (rfft == NULL)
-        return XTRACT_MALLOC_FAILED;
+    M = 2 * N;
+    rfft = scratch;
     memcpy(rfft, data, N * sizeof(double));
+    memset(rfft + N, 0, N * sizeof(double));
 
-    rdft(M, 1, rfft, ooura_data_autocorrelation_fft.ooura_ip,
-         ooura_data_autocorrelation_fft.ooura_w);
+    xtract_transform(ctx, M, 1, rfft);
 
     for (n = 2; n < M; n += 2)
     {
@@ -412,30 +406,26 @@ int xtract_autocorrelation_fft(xtract_context *ctx, const double *data, const in
     rfft[0] = XTRACT_SQ(rfft[0]);
     rfft[1] = XTRACT_SQ(rfft[1]);
 
-    rdft(M, -1, rfft, ooura_data_autocorrelation_fft.ooura_ip,
-         ooura_data_autocorrelation_fft.ooura_w);
+    xtract_transform(ctx, M, -1, rfft);
 
     /* rdft is unnormalised: a forward/inverse round trip scales by M / 2 = N,
      * and the conventional autocorrelation scaling contributes a further 1 / N,
      * giving a total divisor of N * N. This matches xtract_autocorrelation. */
     for (n = 0; n < N; n++)
         result[n] = rfft[n] / ((double)N * N);
-    free(rfft);
 #else
     /* vDSP has its own autocorrelation function, but it doesn't fit the
      * LibXtract model, e.g. we can't guarantee it's going to use
      * an FFT for all values of N */
-    fft = &vdsp_data_autocorrelation_fft.fft;
-
-    /* The setup is for a 2N-point FFT to allow for zero padding. The split
-     * buffers hold N elements each and are reused between calls, so they
-     * must be zeroed before packing the N input samples (N / 2 complex
-     * pairs) into the lower half; the upper half is the zero padding. */
-    memset(fft->realp, 0, N * sizeof(double));
-    memset(fft->imagp, 0, N * sizeof(double));
+    /* The transform is of 2N points to allow for zero padding. The split
+     * buffers hold N elements each, zeroed before the N input samples (N / 2
+     * complex pairs) are packed into the lower half; the upper half is the
+     * zero padding. */
+    split.realp = scratch;
+    split.imagp = scratch + N;
+    memset(scratch, 0, 2 * (size_t)N * sizeof(double));
     vDSP_ctozD((DSPDoubleComplex *)data, 2, fft, 1, N >> 1);
-    vDSP_fft_zripD(vdsp_data_autocorrelation_fft.setup, fft, 1,
-                   vdsp_data_autocorrelation_fft.log2N, FFT_FORWARD);
+    xtract_transform(ctx, 2 * N, FFT_FORWARD, fft);
 
     /* Power spectrum. In the packed real format DC and Nyquist are real
      * values stored in realp[0] and imagp[0] and must be squared separately. */
@@ -451,8 +441,7 @@ int xtract_autocorrelation_fft(xtract_context *ctx, const double *data, const in
     fft->realp[0] = XTRACT_SQ(dc);
     fft->imagp[0] = XTRACT_SQ(nyquist);
 
-    vDSP_fft_zripD(vdsp_data_autocorrelation_fft.setup, fft, 1,
-                   vdsp_data_autocorrelation_fft.log2N, FFT_INVERSE);
+    xtract_transform(ctx, 2 * N, FFT_INVERSE, fft);
 
     /* Unpack the first N time-domain values (N / 2 complex pairs). The
      * forward transform is scaled by 2 relative to the DFT (4 after
@@ -463,6 +452,8 @@ int xtract_autocorrelation_fft(xtract_context *ctx, const double *data, const in
     vDSP_ztocD(fft, 1, (DOUBLE_COMPLEX *)result, 2, N >> 1);
     vDSP_vsdivD(result, 1, &norm, result, 1, N);
 #endif
+
+    xtract_scratch_return(ctx, scratch, 2 * (size_t)N);
 
     return XTRACT_SUCCESS;
 }

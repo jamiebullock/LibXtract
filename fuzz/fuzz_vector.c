@@ -8,9 +8,9 @@
  * libFuzzer harness for the vector feature functions (xtract_vector.h).
  *
  * These write an array (not a scalar) into result and, unlike the scalar/delta
- * features, each needs specific setup: an FFT plan, a mel/gammatone filterbank,
+ * features, each needs specific setup: a context, a mel/gammatone filterbank,
  * or bark band limits, plus an argv whose shape differs per feature. The
- * filterbanks, bark limits, and FFT plans are built once at a fixed
+ * filterbanks, bark limits, and the context are built once at a fixed
  * power-of-two N in LLVMFuzzerInitialize; every call that depends on them
  * runs at that N. The features with no such dependency (DCT,
  * autocorrelation, AMDF, ASDF, LPC, LPCC, the moving-window features,
@@ -92,6 +92,7 @@ static xtract_mel_filter mel;
 static xtract_mel_filter gammatone;
 static xtract_cqt_kernel *cqt;
 static int bark_limits[XTRACT_BARK_BANDS];
+static xtract_context *ctx;
 
 static double **alloc_filterbank(void)
 {
@@ -124,9 +125,7 @@ int LLVMFuzzerInitialize(int *argc, char ***argv)
     xtract_init_bark(VEC_N, SR, bark_limits);
     cqt = xtract_init_cqt(VEC_N, SR, 2000.0, 12, 36, 0.01);
 
-    xtract_init_fft(VEC_N, XTRACT_SPECTRUM);
-    xtract_init_fft(VEC_N, XTRACT_AUTOCORRELATION_FFT);
-    xtract_init_fft(VEC_N, XTRACT_DCT);
+    ctx = xtract_context_new(VEC_N);
     return 0;
 }
 
@@ -231,56 +230,56 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     case FZ_SPECTRUM:
     {
         double a[4] = {fz[0], fold(fz[1], XTRACT_MAGNITUDE_PHASE_SPECTRUM + 2.0), fz[2], fz[3]};
-        xtract_spectrum(NULL, input, VEC_N, maybe_null(null_argv, a), result);
+        xtract_spectrum(ctx, input, VEC_N, maybe_null(null_argv, a), result);
         break;
     }
     case FZ_PEAK_SPECTRUM:
     {
         double a[2] = {fz[0], fold(fz[1], 110.0)};
-        xtract_peak_spectrum(NULL, input, VEC_N, maybe_null(null_argv, a), result);
+        xtract_peak_spectrum(ctx, input, VEC_N, maybe_null(null_argv, a), result);
         break;
     }
     case FZ_HARMONIC_SPECTRUM:
     {
         double a[2] = {fabs(fz[0]), fold(fz[1], 1.1)};
-        xtract_harmonic_spectrum(NULL, input, VEC_N, maybe_null(null_argv, a), result);
+        xtract_harmonic_spectrum(ctx, input, VEC_N, maybe_null(null_argv, a), result);
         break;
     }
     case FZ_SPECTRAL_CONTRAST:
     {
         double a[3] = {(double)clamp_int(fz[0], 0, 64), fz[1], fold(fz[2], 1.1)};
-        xtract_spectral_contrast(NULL, input, VEC_N, maybe_null(null_argv, a), result);
+        xtract_spectral_contrast(ctx, input, VEC_N, maybe_null(null_argv, a), result);
         break;
     }
     case FZ_CHROMA:
     {
         double a[3] = {fz[0], fabs(fz[1]), fabs(fz[2])};
-        xtract_chroma(NULL, input, VEC_N, maybe_null(null_argv, a), result);
+        xtract_chroma(ctx, input, VEC_N, maybe_null(null_argv, a), result);
         break;
     }
     case FZ_CQT:
-        xtract_cqt(NULL, input, VEC_N, maybe_null(null_argv, cqt), result);
+        xtract_cqt(ctx, input, VEC_N, maybe_null(null_argv, cqt), result);
         break;
     case FZ_MFCC:
-        xtract_mfcc(NULL, input, VEC_N, maybe_null(null_argv, &mel), result);
+        xtract_mfcc(ctx, input, VEC_N, maybe_null(null_argv, &mel), result);
         break;
     case FZ_MEL_SPECTROGRAM:
-        xtract_mel_spectrogram(NULL, input, VEC_N, maybe_null(null_argv, &mel), result);
+        xtract_mel_spectrogram(ctx, input, VEC_N, maybe_null(null_argv, &mel), result);
         break;
     case FZ_MMBSES:
-        xtract_mmbses(NULL, input, VEC_N, maybe_null(null_argv, &mel), result);
+        xtract_mmbses(ctx, input, VEC_N, maybe_null(null_argv, &mel), result);
         break;
     case FZ_SPECTRAL_SUBBAND_CENTROIDS:
-        xtract_spectral_subband_centroids(NULL, input, VEC_N, maybe_null(null_argv, &mel), result);
+        xtract_spectral_subband_centroids(ctx, input, VEC_N, maybe_null(null_argv, &mel), result);
         break;
     case FZ_GFCC:
-        xtract_gfcc(NULL, input, VEC_N, maybe_null(null_argv, &gammatone), result);
+        xtract_gfcc(ctx, input, VEC_N, maybe_null(null_argv, &gammatone), result);
         break;
     case FZ_GAMMATONE_SPECTROGRAM:
-        xtract_gammatone_spectrogram(NULL, input, VEC_N, maybe_null(null_argv, &gammatone), result);
+        xtract_gammatone_spectrogram(ctx, input, VEC_N, maybe_null(null_argv, &gammatone), result);
         break;
     case FZ_BARK_COEFFICIENTS:
-        xtract_bark_coefficients(NULL, input, VEC_N, maybe_null(null_argv, bark_limits), result);
+        xtract_bark_coefficients(ctx, input, VEC_N, maybe_null(null_argv, bark_limits), result);
         break;
     case FZ_SUBBANDS:
     {
@@ -292,80 +291,80 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
         a[1] = clamp_int(fz[1], 1, VEC_N);
         a[2] = (fz[2] < 0.0) ? XTRACT_OCTAVE_SUBBANDS : XTRACT_LINEAR_SUBBANDS;
         a[3] = clamp_int(fz[3], 0, VEC_N - 1);
-        xtract_subbands(NULL, input, VEC_N, maybe_null(null_argv, a), result);
+        xtract_subbands(ctx, input, VEC_N, maybe_null(null_argv, a), result);
         break;
     }
     case FZ_LPCC:
     {
         /* argv = order Q, which is also the result length. */
         int order = clamp_int(fz[0], 1, VEC_N);
-        xtract_lpcc(NULL, input, n, maybe_null(null_argv, &order), result);
+        xtract_lpcc(ctx, input, n, maybe_null(null_argv, &order), result);
         break;
     }
     case FZ_AUTOCORRELATION_FFT:
-        xtract_autocorrelation_fft(NULL, input, VEC_N, NULL, result);
+        xtract_autocorrelation_fft(ctx, input, VEC_N, NULL, result);
         break;
     case FZ_DCT:
-        xtract_dct(NULL, input, n, NULL, result);
+        xtract_dct(ctx, input, n, NULL, result);
         break;
     case FZ_AUTOCORRELATION:
-        xtract_autocorrelation(NULL, input, n, NULL, result);
+        xtract_autocorrelation(ctx, input, n, NULL, result);
         break;
     case FZ_AMDF:
-        xtract_amdf(NULL, input, n, NULL, result);
+        xtract_amdf(ctx, input, n, NULL, result);
         break;
     case FZ_ASDF:
-        xtract_asdf(NULL, input, n, NULL, result);
+        xtract_asdf(ctx, input, n, NULL, result);
         break;
     case FZ_LPC:
-        xtract_lpc(NULL, input, n, NULL, result);
+        xtract_lpc(ctx, input, n, NULL, result);
         break;
     case FZ_MOVING_SUM:
     {
         int window = clamp_int(fz[0], -1, VEC_N + 1);
-        xtract_moving_sum(NULL, input, n, maybe_null(null_argv, &window), result);
+        xtract_moving_sum(ctx, input, n, maybe_null(null_argv, &window), result);
         break;
     }
     case FZ_MOVING_AVERAGE:
     {
         int window = clamp_int(fz[0], -1, VEC_N + 1);
-        xtract_moving_average(NULL, input, n, maybe_null(null_argv, &window), result);
+        xtract_moving_average(ctx, input, n, maybe_null(null_argv, &window), result);
         break;
     }
     case FZ_MOVING_VARIANCE:
     {
         int window = clamp_int(fz[0], -1, VEC_N + 1);
-        xtract_moving_variance(NULL, input, n, maybe_null(null_argv, &window), result);
+        xtract_moving_variance(ctx, input, n, maybe_null(null_argv, &window), result);
         break;
     }
     case FZ_MOVING_STANDARD_DEVIATION:
     {
         int window = clamp_int(fz[0], -1, VEC_N + 1);
-        xtract_moving_standard_deviation(NULL, input, n, maybe_null(null_argv, &window), result);
+        xtract_moving_standard_deviation(ctx, input, n, maybe_null(null_argv, &window), result);
         break;
     }
     case FZ_MOVING_MAX:
     {
         int window = clamp_int(fz[0], -1, VEC_N + 1);
-        xtract_moving_max(NULL, input, n, maybe_null(null_argv, &window), result);
+        xtract_moving_max(ctx, input, n, maybe_null(null_argv, &window), result);
         break;
     }
     case FZ_MOVING_MIN:
     {
         int window = clamp_int(fz[0], -1, VEC_N + 1);
-        xtract_moving_min(NULL, input, n, maybe_null(null_argv, &window), result);
+        xtract_moving_min(ctx, input, n, maybe_null(null_argv, &window), result);
         break;
     }
     case FZ_EWMA_AVERAGE:
     {
         double alpha = fold(fz[0], 1.5) - 0.25;
-        xtract_ewma_average(NULL, input, n, maybe_null(null_argv, &alpha), result);
+        xtract_ewma_average(ctx, input, n, maybe_null(null_argv, &alpha), result);
         break;
     }
     case FZ_EWMA_VARIANCE:
     {
         double alpha = fold(fz[0], 1.5) - 0.25;
-        xtract_ewma_variance(NULL, input, n, maybe_null(null_argv, &alpha), result);
+        xtract_ewma_variance(ctx, input, n, maybe_null(null_argv, &alpha), result);
         break;
     }
     case FZ_QUANTISE:
@@ -376,7 +375,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
         a[0] = fz[0];
         a[1] = fz[1];
         a[2] = fold(fz[2], 40.0) - 2.0;
-        xtract_quantise(NULL, input, n, maybe_null(null_argv, a), result);
+        xtract_quantise(ctx, input, n, maybe_null(null_argv, a), result);
         break;
     }
     case FZ_HISTOGRAM:
@@ -388,7 +387,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
         int i;
         for (i = 0; i < in_len; i++)
             in[i] = isfinite(in[i]) ? floor(fold(in[i], (double)VEC_N + 2.0)) - 1.0 : in[i];
-        xtract_histogram(NULL, input, n, maybe_null(null_argv, &levels), result);
+        xtract_histogram(ctx, input, n, maybe_null(null_argv, &levels), result);
         break;
     }
     default:
