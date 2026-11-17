@@ -6,6 +6,13 @@
 
 #include <stdint.h>
 
+#include "xtract/libxtract.h"
+
+enum
+{
+    XTTEST_LONGEST = 65536
+};
+
 /* Fill table with sine wave at given frequency and amplitude */
 void xttest_gen_sine(double *table, uint32_t tablesize, double samplerate, double frequency, double amplitude);
 
@@ -24,3 +31,6 @@ void xttest_mul(double *table, uint32_t tablesize, double constant);
 
 /* Return MIDI cent value for frequency */
 uint16_t xttest_ftom(double frequency);
+
+/* Return a context shared by the tests, created for XTTEST_LONGEST elements and freed at exit */
+xtract_context *xttest_context(void);

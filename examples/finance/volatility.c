@@ -158,18 +158,24 @@ static int first_change(const double *short_volatility, const double *long_volat
 
 static int summarise_returns(const double *returns, int N)
 {
+    xtract_context *ctx = xtract_context_new(N);
     double moments[2];
     double variance;
     double skewness;
     double kurtosis;
     double median;
+
     if (check(xtract_mean(NULL, returns, N, NULL, &moments[0]), "xtract_mean") ||
         check(xtract_variance(NULL, returns, N, &moments[0], &variance), "xtract_variance") ||
         check(xtract_standard_deviation(NULL, returns, N, &variance, &moments[1]), "xtract_standard_deviation") ||
         check(xtract_skewness(NULL, returns, N, moments, &skewness), "xtract_skewness") ||
         check(xtract_kurtosis(NULL, returns, N, moments, &kurtosis), "xtract_kurtosis") ||
-        check(xtract_median(NULL, returns, N, NULL, &median), "xtract_median"))
+        check(xtract_median(ctx, returns, N, NULL, &median), "xtract_median"))
+    {
+        xtract_context_delete(ctx);
         return EXIT_FAILURE;
+    }
+    xtract_context_delete(ctx);
     printf("Daily log returns over %d days\n", N);
     printf("  mean %.5f  median %.5f  standard deviation %.5f (%.1f%% annualised)\n",
            moments[0], median, moments[1], annualised(moments[1]));

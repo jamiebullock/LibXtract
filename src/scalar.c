@@ -1320,7 +1320,6 @@ int xtract_f0(xtract_context *ctx, const double *data, const int N, const void *
 {
     int M, tau, n;
     double sr;
-    size_t bytes;
     double f0, err_tau_1, err_tau_x, array_max,
         threshold_peak, threshold_centre,
         *input;
@@ -1340,10 +1339,10 @@ int xtract_f0(xtract_context *ctx, const double *data, const int N, const void *
     if (sr == 0)
         sr = 44100.0;
 
-    input = (double *)malloc(bytes = N * sizeof(double));
+    input = xtract_scratch_take(ctx, N, (size_t)N);
     if (input == NULL)
-        return XTRACT_MALLOC_FAILED;
-    input = (double *)memcpy(input, data, bytes);
+        return XTRACT_BAD_STATE;
+    memcpy(input, data, (size_t)N * sizeof(double));
 
     threshold_peak = XTRACT_F0_PEAK_CLIP;
     threshold_centre = XTRACT_F0_CENTRE_CLIP;
@@ -1397,12 +1396,12 @@ int xtract_f0(xtract_context *ctx, const double *data, const int N, const void *
         {
             f0 = sr / (tau + (err_tau_x / err_tau_1));
             *result = f0;
-            free(input);
+            xtract_scratch_return(ctx, input, (size_t)N);
             return XTRACT_SUCCESS;
         }
     }
     *result = -0;
-    free(input);
+    xtract_scratch_return(ctx, input, (size_t)N);
     return XTRACT_NO_RESULT;
 }
 
@@ -1638,16 +1637,16 @@ int xtract_mcleod_f0(xtract_context *ctx, const double *data, const int N, const
         sr = 44100.0;
 
     lags = mcleod_lags(N);
-    nsdf = (double *)malloc((lags + 1) * sizeof(double));
+    nsdf = xtract_scratch_take(ctx, N, (size_t)lags + 1);
     if (nsdf == NULL)
-        return XTRACT_MALLOC_FAILED;
+        return XTRACT_BAD_STATE;
 
     mcleod_nsdf(data, N, lags, nsdf);
 
     if (!mcleod_pitch_peak(nsdf, lags, &best_tau))
     {
         *result = 0.0;
-        free(nsdf);
+        xtract_scratch_return(ctx, nsdf, (size_t)lags + 1);
         return XTRACT_NO_RESULT;
     }
 
@@ -1655,7 +1654,7 @@ int xtract_mcleod_f0(xtract_context *ctx, const double *data, const int N, const
 
     *result = sr / (best_tau + offset);
 
-    free(nsdf);
+    xtract_scratch_return(ctx, nsdf, (size_t)lags + 1);
 
     return XTRACT_SUCCESS;
 }
@@ -1776,13 +1775,13 @@ int xtract_median(xtract_context *ctx, const double *data, const int N, const vo
         return XTRACT_ARGUMENT_ERROR;
     }
 
-    sorted = (double *)malloc((size_t)N * sizeof(double));
+    sorted = xtract_scratch_take(ctx, N, (size_t)N);
     if (sorted == NULL)
-        return XTRACT_MALLOC_FAILED;
+        return XTRACT_BAD_STATE;
 
     memcpy(sorted, data, (size_t)N * sizeof(double));
     *result = median_of_values(sorted, N);
-    free(sorted);
+    xtract_scratch_return(ctx, sorted, (size_t)N);
 
     return XTRACT_SUCCESS;
 }
@@ -1800,14 +1799,14 @@ int xtract_median_absolute_deviation(xtract_context *ctx, const double *data, co
     }
 
     median = *(const double *)argv;
-    deviations = (double *)malloc((size_t)N * sizeof(double));
+    deviations = xtract_scratch_take(ctx, N, (size_t)N);
     if (deviations == NULL)
-        return XTRACT_MALLOC_FAILED;
+        return XTRACT_BAD_STATE;
 
     for (n = 0; n < N; n++)
         deviations[n] = fabs(data[n] - median);
     *result = median_of_values(deviations, N);
-    free(deviations);
+    xtract_scratch_return(ctx, deviations, (size_t)N);
 
     return XTRACT_SUCCESS;
 }
@@ -2164,15 +2163,15 @@ int xtract_permutation_entropy(xtract_context *ctx, const double *data, const in
     /* A code is a whole number below 8!, which a double holds exactly, so
      * the codes are kept as doubles for the library's one sort */
     windows = N - (order - 1) * delay;
-    codes = (double *)malloc((size_t)windows * sizeof(double));
+    codes = xtract_scratch_take(ctx, N, (size_t)windows);
     if (codes == NULL)
-        return XTRACT_MALLOC_FAILED;
+        return XTRACT_BAD_STATE;
 
     for (n = 0; n < windows; n++)
         codes[n] = ordinal_pattern(data + n, order, delay);
     xtract_sort_ascending(codes, windows);
     *result = entropy_of_sorted_codes(codes, windows) / log((double)patterns);
-    free(codes);
+    xtract_scratch_return(ctx, codes, (size_t)windows);
 
     if (*result < 0.0)
         *result = 0.0;
@@ -2338,13 +2337,13 @@ int xtract_periodicity(xtract_context *ctx, const double *data, const int N, con
     }
 
     lags = mcleod_lags(N);
-    nsdf = (double *)malloc((lags + 1) * sizeof(double));
+    nsdf = xtract_scratch_take(ctx, N, (size_t)lags + 1);
     if (nsdf == NULL)
-        return XTRACT_MALLOC_FAILED;
+        return XTRACT_BAD_STATE;
 
     mcleod_nsdf(data, N, lags, nsdf);
     found = mcleod_highest_key_maximum(nsdf, lags, &highest);
-    free(nsdf);
+    xtract_scratch_return(ctx, nsdf, (size_t)lags + 1);
 
     if (!found)
     {
@@ -2370,14 +2369,14 @@ int xtract_signal_confidence(xtract_context *ctx, const double *data, const int 
     }
 
     lags = mcleod_lags(N);
-    nsdf = (double *)malloc((lags + 1) * sizeof(double));
+    nsdf = xtract_scratch_take(ctx, N, (size_t)lags + 1);
     if (nsdf == NULL)
-        return XTRACT_MALLOC_FAILED;
+        return XTRACT_BAD_STATE;
 
     mcleod_nsdf(data, N, lags, nsdf);
     found = mcleod_pitch_peak(nsdf, lags, &peak);
     height = found ? mcleod_peak_height(nsdf, peak) : 0.0;
-    free(nsdf);
+    xtract_scratch_return(ctx, nsdf, (size_t)lags + 1);
 
     if (!found)
     {
