@@ -9,6 +9,7 @@
 
 #include <math.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #define XTTEST_2PI 6.28318530717958647693
 
@@ -61,4 +62,23 @@ void xttest_mul(double *table, uint32_t tablesize, double constant)
     {
         table[i] *= constant;
     }
+}
+
+static xtract_context *shared_context;
+
+static void delete_shared_context(void)
+{
+    xtract_context_delete(shared_context);
+}
+
+xtract_context *xttest_context(void)
+{
+    if (shared_context == NULL)
+    {
+        shared_context = xtract_context_new(XTTEST_LONGEST);
+        if (shared_context != NULL)
+            atexit(delete_shared_context);
+    }
+
+    return shared_context;
 }

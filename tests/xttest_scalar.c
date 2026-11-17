@@ -42,7 +42,7 @@ UTEST(f0, sine_512_44100_86hz_no_result)
     int rv;
 
     xttest_gen_sine(table, blocksize, samplerate, frequency, amplitude);
-    rv = xtract_f0(NULL, table, blocksize, &samplerate, &result);
+    rv = xtract_f0(xttest_context(), table, blocksize, &samplerate, &result);
 
     ASSERT_EQ(rv, XTRACT_NO_RESULT);
     ASSERT_EQ(result, 0.0);
@@ -60,7 +60,7 @@ UTEST(f0, sine_512_44100_172hz_no_result)
     int rv;
 
     xttest_gen_sine(table, blocksize, samplerate, frequency, amplitude);
-    rv = xtract_f0(NULL, table, blocksize, &samplerate, &result);
+    rv = xtract_f0(xttest_context(), table, blocksize, &samplerate, &result);
 
     ASSERT_EQ(rv, XTRACT_NO_RESULT);
     ASSERT_EQ(result, 0.0);
@@ -77,7 +77,7 @@ UTEST(f0, sine_512_44100_344hz_nearest_cent)
     double table[512];
 
     xttest_gen_sine(table, blocksize, samplerate, frequency, amplitude);
-    xtract_f0(NULL, table, blocksize, &samplerate, &result);
+    xtract_f0(xttest_context(), table, blocksize, &samplerate, &result);
 
     ASSERT_EQ(xttest_ftom(result), xttest_ftom(frequency));
 }
@@ -92,7 +92,7 @@ UTEST(f0, sine_512_44100_344hz_amp001_nearest_cent)
     double table[512];
 
     xttest_gen_sine(table, blocksize, samplerate, frequency, amplitude);
-    xtract_f0(NULL, table, blocksize, &samplerate, &result);
+    xtract_f0(xttest_context(), table, blocksize, &samplerate, &result);
 
     ASSERT_EQ(xttest_ftom(result), xttest_ftom(frequency));
 }
@@ -109,7 +109,7 @@ UTEST(f0, sine_1024_44100_86hz_no_result)
     int rv;
 
     xttest_gen_sine(table, blocksize, samplerate, frequency, amplitude);
-    rv = xtract_f0(NULL, table, blocksize, &samplerate, &result);
+    rv = xtract_f0(xttest_context(), table, blocksize, &samplerate, &result);
 
     ASSERT_EQ(rv, XTRACT_NO_RESULT);
     ASSERT_EQ(result, 0.0);
@@ -126,7 +126,7 @@ UTEST(f0, sine_1024_44100_140hz_nearest_cent)
     double table[1024];
 
     xttest_gen_sine(table, blocksize, samplerate, frequency, amplitude);
-    xtract_f0(NULL, table, blocksize, &samplerate, &result);
+    xtract_f0(xttest_context(), table, blocksize, &samplerate, &result);
 
     ASSERT_EQ(xttest_ftom(result), xttest_ftom(frequency));
 }
@@ -142,7 +142,7 @@ UTEST(f0, sine_1024_44100_155hz_quantized)
     double table[1024];
 
     xttest_gen_sine(table, blocksize, samplerate, frequency, amplitude);
-    xtract_f0(NULL, table, blocksize, &samplerate, &result);
+    xtract_f0(xttest_context(), table, blocksize, &samplerate, &result);
 
     /* period of 284 samples */
     ASSERT_EQ(xttest_ftom(result), xttest_ftom(155.28169014));
@@ -159,7 +159,7 @@ UTEST(f0, sine_1024_44100_172hz_nearest_cent)
     double table[1024];
 
     xttest_gen_sine(table, blocksize, samplerate, frequency, amplitude);
-    xtract_f0(NULL, table, blocksize, &samplerate, &result);
+    xtract_f0(xttest_context(), table, blocksize, &samplerate, &result);
 
     ASSERT_EQ(xttest_ftom(result), xttest_ftom(frequency));
 }
@@ -176,7 +176,7 @@ UTEST(f0, sine_1024_44100_344hz_amp1_nearest_cent)
     uint16_t expected = xttest_ftom(frequency);
 
     xttest_gen_sine(table, blocksize, samplerate, frequency, amplitude);
-    xtract_f0(NULL, table, blocksize, &samplerate, &result);
+    xtract_f0(xttest_context(), table, blocksize, &samplerate, &result);
 
     ASSERT_EQ(xttest_ftom(result), expected);
 }
@@ -192,7 +192,7 @@ UTEST(f0, sine_1024_44100_344hz_amp001_nearest_cent)
     uint16_t expected = xttest_ftom(frequency);
 
     xttest_gen_sine(table, blocksize, samplerate, frequency, amplitude);
-    xtract_f0(NULL, table, blocksize, &samplerate, &result);
+    xtract_f0(xttest_context(), table, blocksize, &samplerate, &result);
 
     ASSERT_EQ(xttest_ftom(result), expected);
 }
@@ -211,7 +211,7 @@ UTEST(f0, sine_1024_44100_344hz_noise10_nearest_cent)
     xttest_gen_sine(table, blocksize, samplerate, frequency, 1.0 - amplitude);
     xttest_gen_noise(noise, blocksize, amplitude);
     xttest_add(table, noise, blocksize);
-    xtract_f0(NULL, table, blocksize, &samplerate, &result);
+    xtract_f0(xttest_context(), table, blocksize, &samplerate, &result);
 
     ASSERT_EQ(xttest_ftom(result), expected);
 }
@@ -230,7 +230,7 @@ UTEST(f0, sine_1024_44100_344hz_noise20_nearest_cent)
     xttest_gen_sine(table, blocksize, samplerate, frequency, 1.0 - amplitude);
     xttest_gen_noise(noise, blocksize, amplitude);
     xttest_add(table, noise, blocksize);
-    xtract_f0(NULL, table, blocksize, &samplerate, &result);
+    xtract_f0(xttest_context(), table, blocksize, &samplerate, &result);
 
     ASSERT_EQ(xttest_ftom(result), expected);
 }
@@ -248,7 +248,7 @@ UTEST(f0, sine_1024_44100_344hz_noise25_returns_result)
     xttest_gen_sine(table, blocksize, samplerate, frequency, 1.0 - amplitude);
     xttest_gen_noise(noise, blocksize, amplitude);
     xttest_add(table, noise, blocksize);
-    xtract_f0(NULL, table, blocksize, &samplerate, &result);
+    xtract_f0(xttest_context(), table, blocksize, &samplerate, &result);
 
     /* At 25% noise with short blocks (1024 @ 44100), accuracy varies with
      * FFT backend and clipping. Only verify a result is produced. */
@@ -271,7 +271,7 @@ UTEST(f0, sine_1024_44100_344hz_noise35_inaccurate)
     xttest_gen_sine(table, blocksize, samplerate, frequency, 1.0 - amplitude);
     xttest_gen_noise(noise, blocksize, amplitude);
     xttest_add(table, noise, blocksize);
-    xtract_f0(NULL, table, blocksize, &samplerate, &result);
+    xtract_f0(xttest_context(), table, blocksize, &samplerate, &result);
 
     actual = xttest_ftom(result);
     difference = abs((int)expected - (int)actual);
@@ -289,7 +289,7 @@ UTEST(f0, sine_1024_11025_86hz_nearest_cent)
     double table[1024];
 
     xttest_gen_sine(table, blocksize, samplerate, frequency, amplitude);
-    xtract_f0(NULL, table, blocksize, &samplerate, &result);
+    xtract_f0(xttest_context(), table, blocksize, &samplerate, &result);
 
     ASSERT_EQ(xttest_ftom(result), xttest_ftom(frequency));
 }
@@ -305,7 +305,7 @@ UTEST(f0, sine_1024_11025_172hz_nearest_cent)
     double table[1024];
 
     xttest_gen_sine(table, blocksize, samplerate, frequency, amplitude);
-    xtract_f0(NULL, table, blocksize, &samplerate, &result);
+    xtract_f0(xttest_context(), table, blocksize, &samplerate, &result);
 
     ASSERT_EQ(xttest_ftom(result), xttest_ftom(frequency));
 }
@@ -322,7 +322,7 @@ UTEST(f0, sine_1024_11025_344hz_amp1_nearest_cent)
     uint16_t expected = xttest_ftom(frequency);
 
     xttest_gen_sine(table, blocksize, samplerate, frequency, amplitude);
-    xtract_f0(NULL, table, blocksize, &samplerate, &result);
+    xtract_f0(xttest_context(), table, blocksize, &samplerate, &result);
 
     ASSERT_EQ(xttest_ftom(result), expected);
 }
@@ -338,7 +338,7 @@ UTEST(f0, sine_1024_11025_344hz_amp001_nearest_cent)
     uint16_t expected = xttest_ftom(frequency);
 
     xttest_gen_sine(table, blocksize, samplerate, frequency, amplitude);
-    xtract_f0(NULL, table, blocksize, &samplerate, &result);
+    xtract_f0(xttest_context(), table, blocksize, &samplerate, &result);
 
     ASSERT_EQ(xttest_ftom(result), expected);
 }
@@ -359,7 +359,7 @@ UTEST(f0, sine_1024_11025_344hz_noise20_quarter_tone)
     xttest_gen_sine(table, blocksize, samplerate, frequency, 1.0 - amplitude);
     xttest_gen_noise(noise, blocksize, amplitude);
     xttest_add(table, noise, blocksize);
-    xtract_f0(NULL, table, blocksize, &samplerate, &result);
+    xtract_f0(xttest_context(), table, blocksize, &samplerate, &result);
 
     actual = xttest_ftom(result);
     min = expected - 50;
@@ -384,7 +384,7 @@ UTEST(f0, sine_1024_11025_344hz_noise40_semi_tone)
     xttest_gen_sine(table, blocksize, samplerate, frequency, 1.0 - amplitude);
     xttest_gen_noise(noise, blocksize, amplitude);
     xttest_add(table, noise, blocksize);
-    xtract_f0(NULL, table, blocksize, &samplerate, &result);
+    xtract_f0(xttest_context(), table, blocksize, &samplerate, &result);
 
     actual = xttest_ftom(result);
     min = expected - 100;
@@ -406,7 +406,7 @@ UTEST(f0, sine_1024_11025_344hz_noise60_returns_result)
     xttest_gen_sine(table, blocksize, samplerate, frequency, 1.0 - amplitude);
     xttest_gen_noise(noise, blocksize, amplitude);
     xttest_add(table, noise, blocksize);
-    xtract_f0(NULL, table, blocksize, &samplerate, &result);
+    xtract_f0(xttest_context(), table, blocksize, &samplerate, &result);
 
     /* At 60% noise, detection accuracy varies between FFT backends
      * (Accelerate vs OOURA). We only verify that a result is produced. */
@@ -429,7 +429,7 @@ UTEST(f0, sine_1024_11025_344hz_noise80_inaccurate)
     xttest_gen_sine(table, blocksize, samplerate, frequency, 1.0 - amplitude);
     xttest_gen_noise(noise, blocksize, amplitude);
     xttest_add(table, noise, blocksize);
-    xtract_f0(NULL, table, blocksize, &samplerate, &result);
+    xtract_f0(xttest_context(), table, blocksize, &samplerate, &result);
 
     actual = xttest_ftom(result);
     difference = abs((int)expected - (int)actual);
@@ -448,7 +448,7 @@ UTEST(f0, sine_2048_44100_43hz_no_result)
     int rv;
 
     xttest_gen_sine(table, blocksize, samplerate, frequency, amplitude);
-    rv = xtract_f0(NULL, table, blocksize, &samplerate, &result);
+    rv = xtract_f0(xttest_context(), table, blocksize, &samplerate, &result);
 
     ASSERT_EQ(rv, XTRACT_NO_RESULT);
     ASSERT_EQ(result, 0.0);
@@ -465,7 +465,7 @@ UTEST(f0, sine_2048_44100_86hz_nearest_cent)
     double table[2048];
 
     xttest_gen_sine(table, blocksize, samplerate, frequency, amplitude);
-    xtract_f0(NULL, table, blocksize, &samplerate, &result);
+    xtract_f0(xttest_context(), table, blocksize, &samplerate, &result);
 
     ASSERT_EQ(xttest_ftom(result), xttest_ftom(frequency));
 }
@@ -481,7 +481,7 @@ UTEST(f0, sine_2048_44100_172hz_nearest_cent)
     double table[2048];
 
     xttest_gen_sine(table, blocksize, samplerate, frequency, amplitude);
-    xtract_f0(NULL, table, blocksize, &samplerate, &result);
+    xtract_f0(xttest_context(), table, blocksize, &samplerate, &result);
 
     ASSERT_EQ(xttest_ftom(result), xttest_ftom(frequency));
 }
@@ -497,7 +497,7 @@ UTEST(f0, sine_2048_44100_344hz_amp1_nearest_cent)
     double table[2048];
 
     xttest_gen_sine(table, blocksize, samplerate, frequency, amplitude);
-    xtract_f0(NULL, table, blocksize, &samplerate, &result);
+    xtract_f0(xttest_context(), table, blocksize, &samplerate, &result);
 
     ASSERT_EQ(xttest_ftom(result), xttest_ftom(frequency));
 }
@@ -516,7 +516,7 @@ UTEST(f0, saw_512_44100_86hz_no_result)
     int rv;
 
     xttest_gen_sawtooth(table, blocksize, samplerate, frequency, amplitude);
-    rv = xtract_f0(NULL, table, blocksize, &samplerate, &result);
+    rv = xtract_f0(xttest_context(), table, blocksize, &samplerate, &result);
 
     ASSERT_EQ(rv, XTRACT_NO_RESULT);
     ASSERT_EQ(result, 0.0);
@@ -534,7 +534,7 @@ UTEST(f0, saw_512_44100_172hz_quarter_tone)
     uint16_t actual, expected, min, max;
 
     xttest_gen_sawtooth(table, blocksize, samplerate, frequency, amplitude);
-    xtract_f0(NULL, table, blocksize, &samplerate, &result);
+    xtract_f0(xttest_context(), table, blocksize, &samplerate, &result);
 
     actual = xttest_ftom(result);
     expected = xttest_ftom(frequency);
@@ -556,7 +556,7 @@ UTEST(f0, saw_512_44100_344hz_quarter_tone)
     uint16_t actual, expected, min, max;
 
     xttest_gen_sawtooth(table, blocksize, samplerate, frequency, amplitude);
-    xtract_f0(NULL, table, blocksize, &samplerate, &result);
+    xtract_f0(xttest_context(), table, blocksize, &samplerate, &result);
 
     actual = xttest_ftom(result);
     expected = xttest_ftom(frequency);
@@ -577,7 +577,7 @@ UTEST(f0, saw_512_44100_344hz_amp001_quarter_tone)
     uint16_t actual, expected, min, max;
 
     xttest_gen_sawtooth(table, blocksize, samplerate, frequency, amplitude);
-    xtract_f0(NULL, table, blocksize, &samplerate, &result);
+    xtract_f0(xttest_context(), table, blocksize, &samplerate, &result);
 
     actual = xttest_ftom(result);
     expected = xttest_ftom(frequency);
@@ -599,7 +599,7 @@ UTEST(f0, saw_1024_44100_86hz_quarter_tone)
     uint16_t actual, expected, min, max;
 
     xttest_gen_sawtooth(table, blocksize, samplerate, frequency, amplitude);
-    xtract_f0(NULL, table, blocksize, &samplerate, &result);
+    xtract_f0(xttest_context(), table, blocksize, &samplerate, &result);
 
     actual = xttest_ftom(result);
     expected = xttest_ftom(frequency);
@@ -620,7 +620,7 @@ UTEST(f0, saw_1024_44100_140hz_nearest_cent)
     double table[1024];
 
     xttest_gen_sawtooth(table, blocksize, samplerate, frequency, amplitude);
-    xtract_f0(NULL, table, blocksize, &samplerate, &result);
+    xtract_f0(xttest_context(), table, blocksize, &samplerate, &result);
 
     ASSERT_EQ(xttest_ftom(result), xttest_ftom(frequency));
 }
@@ -636,7 +636,7 @@ UTEST(f0, saw_1024_44100_155hz_quantized)
     double table[1024];
 
     xttest_gen_sawtooth(table, blocksize, samplerate, frequency, amplitude);
-    xtract_f0(NULL, table, blocksize, &samplerate, &result);
+    xtract_f0(xttest_context(), table, blocksize, &samplerate, &result);
 
     /* period of 284 samples */
     ASSERT_EQ(xttest_ftom(result), xttest_ftom(155.28169014));
@@ -654,7 +654,7 @@ UTEST(f0, saw_1024_44100_172hz_quarter_tone)
     uint16_t actual, expected, min, max;
 
     xttest_gen_sawtooth(table, blocksize, samplerate, frequency, amplitude);
-    xtract_f0(NULL, table, blocksize, &samplerate, &result);
+    xtract_f0(xttest_context(), table, blocksize, &samplerate, &result);
 
     actual = xttest_ftom(result);
     expected = xttest_ftom(frequency);
@@ -676,7 +676,7 @@ UTEST(f0, saw_1024_44100_344hz_amp1_quarter_tone)
     uint16_t actual, expected, min, max;
 
     xttest_gen_sawtooth(table, blocksize, samplerate, frequency, amplitude);
-    xtract_f0(NULL, table, blocksize, &samplerate, &result);
+    xtract_f0(xttest_context(), table, blocksize, &samplerate, &result);
 
     actual = xttest_ftom(result);
     expected = xttest_ftom(frequency);
@@ -697,7 +697,7 @@ UTEST(f0, saw_1024_44100_344hz_amp001_quarter_tone)
     uint16_t actual, expected, min, max;
 
     xttest_gen_sawtooth(table, blocksize, samplerate, frequency, amplitude);
-    xtract_f0(NULL, table, blocksize, &samplerate, &result);
+    xtract_f0(xttest_context(), table, blocksize, &samplerate, &result);
 
     actual = xttest_ftom(result);
     expected = xttest_ftom(frequency);
@@ -721,7 +721,7 @@ UTEST(f0, saw_1024_44100_344hz_noise10_quarter_tone)
     xttest_gen_sawtooth(table, blocksize, samplerate, frequency, 1.0 - amplitude);
     xttest_gen_noise(noise, blocksize, amplitude);
     xttest_add(table, noise, blocksize);
-    xtract_f0(NULL, table, blocksize, &samplerate, &result);
+    xtract_f0(xttest_context(), table, blocksize, &samplerate, &result);
 
     actual = xttest_ftom(result);
     expected = xttest_ftom(frequency);
@@ -745,7 +745,7 @@ UTEST(f0, saw_1024_44100_344hz_noise20_quarter_tone)
     xttest_gen_sawtooth(table, blocksize, samplerate, frequency, 1.0 - amplitude);
     xttest_gen_noise(noise, blocksize, amplitude);
     xttest_add(table, noise, blocksize);
-    xtract_f0(NULL, table, blocksize, &samplerate, &result);
+    xtract_f0(xttest_context(), table, blocksize, &samplerate, &result);
 
     actual = xttest_ftom(result);
     expected = xttest_ftom(frequency);
@@ -769,7 +769,7 @@ UTEST(f0, saw_1024_44100_344hz_noise25_quarter_tone)
     xttest_gen_sawtooth(table, blocksize, samplerate, frequency, 1.0 - amplitude);
     xttest_gen_noise(noise, blocksize, amplitude);
     xttest_add(table, noise, blocksize);
-    xtract_f0(NULL, table, blocksize, &samplerate, &result);
+    xtract_f0(xttest_context(), table, blocksize, &samplerate, &result);
 
     actual = xttest_ftom(result);
     expected = xttest_ftom(frequency);
@@ -794,7 +794,7 @@ UTEST(f0, saw_1024_44100_344hz_noise30_quarter_tone)
     xttest_gen_sawtooth(table, blocksize, samplerate, frequency, 1.0 - amplitude);
     xttest_gen_noise(noise, blocksize, amplitude);
     xttest_add(table, noise, blocksize);
-    xtract_f0(NULL, table, blocksize, &samplerate, &result);
+    xtract_f0(xttest_context(), table, blocksize, &samplerate, &result);
 
     actual = xttest_ftom(result);
     min = expected - 50;
@@ -817,7 +817,7 @@ UTEST(f0, saw_1024_44100_344hz_noise35_quarter_tone)
     xttest_gen_sawtooth(table, blocksize, samplerate, frequency, 1.0 - amplitude);
     xttest_gen_noise(noise, blocksize, amplitude);
     xttest_add(table, noise, blocksize);
-    xtract_f0(NULL, table, blocksize, &samplerate, &result);
+    xtract_f0(xttest_context(), table, blocksize, &samplerate, &result);
 
     actual = xttest_ftom(result);
     expected = xttest_ftom(frequency);
@@ -839,7 +839,7 @@ UTEST(f0, saw_1024_11025_86hz_quarter_tone)
     uint16_t actual, expected, min, max;
 
     xttest_gen_sawtooth(table, blocksize, samplerate, frequency, amplitude);
-    xtract_f0(NULL, table, blocksize, &samplerate, &result);
+    xtract_f0(xttest_context(), table, blocksize, &samplerate, &result);
 
     actual = xttest_ftom(result);
     expected = xttest_ftom(frequency);
@@ -861,7 +861,7 @@ UTEST(f0, saw_1024_11025_172hz_quarter_tone)
     uint16_t actual, expected, min, max;
 
     xttest_gen_sawtooth(table, blocksize, samplerate, frequency, amplitude);
-    xtract_f0(NULL, table, blocksize, &samplerate, &result);
+    xtract_f0(xttest_context(), table, blocksize, &samplerate, &result);
 
     actual = xttest_ftom(result);
     expected = xttest_ftom(frequency);
@@ -883,7 +883,7 @@ UTEST(f0, saw_1024_11025_344hz_amp1_quarter_tone)
     uint16_t actual, expected, min, max;
 
     xttest_gen_sawtooth(table, blocksize, samplerate, frequency, amplitude);
-    xtract_f0(NULL, table, blocksize, &samplerate, &result);
+    xtract_f0(xttest_context(), table, blocksize, &samplerate, &result);
 
     actual = xttest_ftom(result);
     expected = xttest_ftom(frequency);
@@ -904,7 +904,7 @@ UTEST(f0, saw_1024_11025_344hz_amp001_quarter_tone)
     uint16_t actual, expected, min, max;
 
     xttest_gen_sawtooth(table, blocksize, samplerate, frequency, amplitude);
-    xtract_f0(NULL, table, blocksize, &samplerate, &result);
+    xtract_f0(xttest_context(), table, blocksize, &samplerate, &result);
 
     actual = xttest_ftom(result);
     expected = xttest_ftom(frequency);
@@ -929,7 +929,7 @@ UTEST(f0, saw_1024_11025_344hz_noise20_quarter_tone)
     xttest_gen_sawtooth(table, blocksize, samplerate, frequency, 1.0 - amplitude);
     xttest_gen_noise(noise, blocksize, amplitude);
     xttest_add(table, noise, blocksize);
-    xtract_f0(NULL, table, blocksize, &samplerate, &result);
+    xtract_f0(xttest_context(), table, blocksize, &samplerate, &result);
 
     actual = xttest_ftom(result);
     min = expected - 50;
@@ -951,7 +951,7 @@ UTEST(f0, saw_1024_11025_344hz_noise40_returns_result)
     xttest_gen_sawtooth(table, blocksize, samplerate, frequency, 1.0 - amplitude);
     xttest_gen_noise(noise, blocksize, amplitude);
     xttest_add(table, noise, blocksize);
-    xtract_f0(NULL, table, blocksize, &samplerate, &result);
+    xtract_f0(xttest_context(), table, blocksize, &samplerate, &result);
 
     /* At 40% noise on sawtooth, detection accuracy varies between FFT
      * backends. Some succeed, some fail. Only verify a result is produced. */
@@ -970,7 +970,7 @@ UTEST(f0, saw_2048_44100_43hz_quarter_tone)
     uint16_t actual, expected, min, max;
 
     xttest_gen_sawtooth(table, blocksize, samplerate, frequency, amplitude);
-    xtract_f0(NULL, table, blocksize, &samplerate, &result);
+    xtract_f0(xttest_context(), table, blocksize, &samplerate, &result);
 
     actual = xttest_ftom(result);
     expected = xttest_ftom(frequency);
@@ -991,7 +991,7 @@ UTEST(f0, saw_2048_44100_86hz_nearest_cent)
     double table[2048];
 
     xttest_gen_sawtooth(table, blocksize, samplerate, frequency, amplitude);
-    xtract_f0(NULL, table, blocksize, &samplerate, &result);
+    xtract_f0(xttest_context(), table, blocksize, &samplerate, &result);
 
     ASSERT_EQ(xttest_ftom(result), xttest_ftom(frequency));
 }
@@ -1007,7 +1007,7 @@ UTEST(f0, saw_2048_44100_172hz_nearest_cent)
     double table[2048];
 
     xttest_gen_sawtooth(table, blocksize, samplerate, frequency, amplitude);
-    xtract_f0(NULL, table, blocksize, &samplerate, &result);
+    xtract_f0(xttest_context(), table, blocksize, &samplerate, &result);
 
     ASSERT_EQ(xttest_ftom(result), xttest_ftom(frequency));
 }
@@ -1023,7 +1023,7 @@ UTEST(f0, saw_2048_44100_344hz_amp1_nearest_cent)
     double table[2048];
 
     xttest_gen_sawtooth(table, blocksize, samplerate, frequency, amplitude);
-    xtract_f0(NULL, table, blocksize, &samplerate, &result);
+    xtract_f0(xttest_context(), table, blocksize, &samplerate, &result);
 
     ASSERT_EQ(xttest_ftom(result), xttest_ftom(frequency));
 }
@@ -1802,7 +1802,7 @@ UTEST(mcleod_f0, sine_1024_44100_86hz_nearest_cent)
     double table[1024];
 
     xttest_gen_sine(table, blocksize, samplerate, frequency, amplitude);
-    xtract_mcleod_f0(NULL, table, blocksize, &samplerate, &result);
+    xtract_mcleod_f0(xttest_context(), table, blocksize, &samplerate, &result);
 
     ASSERT_EQ(xttest_ftom(result), xttest_ftom(frequency));
 }
@@ -1817,7 +1817,7 @@ UTEST(mcleod_f0, sine_1024_44100_172hz_nearest_cent)
     double table[1024];
 
     xttest_gen_sine(table, blocksize, samplerate, frequency, amplitude);
-    xtract_mcleod_f0(NULL, table, blocksize, &samplerate, &result);
+    xtract_mcleod_f0(xttest_context(), table, blocksize, &samplerate, &result);
 
     ASSERT_EQ(xttest_ftom(result), xttest_ftom(frequency));
 }
@@ -1832,7 +1832,7 @@ UTEST(mcleod_f0, sine_1024_44100_344hz_nearest_cent)
     double table[1024];
 
     xttest_gen_sine(table, blocksize, samplerate, frequency, amplitude);
-    xtract_mcleod_f0(NULL, table, blocksize, &samplerate, &result);
+    xtract_mcleod_f0(xttest_context(), table, blocksize, &samplerate, &result);
 
     ASSERT_EQ(xttest_ftom(result), xttest_ftom(frequency));
 }
@@ -1848,7 +1848,7 @@ UTEST(mcleod_f0, sine_1024_44100_1000hz_within_10_cents)
     uint16_t actual, expected;
 
     xttest_gen_sine(table, blocksize, samplerate, frequency, amplitude);
-    xtract_mcleod_f0(NULL, table, blocksize, &samplerate, &result);
+    xtract_mcleod_f0(xttest_context(), table, blocksize, &samplerate, &result);
 
     actual = xttest_ftom(result);
     expected = xttest_ftom(frequency);
@@ -1866,7 +1866,7 @@ UTEST(mcleod_f0, sawtooth_1024_44100_172hz_within_10_cents)
     uint16_t actual, expected;
 
     xttest_gen_sawtooth(table, blocksize, samplerate, frequency, amplitude);
-    xtract_mcleod_f0(NULL, table, blocksize, &samplerate, &result);
+    xtract_mcleod_f0(xttest_context(), table, blocksize, &samplerate, &result);
 
     actual = xttest_ftom(result);
     expected = xttest_ftom(frequency);
@@ -1888,7 +1888,7 @@ UTEST(mcleod_f0, sine_1024_44100_strong_second_harmonic)
     for (n = 0; n < blocksize; n++)
         table[n] = 0.6 * sin(2.0 * M_PI * frequency * n / samplerate) + 0.9 * sin(2.0 * M_PI * 2.0 * frequency * n / samplerate);
 
-    xtract_mcleod_f0(NULL, table, blocksize, &samplerate, &result);
+    xtract_mcleod_f0(xttest_context(), table, blocksize, &samplerate, &result);
 
     actual = xttest_ftom(result);
     expected = xttest_ftom(frequency);
@@ -1904,7 +1904,7 @@ UTEST(mcleod_f0, sine_1024_44100_silence_no_result)
     int rv;
 
     memset(table, 0, blocksize * sizeof(double));
-    rv = xtract_mcleod_f0(NULL, table, blocksize, &samplerate, &result);
+    rv = xtract_mcleod_f0(xttest_context(), table, blocksize, &samplerate, &result);
 
     ASSERT_EQ(rv, XTRACT_NO_RESULT);
     ASSERT_EQ(result, 0.0);
@@ -1925,8 +1925,8 @@ UTEST(mcleod_f0, beats_f0_at_86hz)
     uint16_t actual, expected;
 
     xttest_gen_sine(table, blocksize, samplerate, frequency, amplitude);
-    rv_f0 = xtract_f0(NULL, table, blocksize, &samplerate, &result_f0);
-    rv_mcleod = xtract_mcleod_f0(NULL, table, blocksize, &samplerate, &result_mcleod);
+    rv_f0 = xtract_f0(xttest_context(), table, blocksize, &samplerate, &result_f0);
+    rv_mcleod = xtract_mcleod_f0(xttest_context(), table, blocksize, &samplerate, &result_mcleod);
 
     ASSERT_EQ(rv_f0, XTRACT_NO_RESULT);
     ASSERT_EQ(rv_mcleod, XTRACT_SUCCESS);
@@ -1944,7 +1944,7 @@ UTEST(periodicity, sine_is_one)
 
     xttest_gen_sine(table, 1024, 44100.0, 220.0, 1.0);
 
-    ASSERT_EQ(xtract_periodicity(NULL, table, 1024, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_periodicity(xttest_context(), table, 1024, NULL, &result), XTRACT_SUCCESS);
     CHECK_REL(result, 1.0, 1e-4);
 }
 
@@ -1963,8 +1963,8 @@ UTEST(periodicity, is_scale_invariant)
     for (n = 0; n < 1024; n++)
         scaled[n] = 5.0 * table[n];
 
-    ASSERT_EQ(xtract_periodicity(NULL, table, 1024, NULL, &unit), XTRACT_SUCCESS);
-    ASSERT_EQ(xtract_periodicity(NULL, scaled, 1024, NULL, &times_five), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_periodicity(xttest_context(), table, 1024, NULL, &unit), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_periodicity(xttest_context(), scaled, 1024, NULL, &times_five), XTRACT_SUCCESS);
     CHECK_REL(times_five, unit, 1e-12);
 }
 
@@ -1975,7 +1975,7 @@ UTEST(periodicity, noise_is_low)
 
     xttest_gen_noise(table, 1024, 1.0);
 
-    ASSERT_EQ(xtract_periodicity(NULL, table, 1024, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_periodicity(xttest_context(), table, 1024, NULL, &result), XTRACT_SUCCESS);
     ASSERT_LT(result, 0.3);
 }
 
@@ -1986,7 +1986,7 @@ UTEST(periodicity, silence_no_result)
 
     memset(table, 0, sizeof(table));
 
-    ASSERT_EQ(xtract_periodicity(NULL, table, 1024, NULL, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(xtract_periodicity(xttest_context(), table, 1024, NULL, &result), XTRACT_NO_RESULT);
     ASSERT_EQ(result, 0.0);
 }
 
@@ -2002,7 +2002,7 @@ UTEST(periodicity, series_with_an_offset_no_result)
     for (n = 0; n < 1024; n++)
         table[n] += 10.0;
 
-    ASSERT_EQ(xtract_periodicity(NULL, table, 1024, NULL, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(xtract_periodicity(xttest_context(), table, 1024, NULL, &result), XTRACT_NO_RESULT);
     ASSERT_EQ(result, 0.0);
 }
 
@@ -2011,7 +2011,7 @@ UTEST(periodicity, single_sample_no_result)
     double data[] = {1.0};
     double result = -1.0;
 
-    ASSERT_EQ(xtract_periodicity(NULL, data, 1, NULL, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(xtract_periodicity(xttest_context(), data, 1, NULL, &result), XTRACT_NO_RESULT);
     ASSERT_EQ(result, 0.0);
 }
 
@@ -2020,7 +2020,7 @@ UTEST(periodicity, n_zero_argument_error)
     double data[] = {1.0};
     double result = -1.0;
 
-    ASSERT_EQ(xtract_periodicity(NULL, data, 0, NULL, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_periodicity(xttest_context(), data, 0, NULL, &result), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(result, 0.0);
 }
 
@@ -2031,7 +2031,7 @@ UTEST(signal_confidence, sine_is_one)
 
     xttest_gen_sine(table, 1024, 44100.0, 220.0, 1.0);
 
-    ASSERT_EQ(xtract_signal_confidence(NULL, table, 1024, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_signal_confidence(xttest_context(), table, 1024, NULL, &result), XTRACT_SUCCESS);
     CHECK_REL(result, 1.0, 1e-4);
 }
 
@@ -2051,9 +2051,9 @@ UTEST(signal_confidence, is_the_height_of_the_chosen_peak_not_the_highest)
     for (n = 0; n < 1024; n++)
         table[n] = sin(2.0 * M_PI * 220.0 * n / samplerate) + 0.3 * sin(2.0 * M_PI * 330.0 * n / samplerate);
 
-    ASSERT_EQ(xtract_signal_confidence(NULL, table, 1024, NULL, &confidence), XTRACT_SUCCESS);
-    ASSERT_EQ(xtract_periodicity(NULL, table, 1024, NULL, &periodicity), XTRACT_SUCCESS);
-    ASSERT_EQ(xtract_mcleod_f0(NULL, table, 1024, &samplerate, &f0), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_signal_confidence(xttest_context(), table, 1024, NULL, &confidence), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_periodicity(xttest_context(), table, 1024, NULL, &periodicity), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_mcleod_f0(xttest_context(), table, 1024, &samplerate, &f0), XTRACT_SUCCESS);
 
     CHECK_NEAR(confidence, (1.0 - 0.09) / 1.09, 1e-2);
     CHECK_REL(periodicity, 1.0, 1e-4);
@@ -2071,8 +2071,8 @@ UTEST(signal_confidence, is_at_most_the_periodicity)
     xttest_gen_noise(noise, 1024, 1.0);
     xttest_add(table, noise, 1024);
 
-    ASSERT_EQ(xtract_signal_confidence(NULL, table, 1024, NULL, &confidence), XTRACT_SUCCESS);
-    ASSERT_EQ(xtract_periodicity(NULL, table, 1024, NULL, &periodicity), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_signal_confidence(xttest_context(), table, 1024, NULL, &confidence), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_periodicity(xttest_context(), table, 1024, NULL, &periodicity), XTRACT_SUCCESS);
     ASSERT_LE(confidence, periodicity);
     ASSERT_GT(confidence, 0.0);
 }
@@ -2085,12 +2085,12 @@ UTEST(signal_confidence, no_result_exactly_when_f0_has_none)
     double f0 = -1.0;
 
     memset(table, 0, sizeof(table));
-    ASSERT_EQ(xtract_signal_confidence(NULL, table, 1024, NULL, &confidence), XTRACT_NO_RESULT);
-    ASSERT_EQ(xtract_mcleod_f0(NULL, table, 1024, &samplerate, &f0), XTRACT_NO_RESULT);
+    ASSERT_EQ(xtract_signal_confidence(xttest_context(), table, 1024, NULL, &confidence), XTRACT_NO_RESULT);
+    ASSERT_EQ(xtract_mcleod_f0(xttest_context(), table, 1024, &samplerate, &f0), XTRACT_NO_RESULT);
     ASSERT_EQ(confidence, 0.0);
 
     xttest_gen_noise(table, 1024, 1.0);
-    ASSERT_EQ(xtract_signal_confidence(NULL, table, 1024, NULL, &confidence), xtract_mcleod_f0(NULL, table, 1024, &samplerate, &f0));
+    ASSERT_EQ(xtract_signal_confidence(xttest_context(), table, 1024, NULL, &confidence), xtract_mcleod_f0(xttest_context(), table, 1024, &samplerate, &f0));
 }
 
 UTEST(signal_confidence, n_zero_argument_error)
@@ -2098,7 +2098,7 @@ UTEST(signal_confidence, n_zero_argument_error)
     double data[] = {1.0};
     double result = -1.0;
 
-    ASSERT_EQ(xtract_signal_confidence(NULL, data, 0, NULL, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_signal_confidence(xttest_context(), data, 0, NULL, &result), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(result, 0.0);
 }
 
@@ -2218,8 +2218,8 @@ UTEST(mcleod_f0, at_least_as_accurate_at_172hz)
     int err_f0, err_mcleod;
 
     xttest_gen_sine(table, blocksize, samplerate, frequency, amplitude);
-    rv_f0 = xtract_f0(NULL, table, blocksize, &samplerate, &result_f0);
-    rv_mcleod = xtract_mcleod_f0(NULL, table, blocksize, &samplerate, &result_mcleod);
+    rv_f0 = xtract_f0(xttest_context(), table, blocksize, &samplerate, &result_f0);
+    rv_mcleod = xtract_mcleod_f0(xttest_context(), table, blocksize, &samplerate, &result_mcleod);
 
     ASSERT_EQ(rv_f0, XTRACT_SUCCESS);
     ASSERT_EQ(rv_mcleod, XTRACT_SUCCESS);
@@ -2246,8 +2246,8 @@ UTEST(mcleod_f0, detects_pitch_at_344hz_with_noise)
     xttest_gen_noise(noise, blocksize, 0.25);
     xttest_add(table, noise, blocksize);
 
-    rv_f0 = xtract_f0(NULL, table, blocksize, &samplerate, &result_f0);
-    rv_mcleod = xtract_mcleod_f0(NULL, table, blocksize, &samplerate, &result_mcleod);
+    rv_f0 = xtract_f0(xttest_context(), table, blocksize, &samplerate, &result_f0);
+    rv_mcleod = xtract_mcleod_f0(xttest_context(), table, blocksize, &samplerate, &result_mcleod);
 
     ASSERT_EQ(rv_mcleod, XTRACT_SUCCESS);
     actual = xttest_ftom(result_mcleod);
@@ -2270,7 +2270,7 @@ UTEST(mcleod_f0, interpolates_a_period_that_falls_between_lags)
     for (n = 0; n < N; n++)
         data[n] = sin(2.0 * M_PI * n / period);
 
-    ASSERT_EQ(xtract_mcleod_f0(NULL, data, N, &sr, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_mcleod_f0(xttest_context(), data, N, &sr, &result), XTRACT_SUCCESS);
     CHECK_REL(result, sr / period, 2e-3);
 }
 
@@ -2285,7 +2285,7 @@ UTEST(mcleod_f0, zero_sample_rate_means_44100)
     for (n = 0; n < N; n++)
         data[n] = sin(2.0 * M_PI * n / 16.0);
 
-    ASSERT_EQ(xtract_mcleod_f0(NULL, data, N, &zero, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_mcleod_f0(xttest_context(), data, N, &zero, &result), XTRACT_SUCCESS);
     CHECK_REL(result, 44100.0 / 16.0, 1e-3);
 }
 
@@ -2294,7 +2294,7 @@ UTEST(mcleod_f0, rejects_a_null_argv)
     double data[64] = {0};
     double result = 1.0;
 
-    ASSERT_EQ(xtract_mcleod_f0(NULL, data, 64, NULL, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_mcleod_f0(xttest_context(), data, 64, NULL, &result), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(result, 0.0);
 }
 
@@ -2319,7 +2319,7 @@ UTEST(mcleod_f0, first_key_maximum_within_threshold_of_the_highest_wins)
     double result = 0.0;
 
     alternating_sine(data, N, 16, 0.7);
-    ASSERT_EQ(xtract_mcleod_f0(NULL, data, N, &sr, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_mcleod_f0(xttest_context(), data, N, &sr, &result), XTRACT_SUCCESS);
     CHECK_REL(result, sr / 16.0, 2e-3);
 }
 
@@ -2331,7 +2331,7 @@ UTEST(mcleod_f0, key_maximum_below_threshold_yields_to_the_next)
     double result = 0.0;
 
     alternating_sine(data, N, 16, 0.4);
-    ASSERT_EQ(xtract_mcleod_f0(NULL, data, N, &sr, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_mcleod_f0(xttest_context(), data, N, &sr, &result), XTRACT_SUCCESS);
     CHECK_REL(result, sr / 32.0, 2e-3);
 }
 
@@ -2350,7 +2350,7 @@ UTEST(mcleod_f0, threshold_is_relative_to_the_highest_key_maximum)
     for (n = 0; n < N; n++)
         data[n] = exp(-n / 16.0) * sin(2.0 * M_PI * n / 16.0);
 
-    ASSERT_EQ(xtract_mcleod_f0(NULL, data, N, &sr, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_mcleod_f0(xttest_context(), data, N, &sr, &result), XTRACT_SUCCESS);
     CHECK_REL(result, sr / 16.0, 1e-2);
 }
 
@@ -2367,7 +2367,7 @@ UTEST(mcleod_f0, zero_crossings_that_land_exactly_on_zero_bound_the_regions)
     for (n = 0; n < N; n++)
         data[n] = (n % 2) ? 0.0 : (n % 4 ? -1.0 : 1.0);
 
-    ASSERT_EQ(xtract_mcleod_f0(NULL, data, N, &sr, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_mcleod_f0(xttest_context(), data, N, &sr, &result), XTRACT_SUCCESS);
     CHECK_REL(result, sr / 4.0, 1e-9);
 }
 
@@ -2387,7 +2387,7 @@ UTEST(mcleod_f0, key_maximum_height_is_the_interpolated_peak_not_the_sample)
     for (n = 0; n < N; n++)
         data[n] = sin(2.0 * M_PI * n / period);
 
-    ASSERT_EQ(xtract_mcleod_f0(NULL, data, N, &sr, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_mcleod_f0(xttest_context(), data, N, &sr, &result), XTRACT_SUCCESS);
     CHECK_REL(result, sr / period, 1e-3);
 }
 
@@ -2404,7 +2404,7 @@ UTEST(mcleod_f0, a_period_longer_than_half_the_window_gives_no_result)
     for (n = 0; n < N; n++)
         data[n] = cos(2.0 * M_PI * n / 60.0);
 
-    ASSERT_EQ(xtract_mcleod_f0(NULL, data, N, &sr, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(xtract_mcleod_f0(xttest_context(), data, N, &sr, &result), XTRACT_NO_RESULT);
     ASSERT_EQ(result, 0.0);
 }
 
@@ -2422,7 +2422,7 @@ UTEST(mcleod_f0, a_region_still_rising_at_the_last_scanned_lag_has_no_key_maximu
     for (n = 0; n < N; n++)
         data[n] = cos(2.0 * M_PI * n / 70.0);
 
-    ASSERT_EQ(xtract_mcleod_f0(NULL, data, N, &sr, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(xtract_mcleod_f0(xttest_context(), data, N, &sr, &result), XTRACT_NO_RESULT);
     ASSERT_EQ(result, 0.0);
 }
 
@@ -2441,15 +2441,15 @@ UTEST(mcleod_f0, every_period_up_to_half_the_window_is_found_and_none_beyond)
 
         if (period <= N / 2)
         {
-            ASSERT_EQ(xtract_mcleod_f0(NULL, data, N, &sr, &f0), XTRACT_SUCCESS);
+            ASSERT_EQ(xtract_mcleod_f0(xttest_context(), data, N, &sr, &f0), XTRACT_SUCCESS);
             CHECK_REL(f0, sr / period, 1e-2);
-            ASSERT_EQ(xtract_periodicity(NULL, data, N, NULL, &periodicity), XTRACT_SUCCESS);
+            ASSERT_EQ(xtract_periodicity(xttest_context(), data, N, NULL, &periodicity), XTRACT_SUCCESS);
             ASSERT_GE(periodicity, 0.95);
         }
         else
         {
-            ASSERT_EQ(xtract_mcleod_f0(NULL, data, N, &sr, &f0), XTRACT_NO_RESULT);
-            ASSERT_EQ(xtract_periodicity(NULL, data, N, NULL, &periodicity), XTRACT_NO_RESULT);
+            ASSERT_EQ(xtract_mcleod_f0(xttest_context(), data, N, &sr, &f0), XTRACT_NO_RESULT);
+            ASSERT_EQ(xtract_periodicity(xttest_context(), data, N, NULL, &periodicity), XTRACT_NO_RESULT);
         }
     }
 }
@@ -2469,7 +2469,7 @@ UTEST(mcleod_f0, a_peak_on_the_last_scanned_lag_is_interpolated)
     for (n = 0; n < N; n++)
         data[n] = cos(2.0 * M_PI * n / (N / 2));
 
-    ASSERT_EQ(xtract_mcleod_f0(NULL, data, N, &sr, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_mcleod_f0(xttest_context(), data, N, &sr, &result), XTRACT_SUCCESS);
     CHECK_REL(result, sr / (N / 2), 1e-3);
 }
 
@@ -2825,12 +2825,12 @@ UTEST(scalar, pitch_detectors_reject_an_empty_input_and_a_null_argv)
     double sr = 44100.0;
     double result;
 
-    ASSERT_REJECTED(xtract_f0(NULL, data, 0, &sr, &result));
-    ASSERT_REJECTED(xtract_f0(NULL, data, 64, NULL, &result));
-    ASSERT_REJECTED(xtract_failsafe_f0(NULL, data, 0, &sr, &result));
-    ASSERT_REJECTED(xtract_failsafe_f0(NULL, data, 64, NULL, &result));
-    ASSERT_REJECTED(xtract_mcleod_f0(NULL, data, 0, &sr, &result));
-    ASSERT_REJECTED(xtract_mcleod_f0(NULL, data, 64, NULL, &result));
+    ASSERT_REJECTED(xtract_f0(xttest_context(), data, 0, &sr, &result));
+    ASSERT_REJECTED(xtract_f0(xttest_context(), data, 64, NULL, &result));
+    ASSERT_REJECTED(xtract_failsafe_f0(xttest_context(), data, 0, &sr, &result));
+    ASSERT_REJECTED(xtract_failsafe_f0(xttest_context(), data, 64, NULL, &result));
+    ASSERT_REJECTED(xtract_mcleod_f0(xttest_context(), data, 0, &sr, &result));
+    ASSERT_REJECTED(xtract_mcleod_f0(xttest_context(), data, 64, NULL, &result));
 }
 
 UTEST(scalar, spectral_features_reject_an_odd_or_too_short_input_and_a_null_argv)
@@ -2945,7 +2945,7 @@ UTEST(scalar, median_of_an_odd_length_series_is_the_middle_sorted_value)
     double data[5] = {4.0, 1.0, 5.0, 3.0, 2.0};
     double result = -1.0;
 
-    ASSERT_EQ(xtract_median(NULL, data, 5, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_median(xttest_context(), data, 5, NULL, &result), XTRACT_SUCCESS);
     ASSERT_EQ(result, 3.0);
     ASSERT_EQ(data[0], 4.0);
     ASSERT_EQ(data[4], 2.0);
@@ -2956,7 +2956,7 @@ UTEST(scalar, median_of_an_even_length_series_is_the_mean_of_the_two_middle_valu
     double data[6] = {9.5, -6.0, 1.0, 3.0, -1.5, 4.25};
     double result = -1.0;
 
-    ASSERT_EQ(xtract_median(NULL, data, 6, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_median(xttest_context(), data, 6, NULL, &result), XTRACT_SUCCESS);
     ASSERT_EQ(result, 2.0);
 }
 
@@ -2965,11 +2965,11 @@ UTEST(scalar, median_of_two_values_at_the_double_limit_does_not_overflow)
     double data[2] = {DBL_MAX, DBL_MAX};
     double result = 0.0;
 
-    ASSERT_EQ(xtract_median(NULL, data, 2, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_median(xttest_context(), data, 2, NULL, &result), XTRACT_SUCCESS);
     ASSERT_EQ(result, DBL_MAX);
     data[0] = -DBL_MAX;
     data[1] = -DBL_MAX;
-    ASSERT_EQ(xtract_median(NULL, data, 2, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_median(xttest_context(), data, 2, NULL, &result), XTRACT_SUCCESS);
     ASSERT_EQ(result, -DBL_MAX);
 }
 
@@ -2978,7 +2978,7 @@ UTEST(scalar, median_of_a_single_value_is_that_value)
     double data[1] = {-7.25};
     double result = 0.0;
 
-    ASSERT_EQ(xtract_median(NULL, data, 1, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_median(xttest_context(), data, 1, NULL, &result), XTRACT_SUCCESS);
     ASSERT_EQ(result, -7.25);
 }
 
@@ -2987,11 +2987,11 @@ UTEST(scalar, median_orders_a_nan_element_after_every_number)
     double data[5] = {2.0, NAN, 1.0, 4.0, 3.0};
     double result = 0.0;
 
-    ASSERT_EQ(xtract_median(NULL, data, 5, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_median(xttest_context(), data, 5, NULL, &result), XTRACT_SUCCESS);
     ASSERT_EQ(result, 3.0);
     data[0] = NAN;
     data[2] = NAN;
-    ASSERT_EQ(xtract_median(NULL, data, 5, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_median(xttest_context(), data, 5, NULL, &result), XTRACT_SUCCESS);
     ASSERT_TRUE(isnan(result));
 }
 
@@ -3007,7 +3007,7 @@ UTEST(scalar, median_matches_a_sorted_copy_at_every_length)
         memcpy(sorted, data, n * sizeof(double));
         insertion_sort(sorted, n);
         expected = n & 1 ? sorted[n / 2] : 0.5 * (sorted[n / 2 - 1] + sorted[n / 2]);
-        ASSERT_EQ(xtract_median(NULL, data, n, NULL, &result), XTRACT_SUCCESS);
+        ASSERT_EQ(xtract_median(xttest_context(), data, n, NULL, &result), XTRACT_SUCCESS);
         ASSERT_EQ(result, expected);
     }
 }
@@ -3050,7 +3050,7 @@ UTEST(scalar, median_matches_a_sorted_copy_of_long_series_in_any_order)
             memcpy(sorted, data, n * sizeof(double));
             insertion_sort(sorted, n);
             expected = n & 1 ? sorted[n / 2] : 0.5 * sorted[n / 2 - 1] + 0.5 * sorted[n / 2];
-            ASSERT_EQ(xtract_median(NULL, data, n, NULL, &result), XTRACT_SUCCESS);
+            ASSERT_EQ(xtract_median(xttest_context(), data, n, NULL, &result), XTRACT_SUCCESS);
             ASSERT_EQ(result, expected);
         }
     }
@@ -3061,7 +3061,7 @@ UTEST(scalar, median_rejects_an_empty_series_and_sets_the_result_to_zero)
     double data[1] = {1.0};
     double result = -1.0;
 
-    ASSERT_EQ(xtract_median(NULL, data, 0, NULL, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_median(xttest_context(), data, 0, NULL, &result), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(result, 0.0);
 }
 
@@ -3071,7 +3071,7 @@ UTEST(scalar, median_absolute_deviation_of_1_to_5_is_1)
     double median = 3.0;
     double result = -1.0;
 
-    ASSERT_EQ(xtract_median_absolute_deviation(NULL, data, 5, &median, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_median_absolute_deviation(xttest_context(), data, 5, &median, &result), XTRACT_SUCCESS);
     ASSERT_EQ(result, 1.0);
 }
 
@@ -3081,7 +3081,7 @@ UTEST(scalar, median_absolute_deviation_of_an_even_length_series)
     double median = 3.0;
     double result = -1.0;
 
-    ASSERT_EQ(xtract_median_absolute_deviation(NULL, data, 4, &median, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_median_absolute_deviation(xttest_context(), data, 4, &median, &result), XTRACT_SUCCESS);
     ASSERT_EQ(result, 1.5);
 }
 
@@ -3091,7 +3091,7 @@ UTEST(scalar, median_absolute_deviation_of_a_constant_series_is_exactly_zero)
     double median = 2.5;
     double result = -1.0;
 
-    ASSERT_EQ(xtract_median_absolute_deviation(NULL, data, 4, &median, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_median_absolute_deviation(xttest_context(), data, 4, &median, &result), XTRACT_SUCCESS);
     ASSERT_EQ(result, 0.0);
 }
 
@@ -3102,11 +3102,11 @@ UTEST(scalar, median_absolute_deviation_is_the_median_of_the_deviations_from_the
     double median, expected, result;
     int i;
 
-    ASSERT_EQ(xtract_median(NULL, data, 9, NULL, &median), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_median(xttest_context(), data, 9, NULL, &median), XTRACT_SUCCESS);
     for (i = 0; i < 9; i++)
         deviations[i] = fabs(data[i] - median);
-    ASSERT_EQ(xtract_median(NULL, deviations, 9, NULL, &expected), XTRACT_SUCCESS);
-    ASSERT_EQ(xtract_median_absolute_deviation(NULL, data, 9, &median, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_median(xttest_context(), deviations, 9, NULL, &expected), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_median_absolute_deviation(xttest_context(), data, 9, &median, &result), XTRACT_SUCCESS);
     ASSERT_EQ(result, expected);
 }
 
@@ -3116,10 +3116,10 @@ UTEST(scalar, median_absolute_deviation_rejects_a_missing_median_or_empty_series
     double median = 2.0;
     double result = -1.0;
 
-    ASSERT_EQ(xtract_median_absolute_deviation(NULL, data, 3, NULL, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_median_absolute_deviation(xttest_context(), data, 3, NULL, &result), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(result, 0.0);
     result = -1.0;
-    ASSERT_EQ(xtract_median_absolute_deviation(NULL, data, 0, &median, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_median_absolute_deviation(xttest_context(), data, 0, &median, &result), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(result, 0.0);
 }
 
@@ -3569,7 +3569,7 @@ UTEST(scalar, permutation_entropy_of_the_bandt_pompe_example_is_their_published_
     int args[2] = {3, 1};
     double expected = -(2.0 * 0.4 * log(0.4) + 0.2 * log(0.2)) / log(6.0);
 
-    ASSERT_EQ(xtract_permutation_entropy(NULL, data, 7, args, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_permutation_entropy(xttest_context(), data, 7, args, &result), XTRACT_SUCCESS);
     CHECK_REL(result, expected, EPSILON);
     CHECK_NEAR(result * log(6.0), 1.0549, 1e-4);
 }
@@ -3580,10 +3580,10 @@ UTEST(scalar, permutation_entropy_of_a_monotonic_series_is_0)
     double result = -1.0;
     int args[2] = {3, 1};
 
-    ASSERT_EQ(xtract_permutation_entropy(NULL, data, 6, args, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_permutation_entropy(xttest_context(), data, 6, args, &result), XTRACT_SUCCESS);
     ASSERT_EQ(result, 0.0);
     args[0] = 2;
-    ASSERT_EQ(xtract_permutation_entropy(NULL, data, 6, args, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_permutation_entropy(xttest_context(), data, 6, args, &result), XTRACT_SUCCESS);
     ASSERT_EQ(result, 0.0);
 }
 
@@ -3594,7 +3594,7 @@ UTEST(scalar, permutation_entropy_of_an_alternating_series_at_order_2)
     int args[2] = {2, 1};
     double expected = -(0.6 * log(0.6) + 0.4 * log(0.4)) / log(2.0);
 
-    ASSERT_EQ(xtract_permutation_entropy(NULL, data, 6, args, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_permutation_entropy(xttest_context(), data, 6, args, &result), XTRACT_SUCCESS);
     CHECK_REL(result, expected, EPSILON);
 }
 
@@ -3604,10 +3604,10 @@ UTEST(scalar, permutation_entropy_with_a_delay_skips_elements_between_pattern_po
     double result = -1.0;
     int args[2] = {2, 2};
 
-    ASSERT_EQ(xtract_permutation_entropy(NULL, data, 6, args, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_permutation_entropy(xttest_context(), data, 6, args, &result), XTRACT_SUCCESS);
     ASSERT_EQ(result, 0.0);
     args[1] = 1;
-    ASSERT_EQ(xtract_permutation_entropy(NULL, data, 6, args, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_permutation_entropy(xttest_context(), data, 6, args, &result), XTRACT_SUCCESS);
     CHECK_REL(result, -(0.6 * log(0.6) + 0.4 * log(0.4)) / log(2.0), EPSILON);
 }
 
@@ -3618,7 +3618,7 @@ UTEST(scalar, permutation_entropy_orders_equal_values_by_position)
     int args[2] = {2, 1};
     double expected = -(2.0 / 3.0 * log(2.0 / 3.0) + 1.0 / 3.0 * log(1.0 / 3.0)) / log(2.0);
 
-    ASSERT_EQ(xtract_permutation_entropy(NULL, data, 4, args, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_permutation_entropy(xttest_context(), data, 4, args, &result), XTRACT_SUCCESS);
     CHECK_REL(result, expected, EPSILON);
 }
 
@@ -3637,7 +3637,7 @@ UTEST(scalar, permutation_entropy_of_a_noise_series_is_close_to_1_at_every_order
     }
     for (args[0] = 2; args[0] <= 5; args[0]++)
     {
-        ASSERT_EQ(xtract_permutation_entropy(NULL, data, 4096, args, &result), XTRACT_SUCCESS);
+        ASSERT_EQ(xtract_permutation_entropy(xttest_context(), data, 4096, args, &result), XTRACT_SUCCESS);
         CHECK_NEAR(result, 1.0, 0.02);
     }
 }
@@ -3648,7 +3648,7 @@ UTEST(scalar, permutation_entropy_of_equally_frequent_patterns_is_1)
     double result = -1.0;
     int args[2] = {2, 1};
 
-    ASSERT_EQ(xtract_permutation_entropy(NULL, data, 5, args, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_permutation_entropy(xttest_context(), data, 5, args, &result), XTRACT_SUCCESS);
     CHECK_REL(result, 1.0, EPSILON);
     ASSERT_LE(result, 1.0);
 }
@@ -3661,7 +3661,7 @@ UTEST(scalar, permutation_entropy_at_order_8_of_fewer_windows_than_patterns)
     int args[2] = {8, 1};
     double expected = -(0.4 * log(0.4) + 3.0 * 0.2 * log(0.2)) / log(40320.0);
 
-    ASSERT_EQ(xtract_permutation_entropy(NULL, data, 12, args, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_permutation_entropy(xttest_context(), data, 12, args, &result), XTRACT_SUCCESS);
     CHECK_REL(result, expected, EPSILON);
 }
 
@@ -3729,7 +3729,7 @@ UTEST(scalar, permutation_entropy_matches_a_count_of_alike_windows_at_every_orde
         {
             for (args[1] = 1; args[1] <= 3; args[1]++)
             {
-                ASSERT_EQ(xtract_permutation_entropy(NULL, data, N, args, &result), XTRACT_SUCCESS);
+                ASSERT_EQ(xtract_permutation_entropy(xttest_context(), data, N, args, &result), XTRACT_SUCCESS);
                 CHECK_NEAR(result, permutation_entropy_by_comparing_every_pair_of_windows(data, N, args[0], args[1]), 1e-12);
             }
         }
@@ -3742,33 +3742,33 @@ UTEST(scalar, permutation_entropy_rejects_a_missing_or_out_of_range_argument_and
     double result = -1.0;
     int args[2] = {3, 1};
 
-    ASSERT_EQ(xtract_permutation_entropy(NULL, data, 8, NULL, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_permutation_entropy(xttest_context(), data, 8, NULL, &result), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(result, 0.0);
     args[0] = 1;
     result = -1.0;
-    ASSERT_EQ(xtract_permutation_entropy(NULL, data, 8, args, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_permutation_entropy(xttest_context(), data, 8, args, &result), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(result, 0.0);
     args[0] = 9;
     result = -1.0;
-    ASSERT_EQ(xtract_permutation_entropy(NULL, data, 8, args, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_permutation_entropy(xttest_context(), data, 8, args, &result), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(result, 0.0);
     args[0] = 3;
     args[1] = 0;
     result = -1.0;
-    ASSERT_EQ(xtract_permutation_entropy(NULL, data, 8, args, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_permutation_entropy(xttest_context(), data, 8, args, &result), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(result, 0.0);
     args[1] = 4;
     result = -1.0;
-    ASSERT_EQ(xtract_permutation_entropy(NULL, data, 8, args, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_permutation_entropy(xttest_context(), data, 8, args, &result), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(result, 0.0);
     args[1] = 3;
-    ASSERT_EQ(xtract_permutation_entropy(NULL, data, 8, args, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_permutation_entropy(xttest_context(), data, 8, args, &result), XTRACT_SUCCESS);
     args[0] = 8;
     args[1] = 1;
-    ASSERT_EQ(xtract_permutation_entropy(NULL, data, 8, args, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_permutation_entropy(xttest_context(), data, 8, args, &result), XTRACT_SUCCESS);
     ASSERT_EQ(result, 0.0);
     result = -1.0;
-    ASSERT_EQ(xtract_permutation_entropy(NULL, data, 7, args, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_permutation_entropy(xttest_context(), data, 7, args, &result), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(result, 0.0);
 }
 
@@ -3812,7 +3812,7 @@ UTEST(scalar, lempel_ziv_complexity_binarises_above_the_threshold_from_argv)
     double data[4] = {1.0, 2.0, 3.0, 4.0};
     double median, result;
 
-    ASSERT_EQ(xtract_median(NULL, data, 4, NULL, &median), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_median(xttest_context(), data, 4, NULL, &median), XTRACT_SUCCESS);
     ASSERT_EQ(xtract_lempel_ziv_complexity(NULL, data, 4, &median, &result), XTRACT_SUCCESS);
     CHECK_REL(lempel_ziv_phrases(result, 4), 3.0, EPSILON);
     median = 4.0;
@@ -4150,4 +4150,82 @@ UTEST(peak_asymmetry, n_zero_argument_error)
 
     ASSERT_EQ(xtract_peak_asymmetry(NULL, data, 0, NULL, &result), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(result, 0.0);
+}
+
+typedef int (*scalar_feature)(xtract_context *, const double *, const int, const void *, double *);
+
+enum
+{
+    NEEDY_FEATURES = 7,
+    NEEDY_LONGEST = 96
+};
+
+static const scalar_feature NEEDY[NEEDY_FEATURES] = {xtract_median, xtract_median_absolute_deviation, xtract_permutation_entropy,
+                                                     xtract_f0, xtract_mcleod_f0, xtract_periodicity, xtract_signal_confidence};
+
+static const void *needy_argv(const int feature)
+{
+    static const double centre = 0.25;
+    static const double samplerate = 8000.0;
+    static const int order_and_delay[2] = {3, 1};
+
+    if (feature == 1)
+        return &centre;
+    if (feature == 2)
+        return order_and_delay;
+    if (feature == 3 || feature == 4)
+        return &samplerate;
+    return NULL;
+}
+
+static void fill_tone(double *data, const int N)
+{
+    int n;
+
+    for (n = 0; n < N; n++)
+        data[n] = sin(0.4 * n) + 0.2 * sin(1.3 * n);
+}
+
+UTEST(scalar, a_feature_that_takes_scratch_is_in_a_bad_state_without_a_context_for_its_length)
+{
+    double data[NEEDY_LONGEST];
+    double result;
+    xtract_context *shorter = xtract_context_new(NEEDY_LONGEST - 1);
+    int f;
+
+    fill_tone(data, NEEDY_LONGEST);
+    for (f = 0; f < NEEDY_FEATURES; f++)
+    {
+        result = -1.0;
+        ASSERT_EQ(NEEDY[f](NULL, data, NEEDY_LONGEST, needy_argv(f), &result), XTRACT_BAD_STATE);
+        ASSERT_EQ(result, -1.0);
+        ASSERT_EQ(NEEDY[f](shorter, data, NEEDY_LONGEST, needy_argv(f), &result), XTRACT_BAD_STATE);
+        ASSERT_EQ(result, -1.0);
+    }
+    xtract_context_delete(shorter);
+}
+
+UTEST(scalar, a_context_created_for_exactly_the_length_serves_every_feature_that_takes_scratch)
+{
+    double data[NEEDY_LONGEST];
+    double exact_result, shared_result;
+    xtract_context *exact;
+    int f, N, exact_code, shared_code;
+
+    fill_tone(data, NEEDY_LONGEST);
+    for (N = 4; N <= NEEDY_LONGEST; N++)
+    {
+        exact = xtract_context_new(N);
+        ASSERT_TRUE(exact != NULL);
+        for (f = 0; f < NEEDY_FEATURES; f++)
+        {
+            exact_result = shared_result = -1.0;
+            exact_code = NEEDY[f](exact, data, N, needy_argv(f), &exact_result);
+            shared_code = NEEDY[f](xttest_context(), data, N, needy_argv(f), &shared_result);
+            ASSERT_TRUE(exact_code == XTRACT_SUCCESS || exact_code == XTRACT_NO_RESULT);
+            ASSERT_EQ(exact_code, shared_code);
+            ASSERT_EQ(exact_result, shared_result);
+        }
+        xtract_context_delete(exact);
+    }
 }

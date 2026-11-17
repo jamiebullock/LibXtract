@@ -425,7 +425,7 @@ extern "C"
 
     /** \brief Extract the fundamental frequency of an input vector
      *
-     * \param *ctx: a pointer to a context, or NULL
+     * \param *ctx: a pointer to a context created for at least N elements
      * \param *data: a pointer to the first element in an array of doubles representing an audio vector
      * \param N: the number of elements to be considered, at least 1
      * \param *argv: a pointer to a double representing the audio sample rate, finite and at least 0; 0 selects 44100 Hz
@@ -440,7 +440,7 @@ extern "C"
 
     /** \brief Extract the fundamental frequency of an input vector
      *
-     * \param *ctx: a pointer to a context created for at least N elements, which the fallback needs
+     * \param *ctx: a pointer to a context created for at least N elements
      * \param *data: a pointer to the first element in an array of doubles representing an audio vector
      * \param N: the number of elements to be considered, at least 1. When xtract_f0() finds no result the fallback takes the spectrum of the N values, which needs N to be a power of two of at least 2
      * \param *argv: a pointer to a double representing the audio sample rate, finite and at least 0; 0 selects 44100 Hz
@@ -473,7 +473,7 @@ extern "C"
      * interpolation for sub-sample accuracy. Based on McLeod and Wyvill (2005)
      * "A Smarter Way to Find Pitch".
      *
-     * \param *ctx: a pointer to a context, or NULL
+     * \param *ctx: a pointer to a context created for at least N elements
      * \param *data: a pointer to the first element in an array of doubles representing an audio vector
      * \param N: the number of elements to be considered, at least 1; a period longer than N / 2 samples is not found, so N must span at least two periods of the lowest frequency expected
      * \param *argv: a pointer to a double representing the audio sample rate, finite and at least 0; 0 selects 44100 Hz
@@ -516,7 +516,7 @@ extern "C"
 
     /** \brief Extract the median of an input vector
      *
-     * \param *ctx: a pointer to a context, or NULL
+     * \param *ctx: a pointer to a context created for at least N elements
      * \param *data: a pointer to the first element in an array of doubles
      * \param N: the number of elements to be considered, at least 1
      * \param *argv: not used
@@ -526,7 +526,7 @@ extern "C"
 
     /** \brief Extract the median absolute deviation of an input vector
      *
-     * \param *ctx: a pointer to a context, or NULL
+     * \param *ctx: a pointer to a context created for at least N elements
      * \param *data: a pointer to the first element in an array of doubles
      * \param N: the number of elements to be considered, at least 1
      * \param *argv: a pointer to a double representing the median of the input vector
@@ -616,7 +616,7 @@ extern "C"
 
     /** \brief Extract the permutation entropy of an input vector: the Shannon entropy of the ordinal patterns of its windows, divided by the entropy of every pattern being equally likely
      *
-     * \param *ctx: a pointer to a context, or NULL
+     * \param *ctx: a pointer to a context created for at least N elements
      * \param *data: a pointer to the first element in an array of doubles
      * \param N: the number of elements to be considered, at least (order - 1) * delay + 1
      * \param *argv: a pointer to an array of two ints: the order, the number of elements in a pattern, from 2 to 8; and the delay, the distance between consecutive elements of a pattern, at least 1
@@ -656,7 +656,7 @@ extern "C"
 
     /** \brief Extract the periodicity of an input vector: the height of the highest key maximum of its normalised square difference function, the measure the McLeod pitch method selects its pitch peak from
      *
-     * \param *ctx: a pointer to a context, or NULL
+     * \param *ctx: a pointer to a context created for at least N elements
      * \param *data: a pointer to the first element in an array of doubles
      * \param N: the number of elements to be considered, at least 1
      * \param *argv: not used
@@ -666,7 +666,7 @@ extern "C"
 
     /** \brief Extract the confidence of the McLeod pitch method's fundamental frequency estimate for an input vector: the height of the key maximum of its normalised square difference function that xtract_mcleod_f0() takes as the pitch peak
      *
-     * \param *ctx: a pointer to a context, or NULL
+     * \param *ctx: a pointer to a context created for at least N elements
      * \param *data: a pointer to the first element in an array of doubles representing an audio vector
      * \param N: the number of elements to be considered, at least 1
      * \param *argv: not used
