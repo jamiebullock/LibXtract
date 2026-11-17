@@ -8,6 +8,7 @@
 #include "xtract/libxtract.h"
 
 #include "xttest_approx.h"
+#include "xttest_util.h"
 
 #include <math.h>
 
@@ -31,7 +32,7 @@ UTEST(delta, flux_l2_default_filter)
     double data[] = {3.0, 5.0, 1.0, 2.0, 1.0, 1.0, 1.0, 1.0};
     double argv[] = {2.0, (double)XTRACT_NO_LNORM_FILTER, 0.0};
     double result = -1.0;
-    int rv = xtract_flux(NULL, data, 8, argv, &result);
+    int rv = xtract_flux(xttest_context(), data, 8, argv, &result);
     ASSERT_EQ(rv, XTRACT_SUCCESS);
     CHECK_REL(result, sqrt(21.0), EPSILON);
 }
@@ -44,7 +45,7 @@ UTEST(delta, flux_positive_slope_filter)
     double data[] = {4.0, 5.0, 1.0, 2.0, 1.0, 1.0, 3.0, 1.0};
     double argv[] = {2.0, (double)XTRACT_POSITIVE_SLOPE, 0.0};
     double result = -1.0;
-    int rv = xtract_flux(NULL, data, 8, argv, &result);
+    int rv = xtract_flux(xttest_context(), data, 8, argv, &result);
     ASSERT_EQ(rv, XTRACT_SUCCESS);
     CHECK_REL(result, sqrt(26.0), EPSILON);
 }
@@ -56,7 +57,7 @@ UTEST(delta, flux_default_filter_takes_absolute_value)
     double data[] = {4.0, 5.0, 1.0, 2.0, 1.0, 1.0, 3.0, 1.0};
     double argv[] = {2.0, (double)XTRACT_NO_LNORM_FILTER, 0.0};
     double result = -1.0;
-    int rv = xtract_flux(NULL, data, 8, argv, &result);
+    int rv = xtract_flux(xttest_context(), data, 8, argv, &result);
     ASSERT_EQ(rv, XTRACT_SUCCESS);
     CHECK_REL(result, sqrt(30.0), EPSILON);
 }
@@ -67,7 +68,7 @@ UTEST(delta, flux_normalise_applies_log)
     double data[] = {3.0, 5.0, 1.0, 2.0, 1.0, 1.0, 1.0, 1.0};
     double argv[] = {2.0, (double)XTRACT_NO_LNORM_FILTER, 1.0};
     double result = -1.0;
-    int rv = xtract_flux(NULL, data, 8, argv, &result);
+    int rv = xtract_flux(xttest_context(), data, 8, argv, &result);
     ASSERT_EQ(rv, XTRACT_SUCCESS);
     CHECK_REL(result, log(1.0 + sqrt(21.0)), EPSILON);
 }
@@ -78,7 +79,7 @@ UTEST(delta, flux_positive_slope_no_rising_bins_yields_no_result)
     double data[] = {1.0, 1.0, 1.0, 1.0, 2.0, 2.0, 2.0, 2.0};
     double argv[] = {2.0, (double)XTRACT_POSITIVE_SLOPE, 0.0};
     double result = -1.0;
-    int rv = xtract_flux(NULL, data, 8, argv, &result);
+    int rv = xtract_flux(xttest_context(), data, 8, argv, &result);
     ASSERT_EQ(rv, XTRACT_NO_RESULT);
 }
 
@@ -327,13 +328,13 @@ UTEST(delta, delta_features_reject_a_short_or_odd_input_and_a_null_argv)
     double result = 1.0;
     double vec[2] = {-1.0, -1.0};
 
-    ASSERT_EQ(xtract_flux(NULL, data, 3, argv, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_flux(xttest_context(), data, 3, argv, &result), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(result, 0.0);
     result = 1.0;
-    ASSERT_EQ(xtract_flux(NULL, data, 0, argv, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_flux(xttest_context(), data, 0, argv, &result), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(result, 0.0);
     result = 1.0;
-    ASSERT_EQ(xtract_flux(NULL, data, 4, NULL, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_flux(xttest_context(), data, 4, NULL, &result), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(result, 0.0);
     result = 1.0;
     ASSERT_EQ(xtract_lnorm(NULL, data, 0, argv, &result), XTRACT_ARGUMENT_ERROR);
@@ -345,7 +346,7 @@ UTEST(delta, delta_features_reject_a_short_or_odd_input_and_a_null_argv)
     ASSERT_EQ(xtract_difference_vector(NULL, data, 0, NULL, vec), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(vec[0], -1.0);
 
-    ASSERT_EQ(xtract_flux(NULL, data, 2, argv, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_flux(xttest_context(), data, 2, argv, &result), XTRACT_SUCCESS);
     CHECK_REL(result, 1.0, 1e-12);
     ASSERT_EQ(xtract_lnorm(NULL, data, 1, argv, &result), XTRACT_SUCCESS);
     CHECK_REL(result, 1.0, 1e-12);
@@ -380,7 +381,7 @@ UTEST(delta, flux_negative_slope_filter_counts_the_bins_that_fell)
     double data[] = {4.0, 5.0, 1.0, 2.0, 1.0, 1.0, 3.0, 1.0};
     double argv[] = {2.0, (double)XTRACT_NEGATIVE_SLOPE, 0.0};
     double result = -1.0;
-    ASSERT_EQ(xtract_flux(NULL, data, 8, argv, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_flux(xttest_context(), data, 8, argv, &result), XTRACT_SUCCESS);
     CHECK_REL(result, 2.0, EPSILON);
 }
 
@@ -389,7 +390,7 @@ UTEST(delta, flux_positive_slope_l1_is_the_half_wave_rectified_flux)
     double data[] = {4.0, 5.0, 1.0, 2.0, 1.0, 1.0, 3.0, 1.0};
     double argv[] = {1.0, (double)XTRACT_POSITIVE_SLOPE, 0.0};
     double result = -1.0;
-    ASSERT_EQ(xtract_flux(NULL, data, 8, argv, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_flux(xttest_context(), data, 8, argv, &result), XTRACT_SUCCESS);
     CHECK_REL(result, 8.0, EPSILON);
 }
 
@@ -626,4 +627,29 @@ UTEST(modified_kullback_leibler, rejects_bad_arguments)
     result = -1.0;
     ASSERT_EQ(xtract_modified_kullback_leibler(NULL, data, 4, &epsilon, &result), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(result, 0.0);
+}
+
+UTEST(delta, flux_is_in_a_bad_state_without_a_context_for_its_length)
+{
+    const double data[] = {3.0, 5.0, 1.0, 2.0, 1.0, 1.0, 1.0, 1.0};
+    const double argv[] = {2.0, (double)XTRACT_NO_LNORM_FILTER, 0.0};
+    double result = -1.0;
+    xtract_context *shorter = xtract_context_new(7);
+
+    ASSERT_EQ(xtract_flux(NULL, data, 8, argv, &result), XTRACT_BAD_STATE);
+    ASSERT_EQ(xtract_flux(shorter, data, 8, argv, &result), XTRACT_BAD_STATE);
+    ASSERT_EQ(result, -1.0);
+    xtract_context_delete(shorter);
+}
+
+UTEST(delta, flux_takes_a_context_created_for_exactly_its_length)
+{
+    const double data[] = {3.0, 5.0, 1.0, 2.0, 1.0, 1.0, 1.0, 1.0};
+    const double argv[] = {2.0, (double)XTRACT_NO_LNORM_FILTER, 0.0};
+    double result = -1.0;
+    xtract_context *exact = xtract_context_new(8);
+
+    ASSERT_EQ(xtract_flux(exact, data, 8, argv, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, sqrt(21.0), EPSILON);
+    xtract_context_delete(exact);
 }

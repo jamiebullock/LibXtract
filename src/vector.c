@@ -507,14 +507,14 @@ static int cepstral_coefficients(xtract_context *ctx, const double *data, const 
     if (N < 1 || !filterbank_is_valid(f))
         return XTRACT_ARGUMENT_ERROR;
 
-    temp = (double *)calloc(f->n_filters, sizeof(double));
+    temp = xtract_scratch_take(ctx, N > f->n_filters ? N : f->n_filters, (size_t)f->n_filters);
     if (temp == NULL)
-        return XTRACT_MALLOC_FAILED;
+        return XTRACT_BAD_STATE;
 
     rv = filterbank_spectrogram(data, N, f, temp);
     if (rv == XTRACT_SUCCESS)
         rv = xtract_dct(ctx, temp, f->n_filters, f->dct_table, result);
-    free(temp);
+    xtract_scratch_return(ctx, temp, (size_t)f->n_filters);
 
     return rv;
 }
@@ -1154,7 +1154,7 @@ int xtract_moving_standard_deviation(xtract_context *ctx, const double *data, co
     return XTRACT_SUCCESS;
 }
 
-static int moving_extremum(const double *data, const int N, const void *argv, double *result, const int largest)
+static int moving_extremum(xtract_context *ctx, const double *data, const int N, const void *argv, double *result, const int largest)
 {
     const int window = moving_window(N, argv, 1);
     int *deque;
@@ -1165,10 +1165,9 @@ static int moving_extremum(const double *data, const int N, const void *argv, do
     if (window == 0)
         return XTRACT_ARGUMENT_ERROR;
 
-    deque = (int *)malloc((size_t)window * sizeof(int));
-
+    deque = xtract_scratch_take_ints(ctx, N, (size_t)window);
     if (deque == NULL)
-        return XTRACT_MALLOC_FAILED;
+        return XTRACT_BAD_STATE;
 
     for (n = 0; n < N; n++)
     {
@@ -1195,19 +1194,19 @@ static int moving_extremum(const double *data, const int N, const void *argv, do
             result[n - window + 1] = data[deque[head]];
     }
 
-    free(deque);
+    xtract_scratch_return_ints(ctx, deque, (size_t)window);
 
     return XTRACT_SUCCESS;
 }
 
 int xtract_moving_max(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
-    return moving_extremum(data, N, argv, result, 1);
+    return moving_extremum(ctx, data, N, argv, result, 1);
 }
 
 int xtract_moving_min(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
-    return moving_extremum(data, N, argv, result, 0);
+    return moving_extremum(ctx, data, N, argv, result, 0);
 }
 
 static int ewma_alpha(const void *argv, double *alpha)
@@ -1264,9 +1263,9 @@ static double mean_of(const double *values, const int count)
     return sum / count;
 }
 
-static int contrast_no_result(double *sorted, double *result, const int bands)
+static int contrast_no_result(xtract_context *ctx, double *sorted, const int M, double *result, const int bands)
 {
-    free(sorted);
+    xtract_scratch_return(ctx, sorted, (size_t)M);
     memset(result, 0, (size_t)(bands + 1) * sizeof(double));
     return XTRACT_NO_RESULT;
 }
@@ -1291,9 +1290,9 @@ int xtract_spectral_contrast(xtract_context *ctx, const double *data, const int 
     M = N >> 1;
     freqs = data + M;
 
-    sorted = (double *)malloc((size_t)M * sizeof(double));
+    sorted = xtract_scratch_take(ctx, N, (size_t)M);
     if (sorted == NULL)
-        return XTRACT_MALLOC_FAILED;
+        return XTRACT_BAD_STATE;
 
     low = 0.0;
     high = lowest;
@@ -1307,7 +1306,7 @@ int xtract_spectral_contrast(xtract_context *ctx, const double *data, const int 
         }
 
         if (count == 0)
-            return contrast_no_result(sorted, result, bands);
+            return contrast_no_result(ctx, sorted, M, result, bands);
 
         xtract_sort_ascending(sorted, count);
         averaged = (int)(fraction * count + 0.5);
@@ -1316,14 +1315,14 @@ int xtract_spectral_contrast(xtract_context *ctx, const double *data, const int 
         valley = mean_of(sorted, averaged);
         peak = mean_of(sorted + count - averaged, averaged);
         if (valley <= 0.0)
-            return contrast_no_result(sorted, result, bands);
+            return contrast_no_result(ctx, sorted, M, result, bands);
 
         result[band] = log(peak / valley);
         low = high;
         high *= 2.0;
     }
 
-    free(sorted);
+    xtract_scratch_return(ctx, sorted, (size_t)M);
 
     return XTRACT_SUCCESS;
 }
@@ -1393,9 +1392,9 @@ int xtract_cqt(xtract_context *ctx, const double *data, const int N, const void 
     if (N < 2 || (N & 1) || kernel == NULL || kernel->N != N)
         return XTRACT_ARGUMENT_ERROR;
 
-    real = (double *)malloc((size_t)N * sizeof(double));
+    real = xtract_scratch_take(ctx, N, (size_t)N);
     if (real == NULL)
-        return XTRACT_MALLOC_FAILED;
+        return XTRACT_BAD_STATE;
     imag = real + M;
 
     for (n = 0; n < M; n++)
@@ -1420,7 +1419,7 @@ int xtract_cqt(xtract_context *ctx, const double *data, const int N, const void 
         result[kernel->n_bins + band] = kernel->frequencies[band];
     }
 
-    free(real);
+    xtract_scratch_return(ctx, real, (size_t)N);
 
     return XTRACT_SUCCESS;
 }

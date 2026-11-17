@@ -34,6 +34,16 @@ static const int eligible[] = {
 #define N_ELIGIBLE ((int)(sizeof(eligible) / sizeof(eligible[0])))
 #define MAX_N 4096
 
+static xtract_context *ctx;
+
+int LLVMFuzzerInitialize(int *argc, char ***argv)
+{
+    (void)argc;
+    (void)argv;
+    ctx = xtract_context_new(MAX_N);
+    return 0;
+}
+
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     int feature;
@@ -78,7 +88,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     memcpy(in, data, (size_t)n * sizeof(double));
     input = n > 0 ? in : in + 1;
 
-    (void)xtract[feature](NULL, input, n, null_argv ? NULL : argv, result);
+    (void)xtract[feature](ctx, input, n, null_argv ? NULL : argv, result);
 
     free(in);
     free(result);

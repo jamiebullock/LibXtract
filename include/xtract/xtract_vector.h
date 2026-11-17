@@ -48,7 +48,7 @@ extern "C"
 
     /** \brief Extract Mel Frequency Cepstral Coefficients based on a method described by Rabiner
      *
-     * \param *ctx: a pointer to a context, or NULL
+     * \param *ctx: a pointer to a context created for at least the larger of N and n_filters elements
      * \param *data: a pointer to the first element in an array of spectral coefficients, the first half of the array pointed to by *result from xtract_spectrum() called with DC included (argv[2] == 1), so that element k is bin k as the filterbank expects. Rabiner and Juang define the mel cepstrum on the power spectrum (XTRACT_POWER_SPECTRUM); a magnitude spectrum may be passed instead
      * \param N: the number of coefficients, half the transform size the filterbank was initialised with, at least 1
      * \param *argv: a pointer to a data structure of type xtract_mel_filter, containing n_filters coefficient tables to make up a mel-spaced filterbank; n_filters must be at least 1 and filters, and each of its rows, non-NULL, each row holding at least N coefficients
@@ -79,7 +79,7 @@ extern "C"
      * bank. They are more robust to noise than MFCCs, which use a mel filter
      * bank.
      *
-     * \param *ctx: a pointer to a context, or NULL
+     * \param *ctx: a pointer to a context created for at least the larger of N and n_filters elements
      * \param *data: a pointer to the first element in an array of spectral coefficients, the first half of the array pointed to by *result from xtract_spectrum() called with DC included (argv[2] == 1), so that element k is bin k as the filterbank expects. the gammatone filterbank is applied to the power spectrum (XTRACT_POWER_SPECTRUM) in the same way; a magnitude spectrum may be passed instead
      * \param N: the number of coefficients, half the transform size the filterbank was initialised with, at least 1
      * \param *argv: a pointer to a data structure of type xtract_mel_filter, containing n_filters coefficient tables to make up a gammatone filterbank; n_filters must be at least 1 and filters, and each of its rows, non-NULL, each row holding at least N coefficients
@@ -291,7 +291,7 @@ extern "C"
 
     /** \brief Extract the largest value of a series over a sliding window
      *
-     * \param *ctx: a pointer to a context, or NULL
+     * \param *ctx: a pointer to a context created for at least N elements
      * \param *data: a pointer to the first element in an array of doubles
      * \param N: the number of elements in the array pointed to by *data, at least the window length
      * \param *argv: a pointer to an int holding the window length, at least 1 and at most N
@@ -301,7 +301,7 @@ extern "C"
 
     /** \brief Extract the smallest value of a series over a sliding window
      *
-     * \param *ctx: a pointer to a context, or NULL
+     * \param *ctx: a pointer to a context created for at least N elements
      * \param *data: a pointer to the first element in an array of doubles
      * \param N: the number of elements in the array pointed to by *data, at least the window length
      * \param *argv: a pointer to an int holding the window length, at least 1 and at most N
@@ -331,7 +331,7 @@ extern "C"
 
     /** \brief Extract the spectral contrast of a spectrum: in each of a set of octave bands, the natural log of the ratio of the mean of the band's largest coefficients to the mean of its smallest
      *
-     * \param *ctx: a pointer to a context, or NULL
+     * \param *ctx: a pointer to a context created for at least N elements
      * \param *data: a pointer to the first element in an array of doubles containing N/2 magnitude/power coefficients followed by N/2 bin frequencies in Hz, e.g. the *result from xtract_spectrum()
      * \param N: the size of the array pointed to by *data, at least 2 and even
      * \param *argv: a pointer to an array of three doubles: the number of octave bands, cast to an integer, at least 1; the lower edge of the first octave band in Hz, finite and at least 0; and the fraction of a band's bins averaged at each end, from 0 to 1, at least one bin being averaged whatever the fraction
@@ -353,7 +353,7 @@ extern "C"
 
     /** \brief Extract the constant-Q spectrum of a magnitude/phase spectrum: the magnitude in each band of a kernel from xtract_init_cqt(), followed by the band centre frequencies
      *
-     * \param *ctx: a pointer to a context, or NULL
+     * \param *ctx: a pointer to a context created for at least N elements
      * \param *data: a magnitude/phase spectrum with DC included, the *result of xtract_spectrum() by XTRACT_MAGNITUDE_PHASE_SPECTRUM with the third argument 1: the first N/2 elements are the bin magnitudes from DC upward and the next N/2 their phases
      * \param N: the number of array elements to be considered, at least 2 and even, and equal to the N the kernel was built for
      * \param *argv: a pointer to an xtract_cqt_kernel from xtract_init_cqt()

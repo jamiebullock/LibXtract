@@ -205,7 +205,7 @@ int main(void)
         xtract[XTRACT_HARMONIC_SPECTRUM](NULL, peaks, BLOCKSIZE, argd, harmonics);
 
         /* compute the MFCCs from the power spectrum taken above */
-        xtract_mfcc(NULL, power_spectrum, BLOCKSIZE >> 1, &mel_filters, mfccs);
+        xtract_mfcc(ctx, power_spectrum, BLOCKSIZE >> 1, &mel_filters, mfccs);
 
         double gated[BLOCKSIZE] = {0};
         double block_max = 0.0;
@@ -255,7 +255,7 @@ int main(void)
         argd[2] = 1;                     /* normalise */
 
         /* Right shift HALF_BLOCKSIZE because we only want amplitudes not frequencies */
-        xtract_flux(NULL, difference, HALF_BLOCKSIZE >> 1, argd, &flux);
+        xtract_flux(ctx, difference, HALF_BLOCKSIZE >> 1, argd, &flux);
 
         xtract_last_n(last_n_state, &flux, MAVG_COUNT, NULL, lastn);
 
