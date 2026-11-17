@@ -9,6 +9,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include "xtract/libxtract.h"
+#include "xtract_context_private.h"
 #include "xtract_macros_private.h"
 
 /* Direct multiplication for the common small integer orders, avoiding pow()'s
@@ -42,17 +43,16 @@ int xtract_flux(xtract_context *ctx, const double *data, const int N, const void
 
     M = N >> 1;
 
-    diff = (double *)malloc(M * sizeof(double));
-
+    diff = xtract_scratch_take(ctx, N, (size_t)M);
     if (diff == NULL)
-        return XTRACT_MALLOC_FAILED;
+        return XTRACT_BAD_STATE;
 
     for (n = 0; n < M; n++)
         diff[n] = data[n] - data[M + n];
 
     rv = xtract_lnorm(ctx, diff, M, argv, result);
 
-    free(diff);
+    xtract_scratch_return(ctx, diff, (size_t)M);
 
     return rv;
 }

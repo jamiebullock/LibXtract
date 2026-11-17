@@ -28,7 +28,7 @@ extern "C"
 
     /** \brief Extract flux
      *
-     * \param *ctx: a pointer to a context, or NULL
+     * \param *ctx: a pointer to a context created for at least N elements
      * \param *data: a pointer to the first element in an array of doubles comprising two successive spectral frames: the current frame in the first N/2 elements, the previous frame in the second N/2 elements
      * \param N: the total number of elements in the array pointed to by *data (twice the frame size), at least 2 and even
      * \param *argv: a pointer to an array of three doubles as for xtract_lnorm(): the norm order, the filter type (enumeration xtract_lnorm_filter_types_), and the normalise flag. XTRACT_POSITIVE_SLOPE counts only the bins that rose from the previous frame, which is the half-wave rectified flux used for onset detection, and XTRACT_NEGATIVE_SLOPE only the bins that fell
