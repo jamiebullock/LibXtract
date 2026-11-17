@@ -36,6 +36,16 @@
         return (void *)i;
     }
 
+    void *last_n_state_to_voidp(xtract_last_n_state *state)
+    {
+        return (void *)state;
+    }
+
+    void *wavelet_f0_state_to_voidp(xtract_wavelet_f0_state *state)
+    {
+        return (void *)state;
+    }
+
     xtract_function_descriptor_t 
             *get_descriptor(xtract_function_descriptor_t *fd, int i){
 

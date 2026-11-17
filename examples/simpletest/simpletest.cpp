@@ -108,7 +108,6 @@ int main(void)
     double *window_subframe = NULL;
     double mfccs[MFCC_FREQ_BANDS] = {0};
     double argd[4] = {0};
-    double samplerate = 44100.0;
     double prev_note = 0.0;
     int n;
     int rv = XTRACT_SUCCESS;
@@ -150,7 +149,7 @@ int main(void)
     /* create the window functions */
     window = xtract_init_window(BLOCKSIZE, XTRACT_HANN);
     window_subframe = xtract_init_window(HALF_BLOCKSIZE, XTRACT_HANN);
-    xtract_init_wavelet_f0_state();
+    xtract_wavelet_f0_state *wavelet_f0_state = xtract_wavelet_f0_state_new(SAMPLERATE);
     xtract_context *ctx = xtract_context_new(BLOCKSIZE);
 
     // fill_wavetable(344.53125f, NOISE); // 344.53125f = 128 samples @ 44100 Hz
@@ -165,7 +164,7 @@ int main(void)
     for (uint64_t n = 0; (n + BLOCKSIZE) < wavSamples; n += HALF_BLOCKSIZE) // Overlap by HALF_BLOCKSIZE
     {
         /* get the F0 */
-        xtract[XTRACT_WAVELET_F0](NULL, &data[n], BLOCKSIZE, &samplerate, &f0);
+        xtract[XTRACT_WAVELET_F0](NULL, &data[n], BLOCKSIZE, wavelet_f0_state, &f0);
 
         /* get the F0 as a MIDI note */
         if (f0 != 0.0)
@@ -257,7 +256,7 @@ int main(void)
         /* Right shift HALF_BLOCKSIZE because we only want amplitudes not frequencies */
         xtract_flux(ctx, difference, HALF_BLOCKSIZE >> 1, argd, &flux);
 
-        xtract_last_n(last_n_state, &flux, MAVG_COUNT, NULL, lastn);
+        xtract_last_n(NULL, &flux, MAVG_COUNT, last_n_state, lastn);
 
         argd[0] = 10; /* flux threshold */
         double flux_current = 0.0;
@@ -285,6 +284,8 @@ int main(void)
 
     xtract_free_window(window);
     xtract_free_window(window_subframe);
+    xtract_wavelet_f0_state_delete(wavelet_f0_state);
+    xtract_last_n_state_delete(last_n_state);
     xtract_context_delete(ctx);
 
     return 0;

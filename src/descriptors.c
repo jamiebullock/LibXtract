@@ -177,12 +177,18 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             break;
         case XTRACT_F0:
         case XTRACT_FAILSAFE_F0:
-        case XTRACT_WAVELET_F0:
         case XTRACT_MCLEOD_F0:
             *argv_min = DBL_MIN;
             *argv_max = XTRACT_UNBOUNDED_MAX;
             *argv_def = XTRACT_SR_DEFAULT;
             *argv_unit = XTRACT_HERTZ;
+            break;
+        case XTRACT_WAVELET_F0:
+        case XTRACT_LAST_N:
+            *argv_min = XTRACT_UNBOUNDED_MIN;
+            *argv_max = XTRACT_UNBOUNDED_MAX;
+            *argv_def = XTRACT_NO_DEFAULT;
+            *argv_unit = XTRACT_UNIT_NONE;
             break;
         case XTRACT_MIDICENT:
             *argv_min = 0.0;
@@ -622,6 +628,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_EWMA_VARIANCE:
         case XTRACT_QUANTISE:
         case XTRACT_HISTOGRAM:
+        case XTRACT_LAST_N:
             *data_format = XTRACT_ARBITRARY_SERIES;
             break;
         case XTRACT_SPECTRAL_MEAN:
@@ -855,6 +862,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_EWMA_AVERAGE:
         case XTRACT_EWMA_VARIANCE:
         case XTRACT_QUANTISE:
+        case XTRACT_LAST_N:
             *data_unit = XTRACT_UNIT_ANY;
             break;
         case XTRACT_HISTOGRAM:
@@ -1757,6 +1765,13 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             copy_author(author, "Timo Ojala");
             *year = 2002;
             break;
+        case XTRACT_LAST_N:
+            copy_name(name, "last_n");
+            copy_name(p_name, "Last N Values");
+            copy_desc(desc, "Extract the last N values of a stream given one value at a time");
+            copy_desc(p_desc, "Extract the last N values of a stream given one value at a time");
+            copy_author(author, "");
+            break;
         case XTRACT_KULLBACK_LEIBLER_DIVERGENCE:
             copy_name(name, "kullback_leibler_divergence");
             copy_name(p_name, "Kullback-Leibler Divergence");
@@ -1899,7 +1914,6 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_LOWEST_VALUE:
         case XTRACT_F0:
         case XTRACT_FAILSAFE_F0:
-        case XTRACT_WAVELET_F0:
         case XTRACT_MCLEOD_F0:
         case XTRACT_MIDICENT:
         case XTRACT_FLATNESS_DB:
@@ -1954,6 +1968,14 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_CQT:
             *argc = 1;
             *argv_type = XTRACT_CQT_KERNEL;
+            break;
+        case XTRACT_LAST_N:
+            *argc = 1;
+            *argv_type = XTRACT_LAST_N_STATE;
+            break;
+        case XTRACT_WAVELET_F0:
+            *argc = 1;
+            *argv_type = XTRACT_WAVELET_F0_STATE;
             break;
         case XTRACT_LPCC:
         case XTRACT_MOVING_SUM:
@@ -2163,6 +2185,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_HISTOGRAM:
         case XTRACT_COOCCURRENCE_MATRIX:
         case XTRACT_LOCAL_BINARY_PATTERNS:
+        case XTRACT_LAST_N:
             *is_scalar = XTRACT_FALSE;
             break;
         default:
@@ -2494,6 +2517,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             case XTRACT_EWMA_AVERAGE:
             case XTRACT_EWMA_VARIANCE:
             case XTRACT_CROSS_CORRELATION:
+            case XTRACT_LAST_N:
                 *result_format = XTRACT_ARBITRARY_SERIES;
                 *result_unit = XTRACT_UNIT_ANY;
                 break;

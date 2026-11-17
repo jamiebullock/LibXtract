@@ -10,10 +10,12 @@
 #include "xtract/libxtract.h"
 
 #include "c-ringbuf/ringbuf.h"
+#include "xtract_stateful_private.h"
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <float.h>
+#include <math.h>
 
 struct xtract_last_n_state_
 {
@@ -44,12 +46,16 @@ xtract_last_n_state *xtract_last_n_state_new(size_t N)
 
 void xtract_last_n_state_delete(xtract_last_n_state *last_n_state)
 {
+    if (last_n_state == NULL)
+        return;
+
     ringbuf_free(&last_n_state->ringbuf);
     free(last_n_state);
 }
 
-int xtract_last_n(const xtract_last_n_state *state, const double *data, const int N, const void *argv, double *result)
+int xtract_last_n(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
+    const xtract_last_n_state *state = (const xtract_last_n_state *)argv;
     size_t N_bytes;
     size_t used;
     size_t result_offset;
@@ -75,4 +81,26 @@ int xtract_last_n(const xtract_last_n_state *state, const double *data, const in
     }
 
     return XTRACT_SUCCESS;
+}
+
+xtract_wavelet_f0_state *xtract_wavelet_f0_state_new(double sample_rate)
+{
+    xtract_wavelet_f0_state *wavelet_f0_state;
+
+    if (!isfinite(sample_rate) || sample_rate <= 0.0)
+        return NULL;
+
+    wavelet_f0_state = malloc(sizeof(xtract_wavelet_f0_state));
+    if (wavelet_f0_state == NULL)
+        return NULL;
+
+    dywapitch_inittracking(&wavelet_f0_state->tracker);
+    wavelet_f0_state->sample_rate = sample_rate;
+
+    return wavelet_f0_state;
+}
+
+void xtract_wavelet_f0_state_delete(xtract_wavelet_f0_state *wavelet_f0_state)
+{
+    free(wavelet_f0_state);
 }

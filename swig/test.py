@@ -116,12 +116,12 @@ for i in range(N):
 data = xtract.doubleArray(1)
 data[0] = 42.0
 # N.B. data is a single sample; N is the window size, not the size of data
-xtract.xtract_last_n(state, data, N, None, result)
+xtract.xtract_last_n(None, data, N, state, result)
 
 print('last_n after one value: %.1f' % result[N - 1])
 
 data[0] = 99.0
-xtract.xtract_last_n(state, data, N, None, result)
+xtract.xtract_last_n(None, data, N, state, result)
 
 print('last_n after two values: %.1f, %.1f' % (result[N - 2], result[N - 1]))
 

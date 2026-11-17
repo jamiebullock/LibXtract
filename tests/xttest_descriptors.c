@@ -135,7 +135,6 @@ UTEST(descriptors, argv_ranges_match_the_functions)
 
     ASSERT_EQ(fd[XTRACT_F0].argv.min[0], DBL_MIN);
     ASSERT_EQ(fd[XTRACT_MCLEOD_F0].argv.min[0], DBL_MIN);
-    ASSERT_EQ(fd[XTRACT_WAVELET_F0].argv.min[0], DBL_MIN);
     CHECK_REL(fd[XTRACT_MIDICENT].argv.min[0], 0.0, EPSILON);
     ASSERT_EQ(fd[XTRACT_MIDICENT].argv.max[0], XTRACT_UNBOUNDED_MAX);
     ASSERT_EQ(fd[XTRACT_MIDICENT].argv.unit[0], XTRACT_HERTZ);
@@ -655,6 +654,26 @@ UTEST(descriptors, appended_features_are_fully_described)
     ASSERT_EQ(fd[XTRACT_CQT].result.vector.unit, XTRACT_ANY_AMPLITUDE_HERTZ);
     ASSERT_EQ(fd[XTRACT_CQT].algo.year, 1992);
 
+    ASSERT_EQ(fd[XTRACT_WAVELET_F0].argc, 1);
+    ASSERT_EQ(fd[XTRACT_WAVELET_F0].argv.type, XTRACT_WAVELET_F0_STATE);
+    ASSERT_EQ(fd[XTRACT_WAVELET_F0].argv.min[0], XTRACT_UNBOUNDED_MIN);
+    ASSERT_EQ(fd[XTRACT_WAVELET_F0].argv.max[0], XTRACT_UNBOUNDED_MAX);
+    ASSERT_EQ(fd[XTRACT_WAVELET_F0].argv.unit[0], XTRACT_UNIT_NONE);
+
+    ASSERT_STREQ(fd[XTRACT_LAST_N].algo.name, "last_n");
+    ASSERT_EQ(fd[XTRACT_LAST_N].argc, 1);
+    ASSERT_EQ(fd[XTRACT_LAST_N].argv.type, XTRACT_LAST_N_STATE);
+    ASSERT_EQ(fd[XTRACT_LAST_N].argv.min[0], XTRACT_UNBOUNDED_MIN);
+    ASSERT_EQ(fd[XTRACT_LAST_N].argv.max[0], XTRACT_UNBOUNDED_MAX);
+    ASSERT_EQ(fd[XTRACT_LAST_N].argv.unit[0], XTRACT_UNIT_NONE);
+    ASSERT_EQ(fd[XTRACT_LAST_N].argv.donor[0], XTRACT_ANY);
+    ASSERT_EQ(fd[XTRACT_LAST_N].data.format, XTRACT_ARBITRARY_SERIES);
+    ASSERT_EQ(fd[XTRACT_LAST_N].data.unit, XTRACT_UNIT_ANY);
+    ASSERT_EQ(fd[XTRACT_LAST_N].is_scalar, XTRACT_FALSE);
+    ASSERT_EQ(fd[XTRACT_LAST_N].is_delta, XTRACT_FALSE);
+    ASSERT_EQ(fd[XTRACT_LAST_N].result.vector.format, XTRACT_ARBITRARY_SERIES);
+    ASSERT_EQ(fd[XTRACT_LAST_N].result.vector.unit, XTRACT_UNIT_ANY);
+
     ASSERT_EQ(xtract_free_descriptors(fd), XTRACT_SUCCESS);
 }
 
@@ -739,6 +758,7 @@ UTEST(dispatch, slots_map_to_the_expected_function)
     ASSERT_TRUE(xtract[XTRACT_ANGULAR_SECOND_MOMENT] == xtract_angular_second_moment);
     ASSERT_TRUE(xtract[XTRACT_INVERSE_DIFFERENCE_MOMENT] == xtract_inverse_difference_moment);
     ASSERT_TRUE(xtract[XTRACT_LOCAL_BINARY_PATTERNS] == xtract_local_binary_patterns);
+    ASSERT_TRUE(xtract[XTRACT_LAST_N] == xtract_last_n);
 }
 
 /* ===== Descriptor conformance ===== */
@@ -828,6 +848,7 @@ static int conf_call_n(const xtract_function_descriptor_t *d)
         return 16;
     case XTRACT_FAILSAFE_F0:
     case XTRACT_WAVELET_F0:
+    case XTRACT_LAST_N:
         return CONF_N;
     default:
         return conf_min_n(d);
@@ -869,7 +890,8 @@ static void conf_set(const xtract_function_descriptor_t *d, double *argf, int *a
 
 static const void *conf_argv(const xtract_function_descriptor_t *d, double *argf, int *argi,
                              const xtract_mel_filter *mel, const int *bark, const double *window,
-                             const xtract_cqt_kernel *cqt)
+                             const xtract_cqt_kernel *cqt, const xtract_last_n_state *last_n,
+                             const xtract_wavelet_f0_state *wavelet_f0)
 {
     int i;
 
@@ -879,6 +901,10 @@ static const void *conf_argv(const xtract_function_descriptor_t *d, double *argf
         return mel;
     if (d->argv.type == XTRACT_CQT_KERNEL)
         return cqt;
+    if (d->argv.type == XTRACT_LAST_N_STATE)
+        return last_n;
+    if (d->argv.type == XTRACT_WAVELET_F0_STATE)
+        return wavelet_f0;
     if (d->id == XTRACT_BARK_COEFFICIENTS)
         return bark;
     if (d->id == XTRACT_WINDOWED)
@@ -914,6 +940,8 @@ UTEST(descriptors, every_feature_conforms_to_its_descriptor)
     xtract_mel_filter mel;
     xtract_cqt_kernel *cqt = xtract_init_cqt(CONF_N, 1000.0, 100.0, 1, 2, 0.01);
     xtract_context *ctx = xtract_context_new(CONF_LONGEST);
+    xtract_last_n_state *last_n = xtract_last_n_state_new(CONF_N);
+    xtract_wavelet_f0_state *wavelet_f0 = xtract_wavelet_f0_state_new(44100.0);
     int bark[XTRACT_BARK_BANDS];
     int f, i, rv;
     const void *argv;
@@ -921,6 +949,8 @@ UTEST(descriptors, every_feature_conforms_to_its_descriptor)
     ASSERT_TRUE(fd != NULL);
     ASSERT_TRUE(cqt != NULL);
     ASSERT_TRUE(ctx != NULL);
+    ASSERT_TRUE(last_n != NULL);
+    ASSERT_TRUE(wavelet_f0 != NULL);
     for (i = 0; i < CONF_FILTERS; i++)
         rows[i] = row_store[i];
     xtract_init_mfcc(CONF_N, 22050.0, XTRACT_EQUAL_GAIN, 100.0, 8000.0, CONF_FILTERS, rows);
@@ -928,7 +958,6 @@ UTEST(descriptors, every_feature_conforms_to_its_descriptor)
     mel.filters = rows;
     mel.dct_table = NULL;
     xtract_init_bark(2 * CONF_N, 44100.0, bark);
-    xtract_init_wavelet_f0_state();
     for (i = 0; i < XTRACT_WINDOW_SIZE; i++)
         window[i] = 1.0;
 
@@ -939,7 +968,7 @@ UTEST(descriptors, every_feature_conforms_to_its_descriptor)
         const int call_n = conf_call_n(d);
 
         conf_fill_data(d, data, call_n);
-        argv = conf_argv(d, argf, argi, &mel, bark, window, cqt);
+        argv = conf_argv(d, argf, argi, &mel, bark, window, cqt, last_n, wavelet_f0);
 
         rv = xtract[f](ctx, data, call_n, argv, result);
         if (rv == XTRACT_FEATURE_NOT_IMPLEMENTED)
@@ -997,6 +1026,8 @@ UTEST(descriptors, every_feature_conforms_to_its_descriptor)
         }
     }
 
+    xtract_wavelet_f0_state_delete(wavelet_f0);
+    xtract_last_n_state_delete(last_n);
     xtract_context_delete(ctx);
     xtract_free_cqt(cqt);
     ASSERT_EQ(xtract_free_descriptors(fd), XTRACT_SUCCESS);

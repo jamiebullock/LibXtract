@@ -8,6 +8,8 @@
 #ifndef XTRACT_STATEFUL_H
 #define XTRACT_STATEFUL_H
 
+#include "xtract_context.h"
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -24,34 +26,47 @@ extern "C"
 #include <stdint.h>
 #include <string.h>
 
+    /** \brief The state xtract_last_n() keeps for one stream of values */
     typedef struct xtract_last_n_state_ xtract_last_n_state;
 
-    /**
-     *  Allocate the state for xtract_last_n() over frames of capacity values
+    /** \brief The state xtract_wavelet_f0() keeps for one stream of frames */
+    typedef struct xtract_wavelet_f0_state_ xtract_wavelet_f0_state;
+
+    /** \brief Allocate the state of one stream of values for xtract_last_n()
      *
-     *  @param capacity  the N that xtract_last_n() will be called with
-     *  @return a pointer to the new state, or NULL if memory cannot be allocated
+     * \param capacity: the N that xtract_last_n() will be called with
+     * \return a pointer to the new state, or NULL if memory cannot be allocated
      */
     xtract_last_n_state *xtract_last_n_state_new(size_t capacity);
 
-    /**
-     *  Free a state allocated by xtract_last_n_state_new()
+    /** \brief Free a state allocated by xtract_last_n_state_new()
      *
-     *  @param last_n_state  the state to free, as returned by xtract_last_n_state_new()
+     * \param *last_n_state: the state to free, as returned by xtract_last_n_state_new(), or NULL
      */
     void xtract_last_n_state_delete(xtract_last_n_state *last_n_state);
 
-    /**
-     *  Write a vector of the last N input values to `result`
+    /** \brief Write a vector of the last N input values to *result
      *
-     *  @param state  a pointer to an xtract_last_n_state struct as allocated by xtract_last_n_state_new(); NULL is an argument error
-     *  @param data   a pointer to a double representing the current input value
-     *  @param N      an integer representing 'N' the number of values to be written to *result, at least 1 (fewer is an argument error) and equal to the capacity the state was created with (any other positive size is a bad state)
-     *  @param argv   a pointer to NULL
-     *  @param result a pointer to an array of doubles representing the last N values, where the nth value is the current one. The array must have been allocated to size N elements and initialised by the caller
-     *
+     * \param *ctx: a pointer to a context, or NULL
+     * \param *data: a pointer to a double representing the current input value
+     * \param N: the number of values to be written to *result, at least 1 and equal to the capacity the state was created with
+     * \param *argv: a pointer to the xtract_last_n_state of the stream the value belongs to, as allocated by xtract_last_n_state_new()
+     * \param *result: a pointer to an array of N doubles: the last N input values, the current one last, with 0 for each value before the first call
      */
-    int xtract_last_n(const xtract_last_n_state *state, const double *data, const int N, const void *argv, double *result);
+    int xtract_last_n(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
+
+    /** \brief Allocate the state of one stream of frames for xtract_wavelet_f0()
+     *
+     * \param sample_rate: the sample rate of the stream in Hertz, finite and above 0
+     * \return a pointer to the new state, or NULL if the sample rate is out of range or memory cannot be allocated
+     */
+    xtract_wavelet_f0_state *xtract_wavelet_f0_state_new(double sample_rate);
+
+    /** \brief Free a state allocated by xtract_wavelet_f0_state_new()
+     *
+     * \param *wavelet_f0_state: the state to free, as returned by xtract_wavelet_f0_state_new(), or NULL
+     */
+    void xtract_wavelet_f0_state_delete(xtract_wavelet_f0_state *wavelet_f0_state);
 
     /** @} */
 

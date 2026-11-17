@@ -456,13 +456,11 @@ extern "C"
      * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles representing an audio vector
      * \param N: the number of elements to be considered, at least 1
-     * \param *argv: a pointer to a double representing the audio sample rate, finite and above 0
+     * \param *argv: a pointer to the xtract_wavelet_f0_state of the stream the frame belongs to, as allocated by xtract_wavelet_f0_state_new()
      * \param *result: the pitch of N values from the array pointed to by *data
      *
      * This function uses the time-domain wavelet-based method described in Larson and Maddox (2005) and
      * implemented in the dywapitchtrack library
-     *
-     * xtract_init_wavelet_f0_state() must be called exactly once prior to calling xtract_wavelet_f0()
      *
      */
     int xtract_wavelet_f0(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
