@@ -100,20 +100,6 @@ UTEST(attack_time, linear_ramp_between_the_fractions)
     CHECK_REL(result, 70.0 / 1000.0, EPSILON);
 }
 
-UTEST(attack_time, zero_sample_rate_selects_44100)
-{
-    double data[100];
-    double argv[] = {0.0, 0.2, 0.9};
-    double result = -1.0;
-    int n;
-
-    for (n = 0; n < 100; n++)
-        data[n] = n / 99.0;
-
-    ASSERT_EQ(xtract_attack_time(NULL, data, 100, argv, &result), XTRACT_SUCCESS);
-    CHECK_REL(result, 70.0 / 44100.0, EPSILON);
-}
-
 UTEST(attack_time, fractions_are_relative_to_the_maximum)
 {
     double data[100];
@@ -162,6 +148,7 @@ UTEST(attack_time, rejects_bad_arguments)
 {
     double data[] = {0.0, 1.0};
     double negative_rate[] = {-1.0, 0.2, 0.9};
+    double zero_rate[] = {0.0, 0.2, 0.9};
     double start_above_one[] = {1.0, 1.5, 0.9};
     double stop_below_zero[] = {1.0, 0.2, -0.1};
     double good[] = {1.0, 0.2, 0.9};
@@ -171,6 +158,9 @@ UTEST(attack_time, rejects_bad_arguments)
     ASSERT_EQ(result, 0.0);
     result = -1.0;
     ASSERT_EQ(xtract_attack_time(NULL, data, 2, negative_rate, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    result = -1.0;
+    ASSERT_EQ(xtract_attack_time(NULL, data, 2, zero_rate, &result), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(result, 0.0);
     result = -1.0;
     ASSERT_EQ(xtract_attack_time(NULL, data, 2, start_above_one, &result), XTRACT_ARGUMENT_ERROR);
@@ -244,6 +234,7 @@ UTEST(decay_time, rejects_bad_arguments)
 {
     double data[] = {1.0, 0.0};
     double negative_rate[] = {-1.0, 0.4};
+    double zero_rate[] = {0.0, 0.4};
     double threshold_above_one[] = {1.0, 2.0};
     double good[] = {1.0, 0.4};
     double result = -1.0;
@@ -252,6 +243,9 @@ UTEST(decay_time, rejects_bad_arguments)
     ASSERT_EQ(result, 0.0);
     result = -1.0;
     ASSERT_EQ(xtract_decay_time(NULL, data, 2, negative_rate, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    result = -1.0;
+    ASSERT_EQ(xtract_decay_time(NULL, data, 2, zero_rate, &result), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(result, 0.0);
     result = -1.0;
     ASSERT_EQ(xtract_decay_time(NULL, data, 2, threshold_above_one, &result), XTRACT_ARGUMENT_ERROR);

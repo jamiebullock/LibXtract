@@ -2288,7 +2288,7 @@ UTEST(vector, spectrum_rejects_a_null_argv_and_a_type_outside_the_enumeration)
 {
     double data[8] = {0};
     double result[8] = {0};
-    double argv[4] = {0.0, 5.0, 0.0, 0.0};
+    double argv[4] = {1.0, 5.0, 0.0, 0.0};
     xtract_context *ctx = xtract_context_new(8);
 
     ASSERT_EQ(xtract_spectrum(ctx, data, 8, NULL, result), XTRACT_ARGUMENT_ERROR);
@@ -2306,7 +2306,7 @@ UTEST(spectrum, rejects_a_length_that_is_not_a_power_of_two_of_at_least_2)
 {
     double data[8] = {1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0};
     double result[8] = {-1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0};
-    double argv[4] = {0.0, XTRACT_MAGNITUDE_SPECTRUM, 0.0, 0.0};
+    double argv[4] = {1.0, XTRACT_MAGNITUDE_SPECTRUM, 0.0, 0.0};
     xtract_context *ctx = xtract_context_new(8);
 
     ASSERT_EQ(xtract_spectrum(ctx, data, 0, argv, result), XTRACT_ARGUMENT_ERROR);
@@ -2342,7 +2342,7 @@ UTEST(spectrum, no_context_is_a_bad_state)
 {
     double data[8] = {0};
     double result[8];
-    double argv[4] = {0.0, XTRACT_MAGNITUDE_SPECTRUM, 0.0, 0.0};
+    double argv[4] = {1.0, XTRACT_MAGNITUDE_SPECTRUM, 0.0, 0.0};
     int n;
 
     for (n = 0; n < 8; n++)
@@ -2356,7 +2356,7 @@ UTEST(spectrum, a_context_created_for_fewer_elements_is_a_bad_state)
 {
     double data[8] = {0};
     double result[8];
-    double argv[4] = {0.0, XTRACT_MAGNITUDE_SPECTRUM, 0.0, 0.0};
+    double argv[4] = {1.0, XTRACT_MAGNITUDE_SPECTRUM, 0.0, 0.0};
     xtract_context *ctx = xtract_context_new(7);
     int n;
 
@@ -2404,7 +2404,7 @@ UTEST(spectrum, one_context_serves_spectra_of_two_different_sizes)
      * points and bin 2 of 16, and coefficient m holds bin m + 1 */
     double data[16];
     double of_8[8], of_16[16], of_8_again[8];
-    double argv[4] = {0.0, XTRACT_MAGNITUDE_SPECTRUM, 0.0, 0.0};
+    double argv[4] = {1.0, XTRACT_MAGNITUDE_SPECTRUM, 0.0, 0.0};
     xtract_context *ctx = xtract_context_new(16);
     int n;
 
@@ -2425,7 +2425,7 @@ UTEST(autocorrelation_fft, shares_a_context_with_the_spectrum)
 {
     double data[16];
     double spectrum[16], spectrum_again[16], autocorrelation[16], reference[16];
-    double argv[4] = {0.0, XTRACT_MAGNITUDE_SPECTRUM, 0.0, 0.0};
+    double argv[4] = {1.0, XTRACT_MAGNITUDE_SPECTRUM, 0.0, 0.0};
     xtract_context *ctx = xtract_context_new(16);
     int n;
 
@@ -2596,14 +2596,28 @@ UTEST(vector, subbands_accepts_only_features_that_reduce_a_plain_vector_to_one_s
     ASSERT_EQ(xtract_free_descriptors(fd), XTRACT_SUCCESS);
 }
 
-UTEST(vector, peak_spectrum_zero_spacing_defaults_to_44100_over_the_transform_length)
+UTEST(vector, spectrum_and_peak_spectrum_reject_a_bin_spacing_that_is_not_finite_and_above_zero)
 {
-    double data[4] = {0.0, 1.0, 0.0, 0.0};
-    double result[8] = {0};
-    double argv[2] = {0.0, 0.0};
+    const double spacings[4] = {0.0, -1.0, NAN, INFINITY};
+    double data[8] = {0.0, 1.0, 0.0, -1.0, 0.0, 1.0, 0.0, -1.0};
+    double result[8];
+    double spectrum_argv[4] = {1.0, XTRACT_MAGNITUDE_SPECTRUM, 0.0, 0.0};
+    double peak_argv[2] = {1.0, 0.0};
+    xtract_context *ctx = xtract_context_new(8);
+    int n, s;
 
-    ASSERT_EQ(xtract_peak_spectrum(NULL, data, 4, argv, result), XTRACT_SUCCESS);
-    CHECK_REL(result[4 + 1], 2.0 * 44100.0 / 8.0, EPSILON);
+    for (s = 0; s < 4; s++)
+    {
+        for (n = 0; n < 8; n++)
+            result[n] = -1.0;
+        spectrum_argv[0] = spacings[s];
+        peak_argv[0] = spacings[s];
+        ASSERT_EQ(xtract_spectrum(ctx, data, 8, spectrum_argv, result), XTRACT_ARGUMENT_ERROR);
+        ASSERT_EQ(xtract_peak_spectrum(NULL, data, 4, peak_argv, result), XTRACT_ARGUMENT_ERROR);
+        for (n = 0; n < 8; n++)
+            ASSERT_EQ(result[n], -1.0);
+    }
+    xtract_context_delete(ctx);
 }
 
 /* ===== xtract_moving_sum / average / variance / standard_deviation ===== */
@@ -3459,6 +3473,7 @@ UTEST(cqt, init_rejects_out_of_range_arguments)
     xtract_free_cqt(NULL);
     ASSERT_TRUE(xtract_init_cqt(1, CQT_SR, CQT_FMIN, 12, CQT_BINS, 0.01) == NULL);
     ASSERT_TRUE(xtract_init_cqt(CQT_N + 1, CQT_SR, CQT_FMIN, 12, CQT_BINS, 0.01) == NULL);
+    ASSERT_TRUE(xtract_init_cqt(CQT_N, 0.0, CQT_FMIN, 12, CQT_BINS, 0.01) == NULL);
     ASSERT_TRUE(xtract_init_cqt(CQT_N, -1.0, CQT_FMIN, 12, CQT_BINS, 0.01) == NULL);
     ASSERT_TRUE(xtract_init_cqt(CQT_N, NAN, CQT_FMIN, 12, CQT_BINS, 0.01) == NULL);
     ASSERT_TRUE(xtract_init_cqt(CQT_N, INFINITY, CQT_FMIN, 12, CQT_BINS, 0.01) == NULL);
@@ -3593,27 +3608,6 @@ UTEST(cqt, leaving_out_the_coefficients_below_the_threshold_changes_little)
     }
     xtract_free_cqt(dense);
     xtract_free_cqt(sparse);
-}
-
-UTEST(cqt, a_sample_rate_of_zero_selects_44100)
-{
-    xtract_cqt_kernel *given = xtract_init_cqt(CQT_N, 44100.0, CQT_FMIN, 12, CQT_BINS, 0.01);
-    xtract_cqt_kernel *defaulted = xtract_init_cqt(CQT_N, 0.0, CQT_FMIN, 12, CQT_BINS, 0.01);
-    static double signal[CQT_N], spectrum[CQT_N];
-    double expected[2 * CQT_BINS], result[2 * CQT_BINS];
-    int band;
-
-    ASSERT_TRUE(given != NULL);
-    ASSERT_TRUE(defaulted != NULL);
-    memset(signal, 0, sizeof(signal));
-    cqt_tone(signal, CQT_N, 0.5, 311.1, 0.0);
-    ASSERT_EQ(cqt_spectrum(signal, CQT_N, spectrum), XTRACT_SUCCESS);
-    ASSERT_EQ(xtract_cqt(xttest_context(), spectrum, CQT_N, given, expected), XTRACT_SUCCESS);
-    ASSERT_EQ(xtract_cqt(xttest_context(), spectrum, CQT_N, defaulted, result), XTRACT_SUCCESS);
-    for (band = 0; band < 2 * CQT_BINS; band++)
-        ASSERT_EQ(result[band], expected[band]);
-    xtract_free_cqt(given);
-    xtract_free_cqt(defaulted);
 }
 
 UTEST(cqt, result_is_a_spectrum_chroma_reads_pitch_classes_from)

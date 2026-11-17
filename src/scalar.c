@@ -1316,6 +1316,11 @@ int xtract_hps(xtract_context *ctx, const double *data, const int N, const void 
     return XTRACT_SUCCESS;
 }
 
+static int is_sample_rate(const double value)
+{
+    return isfinite(value) && value > 0.0;
+}
+
 int xtract_f0(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
     int M, tau, n;
@@ -1331,13 +1336,11 @@ int xtract_f0(xtract_context *ctx, const double *data, const int N, const void *
     }
 
     sr = *(double *)argv;
-    if (!isfinite(sr) || sr < 0.0)
+    if (!is_sample_rate(sr))
     {
         *result = 0.0;
         return XTRACT_ARGUMENT_ERROR;
     }
-    if (sr == 0)
-        sr = 44100.0;
 
     input = xtract_scratch_take(ctx, N, (size_t)N);
     if (input == NULL)
@@ -1417,13 +1420,11 @@ int xtract_failsafe_f0(xtract_context *ctx, const double *data, const int N, con
         return rv;
 
     sr = *(double *)argv;
-    if (!isfinite(sr) || sr < 0.0)
+    if (!is_sample_rate(sr))
     {
         *result = 0.0;
         return XTRACT_ARGUMENT_ERROR;
     }
-    if (sr == 0)
-        sr = 44100.0;
     if (N < 2 || !xtract_is_poweroftwo((unsigned int)N))
     {
         *result = 0.0;
@@ -1454,7 +1455,7 @@ int xtract_failsafe_f0(xtract_context *ctx, const double *data, const int N, con
 
     xtract_scratch_return(ctx, spectrum, 2 * (size_t)N);
 
-    if (rv == XTRACT_NO_RESULT)
+    if (rv != XTRACT_SUCCESS)
         *result = 0.0;
 
     return rv;
@@ -1471,13 +1472,11 @@ int xtract_wavelet_f0(xtract_context *ctx, const double *data, const int N, cons
     }
 
     sr = *(double *)argv;
-    if (!isfinite(sr) || sr < 0.0)
+    if (!is_sample_rate(sr))
     {
         *result = 0.0;
         return XTRACT_ARGUMENT_ERROR;
     }
-    if (sr == 0)
-        sr = 44100.0;
 
     *result = dywapitch_computepitch(&wavelet_f0_state, data, 0, N);
 
@@ -1628,13 +1627,11 @@ int xtract_mcleod_f0(xtract_context *ctx, const double *data, const int N, const
     }
 
     sr = *(double *)argv;
-    if (!isfinite(sr) || sr < 0.0)
+    if (!is_sample_rate(sr))
     {
         *result = 0.0;
         return XTRACT_ARGUMENT_ERROR;
     }
-    if (sr == 0)
-        sr = 44100.0;
 
     lags = mcleod_lags(N);
     nsdf = xtract_scratch_take(ctx, N, (size_t)lags + 1);
@@ -2415,16 +2412,6 @@ static int index_of_minimum(const double *data, const int N)
     return trough;
 }
 
-static int sample_rate_argument(const double value, double *sr)
-{
-    if (!isfinite(value) || value < 0.0)
-        return 0;
-
-    *sr = value == 0.0 ? XTRACT_SR_DEFAULT : value;
-
-    return 1;
-}
-
 static int is_fraction(const double value)
 {
     return value >= 0.0 && value <= 1.0;
@@ -2436,11 +2423,12 @@ int xtract_attack_time(xtract_context *ctx, const double *data, const int N, con
     double sr, peak;
     int start, stop;
 
-    if (N < 1 || argv == NULL || !sample_rate_argument(args[0], &sr) || !is_fraction(args[1]) || !is_fraction(args[2]))
+    if (N < 1 || argv == NULL || !is_sample_rate(args[0]) || !is_fraction(args[1]) || !is_fraction(args[2]))
     {
         *result = 0.0;
         return XTRACT_ARGUMENT_ERROR;
     }
+    sr = args[0];
 
     peak = data[index_of_maximum(data, N)];
     if (peak <= 0.0)
@@ -2465,11 +2453,12 @@ int xtract_decay_time(xtract_context *ctx, const double *data, const int N, cons
     double sr, peak;
     int peak_index, end;
 
-    if (N < 1 || argv == NULL || !sample_rate_argument(args[0], &sr) || !is_fraction(args[1]))
+    if (N < 1 || argv == NULL || !is_sample_rate(args[0]) || !is_fraction(args[1]))
     {
         *result = 0.0;
         return XTRACT_ARGUMENT_ERROR;
     }
+    sr = args[0];
 
     peak_index = index_of_maximum(data, N);
     peak = data[peak_index];
@@ -2493,11 +2482,12 @@ int xtract_decay_rate(xtract_context *ctx, const double *data, const int N, cons
     double sr, peak, floor_value, mean_time, mean_log, covariance, variance;
     int peak_index, n, count;
 
-    if (N < 1 || argv == NULL || !sample_rate_argument(args[0], &sr) || !is_fraction(args[1]))
+    if (N < 1 || argv == NULL || !is_sample_rate(args[0]) || !is_fraction(args[1]))
     {
         *result = 0.0;
         return XTRACT_ARGUMENT_ERROR;
     }
+    sr = args[0];
 
     peak_index = index_of_maximum(data, N);
     peak = data[peak_index];

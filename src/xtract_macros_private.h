@@ -36,12 +36,6 @@
 #define XTRACT_F0_PEAK_CLIP 0.8
 #define XTRACT_F0_CENTRE_CLIP 0.3
 
-#define XTRACT_CHECK_nyquist \
-    if (!nyquist)            \
-    nyquist = XTRACT_SR_DEFAULT / 2
-#define XTRACT_CHECK_q \
-    if (!q)            \
-    q = XTRACT_SR_DEFAULT / N
 #define XTRACT_GET_MAX max = result[m] > max ? result[m] : max
 #define XTRACT_SET_FREQUENCY result[M + m] = n * q
 #define XTRACT_IS_ODD(x) (x % 2 != 0 ? 1 : 0)

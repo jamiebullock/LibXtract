@@ -428,7 +428,7 @@ extern "C"
      * \param *ctx: a pointer to a context created for at least N elements
      * \param *data: a pointer to the first element in an array of doubles representing an audio vector
      * \param N: the number of elements to be considered, at least 1
-     * \param *argv: a pointer to a double representing the audio sample rate, finite and at least 0; 0 selects 44100 Hz
+     * \param *argv: a pointer to a double representing the audio sample rate, finite and above 0
      * \param *result: the pitch of N values from the array pointed to by *data
      *
      * This algorithm is based on the AMDF, with peak and centre clipping. It would benefit from further improvements to improve noise robustness and overall efficiency
@@ -443,7 +443,7 @@ extern "C"
      * \param *ctx: a pointer to a context created for at least N elements
      * \param *data: a pointer to the first element in an array of doubles representing an audio vector
      * \param N: the number of elements to be considered, at least 1. When xtract_f0() finds no result the fallback takes the spectrum of the N values, which needs N to be a power of two of at least 2
-     * \param *argv: a pointer to a double representing the audio sample rate, finite and at least 0; 0 selects 44100 Hz
+     * \param *argv: a pointer to a double representing the audio sample rate, finite and above 0
      * \param *result: the pitch of N values from the array pointed to by *data
      *
      * This function wraps xtract_f0, but provides the frequency of the lowest partial in the peak spectrum if f0 can't be found.
@@ -456,7 +456,7 @@ extern "C"
      * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles representing an audio vector
      * \param N: the number of elements to be considered, at least 1
-     * \param *argv: a pointer to a double representing the audio sample rate, finite and at least 0; 0 selects 44100 Hz
+     * \param *argv: a pointer to a double representing the audio sample rate, finite and above 0
      * \param *result: the pitch of N values from the array pointed to by *data
      *
      * This function uses the time-domain wavelet-based method described in Larson and Maddox (2005) and
@@ -476,7 +476,7 @@ extern "C"
      * \param *ctx: a pointer to a context created for at least N elements
      * \param *data: a pointer to the first element in an array of doubles representing an audio vector
      * \param N: the number of elements to be considered, at least 1; a period longer than N / 2 samples is not found, so N must span at least two periods of the lowest frequency expected
-     * \param *argv: a pointer to a double representing the audio sample rate, finite and at least 0; 0 selects 44100 Hz
+     * \param *argv: a pointer to a double representing the audio sample rate, finite and above 0
      * \param *result: the pitch of N values from the array pointed to by *data, or 0 with no result when no period of at most N / 2 samples is found
      */
     int xtract_mcleod_f0(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
@@ -679,7 +679,7 @@ extern "C"
      * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles representing an amplitude envelope or any segment with a single peak
      * \param N: the number of elements to be considered, at least 1
-     * \param *argv: a pointer to an array of two doubles: the sample rate, finite and at least 0, with 0 selecting 44100 Hz; and the threshold fraction of the maximum, from 0 to 1
+     * \param *argv: a pointer to an array of two doubles: the sample rate, finite and above 0; and the threshold fraction of the maximum, from 0 to 1
      * \param *result: the decay rate of N values from the array pointed to by *data in units of 1 per second, negative for an envelope that decays, or 0 with no result when the maximum is not positive or fewer than two elements exceed the threshold
      */
     int xtract_decay_rate(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);

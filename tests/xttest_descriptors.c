@@ -133,9 +133,9 @@ UTEST(descriptors, argv_ranges_match_the_functions)
     ASSERT_EQ(fd[XTRACT_CREST].argv.min[1], XTRACT_UNBOUNDED_MIN);
     ASSERT_EQ(fd[XTRACT_NOISINESS].argv.max[0], XTRACT_UNBOUNDED_MAX);
 
-    CHECK_REL(fd[XTRACT_F0].argv.min[0], 0.0, EPSILON);
-    CHECK_REL(fd[XTRACT_MCLEOD_F0].argv.min[0], 0.0, EPSILON);
-    CHECK_REL(fd[XTRACT_WAVELET_F0].argv.min[0], 0.0, EPSILON);
+    ASSERT_EQ(fd[XTRACT_F0].argv.min[0], DBL_MIN);
+    ASSERT_EQ(fd[XTRACT_MCLEOD_F0].argv.min[0], DBL_MIN);
+    ASSERT_EQ(fd[XTRACT_WAVELET_F0].argv.min[0], DBL_MIN);
     CHECK_REL(fd[XTRACT_MIDICENT].argv.min[0], 0.0, EPSILON);
     ASSERT_EQ(fd[XTRACT_MIDICENT].argv.max[0], XTRACT_UNBOUNDED_MAX);
     ASSERT_EQ(fd[XTRACT_MIDICENT].argv.unit[0], XTRACT_HERTZ);
@@ -146,7 +146,7 @@ UTEST(descriptors, argv_ranges_match_the_functions)
     CHECK_REL(fd[XTRACT_TRISTIMULUS_2].argv.min[0], 0.0, EPSILON);
     ASSERT_EQ(fd[XTRACT_TRISTIMULUS_3].argv.donor[0], XTRACT_FAILSAFE_F0);
 
-    CHECK_REL(fd[XTRACT_SPECTRUM].argv.min[0], 0.0, EPSILON);
+    ASSERT_EQ(fd[XTRACT_SPECTRUM].argv.min[0], DBL_MIN);
     ASSERT_EQ(fd[XTRACT_SPECTRUM].argv.max[0], XTRACT_UNBOUNDED_MAX);
     CHECK_REL(fd[XTRACT_SPECTRUM].argv.max[1], (double)XTRACT_MAGNITUDE_PHASE_SPECTRUM, EPSILON);
 
