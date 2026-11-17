@@ -7,6 +7,7 @@
 #include "xtract/libxtract.h"
 
 #include "xttest_approx.h"
+#include "xttest_util.h"
 
 /*
  * Unit tests for the descriptor system (xtract_make_descriptors /
@@ -927,6 +928,12 @@ static void conf_fill_data(const xtract_function_descriptor_t *d, double *data, 
     }
 }
 
+static int conf_call(int f, xtract_context *ctx, const double *data, int N, const void *argv, double *result) XTTEST_REALTIME;
+static int conf_call(int f, xtract_context *ctx, const double *data, int N, const void *argv, double *result)
+{
+    return xtract[f](ctx, data, N, argv, result);
+}
+
 UTEST(descriptors, every_feature_conforms_to_its_descriptor)
 {
     xtract_function_descriptor_t *fd = xtract_make_descriptors();
@@ -970,7 +977,7 @@ UTEST(descriptors, every_feature_conforms_to_its_descriptor)
         conf_fill_data(d, data, call_n);
         argv = conf_argv(d, argf, argi, &mel, bark, window, cqt, last_n, wavelet_f0);
 
-        rv = xtract[f](ctx, data, call_n, argv, result);
+        rv = conf_call(f, ctx, data, call_n, argv, result);
         if (rv == XTRACT_FEATURE_NOT_IMPLEMENTED)
         {
             ASSERT_TRUE_MSG(f == XTRACT_POWER, d->algo.name);
@@ -980,29 +987,29 @@ UTEST(descriptors, every_feature_conforms_to_its_descriptor)
         ASSERT_NE_MSG(rv, XTRACT_BAD_STATE, d->algo.name);
 
         if (conf_null_argv_allowed(d))
-            ASSERT_NE_MSG(xtract[f](ctx, data, call_n, NULL, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
+            ASSERT_NE_MSG(conf_call(f, ctx, data, call_n, NULL, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
         else
-            ASSERT_EQ_MSG(xtract[f](ctx, data, call_n, NULL, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
+            ASSERT_EQ_MSG(conf_call(f, ctx, data, call_n, NULL, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
 
         if (min_n > 0)
-            ASSERT_EQ_MSG(xtract[f](ctx, data, min_n - 1, argv, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
+            ASSERT_EQ_MSG(conf_call(f, ctx, data, min_n - 1, argv, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
         if (conf_two_half(d))
-            ASSERT_EQ_MSG(xtract[f](ctx, data, min_n + 1, argv, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
+            ASSERT_EQ_MSG(conf_call(f, ctx, data, min_n + 1, argv, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
         if (d->data.format == XTRACT_SQUARE_MATRIX)
-            ASSERT_EQ_MSG(xtract[f](ctx, data, 2, argv, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
+            ASSERT_EQ_MSG(conf_call(f, ctx, data, 2, argv, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
         if (d->data.format == XTRACT_CHANNELS)
-            ASSERT_EQ_MSG(xtract[f](ctx, data, call_n + 1, argv, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
+            ASSERT_EQ_MSG(conf_call(f, ctx, data, call_n + 1, argv, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
         if (d->data.format == XTRACT_GRID)
         {
             conf_set(d, argf, argi, 0, 2.0);
-            ASSERT_NE_MSG(xtract[f](ctx, data, 4, argv, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
-            ASSERT_EQ_MSG(xtract[f](ctx, data, 3, argv, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
+            ASSERT_NE_MSG(conf_call(f, ctx, data, 4, argv, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
+            ASSERT_EQ_MSG(conf_call(f, ctx, data, 3, argv, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
             conf_set(d, argf, argi, 0, conf_default(d, 0));
         }
         if (d->data.format == XTRACT_BARK_COEFFS)
-            ASSERT_EQ_MSG(xtract[f](ctx, data, XTRACT_BARK_BANDS + 1, argv, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
+            ASSERT_EQ_MSG(conf_call(f, ctx, data, XTRACT_BARK_BANDS + 1, argv, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
         if (d->data.format == XTRACT_CENTRAL_MOMENT_COEFFS || d->data.format == XTRACT_NORMALISED_MOMENT_COEFFS)
-            ASSERT_EQ_MSG(xtract[f](ctx, data, min_n + 1, argv, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
+            ASSERT_EQ_MSG(conf_call(f, ctx, data, min_n + 1, argv, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
 
         for (i = 0; i < d->argc && i < XTRACT_MAXARGS; i++)
         {
@@ -1011,16 +1018,16 @@ UTEST(descriptors, every_feature_conforms_to_its_descriptor)
             if (d->argv.min[i] != XTRACT_UNBOUNDED_MIN)
             {
                 conf_set(d, argf, argi, i, d->argv.min[i] - 1.0);
-                ASSERT_EQ_MSG(xtract[f](ctx, data, call_n, argv, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
+                ASSERT_EQ_MSG(conf_call(f, ctx, data, call_n, argv, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
                 conf_set(d, argf, argi, i, d->argv.min[i]);
-                ASSERT_NE_MSG(xtract[f](ctx, data, call_n, argv, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
+                ASSERT_NE_MSG(conf_call(f, ctx, data, call_n, argv, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
             }
             if (d->argv.max[i] != XTRACT_UNBOUNDED_MAX)
             {
                 conf_set(d, argf, argi, i, d->argv.max[i] + 1.0);
-                ASSERT_EQ_MSG(xtract[f](ctx, data, call_n, argv, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
+                ASSERT_EQ_MSG(conf_call(f, ctx, data, call_n, argv, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
                 conf_set(d, argf, argi, i, d->argv.max[i]);
-                ASSERT_NE_MSG(xtract[f](ctx, data, call_n, argv, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
+                ASSERT_NE_MSG(conf_call(f, ctx, data, call_n, argv, result), XTRACT_ARGUMENT_ERROR, d->algo.name);
             }
             conf_set(d, argf, argi, i, conf_default(d, i));
         }

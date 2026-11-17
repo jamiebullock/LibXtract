@@ -13,6 +13,18 @@ enum
     XTTEST_LONGEST = 65536
 };
 
+/* Marks the declaration of a function that RealtimeSanitizer checks: in a
+ * build with it, an allocation, a lock or a blocking call made while the
+ * function runs ends the test binary with a report */
+#if defined(__has_feature)
+#if __has_feature(realtime_sanitizer)
+#define XTTEST_REALTIME __attribute__((nonblocking))
+#endif
+#endif
+#ifndef XTTEST_REALTIME
+#define XTTEST_REALTIME
+#endif
+
 /* Fill table with sine wave at given frequency and amplitude */
 void xttest_gen_sine(double *table, uint32_t tablesize, double samplerate, double frequency, double amplitude);
 

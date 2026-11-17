@@ -30,6 +30,20 @@ if(NOT APPLE)
 endif()
 
 add_test(NAME xttest COMMAND xttest)
+if(XTRACT_REALTIME_SANITIZER)
+    add_executable(realtime_violation realtime_violation.c)
+    set_target_properties(realtime_violation PROPERTIES
+        C_STANDARD 99
+        C_STANDARD_REQUIRED ON
+        C_EXTENSIONS OFF)
+    target_link_libraries(realtime_violation PRIVATE xtract::xtract)
+    add_test(NAME realtime_sanitizer_reports_an_allocation COMMAND realtime_violation)
+    # The program runs on after the report so that it ends normally, since
+    # CTest fails a test that aborts whatever it printed
+    set_tests_properties(realtime_sanitizer_reports_an_allocation PROPERTIES
+        ENVIRONMENT "RTSAN_OPTIONS=halt_on_error=false"
+        PASS_REGULAR_EXPRESSION "RealtimeSanitizer: unsafe-library-call")
+endif()
 add_test(NAME version_check
     COMMAND ${CMAKE_COMMAND}
         -DSCRIPT=${PROJECT_SOURCE_DIR}/cmake/version.cmake

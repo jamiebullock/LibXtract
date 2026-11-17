@@ -74,6 +74,7 @@ Each of the other presets builds under its own directory in `build/`. Configure 
 | `asan` | `ctest --preset asan` | The tests under AddressSanitizer and UBSan |
 | `coverage` | `cmake --build --preset coverage --target coverage` | Line and branch coverage of the test suite (needs lcov) |
 | `fuzz` | `ctest --preset fuzz` | The libFuzzer harnesses (needs a clang with libFuzzer) |
+| `rtsan` | `ctest --preset rtsan` | The tests under RealtimeSanitizer, which reports a feature function that allocates, locks or blocks (needs clang 20 or later) |
 | `mutation` | `cmake --build --preset mutation --target mutation` | Mutation testing with Mull (needs clang-18 and mull-18; CI runs it) |
 
 The default preset also has targets that run a tool, each built with `cmake --build --preset default --target <name>`:

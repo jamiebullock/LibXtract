@@ -66,6 +66,19 @@
       }
     },
     {
+      "name": "rtsan",
+      "inherits": "base",
+      "displayName": "Library and tests with RealtimeSanitizer",
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "clang",
+        "CMAKE_BUILD_TYPE": "Debug",
+        "XTRACT_BUILD_EXAMPLES": "OFF",
+        "XTRACT_BUILD_BENCH": "OFF",
+        "CMAKE_C_FLAGS": "-O3 -fno-omit-frame-pointer -g",
+        "XTRACT_REALTIME_SANITIZER": "ON"
+      }
+    },
+    {
       "name": "mutation",
       "inherits": "asan",
       "displayName": "Library compiled with the Mull plugin for mutation testing",
@@ -80,6 +93,7 @@
     { "name": "asan", "configurePreset": "asan", "configuration": "Debug" },
     { "name": "coverage", "configurePreset": "coverage", "configuration": "Debug" },
     { "name": "fuzz", "configurePreset": "fuzz", "configuration": "Debug" },
+    { "name": "rtsan", "configurePreset": "rtsan", "configuration": "Debug" },
     { "name": "mutation", "configurePreset": "mutation", "configuration": "Debug" }
   ],
   "testPresets": [
@@ -93,6 +107,7 @@
     { "name": "asan", "inherits": "base", "configurePreset": "asan", "configuration": "Debug" },
     { "name": "coverage", "inherits": "base", "configurePreset": "coverage", "configuration": "Debug" },
     { "name": "fuzz", "inherits": "base", "configurePreset": "fuzz", "configuration": "Debug" },
+    { "name": "rtsan", "inherits": "base", "configurePreset": "rtsan", "configuration": "Debug" },
     { "name": "mutation", "inherits": "base", "configurePreset": "mutation", "configuration": "Debug" }
   ]
 }

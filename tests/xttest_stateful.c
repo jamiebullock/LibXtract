@@ -122,6 +122,12 @@ UTEST(helper, features_from_subframes_still_computes_the_second_subframe_when_th
     ASSERT_EQ(result[3], 0.0);
 }
 
+static int subframes_call(xtract_context *ctx, const double *data, int N, int feature, const void *argv, double *result) XTTEST_REALTIME;
+static int subframes_call(xtract_context *ctx, const double *data, int N, int feature, const void *argv, double *result)
+{
+    return xtract_features_from_subframes(ctx, data, N, feature, argv, result);
+}
+
 UTEST(helper, features_from_subframes_passes_its_context_to_the_feature)
 {
     /* Each subframe of 8 elements alternates in sign, so its spectrum is 1
@@ -131,8 +137,8 @@ UTEST(helper, features_from_subframes_passes_its_context_to_the_feature)
     double argv[4] = {1.0, XTRACT_MAGNITUDE_SPECTRUM, 0.0, 0.0};
     xtract_context *ctx = xtract_context_new(8);
 
-    ASSERT_EQ(xtract_features_from_subframes(NULL, data, 16, XTRACT_SPECTRUM, argv, result), XTRACT_BAD_STATE);
-    ASSERT_EQ(xtract_features_from_subframes(ctx, data, 16, XTRACT_SPECTRUM, argv, result), XTRACT_SUCCESS);
+    ASSERT_EQ(subframes_call(NULL, data, 16, XTRACT_SPECTRUM, argv, result), XTRACT_BAD_STATE);
+    ASSERT_EQ(subframes_call(ctx, data, 16, XTRACT_SPECTRUM, argv, result), XTRACT_SUCCESS);
     CHECK_REL(result[3], 1.0, EPSILON);
     CHECK_REL(result[8 + 3], 1.0, EPSILON);
     xtract_context_delete(ctx);

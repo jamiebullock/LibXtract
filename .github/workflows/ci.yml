@@ -115,6 +115,22 @@ jobs:
           cmake --build build/package --config Release
           ctest --test-dir build/package --build-config Release --output-on-failure
 
+  realtime:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Install clang (provides RealtimeSanitizer)
+        run: sudo apt-get update && sudo apt-get install -y clang
+
+      - name: Tests under RealtimeSanitizer
+        run: |
+          cmake --preset rtsan
+          cmake --build --preset rtsan
+          ctest --preset rtsan
+
   fuzz:
     runs-on: ubuntu-latest
     steps:
