@@ -859,7 +859,7 @@ static int conf_call_n(const xtract_function_descriptor_t *d)
 
 static int conf_null_argv_allowed(const xtract_function_descriptor_t *d)
 {
-    return d->argc == 0 || d->id == XTRACT_LPCC || d->id == XTRACT_HPS;
+    return d->argc == 0;
 }
 
 static int conf_bounds_checkable(const xtract_function_descriptor_t *d, int i)
