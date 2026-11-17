@@ -1461,9 +1461,14 @@ int xtract_failsafe_f0(xtract_context *ctx, const double *data, const int N, con
     return rv;
 }
 
+/* dywapitch_computepitch() works in three ints for each sample */
+#define WAVELET_F0_INTS_PER_SAMPLE 3
+
 int xtract_wavelet_f0(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
     xtract_wavelet_f0_state *state = (xtract_wavelet_f0_state *)argv;
+    double *samples;
+    int *ints;
 
     if (N < 1 || state == NULL)
     {
@@ -1471,7 +1476,20 @@ int xtract_wavelet_f0(xtract_context *ctx, const double *data, const int N, cons
         return XTRACT_ARGUMENT_ERROR;
     }
 
-    *result = dywapitch_computepitch(&state->tracker, data, 0, N);
+    samples = xtract_scratch_take(ctx, N, (size_t)N);
+    if (samples == NULL)
+        return XTRACT_BAD_STATE;
+    ints = xtract_scratch_take_ints(ctx, N, WAVELET_F0_INTS_PER_SAMPLE * (size_t)N);
+    if (ints == NULL)
+    {
+        xtract_scratch_return(ctx, samples, (size_t)N);
+        return XTRACT_BAD_STATE;
+    }
+
+    *result = dywapitch_computepitch(&state->tracker, data, 0, N, samples, ints);
+
+    xtract_scratch_return_ints(ctx, ints, WAVELET_F0_INTS_PER_SAMPLE * (size_t)N);
+    xtract_scratch_return(ctx, samples, (size_t)N);
 
     if (*result == 0.0)
     {

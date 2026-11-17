@@ -164,7 +164,7 @@ int main(void)
     for (uint64_t n = 0; (n + BLOCKSIZE) < wavSamples; n += HALF_BLOCKSIZE) // Overlap by HALF_BLOCKSIZE
     {
         /* get the F0 */
-        xtract[XTRACT_WAVELET_F0](NULL, &data[n], BLOCKSIZE, wavelet_f0_state, &f0);
+        xtract[XTRACT_WAVELET_F0](ctx, &data[n], BLOCKSIZE, wavelet_f0_state, &f0);
 
         /* get the F0 as a MIDI note */
         if (f0 != 0.0)
