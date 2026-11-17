@@ -36,7 +36,7 @@ extern "C"
 
     /** \brief Extract the lag at which two series are most correlated: the lag of the largest correlation coefficient from xtract_cross_correlation(), taking the one nearest zero on a tie and the negative one before the positive
      *
-     * \param *ctx: a pointer to a context, or NULL
+     * \param *ctx: a pointer to a context created for at least N elements
      * \param *data: a pointer to the first element in an array of doubles comprising two series of equal length: the first series in the first N/2 elements, the second in the second N/2 elements
      * \param N: the total number of elements in the array pointed to by *data (twice the series length), at least 2 and even
      * \param *argv: not used
@@ -86,7 +86,7 @@ extern "C"
 
     /** \brief Extract the variances of the principal components of a set of series: the eigenvalues of their covariance matrix, largest first
      *
-     * \param *ctx: a pointer to a context, or NULL
+     * \param *ctx: a pointer to a context created for at least N elements
      * \param *data: a pointer to the first element in an array of doubles comprising the C * C values of a symmetric matrix: a covariance matrix as xtract_covariance_matrix() gives it, or a correlation matrix as xtract_correlation_matrix() gives it for the principal components of the standardised series. The diagonal and the values above it, at index i * C + j with j greater than i, are read
      * \param N: the number of elements in the array pointed to by *data, a perfect square of at least 1
      * \param *argv: not used
