@@ -1335,12 +1335,9 @@ int xtract_chroma(xtract_context *ctx, const double *data, const int N, const vo
     reference = ((const double *)argv)[0];
     lowest = ((const double *)argv)[1];
     highest = ((const double *)argv)[2];
-    if (!isfinite(reference) || reference < 0.0 || !isfinite(lowest) || lowest < 0.0 ||
+    if (!isfinite(reference) || reference <= 0.0 || !isfinite(lowest) || lowest < 0.0 ||
         !isfinite(highest) || highest < 0.0 || (highest > 0.0 && highest <= lowest))
         return XTRACT_ARGUMENT_ERROR;
-
-    if (reference == 0.0)
-        reference = XTRACT_CHROMA_REFERENCE_DEFAULT;
 
     M = N >> 1;
     freqs = data + M;

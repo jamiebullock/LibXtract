@@ -3285,10 +3285,10 @@ UTEST(chroma, a_bin_rounds_to_the_nearest_pitch_class_and_the_largest_class_is_o
     CHECK_NEAR(result[PC_C], 0.0, EPSILON);
 }
 
-UTEST(chroma, the_reference_moves_every_class_and_zero_selects_440)
+UTEST(chroma, the_reference_moves_every_class)
 {
     double data[] = {1.0, 1.0, 440.0, 660.0};
-    double argv[] = {0.0, 0.0, 0.0};
+    double argv[] = {440.0, 0.0, 0.0};
     double result[XTRACT_PITCH_CLASSES];
     ASSERT_EQ(xtract_chroma(NULL, data, 4, argv, result), XTRACT_SUCCESS);
     CHECK_REL(result[PC_A], 1.0, EPSILON);
@@ -3374,6 +3374,8 @@ UTEST(chroma, rejects_bad_arguments)
     ASSERT_EQ(xtract_chroma(NULL, data, 3, argv, result), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(xtract_chroma(NULL, data, 0, argv, result), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(xtract_chroma(NULL, data, 4, NULL, result), XTRACT_ARGUMENT_ERROR);
+    argv[0] = 0.0;
+    ASSERT_EQ(xtract_chroma(NULL, data, 4, argv, result), XTRACT_ARGUMENT_ERROR);
     argv[0] = -1.0;
     ASSERT_EQ(xtract_chroma(NULL, data, 4, argv, result), XTRACT_ARGUMENT_ERROR);
     argv[0] = NAN;

@@ -400,7 +400,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *(argv_unit + 2) = XTRACT_UNIT_NONE;
             break;
         case XTRACT_CHROMA:
-            *argv_min = 0.0;
+            *argv_min = DBL_MIN;
             *argv_max = XTRACT_UNBOUNDED_MAX;
             *argv_def = 440.0;
             *argv_unit = XTRACT_HERTZ;
