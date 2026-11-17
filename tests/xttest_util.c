@@ -76,7 +76,8 @@ xtract_context *xttest_context(void)
     if (shared_context == NULL)
     {
         shared_context = xtract_context_new(XTTEST_LONGEST);
-        atexit(delete_shared_context);
+        if (shared_context != NULL)
+            atexit(delete_shared_context);
     }
 
     return shared_context;
