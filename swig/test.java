@@ -73,11 +73,11 @@ public class test {
         doubleArray data = new doubleArray(1);
         data.setitem(0, 42.0);
         /* N.B. data is a single sample; N is the window size, not the size of data */
-        xtract.xtract_last_n(state, data.cast(), N, null, lastN.cast());
+        xtract.xtract_last_n(null, data.cast(), N, xtract.last_n_state_to_voidp(state), lastN.cast());
         System.out.printf("last_n after one value: %.1f%n", lastN.getitem(N - 1));
 
         data.setitem(0, 99.0);
-        xtract.xtract_last_n(state, data.cast(), N, null, lastN.cast());
+        xtract.xtract_last_n(null, data.cast(), N, xtract.last_n_state_to_voidp(state), lastN.cast());
         System.out.printf("last_n after two values: %.1f, %.1f%n",
                 lastN.getitem(N - 2), lastN.getitem(N - 1));
 

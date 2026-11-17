@@ -138,21 +138,33 @@ UTEST(helper, features_from_subframes_passes_its_context_to_the_feature)
     xtract_context_delete(ctx);
 }
 
-UTEST(stateful, init_wavelet_f0_state)
+UTEST(stateful, wavelet_f0_state_new_rejects_a_sample_rate_that_is_not_finite_and_above_zero)
 {
-    ASSERT_EQ(xtract_init_wavelet_f0_state(), XTRACT_SUCCESS);
+    ASSERT_TRUE(xtract_wavelet_f0_state_new(0.0) == NULL);
+    ASSERT_TRUE(xtract_wavelet_f0_state_new(-44100.0) == NULL);
+    ASSERT_TRUE(xtract_wavelet_f0_state_new(NAN) == NULL);
+    ASSERT_TRUE(xtract_wavelet_f0_state_new(INFINITY) == NULL);
 }
 
-UTEST(stateful, wavelet_f0_rejects_null_argv_and_an_empty_input)
+UTEST(stateful, state_delete_accepts_null)
+{
+    xtract_wavelet_f0_state_delete(NULL);
+    xtract_last_n_state_delete(NULL);
+}
+
+UTEST(stateful, wavelet_f0_rejects_a_null_state_and_an_empty_input)
 {
     double table[WAVELET_N];
-    double samplerate = 44100.0;
+    xtract_wavelet_f0_state *state = xtract_wavelet_f0_state_new(44100.0);
     double result = -1.0;
+
+    ASSERT_TRUE(state != NULL);
     ASSERT_EQ(xtract_wavelet_f0(NULL, table, WAVELET_N, NULL, &result), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(result, 0.0);
     result = -1.0;
-    ASSERT_EQ(xtract_wavelet_f0(NULL, table, 0, &samplerate, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_wavelet_f0(NULL, table, 0, state, &result), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(result, 0.0);
+    xtract_wavelet_f0_state_delete(state);
 }
 
 UTEST(stateful, wavelet_f0_detects_sine_pitch)
@@ -165,42 +177,72 @@ UTEST(stateful, wavelet_f0_detects_sine_pitch)
     double samplerate = 44100.0;
     double frequency = 440.0;
     double result = -1.0;
+    xtract_wavelet_f0_state *state = xtract_wavelet_f0_state_new(samplerate);
     int rv;
 
-    xtract_init_wavelet_f0_state();
+    ASSERT_TRUE(state != NULL);
     xttest_gen_sine(table, WAVELET_N, samplerate, frequency, 1.0);
-    rv = xtract_wavelet_f0(NULL, table, WAVELET_N, &samplerate, &result);
+    rv = xtract_wavelet_f0(NULL, table, WAVELET_N, state, &result);
     ASSERT_EQ(rv, XTRACT_SUCCESS);
     CHECK_REL(result, frequency, 0.01);
+    xtract_wavelet_f0_state_delete(state);
 }
 
-UTEST(stateful, wavelet_f0_rejects_a_sample_rate_that_is_not_finite_and_above_zero)
+UTEST(stateful, wavelet_f0_scales_the_pitch_by_the_sample_rate_of_its_state)
 {
-    const double rates[4] = {0.0, -44100.0, NAN, INFINITY};
     double table[WAVELET_N];
-    double result;
-    int r;
+    double at_44100 = -1.0;
+    double at_22050 = -1.0;
+    xtract_wavelet_f0_state *state_44100 = xtract_wavelet_f0_state_new(44100.0);
+    xtract_wavelet_f0_state *state_22050 = xtract_wavelet_f0_state_new(22050.0);
 
+    ASSERT_TRUE(state_44100 != NULL);
+    ASSERT_TRUE(state_22050 != NULL);
     xttest_gen_sine(table, WAVELET_N, 44100.0, 440.0, 1.0);
-    for (r = 0; r < 4; r++)
-    {
-        result = -1.0;
-        ASSERT_EQ(xtract_wavelet_f0(NULL, table, WAVELET_N, &rates[r], &result), XTRACT_ARGUMENT_ERROR);
-        ASSERT_EQ(result, 0.0);
-    }
+    ASSERT_EQ(xtract_wavelet_f0(NULL, table, WAVELET_N, state_44100, &at_44100), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_wavelet_f0(NULL, table, WAVELET_N, state_22050, &at_22050), XTRACT_SUCCESS);
+    CHECK_REL(at_22050, at_44100 / 2.0, EPSILON);
+    xtract_wavelet_f0_state_delete(state_44100);
+    xtract_wavelet_f0_state_delete(state_22050);
+}
+
+UTEST(stateful, wavelet_f0_follows_each_stream_in_its_own_state)
+{
+    /* The tracker drops a pitch more than 20% from the one before it, so a
+     * stream that has heard 440 Hz gives no result for a frame of 300 Hz,
+     * while a stream whose first frame it is reports it. */
+    double at_440[WAVELET_N];
+    double at_300[WAVELET_N];
+    double result = -1.0;
+    xtract_wavelet_f0_state *first = xtract_wavelet_f0_state_new(44100.0);
+    xtract_wavelet_f0_state *second = xtract_wavelet_f0_state_new(44100.0);
+
+    ASSERT_TRUE(first != NULL);
+    ASSERT_TRUE(second != NULL);
+    xttest_gen_sine(at_440, WAVELET_N, 44100.0, 440.0, 1.0);
+    xttest_gen_sine(at_300, WAVELET_N, 44100.0, 300.0, 1.0);
+
+    ASSERT_EQ(xtract_wavelet_f0(NULL, at_440, WAVELET_N, first, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 440.0, 0.01);
+    ASSERT_EQ(xtract_wavelet_f0(NULL, at_300, WAVELET_N, second, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 300.0, 0.01);
+    ASSERT_EQ(xtract_wavelet_f0(NULL, at_300, WAVELET_N, first, &result), XTRACT_NO_RESULT);
+    xtract_wavelet_f0_state_delete(first);
+    xtract_wavelet_f0_state_delete(second);
 }
 
 UTEST(stateful, wavelet_f0_silence_yields_no_result)
 {
     double table[WAVELET_N];
-    double samplerate = 44100.0;
     double result = -1.0;
+    xtract_wavelet_f0_state *state = xtract_wavelet_f0_state_new(44100.0);
     uint32_t n;
 
-    xtract_init_wavelet_f0_state();
+    ASSERT_TRUE(state != NULL);
     for (n = 0; n < WAVELET_N; n++)
         table[n] = 0.0;
-    ASSERT_EQ(xtract_wavelet_f0(NULL, table, WAVELET_N, &samplerate, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(xtract_wavelet_f0(NULL, table, WAVELET_N, state, &result), XTRACT_NO_RESULT);
+    xtract_wavelet_f0_state_delete(state);
 }
 
 UTEST(stateful, failsafe_f0_returns_estimate_when_detection_succeeds)
@@ -306,12 +348,36 @@ UTEST(stateful, last_n_rejects_a_null_state_or_an_empty_input_and_reports_a_size
 
     ASSERT_TRUE(state != NULL);
     ASSERT_EQ(xtract_last_n(NULL, &sample, 4, NULL, result), XTRACT_ARGUMENT_ERROR);
-    ASSERT_EQ(xtract_last_n(state, &sample, 0, NULL, result), XTRACT_ARGUMENT_ERROR);
-    ASSERT_EQ(xtract_last_n(state, &sample, 3, NULL, result), XTRACT_BAD_STATE);
+    ASSERT_EQ(xtract_last_n(NULL, &sample, 0, state, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_last_n(NULL, &sample, 3, state, result), XTRACT_BAD_STATE);
     ASSERT_EQ(result[0], -1.0);
 
-    ASSERT_EQ(xtract_last_n(state, &sample, 4, NULL, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_last_n(NULL, &sample, 4, state, result), XTRACT_SUCCESS);
     ASSERT_EQ(result[0], 0.0);
     CHECK_REL(result[3], 1.0, EPSILON);
     xtract_last_n_state_delete(state);
+}
+
+UTEST(stateful, last_n_keeps_the_values_of_each_stream_in_its_own_state)
+{
+    xtract_last_n_state *first = xtract_last_n_state_new(3);
+    xtract_last_n_state *second = xtract_last_n_state_new(3);
+    double result[3] = {-1.0, -1.0, -1.0};
+    double value;
+
+    ASSERT_TRUE(first != NULL);
+    ASSERT_TRUE(second != NULL);
+    for (value = 1.0; value <= 4.0; value += 1.0)
+        ASSERT_EQ(xtract[XTRACT_LAST_N](NULL, &value, 3, first, result), XTRACT_SUCCESS);
+    ASSERT_EQ(result[0], 2.0);
+    ASSERT_EQ(result[1], 3.0);
+    ASSERT_EQ(result[2], 4.0);
+
+    value = 9.0;
+    ASSERT_EQ(xtract[XTRACT_LAST_N](NULL, &value, 3, second, result), XTRACT_SUCCESS);
+    ASSERT_EQ(result[0], 0.0);
+    ASSERT_EQ(result[1], 0.0);
+    ASSERT_EQ(result[2], 9.0);
+    xtract_last_n_state_delete(first);
+    xtract_last_n_state_delete(second);
 }

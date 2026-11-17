@@ -48,6 +48,7 @@ extern "C"
 #include "xtract_delta.h"
 #include "xtract_multivariate.h"
 #include "xtract_grid.h"
+#include "xtract_stateful.h"
 #include "xtract_types.h"
 #include "xtract_macros.h"
 #include "xtract_helper.h"
@@ -190,6 +191,7 @@ extern "C"
         XTRACT_ANGULAR_SECOND_MOMENT,
         XTRACT_INVERSE_DIFFERENCE_MOMENT,
         XTRACT_LOCAL_BINARY_PATTERNS,
+        XTRACT_LAST_N,
         XTRACT_FEATURE_COUNT
     };
 
@@ -275,7 +277,9 @@ extern "C"
         XTRACT_FLOATARRAY,
         XTRACT_INT,
         XTRACT_MEL_FILTER,
-        XTRACT_CQT_KERNEL
+        XTRACT_CQT_KERNEL,
+        XTRACT_LAST_N_STATE,
+        XTRACT_WAVELET_F0_STATE
     } xtract_type_t;
 
     /** \brief Enumeration of units*/
@@ -468,9 +472,6 @@ extern "C"
      *
      */
     extern int (*xtract[XTRACT_FEATURES])(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
-
-    /** \brief A function to initialise wavelet f0 detector state */
-    int xtract_init_wavelet_f0_state(void);
 
     /** \brief A structure to store a set of n_filters Mel filters
      *

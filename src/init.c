@@ -15,11 +15,7 @@
 #include "xtract/libxtract.h"
 #include "xtract_cqt_private.h"
 #include "xtract_window_private.h"
-#define DEFINE_GLOBALS
-#include "xtract_globals_private.h"
 #include "xtract_macros_private.h"
-
-thread_local dywapitchtracker wavelet_f0_state;
 
 int xtract_init_bark(int N, double sr, int *band_limits)
 {
@@ -216,12 +212,6 @@ int xtract_init_gfcc(int N, double nyquist, double freq_min, double freq_max, in
     free(centre_freqs);
     free(bandwidths);
 
-    return XTRACT_SUCCESS;
-}
-
-int xtract_init_wavelet_f0_state(void)
-{
-    dywapitch_inittracking(&wavelet_f0_state);
     return XTRACT_SUCCESS;
 }
 

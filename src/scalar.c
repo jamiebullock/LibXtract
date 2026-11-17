@@ -27,8 +27,8 @@
 #include "xtract/xtract_helper.h"
 #include "xtract_context_private.h"
 #include "xtract_macros_private.h"
-#include "xtract_globals_private.h"
 #include "xtract_sort_private.h"
+#include "xtract_stateful_private.h"
 
 int xtract_mean(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
@@ -1463,22 +1463,15 @@ int xtract_failsafe_f0(xtract_context *ctx, const double *data, const int N, con
 
 int xtract_wavelet_f0(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
-    double sr;
+    xtract_wavelet_f0_state *state = (xtract_wavelet_f0_state *)argv;
 
-    if (N < 1 || argv == NULL)
+    if (N < 1 || state == NULL)
     {
         *result = 0.0;
         return XTRACT_ARGUMENT_ERROR;
     }
 
-    sr = *(double *)argv;
-    if (!is_sample_rate(sr))
-    {
-        *result = 0.0;
-        return XTRACT_ARGUMENT_ERROR;
-    }
-
-    *result = dywapitch_computepitch(&wavelet_f0_state, data, 0, N);
+    *result = dywapitch_computepitch(&state->tracker, data, 0, N);
 
     if (*result == 0.0)
     {
@@ -1486,7 +1479,7 @@ int xtract_wavelet_f0(xtract_context *ctx, const double *data, const int N, cons
     }
 
     /* dywapitchtrack assumes 44100 Hz internally; scale for actual samplerate */
-    *result *= sr / 44100.0;
+    *result *= state->sample_rate / 44100.0;
 
     return XTRACT_SUCCESS;
 }

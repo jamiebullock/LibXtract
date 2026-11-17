@@ -18,9 +18,10 @@
  * Run under AddressSanitizer + UBSan.
  *
  * failsafe_f0 computes a spectrum internally, so it runs at a fixed
- * power-of-two N; wavelet_f0 runs its detector at the size its state was
- * built for. Every other feature takes a fuzzer-chosen N. One context, made
- * for the longest input, is passed to every call.
+ * power-of-two N; wavelet_f0 runs at a fixed N as well, with the state of one
+ * stream in place of the argv buffer. Every other feature takes a
+ * fuzzer-chosen N. One context, made for the longest input, is passed to
+ * every call.
  *
  * Build/run: the fuzz preset (see fuzz/CMakeLists.txt)
  */
@@ -69,13 +70,14 @@ static const int enum_features[] = {
 #define N_FEATURES ((int)(sizeof(enum_features) / sizeof(enum_features[0])))
 
 static xtract_context *ctx;
+static xtract_wavelet_f0_state *wavelet_f0_state;
 
 int LLVMFuzzerInitialize(int *argc, char ***argv)
 {
     (void)argc;
     (void)argv;
     ctx = xtract_context_new(MAX_N);
-    xtract_init_wavelet_f0_state();
+    wavelet_f0_state = xtract_wavelet_f0_state_new(44100.0);
     return 0;
 }
 
@@ -112,8 +114,8 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     feature = enum_features[sel];
     fn = xtract[feature];
 
-    /* The two state-dependent features run at the size they were initialised
-     * for, reading a full window padded with zeros when the fuzzer gave less. */
+    /* These two features run at a fixed size, reading a full window padded
+     * with zeros when the fuzzer gave less. */
     if (fn == xtract[XTRACT_FAILSAFE_F0])
         n = FFT_N;
     else if (fn == xtract[XTRACT_WAVELET_F0])
@@ -148,6 +150,8 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
             int_args[i] = argv[i] >= -1.0 && argv[i] <= (double)MAX_N ? (int)argv[i] : -1;
         (void)fn(ctx, input, n, null_argv ? NULL : int_args, result);
     }
+    else if (feature == XTRACT_WAVELET_F0)
+        (void)fn(ctx, input, n, null_argv ? NULL : wavelet_f0_state, result);
     else
         (void)fn(ctx, input, n, null_argv ? NULL : argv, result);
 

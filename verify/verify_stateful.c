@@ -22,8 +22,8 @@ void verify_last_n(void)
     if (nondet_bool())
         state = xtract_last_n_state_new((size_t)capacity);
 
-    (void)xtract_last_n(state, data, N, NULL, result);
-    (void)xtract_last_n(state, data, N, NULL, result);
+    (void)xtract_last_n(NULL, data, N, state, result);
+    (void)xtract_last_n(NULL, data, N, state, result);
 
     if (state != NULL)
         xtract_last_n_state_delete(state);
