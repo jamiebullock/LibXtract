@@ -43,7 +43,19 @@ xtract_mean(NULL, data, N, NULL, &mean);
 xtract_variance(NULL, data, N, &mean, &variance);
 ```
 
-A value is therefore computed once however many features use it, and features can be combined: the irregularity of a set of MFCCs is a valid call. Functions that work from precomputed tables, such as the mel filterbank and the constant-Q kernel, have an `xtract_init_` function to call first. A function that takes a transform, such as `xtract_spectrum`, needs a context created for at least N elements: `xtract_context_new(N)`.
+A value is therefore computed once however many features use it, and features can be combined: the irregularity of a set of MFCCs is a valid call. Functions that work from precomputed tables, such as the mel filterbank and the constant-Q kernel, have an `xtract_init_` function to call first.
+
+No feature function allocates memory. A function that needs working memory or a transform, such as `xtract_median` or `xtract_spectrum`, takes it from a context created for at least N elements, and every other function accepts NULL:
+
+```c
+xtract_context *ctx = xtract_context_new(N);
+double median;
+
+xtract_median(ctx, data, N, NULL, &median);
+xtract_context_delete(ctx);
+```
+
+One thread uses a context at a time. The API reference says which functions need one.
 
 [`examples/`](examples) holds complete programs. [`finance`](examples/finance) computes the rolling and exponentially weighted volatility of a price series and finds a change of volatility regime; [`simpletest`](examples/simpletest) runs pitch tracking, MFCCs and onset detection over an audio file.
 
