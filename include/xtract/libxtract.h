@@ -239,17 +239,12 @@ extern "C"
      * XTRACT_NO_RESULT: the arguments are valid but the data has no answer, such as a zero amplitude sum, a zero denominator or no periodicity. The result is set to 0.
      *
      * XTRACT_BAD_STATE: the context the function needs is missing or was created for fewer elements, or the state, kernel or filterbank it is given was created for a different size. The result is left untouched.
-     *
-     * XTRACT_BAD_ARGV, XTRACT_BAD_VECTOR_SIZE and XTRACT_DENORMAL_FOUND are deprecated: XTRACT_ARGUMENT_ERROR is returned in their place, and they will be removed in 2.0.
      */
     enum xtract_return_codes_
     {
         XTRACT_SUCCESS,
         XTRACT_MALLOC_FAILED,
-        XTRACT_BAD_ARGV,
-        XTRACT_BAD_VECTOR_SIZE,
         XTRACT_BAD_STATE,
-        XTRACT_DENORMAL_FOUND,
         XTRACT_NO_RESULT,
         XTRACT_FEATURE_NOT_IMPLEMENTED,
         XTRACT_ARGUMENT_ERROR
