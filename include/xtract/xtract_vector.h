@@ -99,7 +99,7 @@ extern "C"
     /** \brief Extract Mel based Multi-Band Spectral Entropy Signature coefficients
      *
      * \param *ctx: a pointer to a context, or NULL
-     * \param *data: a magnitude/phase spectrum, the result from xtract_spectrum() by XTRACT_MAGNITUDE_PHASE_SPECTRUM. The first N/2 elements are bin magnitudes and the next N/2 the corresponding phases.
+     * \param *data: a magnitude/phase spectrum with DC included, the *result of xtract_spectrum() by XTRACT_MAGNITUDE_PHASE_SPECTRUM with the third argument 1, so that element k is bin k as the filterbank expects: the first N/2 elements are the bin magnitudes from DC upward and the next N/2 their phases
      * \param N: the number of array elements to be considered (the full magnitude+phase array length; N/2 frequency bins are processed), at least 2 and even, and equal to the N the filterbank was built for
      * \param *argv: a pointer to an xtract_filterbank from xtract_init_mfcc() or xtract_init_filterbank(), built for the size of the transform that produced the spectrum
      * \param *result: a pointer to an array of n_filters elements containing the resultant MEL-MBSES
@@ -113,12 +113,12 @@ extern "C"
     /** \brief Extract centroids of the spectral mel subbands
      *
      * \param *ctx: a pointer to a context, or NULL
-     * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector, (e.g. the array pointed to by *result from xtract_spectrum(), xtract_peak_spectrum() or xtract_harmonic_spectrum()): N/2 amplitudes followed by N/2 frequencies
+     * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector: N/2 amplitudes followed by N/2 frequencies, the array pointed to by *result from xtract_spectrum() called with DC included (argv[2] == 1), so that element k is bin k as the filterbank expects
      * \param N: the size of the array pointed to by *data, at least 2 and even, and equal to the N the filterbank was built for
      * \param *argv: a pointer to an xtract_filterbank from xtract_init_mfcc() or xtract_init_filterbank(), built for the size of the transform that produced the spectrum
      * \param *result: a pointer to an array of n_filters doubles containing the spectral band centroids, in the unit of the frequencies
      *
-     * Note: for a more 'accurate' result *result from xtract_peak_spectrum() can be passed in. This gives the interpolated peak frequency locations.
+     * Note: the *result of xtract_peak_spectrum() or xtract_harmonic_spectrum() may be passed in for the interpolated peak frequencies. Its element k is bin k + 1, so each peak is weighted by the filterbank's gain for the bin below it.
      */
     int xtract_spectral_subband_centroids(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
