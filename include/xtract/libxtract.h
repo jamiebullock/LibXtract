@@ -515,9 +515,10 @@ extern "C"
      *
      * A pointer to an array of XTRACT_BARK_BANDS ints must be passed in, and is populated with the bin number at which each band starts, on the bin grid of an N-point transform with DC at bin 0. The spectrum these limits are applied to by xtract_bark_coefficients() therefore has N / 2 elements, element k being bin k
      *
-     * \param N: the size of the transform the band limits will be applied to
-     * \param sr: the sample rate
+     * \param N: the size of the transform the band limits will be applied to, at least 2
+     * \param sr: the sample rate in Hz, finite and above 0
      * \param *band_limits: a pointer to an array of XTRACT_BARK_BANDS ints
+     * \return XTRACT_SUCCESS, or XTRACT_ARGUMENT_ERROR, with the array left untouched, if an argument is out of range or the highest band would start above bin INT_MAX
      */
     int xtract_init_bark(int N, double sr, int *band_limits);
 
