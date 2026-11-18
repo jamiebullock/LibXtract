@@ -12,6 +12,8 @@
 #include "xttest_approx.h"
 #include "xttest_util.h"
 
+#include <float.h>
+#include <limits.h>
 #include <math.h>
 #include <string.h>
 #include <stdlib.h>
@@ -1250,6 +1252,47 @@ UTEST(vector, init_bark_band_limits_are_rounded)
     xtract_init_bark(2048, 48000.0, band_limits);
     for (i = 0; i < XTRACT_BARK_BANDS; i++)
         ASSERT_EQ(band_limits[i], expected_2048_48000[i]);
+}
+
+UTEST(vector, init_bark_rejects_a_transform_size_below_2)
+{
+    int band_limits[XTRACT_BARK_BANDS];
+
+    band_limits[XTRACT_BARK_BANDS - 1] = -7;
+    ASSERT_EQ(xtract_init_bark(1, 44100.0, band_limits), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_init_bark(0, 44100.0, band_limits), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_init_bark(-1024, 44100.0, band_limits), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(band_limits[XTRACT_BARK_BANDS - 1], -7);
+    ASSERT_EQ(xtract_init_bark(2, 44100.0, band_limits), XTRACT_SUCCESS);
+    ASSERT_EQ(band_limits[XTRACT_BARK_BANDS - 1], 1);
+}
+
+UTEST(vector, init_bark_rejects_a_sample_rate_that_is_not_finite_and_above_0)
+{
+    int band_limits[XTRACT_BARK_BANDS];
+
+    band_limits[0] = -7;
+    ASSERT_EQ(xtract_init_bark(1024, 0.0, band_limits), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_init_bark(1024, -44100.0, band_limits), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_init_bark(1024, NAN, band_limits), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_init_bark(1024, INFINITY, band_limits), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(band_limits[0], -7);
+}
+
+UTEST(vector, init_bark_rejects_a_sample_rate_too_low_for_the_highest_limit_to_be_an_int)
+{
+    /* The highest band starts at 20500 Hz, which is bin 20500 / sr * N. */
+    const double rate_for_bin_int_max = 2.0 * 20500.0 / INT_MAX;
+    const double rate_for_the_bin_above = 2.0 * 20500.0 / 2147483648.0;
+    int band_limits[XTRACT_BARK_BANDS];
+
+    band_limits[0] = -7;
+    ASSERT_EQ(xtract_init_bark(2, rate_for_the_bin_above, band_limits), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_init_bark(1024, DBL_MIN, band_limits), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(band_limits[0], -7);
+    ASSERT_EQ(xtract_init_bark(2, rate_for_bin_int_max, band_limits), XTRACT_SUCCESS);
+    ASSERT_EQ(band_limits[0], 0);
+    ASSERT_EQ(band_limits[XTRACT_BARK_BANDS - 1], INT_MAX);
 }
 
 /* ===== xtract_bark_coefficients ===== */

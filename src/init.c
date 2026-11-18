@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Zlib
  */
 
+#include <limits.h>
 #include <math.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -23,8 +24,19 @@ int xtract_init_bark(int N, double sr, int *band_limits)
 
     int bands = XTRACT_BARK_BANDS;
 
+    if (N < 2 || !isfinite(sr) || sr <= 0.0)
+        return XTRACT_ARGUMENT_ERROR;
+
+    /* The highest band comes first, so a limit too large for an int is found
+     * before anything is written. */
     while (bands--)
-        band_limits[bands] = (int)floor(edges[bands] / sr * N + 0.5);
+    {
+        const double limit = floor(edges[bands] / sr * N + 0.5);
+
+        if (limit > INT_MAX)
+            return XTRACT_ARGUMENT_ERROR;
+        band_limits[bands] = (int)limit;
+    }
 
     return XTRACT_SUCCESS;
 }
