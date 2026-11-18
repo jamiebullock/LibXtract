@@ -441,21 +441,21 @@ int xtract_principal_variances(xtract_context *ctx, const double *data, const in
 #define COHERENCE_SCRATCH_SEGMENTS (COHERENCE_WORK_SEGMENTS + 1)
 #endif
 
-/* Bins 1 to L / 2 of the transform of one segment of L elements, which is
- * overwritten. The scale of the two transform libraries differs and cancels
- * in the coherence */
+/* Bins 0 to L / 2 - 1 of the transform of one segment of L elements, which
+ * is overwritten. The scale of the two transform libraries differs and
+ * cancels in the coherence */
 static void segment_bins(xtract_context *ctx, double *segment, const int L, double *real, double *imaginary, double *split)
 {
     const int bins = L >> 1;
     int k;
 #ifdef USE_OOURA
     xtract_transform(ctx, L, 1, segment);
+    real[0] = segment[0];
     for (k = 1; k < bins; k++)
     {
-        real[k - 1] = segment[2 * k];
-        imaginary[k - 1] = segment[2 * k + 1];
+        real[k] = segment[2 * k];
+        imaginary[k] = segment[2 * k + 1];
     }
-    real[bins - 1] = segment[1];
 #else
     DSPDoubleSplitComplex fft;
 
@@ -463,14 +463,14 @@ static void segment_bins(xtract_context *ctx, double *segment, const int L, doub
     fft.imagp = split + bins;
     vDSP_ctozD((DSPDoubleComplex *)segment, 2, &fft, 1, bins);
     xtract_transform(ctx, L, FFT_FORWARD, &fft);
+    real[0] = fft.realp[0];
     for (k = 1; k < bins; k++)
     {
-        real[k - 1] = fft.realp[k];
-        imaginary[k - 1] = fft.imagp[k];
+        real[k] = fft.realp[k];
+        imaginary[k] = fft.imagp[k];
     }
-    real[bins - 1] = fft.imagp[0];
 #endif
-    imaginary[bins - 1] = 0.0;
+    imaginary[0] = 0.0;
 }
 
 static void windowed_segment(const double *series, const double *window, const int L, double *segment)
