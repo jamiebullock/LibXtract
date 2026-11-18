@@ -533,16 +533,15 @@ extern "C"
 
     /** \brief Make a window of a given type and return a pointer to it
      *
-     * \param N: the size of the window
-     * \param type: the type of the window as given in the enumeration window_types_
-     *
+     * \param N: the size of the window, at least 2
+     * \param type: the type of the window as given in the enumeration xtract_window_types_
+     * \return a pointer to the window, or NULL if an argument is out of range or allocation fails
      */
     double *xtract_init_window(const int N, const int type);
 
-    /** \brief Free a window as allocated by xtract_make_window()
+    /** \brief Free a window as allocated by xtract_init_window()
      *
-     * \param *window: a pointer to an array of doubles as allocated by xtract_make_window()
-     *
+     * \param *window: a pointer to a window as allocated by xtract_init_window(), or NULL
      */
     void xtract_free_window(double *window);
 

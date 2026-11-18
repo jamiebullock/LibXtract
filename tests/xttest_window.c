@@ -16,7 +16,7 @@
  * window-generation functions it dispatches to), xtract_free_window, and
  * xtract_windowed.
  *
- * All windows are generated with N = 5, so M = N - 1 = 4 and the window has an
+ * Each window type is checked at N = 5, so M = N - 1 = 4 and the window has an
  * exact centre at index 2. Expected values are derived directly from the window
  * formulae (window.c). Symmetric windows satisfy w[0] == w[4] and w[1] == w[3],
  * and all of the windows defined here reach 1.0 at the centre.
@@ -153,18 +153,41 @@ UTEST(window, kaiser)
     xtract_free_window(w);
 }
 
-UTEST(window, unknown_type_falls_back_to_hann)
+UTEST(window, init_window_rejects_a_type_outside_the_enumeration)
 {
-    /* The switch default in xtract_init_window generates a Hann window. */
-    double *w = xtract_init_window(5, 9999);
-    double *hann = xtract_init_window(5, XTRACT_HANN);
-    int n;
-    ASSERT_TRUE(w != NULL);
-    ASSERT_TRUE(hann != NULL);
-    for (n = 0; n < 5; n++)
-        CHECK_NEAR(w[n], hann[n], EPSILON);
-    xtract_free_window(w);
-    xtract_free_window(hann);
+    ASSERT_TRUE(xtract_init_window(5, XTRACT_GAUSS - 1) == NULL);
+    ASSERT_TRUE(xtract_init_window(5, XTRACT_BLACKMAN_HARRIS + 1) == NULL);
+}
+
+UTEST(window, init_window_rejects_a_size_below_2_for_every_type)
+{
+    int type;
+
+    for (type = XTRACT_GAUSS; type <= XTRACT_BLACKMAN_HARRIS; type++)
+    {
+        ASSERT_TRUE(xtract_init_window(1, type) == NULL);
+        ASSERT_TRUE(xtract_init_window(0, type) == NULL);
+        ASSERT_TRUE(xtract_init_window(-5, type) == NULL);
+    }
+}
+
+UTEST(window, init_window_gives_finite_values_at_a_size_of_2_for_every_type)
+{
+    int type;
+
+    for (type = XTRACT_GAUSS; type <= XTRACT_BLACKMAN_HARRIS; type++)
+    {
+        double *w = xtract_init_window(2, type);
+
+        ASSERT_TRUE(w != NULL);
+        ASSERT_TRUE(isfinite(w[0]) && isfinite(w[1]));
+        xtract_free_window(w);
+    }
+}
+
+UTEST(window, free_window_accepts_null)
+{
+    xtract_free_window(NULL);
 }
 
 UTEST(window, windowed_applies_element_wise)
