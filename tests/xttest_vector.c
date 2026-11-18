@@ -2514,13 +2514,13 @@ UTEST(vector, filterbank_spectrograms_are_the_log_of_the_sum_each_filter_passes)
     const double data[4] = {1.0, 2.0, 3.0, 4.0};
     const double gains[4] = {0.5, 0.25, 2.0, 1.0};
     xtract_filterbank *f = xtract_init_filterbank(8, 1, gains);
-    double result[1];
+    double mel[1] = {0.0}, gammatone[1] = {0.0};
 
     ASSERT_TRUE(f != NULL);
-    ASSERT_EQ(xtract_mel_spectrogram(NULL, data, 4, f, result), XTRACT_SUCCESS);
-    ASSERT_EQ(result[0], log(11.0));
-    ASSERT_EQ(xtract_gammatone_spectrogram(NULL, data, 4, f, result), XTRACT_SUCCESS);
-    ASSERT_EQ(result[0], log(11.0));
+    ASSERT_EQ(xtract_mel_spectrogram(NULL, data, 4, f, mel), XTRACT_SUCCESS);
+    ASSERT_EQ(mel[0], log(11.0));
+    ASSERT_EQ(xtract_gammatone_spectrogram(NULL, data, 4, f, gammatone), XTRACT_SUCCESS);
+    ASSERT_EQ(gammatone[0], log(11.0));
     xtract_free_filterbank(f);
 }
 
