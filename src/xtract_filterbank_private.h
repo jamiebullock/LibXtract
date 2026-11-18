@@ -23,10 +23,16 @@ struct xtract_filterbank_
     double *dct_table;
 };
 
-/** \brief The N / 2 gains of one filter */
+/** \brief The number of bins each filter has a gain for */
+static inline int xtract_filterbank_bins(const xtract_filterbank *filterbank)
+{
+    return filterbank->N >> 1;
+}
+
+/** \brief The gains of one filter, one for each bin */
 static inline double *xtract_filter_gains(const xtract_filterbank *filterbank, const int filter)
 {
-    return filterbank->gains + (size_t)filter * (size_t)(filterbank->N >> 1);
+    return filterbank->gains + (size_t)filter * (size_t)xtract_filterbank_bins(filterbank);
 }
 
 #endif

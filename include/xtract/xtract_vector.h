@@ -50,7 +50,7 @@ extern "C"
      *
      * \param *ctx: a pointer to a context created for at least the larger of N and the filterbank's n_filters elements
      * \param *data: a pointer to the first element in an array of spectral coefficients, the first half of the array pointed to by *result from xtract_spectrum() called with DC included (argv[2] == 1), so that element k is bin k as the filterbank expects. Rabiner and Juang define the mel cepstrum on the power spectrum (XTRACT_POWER_SPECTRUM); a magnitude spectrum may be passed instead
-     * \param N: the number of coefficients, at least 1 and at most the N the filterbank was built for. The filterbank weights as many coefficients as that transform has bins, half its N, and gives the rest no weight
+     * \param N: the number of coefficients, at least 1 and equal to half the N the filterbank was built for
      * \param *argv: a pointer to an xtract_filterbank from xtract_init_mfcc() or xtract_init_filterbank(), built for the size of the transform that produced the spectrum
      * \param *result: a pointer to an array of n_filters doubles containing the resultant MFCC
      */
@@ -63,7 +63,7 @@ extern "C"
      *
      * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of spectral coefficients, the first half of the array pointed to by *result from xtract_spectrum() called with DC included (argv[2] == 1), so that element k is bin k as the filterbank expects. Rabiner and Juang define the mel cepstrum on the power spectrum (XTRACT_POWER_SPECTRUM); a magnitude spectrum may be passed instead
-     * \param N: the number of coefficients, at least 1 and at most the N the filterbank was built for. The filterbank weights as many coefficients as that transform has bins, half its N, and gives the rest no weight
+     * \param N: the number of coefficients, at least 1 and equal to half the N the filterbank was built for
      * \param *argv: a pointer to an xtract_filterbank from xtract_init_mfcc() or xtract_init_filterbank(), built for the size of the transform that produced the spectrum
      * \param *result: a pointer to an array of n_filters doubles containing the resultant log mel energies (one per filter)
      */
@@ -77,7 +77,7 @@ extern "C"
      *
      * \param *ctx: a pointer to a context created for at least the larger of N and the filterbank's n_filters elements
      * \param *data: a pointer to the first element in an array of spectral coefficients, the first half of the array pointed to by *result from xtract_spectrum() called with DC included (argv[2] == 1), so that element k is bin k as the filterbank expects. the gammatone filterbank is applied to the power spectrum (XTRACT_POWER_SPECTRUM) in the same way; a magnitude spectrum may be passed instead
-     * \param N: the number of coefficients, at least 1 and at most the N the filterbank was built for. The filterbank weights as many coefficients as that transform has bins, half its N, and gives the rest no weight
+     * \param N: the number of coefficients, at least 1 and equal to half the N the filterbank was built for
      * \param *argv: a pointer to an xtract_filterbank from xtract_init_gfcc() or xtract_init_filterbank(), built for the size of the transform that produced the spectrum
      * \param *result: a pointer to an array of n_filters doubles containing the resultant GFCC
      */
@@ -90,7 +90,7 @@ extern "C"
      *
      * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of spectral coefficients, the first half of the array pointed to by *result from xtract_spectrum() called with DC included (argv[2] == 1), so that element k is bin k as the filterbank expects. the gammatone filterbank is applied to the power spectrum (XTRACT_POWER_SPECTRUM) in the same way; a magnitude spectrum may be passed instead
-     * \param N: the number of coefficients, at least 1 and at most the N the filterbank was built for. The filterbank weights as many coefficients as that transform has bins, half its N, and gives the rest no weight
+     * \param N: the number of coefficients, at least 1 and equal to half the N the filterbank was built for
      * \param *argv: a pointer to an xtract_filterbank from xtract_init_gfcc() or xtract_init_filterbank(), built for the size of the transform that produced the spectrum
      * \param *result: a pointer to an array of n_filters doubles containing the resultant log gammatone energies (one per filter)
      */
@@ -100,7 +100,7 @@ extern "C"
      *
      * \param *ctx: a pointer to a context, or NULL
      * \param *data: a magnitude/phase spectrum, the result from xtract_spectrum() by XTRACT_MAGNITUDE_PHASE_SPECTRUM. The first N/2 elements are bin magnitudes and the next N/2 the corresponding phases.
-     * \param N: the number of array elements to be considered (the full magnitude+phase array length; N/2 frequency bins are processed), at least 2 and even, and at most the N the filterbank was built for
+     * \param N: the number of array elements to be considered (the full magnitude+phase array length; N/2 frequency bins are processed), at least 2 and even, and equal to the N the filterbank was built for
      * \param *argv: a pointer to an xtract_filterbank from xtract_init_mfcc() or xtract_init_filterbank(), built for the size of the transform that produced the spectrum
      * \param *result: a pointer to an array of n_filters elements containing the resultant MEL-MBSES
      *
@@ -114,7 +114,7 @@ extern "C"
      *
      * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector, (e.g. the array pointed to by *result from xtract_spectrum(), xtract_peak_spectrum() or xtract_harmonic_spectrum()): N/2 amplitudes followed by N/2 frequencies
-     * \param N: the size of the array pointed to by *data, at least 2 and even, and at most the N the filterbank was built for
+     * \param N: the size of the array pointed to by *data, at least 2 and even, and equal to the N the filterbank was built for
      * \param *argv: a pointer to an xtract_filterbank from xtract_init_mfcc() or xtract_init_filterbank(), built for the size of the transform that produced the spectrum
      * \param *result: a pointer to an array of n_filters doubles containing the spectral band centroids, in the unit of the frequencies
      *
