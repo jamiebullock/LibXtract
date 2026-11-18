@@ -15,6 +15,7 @@
 #include "xtract/libxtract.h"
 #include "xtract_context_private.h"
 #include "xtract_cqt_private.h"
+#include "xtract_filterbank_private.h"
 #include "xtract_macros_private.h"
 #include "xtract_sort_private.h"
 
@@ -456,36 +457,24 @@ int xtract_autocorrelation_fft(xtract_context *ctx, const double *data, const in
     return XTRACT_SUCCESS;
 }
 
-/* A usable filterbank: at least one filter, each with a table to read */
-static int filterbank_is_valid(const xtract_mel_filter *f)
+/* The log of the sum each filter passes of the first N elements of data. A
+ * filter has a gain for half as many elements as the filterbank was built
+ * for, and the elements beyond them are not read. */
+static void log_filterbank_energies(const double *data, const int N, const xtract_filterbank *f, double *result)
 {
-    int filter;
-
-    if (f == NULL || f->n_filters < 1 || f->filters == NULL)
-        return 0;
-    for (filter = 0; filter < f->n_filters; filter++)
-    {
-        if (f->filters[filter] == NULL)
-            return 0;
-    }
-
-    return 1;
-}
-
-static int filterbank_spectrogram(const double *data, const int N, const xtract_mel_filter *f, double *result)
-{
+    const int bins = f->N >> 1;
+    const int weighted = N < bins ? N : bins;
     int n, filter;
 
-    if (N < 1 || !filterbank_is_valid(f))
-        return XTRACT_ARGUMENT_ERROR;
-
     for (filter = 0; filter < f->n_filters; filter++)
     {
+        const double *gains = xtract_filter_gains(f, filter);
+
         result[filter] = 0.0;
-        for (n = 0; n < N; n++)
+        for (n = 0; n < weighted; n++)
         {
-            if (f->filters[filter][n] != 0)
-                result[filter] += data[n] * f->filters[filter][n];
+            if (gains[n] != 0)
+                result[filter] += data[n] * gains[n];
         }
         if (result[filter] < XTRACT_LOG_LIMIT)
             result[filter] = XTRACT_LOG_LIMIT_DB;
@@ -493,25 +482,36 @@ static int filterbank_spectrogram(const double *data, const int N, const xtract_
             /* cppcheck-suppress invalidFunctionArg */
             result[filter] = log(result[filter]);
     }
+}
+
+static int filterbank_spectrogram(const double *data, const int N, const xtract_filterbank *f, double *result)
+{
+    if (N < 1 || f == NULL)
+        return XTRACT_ARGUMENT_ERROR;
+    if (N > f->N)
+        return XTRACT_BAD_STATE;
+
+    log_filterbank_energies(data, N, f, result);
 
     return XTRACT_SUCCESS;
 }
 
-static int cepstral_coefficients(xtract_context *ctx, const double *data, const int N, const xtract_mel_filter *f, double *result)
+static int cepstral_coefficients(xtract_context *ctx, const double *data, const int N, const xtract_filterbank *f, double *result)
 {
     double *temp;
     int rv;
 
-    if (N < 1 || !filterbank_is_valid(f))
+    if (N < 1 || f == NULL)
         return XTRACT_ARGUMENT_ERROR;
+    if (N > f->N)
+        return XTRACT_BAD_STATE;
 
     temp = xtract_scratch_take(ctx, N > f->n_filters ? N : f->n_filters, (size_t)f->n_filters);
     if (temp == NULL)
         return XTRACT_BAD_STATE;
 
-    rv = filterbank_spectrogram(data, N, f, temp);
-    if (rv == XTRACT_SUCCESS)
-        rv = xtract_dct(ctx, temp, f->n_filters, f->dct_table, result);
+    log_filterbank_energies(data, N, f, temp);
+    rv = xtract_dct(ctx, temp, f->n_filters, f->dct_table, result);
     xtract_scratch_return(ctx, temp, (size_t)f->n_filters);
 
     return rv;
@@ -519,22 +519,22 @@ static int cepstral_coefficients(xtract_context *ctx, const double *data, const 
 
 int xtract_mel_spectrogram(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
-    return filterbank_spectrogram(data, N, (const xtract_mel_filter *)argv, result);
+    return filterbank_spectrogram(data, N, (const xtract_filterbank *)argv, result);
 }
 
 int xtract_mfcc(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
-    return cepstral_coefficients(ctx, data, N, (const xtract_mel_filter *)argv, result);
+    return cepstral_coefficients(ctx, data, N, (const xtract_filterbank *)argv, result);
 }
 
 int xtract_gammatone_spectrogram(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
-    return filterbank_spectrogram(data, N, (const xtract_mel_filter *)argv, result);
+    return filterbank_spectrogram(data, N, (const xtract_filterbank *)argv, result);
 }
 
 int xtract_gfcc(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
-    return cepstral_coefficients(ctx, data, N, (const xtract_mel_filter *)argv, result);
+    return cepstral_coefficients(ctx, data, N, (const xtract_filterbank *)argv, result);
 }
 
 static double bivariate_gaussian_entropy(double sxx, double syy, double sxy, const int count)
@@ -572,15 +572,18 @@ int xtract_mmbses(xtract_context *ctx, const double *data, const int N, const vo
      * covariance (Rincon et al. 2013, "A Context-Aware Baby Monitor for the
      * Automatic Selective Archiving of the Language of Infants", Eq. 5; after
      * Camarena-Ibarrola & Chavez). */
-    const xtract_mel_filter *f = (const xtract_mel_filter *)argv;
+    const xtract_filterbank *f = (const xtract_filterbank *)argv;
     const int M = N >> 1;
     int n, filter;
 
-    if (N < 2 || (N & 1) || !filterbank_is_valid(f))
+    if (N < 2 || (N & 1) || f == NULL)
         return XTRACT_ARGUMENT_ERROR;
+    if (N > f->N)
+        return XTRACT_BAD_STATE;
 
     for (filter = 0; filter < f->n_filters; filter++)
     {
+        const double *gains = xtract_filter_gains(f, filter);
         int count = 0;
         double sxx = 0.0, syy = 0.0, sxy = 0.0;
 
@@ -588,7 +591,7 @@ int xtract_mmbses(xtract_context *ctx, const double *data, const int N, const vo
          * complex coefficients (real = mag*cos(phase), imaginary = mag*sin(phase)). */
         for (n = 0; n < M; n++)
         {
-            double weight = f->filters[filter][n];
+            double weight = gains[n];
             double re, im;
 
             if (weight == 0.0)
@@ -610,22 +613,25 @@ int xtract_mmbses(xtract_context *ctx, const double *data, const int N, const vo
 
 int xtract_spectral_subband_centroids(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
-    xtract_mel_filter *f = (xtract_mel_filter *)argv;
+    const xtract_filterbank *f = (const xtract_filterbank *)argv;
     int n, filter;
     const int M = N >> 1;
     const double *amps = data;
     const double *freqs = data + M;
 
-    if (N < 2 || (N & 1) || !filterbank_is_valid(f))
+    if (N < 2 || (N & 1) || f == NULL)
         return XTRACT_ARGUMENT_ERROR;
+    if (N > f->N)
+        return XTRACT_BAD_STATE;
 
     for (filter = 0; filter < f->n_filters; filter++)
     {
+        const double *gains = xtract_filter_gains(f, filter);
         double FA = 0.0, A = 0.0;
 
         for (n = 0; n < M; n++)
         {
-            double weighted_amp = amps[n] * f->filters[filter][n];
+            double weighted_amp = amps[n] * gains[n];
 
             FA += freqs[n] * weighted_amp;
             A += weighted_amp;

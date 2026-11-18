@@ -238,7 +238,7 @@ extern "C"
      *
      * XTRACT_NO_RESULT: the arguments are valid but the data has no answer, such as a zero amplitude sum, a zero denominator or no periodicity. The result is set to 0.
      *
-     * XTRACT_BAD_STATE: the context the function needs is missing or was created for fewer elements, or the state or kernel it is given was created for a different size. The result is left untouched.
+     * XTRACT_BAD_STATE: the context the function needs is missing or was created for fewer elements, the state or kernel it is given was created for a different size, or the filterbank it is given was built for a smaller N. The result is left untouched.
      *
      * XTRACT_BAD_ARGV, XTRACT_BAD_VECTOR_SIZE and XTRACT_DENORMAL_FOUND are deprecated: XTRACT_ARGUMENT_ERROR is returned in their place, and they will be removed in 2.0.
      */
@@ -278,7 +278,7 @@ extern "C"
         XTRACT_FLOAT,
         XTRACT_FLOATARRAY,
         XTRACT_INT,
-        XTRACT_MEL_FILTER,
+        XTRACT_FILTERBANK,
         XTRACT_CQT_KERNEL,
         XTRACT_LAST_N_STATE,
         XTRACT_WAVELET_F0_STATE
@@ -475,43 +475,50 @@ extern "C"
      */
     extern int (*xtract[XTRACT_FEATURES])(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
-    /** \brief A structure to store a set of n_filters Mel filters
-     *
-     * Zero-initialise the structure, or set every field, before passing it to a feature function. The feature functions accept any n_filters of at least 1, so a structure filled by hand may hold a single filter; xtract_init_mfcc() and xtract_init_gfcc() build at least 2. dct_table is the cosine table used by xtract_mfcc() and xtract_gfcc() for their final DCT: either the result of xtract_init_dct(n_filters), which the caller frees with xtract_free_dct(), or NULL to have the cosines evaluated on each call.
-     */
-    typedef struct xtract_mel_filter_
-    {
-        int n_filters;
-        double **filters;
-        double *dct_table;
-    } xtract_mel_filter;
+    /** \brief The filterbank that xtract_mel_spectrogram(), xtract_mfcc() and the other filterbank features apply, built by xtract_init_mfcc(), xtract_init_gfcc() or xtract_init_filterbank() and freed by xtract_free_filterbank() */
+    typedef struct xtract_filterbank_ xtract_filterbank;
 
-    /** \brief A function to initialise a mel filter bank
+    /** \brief Build a mel filterbank
      *
-     * It is up to the caller to pass in a pointer to memory allocated for freq_bands arrays of length N. This function populates these arrays with the coefficients of freq_bands triangular filters whose peaks are equally spaced on the mel scale from freq_min, each filter spanning the peaks either side of its own and the first rising from 0 Hz (Rabiner and Juang 1993, section 4.5.6). Coefficient k of each array is the filter's gain at bin k of an N-point transform with DC included, at frequency k * nyquist / (N / 2); coefficients from N / 2 upward are zero.
+     * The filterbank has n_filters triangular filters whose peaks are equally spaced on the mel scale from freq_min, each filter spanning the peaks either side of its own and the first rising from 0 Hz (Rabiner and Juang 1993, section 4.5.6). Each filter has a gain for each of the N / 2 bins of an N-point transform from DC upward, bin k being at frequency k * nyquist / (N / 2).
      *
-     * \param N: the size of the transform the filters will be applied to
-     * \param nyquist: half the sample rate
+     * \param N: the size of the transform the filters will be applied to, at least 2 and even
+     * \param nyquist: half the sample rate in Hz, finite and above 0
      * \param style: XTRACT_EQUAL_GAIN or XTRACT_EQUAL_AREA, as given in the enumeration xtract_mfcc_types_
-     * \param freq_min: the peak frequency of the first filter
-     * \param freq_max: the frequency the peaks step towards, reached one step beyond the last filter
-     * \param freq_bands: the number of filters, at least 2
-     * \param **fft_tables: an array of pointers to arrays of length N, to be populated with filter coefficients
+     * \param freq_min: the peak frequency of the first filter in Hz, finite and at least 0
+     * \param freq_max: the frequency in Hz the peaks step towards, reached one step beyond the last filter, finite and above freq_min
+     * \param n_filters: the number of filters, at least 2
+     * \return a pointer to the filterbank, or NULL if an argument is out of range or allocation fails
      */
-    int xtract_init_mfcc(int N, double nyquist, int style, double freq_min, double freq_max, int freq_bands, double **fft_tables);
+    xtract_filterbank *xtract_init_mfcc(const int N, const double nyquist, const int style, const double freq_min, const double freq_max, const int n_filters);
 
-    /** \brief A function to initialise a gammatone filter bank for GFCC extraction
+    /** \brief Build a gammatone filterbank
      *
-     * It is up to the caller to pass in a pointer to memory allocated for freq_bands arrays of length N. This function populates these arrays with magnitude coefficients representing the gammatone filterbank on the ERB scale.
+     * The filterbank has n_filters gammatone filters whose centre frequencies are equally spaced on the ERB scale from freq_min to freq_max. Each filter has a gain for each of the N / 2 bins of an N-point transform from DC upward, bin k being at frequency k * nyquist / (N / 2).
      *
-     * \param N: the size of the transform the filters will be applied to; coefficient k of each array is the filter's gain at bin k, at frequency k * nyquist / (N / 2), and coefficients from N / 2 upward are zero
-     * \param nyquist: the Nyquist frequency
-     * \param freq_min: the minimum frequency for the filter bank
-     * \param freq_max: the maximum frequency for the filter bank
-     * \param freq_bands: the number of gammatone filters, at least 2
-     * \param **fft_tables: an array of pointers to arrays of length N, to be populated with filter coefficients
+     * \param N: the size of the transform the filters will be applied to, at least 2 and even
+     * \param nyquist: half the sample rate in Hz, finite and above 0
+     * \param freq_min: the centre frequency of the first filter in Hz, finite and at least 0
+     * \param freq_max: the centre frequency of the last filter in Hz, finite and above freq_min
+     * \param n_filters: the number of filters, at least 2
+     * \return a pointer to the filterbank, or NULL if an argument is out of range or allocation fails
      */
-    int xtract_init_gfcc(int N, double nyquist, double freq_min, double freq_max, int freq_bands, double **fft_tables);
+    xtract_filterbank *xtract_init_gfcc(const int N, const double nyquist, const double freq_min, const double freq_max, const int n_filters);
+
+    /** \brief Build a filterbank from the gains of the caller's own filters
+     *
+     * \param N: the size of the transform the filters will be applied to, at least 2 and even
+     * \param n_filters: the number of filters, at least 1
+     * \param *gains: a pointer to an array of n_filters * (N / 2) doubles, which is copied: the gain of the first filter at each of the N / 2 bins of the transform from DC upward, then the gains of the second filter, and so on
+     * \return a pointer to the filterbank, or NULL if an argument is out of range or allocation fails
+     */
+    xtract_filterbank *xtract_init_filterbank(const int N, const int n_filters, const double *gains);
+
+    /** \brief Free a filterbank as allocated by xtract_init_mfcc(), xtract_init_gfcc() or xtract_init_filterbank()
+     *
+     * \param *filterbank: a pointer to a filterbank, or NULL
+     */
+    void xtract_free_filterbank(xtract_filterbank *filterbank);
 
     /** \brief A function to initialise bark filter bounds
      *

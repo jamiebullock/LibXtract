@@ -10,7 +10,7 @@ Each function named `verify_*` in `verify_scalar.c`, `verify_vector.c`, `verify_
 - an argv that is either NULL or a buffer of any values, so both the missing and the supplied cases are covered; where argv selects the result length (`lpcc`'s order) that field is bounded to the input bound, since the harness must allocate the result;
 - a result buffer of exactly the length the header documents for that call;
 - for the features that take scratch, a context that either gives it, as an allocation of exactly the size asked for, or refuses;
-- for the filterbank features, a filterbank of up to `VERIFY_MAX_FILTERS` filters whose rows are exactly as wide as the input, with any row, the row table or the DCT table possibly NULL.
+- for the filterbank features, a filterbank of up to `VERIFY_MAX_FILTERS` filters, built for a transform of any even size from 2 to twice the proof's bound, whose gains and cosine table are allocated at exactly their sizes, the cosine table possibly NULL.
 
 Three functions have no proof, each because the formula outgrows both solvers before N reaches 8:
 

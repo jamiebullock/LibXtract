@@ -8,13 +8,13 @@
 #include <math.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include <stdio.h>
-#include <assert.h>
+#include <string.h>
 
 #include "fft.h"
 
 #include "xtract/libxtract.h"
 #include "xtract_cqt_private.h"
+#include "xtract_filterbank_private.h"
 #include "xtract_window_private.h"
 #include "xtract_macros_private.h"
 
@@ -41,19 +41,17 @@ int xtract_init_bark(int N, double sr, int *band_limits)
     return XTRACT_SUCCESS;
 }
 
-/* Fill one filter's table by sampling its frequency response at every bin
- * below Nyquist of an N-point transform, bin k at k * nyquist / (N / 2), and
- * zeroing the bins from Nyquist up. shape is passed through to response. */
-static void sample_filter(double *table, const int N, const double nyquist,
+/* Fill one filter's gains by sampling its frequency response at every bin of
+ * an N-point transform, bin k at k * nyquist / (N / 2). shape is passed
+ * through to response. */
+static void sample_filter(double *gains, const int N, const double nyquist,
                           double (*response)(double hz, const double *shape), const double *shape)
 {
     const int M = N >> 1;
     int k;
 
     for (k = 0; k < M; k++)
-        table[k] = response((double)k / M * nyquist, shape);
-    for (k = M; k < N; k++)
-        table[k] = 0.0;
+        gains[k] = response((double)k / M * nyquist, shape);
 }
 
 /* shape: lower edge, peak and upper edge in Hz, then the peak height. */
@@ -81,150 +79,160 @@ static double gammatone_response(const double hz, const double *shape)
     return gain * gain;
 }
 
-int xtract_init_mfcc(int N, double nyquist, int style, double freq_min, double freq_max, int freq_bands, double **fft_tables)
+static int is_a_transform_size(const int N)
 {
-    int n;
-    double norm, mel_freq_max, mel_freq_min, norm_fact, height,
-        freq_bw_mel, *mel_peak, *height_norm, *lin_peak;
-    double shape[4];
-
-    mel_peak = height_norm = lin_peak = NULL;
-    norm = 1;
-
-    if (freq_bands <= 1)
-    {
-        return XTRACT_ARGUMENT_ERROR;
-    }
-
-    mel_freq_max = 1127 * log(1 + freq_max / 700);
-    mel_freq_min = 1127 * log(1 + freq_min / 700);
-    freq_bw_mel = (mel_freq_max - mel_freq_min) / freq_bands;
-
-    mel_peak = (double *)malloc((freq_bands + 2) * sizeof(double));
-    /* +2 for zeros at start and end */
-
-    if (mel_peak == NULL)
-    {
-        perror("error");
-        return XTRACT_MALLOC_FAILED;
-    }
-
-    lin_peak = (double *)malloc((freq_bands + 2) * sizeof(double));
-
-    if (lin_peak == NULL)
-    {
-        perror("error");
-        free(mel_peak);
-        return XTRACT_MALLOC_FAILED;
-    }
-
-    height_norm = (double *)malloc(freq_bands * sizeof(double));
-
-    if (height_norm == NULL)
-    {
-        perror("error");
-        free(mel_peak);
-        free(lin_peak);
-        return XTRACT_MALLOC_FAILED;
-    }
-
-    mel_peak[0] = mel_freq_min;
-    lin_peak[0] = freq_min;
-
-    for (n = 1; n < (freq_bands + 2); ++n)
-    {
-        /* roll out peak locations on the mel and linear scales */
-        mel_peak[n] = mel_peak[n - 1] + freq_bw_mel;
-        lin_peak[n] = 700 * (exp(mel_peak[n] / 1127) - 1);
-    }
-
-    for (n = 0; n < freq_bands; n++)
-    {
-        /* roll out normalised gain of each peak */
-        if (style == XTRACT_EQUAL_GAIN)
-        {
-            height = 1;
-            norm_fact = norm;
-        }
-        else
-        {
-            /* Equal area: a triangle's height is inverse to its own base,
-             * peak n - 1 to peak n + 1, with the first filter's base
-             * starting at 0 Hz where its rise begins. Scaled so that the
-             * first filter keeps a gain of 1. */
-            const double lower = n == 0 ? 0.0 : lin_peak[n - 1];
-
-            assert(n + 1 < freq_bands + 2);
-            height = 2 / (lin_peak[n + 1] - lower);
-            norm_fact = norm / (2 / lin_peak[1]);
-        }
-        height_norm[n] = height * norm_fact;
-    }
-
-    /* Each filter is the triangle through its lower peak, its own peak and
-     * its upper peak on the linear frequency scale (Rabiner and Juang 1993,
-     * section 4.5.6), sampled at the bin frequencies. */
-    for (n = 0; n < freq_bands; n++)
-    {
-        shape[0] = n == 0 ? 0.0 : lin_peak[n - 1];
-        shape[1] = lin_peak[n];
-        shape[2] = lin_peak[n + 1];
-        shape[3] = height_norm[n];
-        sample_filter(fft_tables[n], N, nyquist, triangle_response, shape);
-    }
-
-    free(mel_peak);
-    free(lin_peak);
-    free(height_norm);
-
-    return XTRACT_SUCCESS;
+    return N >= 2 && !(N & 1);
 }
 
-int xtract_init_gfcc(int N, double nyquist, double freq_min, double freq_max, int freq_bands, double **fft_tables)
+static int is_a_frequency_range(const double nyquist, const double freq_min, const double freq_max)
 {
+    return isfinite(nyquist) && nyquist > 0.0 && isfinite(freq_min) && freq_min >= 0.0 && isfinite(freq_max) && freq_max > freq_min;
+}
+
+static xtract_filterbank *filterbank_alloc(const int N, const int n_filters)
+{
+    const size_t bins = (size_t)(N >> 1);
+    xtract_filterbank *filterbank;
+
+    if ((size_t)n_filters > SIZE_MAX / sizeof(double) / bins)
+        return NULL;
+
+    filterbank = (xtract_filterbank *)calloc(1, sizeof(xtract_filterbank));
+    if (filterbank == NULL)
+        return NULL;
+    filterbank->N = N;
+    filterbank->n_filters = n_filters;
+    filterbank->gains = (double *)malloc((size_t)n_filters * bins * sizeof(double));
+    if (filterbank->gains == NULL)
+    {
+        xtract_free_filterbank(filterbank);
+        return NULL;
+    }
+
+    return filterbank;
+}
+
+/* A filterbank with the cosine table that xtract_mfcc() and xtract_gfcc() pass
+ * to xtract_dct(). The table has n_filters * n_filters elements, so a
+ * filterbank built from a caller's gains, which may have any number of
+ * filters, has none. */
+static xtract_filterbank *cepstral_filterbank_alloc(const int N, const int n_filters)
+{
+    xtract_filterbank *filterbank = filterbank_alloc(N, n_filters);
+
+    if (filterbank == NULL)
+        return NULL;
+    filterbank->dct_table = xtract_init_dct(n_filters);
+    if (filterbank->dct_table == NULL)
+    {
+        xtract_free_filterbank(filterbank);
+        return NULL;
+    }
+
+    return filterbank;
+}
+
+xtract_filterbank *xtract_init_mfcc(const int N, const double nyquist, const int style, const double freq_min, const double freq_max, const int n_filters)
+{
+    xtract_filterbank *filterbank;
+    double mel_min, mel_max, mel_step, mel_peak, first_height, lower, peak;
+    double shape[4];
     int n;
-    double *centre_freqs, *bandwidths;
+
+    if (!is_a_transform_size(N) || !is_a_frequency_range(nyquist, freq_min, freq_max) || n_filters < 2 ||
+        (style != XTRACT_EQUAL_GAIN && style != XTRACT_EQUAL_AREA))
+        return NULL;
+
+    filterbank = cepstral_filterbank_alloc(N, n_filters);
+    if (filterbank == NULL)
+        return NULL;
+
+    /* The peaks are equally spaced on the mel scale from freq_min, with
+     * freq_max one step beyond the last filter's peak. Each filter is the
+     * triangle through the peak below its own, its own and the peak above
+     * on the linear frequency scale (Rabiner and Juang 1993, section 4.5.6),
+     * the first rising from 0 Hz. */
+    mel_min = 1127 * log(1 + freq_min / 700);
+    mel_max = 1127 * log(1 + freq_max / 700);
+    mel_step = (mel_max - mel_min) / n_filters;
+    first_height = 2 / (700 * (exp((mel_min + mel_step) / 1127) - 1));
+    mel_peak = mel_min;
+    lower = 0.0;
+    peak = freq_min;
+    for (n = 0; n < n_filters; n++)
+    {
+        double upper;
+
+        mel_peak += mel_step;
+        upper = 700 * (exp(mel_peak / 1127) - 1);
+        shape[0] = lower;
+        shape[1] = peak;
+        shape[2] = upper;
+        /* Equal area: a triangle's height is inverse to its base, scaled so
+         * that the first filter keeps a gain of 1. */
+        shape[3] = style == XTRACT_EQUAL_GAIN ? 1.0 : 2 / (upper - lower) * (1 / first_height);
+        sample_filter(xtract_filter_gains(filterbank, n), N, nyquist, triangle_response, shape);
+        lower = peak;
+        peak = upper;
+    }
+
+    return filterbank;
+}
+
+xtract_filterbank *xtract_init_gfcc(const int N, const double nyquist, const double freq_min, const double freq_max, const int n_filters)
+{
+    xtract_filterbank *filterbank;
     double erb_min, erb_max, erb_step;
     double shape[2];
+    int n;
 
-    if (freq_bands <= 1)
-        return XTRACT_ARGUMENT_ERROR;
+    if (!is_a_transform_size(N) || !is_a_frequency_range(nyquist, freq_min, freq_max) || n_filters < 2)
+        return NULL;
 
-    centre_freqs = (double *)malloc(freq_bands * sizeof(double));
-    if (centre_freqs == NULL)
-        return XTRACT_MALLOC_FAILED;
+    filterbank = cepstral_filterbank_alloc(N, n_filters);
+    if (filterbank == NULL)
+        return NULL;
 
-    bandwidths = (double *)malloc(freq_bands * sizeof(double));
-    if (bandwidths == NULL)
-    {
-        free(centre_freqs);
-        return XTRACT_MALLOC_FAILED;
-    }
-
-    /* Compute centre frequencies on the ERB scale */
+    /* Centre frequencies equally spaced on the ERB scale */
     erb_min = 9.26449 * log(1.0 + freq_min / (24.7 * 9.26449));
     erb_max = 9.26449 * log(1.0 + freq_max / (24.7 * 9.26449));
-    erb_step = (erb_max - erb_min) / (freq_bands - 1);
+    erb_step = (erb_max - erb_min) / (n_filters - 1);
 
-    for (n = 0; n < freq_bands; n++)
+    for (n = 0; n < n_filters; n++)
     {
-        double erb = erb_min + n * erb_step;
-        centre_freqs[n] = 24.7 * 9.26449 * (exp(erb / 9.26449) - 1.0);
+        const double erb = erb_min + n * erb_step;
+
+        shape[0] = 24.7 * 9.26449 * (exp(erb / 9.26449) - 1.0);
         /* ERB bandwidth: B = 24.7 * (4.37 * f / 1000 + 1) */
-        bandwidths[n] = 24.7 * (4.37 * centre_freqs[n] / 1000.0 + 1.0);
+        shape[1] = 24.7 * (4.37 * shape[0] / 1000.0 + 1.0);
+        sample_filter(xtract_filter_gains(filterbank, n), N, nyquist, gammatone_response, shape);
     }
 
-    for (n = 0; n < freq_bands; n++)
-    {
-        shape[0] = centre_freqs[n];
-        shape[1] = bandwidths[n];
-        sample_filter(fft_tables[n], N, nyquist, gammatone_response, shape);
-    }
+    return filterbank;
+}
 
-    free(centre_freqs);
-    free(bandwidths);
+xtract_filterbank *xtract_init_filterbank(const int N, const int n_filters, const double *gains)
+{
+    xtract_filterbank *filterbank;
 
-    return XTRACT_SUCCESS;
+    if (!is_a_transform_size(N) || n_filters < 1 || gains == NULL)
+        return NULL;
+
+    filterbank = filterbank_alloc(N, n_filters);
+    if (filterbank == NULL)
+        return NULL;
+    memcpy(filterbank->gains, gains, (size_t)n_filters * (size_t)(N >> 1) * sizeof(double));
+
+    return filterbank;
+}
+
+void xtract_free_filterbank(xtract_filterbank *filterbank)
+{
+    if (filterbank == NULL)
+        return;
+    free(filterbank->gains);
+    xtract_free_dct(filterbank->dct_table);
+    free(filterbank);
 }
 
 double *xtract_init_window(const int N, const int type)

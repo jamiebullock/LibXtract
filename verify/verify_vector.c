@@ -9,11 +9,16 @@
 #include "xtract/libxtract.h"
 #include "xtract/xtract_vector.h"
 #include "xtract_cqt_private.h"
+#include "xtract_filterbank_private.h"
 
 #include "verify.h"
 
 #ifndef VERIFY_MAX_FILTERS
 #define VERIFY_MAX_FILTERS 8
+#endif
+
+#if VERIFY_MAX_FILTERS < 1 || VERIFY_SMALL_N < 1
+#error "VERIFY_MAX_FILTERS and VERIFY_SMALL_N must be at least 1: with no filter count or transform size to choose, the filterbank proofs would pass without running"
 #endif
 
 #ifndef VERIFY_MAX_BANDS
@@ -29,60 +34,39 @@ static int at_least_zero(const int n)
     return n > 0 ? n : 0;
 }
 
-static xtract_mel_filter *nondet_filterbank(const int width)
+static xtract_filterbank *nondet_filterbank(void)
 {
-    xtract_mel_filter *f = (xtract_mel_filter *)malloc(sizeof(xtract_mel_filter));
-    int rows;
-    int i;
+    xtract_filterbank *f = (xtract_filterbank *)malloc(sizeof(xtract_filterbank));
 
     __CPROVER_assume(f != NULL);
-    f->n_filters = nondet_between(-1, VERIFY_MAX_FILTERS);
-    rows = at_least_zero(f->n_filters);
-    f->filters = nondet_bool() ? NULL : (double **)malloc((size_t)rows * sizeof(double *));
-    if (f->filters != NULL)
-    {
-        for (i = 0; i < rows; i++)
-            f->filters[i] = nondet_bool() ? NULL : nondet_doubles(width);
-    }
-    f->dct_table = nondet_bool() ? NULL : nondet_doubles(rows * rows);
+    f->N = 2 * nondet_between(1, VERIFY_SMALL_N);
+    f->n_filters = nondet_between(1, VERIFY_MAX_FILTERS);
+    f->gains = nondet_doubles(f->n_filters * (f->N / 2));
+    f->dct_table = nondet_bool() ? NULL : nondet_doubles(f->n_filters * f->n_filters);
 
     return f;
 }
 
-static void free_filterbank(xtract_mel_filter *f)
-{
-    int i;
-
-    if (f->filters != NULL)
-    {
-        for (i = 0; i < at_least_zero(f->n_filters); i++)
-            free(f->filters[i]);
-        free(f->filters);
-    }
-    free(f->dct_table);
-    free(f);
-}
-
-#define FILTERBANK_HARNESS(feature, length, width)                              \
+#define FILTERBANK_HARNESS(feature)                                             \
     void verify_##feature(void)                                                 \
     {                                                                           \
-        const int N = length;                                                   \
+        const int N = nondet_small_length();                                    \
         double *data = nondet_doubles(N);                                       \
-        xtract_mel_filter *filterbank = nondet_filterbank(width);               \
-        double *result = nondet_doubles(at_least_zero(filterbank->n_filters));  \
+        xtract_filterbank *filterbank = nondet_filterbank();                    \
+        double *result = nondet_doubles(filterbank->n_filters);                 \
                                                                                 \
         (void)xtract_##feature(NULL, data, N, nondet_argv(filterbank), result); \
-        free_filterbank(filterbank);                                            \
+        xtract_free_filterbank(filterbank);                                     \
         free(data);                                                             \
         free(result);                                                           \
     }
 
-FILTERBANK_HARNESS(mel_spectrogram, nondet_small_length(), N)
-FILTERBANK_HARNESS(mfcc, nondet_small_length(), N)
-FILTERBANK_HARNESS(gammatone_spectrogram, nondet_small_length(), N)
-FILTERBANK_HARNESS(gfcc, nondet_small_length(), N)
-FILTERBANK_HARNESS(mmbses, nondet_small_length(), N / 2)
-FILTERBANK_HARNESS(spectral_subband_centroids, nondet_small_length(), N / 2)
+FILTERBANK_HARNESS(mel_spectrogram)
+FILTERBANK_HARNESS(mfcc)
+FILTERBANK_HARNESS(gammatone_spectrogram)
+FILTERBANK_HARNESS(gfcc)
+FILTERBANK_HARNESS(mmbses)
+FILTERBANK_HARNESS(spectral_subband_centroids)
 
 void verify_spectrum(void)
 {

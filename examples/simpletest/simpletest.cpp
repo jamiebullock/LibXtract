@@ -112,7 +112,6 @@ int main(void)
     int n;
     int rv = XTRACT_SUCCESS;
     double last_found_peak_time = 0.0;
-    xtract_mel_filter mel_filters;
     xtract_last_n_state *last_n_state = xtract_last_n_state_new(MAVG_COUNT);
 
     unsigned int wavChannels = 0;
@@ -135,16 +134,7 @@ int main(void)
     std::vector<double> data(wavData, wavData + wavSamples);
     drwav_free(wavData, NULL);
 
-    /* Allocate Mel filters */
-    mel_filters.n_filters = MFCC_FREQ_BANDS;
-    mel_filters.filters = (double **)malloc(MFCC_FREQ_BANDS * sizeof(double *));
-    for (uint8_t k = 0; k < MFCC_FREQ_BANDS; ++k)
-    {
-        mel_filters.filters[k] = (double *)malloc(BLOCKSIZE * sizeof(double));
-    }
-
-    xtract_init_mfcc(BLOCKSIZE, SAMPLERATE >> 1, XTRACT_EQUAL_GAIN, MFCC_FREQ_MIN, MFCC_FREQ_MAX, mel_filters.n_filters, mel_filters.filters);
-    mel_filters.dct_table = xtract_init_dct(MFCC_FREQ_BANDS);
+    xtract_filterbank *mel_filters = xtract_init_mfcc(BLOCKSIZE, SAMPLERATE >> 1, XTRACT_EQUAL_GAIN, MFCC_FREQ_MIN, MFCC_FREQ_MAX, MFCC_FREQ_BANDS);
 
     /* create the window functions */
     window = xtract_init_window(BLOCKSIZE, XTRACT_HANN);
@@ -204,7 +194,7 @@ int main(void)
         xtract[XTRACT_HARMONIC_SPECTRUM](NULL, peaks, BLOCKSIZE, argd, harmonics);
 
         /* compute the MFCCs from the power spectrum taken above */
-        xtract_mfcc(ctx, power_spectrum, BLOCKSIZE >> 1, &mel_filters, mfccs);
+        xtract_mfcc(ctx, power_spectrum, BLOCKSIZE >> 1, mel_filters, mfccs);
 
         double gated[BLOCKSIZE] = {0};
         double block_max = 0.0;
@@ -275,13 +265,7 @@ int main(void)
     }
 
     /* clean up */
-    for (n = 0; n < MFCC_FREQ_BANDS; ++n)
-    {
-        free(mel_filters.filters[n]);
-    }
-    free(mel_filters.filters);
-    xtract_free_dct(mel_filters.dct_table);
-
+    xtract_free_filterbank(mel_filters);
     xtract_free_window(window);
     xtract_free_window(window_subframe);
     xtract_wavelet_f0_state_delete(wavelet_f0_state);

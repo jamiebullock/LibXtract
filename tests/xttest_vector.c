@@ -238,9 +238,8 @@ UTEST(vector, spectral_subband_centroids_single_partial_per_band)
     const int N = 16;
     const int M = N / 2;
     double data[16] = {0};
-    double filter_bank[2][8];
-    double *filter_ptrs[2] = {filter_bank[0], filter_bank[1]};
-    xtract_mel_filter mf;
+    double gains[2][8];
+    xtract_filterbank *filterbank;
     double result[2] = {0};
     int n;
 
@@ -251,20 +250,20 @@ UTEST(vector, spectral_subband_centroids_single_partial_per_band)
 
     for (n = 0; n < M; n++)
     {
-        filter_bank[0][n] = n < 4 ? 1.0 : 0.0;
-        filter_bank[1][n] = n < 4 ? 0.0 : 1.0;
+        gains[0][n] = n < 4 ? 1.0 : 0.0;
+        gains[1][n] = n < 4 ? 0.0 : 1.0;
     }
-    mf.n_filters = 2;
-    mf.dct_table = NULL;
-    mf.filters = filter_ptrs;
+    filterbank = xtract_init_filterbank(N, 2, gains[0]);
+    ASSERT_TRUE(filterbank != NULL);
 
-    ASSERT_EQ(xtract_spectral_subband_centroids(NULL, data, N, &mf, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_spectral_subband_centroids(NULL, data, N, filterbank, result), XTRACT_SUCCESS);
     CHECK_REL(result[0], 300.0, EPSILON);
     CHECK_REL(result[1], 600.0, EPSILON);
 
     result[0] = -1.0;
-    ASSERT_EQ(xtract_spectral_subband_centroids(NULL, data, N - 1, &mf, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_spectral_subband_centroids(NULL, data, N - 1, filterbank, result), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(result[0], -1.0);
+    xtract_free_filterbank(filterbank);
 }
 
 /* ===== xtract_lpcc ===== */
@@ -2049,27 +2048,18 @@ UTEST(vector, mel_spectrogram_produces_log_mel_energies_mfcc_applies_dct_to)
     double data[128];
     double mel_result[13] = {0};
     double mfcc_result[13] = {0};
-    xtract_mel_filter mel_filters;
+    xtract_filterbank *mel_filters = xtract_init_mfcc(N, 22050.0 / 2, XTRACT_EQUAL_GAIN, 20, 8000, n_filters);
     double max_energy;
     double dct_of_mel[13] = {0};
     int rv;
     int i;
 
+    ASSERT_TRUE(mel_filters != NULL);
     memset(data, 0, sizeof(data));
     data[10] = 1.0;
 
-    /* Init mel filter bank */
-    mel_filters.n_filters = n_filters;
-    mel_filters.dct_table = NULL;
-    mel_filters.filters = (double **)malloc(n_filters * sizeof(double *));
-    for (i = 0; i < n_filters; i++)
-        mel_filters.filters[i] = (double *)calloc(N, sizeof(double));
-
-    xtract_init_mfcc(N, 22050.0 / 2, XTRACT_EQUAL_GAIN, 20, 8000,
-                     n_filters, mel_filters.filters);
-
     /* Compute mel spectrogram */
-    rv = xtract_mel_spectrogram(NULL, data, N, &mel_filters, mel_result);
+    rv = xtract_mel_spectrogram(NULL, data, N, mel_filters, mel_result);
     ASSERT_EQ(rv, XTRACT_SUCCESS);
 
     /* All values should be finite (log-scaled) */
@@ -2086,15 +2076,12 @@ UTEST(vector, mel_spectrogram_produces_log_mel_energies_mfcc_applies_dct_to)
     /* MFCC should equal DCT of mel spectrogram */
     xtract_dct(NULL, mel_result, n_filters, NULL, dct_of_mel);
 
-    xtract_mfcc(xttest_context(), data, N, &mel_filters, mfcc_result);
+    xtract_mfcc(xttest_context(), data, N, mel_filters, mfcc_result);
 
     for (i = 0; i < n_filters; i++)
         CHECK_NEAR(mfcc_result[i], dct_of_mel[i], 1e-10);
 
-    /* Clean up */
-    for (i = 0; i < n_filters; i++)
-        free(mel_filters.filters[i]);
-    free(mel_filters.filters);
+    xtract_free_filterbank(mel_filters);
 }
 
 /* ===== xtract_gfcc and xtract_gammatone_spectrogram ===== */
@@ -2106,26 +2093,18 @@ UTEST(vector, gfcc_equals_dct_of_gammatone_spectrogram)
     double data[128];
     double gt_result[13] = {0};
     double gfcc_result[13] = {0};
-    xtract_mel_filter gt_filters;
+    xtract_filterbank *gt_filters = xtract_init_gfcc(N, 22050.0 / 2, 20, 8000, n_filters);
     double max_energy;
     double dct_of_gt[13] = {0};
     int rv;
     int i;
 
+    ASSERT_TRUE(gt_filters != NULL);
     memset(data, 0, sizeof(data));
     data[10] = 1.0;
 
-    /* Init gammatone filter bank */
-    gt_filters.n_filters = n_filters;
-    gt_filters.dct_table = NULL;
-    gt_filters.filters = (double **)malloc(n_filters * sizeof(double *));
-    for (i = 0; i < n_filters; i++)
-        gt_filters.filters[i] = (double *)calloc(N, sizeof(double));
-
-    xtract_init_gfcc(N, 22050.0 / 2, 20, 8000, n_filters, gt_filters.filters);
-
     /* Compute gammatone spectrogram */
-    rv = xtract_gammatone_spectrogram(NULL, data, N, &gt_filters, gt_result);
+    rv = xtract_gammatone_spectrogram(NULL, data, N, gt_filters, gt_result);
     ASSERT_EQ(rv, XTRACT_SUCCESS);
 
     /* All values should be finite */
@@ -2142,22 +2121,19 @@ UTEST(vector, gfcc_equals_dct_of_gammatone_spectrogram)
     /* GFCC should equal DCT of gammatone spectrogram */
     xtract_dct(NULL, gt_result, n_filters, NULL, dct_of_gt);
 
-    xtract_gfcc(xttest_context(), data, N, &gt_filters, gfcc_result);
+    xtract_gfcc(xttest_context(), data, N, gt_filters, gfcc_result);
 
     for (i = 0; i < n_filters; i++)
         CHECK_NEAR(gfcc_result[i], dct_of_gt[i], 1e-10);
 
-    /* Clean up */
-    for (i = 0; i < n_filters; i++)
-        free(gt_filters.filters[i]);
-    free(gt_filters.filters);
+    xtract_free_filterbank(gt_filters);
 }
 
 /* ===== xtract_mmbses =====
  *
  * Mel-based Multi-Band Spectral Entropy Signature. The input is a
  * magnitude/phase spectrum: data is {magnitudes (M), phases (M)} with N = 2*M;
- * argv is an xtract_mel_filter. Per band, the filter-weighted complex
+ * argv is an xtract_filterbank. Per band, the filter-weighted complex
  * coefficients (real = mag*cos(phase), imaginary = mag*sin(phase)) are modelled as a
  * zero-mean bivariate Gaussian and the result is its differential entropy
  *     H = ln(2*pi*e) + (1/2)ln(sigma_xx*sigma_yy - sigma_xy^2),
@@ -2170,16 +2146,13 @@ UTEST(vector, mmbses_all_zero_filter_produces_zero_coefficient)
     /* No bin passes the filter (count == 0), so the band is left at 0. */
     const int N = 4;
     double data[4] = {1.0, 1.0, 0.0, 0.0};
-    double filt[2] = {0.0, 0.0};
-    double *filt_ptr[1] = {filt};
-    xtract_mel_filter mf;
+    const double filt[2] = {0.0, 0.0};
+    xtract_filterbank *mf = xtract_init_filterbank(N, 1, filt);
     double result[1] = {-1.0};
 
-    mf.n_filters = 1;
-
-    mf.dct_table = NULL;
-    mf.filters = filt_ptr;
-    ASSERT_EQ(xtract_mmbses(NULL, data, N, &mf, result), XTRACT_SUCCESS);
+    ASSERT_TRUE(mf != NULL);
+    ASSERT_EQ(xtract_mmbses(NULL, data, N, mf, result), XTRACT_SUCCESS);
+    xtract_free_filterbank(mf);
     CHECK_NEAR(result[0], 0.0, EPSILON);
 }
 
@@ -2190,16 +2163,13 @@ UTEST(vector, mmbses_single_passed_bin_floors_determinant)
      * covariance, so the determinant term floors to -96 dB. */
     const int N = 4;
     double data[4] = {5.0, 0.0, 0.0, 0.0};
-    double filt[2] = {1.0, 0.0};
-    double *filt_ptr[1] = {filt};
-    xtract_mel_filter mf;
+    const double filt[2] = {1.0, 0.0};
+    xtract_filterbank *mf = xtract_init_filterbank(N, 1, filt);
     double result[1] = {-1.0};
 
-    mf.n_filters = 1;
-
-    mf.dct_table = NULL;
-    mf.filters = filt_ptr;
-    ASSERT_EQ(xtract_mmbses(NULL, data, N, &mf, result), XTRACT_SUCCESS);
+    ASSERT_TRUE(mf != NULL);
+    ASSERT_EQ(xtract_mmbses(NULL, data, N, mf, result), XTRACT_SUCCESS);
+    xtract_free_filterbank(mf);
     CHECK_REL(result[0], (log(2.0 * M_PI) + 1.0) + 0.5 * LOG_LIMIT_DB, EPSILON);
 }
 
@@ -2211,16 +2181,13 @@ UTEST(vector, mmbses_two_collinear_bins_floor_determinant)
      * (Phase pi would bring in the rounding of sin(pi) != 0.) */
     const int N = 4;
     double data[4] = {1.0, 2.0, 0.0, 0.0};
-    double filt[2] = {1.0, 1.0};
-    double *filt_ptr[1] = {filt};
-    xtract_mel_filter mf;
+    const double filt[2] = {1.0, 1.0};
+    xtract_filterbank *mf = xtract_init_filterbank(N, 1, filt);
     double result[1] = {-1.0};
 
-    mf.n_filters = 1;
-
-    mf.dct_table = NULL;
-    mf.filters = filt_ptr;
-    ASSERT_EQ(xtract_mmbses(NULL, data, N, &mf, result), XTRACT_SUCCESS);
+    ASSERT_TRUE(mf != NULL);
+    ASSERT_EQ(xtract_mmbses(NULL, data, N, mf, result), XTRACT_SUCCESS);
+    xtract_free_filterbank(mf);
     CHECK_REL(result[0], (log(2.0 * M_PI) + 1.0) + 0.5 * LOG_LIMIT_DB, EPSILON);
 }
 
@@ -2231,16 +2198,13 @@ UTEST(vector, mmbses_two_orthogonal_bins_positive_determinant)
      * determinant is 0.25. */
     const int N = 4;
     double data[4] = {1.0, 1.0, 0.0, M_PI / 2.0};
-    double filt[2] = {1.0, 1.0};
-    double *filt_ptr[1] = {filt};
-    xtract_mel_filter mf;
+    const double filt[2] = {1.0, 1.0};
+    xtract_filterbank *mf = xtract_init_filterbank(N, 1, filt);
     double result[1] = {-1.0};
 
-    mf.n_filters = 1;
-
-    mf.dct_table = NULL;
-    mf.filters = filt_ptr;
-    ASSERT_EQ(xtract_mmbses(NULL, data, N, &mf, result), XTRACT_SUCCESS);
+    ASSERT_TRUE(mf != NULL);
+    ASSERT_EQ(xtract_mmbses(NULL, data, N, mf, result), XTRACT_SUCCESS);
+    xtract_free_filterbank(mf);
     CHECK_REL(result[0], (log(2.0 * M_PI) + 1.0) + 0.5 * log(0.25), EPSILON);
 }
 
@@ -2252,90 +2216,68 @@ UTEST(vector, mmbses_three_bins_exercise_full_covariance_path)
      * (2/3)(2/3) - (1/3)^2 = 1/3. */
     const int N = 6;
     double data[6] = {1.0, 1.0, sqrt(2.0), 0.0, M_PI / 2.0, M_PI / 4.0};
-    double filt[3] = {1.0, 1.0, 1.0};
-    double *filt_ptr[1] = {filt};
-    xtract_mel_filter mf;
+    const double filt[3] = {1.0, 1.0, 1.0};
+    xtract_filterbank *mf = xtract_init_filterbank(N, 1, filt);
     double result[1] = {-1.0};
     double expected = (log(2.0 * M_PI) + 1.0) + 0.5 * log(1.0 / 3.0);
 
-    mf.n_filters = 1;
-
-    mf.dct_table = NULL;
-    mf.filters = filt_ptr;
-    ASSERT_EQ(xtract_mmbses(NULL, data, N, &mf, result), XTRACT_SUCCESS);
+    ASSERT_TRUE(mf != NULL);
+    ASSERT_EQ(xtract_mmbses(NULL, data, N, mf, result), XTRACT_SUCCESS);
+    xtract_free_filterbank(mf);
     CHECK_REL(result[0], expected, EPSILON);
 }
 
-UTEST(vector, mfcc_and_gfcc_with_dct_table_match_table_less_path)
+UTEST(vector, mfcc_and_gfcc_are_the_dct_of_the_log_energy_each_filter_passes)
 {
-    /* Two checks per feature: the table and table-less paths agree, and
-     * coefficient 0 equals the sum of the log filterbank energies, which is
-     * what a DCT-II basis of all ones at index 0 reduces to. The energies
-     * are accumulated here from the filter coefficients and the input, and
-     * every filter is required to pass energy so the log floor is never in
-     * play. */
-    const int N = 256;
-    const int n_filters = 13;
-    double data[256];
-    double table_less[13], with_table[13];
-    double expected_c0, energy;
-    xtract_mel_filter mf;
+    /* The energies are accumulated here from the gains and the input, and
+     * every filter passes energy so the log floor is never in play. The
+     * expected coefficients are their DCT-II, and coefficient 0 is their sum,
+     * which is what a basis of all ones at index 0 reduces to. */
+    enum
+    {
+        BINS = 256,
+        FILTERS = 13
+    };
+    double data[BINS];
+    static double gains[FILTERS][BINS];
+    double log_energies[FILTERS], expected[FILTERS], mfcc[FILTERS], gfcc[FILTERS];
+    double expected_c0 = 0.0;
+    xtract_filterbank *filterbank;
     int i, k;
 
-    for (i = 0; i < N; i++)
+    for (i = 0; i < BINS; i++)
         data[i] = 1.0 + 0.5 * sin(0.3 * i);
-
-    mf.n_filters = n_filters;
-    mf.filters = (double **)malloc(n_filters * sizeof(double *));
-    for (i = 0; i < n_filters; i++)
-        mf.filters[i] = (double *)calloc(N, sizeof(double));
-    xtract_init_mfcc(N, 22050.0 / 2, XTRACT_EQUAL_GAIN, 100, 8000, n_filters, mf.filters);
-
-    expected_c0 = 0.0;
-    for (k = 0; k < n_filters; k++)
+    for (k = 0; k < FILTERS; k++)
     {
-        energy = 0.0;
-        for (i = 0; i < N; i++)
-            energy += data[i] * mf.filters[k][i];
-        ASSERT_TRUE(energy > 0.0);
-        expected_c0 += log(energy);
+        double energy = 0.0;
+
+        for (i = 0; i < BINS; i++)
+        {
+            gains[k][i] = ((k + i) % 7 + 1) / 7.0;
+            energy += data[i] * gains[k][i];
+        }
+        log_energies[k] = log(energy);
+        expected_c0 += log_energies[k];
+    }
+    for (k = 0; k < FILTERS; k++)
+    {
+        expected[k] = 0.0;
+        for (i = 0; i < FILTERS; i++)
+            expected[k] += log_energies[i] * cos(M_PI * k * (i + 0.5) / FILTERS);
     }
 
-    mf.dct_table = NULL;
-    ASSERT_EQ(xtract_mfcc(xttest_context(), data, N, &mf, table_less), XTRACT_SUCCESS);
-    mf.dct_table = xtract_init_dct(n_filters);
-    ASSERT_TRUE(mf.dct_table != NULL);
-    ASSERT_EQ(xtract_mfcc(xttest_context(), data, N, &mf, with_table), XTRACT_SUCCESS);
-    for (i = 0; i < n_filters; i++)
-        CHECK_NEAR(with_table[i], table_less[i], 1e-12);
-    CHECK_REL(with_table[0], expected_c0, 1e-9);
-    xtract_free_dct(mf.dct_table);
+    filterbank = xtract_init_filterbank(2 * BINS, FILTERS, gains[0]);
+    ASSERT_TRUE(filterbank != NULL);
+    ASSERT_EQ(xtract_mfcc(xttest_context(), data, BINS, filterbank, mfcc), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_gfcc(xttest_context(), data, BINS, filterbank, gfcc), XTRACT_SUCCESS);
+    xtract_free_filterbank(filterbank);
 
-    xtract_init_gfcc(N, 22050.0 / 2, 100, 8000, n_filters, mf.filters);
-
-    expected_c0 = 0.0;
-    for (k = 0; k < n_filters; k++)
+    for (k = 0; k < FILTERS; k++)
     {
-        energy = 0.0;
-        for (i = 0; i < N; i++)
-            energy += data[i] * mf.filters[k][i];
-        ASSERT_TRUE(energy > 0.0);
-        expected_c0 += log(energy);
+        CHECK_NEAR(mfcc[k], expected[k], 1e-12);
+        ASSERT_EQ(gfcc[k], mfcc[k]);
     }
-
-    mf.dct_table = NULL;
-    ASSERT_EQ(xtract_gfcc(xttest_context(), data, N, &mf, table_less), XTRACT_SUCCESS);
-    mf.dct_table = xtract_init_dct(n_filters);
-    ASSERT_TRUE(mf.dct_table != NULL);
-    ASSERT_EQ(xtract_gfcc(xttest_context(), data, N, &mf, with_table), XTRACT_SUCCESS);
-    for (i = 0; i < n_filters; i++)
-        CHECK_NEAR(with_table[i], table_less[i], 1e-12);
-    CHECK_REL(with_table[0], expected_c0, 1e-9);
-    xtract_free_dct(mf.dct_table);
-
-    for (i = 0; i < n_filters; i++)
-        free(mf.filters[i]);
-    free(mf.filters);
+    CHECK_REL(mfcc[0], expected_c0, 1e-9);
 }
 
 /* ===== Argument contract ===== */
@@ -2500,25 +2442,22 @@ UTEST(autocorrelation_fft, shares_a_context_with_the_spectrum)
     xtract_context_delete(ctx);
 }
 
-UTEST(vector, filterbank_features_reject_a_short_input_and_an_unusable_filterbank)
+UTEST(vector, filterbank_features_reject_a_short_input_and_a_missing_filterbank)
 {
     double data[4] = {1.0, 1.0, 0.0, 0.0};
-    double row[4] = {1.0, 1.0, 1.0, 1.0};
-    double *rows[1] = {row};
-    xtract_mel_filter f;
+    const double gains[2] = {1.0, 1.0};
+    xtract_filterbank *f = xtract_init_filterbank(4, 1, gains);
     double result[2] = {-1.0, -1.0};
 
-    f.n_filters = 1;
-    f.filters = rows;
-    f.dct_table = NULL;
-
-    ASSERT_EQ(xtract_mel_spectrogram(NULL, data, 0, &f, result), XTRACT_ARGUMENT_ERROR);
-    ASSERT_EQ(xtract_mfcc(xttest_context(), data, 0, &f, result), XTRACT_ARGUMENT_ERROR);
-    ASSERT_EQ(xtract_gammatone_spectrogram(NULL, data, 0, &f, result), XTRACT_ARGUMENT_ERROR);
-    ASSERT_EQ(xtract_gfcc(xttest_context(), data, 0, &f, result), XTRACT_ARGUMENT_ERROR);
-    ASSERT_EQ(xtract_mmbses(NULL, data, 1, &f, result), XTRACT_ARGUMENT_ERROR);
-    ASSERT_EQ(xtract_mmbses(NULL, data, 3, &f, result), XTRACT_ARGUMENT_ERROR);
-    ASSERT_EQ(xtract_spectral_subband_centroids(NULL, data, 0, &f, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_TRUE(f != NULL);
+    ASSERT_EQ(xtract_mel_spectrogram(NULL, data, 0, f, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_mfcc(xttest_context(), data, 0, f, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_gammatone_spectrogram(NULL, data, 0, f, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_gfcc(xttest_context(), data, 0, f, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_mmbses(NULL, data, 1, f, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_mmbses(NULL, data, 3, f, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_spectral_subband_centroids(NULL, data, 0, f, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_spectral_subband_centroids(NULL, data, 3, f, result), XTRACT_ARGUMENT_ERROR);
 
     ASSERT_EQ(xtract_mel_spectrogram(NULL, data, 4, NULL, result), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(xtract_mfcc(xttest_context(), data, 4, NULL, result), XTRACT_ARGUMENT_ERROR);
@@ -2526,27 +2465,62 @@ UTEST(vector, filterbank_features_reject_a_short_input_and_an_unusable_filterban
     ASSERT_EQ(xtract_gfcc(xttest_context(), data, 4, NULL, result), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(xtract_mmbses(NULL, data, 4, NULL, result), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(xtract_spectral_subband_centroids(NULL, data, 2, NULL, result), XTRACT_ARGUMENT_ERROR);
-
-    f.n_filters = 0;
-    ASSERT_EQ(xtract_mel_spectrogram(NULL, data, 4, &f, result), XTRACT_ARGUMENT_ERROR);
-    ASSERT_EQ(xtract_mfcc(xttest_context(), data, 4, &f, result), XTRACT_ARGUMENT_ERROR);
-    f.n_filters = 1;
-    f.filters = NULL;
-    ASSERT_EQ(xtract_mel_spectrogram(NULL, data, 4, &f, result), XTRACT_ARGUMENT_ERROR);
-    ASSERT_EQ(xtract_mmbses(NULL, data, 4, &f, result), XTRACT_ARGUMENT_ERROR);
-    f.filters = rows;
-    rows[0] = NULL;
-    ASSERT_EQ(xtract_mel_spectrogram(NULL, data, 4, &f, result), XTRACT_ARGUMENT_ERROR);
-    ASSERT_EQ(xtract_gfcc(xttest_context(), data, 4, &f, result), XTRACT_ARGUMENT_ERROR);
-    ASSERT_EQ(xtract_mmbses(NULL, data, 4, &f, result), XTRACT_ARGUMENT_ERROR);
-    ASSERT_EQ(xtract_spectral_subband_centroids(NULL, data, 2, &f, result), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(result[0], -1.0);
 
-    rows[0] = row;
-    ASSERT_EQ(xtract_mel_spectrogram(NULL, data, 4, &f, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_mel_spectrogram(NULL, data, 4, f, result), XTRACT_SUCCESS);
     CHECK_REL(result[0], log(2.0), EPSILON);
-    ASSERT_EQ(xtract_mfcc(xttest_context(), data, 4, &f, result), XTRACT_SUCCESS);
-    ASSERT_EQ(xtract_mmbses(NULL, data, 4, &f, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_mfcc(xttest_context(), data, 4, f, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_mmbses(NULL, data, 4, f, result), XTRACT_SUCCESS);
+    xtract_free_filterbank(f);
+}
+
+UTEST(vector, filterbank_features_are_in_a_bad_state_with_a_filterbank_built_for_a_smaller_transform)
+{
+    const double data[6] = {1.0, 1.0, 100.0, 200.0, 0.0, 0.0};
+    const double gains[2] = {1.0, 1.0};
+    xtract_filterbank *f = xtract_init_filterbank(4, 1, gains);
+    double result[1] = {-1.0};
+
+    ASSERT_TRUE(f != NULL);
+    ASSERT_EQ(xtract_mel_spectrogram(NULL, data, 5, f, result), XTRACT_BAD_STATE);
+    ASSERT_EQ(xtract_mfcc(xttest_context(), data, 5, f, result), XTRACT_BAD_STATE);
+    ASSERT_EQ(xtract_gammatone_spectrogram(NULL, data, 5, f, result), XTRACT_BAD_STATE);
+    ASSERT_EQ(xtract_gfcc(xttest_context(), data, 5, f, result), XTRACT_BAD_STATE);
+    ASSERT_EQ(xtract_mmbses(NULL, data, 6, f, result), XTRACT_BAD_STATE);
+    ASSERT_EQ(xtract_spectral_subband_centroids(NULL, data, 6, f, result), XTRACT_BAD_STATE);
+    ASSERT_EQ(result[0], -1.0);
+
+    ASSERT_EQ(xtract_mel_spectrogram(NULL, data, 4, f, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_mfcc(xttest_context(), data, 4, f, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_gammatone_spectrogram(NULL, data, 4, f, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_gfcc(xttest_context(), data, 4, f, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_mmbses(NULL, data, 4, f, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_spectral_subband_centroids(NULL, data, 4, f, result), XTRACT_SUCCESS);
+    xtract_free_filterbank(f);
+}
+
+UTEST(vector, filterbank_spectrograms_weight_no_coefficient_beyond_the_bins_of_the_transform)
+{
+    /* A filterbank built for a transform of 8 points has a gain for its 4
+     * bins. The values beyond them are large enough to change any sum that
+     * read them. */
+    const double data[8] = {1.0, 2.0, 3.0, 4.0, 1e9, 1e9, 1e9, 1e9};
+    const double gains[4] = {0.5, 0.25, 2.0, 1.0};
+    xtract_filterbank *f = xtract_init_filterbank(8, 1, gains);
+    double result[1];
+
+    ASSERT_TRUE(f != NULL);
+    ASSERT_EQ(xtract_mel_spectrogram(NULL, data, 2, f, result), XTRACT_SUCCESS);
+    ASSERT_EQ(result[0], log(1.0));
+    ASSERT_EQ(xtract_mel_spectrogram(NULL, data, 4, f, result), XTRACT_SUCCESS);
+    ASSERT_EQ(result[0], log(11.0));
+    ASSERT_EQ(xtract_mel_spectrogram(NULL, data, 5, f, result), XTRACT_SUCCESS);
+    ASSERT_EQ(result[0], log(11.0));
+    ASSERT_EQ(xtract_gammatone_spectrogram(NULL, data, 8, f, result), XTRACT_SUCCESS);
+    ASSERT_EQ(result[0], log(11.0));
+    ASSERT_EQ(xtract_mfcc(xttest_context(), data, 8, f, result), XTRACT_SUCCESS);
+    ASSERT_EQ(result[0], log(11.0));
+    xtract_free_filterbank(f);
 }
 
 UTEST(vector, time_domain_vector_features_reject_an_empty_input)
@@ -4055,27 +4029,17 @@ static int call_cqt(xtract_context *ctx, double *result)
 static int call_cepstrum(xtract_context *ctx, double *result, const int gammatone)
 {
     double data[SCRATCH_BINS];
-    double coefficients[SCRATCH_FILTERS][SCRATCH_BINS] = {{0}};
-    double *rows[SCRATCH_FILTERS];
-    xtract_mel_filter filterbank;
-    int n;
+    xtract_filterbank *filterbank = gammatone ? xtract_init_gfcc(SCRATCH_BINS, 22050.0 / 2, 100, 8000, SCRATCH_FILTERS)
+                                              : xtract_init_mfcc(SCRATCH_BINS, 22050.0 / 2, XTRACT_EQUAL_GAIN, 100, 8000, SCRATCH_FILTERS);
+    int n, rv;
 
     for (n = 0; n < SCRATCH_BINS; n++)
         data[n] = 1.0 + 0.5 * sin(0.3 * n);
-    for (n = 0; n < SCRATCH_FILTERS; n++)
-        rows[n] = coefficients[n];
-    filterbank.n_filters = SCRATCH_FILTERS;
-    filterbank.filters = rows;
-    filterbank.dct_table = NULL;
+    rv = gammatone ? xtract_gfcc(ctx, data, SCRATCH_BINS, filterbank, result)
+                   : xtract_mfcc(ctx, data, SCRATCH_BINS, filterbank, result);
+    xtract_free_filterbank(filterbank);
 
-    if (gammatone)
-    {
-        xtract_init_gfcc(SCRATCH_BINS, 22050.0 / 2, 100, 8000, SCRATCH_FILTERS, rows);
-        return xtract_gfcc(ctx, data, SCRATCH_BINS, &filterbank, result);
-    }
-    xtract_init_mfcc(SCRATCH_BINS, 22050.0 / 2, XTRACT_EQUAL_GAIN, 100, 8000, SCRATCH_FILTERS, rows);
-
-    return xtract_mfcc(ctx, data, SCRATCH_BINS, &filterbank, result);
+    return rv;
 }
 
 static int call_mfcc(xtract_context *ctx, double *result)
@@ -4174,10 +4138,9 @@ enum
 UTEST(vector, cepstral_coefficients_of_more_filters_than_bins_need_a_context_for_the_filter_count)
 {
     const double data[FEW_BINS] = {1.0, 2.0, 3.0, 4.0};
-    double coefficients[MORE_FILTERS][FEW_BINS];
-    double *rows[MORE_FILTERS];
+    double gains[MORE_FILTERS][FEW_BINS];
     double result[MORE_FILTERS];
-    xtract_mel_filter filterbank;
+    xtract_filterbank *filterbank;
     xtract_context *for_the_bins = xtract_context_new(FEW_BINS);
     xtract_context *one_filter_short = xtract_context_new(MORE_FILTERS - 1);
     xtract_context *for_the_filters = xtract_context_new(MORE_FILTERS);
@@ -4185,25 +4148,24 @@ UTEST(vector, cepstral_coefficients_of_more_filters_than_bins_need_a_context_for
 
     for (filter = 0; filter < MORE_FILTERS; filter++)
     {
-        rows[filter] = coefficients[filter];
         result[filter] = -1.0;
         for (bin = 0; bin < FEW_BINS; bin++)
-            coefficients[filter][bin] = 0.25;
+            gains[filter][bin] = 0.25;
     }
-    filterbank.n_filters = MORE_FILTERS;
-    filterbank.filters = rows;
-    filterbank.dct_table = NULL;
+    filterbank = xtract_init_filterbank(2 * FEW_BINS, MORE_FILTERS, gains[0]);
+    ASSERT_TRUE(filterbank != NULL);
 
-    ASSERT_EQ(xtract_mfcc(for_the_bins, data, FEW_BINS, &filterbank, result), XTRACT_BAD_STATE);
-    ASSERT_EQ(xtract_mfcc(one_filter_short, data, FEW_BINS, &filterbank, result), XTRACT_BAD_STATE);
-    ASSERT_EQ(xtract_gfcc(for_the_bins, data, FEW_BINS, &filterbank, result), XTRACT_BAD_STATE);
-    ASSERT_EQ(xtract_gfcc(one_filter_short, data, FEW_BINS, &filterbank, result), XTRACT_BAD_STATE);
+    ASSERT_EQ(xtract_mfcc(for_the_bins, data, FEW_BINS, filterbank, result), XTRACT_BAD_STATE);
+    ASSERT_EQ(xtract_mfcc(one_filter_short, data, FEW_BINS, filterbank, result), XTRACT_BAD_STATE);
+    ASSERT_EQ(xtract_gfcc(for_the_bins, data, FEW_BINS, filterbank, result), XTRACT_BAD_STATE);
+    ASSERT_EQ(xtract_gfcc(one_filter_short, data, FEW_BINS, filterbank, result), XTRACT_BAD_STATE);
     for (filter = 0; filter < MORE_FILTERS; filter++)
         ASSERT_EQ(result[filter], -1.0);
-    ASSERT_EQ(xtract_mfcc(for_the_filters, data, FEW_BINS, &filterbank, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_mfcc(for_the_filters, data, FEW_BINS, filterbank, result), XTRACT_SUCCESS);
     ASSERT_TRUE(result[0] != -1.0);
-    ASSERT_EQ(xtract_gfcc(for_the_filters, data, FEW_BINS, &filterbank, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_gfcc(for_the_filters, data, FEW_BINS, filterbank, result), XTRACT_SUCCESS);
 
+    xtract_free_filterbank(filterbank);
     xtract_context_delete(for_the_bins);
     xtract_context_delete(one_filter_short);
     xtract_context_delete(for_the_filters);

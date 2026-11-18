@@ -46,52 +46,15 @@
         return (void *)state;
     }
 
+    void *filterbank_to_voidp(xtract_filterbank *filterbank)
+    {
+        return (void *)filterbank;
+    }
+
     xtract_function_descriptor_t 
             *get_descriptor(xtract_function_descriptor_t *fd, int i){
 
         return &fd[i];
-    }
-
-    /* Return a pointer to memory allocated for a mel filterbank */
-    xtract_mel_filter *create_filterbank(int n_filters, int blocksize){
-        
-        double **filters;
-        xtract_mel_filter *mf;
-        int n, N;
-
-        N = blocksize;
-
-        mf = (xtract_mel_filter *)malloc(sizeof(xtract_mel_filter));
-        mf->n_filters = n_filters;
-
-        filters = (double **)malloc(n_filters * sizeof(double *));
-
-        for(n = 0; n < n_filters; n++)
-            filters[n] = (double *)malloc(N * sizeof(double));
-
-        mf->filters = filters;
-        mf->dct_table = xtract_init_dct(n_filters);
-        
-        return mf;
-
-    }
-    
-    /* Free a mel filterbank */
-    void destroy_filterbank(xtract_mel_filter *filterbank){
-        
-        int i = filterbank->n_filters;
-        double **filters;
-
-        filters = filterbank->filters;
-            
-        while(i--)
-            free(filters[i]);
-
-        free(filters);
-        xtract_free_dct(filterbank->dct_table);
-
-        free(filterbank);
-
     }
 
 %}

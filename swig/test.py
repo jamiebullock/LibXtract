@@ -4,6 +4,7 @@
 # SPDX-FileCopyrightText: 2007 Jamie Bullock
 # SPDX-License-Identifier: Zlib
 
+import math
 import sys
 
 try:
@@ -69,6 +70,23 @@ xtract.xtract_context_delete(ctx)
 for i in range(len):
     print(result[i])
 
+print('Computing the log energy a filter passes...')
+
+gains = xtract.doubleArray(4)
+coefficients = xtract.doubleArray(4)
+for i, (gain, coefficient) in enumerate(zip([0.5, 0.25, 2.0, 1.0], [1.0, 2.0, 3.0, 4.0])):
+    gains[i] = gain
+    coefficients[i] = coefficient
+
+filterbank = xtract.xtract_init_filterbank(8, 1, gains)
+energy = xtract.doubleArray(1)
+xtract.xtract_mel_spectrogram(None, coefficients, 4, filterbank, energy)
+xtract.xtract_free_filterbank(filterbank)
+
+print('The log energy is %.4f' % energy[0])
+
+if not abs(energy[0] - math.log(11.0)) <= 1e-12:
+    sys.exit(1)
 
 print('Computing windowed subframes...')
 

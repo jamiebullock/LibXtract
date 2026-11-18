@@ -59,8 +59,8 @@ SMALL_PROOFS = verify_hps verify_mcleod_f0 verify_sharpness \
 	verify_lempel_ziv_complexity verify_sample_entropy verify_approximate_entropy \
 	verify_periodicity verify_signal_confidence verify_spectral_contrast \
 	verify_chroma verify_covariance_matrix
-# The filterbank proofs take a filterbank of up to this many filters; the
-# count multiplies the formula, and N is the bound the proofs are about.
+# The filterbank proofs take a filterbank of up to this many filters, at least
+# 1; the count multiplies the formula, and N is the bound the proofs are about.
 VERIFY_MAX_FILTERS ?= 2
 # principal_variances is built with this sweep limit in place of its own.
 # Every sweep makes the same accesses to a matrix of arbitrary values, so the

@@ -63,6 +63,33 @@ public class test {
             System.out.println(result.getitem(i));
         }
 
+        System.out.println("Computing the log energy a filter passes...");
+
+        double[] gainValues = {0.5, 0.25, 2.0, 1.0};
+        double[] coefficientValues = {1.0, 2.0, 3.0, 4.0};
+        doubleArray gains = new doubleArray(4);
+        doubleArray coefficients = new doubleArray(4);
+        for (int i = 0; i < 4; i++) {
+            gains.setitem(i, gainValues[i]);
+            coefficients.setitem(i, coefficientValues[i]);
+        }
+
+        SWIGTYPE_p_xtract_filterbank_ filterbank = xtract.xtract_init_filterbank(8, 1, gains.cast());
+        doubleArray energy = new doubleArray(1);
+        xtract.xtract_mel_spectrogram(null, coefficients.cast(), 4,
+                xtract.filterbank_to_voidp(filterbank), energy.cast());
+        xtract.xtract_free_filterbank(filterbank);
+
+        System.out.printf("The log energy is %.4f%n", energy.getitem(0));
+
+        if (!(Math.abs(energy.getitem(0) - Math.log(11.0)) <= 1e-12)) {
+            System.exit(1);
+        }
+
+        gains.delete();
+        coefficients.delete();
+        energy.delete();
+
         System.out.println("Testing stateful functions...");
 
         int N = 4;

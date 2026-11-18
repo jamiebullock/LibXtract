@@ -45,6 +45,24 @@ for (let i = 0; i < len; i++) {
     console.log(result.getitem(i));
 }
 
+console.log('Computing the log energy a filter passes...');
+
+const gains = new xtract.doubleArray(4);
+const coefficients = new xtract.doubleArray(4);
+[0.5, 0.25, 2.0, 1.0].forEach((gain, i) => gains.setitem(i, gain));
+[1.0, 2.0, 3.0, 4.0].forEach((coefficient, i) => coefficients.setitem(i, coefficient));
+
+const filterbank = xtract.xtract_init_filterbank(8, 1, gains.cast());
+const energy = new xtract.doubleArray(1);
+xtract.xtract_mel_spectrogram(null, coefficients.cast(), 4, xtract.filterbank_to_voidp(filterbank), energy.cast());
+xtract.xtract_free_filterbank(filterbank);
+
+console.log('The log energy is ' + energy.getitem(0).toFixed(4));
+
+if (!(Math.abs(energy.getitem(0) - Math.log(11.0)) <= 1e-12)) {
+    process.exit(1);
+}
+
 console.log('Testing stateful functions...');
 
 const N = 4;

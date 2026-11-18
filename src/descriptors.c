@@ -1963,7 +1963,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_MMBSES:
         case XTRACT_SPECTRAL_SUBBAND_CENTROIDS:
             *argc = 1;
-            *argv_type = XTRACT_MEL_FILTER;
+            *argv_type = XTRACT_FILTERBANK;
             break;
         case XTRACT_CQT:
             *argc = 1;
