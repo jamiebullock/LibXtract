@@ -368,15 +368,15 @@ static int cqt_append_band(xtract_cqt_kernel *kernel, const int band, const doub
 
     bins = (int *)realloc(kernel->bin, (size_t)(total + count) * sizeof(int));
     if (bins == NULL)
-        return XTRACT_MALLOC_FAILED;
+        return 0;
     kernel->bin = bins;
     reals = (double *)realloc(kernel->real, (size_t)(total + count) * sizeof(double));
     if (reals == NULL)
-        return XTRACT_MALLOC_FAILED;
+        return 0;
     kernel->real = reals;
     imags = (double *)realloc(kernel->imag, (size_t)(total + count) * sizeof(double));
     if (imags == NULL)
-        return XTRACT_MALLOC_FAILED;
+        return 0;
     kernel->imag = imags;
 
     for (j = 0, e = total; j < M; j++)
@@ -391,7 +391,7 @@ static int cqt_append_band(xtract_cqt_kernel *kernel, const int band, const doub
     }
     kernel->first[band + 1] = total + count;
 
-    return XTRACT_SUCCESS;
+    return 1;
 }
 
 xtract_cqt_kernel *xtract_init_cqt(const int N, const double sr, const double fmin, const int bins_per_octave, const int n_bins, const double threshold)
@@ -450,7 +450,7 @@ xtract_cqt_kernel *xtract_init_cqt(const int N, const double sr, const double fm
             imag[j] = (sum_real * shift_imag + sum_imag * shift_real) / window_sum;
         }
         kernel->frequencies[band] = frequency;
-        if (cqt_append_band(kernel, band, real, imag, M, threshold) != XTRACT_SUCCESS)
+        if (!cqt_append_band(kernel, band, real, imag, M, threshold))
         {
             free(real);
             xtract_free_cqt(kernel);

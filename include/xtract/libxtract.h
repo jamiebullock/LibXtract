@@ -243,7 +243,6 @@ extern "C"
     enum xtract_return_codes_
     {
         XTRACT_SUCCESS,
-        XTRACT_MALLOC_FAILED,
         XTRACT_BAD_STATE,
         XTRACT_NO_RESULT,
         XTRACT_FEATURE_NOT_IMPLEMENTED,
