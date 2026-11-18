@@ -457,13 +457,11 @@ int xtract_autocorrelation_fft(xtract_context *ctx, const double *data, const in
     return XTRACT_SUCCESS;
 }
 
-/* The log of the sum each filter passes of the first N elements of data. A
- * filter has a gain for half as many elements as the filterbank was built
- * for, and the elements beyond them are not read. */
-static void log_filterbank_energies(const double *data, const int N, const xtract_filterbank *f, double *result)
+/* The log of the sum each filter passes of data, which has an element for
+ * each bin the filterbank has a gain for. */
+static void log_filterbank_energies(const double *data, const xtract_filterbank *f, double *result)
 {
-    const int bins = f->N >> 1;
-    const int weighted = N < bins ? N : bins;
+    const int bins = xtract_filterbank_bins(f);
     int n, filter;
 
     for (filter = 0; filter < f->n_filters; filter++)
@@ -471,7 +469,7 @@ static void log_filterbank_energies(const double *data, const int N, const xtrac
         const double *gains = xtract_filter_gains(f, filter);
 
         result[filter] = 0.0;
-        for (n = 0; n < weighted; n++)
+        for (n = 0; n < bins; n++)
         {
             if (gains[n] != 0)
                 result[filter] += data[n] * gains[n];
@@ -488,10 +486,10 @@ static int filterbank_spectrogram(const double *data, const int N, const xtract_
 {
     if (N < 1 || f == NULL)
         return XTRACT_ARGUMENT_ERROR;
-    if (N > f->N)
+    if (N != xtract_filterbank_bins(f))
         return XTRACT_BAD_STATE;
 
-    log_filterbank_energies(data, N, f, result);
+    log_filterbank_energies(data, f, result);
 
     return XTRACT_SUCCESS;
 }
@@ -503,14 +501,14 @@ static int cepstral_coefficients(xtract_context *ctx, const double *data, const 
 
     if (N < 1 || f == NULL)
         return XTRACT_ARGUMENT_ERROR;
-    if (N > f->N)
+    if (N != xtract_filterbank_bins(f))
         return XTRACT_BAD_STATE;
 
     temp = xtract_scratch_take(ctx, N > f->n_filters ? N : f->n_filters, (size_t)f->n_filters);
     if (temp == NULL)
         return XTRACT_BAD_STATE;
 
-    log_filterbank_energies(data, N, f, temp);
+    log_filterbank_energies(data, f, temp);
     rv = xtract_dct(ctx, temp, f->n_filters, f->dct_table, result);
     xtract_scratch_return(ctx, temp, (size_t)f->n_filters);
 
@@ -578,7 +576,7 @@ int xtract_mmbses(xtract_context *ctx, const double *data, const int N, const vo
 
     if (N < 2 || (N & 1) || f == NULL)
         return XTRACT_ARGUMENT_ERROR;
-    if (N > f->N)
+    if (N != f->N)
         return XTRACT_BAD_STATE;
 
     for (filter = 0; filter < f->n_filters; filter++)
@@ -621,7 +619,7 @@ int xtract_spectral_subband_centroids(xtract_context *ctx, const double *data, c
 
     if (N < 2 || (N & 1) || f == NULL)
         return XTRACT_ARGUMENT_ERROR;
-    if (N > f->N)
+    if (N != f->N)
         return XTRACT_BAD_STATE;
 
     for (filter = 0; filter < f->n_filters; filter++)

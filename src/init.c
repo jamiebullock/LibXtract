@@ -42,16 +42,16 @@ int xtract_init_bark(int N, double sr, int *band_limits)
 }
 
 /* Fill one filter's gains by sampling its frequency response at every bin of
- * an N-point transform, bin k at k * nyquist / (N / 2). shape is passed
- * through to response. */
-static void sample_filter(double *gains, const int N, const double nyquist,
+ * an N-point transform, bin k at k * sr / N. shape is passed through to
+ * response. */
+static void sample_filter(double *gains, const int N, const double sr,
                           double (*response)(double hz, const double *shape), const double *shape)
 {
     const int M = N >> 1;
     int k;
 
     for (k = 0; k < M; k++)
-        gains[k] = response((double)k / M * nyquist, shape);
+        gains[k] = response((double)k / N * sr, shape);
 }
 
 /* shape: lower edge, peak and upper edge in Hz, then the peak height. */
@@ -84,9 +84,9 @@ static int is_a_transform_size(const int N)
     return N >= 2 && !(N & 1);
 }
 
-static int is_a_frequency_range(const double nyquist, const double freq_min, const double freq_max)
+static int is_a_frequency_range(const double sr, const double freq_min, const double freq_max)
 {
-    return isfinite(nyquist) && nyquist > 0.0 && isfinite(freq_min) && freq_min >= 0.0 && isfinite(freq_max) && freq_max > freq_min;
+    return isfinite(sr) && sr > 0.0 && isfinite(freq_min) && freq_min >= 0.0 && isfinite(freq_max) && freq_max > freq_min;
 }
 
 static xtract_filterbank *filterbank_alloc(const int N, const int n_filters)
@@ -132,14 +132,14 @@ static xtract_filterbank *cepstral_filterbank_alloc(const int N, const int n_fil
     return filterbank;
 }
 
-xtract_filterbank *xtract_init_mfcc(const int N, const double nyquist, const int style, const double freq_min, const double freq_max, const int n_filters)
+xtract_filterbank *xtract_init_mfcc(const int N, const double sr, const int style, const double freq_min, const double freq_max, const int n_filters)
 {
     xtract_filterbank *filterbank;
     double mel_min, mel_max, mel_step, mel_peak, first_height, lower, peak;
     double shape[4];
     int n;
 
-    if (!is_a_transform_size(N) || !is_a_frequency_range(nyquist, freq_min, freq_max) || n_filters < 2 ||
+    if (!is_a_transform_size(N) || !is_a_frequency_range(sr, freq_min, freq_max) || n_filters < 2 ||
         (style != XTRACT_EQUAL_GAIN && style != XTRACT_EQUAL_AREA))
         return NULL;
 
@@ -171,7 +171,7 @@ xtract_filterbank *xtract_init_mfcc(const int N, const double nyquist, const int
         /* Equal area: a triangle's height is inverse to its base, scaled so
          * that the first filter keeps a gain of 1. */
         shape[3] = style == XTRACT_EQUAL_GAIN ? 1.0 : 2 / (upper - lower) * (1 / first_height);
-        sample_filter(xtract_filter_gains(filterbank, n), N, nyquist, triangle_response, shape);
+        sample_filter(xtract_filter_gains(filterbank, n), N, sr, triangle_response, shape);
         lower = peak;
         peak = upper;
     }
@@ -179,14 +179,14 @@ xtract_filterbank *xtract_init_mfcc(const int N, const double nyquist, const int
     return filterbank;
 }
 
-xtract_filterbank *xtract_init_gfcc(const int N, const double nyquist, const double freq_min, const double freq_max, const int n_filters)
+xtract_filterbank *xtract_init_gfcc(const int N, const double sr, const double freq_min, const double freq_max, const int n_filters)
 {
     xtract_filterbank *filterbank;
     double erb_min, erb_max, erb_step;
     double shape[2];
     int n;
 
-    if (!is_a_transform_size(N) || !is_a_frequency_range(nyquist, freq_min, freq_max) || n_filters < 2)
+    if (!is_a_transform_size(N) || !is_a_frequency_range(sr, freq_min, freq_max) || n_filters < 2)
         return NULL;
 
     filterbank = cepstral_filterbank_alloc(N, n_filters);
@@ -205,7 +205,7 @@ xtract_filterbank *xtract_init_gfcc(const int N, const double nyquist, const dou
         shape[0] = 24.7 * 9.26449 * (exp(erb / 9.26449) - 1.0);
         /* ERB bandwidth: B = 24.7 * (4.37 * f / 1000 + 1) */
         shape[1] = 24.7 * (4.37 * shape[0] / 1000.0 + 1.0);
-        sample_filter(xtract_filter_gains(filterbank, n), N, nyquist, gammatone_response, shape);
+        sample_filter(xtract_filter_gains(filterbank, n), N, sr, gammatone_response, shape);
     }
 
     return filterbank;

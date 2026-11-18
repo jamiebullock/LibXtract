@@ -134,7 +134,7 @@ int main(void)
     std::vector<double> data(wavData, wavData + wavSamples);
     drwav_free(wavData, NULL);
 
-    xtract_filterbank *mel_filters = xtract_init_mfcc(BLOCKSIZE, SAMPLERATE >> 1, XTRACT_EQUAL_GAIN, MFCC_FREQ_MIN, MFCC_FREQ_MAX, MFCC_FREQ_BANDS);
+    xtract_filterbank *mel_filters = xtract_init_mfcc(BLOCKSIZE, SAMPLERATE, XTRACT_EQUAL_GAIN, MFCC_FREQ_MIN, MFCC_FREQ_MAX, MFCC_FREQ_BANDS);
 
     /* create the window functions */
     window = xtract_init_window(BLOCKSIZE, XTRACT_HANN);

@@ -852,7 +852,14 @@ static int conf_call_n(const xtract_function_descriptor_t *d)
     case XTRACT_FAILSAFE_F0:
     case XTRACT_WAVELET_F0:
     case XTRACT_LAST_N:
+    case XTRACT_MMBSES:
+    case XTRACT_SPECTRAL_SUBBAND_CENTROIDS:
         return CONF_N;
+    case XTRACT_MFCC:
+    case XTRACT_MEL_SPECTROGRAM:
+    case XTRACT_GFCC:
+    case XTRACT_GAMMATONE_SPECTROGRAM:
+        return CONF_N / 2;
     default:
         return conf_min_n(d);
     }
@@ -944,7 +951,7 @@ UTEST(descriptors, every_feature_conforms_to_its_descriptor)
     double argf[XTRACT_MAXARGS];
     int argi[XTRACT_MAXARGS];
     double window[XTRACT_WINDOW_SIZE];
-    xtract_filterbank *mel = xtract_init_mfcc(CONF_N, 22050.0, XTRACT_EQUAL_GAIN, 100.0, 8000.0, CONF_FILTERS);
+    xtract_filterbank *mel = xtract_init_mfcc(CONF_N, 44100.0, XTRACT_EQUAL_GAIN, 100.0, 8000.0, CONF_FILTERS);
     xtract_cqt_kernel *cqt = xtract_init_cqt(CONF_N, 1000.0, 100.0, 1, 2, 0.01);
     xtract_context *ctx = xtract_context_new(CONF_LONGEST);
     xtract_last_n_state *last_n = xtract_last_n_state_new(CONF_N);

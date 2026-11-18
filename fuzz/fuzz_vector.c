@@ -11,13 +11,15 @@
  * features, each needs specific setup: a context, a mel/gammatone filterbank,
  * or bark band limits, plus an argv whose shape differs per feature. The
  * filterbanks, bark limits, and the context are built once at a fixed
- * power-of-two N in LLVMFuzzerInitialize. The filterbank features, whose
- * filterbank does not fix their N, and the features that need no such setup
- * (DCT, autocorrelation, AMDF, ASDF, LPC, LPCC, the moving-window features,
- * quantise and histogram) are called with a fuzzer-chosen N from 0 up to
- * it, which includes the lengths each of them rejects; every other call runs at that N. The input is allocated at exactly the length each call declares,
- * so a read past it is out of bounds to the sanitizer. Features are called
- * by name.
+ * power-of-two N in LLVMFuzzerInitialize. The features that need no such
+ * setup (DCT, autocorrelation, AMDF, ASDF, LPC, LPCC, the moving-window
+ * features, quantise and histogram) are called with a fuzzer-chosen N from 0
+ * up to it, which includes the lengths each of them rejects. A filterbank
+ * feature is called at the one N its filterbank serves or, when a bit of the
+ * input is set, at a fuzzer-chosen N, which it rejects unless it is that N.
+ * Every other call runs at the fixed N. The input is allocated at exactly
+ * the length each call declares, so a read past it is out of bounds to the
+ * sanitizer. Features are called by name.
  *
  * What is fuzzed: the input vector (always), a flag that passes a NULL argv,
  * and the plain scalar argv fields (spectrum type, peak/harmonic thresholds,
@@ -87,7 +89,6 @@ enum
 };
 
 static const double SR = 44100.0;
-static const double NYQUIST = 22050.0;
 
 static xtract_filterbank *mel;
 static xtract_filterbank *gammatone;
@@ -100,8 +101,8 @@ int LLVMFuzzerInitialize(int *argc, char ***argv)
     (void)argc;
     (void)argv;
 
-    mel = xtract_init_mfcc(VEC_N, NYQUIST, XTRACT_EQUAL_GAIN, 20.0, 8000.0, N_FILTERS);
-    gammatone = xtract_init_gfcc(VEC_N, NYQUIST, 20.0, 8000.0, N_FILTERS);
+    mel = xtract_init_mfcc(VEC_N, SR, XTRACT_EQUAL_GAIN, 20.0, 8000.0, N_FILTERS);
+    gammatone = xtract_init_gfcc(VEC_N, SR, 20.0, 8000.0, N_FILTERS);
 
     xtract_init_bark(VEC_N, SR, bark_limits);
     cqt = xtract_init_cqt(VEC_N, SR, 2000.0, 12, 36, 0.01);
@@ -113,7 +114,7 @@ int LLVMFuzzerInitialize(int *argc, char ***argv)
     return 0;
 }
 
-static int input_length(int feature, int n)
+static int input_length(int feature, int n, int any_length)
 {
     switch (feature)
     {
@@ -121,8 +122,10 @@ static int input_length(int feature, int n)
     case FZ_MEL_SPECTROGRAM:
     case FZ_GFCC:
     case FZ_GAMMATONE_SPECTROGRAM:
+        return any_length ? n : VEC_N / 2;
     case FZ_MMBSES:
     case FZ_SPECTRAL_SUBBAND_CENTROIDS:
+        return any_length ? n : VEC_N;
     case FZ_DCT:
     case FZ_AUTOCORRELATION:
     case FZ_AMDF:
@@ -170,6 +173,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     int feature;
     int null_argv;
+    int any_length;
     int n;
     int in_len;
     uint64_t n_raw;
@@ -185,6 +189,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 
     feature = data[0] % FZ_N_FEATURES;
     null_argv = data[1] & 1;
+    any_length = (data[1] >> 1) & 1;
     data += 2;
     size -= 2;
 
@@ -197,7 +202,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 
     memcpy(&n_raw, &fz[4], sizeof(n_raw));
     n = (int)(n_raw % (VEC_N + 1));
-    in_len = input_length(feature, n);
+    in_len = input_length(feature, n, any_length);
 
     /* At a length of 0 the allocation holds one element and the call receives
      * the pointer one past it: non-NULL, with nothing that may be read */

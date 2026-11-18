@@ -238,7 +238,7 @@ extern "C"
      *
      * XTRACT_NO_RESULT: the arguments are valid but the data has no answer, such as a zero amplitude sum, a zero denominator or no periodicity. The result is set to 0.
      *
-     * XTRACT_BAD_STATE: the context the function needs is missing or was created for fewer elements, the state or kernel it is given was created for a different size, or the filterbank it is given was built for a smaller N. The result is left untouched.
+     * XTRACT_BAD_STATE: the context the function needs is missing or was created for fewer elements, or the state, kernel or filterbank it is given was created for a different size. The result is left untouched.
      *
      * XTRACT_BAD_ARGV, XTRACT_BAD_VECTOR_SIZE and XTRACT_DENORMAL_FOUND are deprecated: XTRACT_ARGUMENT_ERROR is returned in their place, and they will be removed in 2.0.
      */
@@ -480,30 +480,30 @@ extern "C"
 
     /** \brief Build a mel filterbank
      *
-     * The filterbank has n_filters triangular filters whose peaks are equally spaced on the mel scale from freq_min, each filter spanning the peaks either side of its own and the first rising from 0 Hz (Rabiner and Juang 1993, section 4.5.6). Each filter has a gain for each of the N / 2 bins of an N-point transform from DC upward, bin k being at frequency k * nyquist / (N / 2).
+     * The filterbank has n_filters triangular filters whose peaks are equally spaced on the mel scale from freq_min, each filter spanning the peaks either side of its own and the first rising from 0 Hz (Rabiner and Juang 1993, section 4.5.6). Each filter has a gain for each of the N / 2 bins of an N-point transform from DC upward, bin k being at frequency k * sr / N.
      *
      * \param N: the size of the transform the filters will be applied to, at least 2 and even
-     * \param nyquist: half the sample rate in Hz, finite and above 0
+     * \param sr: the sample rate in Hz, finite and above 0
      * \param style: XTRACT_EQUAL_GAIN or XTRACT_EQUAL_AREA, as given in the enumeration xtract_mfcc_types_
      * \param freq_min: the peak frequency of the first filter in Hz, finite and at least 0
      * \param freq_max: the frequency in Hz the peaks step towards, reached one step beyond the last filter, finite and above freq_min
      * \param n_filters: the number of filters, at least 2
      * \return a pointer to the filterbank, or NULL if an argument is out of range or allocation fails
      */
-    xtract_filterbank *xtract_init_mfcc(const int N, const double nyquist, const int style, const double freq_min, const double freq_max, const int n_filters);
+    xtract_filterbank *xtract_init_mfcc(const int N, const double sr, const int style, const double freq_min, const double freq_max, const int n_filters);
 
     /** \brief Build a gammatone filterbank
      *
-     * The filterbank has n_filters gammatone filters whose centre frequencies are equally spaced on the ERB scale from freq_min to freq_max. Each filter has a gain for each of the N / 2 bins of an N-point transform from DC upward, bin k being at frequency k * nyquist / (N / 2).
+     * The filterbank has n_filters gammatone filters whose centre frequencies are equally spaced on the ERB scale from freq_min to freq_max. Each filter has a gain for each of the N / 2 bins of an N-point transform from DC upward, bin k being at frequency k * sr / N.
      *
      * \param N: the size of the transform the filters will be applied to, at least 2 and even
-     * \param nyquist: half the sample rate in Hz, finite and above 0
+     * \param sr: the sample rate in Hz, finite and above 0
      * \param freq_min: the centre frequency of the first filter in Hz, finite and at least 0
      * \param freq_max: the centre frequency of the last filter in Hz, finite and above freq_min
      * \param n_filters: the number of filters, at least 2
      * \return a pointer to the filterbank, or NULL if an argument is out of range or allocation fails
      */
-    xtract_filterbank *xtract_init_gfcc(const int N, const double nyquist, const double freq_min, const double freq_max, const int n_filters);
+    xtract_filterbank *xtract_init_gfcc(const int N, const double sr, const double freq_min, const double freq_max, const int n_filters);
 
     /** \brief Build a filterbank from the gains of the caller's own filters
      *
