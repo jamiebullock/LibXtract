@@ -21,6 +21,9 @@ include(UseSWIG)
 
 set_property(SOURCE xtract.i PROPERTY SWIG_MODULE_NAME xtract)
 set_property(SOURCE xtract.i PROPERTY INCLUDE_DIRECTORIES ${PROJECT_SOURCE_DIR}/include)
+# A change to a header that xtract.i includes regenerates the wrappers
+file(GLOB xtract_headers CONFIGURE_DEPENDS ${PROJECT_SOURCE_DIR}/include/xtract/*.h)
+set_property(SOURCE xtract.i PROPERTY DEPENDS ${xtract_headers})
 
 function(xtract_binding_requirement binding found)
     if(XTRACT_BUILD_${binding} STREQUAL "ON" AND NOT found)
