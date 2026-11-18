@@ -102,7 +102,7 @@ extern "C"
      * \param *data: a pointer to the first element in an array of doubles comprising two series of equal length: the first series in the first N/2 elements, the second in the second N/2 elements
      * \param N: the total number of elements in the array pointed to by *data (twice the series length), even and at least 3 * L, so that each series holds two segments
      * \param *argv: a pointer to an int: the segment length L, a power of two of at least 2
-     * \param *result: a pointer to an array of L/2 doubles: the coherence at the frequencies k * samplerate / L for k from 1 to L/2, the order of the amplitudes xtract_spectrum() gives without the DC component. A frequency at which either series has no power is 0, and when that is so at every frequency there is no result
+     * \param *result: a pointer to an array of L/2 doubles: the coherence at the frequencies k * samplerate / L for k from 1 to L/2. A frequency at which either series has no power is 0, and when that is so at every frequency there is no result
      */
     int xtract_coherence(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 

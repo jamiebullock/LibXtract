@@ -19,12 +19,30 @@
 #include "xtract_macros_private.h"
 #include "xtract_sort_private.h"
 
+#ifdef USE_OOURA
+/* rdft leaves DC in fft[0], the Nyquist bin in fft[1] and bin n in the pair
+ * from fft[2 * n], with the imaginary part as sum a[j] sin(2 pi j n / N): the
+ * conjugate of the transform whose phases xtract_spectrum() gives */
+static void transform_bin(const double *fft, const unsigned int n, double *real, double *imag)
+{
+    *real = fft[n * 2];
+    *imag = n == 0 ? 0.0 : -fft[n * 2 + 1];
+}
+#else
+/* vDSP leaves the Nyquist bin in the imaginary part of bin 0, whose own
+ * imaginary part is 0 */
+static void transform_bin(const DSPDoubleSplitComplex *fft, const unsigned int n, double *real, double *imag)
+{
+    *real = fft->realp[n];
+    *imag = n == 0 ? 0.0 : fft->imagp[n];
+}
+#endif
+
 int xtract_spectrum(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
     int vector = 0;
-    int withDC = 0;
     int normalise = 0;
-    double type, dc, norm;
+    double type, norm;
     double q = 0.0;
     double temp = 0.0;
     double max = 0.0;
@@ -32,7 +50,6 @@ int xtract_spectrum(xtract_context *ctx, const double *data, const int N, const 
     double real = 0.0;
     double imag = 0.0;
     unsigned int n = 0;
-    unsigned int m = 0;
     unsigned int M = N >> 1;
     double *scratch;
 #ifdef USE_OOURA
@@ -48,14 +65,12 @@ int xtract_spectrum(xtract_context *ctx, const double *data, const int N, const 
 
     q = *(double *)argv;
     type = *((double *)argv + 1);
-    dc = *((double *)argv + 2);
-    norm = *((double *)argv + 3);
+    norm = *((double *)argv + 2);
     if (!isfinite(q) || q <= 0.0 ||
         !(type >= XTRACT_MAGNITUDE_SPECTRUM && type <= XTRACT_MAGNITUDE_PHASE_SPECTRUM) ||
-        (dc != 0.0 && dc != 1.0) || (norm != 0.0 && norm != 1.0))
+        (norm != 0.0 && norm != 1.0))
         return XTRACT_ARGUMENT_ERROR;
     vector = (int)type;
-    withDC = (int)dc;
     normalise = (int)norm;
 
     scratch = xtract_scratch_take(ctx, N, (size_t)N);
@@ -63,10 +78,7 @@ int xtract_spectrum(xtract_context *ctx, const double *data, const int N, const 
         return XTRACT_BAD_STATE;
 
 #ifdef USE_OOURA
-    /* ooura is in-place
-     * the output format is
-     * a[0] - DC, a[1] - nyquist, a[2...N-1] - remaining bins
-     */
+    /* ooura is in-place */
     fft = scratch;
     memcpy(fft, data, N * sizeof(double));
 
@@ -87,47 +99,9 @@ int xtract_spectrum(xtract_context *ctx, const double *data, const int N, const 
     switch (vector)
     {
     case XTRACT_LOG_MAGNITUDE_SPECTRUM:
-        for (n = 0, m = 0; m < M; ++n, ++m)
+        for (n = 0; n < M; ++n)
         {
-            if (n == 0 && !withDC) /* discard DC and keep Nyquist */
-            {
-                ++n;
-            }
-#ifdef USE_OOURA
-            /* OOURA discards the imaginary parts of DC and Nyquist, which are always 0 */
-            if (n == M && !withDC)
-            {
-                real = fft[1];
-                imag = 0.0;
-            }
-            else if (n == 0 && withDC)
-            {
-                real = fft[0];
-                imag = 0.0;
-            }
-            else
-            {
-                real = fft[n * 2];
-                imag = fft[n * 2 + 1];
-            }
-#else
-            if (n == M && !withDC)
-            {
-                real = fft->imagp[0];
-                imag = 0.0;
-            }
-            else if (n == 0 && withDC)
-            {
-                real = fft->realp[0];
-                imag = 0.0;
-            }
-            else
-            {
-                real = fft->realp[n];
-                imag = fft->imagp[n];
-            }
-#endif
-
+            transform_bin(fft, n, &real, &imag);
             temp = XTRACT_SQ(real) + XTRACT_SQ(imag);
             if (temp > XTRACT_LOG_LIMIT)
             {
@@ -137,227 +111,72 @@ int xtract_spectrum(xtract_context *ctx, const double *data, const int N, const 
             {
                 temp = XTRACT_LOG_LIMIT_DB;
             }
-            result[m] =
-                /* Scaling */
-                (temp + XTRACT_DB_SCALE_OFFSET) /
-                XTRACT_DB_SCALE_OFFSET;
-
-            XTRACT_SET_FREQUENCY;
-            XTRACT_GET_MAX;
+            result[n] = (temp + XTRACT_DB_SCALE_OFFSET) / XTRACT_DB_SCALE_OFFSET;
+            result[M + n] = n * q;
         }
         break;
 
     case XTRACT_POWER_SPECTRUM:
-        for (n = 0, m = 0; m < M; ++n, ++m)
+        for (n = 0; n < M; ++n)
         {
-            if (n == 0 && !withDC) /* discard DC and keep Nyquist */
-            {
-                ++n;
-            }
-#ifdef USE_OOURA
-            /* OOURA discards the imaginary parts of DC and Nyquist, which are always 0 */
-            if (n == M && !withDC)
-            {
-                real = fft[1];
-                imag = 0.0;
-            }
-            else if (n == 0 && withDC)
-            {
-                real = fft[0];
-                imag = 0.0;
-            }
-            else
-            {
-                real = fft[n * 2];
-                imag = fft[n * 2 + 1];
-            }
-#else
-            if (n == M && !withDC)
-            {
-                real = fft->imagp[0];
-                imag = 0.0;
-            }
-            else if (n == 0 && withDC)
-            {
-                real = fft->realp[0];
-                imag = 0.0;
-            }
-            else
-            {
-                real = fft->realp[n];
-                imag = fft->imagp[n];
-            }
-#endif
-
-            result[m] = (XTRACT_SQ(real) + XTRACT_SQ(imag)) / NxN;
-            XTRACT_SET_FREQUENCY;
-            XTRACT_GET_MAX;
+            transform_bin(fft, n, &real, &imag);
+            result[n] = (XTRACT_SQ(real) + XTRACT_SQ(imag)) / NxN;
+            result[M + n] = n * q;
         }
         break;
 
     case XTRACT_LOG_POWER_SPECTRUM:
-        for (n = 0, m = 0; m < M; ++n, ++m)
+        for (n = 0; n < M; ++n)
         {
-            if (n == 0 && !withDC) /* discard DC and keep Nyquist */
-            {
-                ++n;
-            }
-#ifdef USE_OOURA
-            /* OOURA discards the imaginary parts of DC and Nyquist, which are always 0 */
-            if (n == M && !withDC)
-            {
-                real = fft[1];
-                imag = 0.0;
-            }
-            else if (n == 0 && withDC)
-            {
-                real = fft[0];
-                imag = 0.0;
-            }
-            else
-            {
-                real = fft[n * 2];
-                imag = fft[n * 2 + 1];
-            }
-#else
-            if (n == M && !withDC)
-            {
-                real = fft->imagp[0];
-                imag = 0.0;
-            }
-            else if (n == 0 && withDC)
-            {
-                real = fft->realp[0];
-                imag = 0.0;
-            }
-            else
-            {
-                real = fft->realp[n];
-                imag = fft->imagp[n];
-            }
-#endif
-
+            transform_bin(fft, n, &real, &imag);
             if ((temp = XTRACT_SQ(real) + XTRACT_SQ(imag)) >
                 XTRACT_LOG_LIMIT)
                 temp = log(temp / NxN);
             else
                 temp = XTRACT_LOG_LIMIT_DB;
 
-            result[m] = (temp + XTRACT_DB_SCALE_OFFSET) /
+            result[n] = (temp + XTRACT_DB_SCALE_OFFSET) /
                         XTRACT_DB_SCALE_OFFSET;
-            XTRACT_SET_FREQUENCY;
-            XTRACT_GET_MAX;
+            result[M + n] = n * q;
         }
         break;
 
     case XTRACT_MAGNITUDE_PHASE_SPECTRUM:
-        for (n = 0, m = 0; m < M; ++n, ++m)
+        for (n = 0; n < M; ++n)
         {
-            if (n == 0 && !withDC) /* discard DC and keep Nyquist */
-            {
-                ++n;
-            }
-#ifdef USE_OOURA
-            /* OOURA discards the imaginary parts of DC and Nyquist, which are always 0 */
-            if (n == M && !withDC)
-            {
-                real = fft[1];
-                imag = 0.0;
-            }
-            else if (n == 0 && withDC)
-            {
-                real = fft[0];
-                imag = 0.0;
-            }
-            else
-            {
-                /* rdft returns the imaginary part as sum a[j] sin(2 pi j k / n),
-                 * the conjugate of the transform whose phases are given */
-                real = fft[n * 2];
-                imag = -fft[n * 2 + 1];
-            }
-#else
-            if (n == M && !withDC)
-            {
-                real = fft->imagp[0];
-                imag = 0.0;
-            }
-            else if (n == 0 && withDC)
-            {
-                real = fft->realp[0];
-                imag = 0.0;
-            }
-            else
-            {
-                real = fft->realp[n];
-                imag = fft->imagp[n];
-            }
-#endif
+            transform_bin(fft, n, &real, &imag);
             /* Magnitudes in the first half, phases in the second -- replacing
              * the bin frequencies, which are a deterministic n * q the caller
-             * can recompute. result[m] reconstructs to real/imag via
+             * can recompute. result[n] reconstructs to real/imag via
              * magnitude * cos/sin(phase). */
-            result[m] = sqrt(XTRACT_SQ(real) + XTRACT_SQ(imag)) / (double)N;
-            result[M + m] = atan2(imag, real);
-            XTRACT_GET_MAX;
+            result[n] = sqrt(XTRACT_SQ(real) + XTRACT_SQ(imag)) / (double)N;
+            result[M + n] = atan2(imag, real);
         }
         break;
 
     default:
         /* MAGNITUDE_SPECTRUM */
-        for (n = 0, m = 0; m < M; ++n, ++m)
+        for (n = 0; n < M; ++n)
         {
-            if (n == 0 && !withDC) /* discard DC and keep Nyquist */
-            {
-                ++n;
-            }
-#ifdef USE_OOURA
-            /* OOURA discards the imaginary parts of DC and Nyquist, which are always 0 */
-            if (n == M && !withDC)
-            {
-                real = fft[1];
-                imag = 0.0;
-            }
-            else if (n == 0 && withDC)
-            {
-                real = fft[0];
-                imag = 0.0;
-            }
-            else
-            {
-                real = fft[n * 2];
-                imag = fft[n * 2 + 1];
-            }
-#else
-            if (n == M && !withDC)
-            {
-                real = fft->imagp[0];
-                imag = 0.0;
-            }
-            else if (n == 0 && withDC)
-            {
-                real = fft->realp[0];
-                imag = 0.0;
-            }
-            else
-            {
-                real = fft->realp[n];
-                imag = fft->imagp[n];
-            }
-#endif
-            result[m] = sqrt(XTRACT_SQ(real) + XTRACT_SQ(imag)) / (double)N;
-            XTRACT_SET_FREQUENCY;
-            XTRACT_GET_MAX;
+            transform_bin(fft, n, &real, &imag);
+            result[n] = sqrt(XTRACT_SQ(real) + XTRACT_SQ(imag)) / (double)N;
+            result[M + n] = n * q;
         }
         break;
     }
 
-    if (normalise && max != 0.0)
+    if (normalise)
     {
+        for (n = 0; n < M; n++)
+            max = result[n] > max ? result[n] : max;
+
         /* Scale the magnitude/power coefficients in the first half; the second
          * half (bin frequencies, or phases for MAGNITUDE_PHASE) is left as-is. */
-        for (n = 0; n < M; n++)
-            result[n] /= max;
+        if (max != 0.0)
+        {
+            for (n = 0; n < M; n++)
+                result[n] /= max;
+        }
     }
 
     xtract_scratch_return(ctx, scratch, (size_t)N);
@@ -808,7 +627,7 @@ int xtract_peak_spectrum(xtract_context *ctx, const double *data, const int N, c
         {
             if (data[n] > data[n - 1] && n + 1 < N && data[n] > data[n + 1])
             {
-                result[N + n] = q * (n + 1 + (p = .5 * ((y = data[n - 1]) - (y3 = data[n + 1])) / (data[n - 1] - 2 * (y2 = data[n]) + data[n + 1])));
+                result[N + n] = q * (n + (p = .5 * ((y = data[n - 1]) - (y3 = data[n + 1])) / (data[n - 1] - 2 * (y2 = data[n]) + data[n + 1])));
                 result[n] = y2 - .25 * (y - y3) * p;
             }
             else

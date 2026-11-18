@@ -235,7 +235,7 @@ extern "C"
      * \param *data: a pointer to the first element in an array of doubles representing the magnitude coefficients from the spectrum of an audio vector, (e.g. the first half of the array pointed to by *result from xtract_spectrum().
      * \param N: the number of elements to be considered, at least 1
      * \param *argv: a pointer to an array of two doubles: argv[0] is the bin spacing in Hz, the sample rate divided by the transform length (twice N for the first half of an xtract_spectrum() output), finite and at least 0, and argv[1] is the rolloff threshold as a percentage from 0 to 100 (e.g. 95.0 for the 95th percentile).
-     * \param *result: the spectral rolloff in Hz of N values from the array pointed to by *data. This is the point in the spectrum below which argv[1] percent of the energy is distributed.
+     * \param *result: the spectral rolloff in Hz of N values from the array pointed to by *data, the first of them being bin 0: the frequency of the first bin at which the running sum of the coefficients reaches argv[1] percent of their total.
      */
     int xtract_rolloff(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
@@ -416,7 +416,7 @@ extern "C"
     /** \brief Extract the Pitch of an input vector using Harmonic Product Spectrum (HPS) analysis
      *
      * \param *ctx: a pointer to a context, or NULL
-     * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector, as produced by xtract_spectrum() in either of its layouts. The first half of the array holds the magnitude of each frequency bin and the second half the bin frequencies, which must be an ascending grid starting at zero or at one bin; any other grid is an argument error
+     * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector, as produced by xtract_spectrum(). The first half of the array holds the magnitude of each frequency bin and the second half the bin frequencies, which must be an ascending grid starting at zero or at one bin; any other grid is an argument error
      * \param N: The length of the vector pointed to by *data, at least 4 and even.
      * \param *argv: a pointer to a double giving the number of harmonics to multiply, from 2 to 16 (any other value is an argument error). More harmonics make the estimate robust to a weak or missing low harmonic at the cost of a smaller range of fundamentals that fit below the Nyquist bin
      * \param *result: the fundamental frequency in Hertz, interpolated between bins, or 0 when the spectrum is silent or too short for the number of harmonics and no result is returned
