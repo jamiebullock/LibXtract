@@ -88,39 +88,19 @@ enum
 static const double SR = 44100.0;
 static const double NYQUIST = 22050.0;
 
-static xtract_mel_filter mel;
-static xtract_mel_filter gammatone;
+static xtract_filterbank *mel;
+static xtract_filterbank *gammatone;
 static xtract_cqt_kernel *cqt;
 static int bark_limits[XTRACT_BARK_BANDS];
 static xtract_context *ctx;
-
-static double **alloc_filterbank(void)
-{
-    double **f = (double **)malloc(N_FILTERS * sizeof(double *));
-    int i;
-    if (f == NULL)
-        return NULL;
-    for (i = 0; i < N_FILTERS; i++)
-        f[i] = (double *)calloc(VEC_N, sizeof(double));
-    return f;
-}
 
 int LLVMFuzzerInitialize(int *argc, char ***argv)
 {
     (void)argc;
     (void)argv;
 
-    mel.n_filters = N_FILTERS;
-    mel.filters = alloc_filterbank();
-    mel.dct_table = xtract_init_dct(N_FILTERS);
-    xtract_init_mfcc(VEC_N, NYQUIST, XTRACT_EQUAL_GAIN, 20.0, 8000.0,
-                     N_FILTERS, mel.filters);
-
-    gammatone.n_filters = N_FILTERS;
-    gammatone.filters = alloc_filterbank();
-    gammatone.dct_table = NULL;
-    xtract_init_gfcc(VEC_N, NYQUIST, 20.0, 8000.0, N_FILTERS,
-                     gammatone.filters);
+    mel = xtract_init_mfcc(VEC_N, NYQUIST, XTRACT_EQUAL_GAIN, 20.0, 8000.0, N_FILTERS);
+    gammatone = xtract_init_gfcc(VEC_N, NYQUIST, 20.0, 8000.0, N_FILTERS);
 
     xtract_init_bark(VEC_N, SR, bark_limits);
     cqt = xtract_init_cqt(VEC_N, SR, 2000.0, 12, 36, 0.01);
@@ -261,22 +241,22 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
         xtract_cqt(ctx, input, VEC_N, maybe_null(null_argv, cqt), result);
         break;
     case FZ_MFCC:
-        xtract_mfcc(ctx, input, VEC_N, maybe_null(null_argv, &mel), result);
+        xtract_mfcc(ctx, input, VEC_N, maybe_null(null_argv, mel), result);
         break;
     case FZ_MEL_SPECTROGRAM:
-        xtract_mel_spectrogram(ctx, input, VEC_N, maybe_null(null_argv, &mel), result);
+        xtract_mel_spectrogram(ctx, input, VEC_N, maybe_null(null_argv, mel), result);
         break;
     case FZ_MMBSES:
-        xtract_mmbses(ctx, input, VEC_N, maybe_null(null_argv, &mel), result);
+        xtract_mmbses(ctx, input, VEC_N, maybe_null(null_argv, mel), result);
         break;
     case FZ_SPECTRAL_SUBBAND_CENTROIDS:
-        xtract_spectral_subband_centroids(ctx, input, VEC_N, maybe_null(null_argv, &mel), result);
+        xtract_spectral_subband_centroids(ctx, input, VEC_N, maybe_null(null_argv, mel), result);
         break;
     case FZ_GFCC:
-        xtract_gfcc(ctx, input, VEC_N, maybe_null(null_argv, &gammatone), result);
+        xtract_gfcc(ctx, input, VEC_N, maybe_null(null_argv, gammatone), result);
         break;
     case FZ_GAMMATONE_SPECTROGRAM:
-        xtract_gammatone_spectrogram(ctx, input, VEC_N, maybe_null(null_argv, &gammatone), result);
+        xtract_gammatone_spectrogram(ctx, input, VEC_N, maybe_null(null_argv, gammatone), result);
         break;
     case FZ_BARK_COEFFICIENTS:
         xtract_bark_coefficients(ctx, input, VEC_N, maybe_null(null_argv, bark_limits), result);

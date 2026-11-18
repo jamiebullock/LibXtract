@@ -176,7 +176,7 @@ UTEST(descriptors, appended_features_are_fully_described)
     ASSERT_TRUE(fd[XTRACT_PEAK].algo.name[0] != 0);
 
     ASSERT_EQ(fd[XTRACT_MMBSES].argc, 1);
-    ASSERT_EQ(fd[XTRACT_MMBSES].argv.type, XTRACT_MEL_FILTER);
+    ASSERT_EQ(fd[XTRACT_MMBSES].argv.type, XTRACT_FILTERBANK);
     ASSERT_EQ(fd[XTRACT_MMBSES].argv.donor[0], XTRACT_INIT_MFCC);
     ASSERT_EQ(fd[XTRACT_MMBSES].data.format, XTRACT_SPECTRAL_MAGNITUDE_PHASE);
     ASSERT_EQ(fd[XTRACT_MMBSES].result.vector.format, XTRACT_MEL_COEFFS);
@@ -184,7 +184,7 @@ UTEST(descriptors, appended_features_are_fully_described)
     ASSERT_EQ(fd[XTRACT_MMBSES].algo.year, 2013);
 
     ASSERT_EQ(fd[XTRACT_SPECTRAL_SUBBAND_CENTROIDS].argc, 1);
-    ASSERT_EQ(fd[XTRACT_SPECTRAL_SUBBAND_CENTROIDS].argv.type, XTRACT_MEL_FILTER);
+    ASSERT_EQ(fd[XTRACT_SPECTRAL_SUBBAND_CENTROIDS].argv.type, XTRACT_FILTERBANK);
     ASSERT_EQ(fd[XTRACT_SPECTRAL_SUBBAND_CENTROIDS].argv.donor[0], XTRACT_INIT_MFCC);
     ASSERT_EQ(fd[XTRACT_SPECTRAL_SUBBAND_CENTROIDS].data.format, XTRACT_SPECTRAL);
     ASSERT_EQ(fd[XTRACT_SPECTRAL_SUBBAND_CENTROIDS].data.unit, XTRACT_ANY_AMPLITUDE_HERTZ);
@@ -892,7 +892,7 @@ static void conf_set(const xtract_function_descriptor_t *d, double *argf, int *a
 }
 
 static const void *conf_argv(const xtract_function_descriptor_t *d, double *argf, int *argi,
-                             const xtract_mel_filter *mel, const int *bark, const double *window,
+                             const xtract_filterbank *mel, const int *bark, const double *window,
                              const xtract_cqt_kernel *cqt, const xtract_last_n_state *last_n,
                              const xtract_wavelet_f0_state *wavelet_f0)
 {
@@ -900,7 +900,7 @@ static const void *conf_argv(const xtract_function_descriptor_t *d, double *argf
 
     if (d->argc == 0)
         return NULL;
-    if (d->argv.type == XTRACT_MEL_FILTER)
+    if (d->argv.type == XTRACT_FILTERBANK)
         return mel;
     if (d->argv.type == XTRACT_CQT_KERNEL)
         return cqt;
@@ -944,9 +944,7 @@ UTEST(descriptors, every_feature_conforms_to_its_descriptor)
     double argf[XTRACT_MAXARGS];
     int argi[XTRACT_MAXARGS];
     double window[XTRACT_WINDOW_SIZE];
-    double row_store[CONF_FILTERS][CONF_N];
-    double *rows[CONF_FILTERS];
-    xtract_mel_filter mel;
+    xtract_filterbank *mel = xtract_init_mfcc(CONF_N, 22050.0, XTRACT_EQUAL_GAIN, 100.0, 8000.0, CONF_FILTERS);
     xtract_cqt_kernel *cqt = xtract_init_cqt(CONF_N, 1000.0, 100.0, 1, 2, 0.01);
     xtract_context *ctx = xtract_context_new(CONF_LONGEST);
     xtract_last_n_state *last_n = xtract_last_n_state_new(CONF_N);
@@ -956,16 +954,11 @@ UTEST(descriptors, every_feature_conforms_to_its_descriptor)
     const void *argv;
 
     ASSERT_TRUE(fd != NULL);
+    ASSERT_TRUE(mel != NULL);
     ASSERT_TRUE(cqt != NULL);
     ASSERT_TRUE(ctx != NULL);
     ASSERT_TRUE(last_n != NULL);
     ASSERT_TRUE(wavelet_f0 != NULL);
-    for (i = 0; i < CONF_FILTERS; i++)
-        rows[i] = row_store[i];
-    xtract_init_mfcc(CONF_N, 22050.0, XTRACT_EQUAL_GAIN, 100.0, 8000.0, CONF_FILTERS, rows);
-    mel.n_filters = CONF_FILTERS;
-    mel.filters = rows;
-    mel.dct_table = NULL;
     xtract_init_bark(2 * CONF_N, 44100.0, bark);
     for (i = 0; i < XTRACT_WINDOW_SIZE; i++)
         window[i] = 1.0;
@@ -977,7 +970,7 @@ UTEST(descriptors, every_feature_conforms_to_its_descriptor)
         const int call_n = conf_call_n(d);
 
         conf_fill_data(d, data, call_n);
-        argv = conf_argv(d, argf, argi, &mel, bark, window, cqt, last_n, wavelet_f0);
+        argv = conf_argv(d, argf, argi, mel, bark, window, cqt, last_n, wavelet_f0);
 
         rv = conf_call(f, ctx, data, call_n, argv, result);
         if (rv == XTRACT_FEATURE_NOT_IMPLEMENTED)
@@ -1039,5 +1032,6 @@ UTEST(descriptors, every_feature_conforms_to_its_descriptor)
     xtract_last_n_state_delete(last_n);
     xtract_context_delete(ctx);
     xtract_free_cqt(cqt);
+    xtract_free_filterbank(mel);
     ASSERT_EQ(xtract_free_descriptors(fd), XTRACT_SUCCESS);
 }

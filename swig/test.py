@@ -69,6 +69,17 @@ xtract.xtract_context_delete(ctx)
 for i in range(len):
     print(result[i])
 
+print('Computing a mel spectrogram...')
+
+mel = xtract.xtract_init_mfcc(len, 22050.0, xtract.XTRACT_EQUAL_GAIN, 100.0, 8000.0, 2)
+energies = xtract.doubleArray(2)
+
+if xtract.xtract_mel_spectrogram(None, result, len // 2, mel, energies) != xtract.XTRACT_SUCCESS:
+    sys.exit(1)
+
+xtract.xtract_free_filterbank(mel)
+
+print('The log energies are %.2f, %.2f' % (energies[0], energies[1]))
 
 print('Computing windowed subframes...')
 

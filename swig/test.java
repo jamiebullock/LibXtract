@@ -63,6 +63,22 @@ public class test {
             System.out.println(result.getitem(i));
         }
 
+        System.out.println("Computing a mel spectrogram...");
+
+        SWIGTYPE_p_xtract_filterbank_ mel = xtract.xtract_init_mfcc(len, 22050.0,
+                xtract_mfcc_types_.XTRACT_EQUAL_GAIN.swigValue(), 100.0, 8000.0, 2);
+        doubleArray energies = new doubleArray(2);
+
+        if (xtract.xtract_mel_spectrogram(null, result.cast(), len / 2,
+                xtract.filterbank_to_voidp(mel), energies.cast()) != xtract_return_codes_.XTRACT_SUCCESS.swigValue()) {
+            System.exit(1);
+        }
+
+        xtract.xtract_free_filterbank(mel);
+
+        System.out.printf("The log energies are %.2f, %.2f%n", energies.getitem(0), energies.getitem(1));
+        energies.delete();
+
         System.out.println("Testing stateful functions...");
 
         int N = 4;

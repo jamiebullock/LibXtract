@@ -45,6 +45,19 @@ for (let i = 0; i < len; i++) {
     console.log(result.getitem(i));
 }
 
+console.log('Computing a mel spectrogram...');
+
+const mel = xtract.xtract_init_mfcc(len, 22050.0, xtract.XTRACT_EQUAL_GAIN, 100.0, 8000.0, 2);
+const energies = new xtract.doubleArray(2);
+
+if (xtract.xtract_mel_spectrogram(null, result.cast(), len / 2, xtract.filterbank_to_voidp(mel), energies.cast()) !== xtract.XTRACT_SUCCESS) {
+    process.exit(1);
+}
+
+xtract.xtract_free_filterbank(mel);
+
+console.log('The log energies are ' + energies.getitem(0).toFixed(2) + ', ' + energies.getitem(1).toFixed(2));
+
 console.log('Testing stateful functions...');
 
 const N = 4;
