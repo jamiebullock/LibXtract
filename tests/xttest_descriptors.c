@@ -935,7 +935,7 @@ static void conf_fill_data(const xtract_function_descriptor_t *d, double *data, 
     if (conf_two_half(d))
     {
         for (i = n / 2; i < n; i++)
-            data[i] = (i - n / 2 + 1) * 100.0;
+            data[i] = (i - n / 2) * 100.0;
     }
 }
 

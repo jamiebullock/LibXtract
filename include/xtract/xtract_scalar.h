@@ -416,7 +416,7 @@ extern "C"
     /** \brief Extract the Pitch of an input vector using Harmonic Product Spectrum (HPS) analysis
      *
      * \param *ctx: a pointer to a context, or NULL
-     * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector, as produced by xtract_spectrum(). The first half of the array holds the magnitude of each frequency bin and the second half the bin frequencies, which must be an ascending grid starting at zero or at one bin; any other grid is an argument error
+     * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector, as produced by xtract_spectrum(). The first half of the array holds the magnitude of each frequency bin and the second half the bin frequencies, which must rise from zero in equal steps; any other grid is an argument error
      * \param N: The length of the vector pointed to by *data, at least 4 and even.
      * \param *argv: a pointer to a double giving the number of harmonics to multiply, from 2 to 16 (any other value is an argument error). More harmonics make the estimate robust to a weak or missing low harmonic at the cost of a smaller range of fundamentals that fit below the Nyquist bin
      * \param *result: the fundamental frequency in Hertz, interpolated between bins, or 0 when the spectrum is silent or too short for the number of harmonics and no result is returned

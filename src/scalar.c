@@ -1160,14 +1160,14 @@ int xtract_nonzero_count(xtract_context *ctx, const double *data, const int N, c
 /* Sum of log magnitudes over the first R harmonics of coefficient i, each
  * floored at XTRACT_LOG_LIMIT so that an empty bin lowers a candidate's
  * score by a finite amount. */
-static double hps_score(const double *data, const int i, const int off, const int R)
+static double hps_score(const double *data, const int i, const int R)
 {
     double score = 0.0;
     int r;
 
     for (r = 1; r <= R; ++r)
     {
-        const double magnitude = data[r * (i + off) - off];
+        const double magnitude = data[r * i];
 
         score += log(magnitude < XTRACT_LOG_LIMIT ? XTRACT_LOG_LIMIT : magnitude);
     }
@@ -1177,14 +1177,12 @@ static double hps_score(const double *data, const int i, const int off, const in
 
 int xtract_hps(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
-    /* The frequency array says where the grid starts: when freqs[0] == q,
-     * coefficient m is bin m + 1 and off == 1; when freqs[0] == 0, as
-     * xtract_spectrum() gives it, coefficient m is bin m and off == 0.
-     * Harmonic r of coefficient i is then coefficient r * (i + off) - off,
-     * and a DC coefficient is never a candidate. */
+    /* Coefficient i is bin i, as xtract_spectrum() gives it, so harmonic r of
+     * coefficient i is coefficient r * i. Bin 0 is never a candidate. */
     const int M = N / 2;
+    const int first = 1;
     const double *freqs = data + M;
-    int R, i, off, first, count, peak_index, position1_lwr;
+    int R, i, count, peak_index, position1_lwr;
     double harmonics, q, score, peak, largest1_lwr, ratio1, below, above, denominator, delta;
 
     if (N < 4 || (N & 1) || argv == NULL)
@@ -1217,34 +1215,27 @@ int xtract_hps(xtract_context *ctx, const double *data, const int N, const void 
     }
 
     q = freqs[1] - freqs[0];
-    if (q <= 0.0)
+    if (!(q > 0.0))
     {
         *result = 0;
         return XTRACT_ARGUMENT_ERROR;
     }
-    off = xtract_argv_int(floor(freqs[0] / q + 0.5));
-    if (off < 0 || off > 1)
-    {
-        /* Neither xtract_spectrum layout: the grid starts neither at 0 nor at
-         * one bin */
-        *result = 0;
-        return XTRACT_ARGUMENT_ERROR;
-    }
-    first = off ? 0 : 1;
 
-    /* Harmonic indexing and interpolation both assume the whole grid keeps
-     * the spacing of its first two bins */
-    for (i = 2; i < M; ++i)
+    /* Harmonic indexing and interpolation both assume coefficient i is at
+     * i * q. The comparison is false for NaN, so a grid holding one is
+     * rejected with the rest. */
+    for (i = 0; i < M; ++i)
     {
-        if (fabs(freqs[i] - (freqs[0] + i * q)) > 1e-9 * q)
+        if (!(fabs(freqs[i] - i * q) <= 1e-9 * q))
         {
             *result = 0;
             return XTRACT_ARGUMENT_ERROR;
         }
     }
 
-    /* Candidates are the coefficients whose harmonic R is still in range */
-    count = (M + off) / R - off;
+    /* Candidates are the coefficients whose harmonic R, coefficient R * i,
+     * is still in range */
+    count = (M - 1) / R + 1;
     if (count - first <= 1)
     {
         *result = 0;
@@ -1252,10 +1243,10 @@ int xtract_hps(xtract_context *ctx, const double *data, const int N, const void 
     }
 
     peak_index = first;
-    peak = hps_score(data, first, off, R);
+    peak = hps_score(data, first, R);
     for (i = first + 1; i < count; ++i)
     {
-        score = hps_score(data, i, off, R);
+        score = hps_score(data, i, R);
         if (score > peak)
         {
             peak = score;
@@ -1285,8 +1276,7 @@ int xtract_hps(xtract_context *ctx, const double *data, const int N, const void 
 
     ratio1 = data[position1_lwr] / data[peak_index];
 
-    if ((position1_lwr + off) > (peak_index + off) * 0.4 && (position1_lwr + off) < (peak_index + off) * 0.6 &&
-        ratio1 > 0.1)
+    if (position1_lwr > peak_index * 0.4 && position1_lwr < peak_index * 0.6 && ratio1 > 0.1)
         peak_index = position1_lwr;
 
     /* Parabolic interpolation over the log magnitude of the chosen
