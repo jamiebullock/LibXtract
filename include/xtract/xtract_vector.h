@@ -99,7 +99,7 @@ extern "C"
     /** \brief Extract Mel based Multi-Band Spectral Entropy Signature coefficients
      *
      * \param *ctx: a pointer to a context, or NULL
-     * \param *data: a magnitude/phase spectrum with DC included, the *result of xtract_spectrum() by XTRACT_MAGNITUDE_PHASE_SPECTRUM with the third argument 1, so that element k is bin k as the filterbank expects: the first N/2 elements are the bin magnitudes from DC upward and the next N/2 their phases
+     * \param *data: a magnitude/phase spectrum with DC included, the *result of xtract_spectrum() by XTRACT_MAGNITUDE_PHASE_SPECTRUM with argv[2] == 1, so that element k is bin k as the filterbank expects: the first N/2 elements are the bin magnitudes from DC upward and the next N/2 their phases
      * \param N: the number of array elements to be considered (the full magnitude+phase array length; N/2 frequency bins are processed), at least 2 and even, and equal to the N the filterbank was built for
      * \param *argv: a pointer to an xtract_filterbank from xtract_init_mfcc() or xtract_init_filterbank(), built for the size of the transform that produced the spectrum
      * \param *result: a pointer to an array of n_filters elements containing the resultant MEL-MBSES
@@ -345,7 +345,7 @@ extern "C"
     /** \brief Extract the constant-Q spectrum of a magnitude/phase spectrum: the magnitude in each band of a kernel from xtract_init_cqt(), followed by the band centre frequencies
      *
      * \param *ctx: a pointer to a context created for at least N elements
-     * \param *data: a magnitude/phase spectrum with DC included, the *result of xtract_spectrum() by XTRACT_MAGNITUDE_PHASE_SPECTRUM with the third argument 1: the first N/2 elements are the bin magnitudes from DC upward and the next N/2 their phases
+     * \param *data: a magnitude/phase spectrum with DC included, the *result of xtract_spectrum() by XTRACT_MAGNITUDE_PHASE_SPECTRUM with argv[2] == 1: the first N/2 elements are the bin magnitudes from DC upward and the next N/2 their phases
      * \param N: the number of array elements to be considered, at least 2 and even, and equal to the N the kernel was built for
      * \param *argv: a pointer to an xtract_cqt_kernel from xtract_init_cqt()
      * \param *result: a pointer to an array of twice the kernel's n_bins doubles: the n_bins band magnitudes, on the scale of the magnitudes given, followed by the band centre frequencies in Hz. This is the layout of the *result of xtract_spectrum(), so it can be passed on to xtract_chroma(), xtract_spectral_contrast() and the other functions that take a spectrum with its frequencies
