@@ -17,6 +17,10 @@
 #define VERIFY_MAX_FILTERS 8
 #endif
 
+#if VERIFY_MAX_FILTERS < 1
+#error "VERIFY_MAX_FILTERS must be at least 1: with no filter count to choose, the filterbank proofs would pass without running"
+#endif
+
 #ifndef VERIFY_MAX_BANDS
 #define VERIFY_MAX_BANDS 2
 #endif
@@ -38,7 +42,7 @@ static xtract_filterbank *nondet_filterbank(void)
     f->N = 2 * nondet_between(1, VERIFY_SMALL_N);
     f->n_filters = nondet_between(1, VERIFY_MAX_FILTERS);
     f->gains = nondet_doubles(f->n_filters * (f->N / 2));
-    f->dct_table = nondet_doubles(f->n_filters * f->n_filters);
+    f->dct_table = nondet_bool() ? NULL : nondet_doubles(f->n_filters * f->n_filters);
 
     return f;
 }

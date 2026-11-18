@@ -2230,9 +2230,9 @@ UTEST(vector, mmbses_three_bins_exercise_full_covariance_path)
 UTEST(vector, mfcc_and_gfcc_are_the_dct_of_the_log_energy_each_filter_passes)
 {
     /* The energies are accumulated here from the gains and the input, and
-     * every filter passes energy so the log floor is never in play.
-     * Coefficient 0 is their sum, which is what a DCT-II basis of all ones at
-     * index 0 reduces to. */
+     * every filter passes energy so the log floor is never in play. The
+     * expected coefficients are their DCT-II, and coefficient 0 is their sum,
+     * which is what a basis of all ones at index 0 reduces to. */
     enum
     {
         BINS = 256,
@@ -2259,7 +2259,12 @@ UTEST(vector, mfcc_and_gfcc_are_the_dct_of_the_log_energy_each_filter_passes)
         log_energies[k] = log(energy);
         expected_c0 += log_energies[k];
     }
-    ASSERT_EQ(xtract_dct(NULL, log_energies, FILTERS, NULL, expected), XTRACT_SUCCESS);
+    for (k = 0; k < FILTERS; k++)
+    {
+        expected[k] = 0.0;
+        for (i = 0; i < FILTERS; i++)
+            expected[k] += log_energies[i] * cos(M_PI * k * (i + 0.5) / FILTERS);
+    }
 
     filterbank = xtract_init_filterbank(2 * BINS, FILTERS, gains[0]);
     ASSERT_TRUE(filterbank != NULL);

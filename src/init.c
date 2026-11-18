@@ -103,8 +103,27 @@ static xtract_filterbank *filterbank_alloc(const int N, const int n_filters)
     filterbank->N = N;
     filterbank->n_filters = n_filters;
     filterbank->gains = (double *)malloc((size_t)n_filters * bins * sizeof(double));
+    if (filterbank->gains == NULL)
+    {
+        xtract_free_filterbank(filterbank);
+        return NULL;
+    }
+
+    return filterbank;
+}
+
+/* A filterbank with the cosine table that xtract_mfcc() and xtract_gfcc() pass
+ * to xtract_dct(). The table has n_filters * n_filters elements, so a
+ * filterbank built from a caller's gains, which may have any number of
+ * filters, has none. */
+static xtract_filterbank *cepstral_filterbank_alloc(const int N, const int n_filters)
+{
+    xtract_filterbank *filterbank = filterbank_alloc(N, n_filters);
+
+    if (filterbank == NULL)
+        return NULL;
     filterbank->dct_table = xtract_init_dct(n_filters);
-    if (filterbank->gains == NULL || filterbank->dct_table == NULL)
+    if (filterbank->dct_table == NULL)
     {
         xtract_free_filterbank(filterbank);
         return NULL;
@@ -124,7 +143,7 @@ xtract_filterbank *xtract_init_mfcc(const int N, const double nyquist, const int
         (style != XTRACT_EQUAL_GAIN && style != XTRACT_EQUAL_AREA))
         return NULL;
 
-    filterbank = filterbank_alloc(N, n_filters);
+    filterbank = cepstral_filterbank_alloc(N, n_filters);
     if (filterbank == NULL)
         return NULL;
 
@@ -170,7 +189,7 @@ xtract_filterbank *xtract_init_gfcc(const int N, const double nyquist, const dou
     if (!is_a_transform_size(N) || !is_a_frequency_range(nyquist, freq_min, freq_max) || n_filters < 2)
         return NULL;
 
-    filterbank = filterbank_alloc(N, n_filters);
+    filterbank = cepstral_filterbank_alloc(N, n_filters);
     if (filterbank == NULL)
         return NULL;
 

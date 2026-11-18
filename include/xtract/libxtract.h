@@ -478,7 +478,7 @@ extern "C"
 
     /** \brief Build a mel filterbank
      *
-     * The filterbank has n_filters triangular filters whose peaks are equally spaced on the mel scale from freq_min, each filter spanning the peaks either side of its own and the first rising from 0 Hz (Rabiner and Juang 1993, section 4.5.6). Each filter has a gain for every bin of an N-point transform with DC included, bin k being at frequency k * nyquist / (N / 2).
+     * The filterbank has n_filters triangular filters whose peaks are equally spaced on the mel scale from freq_min, each filter spanning the peaks either side of its own and the first rising from 0 Hz (Rabiner and Juang 1993, section 4.5.6). Each filter has a gain for each of the N / 2 bins of an N-point transform from DC upward, bin k being at frequency k * nyquist / (N / 2).
      *
      * \param N: the size of the transform the filters will be applied to, at least 2 and even
      * \param nyquist: half the sample rate in Hz, finite and above 0
@@ -492,7 +492,7 @@ extern "C"
 
     /** \brief Build a gammatone filterbank
      *
-     * The filterbank has n_filters gammatone filters whose centre frequencies are equally spaced on the ERB scale from freq_min to freq_max. Each filter has a gain for every bin of an N-point transform with DC included, bin k being at frequency k * nyquist / (N / 2).
+     * The filterbank has n_filters gammatone filters whose centre frequencies are equally spaced on the ERB scale from freq_min to freq_max. Each filter has a gain for each of the N / 2 bins of an N-point transform from DC upward, bin k being at frequency k * nyquist / (N / 2).
      *
      * \param N: the size of the transform the filters will be applied to, at least 2 and even
      * \param nyquist: half the sample rate in Hz, finite and above 0

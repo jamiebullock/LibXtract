@@ -26,11 +26,14 @@ static const double LOG_FLOOR = -96.0;
 
 /* Reads every gain of a filterbank through xtract_mel_spectrogram(): a
  * spectrum that is 1 at one element and 0 elsewhere gives the log of each
- * filter's gain at that element, and the log floor where the gain is 0. */
+ * filter's gain at that element. A gain too small to lift that above the log
+ * floor is read from a spectrum that is 2^1000 there, which any gain above 0
+ * lifts above the floor, so a gain is read as 0 only when it is 0. */
 static int fb_read(const xtract_filterbank *filterbank, double tables[FB_BANDS][FB_N])
 {
+    const double large = ldexp(1.0, 1000);
     double spectrum[FB_N] = {0};
-    double log_gains[FB_BANDS];
+    double log_gains[FB_BANDS], log_scaled_gains[FB_BANDS];
     int n, k, rv;
 
     for (k = 0; k < FB_N; k++)
@@ -39,9 +42,20 @@ static int fb_read(const xtract_filterbank *filterbank, double tables[FB_BANDS][
         rv = xtract_mel_spectrogram(NULL, spectrum, FB_N, filterbank, log_gains);
         if (rv != XTRACT_SUCCESS)
             return rv;
+        spectrum[k] = large;
+        rv = xtract_mel_spectrogram(NULL, spectrum, FB_N, filterbank, log_scaled_gains);
+        if (rv != XTRACT_SUCCESS)
+            return rv;
         spectrum[k] = 0.0;
         for (n = 0; n < FB_BANDS; n++)
-            tables[n][k] = log_gains[n] == LOG_FLOOR ? 0.0 : exp(log_gains[n]);
+        {
+            if (log_gains[n] != LOG_FLOOR)
+                tables[n][k] = exp(log_gains[n]);
+            else if (log_scaled_gains[n] != LOG_FLOOR)
+                tables[n][k] = ldexp(exp(log_scaled_gains[n]), -1000);
+            else
+                tables[n][k] = 0.0;
+        }
     }
 
     return XTRACT_SUCCESS;
