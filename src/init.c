@@ -242,7 +242,7 @@ double *xtract_init_window(const int N, const int type)
     if (N < 2)
         return NULL;
 
-    window = (double *)malloc((size_t)N * sizeof(double));
+    window = (double *)calloc((size_t)N, sizeof(double));
     if (window == NULL)
         return NULL;
 
