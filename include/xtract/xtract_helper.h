@@ -41,7 +41,7 @@ extern "C"
      * \param *ctx: a pointer to a context, or NULL
      * \param *data a pointer to an array of doubles
      * \param N the number of elements in the array pointed to by *data, at least 1
-     * \param *argv a pointer to a window function of at least N elements as returned by xtract_make_window(); NULL is an argument error
+     * \param *argv a pointer to a window function of at least N elements as returned by xtract_init_window(); NULL is an argument error
      * \param *result a pointer to the first element an array containing the windowed data
      *
      * It is up to the caller to generate and free the array containing the window, and to allocate and free memory of size N to hold the data pointed to by *result

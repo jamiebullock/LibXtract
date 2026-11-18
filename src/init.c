@@ -237,7 +237,12 @@ void xtract_free_filterbank(xtract_filterbank *filterbank)
 
 double *xtract_init_window(const int N, const int type)
 {
-    double *window = (double *)malloc(N * sizeof(double));
+    double *window;
+
+    if (N < 2)
+        return NULL;
+
+    window = (double *)malloc((size_t)N * sizeof(double));
     if (window == NULL)
         return NULL;
 
@@ -271,8 +276,8 @@ double *xtract_init_window(const int N, const int type)
         blackman_harris(window, N);
         break;
     default:
-        hann(window, N);
-        break;
+        free(window);
+        return NULL;
     }
 
     return window;
