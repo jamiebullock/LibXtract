@@ -1374,8 +1374,10 @@ int xtract_cqt(xtract_context *ctx, const double *data, const int N, const void 
     double *real, *imag;
     int n, band, e;
 
-    if (N < 2 || (N & 1) || kernel == NULL || kernel->N != N)
+    if (N < 2 || (N & 1) || kernel == NULL)
         return XTRACT_ARGUMENT_ERROR;
+    if (kernel->N != N)
+        return XTRACT_BAD_STATE;
 
     real = xtract_scratch_take(ctx, N, (size_t)N);
     if (real == NULL)

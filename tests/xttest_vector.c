@@ -3698,7 +3698,26 @@ UTEST(cqt, result_is_a_spectrum_chroma_reads_pitch_classes_from)
     xtract_free_cqt(kernel);
 }
 
-UTEST(cqt, rejects_a_spectrum_of_another_size_a_missing_kernel_and_an_odd_length)
+UTEST(cqt, rejects_a_missing_kernel_an_odd_length_and_a_length_below_2)
+{
+    xtract_cqt_kernel *kernel = xtract_init_cqt(16, 1000.0, 100.0, 1, 2, 0.01);
+    double spectrum[16];
+    double result[4];
+    int n;
+
+    ASSERT_TRUE(kernel != NULL);
+    for (n = 0; n < 16; n++)
+        spectrum[n] = 1.0;
+    result[0] = -1.0;
+    ASSERT_EQ(xtract_cqt(xttest_context(), spectrum, 16, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_cqt(xttest_context(), spectrum, 15, kernel, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_cqt(xttest_context(), spectrum, 0, kernel, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result[0], -1.0);
+    ASSERT_EQ(xtract_cqt(xttest_context(), spectrum, 16, kernel, result), XTRACT_SUCCESS);
+    xtract_free_cqt(kernel);
+}
+
+UTEST(cqt, is_in_a_bad_state_with_a_kernel_built_for_another_size)
 {
     xtract_cqt_kernel *kernel = xtract_init_cqt(16, 1000.0, 100.0, 1, 2, 0.01);
     double spectrum[18];
@@ -3709,11 +3728,9 @@ UTEST(cqt, rejects_a_spectrum_of_another_size_a_missing_kernel_and_an_odd_length
     for (n = 0; n < 18; n++)
         spectrum[n] = 1.0;
     result[0] = -1.0;
-    ASSERT_EQ(xtract_cqt(xttest_context(), spectrum, 16, NULL, result), XTRACT_ARGUMENT_ERROR);
-    ASSERT_EQ(xtract_cqt(xttest_context(), spectrum, 18, kernel, result), XTRACT_ARGUMENT_ERROR);
-    ASSERT_EQ(xtract_cqt(xttest_context(), spectrum, 15, kernel, result), XTRACT_ARGUMENT_ERROR);
-    ASSERT_EQ(xtract_cqt(xttest_context(), spectrum, 2, kernel, result), XTRACT_ARGUMENT_ERROR);
-    ASSERT_EQ(xtract_cqt(xttest_context(), spectrum, 0, kernel, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_cqt(xttest_context(), spectrum, 18, kernel, result), XTRACT_BAD_STATE);
+    ASSERT_EQ(xtract_cqt(xttest_context(), spectrum, 14, kernel, result), XTRACT_BAD_STATE);
+    ASSERT_EQ(xtract_cqt(xttest_context(), spectrum, 2, kernel, result), XTRACT_BAD_STATE);
     ASSERT_EQ(result[0], -1.0);
     ASSERT_EQ(xtract_cqt(xttest_context(), spectrum, 16, kernel, result), XTRACT_SUCCESS);
     xtract_free_cqt(kernel);
