@@ -85,7 +85,7 @@ xtract.xtract_free_filterbank(filterbank)
 
 print('The log energy is %.4f' % energy[0])
 
-if abs(energy[0] - math.log(11.0)) > 1e-12:
+if not abs(energy[0] - math.log(11.0)) <= 1e-12:
     sys.exit(1)
 
 print('Computing windowed subframes...')

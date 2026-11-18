@@ -11,11 +11,11 @@
  * features, each needs specific setup: a context, a mel/gammatone filterbank,
  * or bark band limits, plus an argv whose shape differs per feature. The
  * filterbanks, bark limits, and the context are built once at a fixed
- * power-of-two N in LLVMFuzzerInitialize. The filterbank features, which a
- * filterbank serves at any N up to the one it was built for, and the
- * features that need no such setup (DCT, autocorrelation, AMDF, ASDF, LPC,
- * LPCC, the moving-window features, quantise and histogram) take a
- * fuzzer-chosen N from 0 up to it; every other call runs at that N. The input is allocated at exactly the length each call declares,
+ * power-of-two N in LLVMFuzzerInitialize. The filterbank features, whose
+ * filterbank does not fix their N, and the features that need no such setup
+ * (DCT, autocorrelation, AMDF, ASDF, LPC, LPCC, the moving-window features,
+ * quantise and histogram) are called with a fuzzer-chosen N from 0 up to
+ * it, which includes the lengths each of them rejects; every other call runs at that N. The input is allocated at exactly the length each call declares,
  * so a read past it is out of bounds to the sanitizer. Features are called
  * by name.
  *

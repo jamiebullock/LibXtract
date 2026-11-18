@@ -59,7 +59,7 @@ xtract.xtract_free_filterbank(filterbank);
 
 console.log('The log energy is ' + energy.getitem(0).toFixed(4));
 
-if (Math.abs(energy.getitem(0) - Math.log(11.0)) > 1e-12) {
+if (!(Math.abs(energy.getitem(0) - Math.log(11.0)) <= 1e-12)) {
     process.exit(1);
 }
 

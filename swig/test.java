@@ -82,7 +82,7 @@ public class test {
 
         System.out.printf("The log energy is %.4f%n", energy.getitem(0));
 
-        if (Math.abs(energy.getitem(0) - Math.log(11.0)) > 1e-12) {
+        if (!(Math.abs(energy.getitem(0) - Math.log(11.0)) <= 1e-12)) {
             System.exit(1);
         }
 

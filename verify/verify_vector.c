@@ -17,8 +17,8 @@
 #define VERIFY_MAX_FILTERS 8
 #endif
 
-#if VERIFY_MAX_FILTERS < 1
-#error "VERIFY_MAX_FILTERS must be at least 1: with no filter count to choose, the filterbank proofs would pass without running"
+#if VERIFY_MAX_FILTERS < 1 || VERIFY_SMALL_N < 1
+#error "VERIFY_MAX_FILTERS and VERIFY_SMALL_N must be at least 1: with no filter count or transform size to choose, the filterbank proofs would pass without running"
 #endif
 
 #ifndef VERIFY_MAX_BANDS
