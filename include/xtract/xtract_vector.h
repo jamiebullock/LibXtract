@@ -29,8 +29,8 @@ extern "C"
      * \param *ctx: a pointer to a context created for at least N elements
      * \param *data: a pointer to the first element in an array of doubles representing an audio vector
      * \param N: the number of array elements to be considered, a power of two of at least 2
-     * \param *argv: a pointer to an array of doubles, the first representing (samplerate / N), finite and above 0, the second will be cast to an integer and determines the spectrum type, a value of the enumeration xtract_spectrum_ (e.g. XTRACT_MAGNITUDE_SPECTRUM, XTRACT_LOG_POWER_SPECTRUM). The third argument determines whether or not the DC component is included in the output. If argv[2] == 0 (the default), the N/2 coefficients are bins 1 to N/2, so the Nyquist bin is included, DC is not, and the frequency of coefficient m is (m + 1) * samplerate / N. If argv[2] == 1, the N/2 coefficients are bins 0 to N/2 - 1, so DC is included, the Nyquist bin is not, and the frequency of coefficient m is m * samplerate / N. The output is N elements in either case. The fourth argument determines whether the magnitude/power coefficients are to be normalised. If argv[3] == 1, then the coefficients are normalised. Both flags must be 0 or 1.
-     * \param *result: a pointer to an array of size N containing N/2 magnitude/power/log magnitude/log power coefficients and N/2 bin frequencies. For XTRACT_MAGNITUDE_PHASE_SPECTRUM the second N/2 elements are instead the bin phases in radians, in the convention where a cosine centred on a bin has phase 0 and a sine -pi/2, on every platform.
+     * \param *argv: a pointer to an array of doubles, the first representing (samplerate / N), finite and above 0, the second will be cast to an integer and determines the spectrum type, a value of the enumeration xtract_spectrum_ (e.g. XTRACT_MAGNITUDE_SPECTRUM, XTRACT_LOG_POWER_SPECTRUM). The third argument determines whether the magnitude/power coefficients are to be normalised. If argv[2] == 1, then the coefficients are normalised. It must be 0 or 1.
+     * \param *result: a pointer to an array of size N containing N/2 magnitude/power/log magnitude/log power coefficients and N/2 bin frequencies. Coefficient m is bin m, from DC at m = 0 to the bin below the Nyquist bin, and its frequency is m * samplerate / N. For XTRACT_MAGNITUDE_PHASE_SPECTRUM the second N/2 elements are instead the bin phases in radians, in the convention where a cosine centred on a bin has phase 0 and a sine -pi/2, on every platform.
      *
      * The magnitude/power coefficients are scaled to the range 0-1 so that for a given coefficient x, 0 <= x <= 1
      */
@@ -49,7 +49,7 @@ extern "C"
     /** \brief Extract Mel Frequency Cepstral Coefficients based on a method described by Rabiner
      *
      * \param *ctx: a pointer to a context created for at least the larger of N and the filterbank's n_filters elements
-     * \param *data: a pointer to the first element in an array of spectral coefficients, the first half of the array pointed to by *result from xtract_spectrum() called with DC included (argv[2] == 1), so that element k is bin k as the filterbank expects. Rabiner and Juang define the mel cepstrum on the power spectrum (XTRACT_POWER_SPECTRUM); a magnitude spectrum may be passed instead
+     * \param *data: a pointer to the first element in an array of spectral coefficients, the first half of the array pointed to by *result from xtract_spectrum(), so that element k is bin k as the filterbank expects. Rabiner and Juang define the mel cepstrum on the power spectrum (XTRACT_POWER_SPECTRUM); a magnitude spectrum may be passed instead
      * \param N: the number of coefficients, at least 1 and equal to half the N the filterbank was built for
      * \param *argv: a pointer to an xtract_filterbank from xtract_init_mfcc() or xtract_init_filterbank(), built for the size of the transform that produced the spectrum
      * \param *result: a pointer to an array of n_filters doubles containing the resultant MFCC
@@ -62,7 +62,7 @@ extern "C"
      * is applied to the magnitude spectrum and the result is log-scaled.
      *
      * \param *ctx: a pointer to a context, or NULL
-     * \param *data: a pointer to the first element in an array of spectral coefficients, the first half of the array pointed to by *result from xtract_spectrum() called with DC included (argv[2] == 1), so that element k is bin k as the filterbank expects. Rabiner and Juang define the mel cepstrum on the power spectrum (XTRACT_POWER_SPECTRUM); a magnitude spectrum may be passed instead
+     * \param *data: a pointer to the first element in an array of spectral coefficients, the first half of the array pointed to by *result from xtract_spectrum(), so that element k is bin k as the filterbank expects. Rabiner and Juang define the mel cepstrum on the power spectrum (XTRACT_POWER_SPECTRUM); a magnitude spectrum may be passed instead
      * \param N: the number of coefficients, at least 1 and equal to half the N the filterbank was built for
      * \param *argv: a pointer to an xtract_filterbank from xtract_init_mfcc() or xtract_init_filterbank(), built for the size of the transform that produced the spectrum
      * \param *result: a pointer to an array of n_filters doubles containing the resultant log mel energies (one per filter)
@@ -76,7 +76,7 @@ extern "C"
      * bank.
      *
      * \param *ctx: a pointer to a context created for at least the larger of N and the filterbank's n_filters elements
-     * \param *data: a pointer to the first element in an array of spectral coefficients, the first half of the array pointed to by *result from xtract_spectrum() called with DC included (argv[2] == 1), so that element k is bin k as the filterbank expects. the gammatone filterbank is applied to the power spectrum (XTRACT_POWER_SPECTRUM) in the same way; a magnitude spectrum may be passed instead
+     * \param *data: a pointer to the first element in an array of spectral coefficients, the first half of the array pointed to by *result from xtract_spectrum(), so that element k is bin k as the filterbank expects. the gammatone filterbank is applied to the power spectrum (XTRACT_POWER_SPECTRUM) in the same way; a magnitude spectrum may be passed instead
      * \param N: the number of coefficients, at least 1 and equal to half the N the filterbank was built for
      * \param *argv: a pointer to an xtract_filterbank from xtract_init_gfcc() or xtract_init_filterbank(), built for the size of the transform that produced the spectrum
      * \param *result: a pointer to an array of n_filters doubles containing the resultant GFCC
@@ -89,7 +89,7 @@ extern "C"
      * is applied to the magnitude spectrum and the result is log-scaled.
      *
      * \param *ctx: a pointer to a context, or NULL
-     * \param *data: a pointer to the first element in an array of spectral coefficients, the first half of the array pointed to by *result from xtract_spectrum() called with DC included (argv[2] == 1), so that element k is bin k as the filterbank expects. the gammatone filterbank is applied to the power spectrum (XTRACT_POWER_SPECTRUM) in the same way; a magnitude spectrum may be passed instead
+     * \param *data: a pointer to the first element in an array of spectral coefficients, the first half of the array pointed to by *result from xtract_spectrum(), so that element k is bin k as the filterbank expects. the gammatone filterbank is applied to the power spectrum (XTRACT_POWER_SPECTRUM) in the same way; a magnitude spectrum may be passed instead
      * \param N: the number of coefficients, at least 1 and equal to half the N the filterbank was built for
      * \param *argv: a pointer to an xtract_filterbank from xtract_init_gfcc() or xtract_init_filterbank(), built for the size of the transform that produced the spectrum
      * \param *result: a pointer to an array of n_filters doubles containing the resultant log gammatone energies (one per filter)
@@ -99,7 +99,7 @@ extern "C"
     /** \brief Extract Mel based Multi-Band Spectral Entropy Signature coefficients
      *
      * \param *ctx: a pointer to a context, or NULL
-     * \param *data: a magnitude/phase spectrum with DC included, the *result of xtract_spectrum() by XTRACT_MAGNITUDE_PHASE_SPECTRUM with argv[2] == 1, so that element k is bin k as the filterbank expects: the first N/2 elements are the bin magnitudes from DC upward and the next N/2 their phases
+     * \param *data: a magnitude/phase spectrum, the *result of xtract_spectrum() by XTRACT_MAGNITUDE_PHASE_SPECTRUM, so that element k is bin k as the filterbank expects: the first N/2 elements are the bin magnitudes from DC upward and the next N/2 their phases
      * \param N: the number of array elements to be considered (the full magnitude+phase array length; N/2 frequency bins are processed), at least 2 and even, and equal to the N the filterbank was built for
      * \param *argv: a pointer to an xtract_filterbank from xtract_init_mfcc() or xtract_init_filterbank(), built for the size of the transform that produced the spectrum
      * \param *result: a pointer to an array of n_filters elements containing the resultant MEL-MBSES
@@ -113,12 +113,12 @@ extern "C"
     /** \brief Extract centroids of the spectral mel subbands
      *
      * \param *ctx: a pointer to a context, or NULL
-     * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector: N/2 amplitudes followed by N/2 frequencies, the array pointed to by *result from xtract_spectrum() called with DC included (argv[2] == 1), so that element k is bin k as the filterbank expects
+     * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector: N/2 amplitudes followed by N/2 frequencies, the array pointed to by *result from xtract_spectrum(), so that element k is bin k as the filterbank expects
      * \param N: the size of the array pointed to by *data, at least 2 and even, and equal to the N the filterbank was built for
      * \param *argv: a pointer to an xtract_filterbank from xtract_init_mfcc() or xtract_init_filterbank(), built for the size of the transform that produced the spectrum
      * \param *result: a pointer to an array of n_filters doubles containing the spectral band centroids, in the unit of the frequencies
      *
-     * Note: the *result of xtract_peak_spectrum() or xtract_harmonic_spectrum() may be passed in for the interpolated peak frequencies. Its element k is bin k + 1, so each peak is weighted by the filterbank's gain for the bin below it.
+     * Note: the *result of xtract_peak_spectrum() or xtract_harmonic_spectrum() may be passed in for the interpolated peak frequencies.
      */
     int xtract_spectral_subband_centroids(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
@@ -163,7 +163,7 @@ extern "C"
 
     /** \brief Extract Bark band coefficients based on a method
      * \param *ctx: a pointer to a context, or NULL
-     * \param *data: a pointer to the first element in an array of spectral coefficients, the first half of the array pointed to by *result from xtract_spectrum() called with DC included (argv[2] == 1), so that element k is bin k as the band limits expect
+     * \param *data: a pointer to the first element in an array of spectral coefficients, the first half of the array pointed to by *result from xtract_spectrum(), so that element k is bin k as the band limits expect
      * \param N: the number of coefficients, half the transform size the band limits were initialised with, at least 1
      * \param *argv: a pointer to an array of XTRACT_BARK_BANDS ints representing the limits of each bark band, obtained by calling xtract_init_bark() with the transform size; each limit must be at least 0 and no lower than the one before it
      * \param *result: a pointer to an array of XTRACT_BARK_BANDS doubles containing the resultant bark coefficients, the sum of the coefficients in each band
@@ -175,7 +175,7 @@ extern "C"
 
     /** \brief Extract the amplitude and frequency of spectral peaks from a magnitude spectrum
      * \param *ctx: a pointer to a context, or NULL
-     * \param *data: a pointer to an array of size N containing N magnitude/power/log magnitude/log power coefficients: the first half of the array pointed to by *result from xtract_spectrum() with DC discarded (argv[2] == 0, the default), so that coefficient n is bin n + 1 and the reported frequencies follow that layout
+     * \param *data: a pointer to an array of size N containing N magnitude/power/log magnitude/log power coefficients: the first half of the array pointed to by *result from xtract_spectrum(), so that coefficient n is bin n and the reported frequencies follow that layout
      * \param N: the size of the input array, at least 1 (note: it is assumed that enough memory has been allocated for an output array twice the size)
      * \param *argv: a pointer to an array of doubles, the first representing the bin spacing in Hz, the sample rate divided by the transform length (twice N for the first half of an xtract_spectrum() output), finite and above 0, the second representing the peak threshold as percentage of the magnitude of the maximum peak found, from 0 to 100
      * \param *result: a pointer to an array of size N * 2 containing N magnitude/power/log magnitude/log power coefficients and N bin frequencies.
@@ -345,7 +345,7 @@ extern "C"
     /** \brief Extract the constant-Q spectrum of a magnitude/phase spectrum: the magnitude in each band of a kernel from xtract_init_cqt(), followed by the band centre frequencies
      *
      * \param *ctx: a pointer to a context created for at least N elements
-     * \param *data: a magnitude/phase spectrum with DC included, the *result of xtract_spectrum() by XTRACT_MAGNITUDE_PHASE_SPECTRUM with argv[2] == 1: the first N/2 elements are the bin magnitudes from DC upward and the next N/2 their phases
+     * \param *data: a magnitude/phase spectrum, the *result of xtract_spectrum() by XTRACT_MAGNITUDE_PHASE_SPECTRUM: the first N/2 elements are the bin magnitudes from DC upward and the next N/2 their phases
      * \param N: the number of array elements to be considered, at least 2 and even, and equal to the N the kernel was built for
      * \param *argv: a pointer to an xtract_cqt_kernel from xtract_init_cqt()
      * \param *result: a pointer to an array of twice the kernel's n_bins doubles: the n_bins band magnitudes, on the scale of the magnitudes given, followed by the band centre frequencies in Hz. This is the layout of the *result of xtract_spectrum(), so it can be passed on to xtract_chroma(), xtract_spectral_contrast() and the other functions that take a spectrum with its frequencies

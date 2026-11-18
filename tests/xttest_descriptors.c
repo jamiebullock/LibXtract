@@ -149,6 +149,8 @@ UTEST(descriptors, argv_ranges_match_the_functions)
     ASSERT_EQ(fd[XTRACT_SPECTRUM].argv.min[0], DBL_MIN);
     ASSERT_EQ(fd[XTRACT_SPECTRUM].argv.max[0], XTRACT_UNBOUNDED_MAX);
     CHECK_REL(fd[XTRACT_SPECTRUM].argv.max[1], (double)XTRACT_MAGNITUDE_PHASE_SPECTRUM, EPSILON);
+    ASSERT_EQ(fd[XTRACT_SPECTRUM].argc, 3);
+    CHECK_REL(fd[XTRACT_SPECTRUM].argv.max[2], 1.0, EPSILON);
 
     CHECK_REL(fd[XTRACT_SUBBANDS].argv.max[0], (double)(XTRACT_FEATURES - 1), EPSILON);
     CHECK_REL(fd[XTRACT_SUBBANDS].argv.max[2], (double)XTRACT_LINEAR_SUBBANDS, EPSILON);

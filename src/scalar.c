@@ -652,10 +652,11 @@ int xtract_zcr(xtract_context *ctx, const double *data, const int N, const void 
 
 int xtract_rolloff(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
-    int n = N;
+    int n;
+    int bin = 0;
     double pivot, temp, percentile, q;
 
-    pivot = temp = 0.0;
+    pivot = 0.0;
 
     if (N < 1 || argv == NULL)
     {
@@ -671,16 +672,18 @@ int xtract_rolloff(xtract_context *ctx, const double *data, const int N, const v
         return XTRACT_ARGUMENT_ERROR;
     }
 
-    while (n--)
+    /* The total is summed in the order of the running sum, so that 100
+     * percent of it is reached at the last coefficient that adds to it */
+    for (n = 0; n < N; n++)
         pivot += data[n];
 
     pivot *= percentile / 100.0;
 
-    for (n = 0; n < N && temp < pivot; n++)
-        temp += data[n];
+    temp = data[0];
+    while (temp < pivot && bin + 1 < N)
+        temp += data[++bin];
 
-    *result = n * q;
-    /* *result = (n / (double)N) * (((double *)argv)[1] * .5); */
+    *result = bin * q;
 
     return XTRACT_SUCCESS;
 }
@@ -1174,11 +1177,11 @@ static double hps_score(const double *data, const int i, const int off, const in
 
 int xtract_hps(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
-    /* The frequency array says which spectrum layout this is: with DC
-     * discarded (the xtract_spectrum default) coefficient m is bin m + 1 and
-     * freqs[0] == q, so off == 1; with DC included freqs[0] == 0 and
-     * off == 0. Harmonic r of coefficient i is then coefficient
-     * r * (i + off) - off, and a DC coefficient is never a candidate. */
+    /* The frequency array says where the grid starts: when freqs[0] == q,
+     * coefficient m is bin m + 1 and off == 1; when freqs[0] == 0, as
+     * xtract_spectrum() gives it, coefficient m is bin m and off == 0.
+     * Harmonic r of coefficient i is then coefficient r * (i + off) - off,
+     * and a DC coefficient is never a candidate. */
     const int M = N / 2;
     const double *freqs = data + M;
     int R, i, off, first, count, peak_index, position1_lwr;
@@ -1410,7 +1413,7 @@ int xtract_f0(xtract_context *ctx, const double *data, const int N, const void *
 
 int xtract_failsafe_f0(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
-    double *spectrum, argf[4], *peaks, sr, f0;
+    double *spectrum, argf[3], *peaks, sr, f0;
     int rv;
 
     rv = xtract_f0(ctx, data, N, argv, &f0);
@@ -1440,7 +1443,6 @@ int xtract_failsafe_f0(xtract_context *ctx, const double *data, const int N, con
     argf[0] = sr / N;
     argf[1] = XTRACT_MAGNITUDE_SPECTRUM;
     argf[2] = 0.0;
-    argf[3] = 0.0;
     rv = xtract_spectrum(ctx, data, N, argf, spectrum);
     if (rv == XTRACT_SUCCESS)
     {

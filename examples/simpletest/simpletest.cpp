@@ -173,15 +173,12 @@ int main(void)
         /* get the spectrum */
         argd[0] = SAMPLERATE / (double)BLOCKSIZE;
         argd[1] = XTRACT_MAGNITUDE_SPECTRUM;
-        argd[2] = 0.f; /* DC component - we expect this to zero for square wave */
-        argd[3] = 0.f; /* No Normalisation */
+        argd[2] = 0.f; /* No Normalisation */
 
         xtract[XTRACT_SPECTRUM](ctx, windowed, BLOCKSIZE, &argd[0], spectrum);
 
-        /* The mel filterbank is defined on the power spectrum with DC
-         * included, so that bin k of the spectrum meets coefficient k */
+        /* The mel filterbank is defined on the power spectrum */
         argd[1] = XTRACT_POWER_SPECTRUM;
-        argd[2] = 1.0;
         xtract[XTRACT_SPECTRUM](ctx, windowed, BLOCKSIZE, &argd[0], power_spectrum);
 
         xtract[XTRACT_SPECTRAL_CENTROID](NULL, spectrum, BLOCKSIZE, NULL, &centroid);
@@ -224,8 +221,7 @@ int main(void)
         /* compute Spectral Flux */
         argd[0] = SAMPLERATE / HALF_BLOCKSIZE;
         argd[1] = XTRACT_LOG_POWER_SPECTRUM;
-        argd[2] = 0.f; /* DC component */
-        argd[3] = 1.f; /* Yes Normalisation */
+        argd[2] = 1.f; /* Yes Normalisation */
 
         xtract_features_from_subframes(NULL, gated, BLOCKSIZE, XTRACT_WINDOWED, window_subframe, subframes_windowed);
         xtract_features_from_subframes(ctx, subframes_windowed, BLOCKSIZE, XTRACT_SPECTRUM, argd, subframes_spectrum);

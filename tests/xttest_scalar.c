@@ -1534,32 +1534,51 @@ UTEST(scalar, spectral_slope_increasing)
 
 /* ===== Edge Cases and Known Bugs ===== */
 
-UTEST(scalar, rolloff_first_bin_95)
+UTEST(scalar, rolloff_is_the_frequency_of_the_bin_where_the_running_sum_reaches_the_percentile)
 {
-    /* 4 amplitude bins, all energy in first bin.
-     * argv[0] = freq resolution (samplerate/N), argv[1] = percentile
-     * Rolloff: accumulate until 95% of total energy reached.
-     * Total = 100, pivot = 95. After bin 0: temp=100 >= 95, so n=1.
-     * result = 1 * freq_resolution */
-    double result = 0.0;
-    double data[] = {100.0, 0.0, 0.0, 0.0};
-    double freq_res = 100.0; /* e.g. 400Hz / 4 bins */
+    /* Coefficient n is bin n at n * freq_res. The whole sum is in the third
+     * coefficient, so the running sum reaches 95% of it at bin 2. */
+    double result = -1.0;
+    double data[] = {0.0, 0.0, 100.0, 0.0};
+    double freq_res = 100.0;
     double argv[] = {freq_res, 95.0};
-    int rv = xtract_rolloff(NULL, data, 4, argv, &result);
-    ASSERT_EQ(rv, XTRACT_SUCCESS);
-    CHECK_REL(result, 1.0 * freq_res, EPSILON);
+
+    ASSERT_EQ(xtract_rolloff(NULL, data, 4, argv, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 2.0 * freq_res, EPSILON);
+}
+
+UTEST(scalar, rolloff_is_0_hz_when_the_first_coefficient_reaches_the_percentile)
+{
+    double result = -1.0;
+    double data[] = {100.0, 0.0, 0.0, 0.0};
+    double argv[] = {100.0, 95.0};
+
+    ASSERT_EQ(xtract_rolloff(NULL, data, 4, argv, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(result, 0.0);
 }
 
 UTEST(scalar, rolloff_uniform_50)
 {
-    /* 4 equal bins, total=4, pivot=2. After bin 0: 1, bin 1: 2 >= 2, n=2
-     * result = 2 * freq_res */
+    /* 4 equal bins, total = 4, pivot = 2: the running sum is 1 after bin 0
+     * and reaches 2 at bin 1, so the result is 1 * freq_res */
     double result = 0.0;
     double data[] = {1.0, 1.0, 1.0, 1.0};
     double freq_res = 100.0;
     double argv[] = {freq_res, 50.0};
     int rv = xtract_rolloff(NULL, data, 4, argv, &result);
     ASSERT_EQ(rv, XTRACT_SUCCESS);
+    CHECK_REL(result, 100.0, EPSILON);
+}
+
+UTEST(scalar, rolloff_of_the_whole_sum_is_the_last_bin_that_adds_to_it)
+{
+    /* 0.3 + 0.2 + 0.1 and 0.1 + 0.2 + 0.3 differ in the last place, and 100
+     * percent of the sum is still reached at the third coefficient */
+    double result = -1.0;
+    double data[] = {0.3, 0.2, 0.1, 0.0};
+    double argv[] = {100.0, 100.0};
+
+    ASSERT_EQ(xtract_rolloff(NULL, data, 4, argv, &result), XTRACT_SUCCESS);
     CHECK_REL(result, 200.0, EPSILON);
 }
 
@@ -2818,7 +2837,7 @@ UTEST(scalar, rolloff_rejects_a_percentile_outside_0_to_100_and_a_null_argv)
     ASSERT_REJECTED(xtract_rolloff(NULL, data, 4, NULL, &result));
 
     ASSERT_EQ(xtract_rolloff(NULL, data, 4, argv, &result), XTRACT_SUCCESS);
-    CHECK_REL(result, 200.0, EPSILON);
+    CHECK_REL(result, 100.0, EPSILON);
 }
 
 UTEST(scalar, argv_only_features_reject_a_null_argv)

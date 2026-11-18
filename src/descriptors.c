@@ -248,7 +248,6 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *(argv_def + 1) = XTRACT_NO_DEFAULT;
             *(argv_unit + 1) = XTRACT_UNIT_NONE;
             break;
-            /* argc = 4 */
         case XTRACT_SPECTRUM:
             *argv_min = DBL_MIN;
             *argv_max = XTRACT_UNBOUNDED_MAX;
@@ -262,11 +261,8 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *(argv_max + 2) = 1;
             *(argv_def + 2) = 0;
             *(argv_unit + 2) = XTRACT_UNIT_NONE;
-            *(argv_min + 3) = 0;
-            *(argv_max + 3) = 1;
-            *(argv_def + 3) = 0;
-            *(argv_unit + 3) = XTRACT_UNIT_NONE;
             break;
+            /* argc = 4 */
         case XTRACT_SUBBANDS:
             *argv_min = 0;
             *argv_max = XTRACT_FEATURES - 1;
@@ -540,6 +536,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_ATTACK_TIME:
         case XTRACT_SPECTRAL_CONTRAST:
         case XTRACT_CHROMA:
+        case XTRACT_SPECTRUM:
             *argv_donor = XTRACT_ANY;
             *(argv_donor + 1) = XTRACT_ANY;
             *(argv_donor + 2) = XTRACT_ANY;
@@ -557,12 +554,6 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *(argv_donor + 4) = XTRACT_ANY;
             break;
             /* argc = 4 */
-        case XTRACT_SPECTRUM:
-            *argv_donor = XTRACT_ANY;
-            *(argv_donor + 1) = XTRACT_ANY;
-            *(argv_donor + 2) = XTRACT_ANY;
-            *(argv_donor + 3) = XTRACT_ANY;
-            break;
         case XTRACT_SUBBANDS:
             *argv_donor = XTRACT_ANY;
             *(argv_donor + 1) = XTRACT_ANY;
@@ -1941,11 +1932,8 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_FLUX:
         case XTRACT_LNORM:
         case XTRACT_QUANTISE:
-            *argc = 3;
-            *argv_type = XTRACT_FLOAT;
-            break;
         case XTRACT_SPECTRUM:
-            *argc = 4;
+            *argc = 3;
             *argv_type = XTRACT_FLOAT;
             break;
         case XTRACT_SUBBANDS:

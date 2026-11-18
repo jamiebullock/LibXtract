@@ -130,17 +130,17 @@ static int subframes_call(xtract_context *ctx, const double *data, int N, int fe
 
 UTEST(helper, features_from_subframes_passes_its_context_to_the_feature)
 {
-    /* Each subframe of 8 elements alternates in sign, so its spectrum is 1
-     * in the last of its 4 coefficients */
-    double data[] = {1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0};
+    /* Each subframe of 8 elements is a cosine on bin 2, so its spectrum is
+     * 0.5 in the third of its 4 coefficients */
+    double data[] = {1.0, 0.0, -1.0, 0.0, 1.0, 0.0, -1.0, 0.0, 1.0, 0.0, -1.0, 0.0, 1.0, 0.0, -1.0, 0.0};
     double result[16] = {0};
-    double argv[4] = {1.0, XTRACT_MAGNITUDE_SPECTRUM, 0.0, 0.0};
+    double argv[3] = {1.0, XTRACT_MAGNITUDE_SPECTRUM, 0.0};
     xtract_context *ctx = xtract_context_new(8);
 
     ASSERT_EQ(subframes_call(NULL, data, 16, XTRACT_SPECTRUM, argv, result), XTRACT_BAD_STATE);
     ASSERT_EQ(subframes_call(ctx, data, 16, XTRACT_SPECTRUM, argv, result), XTRACT_SUCCESS);
-    CHECK_REL(result[3], 1.0, EPSILON);
-    CHECK_REL(result[8 + 3], 1.0, EPSILON);
+    CHECK_REL(result[2], 0.5, EPSILON);
+    CHECK_REL(result[8 + 2], 0.5, EPSILON);
     xtract_context_delete(ctx);
 }
 

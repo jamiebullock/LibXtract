@@ -224,7 +224,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     {
     case FZ_SPECTRUM:
     {
-        double a[4] = {fz[0], fold(fz[1], XTRACT_MAGNITUDE_PHASE_SPECTRUM + 2.0), fz[2], fz[3]};
+        double a[3] = {fz[0], fold(fz[1], XTRACT_MAGNITUDE_PHASE_SPECTRUM + 2.0), fz[2]};
         xtract_spectrum(ctx, input, VEC_N, maybe_null(null_argv, a), result);
         break;
     }

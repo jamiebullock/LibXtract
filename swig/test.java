@@ -46,11 +46,10 @@ public class test {
 
         System.out.println("Computing spectrum...");
 
-        doubleArray specArgv = new doubleArray(4);
+        doubleArray specArgv = new doubleArray(3);
         specArgv.setitem(0, 44100.0 / len);
         specArgv.setitem(1, xtract_spectrum_.XTRACT_MAGNITUDE_SPECTRUM.swigValue());
         specArgv.setitem(2, 0.0);
-        specArgv.setitem(3, 0.0);
 
         SWIGTYPE_p_xtract_context_ ctx = xtract.xtract_context_new(len);
 
