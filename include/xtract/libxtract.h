@@ -23,6 +23,8 @@
  * \param double *result points to an array of doubles, or a single double representing the result of the calculation
  *
  *
+ * No feature extraction function allocates. A function that needs working memory or a transform takes it from the context, which xtract_context_new() creates for a largest N, and every other function accepts NULL. The documentation of each function says how large a context it needs. One thread may use a context at a time.
+ *
  * It is up to the calling function to allocate enough memory for the *data, *argv, and *result, and to free it when required. Some feature extraction functions may also require an _init() function to be called in order to perform some initialisation. The struct xtract_function_descriptor_t is used to give an indication of recommended default values, and argc for the *argv array.
  *
  * LibXtract is developed at https://github.com/jamiebullock/LibXtract
