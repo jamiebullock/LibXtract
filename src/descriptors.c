@@ -222,12 +222,6 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *argv_def = XTRACT_NO_DEFAULT;
             *argv_unit = XTRACT_UNIT_NONE;
             break;
-        case XTRACT_SMOOTHNESS:
-            *argv_min = DBL_MIN;
-            *argv_max = XTRACT_UNBOUNDED_MAX;
-            *argv_def = XTRACT_NO_DEFAULT;
-            *argv_unit = XTRACT_DECIBELS;
-            break;
             /* argc = 2 */;
         case XTRACT_ROLLOFF:
             *argv_min = 0.0;
@@ -2043,7 +2037,6 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *argv_type = XTRACT_FLOAT;
             break;
         case XTRACT_SMOOTHED:
-        case XTRACT_SMOOTHNESS:
             *argc = 1;
             *argv_type = XTRACT_FLOAT;
             break;
@@ -2061,6 +2054,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_SPECTRAL_CENTROID:
         case XTRACT_IRREGULARITY_K:
         case XTRACT_IRREGULARITY_J:
+        case XTRACT_SMOOTHNESS:
         case XTRACT_FLATNESS:
         case XTRACT_ZCR:
         case XTRACT_LOUDNESS:

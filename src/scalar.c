@@ -600,16 +600,9 @@ static double level_no_lower_than(const double lowest, const double amplitude)
 int xtract_smoothness(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
     int n;
-    double range, largest, lowest, previous, current, next, sum;
+    double largest, lowest, previous, current, next, sum;
 
-    if (N < 3 || argv == NULL)
-    {
-        *result = 0.0;
-        return XTRACT_ARGUMENT_ERROR;
-    }
-
-    range = *(const double *)argv;
-    if (!isfinite(range) || range <= 0.0)
+    if (N < 3)
     {
         *result = 0.0;
         return XTRACT_ARGUMENT_ERROR;
@@ -628,7 +621,7 @@ int xtract_smoothness(xtract_context *ctx, const double *data, const int N, cons
         return XTRACT_NO_RESULT;
     }
 
-    lowest = 20.0 * log10(largest) - range;
+    lowest = 20.0 * log10(largest) + 20.0 * log10(DBL_EPSILON);
     previous = level_no_lower_than(lowest, data[0]);
     current = level_no_lower_than(lowest, data[1]);
     sum = 0.0;
@@ -636,10 +629,7 @@ int xtract_smoothness(xtract_context *ctx, const double *data, const int N, cons
     for (n = 1; n < N - 1; n++)
     {
         next = level_no_lower_than(lowest, data[n + 1]);
-        /* The distance of current from the mean of the three, as two
-         * differences: each is within the range, and the sum of three levels
-         * can be beyond a double */
-        sum += fabs((current - previous) / 3.0 + (current - next) / 3.0);
+        sum += fabs(current - (previous + current + next) / 3.0);
         previous = current;
         current = next;
     }
