@@ -70,15 +70,30 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         {
             /* argc = 1 */
         case XTRACT_VARIANCE:
-        case XTRACT_SPECTRAL_VARIANCE:
-        case XTRACT_SPREAD:
-        case XTRACT_DIFFERENCE_VECTOR:
         case XTRACT_AVERAGE_DEVIATION:
             /* case XTRACT_SPECTRAL_AVERAGE_DEVIATION: */
         case XTRACT_MEDIAN_ABSOLUTE_DEVIATION:
         case XTRACT_LEMPEL_ZIV_COMPLEXITY:
         case XTRACT_LOWEST_VALUE:
+            *argv_min = XTRACT_UNBOUNDED_MIN;
+            *argv_max = XTRACT_UNBOUNDED_MAX;
+            *argv_def = XTRACT_NO_DEFAULT;
+            *argv_unit = XTRACT_UNIT_ANY;
+            break;
+        case XTRACT_SPECTRAL_VARIANCE:
+        case XTRACT_SPREAD:
+            *argv_min = XTRACT_UNBOUNDED_MIN;
+            *argv_max = XTRACT_UNBOUNDED_MAX;
+            *argv_def = XTRACT_NO_DEFAULT;
+            *argv_unit = XTRACT_HERTZ;
+            break;
         case XTRACT_TONALITY:
+            *argv_min = XTRACT_UNBOUNDED_MIN;
+            *argv_max = XTRACT_UNBOUNDED_MAX;
+            *argv_def = XTRACT_NO_DEFAULT;
+            *argv_unit = XTRACT_DECIBELS;
+            break;
+        case XTRACT_DIFFERENCE_VECTOR:
         case XTRACT_MFCC:
         case XTRACT_MEL_SPECTROGRAM:
         case XTRACT_GFCC:
@@ -90,7 +105,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *argv_min = XTRACT_UNBOUNDED_MIN;
             *argv_max = XTRACT_UNBOUNDED_MAX;
             *argv_def = XTRACT_NO_DEFAULT;
-            *argv_unit = XTRACT_DBFS;
+            *argv_unit = XTRACT_UNIT_NONE;
             break;
         case XTRACT_PEAK:
             *argv_min = XTRACT_UNBOUNDED_MIN;
@@ -150,11 +165,16 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *(argv_unit + 1) = XTRACT_UNIT_ANY;
             break;
         case XTRACT_STANDARD_DEVIATION:
+            *argv_min = 0.0;
+            *argv_max = XTRACT_UNBOUNDED_MAX;
+            *argv_def = XTRACT_NO_DEFAULT;
+            *argv_unit = XTRACT_UNIT_ANY;
+            break;
         case XTRACT_SPECTRAL_STANDARD_DEVIATION:
             *argv_min = 0.0;
             *argv_max = XTRACT_UNBOUNDED_MAX;
             *argv_def = XTRACT_NO_DEFAULT;
-            *argv_unit = XTRACT_DBFS;
+            *argv_unit = XTRACT_HERTZ;
             break;
         case XTRACT_LPCC:
             /* argv[0] is the cepstrum length (Q). The recommended value,
@@ -200,13 +220,13 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *argv_min = 0;
             *argv_max = 1.0;
             *argv_def = XTRACT_NO_DEFAULT;
-            *argv_unit = XTRACT_DBFS;
+            *argv_unit = XTRACT_UNIT_NONE;
             break;
         case XTRACT_SMOOTHNESS:
             *argv_min = DBL_MIN;
             *argv_max = XTRACT_UNBOUNDED_MAX;
             *argv_def = XTRACT_NO_DEFAULT;
-            *argv_unit = XTRACT_DBFS;
+            *argv_unit = XTRACT_DECIBELS;
             break;
             /* argc = 2 */;
         case XTRACT_ROLLOFF:
@@ -2330,7 +2350,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
                 *result_max = XTRACT_UNBOUNDED_MAX;
                 break;
             case XTRACT_SMOOTHNESS:
-                *result_unit = XTRACT_DBFS;
+                *result_unit = XTRACT_DECIBELS;
                 *result_min = 0.0;
                 *result_max = XTRACT_UNBOUNDED_MAX;
                 break;
@@ -2367,7 +2387,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
                 break;
             case XTRACT_FLATNESS_DB:
                 /* 10*log10(flatness), flatness in (0, 1]: <= 0 dB, no true floor */
-                *result_unit = XTRACT_DBFS;
+                *result_unit = XTRACT_DECIBELS;
                 *result_min = XTRACT_UNBOUNDED_MIN;
                 *result_max = 0.0;
                 break;
@@ -2500,6 +2520,8 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             case XTRACT_EWMA_VARIANCE:
             case XTRACT_CROSS_CORRELATION:
             case XTRACT_LAST_N:
+            case XTRACT_AUTOCORRELATION_FFT:
+            case XTRACT_DIFFERENCE_VECTOR:
                 *result_format = XTRACT_ARBITRARY_SERIES;
                 *result_unit = XTRACT_UNIT_ANY;
                 break;
@@ -2562,16 +2584,15 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
                 *result_format = XTRACT_SPECTRAL;
                 *result_unit = XTRACT_ANY_AMPLITUDE_HERTZ;
                 break;
-            case XTRACT_AUTOCORRELATION_FFT:
-                break;
             case XTRACT_MFCC:
                 /* DCT of log filterbank energies: dimensionless cepstral coefficients */
                 *result_format = XTRACT_MEL_COEFFS;
                 *result_unit = XTRACT_UNIT_NONE;
                 break;
             case XTRACT_MEL_SPECTROGRAM:
+                /* natural log of the energy each filter passes */
                 *result_format = XTRACT_MEL_COEFFS;
-                *result_unit = XTRACT_DBFS;
+                *result_unit = XTRACT_UNIT_NONE;
                 break;
             case XTRACT_GFCC:
                 /* DCT of log gammatone energies: dimensionless cepstral coefficients */
@@ -2579,8 +2600,9 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
                 *result_unit = XTRACT_UNIT_NONE;
                 break;
             case XTRACT_GAMMATONE_SPECTROGRAM:
+                /* natural log of the energy each filter passes */
                 *result_format = XTRACT_MEL_COEFFS;
-                *result_unit = XTRACT_DBFS;
+                *result_unit = XTRACT_UNIT_NONE;
                 break;
             case XTRACT_MMBSES:
                 /* differential entropy per band, in nats: dimensionless */
