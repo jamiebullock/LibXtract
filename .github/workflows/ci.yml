@@ -155,8 +155,11 @@ jobs:
           path: build/fuzz/fuzz/crash-*
           if-no-files-found: ignore
 
+  # A run takes up to about 25 minutes. The limit stops a stalled package
+  # install from holding the runner for the default of six hours.
   mutation:
     runs-on: ubuntu-24.04
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v6
         with:
