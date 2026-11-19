@@ -251,9 +251,8 @@ extern "C"
     enum xtract_spectrum_
     {
         XTRACT_MAGNITUDE_SPECTRUM,
-        XTRACT_LOG_MAGNITUDE_SPECTRUM,
+        XTRACT_LOG_SPECTRUM,
         XTRACT_POWER_SPECTRUM,
-        XTRACT_LOG_POWER_SPECTRUM,
         XTRACT_MAGNITUDE_PHASE_SPECTRUM
     };
 
@@ -321,18 +320,18 @@ extern "C"
     /** \brief Enumeration of vector format types*/
     typedef enum xtract_vector_
     {
-        /* N/2 magnitude/log-magnitude/power/log-power coefficients and N/2 frequencies */
+        /* N/2 magnitude, power or log coefficients and N/2 frequencies */
         XTRACT_SPECTRAL,
         /* N spectral amplitudes */
         XTRACT_SPECTRAL_MAGNITUDES,
-        /* N/2 magnitude/log-magnitude/power/log-power peak coefficients and N/2
+        /* N/2 magnitude, power or log peak coefficients and N/2
          * frequencies */
         XTRACT_SPECTRAL_PEAKS,
         /* N spectral peak amplitudes */
         XTRACT_SPECTRAL_PEAKS_MAGNITUDES,
         /* N spectral peak frequencies */
         XTRACT_SPECTRAL_PEAKS_FREQUENCIES,
-        /* N/2 magnitude/log-magnitude/power/log-power harmonic peak coefficients and N/2
+        /* N/2 magnitude, power or log harmonic peak coefficients and N/2
          * frequencies */
         XTRACT_SPECTRAL_HARMONICS,
         /* N spectral harmonic amplitudes */
