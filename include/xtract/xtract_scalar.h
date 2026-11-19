@@ -327,16 +327,6 @@ extern "C"
      */
     int xtract_crest(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
-    /** \brief Extract the Spectral Power of an input vector using a method described by Bee Suan Ong (2005)
-     *
-     * \param *ctx: a pointer to a context, or NULL
-     * \param *data: a pointer to the first element in an array of doubles representing the magnitude coefficients from the spectrum of an audio vector, (e.g. the first half of the array pointed to by *result from xtract_spectrum().
-     * \param N: the number of elements to be considered
-     * \param *argv: a pointer to NULL
-     * \param *result: the spectral power of N values from the array pointed to by *data
-     */
-    int xtract_power(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
-
     /* Odd to even harmonic ratio */
     /** \brief Extract the Odd to even harmonic ratio of an input vector
      *

@@ -1331,14 +1331,6 @@ UTEST(scalar, lowest_value_no_qualifying_values)
     ASSERT_EQ(result, 0.0);
 }
 
-UTEST(scalar, power_not_implemented)
-{
-    double result = 0.0;
-    double data[] = {1.0, 2.0, 3.0, 4.0};
-    int rv = xtract_power(NULL, data, 4, NULL, &result);
-    ASSERT_EQ(rv, XTRACT_FEATURE_NOT_IMPLEMENTED);
-}
-
 UTEST(scalar, midicent_a4)
 {
     /* midicent = 100 * (69 + 12 * log2(440/440)) = 6900 */

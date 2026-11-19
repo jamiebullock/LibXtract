@@ -982,11 +982,6 @@ UTEST(descriptors, every_feature_conforms_to_its_descriptor)
         argv = conf_argv(d, argf, argi, mel, bark, window, cqt, last_n, wavelet_f0);
 
         rv = conf_call(f, ctx, data, call_n, argv, result);
-        if (rv == XTRACT_FEATURE_NOT_IMPLEMENTED)
-        {
-            ASSERT_TRUE_MSG(f == XTRACT_POWER, d->algo.name);
-            continue;
-        }
         ASSERT_NE_MSG(rv, XTRACT_ARGUMENT_ERROR, d->algo.name);
         ASSERT_NE_MSG(rv, XTRACT_BAD_STATE, d->algo.name);
 

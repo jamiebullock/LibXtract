@@ -96,7 +96,6 @@ extern "C"
         XTRACT_NOISINESS,
         XTRACT_RMS_AMPLITUDE,
         XTRACT_SPECTRAL_INHARMONICITY,
-        XTRACT_POWER,
         XTRACT_ODD_EVEN_RATIO,
         XTRACT_SHARPNESS,
         XTRACT_SPECTRAL_SLOPE,
@@ -245,7 +244,6 @@ extern "C"
         XTRACT_SUCCESS,
         XTRACT_BAD_STATE,
         XTRACT_NO_RESULT,
-        XTRACT_FEATURE_NOT_IMPLEMENTED,
         XTRACT_ARGUMENT_ERROR
     };
 
@@ -404,8 +402,7 @@ extern "C"
         xtract_bool_t is_delta; /* features in xtract_delta.h can be scalar or vector */
 
         /* a result range/unit of XTRACT_UNKNOWN_MIN/MAX or XTRACT_UNIT_UNKNOWN
-         * means the feature is unimplemented or its range is genuinely
-         * undetermined, not merely unverified */
+         * means its range is genuinely undetermined, not merely unverified */
         union {
             struct
             {

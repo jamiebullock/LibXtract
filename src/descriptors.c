@@ -647,7 +647,6 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_SMOOTHNESS:
         case XTRACT_SPECTRAL_ENTROPY:
         case XTRACT_FLATNESS:
-        case XTRACT_POWER:
         case XTRACT_PEAK_SPECTRUM:
         case XTRACT_SUBBANDS:
         case XTRACT_MFCC:
@@ -825,7 +824,6 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_FLATNESS:
         case XTRACT_FLATNESS_DB:
         case XTRACT_SPECTRAL_ENTROPY:
-        case XTRACT_POWER:
         case XTRACT_BARK_COEFFICIENTS:
         case XTRACT_RMS_AMPLITUDE:
         case XTRACT_SMOOTHNESS:
@@ -1510,15 +1508,6 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             copy_desc(p_desc, "Extract the RMS amplitude of an audio signal");
             copy_author(author, "");
             break;
-        case XTRACT_POWER:
-            copy_name(name, "power");
-            copy_name(p_name, "Spectral Power");
-            copy_desc(desc, "Extract the spectral power of a spectrum");
-            copy_desc(p_desc,
-                      "Extract the spectral power of an audio spectrum");
-            copy_author(author, "Bee Suan Ong");
-            *year = 2005;
-            break;
         case XTRACT_SHARPNESS:
             copy_name(name, "sharpness");
             copy_name(p_name, "Spectral Sharpness");
@@ -2043,7 +2032,6 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_HIGHEST_VALUE:
         case XTRACT_SUM:
         case XTRACT_RMS_AMPLITUDE:
-        case XTRACT_POWER:
         case XTRACT_SHARPNESS:
         case XTRACT_SPECTRAL_SLOPE:
         case XTRACT_DIFFERENCE_VECTOR:
@@ -2109,7 +2097,6 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_NOISINESS:
         case XTRACT_RMS_AMPLITUDE:
         case XTRACT_SPECTRAL_INHARMONICITY:
-        case XTRACT_POWER:
         case XTRACT_ODD_EVEN_RATIO:
         case XTRACT_SHARPNESS:
         case XTRACT_SPECTRAL_SLOPE:
@@ -2239,7 +2226,6 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_NOISINESS:
         case XTRACT_RMS_AMPLITUDE:
         case XTRACT_SPECTRAL_INHARMONICITY:
-        case XTRACT_POWER:
         case XTRACT_ODD_EVEN_RATIO:
         case XTRACT_SHARPNESS:
         case XTRACT_SPECTRAL_SLOPE:
@@ -2471,8 +2457,6 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
                 *result_min = XTRACT_UNBOUNDED_MIN;
                 *result_max = XTRACT_UNBOUNDED_MAX;
                 break;
-            case XTRACT_POWER:
-                /* unimplemented (returns XTRACT_FEATURE_NOT_IMPLEMENTED) */
             default:
                 *result_unit = XTRACT_UNIT_UNKNOWN;
                 *result_min = XTRACT_UNKNOWN_MIN;
