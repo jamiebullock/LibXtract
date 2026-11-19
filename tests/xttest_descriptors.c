@@ -747,6 +747,15 @@ UTEST(descriptors, appended_features_are_fully_described)
     ASSERT_EQ(fd[XTRACT_LAST_N].result.vector.format, XTRACT_ARBITRARY_SERIES);
     ASSERT_EQ(fd[XTRACT_LAST_N].result.vector.unit, XTRACT_UNIT_ANY);
 
+    ASSERT_STREQ(fd[XTRACT_PACKED].algo.name, "packed");
+    ASSERT_EQ(fd[XTRACT_PACKED].argc, 0);
+    ASSERT_EQ(fd[XTRACT_PACKED].data.format, XTRACT_SPECTRAL_PEAKS);
+    ASSERT_EQ(fd[XTRACT_PACKED].data.unit, XTRACT_ANY_AMPLITUDE_HERTZ);
+    ASSERT_EQ(fd[XTRACT_PACKED].is_scalar, XTRACT_FALSE);
+    ASSERT_EQ(fd[XTRACT_PACKED].is_delta, XTRACT_FALSE);
+    ASSERT_EQ(fd[XTRACT_PACKED].result.vector.format, XTRACT_SPECTRAL_PEAKS);
+    ASSERT_EQ(fd[XTRACT_PACKED].result.vector.unit, XTRACT_ANY_AMPLITUDE_HERTZ);
+
     ASSERT_EQ(xtract_free_descriptors(fd), XTRACT_SUCCESS);
 }
 
@@ -832,6 +841,7 @@ UTEST(dispatch, slots_map_to_the_expected_function)
     ASSERT_TRUE(xtract[XTRACT_INVERSE_DIFFERENCE_MOMENT] == xtract_inverse_difference_moment);
     ASSERT_TRUE(xtract[XTRACT_LOCAL_BINARY_PATTERNS] == xtract_local_binary_patterns);
     ASSERT_TRUE(xtract[XTRACT_LAST_N] == xtract_last_n);
+    ASSERT_TRUE(xtract[XTRACT_PACKED] == xtract_packed);
 }
 
 /* ===== Descriptor conformance ===== */

@@ -534,6 +534,142 @@ UTEST(vector, harmonic_spectrum_rejects_a_frequency_that_is_negative_nan_or_lowe
         ASSERT_EQ(result[n], -1.0);
 }
 
+/* ===== xtract_packed ===== */
+
+UTEST(vector, packed_moves_the_amplitudes_other_than_0_to_the_front_with_their_frequencies)
+{
+    double data[12] = {0.0, 0.5, 0.0, 0.0, 0.25, 0.75, 0.0, 100.0, 0.0, 0.0, 400.0, 500.0};
+    double result[12];
+    int n;
+
+    for (n = 0; n < 12; n++)
+        result[n] = 999.0;
+
+    ASSERT_EQ(xtract_packed(NULL, data, 12, NULL, result), XTRACT_SUCCESS);
+
+    ASSERT_EQ(result[0], 0.5);
+    ASSERT_EQ(result[1], 0.25);
+    ASSERT_EQ(result[2], 0.75);
+    ASSERT_EQ(result[6], 100.0);
+    ASSERT_EQ(result[7], 400.0);
+    ASSERT_EQ(result[8], 500.0);
+    for (n = 3; n < 6; n++)
+    {
+        ASSERT_EQ(result[n], 0.0);
+        ASSERT_EQ(result[6 + n], 0.0);
+    }
+}
+
+UTEST(vector, packed_leaves_out_the_frequency_of_an_amplitude_of_0)
+{
+    double data[6] = {0.0, 0.5, 0.0, 100.0, 200.0, 300.0};
+    double result[6];
+
+    ASSERT_EQ(xtract_packed(NULL, data, 6, NULL, result), XTRACT_SUCCESS);
+
+    ASSERT_EQ(result[0], 0.5);
+    ASSERT_EQ(result[1], 0.0);
+    ASSERT_EQ(result[2], 0.0);
+    ASSERT_EQ(result[3], 200.0);
+    ASSERT_EQ(result[4], 0.0);
+    ASSERT_EQ(result[5], 0.0);
+}
+
+UTEST(vector, packed_keeps_an_amplitude_at_a_frequency_of_0_and_a_negative_amplitude)
+{
+    double data[6] = {0.5, 0.0, -0.25, 0.0, 100.0, 200.0};
+    double result[6];
+
+    ASSERT_EQ(xtract_packed(NULL, data, 6, NULL, result), XTRACT_SUCCESS);
+
+    ASSERT_EQ(result[0], 0.5);
+    ASSERT_EQ(result[1], -0.25);
+    ASSERT_EQ(result[2], 0.0);
+    ASSERT_EQ(result[3], 0.0);
+    ASSERT_EQ(result[4], 200.0);
+    ASSERT_EQ(result[5], 0.0);
+}
+
+UTEST(vector, packed_copies_an_input_with_no_amplitude_of_0)
+{
+    double data[6] = {0.5, 0.25, 0.75, 100.0, 200.0, 300.0};
+    double result[6];
+    int n;
+
+    ASSERT_EQ(xtract_packed(NULL, data, 6, NULL, result), XTRACT_SUCCESS);
+
+    for (n = 0; n < 6; n++)
+        ASSERT_EQ(result[n], data[n]);
+}
+
+UTEST(vector, packed_gives_all_zeros_for_an_input_with_no_amplitude_other_than_0)
+{
+    double data[6] = {0.0, 0.0, 0.0, 100.0, 200.0, 300.0};
+    double result[6] = {999.0, 999.0, 999.0, 999.0, 999.0, 999.0};
+    int n;
+
+    ASSERT_EQ(xtract_packed(NULL, data, 6, NULL, result), XTRACT_SUCCESS);
+
+    for (n = 0; n < 6; n++)
+        ASSERT_EQ(result[n], 0.0);
+}
+
+UTEST(vector, packed_keeps_as_many_amplitudes_as_nonzero_count_gives_for_its_first_half)
+{
+    double data[10] = {0.0, 0.5, 0.0, 0.25, 0.75, 0.0, 100.0, 0.0, 300.0, 400.0};
+    double result[10];
+    double count = -1.0;
+
+    ASSERT_EQ(xtract_packed(NULL, data, 10, NULL, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_nonzero_count(NULL, result, 5, NULL, &count), XTRACT_SUCCESS);
+
+    ASSERT_EQ(count, 3.0);
+    ASSERT_NE(result[2], 0.0);
+    ASSERT_EQ(result[3], 0.0);
+}
+
+UTEST(vector, packed_gives_the_harmonics_of_a_harmonic_spectrum_as_neighbours)
+{
+    /* Peaks at 100, 250, 300 and 500 Hz in bins 1, 3, 5 and 7 of 8; the one
+     * at 250 Hz is not a harmonic of 100 Hz. */
+    double peaks[16] = {0.0, 1.0, 0.0, 0.3, 0.0, 0.5, 0.0, 0.25,
+                        0.0, 100.0, 0.0, 250.0, 0.0, 300.0, 0.0, 500.0};
+    double harmonics[16];
+    double result[16];
+    double argv[2] = {100.0, 0.2};
+
+    ASSERT_EQ(xtract_harmonic_spectrum(NULL, peaks, 16, argv, harmonics), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_packed(NULL, harmonics, 16, NULL, result), XTRACT_SUCCESS);
+
+    ASSERT_EQ(result[0], 1.0);
+    ASSERT_EQ(result[1], 0.5);
+    ASSERT_EQ(result[2], 0.25);
+    ASSERT_EQ(result[3], 0.0);
+    ASSERT_EQ(result[8], 100.0);
+    ASSERT_EQ(result[9], 300.0);
+    ASSERT_EQ(result[10], 500.0);
+    ASSERT_EQ(result[11], 0.0);
+}
+
+UTEST(vector, packed_rejects_an_odd_or_short_input_and_leaves_the_result_untouched)
+{
+    double data[4] = {0.5, 100.0, 0.25, 200.0};
+    double result[4] = {-1.0, -1.0, -1.0, -1.0};
+    int n;
+
+    ASSERT_EQ(xtract_packed(NULL, data, 3, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_packed(NULL, data, 1, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_packed(NULL, data, 0, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_packed(NULL, data, -2, NULL, result), XTRACT_ARGUMENT_ERROR);
+
+    for (n = 0; n < 4; n++)
+        ASSERT_EQ(result[n], -1.0);
+
+    ASSERT_EQ(xtract_packed(NULL, data, 2, NULL, result), XTRACT_SUCCESS);
+    ASSERT_EQ(result[0], 0.5);
+    ASSERT_EQ(result[1], 100.0);
+}
+
 /* ===== xtract_amdf ===== */
 
 UTEST(vector, amdf_of_constant_signal_is_0_at_all_lags)

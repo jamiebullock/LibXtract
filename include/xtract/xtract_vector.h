@@ -192,6 +192,15 @@ extern "C"
      */
     int xtract_harmonic_spectrum(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
+    /** \brief Extract the elements of a spectrum that have an amplitude other than 0, as neighbours at the start of each half and in the order they had
+     * \param *ctx: a pointer to a context, or NULL
+     * \param *data: a pointer to the first element in an array of doubles of which the first half holds amplitudes and the second half the respective frequencies (e.g. *result from xtract_peak_spectrum() or xtract_harmonic_spectrum())
+     * \param N: the size of the array pointed to by *data, at least 2 and even
+     * \param *argv: a pointer to NULL
+     * \param *result: a pointer to an array of size N. The first half holds the amplitudes other than 0 in the order they have in *data, and 0 in every element after them. The second half holds the frequency of each of those amplitudes in the same element of that half, and 0 in every element after them. xtract_nonzero_count() of the first half gives the number of amplitudes kept
+     */
+    int xtract_packed(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
+
     /** \brief Extract Linear Predictive Coding Coefficients
      *
      * Based on algorithm in Rabiner and Juang as implemented by Jutta Degener in Dr. Dobb's Journal December, 1994.
