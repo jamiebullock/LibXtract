@@ -183,7 +183,7 @@ extern "C"
      */
     int xtract_peak_spectrum(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
-    /** \brief Extract the harmonic spectrum from a peak spectrum: the peaks whose frequency divided by the fundamental is within a threshold of a whole number of at least 1, the harmonic number, and where several peaks are nearest to one harmonic number only the largest of them, or the lowest in frequency of those that are equally large
+    /** \brief Extract the harmonic spectrum from a peak spectrum. The harmonic number of a peak is the whole number nearest to its frequency divided by the fundamental. A peak is kept when its harmonic number is at least 1 and that quotient is within a threshold of it. Of several such peaks with one harmonic number only the largest is kept, or the lowest in frequency of those that are equally large
      * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles representing the peak spectrum of an audio vector (e.g. *result from xtract_peak_spectrum()). It is expected that the first half of the array pointed to by *data will contain amplitudes for each peak considered, and the second half will contain the respective frequencies. A frequency of 0 marks an element that holds no peak. No frequency may be negative or NaN, and the frequency of a peak may not be lower than that of a peak before it
      * \param N: the size of the array pointed to by *data, at least 2 and even
