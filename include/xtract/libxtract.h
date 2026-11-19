@@ -285,8 +285,7 @@ extern "C"
          * values stay stable across releases */
         XTRACT_HERTZ = 2,
         XTRACT_ANY_AMPLITUDE_HERTZ,
-        XTRACT_DBFS,
-        XTRACT_DBFS_HERTZ,
+        XTRACT_DECIBELS,
         XTRACT_PERCENT,
         XTRACT_BINS,
         XTRACT_SONE,

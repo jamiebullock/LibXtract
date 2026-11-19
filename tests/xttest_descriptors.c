@@ -105,7 +105,7 @@ UTEST(descriptors, audited_result_ranges_and_units)
 
     /* Flatness in dB is <= 0 with no true floor. */
     CHECK_REL(fd[XTRACT_FLATNESS_DB].result.scalar.max, 0.0, EPSILON);
-    ASSERT_EQ(fd[XTRACT_FLATNESS_DB].result.scalar.unit, XTRACT_DBFS);
+    ASSERT_EQ(fd[XTRACT_FLATNESS_DB].result.scalar.unit, XTRACT_DECIBELS);
 
     /* Loudness is in sones, sharpness in acums. */
     ASSERT_EQ(fd[XTRACT_LOUDNESS].result.scalar.unit, XTRACT_SONE);
@@ -114,6 +114,59 @@ UTEST(descriptors, audited_result_ranges_and_units)
     /* Cepstral/LPC coefficient vectors are dimensionless. */
     ASSERT_EQ(fd[XTRACT_LPCC].result.vector.unit, XTRACT_UNIT_NONE);
     ASSERT_EQ(fd[XTRACT_BARK_COEFFICIENTS].result.vector.unit, XTRACT_UNIT_NONE);
+
+    ASSERT_EQ(xtract_free_descriptors(fd), XTRACT_SUCCESS);
+}
+
+UTEST(descriptors, only_the_decibel_quantities_carry_the_decibel_unit)
+{
+    xtract_function_descriptor_t *fd = xtract_make_descriptors();
+    int f, i;
+
+    ASSERT_TRUE(fd != NULL);
+    for (f = 0; f < XTRACT_FEATURES; f++)
+    {
+        const xtract_unit_t result_unit = fd[f].is_scalar ? fd[f].result.scalar.unit : fd[f].result.vector.unit;
+        const int gives_decibels = f == XTRACT_FLATNESS_DB || f == XTRACT_SMOOTHNESS;
+
+        ASSERT_EQ_MSG(result_unit == XTRACT_DECIBELS, gives_decibels, fd[f].algo.name);
+        for (i = 0; i < fd[f].argc && i < XTRACT_MAXARGS; i++)
+        {
+            const int takes_decibels = i == 0 && (f == XTRACT_TONALITY || f == XTRACT_SMOOTHNESS);
+
+            ASSERT_EQ_MSG(fd[f].argv.unit[i] == XTRACT_DECIBELS, takes_decibels, fd[f].algo.name);
+        }
+    }
+    ASSERT_EQ(xtract_free_descriptors(fd), XTRACT_SUCCESS);
+}
+
+UTEST(descriptors, an_argument_has_the_unit_of_the_value_it_takes)
+{
+    /* A mean, a median, a threshold or a variance of the data. */
+    static const int unit_of_the_data[] = {
+        XTRACT_VARIANCE, XTRACT_STANDARD_DEVIATION, XTRACT_AVERAGE_DEVIATION,
+        XTRACT_MEDIAN_ABSOLUTE_DEVIATION, XTRACT_LEMPEL_ZIV_COMPLEXITY, XTRACT_LOWEST_VALUE};
+    /* A spectral mean, centroid or variance. */
+    static const int hertz[] = {
+        XTRACT_SPECTRAL_VARIANCE, XTRACT_SPECTRAL_STANDARD_DEVIATION, XTRACT_SPREAD};
+    /* A flatness from 0 to 1, a filterbank or a kernel. */
+    static const int no_unit[] = {
+        XTRACT_FLATNESS_DB, XTRACT_MFCC, XTRACT_MEL_SPECTROGRAM, XTRACT_GFCC,
+        XTRACT_GAMMATONE_SPECTROGRAM, XTRACT_MMBSES, XTRACT_SPECTRAL_SUBBAND_CENTROIDS, XTRACT_CQT};
+    xtract_function_descriptor_t *fd = xtract_make_descriptors();
+    size_t i;
+
+    ASSERT_TRUE(fd != NULL);
+    for (i = 0; i < sizeof(unit_of_the_data) / sizeof(unit_of_the_data[0]); i++)
+        ASSERT_EQ_MSG(fd[unit_of_the_data[i]].argv.unit[0], XTRACT_UNIT_ANY, fd[unit_of_the_data[i]].algo.name);
+    for (i = 0; i < sizeof(hertz) / sizeof(hertz[0]); i++)
+        ASSERT_EQ_MSG(fd[hertz[i]].argv.unit[0], XTRACT_HERTZ, fd[hertz[i]].algo.name);
+    for (i = 0; i < sizeof(no_unit) / sizeof(no_unit[0]); i++)
+        ASSERT_EQ_MSG(fd[no_unit[i]].argv.unit[0], XTRACT_UNIT_NONE, fd[no_unit[i]].algo.name);
+
+    /* The log of a band energy is a natural logarithm. */
+    ASSERT_EQ(fd[XTRACT_MEL_SPECTROGRAM].result.vector.unit, XTRACT_UNIT_NONE);
+    ASSERT_EQ(fd[XTRACT_GAMMATONE_SPECTROGRAM].result.vector.unit, XTRACT_UNIT_NONE);
 
     ASSERT_EQ(xtract_free_descriptors(fd), XTRACT_SUCCESS);
 }
