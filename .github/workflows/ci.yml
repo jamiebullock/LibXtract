@@ -191,6 +191,22 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
+  # The binary that the proofs run on is built on every pull request, which
+  # fails when a harness does not compile or calls a function that the
+  # library does not have.
+  verify-build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - uses: ./.github/actions/install-cbmc
+
+      - name: Build the proof binary
+        run: make -C verify xtract.gb
+
   # The proofs take about fifteen minutes, so they run on every push to main
   # and develop and not on pull requests. A failure opens an issue, or adds
   # a comment to the open issue for that branch, so that it is not missed.
@@ -206,11 +222,10 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Install CBMC 6.11.0 and Bitwuzla 0.9.1
+      - uses: ./.github/actions/install-cbmc
+
+      - name: Install Bitwuzla 0.9.1
         run: |
-          curl -fsSL --retry 5 --retry-all-errors --retry-delay 10 -o cbmc.deb https://github.com/diffblue/cbmc/releases/download/cbmc-6.11.0/ubuntu-24.04-cbmc-6.11.0-Linux.deb
-          echo "b3721aa541038384d7801ea3aeabbcddc3e8845ac8f1cbff637cf8dec7481ac8  cbmc.deb" | sha256sum -c -
-          sudo dpkg -i cbmc.deb
           curl -fsSL --retry 5 --retry-all-errors --retry-delay 10 -o bitwuzla.zip https://github.com/bitwuzla/bitwuzla/releases/download/0.9.1/Bitwuzla-Linux-x86_64-static.zip
           echo "057f1546ae2068df57beb178f3eeab1678f0e5f0c378787a05b7bb294617c9c6  bitwuzla.zip" | sha256sum -c -
           unzip -q bitwuzla.zip

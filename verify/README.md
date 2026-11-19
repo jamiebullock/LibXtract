@@ -52,4 +52,6 @@ make -C verify .proofs/verify_last_n.proved
 make -C verify -j3
 ```
 
+The build of the binary the proofs run on, `make -C verify xtract.gb`, takes a few seconds and needs no solver. It fails when the compiler warns, as it does for a call to a function that nothing declares, and when the binary calls a function that this repository declares and that has no body. CI runs it on every pull request, and the proofs on every push to main and develop.
+
 Logs are written to `verify/.proofs/<proof>.log`; a proof that passes leaves `verify/.proofs/<proof>.proved`, and a later `make -C verify` reruns only the proofs whose inputs changed, where a changed bound or solver setting counts as a change to every proof.
