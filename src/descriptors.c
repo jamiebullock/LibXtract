@@ -689,6 +689,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             break;
         case XTRACT_SPECTRAL_INHARMONICITY:
         case XTRACT_HARMONIC_SPECTRUM:
+        case XTRACT_PACKED:
             *data_format = XTRACT_SPECTRAL_PEAKS;
             break;
         case XTRACT_NONZERO_COUNT:
@@ -897,6 +898,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_SPECTRAL_CENTROID:
         case XTRACT_SPECTRAL_SLOPE:
         case XTRACT_HARMONIC_SPECTRUM:
+        case XTRACT_PACKED:
         case XTRACT_SPECTRAL_INHARMONICITY:
         case XTRACT_ODD_EVEN_RATIO:
         case XTRACT_SPECTRAL_SUBBAND_CENTROIDS:
@@ -1118,6 +1120,13 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             copy_name(p_name, "Harmonic Spectrum");
             copy_desc(desc, "Extract the harmonics from a spectrum");
             copy_desc(p_desc, "Extract the harmonics from an audio spectrum");
+            copy_author(author, "");
+            break;
+        case XTRACT_PACKED:
+            copy_name(name, "packed");
+            copy_name(p_name, "Packed Spectrum");
+            copy_desc(desc, "Extract the elements of a spectrum that have an amplitude other than 0");
+            copy_desc(p_desc, "Extract the peaks or harmonics of an audio spectrum as neighbours");
             copy_author(author, "");
             break;
         case XTRACT_NOISINESS:
@@ -2187,6 +2196,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_COOCCURRENCE_MATRIX:
         case XTRACT_LOCAL_BINARY_PATTERNS:
         case XTRACT_LAST_N:
+        case XTRACT_PACKED:
             *is_scalar = XTRACT_FALSE;
             break;
         default:
@@ -2582,6 +2592,10 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             case XTRACT_HARMONIC_SPECTRUM:
             case XTRACT_CQT:
                 *result_format = XTRACT_SPECTRAL;
+                *result_unit = XTRACT_ANY_AMPLITUDE_HERTZ;
+                break;
+            case XTRACT_PACKED:
+                *result_format = XTRACT_SPECTRAL_PEAKS;
                 *result_unit = XTRACT_ANY_AMPLITUDE_HERTZ;
                 break;
             case XTRACT_MFCC:

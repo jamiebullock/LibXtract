@@ -137,4 +137,5 @@ int (*xtract[])(xtract_context *, const double *, const int, const void *, doubl
         xtract_angular_second_moment,
         xtract_inverse_difference_moment,
         xtract_local_binary_patterns,
-        xtract_last_n};
+        xtract_last_n,
+        xtract_packed};

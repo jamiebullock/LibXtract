@@ -13,8 +13,8 @@
  * filterbanks, bark limits, and the context are built once at a fixed
  * power-of-two N in LLVMFuzzerInitialize. The features that need no such
  * setup (DCT, autocorrelation, AMDF, ASDF, LPC, LPCC, the moving-window
- * features, quantise and histogram) are called with a fuzzer-chosen N from 0
- * up to it, which includes the lengths each of them rejects. A filterbank
+ * features, quantise, histogram and packed) are called with a fuzzer-chosen
+ * N from 0 up to it, which includes the lengths each of them rejects. A filterbank
  * feature is called at the one N its filterbank serves or, when a bit of the
  * input is set, at a fuzzer-chosen N, which it rejects unless it is that N.
  * Every other call runs at the fixed N. The input is allocated at exactly
@@ -85,6 +85,7 @@ enum
     FZ_CQT,
     FZ_QUANTISE,
     FZ_HISTOGRAM,
+    FZ_PACKED,
     FZ_N_FEATURES
 };
 
@@ -142,6 +143,7 @@ static int input_length(int feature, int n, int any_length)
     case FZ_EWMA_VARIANCE:
     case FZ_QUANTISE:
     case FZ_HISTOGRAM:
+    case FZ_PACKED:
         return n;
     default:
         return VEC_N;
@@ -385,6 +387,9 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
         xtract_histogram(ctx, input, n, maybe_null(null_argv, &levels), result);
         break;
     }
+    case FZ_PACKED:
+        xtract_packed(ctx, input, n, NULL, result);
+        break;
     default:
         break;
     }

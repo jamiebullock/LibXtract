@@ -696,6 +696,30 @@ int xtract_harmonic_spectrum(xtract_context *ctx, const double *data, const int 
     return XTRACT_SUCCESS;
 }
 
+int xtract_packed(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
+{
+    const int M = N >> 1;
+    int n, kept;
+
+    if (N < 2 || (N & 1))
+        return XTRACT_ARGUMENT_ERROR;
+
+    kept = 0;
+    for (n = 0; n < M; n++)
+    {
+        if (!data[n])
+            continue;
+        result[kept] = data[n];
+        result[M + kept] = data[M + n];
+        kept++;
+    }
+
+    for (n = kept; n < M; n++)
+        result[n] = result[M + n] = 0.0;
+
+    return XTRACT_SUCCESS;
+}
+
 int xtract_lpc(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
     int i, j, M, L;
