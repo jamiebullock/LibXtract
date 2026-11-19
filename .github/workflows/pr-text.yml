@@ -16,6 +16,7 @@ jobs:
   pr-text:
     name: Check the title and description
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v6
         with:
