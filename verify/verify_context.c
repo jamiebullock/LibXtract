@@ -18,6 +18,9 @@
 #define xtract_scratch_return_ints scratch_return_ints_as_compiled
 #define xtract_transform_limit transform_limit_as_compiled
 #define xtract_transform transform_as_compiled
+/* context.c calls this function above its definition, and
+ * xtract_context.h declares it under the library's name only */
+void xtract_context_delete(xtract_context *ctx);
 #include "../src/context.c"
 #undef xtract_context_new
 #undef xtract_context_delete

@@ -1,0 +1,18 @@
+name: Install CBMC
+description: Download the pinned CBMC release, check its checksum and install it
+
+runs:
+  using: composite
+  steps:
+    - name: Install CBMC 6.11.0
+      shell: bash
+      env:
+        CBMC_VERSION: 6.11.0
+        CBMC_SHA256: b3721aa541038384d7801ea3aeabbcddc3e8845ac8f1cbff637cf8dec7481ac8
+      run: |
+        package="ubuntu-24.04-cbmc-${CBMC_VERSION}-Linux.deb"
+        curl --fail --silent --show-error --location --retry 5 --retry-all-errors --retry-delay 10 \
+          --output "$RUNNER_TEMP/$package" \
+          "https://github.com/diffblue/cbmc/releases/download/cbmc-${CBMC_VERSION}/$package"
+        echo "$CBMC_SHA256  $RUNNER_TEMP/$package" | sha256sum --check
+        sudo dpkg -i "$RUNNER_TEMP/$package"

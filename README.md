@@ -101,7 +101,7 @@ The default preset also has targets that run a tool, each built with `cmake --bu
 | `bench` | The benchmarks |
 | `doc` | The API reference (needs Doxygen) |
 
-The CBMC proofs of the feature functions have their own GNU make build, `make -C verify`, which CI runs on every push to main and develop. See [verify/README.md](verify/README.md).
+The CBMC proofs of the feature functions have their own GNU make build, `make -C verify`, which CI builds on every pull request and runs on every push to main and develop. See [verify/README.md](verify/README.md).
 
 ### Install
 

@@ -78,7 +78,9 @@ HARNESS_SRC := $(wildcard verify_*.c) context_stub.c fft_stub.c math_stub.c sort
 HEADERS := verify.h $(wildcard ../include/xtract/*.h ../src/*.h ../src/ooura/*.h \
 	../src/c-ringbuf/*.h ../src/dywapitchtrack/*.h)
 
-CFLAGS = -U__APPLE__ -DUSE_OOURA -DVERIFY_MAX_N=$(VERIFY_MAX_N) -DVERIFY_SMALL_N=$(VERIFY_SMALL_N) \
+# goto-cc reports a call to a function that nothing declares as a warning,
+# which -Wall prints and -Werror makes an error.
+CFLAGS = -Wall -Werror -U__APPLE__ -DUSE_OOURA -DVERIFY_MAX_N=$(VERIFY_MAX_N) -DVERIFY_SMALL_N=$(VERIFY_SMALL_N) \
 	-DVERIFY_MAX_FILTERS=$(VERIFY_MAX_FILTERS) -DXTRACT_JACOBI_MAX_SWEEPS=$(VERIFY_MAX_SWEEPS) \
 	-Dsqrt=verify_sqrt -std=c99 -I../include -I../src
 
@@ -146,8 +148,16 @@ $(CBMC_FLAGS_STAMP): force
 	@echo '$(UNWIND) $(SMALL_UNWIND) $(CBMC_FLAGS)' > $@.new
 	@if cmp -s $@ $@.new; then $(RM) $@.new; else mv $@.new $@; fi
 
+# goto-cc links a call to a declared function that has no body without a
+# message, and each proof that reaches the call then fails when it runs.
+# The build fails here if the binary calls such a function of the library
+# or of the harnesses.
 $(GOTO_BINARY): $(LIB_SRC) $(SORT_SRC) $(CONTEXT_SRC) $(HARNESS_SRC) $(HEADERS) $(CFLAGS_STAMP)
 	$(GOTO_CC) $(CFLAGS) -o $@ $(LIB_SRC) $(HARNESS_SRC)
+	@$(GOTO_INSTRUMENT) --list-undefined-functions $@ > $(PROOF_DIR)/undefined
+	@if grep -E '^(xtract_|verify_)' $(PROOF_DIR)/undefined; then \
+		echo "$@ calls the functions above, which have no body"; exit 1; \
+	fi
 
 $(HARNESS_LIST): $(GOTO_BINARY)
 	@$(GOTO_INSTRUMENT) --list-goto-functions $(GOTO_BINARY) > $@.functions
@@ -170,5 +180,9 @@ $(PROOF_DIR)/%.proved: $(GOTO_BINARY) $(CBMC_FLAGS_STAMP)
 
 clean:
 	@$(RM) -r $(GOTO_BINARY) $(PROOF_DIR)
+
+# goto-cc writes the binary before -Werror fails the build, and a binary left
+# in place would be taken for a good one by the next run.
+.DELETE_ON_ERROR:
 
 .PHONY: all proofs clean force
