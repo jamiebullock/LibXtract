@@ -273,7 +273,7 @@ static void log_filterbank_energies(const double *data, const xtract_filterbank 
                 result[filter] += data[n] * gains[n];
         }
         if (result[filter] < XTRACT_LOG_LIMIT)
-            result[filter] = XTRACT_LOG_LIMIT_DB;
+            result[filter] = XTRACT_LN_LOG_LIMIT;
         else
             /* cppcheck-suppress invalidFunctionArg */
             result[filter] = log(result[filter]);
@@ -350,7 +350,7 @@ static double bivariate_gaussian_entropy(double sxx, double syy, double sxy, con
     det = sxx * syy - XTRACT_SQ(sxy);
 
     if (det < XTRACT_LOG_LIMIT)
-        return gaussian_term + 0.5 * XTRACT_LOG_LIMIT_DB;
+        return gaussian_term + 0.5 * XTRACT_LN_LOG_LIMIT;
 
     return gaussian_term + 0.5 * log(det);
 }
@@ -766,9 +766,9 @@ int xtract_lpcc(xtract_context *ctx, const double *data, const int N, const void
  * NULL argv and writes one scalar, so the dispatch below cannot overrun the
  * result or dereference the NULL argv */
 static const int subband_features[] = {
-    XTRACT_MEAN, XTRACT_IRREGULARITY_K, XTRACT_IRREGULARITY_J, XTRACT_SMOOTHNESS,
-    XTRACT_ZCR, XTRACT_LOUDNESS, XTRACT_FLATNESS, XTRACT_RMS_AMPLITUDE,
-    XTRACT_SHARPNESS, XTRACT_HIGHEST_VALUE, XTRACT_SUM, XTRACT_NONZERO_COUNT};
+    XTRACT_MEAN, XTRACT_IRREGULARITY_K, XTRACT_IRREGULARITY_J, XTRACT_ZCR,
+    XTRACT_LOUDNESS, XTRACT_FLATNESS, XTRACT_RMS_AMPLITUDE, XTRACT_SHARPNESS,
+    XTRACT_HIGHEST_VALUE, XTRACT_SUM, XTRACT_NONZERO_COUNT};
 
 static int is_subband_feature(const int feature)
 {

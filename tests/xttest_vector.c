@@ -2219,7 +2219,7 @@ UTEST(vector, gfcc_equals_dct_of_gammatone_spectrogram)
  * zero-mean bivariate Gaussian and the result is its differential entropy
  *     H = ln(2*pi*e) + (1/2)ln(sigma_xx*sigma_yy - sigma_xy^2),
  * with ln(2*pi*e) = ln(2*pi) + 1 (Rincon et al. 2013, Eq. 5). -96.0
- * (XTRACT_LOG_LIMIT_DB) is the determinant-term floor when it is non-positive.
+ * (XTRACT_LN_LOG_LIMIT) is the determinant-term floor when it is non-positive.
  */
 
 UTEST(vector, mmbses_all_zero_filter_produces_zero_coefficient)
@@ -2239,9 +2239,9 @@ UTEST(vector, mmbses_all_zero_filter_produces_zero_coefficient)
 
 UTEST(vector, mmbses_single_passed_bin_floors_determinant)
 {
-    const double LOG_LIMIT_DB = -96.0;
+    const double LN_LOG_LIMIT = -96.0;
     /* One passed bin (mag 5, phase 0 -> (5, 0)) gives a rank-deficient
-     * covariance, so the determinant term floors to -96 dB. */
+     * covariance, so the determinant term floors to -96. */
     const int N = 4;
     double data[4] = {5.0, 0.0, 0.0, 0.0};
     const double filt[2] = {1.0, 0.0};
@@ -2251,12 +2251,12 @@ UTEST(vector, mmbses_single_passed_bin_floors_determinant)
     ASSERT_TRUE(mf != NULL);
     ASSERT_EQ(xtract_mmbses(NULL, data, N, mf, result), XTRACT_SUCCESS);
     xtract_free_filterbank(mf);
-    CHECK_REL(result[0], (log(2.0 * M_PI) + 1.0) + 0.5 * LOG_LIMIT_DB, EPSILON);
+    CHECK_REL(result[0], (log(2.0 * M_PI) + 1.0) + 0.5 * LN_LOG_LIMIT, EPSILON);
 }
 
 UTEST(vector, mmbses_two_collinear_bins_floor_determinant)
 {
-    const double LOG_LIMIT_DB = -96.0;
+    const double LN_LOG_LIMIT = -96.0;
     /* Two passed bins both at phase 0 -> (1, 0) and (2, 0). All imaginary
      * parts are exactly 0, so sigma_yy = 0 and the determinant is 0 (floored).
      * (Phase pi would bring in the rounding of sin(pi) != 0.) */
@@ -2269,7 +2269,7 @@ UTEST(vector, mmbses_two_collinear_bins_floor_determinant)
     ASSERT_TRUE(mf != NULL);
     ASSERT_EQ(xtract_mmbses(NULL, data, N, mf, result), XTRACT_SUCCESS);
     xtract_free_filterbank(mf);
-    CHECK_REL(result[0], (log(2.0 * M_PI) + 1.0) + 0.5 * LOG_LIMIT_DB, EPSILON);
+    CHECK_REL(result[0], (log(2.0 * M_PI) + 1.0) + 0.5 * LN_LOG_LIMIT, EPSILON);
 }
 
 UTEST(vector, mmbses_two_orthogonal_bins_positive_determinant)
@@ -2678,11 +2678,11 @@ UTEST(vector, harmonic_spectrum_rejects_an_odd_or_short_input_a_null_argv_and_ou
 UTEST(vector, subbands_accepts_only_features_that_reduce_a_plain_vector_to_one_scalar)
 {
     static const int allowed[] = {
-        XTRACT_MEAN, XTRACT_IRREGULARITY_K, XTRACT_IRREGULARITY_J, XTRACT_SMOOTHNESS,
-        XTRACT_ZCR, XTRACT_LOUDNESS, XTRACT_FLATNESS, XTRACT_RMS_AMPLITUDE,
-        XTRACT_SHARPNESS, XTRACT_HIGHEST_VALUE, XTRACT_SUM, XTRACT_NONZERO_COUNT};
+        XTRACT_MEAN, XTRACT_IRREGULARITY_K, XTRACT_IRREGULARITY_J, XTRACT_ZCR,
+        XTRACT_LOUDNESS, XTRACT_FLATNESS, XTRACT_RMS_AMPLITUDE, XTRACT_SHARPNESS,
+        XTRACT_HIGHEST_VALUE, XTRACT_SUM, XTRACT_NONZERO_COUNT};
     static const int rejected[] = {
-        XTRACT_VARIANCE, XTRACT_SPECTRAL_CENTROID, XTRACT_SPECTRAL_SLOPE,
+        XTRACT_VARIANCE, XTRACT_SMOOTHNESS, XTRACT_SPECTRAL_CENTROID, XTRACT_SPECTRAL_SLOPE,
         XTRACT_SPECTRUM, XTRACT_DIFFERENCE_VECTOR, XTRACT_SUBBANDS};
     xtract_function_descriptor_t *fd = xtract_make_descriptors();
     double data[8] = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};

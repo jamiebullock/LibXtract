@@ -1706,83 +1706,141 @@ UTEST(scalar, spread_delegates_to_variance)
     CHECK_REL(result, 7500.0, EPSILON);
 }
 
-UTEST(scalar, smoothness_constant_spectrum)
+UTEST(scalar, smoothness_is_zero_for_a_constant_spectrum)
 {
-    /* All log values are equal, so each bin matches its 3-point average
-     * => smoothness = 0 */
-    double result = 0.0;
-    double data[] = {10.0, 10.0, 10.0, 10.0, 10.0};
-    xtract_smoothness(NULL, data, 5, NULL, &result);
-    CHECK_NEAR(result, 0.0, 1e-9);
-}
-
-UTEST(scalar, smoothness_of_a_log_linear_spectrum_is_zero)
-{
-    /* Logs 0, 1, 2, 3, 4: every interior bin equals the mean of itself and
-     * its neighbours, so every term of the sum is zero. */
     double result = 1.0;
-    double data[5];
-    int n;
+    double data[] = {10.0, 10.0, 10.0, 10.0, 10.0};
+    double range = 120.0;
 
-    for (n = 0; n < 5; n++)
-        data[n] = exp((double)n);
-
-    ASSERT_EQ(xtract_smoothness(NULL, data, 5, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_smoothness(NULL, data, 5, &range, &result), XTRACT_SUCCESS);
     CHECK_NEAR(result, 0.0, 1e-9);
 }
 
-UTEST(scalar, smoothness_sums_the_deviation_from_the_three_bin_mean_in_decibel_units)
+UTEST(scalar, smoothness_is_zero_when_the_levels_lie_on_a_straight_line)
 {
-    /* Logs 0, 2, 0, 3, 0. In the 20 log units the measure uses, the three
-     * interior bins deviate from the mean of their triples by 40 - 40/3,
-     * 0 - 100/3 and 60 - 60/3, which sum to 100. The asymmetry matters:
-     * with a symmetric spectrum a swapped neighbour goes unnoticed. */
+    /* Levels 0, 20, 40, 60 and 80 dB: every interior element is at the mean
+     * of itself and its neighbours. */
+    double result = 1.0;
+    double data[] = {1.0, 10.0, 100.0, 1000.0, 10000.0};
+    double range = 120.0;
+
+    ASSERT_EQ(xtract_smoothness(NULL, data, 5, &range, &result), XTRACT_SUCCESS);
+    CHECK_NEAR(result, 0.0, 1e-9);
+}
+
+UTEST(scalar, smoothness_sums_the_distance_of_each_level_from_the_mean_of_three_in_decibels)
+{
+    /* Levels 0, 40, 0, 60 and 0 dB. The three interior elements lie
+     * 40 - 40/3, 0 - 100/3 and 60 - 60/3 from the mean of their three, which
+     * sum to 100. The asymmetry matters: with a symmetric spectrum a swapped
+     * neighbour goes unnoticed. */
     double result = 0.0;
-    double data[5];
+    double data[] = {1.0, 100.0, 1.0, 1000.0, 1.0};
+    double range = 120.0;
 
-    data[0] = 1.0;
-    data[1] = exp(2.0);
-    data[2] = 1.0;
-    data[3] = exp(3.0);
-    data[4] = 1.0;
-
-    ASSERT_EQ(xtract_smoothness(NULL, data, 5, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_smoothness(NULL, data, 5, &range, &result), XTRACT_SUCCESS);
     CHECK_REL(result, 100.0, 1e-9);
 }
 
-UTEST(scalar, smoothness_treats_empty_bins_at_either_end_as_minus_96)
+UTEST(scalar, smoothness_counts_a_level_below_the_range_as_the_foot_of_the_range)
 {
-    /* Zeros at both ends give logs -96, 1, 2, -96, so the two interior bins
-     * contribute |20 - 20 (-96 + 1 + 2) / 3| = 640 and
-     * |40 - 20 (1 + 2 - 96) / 3| = 660. A finite result is required first,
-     * since a relative check would accept the infinity that log(0) gives. */
+    /* Levels 0, -200 and 0 dB in a range of 60 count as 0, -60 and 0, and
+     * the middle one lies 40 from their mean. */
     double result = 0.0;
-    double data[4] = {0.0, 0.0, 0.0, 0.0};
+    double data[] = {1.0, 1e-10, 1.0};
+    double range = 60.0;
 
-    data[1] = exp(1.0);
-    data[2] = exp(2.0);
-
-    ASSERT_EQ(xtract_smoothness(NULL, data, 4, NULL, &result), XTRACT_SUCCESS);
-    ASSERT_TRUE(isfinite(result));
-    CHECK_NEAR(result, 1300.0, 1e-9);
+    ASSERT_EQ(xtract_smoothness(NULL, data, 3, &range, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 40.0, 1e-9);
 }
 
-UTEST(scalar, smoothness_tests_each_neighbour_for_emptiness_on_its_own)
+UTEST(scalar, smoothness_counts_an_element_that_is_not_above_zero_as_the_foot_of_the_range)
 {
-    /* Logs 0, 1, -96, 2, 3: the empty bin sits two away from an occupied one
-     * on each side, so testing the wrong neighbour for emptiness would swap
-     * a log for the floor. The interior bins contribute 653.33, 1300 and
-     * 646.67, which sum to 2600. */
     double result = 0.0;
-    double data[5] = {1.0, 0.0, 0.0, 0.0, 0.0};
+    double data[] = {1.0, 0.0, 1.0};
+    double range = 60.0;
 
-    data[1] = exp(1.0);
-    data[3] = exp(2.0);
-    data[4] = exp(3.0);
+    ASSERT_EQ(xtract_smoothness(NULL, data, 3, &range, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 40.0, 1e-9);
 
-    ASSERT_EQ(xtract_smoothness(NULL, data, 5, NULL, &result), XTRACT_SUCCESS);
+    data[1] = -5.0;
+    ASSERT_EQ(xtract_smoothness(NULL, data, 3, &range, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 40.0, 1e-9);
+}
+
+UTEST(scalar, smoothness_leaves_a_level_inside_the_range_as_it_is)
+{
+    /* Levels 0, -40 and 0 dB in a range of 60: the middle one lies 80/3 from
+     * the mean. */
+    double result = 0.0;
+    double data[] = {1.0, 0.01, 1.0};
+    double range = 60.0;
+
+    ASSERT_EQ(xtract_smoothness(NULL, data, 3, &range, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 80.0 / 3.0, 1e-9);
+}
+
+UTEST(scalar, smoothness_measures_the_range_from_the_largest_element_wherever_it_is)
+{
+    /* Levels 0, -20 and 60 dB in a range of 60: the foot is 0 dB, so the
+     * middle element counts as 0 and lies 20 from the mean of 0, 0 and 60.
+     * A range measured from any other element would leave it at -20. */
+    double result = 0.0;
+    double last[] = {1.0, 0.1, 1000.0};
+    double first[] = {1000.0, 0.1, 1.0};
+    double range = 60.0;
+
+    ASSERT_EQ(xtract_smoothness(NULL, last, 3, &range, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 20.0, 1e-9);
+    ASSERT_EQ(xtract_smoothness(NULL, first, 3, &range, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 20.0, 1e-9);
+}
+
+UTEST(scalar, smoothness_takes_each_element_at_its_own_level_between_two_others)
+{
+    /* Levels -60, -40, the foot of the range at -120, -20 and 0 dB. The
+     * interior elements lie 100/3, 60 and 80/3 from the mean of their three,
+     * which sum to 120: an element taken for its neighbour would move the
+     * foot of the range to another place. */
+    double result = 0.0;
+    double data[] = {1.0, 10.0, 0.0, 100.0, 1000.0};
+    double range = 120.0;
+
+    ASSERT_EQ(xtract_smoothness(NULL, data, 5, &range, &result), XTRACT_SUCCESS);
     ASSERT_TRUE(isfinite(result));
-    CHECK_NEAR(result, 2600.0, 1e-9);
+    CHECK_REL(result, 120.0, 1e-9);
+}
+
+UTEST(scalar, smoothness_does_not_depend_on_the_level_of_the_input)
+{
+    double quiet = 0.0, loud = 0.0;
+    double data[] = {1.0, 1e-10, 0.01, 1.0, 0.5};
+    double scaled[5];
+    double range = 60.0;
+    int n;
+
+    for (n = 0; n < 5; n++)
+        scaled[n] = data[n] * 4096.0;
+
+    ASSERT_EQ(xtract_smoothness(NULL, data, 5, &range, &quiet), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_smoothness(NULL, scaled, 5, &range, &loud), XTRACT_SUCCESS);
+    ASSERT_GT(quiet, 0.0);
+    CHECK_REL(loud, quiet, 1e-9);
+}
+
+UTEST(scalar, smoothness_has_no_result_when_no_element_is_above_zero)
+{
+    double result = 1.0;
+    double silent[] = {0.0, 0.0, 0.0};
+    double negative[] = {-1.0, -2.0, -3.0};
+    double range = 60.0;
+
+    ASSERT_EQ(xtract_smoothness(NULL, silent, 3, &range, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
+
+    result = 1.0;
+    ASSERT_EQ(xtract_smoothness(NULL, negative, 3, &range, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
 }
 
 UTEST(scalar, spectral_slope_known_value)
@@ -2790,11 +2848,13 @@ UTEST(scalar, magnitude_features_reject_too_few_elements_and_a_null_argv)
 {
     double data[3] = {1.0, 2.0, 3.0};
     double threshold = 0.0;
+    double range = 60.0;
     double result;
 
     ASSERT_REJECTED(xtract_irregularity_k(NULL, data, 2, NULL, &result));
     ASSERT_REJECTED(xtract_irregularity_j(NULL, data, 1, NULL, &result));
-    ASSERT_REJECTED(xtract_smoothness(NULL, data, 2, NULL, &result));
+    ASSERT_REJECTED(xtract_smoothness(NULL, data, 2, &range, &result));
+    ASSERT_REJECTED(xtract_smoothness(NULL, data, 3, NULL, &result));
     ASSERT_REJECTED(xtract_zcr(NULL, data, 0, NULL, &result));
     ASSERT_REJECTED(xtract_flatness(NULL, data, 0, NULL, &result));
     ASSERT_REJECTED(xtract_rms_amplitude(NULL, data, 0, NULL, &result));
@@ -2806,13 +2866,24 @@ UTEST(scalar, magnitude_features_reject_too_few_elements_and_a_null_argv)
 
     ASSERT_EQ(xtract_irregularity_k(NULL, data, 3, NULL, &result), XTRACT_SUCCESS);
     ASSERT_EQ(xtract_irregularity_j(NULL, data, 2, NULL, &result), XTRACT_SUCCESS);
-    ASSERT_EQ(xtract_smoothness(NULL, data, 3, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_smoothness(NULL, data, 3, &range, &result), XTRACT_SUCCESS);
     ASSERT_EQ(xtract_zcr(NULL, data, 1, NULL, &result), XTRACT_SUCCESS);
     ASSERT_EQ(xtract_flatness(NULL, data, 1, NULL, &result), XTRACT_SUCCESS);
     ASSERT_EQ(xtract_rms_amplitude(NULL, data, 1, NULL, &result), XTRACT_SUCCESS);
     ASSERT_EQ(xtract_sum(NULL, data, 1, NULL, &result), XTRACT_SUCCESS);
     ASSERT_EQ(xtract_nonzero_count(NULL, data, 1, NULL, &result), XTRACT_SUCCESS);
     ASSERT_EQ(xtract_lowest_value(NULL, data, 1, &threshold, &result), XTRACT_SUCCESS);
+}
+
+UTEST(scalar, smoothness_rejects_a_range_that_is_not_finite_and_above_zero)
+{
+    const double ranges[4] = {0.0, -60.0, NAN, INFINITY};
+    double data[3] = {1.0, 2.0, 3.0};
+    double result;
+    int i;
+
+    for (i = 0; i < 4; i++)
+        ASSERT_REJECTED(xtract_smoothness(NULL, data, 3, &ranges[i], &result));
 }
 
 UTEST(scalar, rolloff_rejects_a_percentile_outside_0_to_100_and_a_null_argv)

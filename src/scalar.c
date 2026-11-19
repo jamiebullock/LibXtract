@@ -585,42 +585,63 @@ int xtract_tristimulus_3(xtract_context *ctx, const double *data, const int N, c
     }
 }
 
+static double level_no_lower_than(const double lowest, const double amplitude)
+{
+    double level;
+
+    if (amplitude <= 0.0)
+        return lowest;
+
+    level = 20.0 * log10(amplitude);
+
+    return level < lowest ? lowest : level;
+}
+
 int xtract_smoothness(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
     int n;
-    int M = N - 1;
-    double prev = 0.0;
-    double current = 0.0;
-    double next = 0.0;
-    double temp = 0.0;
+    double range, largest, lowest, previous, current, next, sum;
 
-    if (N < 3)
+    if (N < 3 || argv == NULL)
     {
         *result = 0.0;
         return XTRACT_ARGUMENT_ERROR;
     }
 
-    for (n = 1; n < M; n++)
+    range = *(const double *)argv;
+    if (!isfinite(range) || range <= 0.0)
     {
-        if (n == 1)
-        {
-            prev = data[n - 1] <= 0 ? XTRACT_LOG_LIMIT_DB : log(data[n - 1]);
-            current = data[n] <= 0 ? XTRACT_LOG_LIMIT_DB : log(data[n]);
-        }
-        else
-        {
-            prev = current;
-            current = next;
-        }
-
-        next = data[n + 1] <= 0 ? XTRACT_LOG_LIMIT_DB : log(data[n + 1]);
-
-        temp += fabs(20.0 * current - (20.0 * prev +
-                                       20.0 * current + 20.0 * next) /
-                                          3.0);
+        *result = 0.0;
+        return XTRACT_ARGUMENT_ERROR;
     }
 
-    *result = temp;
+    largest = data[0];
+    for (n = 1; n < N; n++)
+    {
+        if (data[n] > largest)
+            largest = data[n];
+    }
+
+    if (largest <= 0.0)
+    {
+        *result = 0.0;
+        return XTRACT_NO_RESULT;
+    }
+
+    lowest = 20.0 * log10(largest) - range;
+    previous = level_no_lower_than(lowest, data[0]);
+    current = level_no_lower_than(lowest, data[1]);
+    sum = 0.0;
+
+    for (n = 1; n < N - 1; n++)
+    {
+        next = level_no_lower_than(lowest, data[n + 1]);
+        sum += fabs(current - (previous + current + next) / 3.0);
+        previous = current;
+        current = next;
+    }
+
+    *result = sum;
 
     return XTRACT_SUCCESS;
 }
