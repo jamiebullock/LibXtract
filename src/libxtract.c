@@ -39,7 +39,6 @@ int (*xtract[])(xtract_context *, const double *, const int, const void *, doubl
         xtract_noisiness,
         xtract_rms_amplitude,
         xtract_spectral_inharmonicity,
-        xtract_power,
         xtract_odd_even_ratio,
         xtract_sharpness,
         xtract_spectral_slope,

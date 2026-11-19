@@ -915,11 +915,6 @@ int xtract_spectral_inharmonicity(xtract_context *ctx, const double *data, const
     return XTRACT_SUCCESS;
 }
 
-int xtract_power(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
-{
-    return XTRACT_FEATURE_NOT_IMPLEMENTED;
-}
-
 int xtract_odd_even_ratio(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
     int n = N >> 1, h = 0;
