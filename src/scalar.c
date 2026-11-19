@@ -636,7 +636,10 @@ int xtract_smoothness(xtract_context *ctx, const double *data, const int N, cons
     for (n = 1; n < N - 1; n++)
     {
         next = level_no_lower_than(lowest, data[n + 1]);
-        sum += fabs(current - (previous + current + next) / 3.0);
+        /* The distance of current from the mean of the three, as two
+         * differences: each is within the range, and the sum of three levels
+         * can be beyond a double */
+        sum += fabs((current - previous) / 3.0 + (current - next) / 3.0);
         previous = current;
         current = next;
     }

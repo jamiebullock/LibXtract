@@ -1811,6 +1811,20 @@ UTEST(scalar, smoothness_takes_each_element_at_its_own_level_between_two_others)
     CHECK_REL(result, 120.0, 1e-9);
 }
 
+UTEST(scalar, smoothness_is_finite_for_a_range_near_the_largest_double)
+{
+    /* Levels 0, -1.2e308 and -1.2e308: the middle one lies a third of the
+     * range from the mean, and the sum of the three levels is beyond a
+     * double. */
+    double result = 0.0;
+    double data[] = {1.0, 0.0, 0.0};
+    double range = 1.2e308;
+
+    ASSERT_EQ(xtract_smoothness(NULL, data, 3, &range, &result), XTRACT_SUCCESS);
+    ASSERT_TRUE(isfinite(result));
+    CHECK_REL(result, 4e307, 1e-9);
+}
+
 UTEST(scalar, smoothness_does_not_depend_on_the_level_of_the_input)
 {
     double quiet = 0.0, loud = 0.0;
