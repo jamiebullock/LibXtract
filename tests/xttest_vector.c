@@ -513,11 +513,12 @@ UTEST(vector, harmonic_spectrum_takes_peaks_of_one_frequency_and_elements_that_h
     ASSERT_EQ(result[7], 2000.0);
 }
 
-UTEST(vector, harmonic_spectrum_rejects_a_frequency_that_is_negative_or_lower_than_one_before_it)
+UTEST(vector, harmonic_spectrum_rejects_a_frequency_that_is_negative_nan_or_lower_than_one_before_it)
 {
     double descending[6] = {0.5, 0.5, 0.5, 1000.0, 3000.0, 2000.0};
     double across_an_empty_element[6] = {0.5, 0.0, 0.5, 2000.0, 0.0, 1000.0};
     double negative[4] = {0.5, 0.5, -1000.0, 1000.0};
+    double not_a_number[6] = {0.5, 0.5, 0.5, 1000.0, NAN, 2000.0};
     double result[6] = {-1.0, -1.0, -1.0, -1.0, -1.0, -1.0};
     double argv[2] = {1000.0, 0.2};
     int n;
@@ -525,6 +526,7 @@ UTEST(vector, harmonic_spectrum_rejects_a_frequency_that_is_negative_or_lower_th
     ASSERT_EQ(xtract_harmonic_spectrum(NULL, descending, 6, argv, result), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(xtract_harmonic_spectrum(NULL, across_an_empty_element, 6, argv, result), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(xtract_harmonic_spectrum(NULL, negative, 4, argv, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_harmonic_spectrum(NULL, not_a_number, 6, argv, result), XTRACT_ARGUMENT_ERROR);
     argv[0] = 0.0;
     ASSERT_EQ(xtract_harmonic_spectrum(NULL, descending, 6, argv, result), XTRACT_ARGUMENT_ERROR);
 

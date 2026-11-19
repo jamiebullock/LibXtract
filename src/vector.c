@@ -648,7 +648,7 @@ int xtract_harmonic_spectrum(xtract_context *ctx, const double *data, const int 
     {
         if (freqs[n])
         {
-            if (freqs[n] < frequency)
+            if (!(freqs[n] >= frequency))
                 return XTRACT_ARGUMENT_ERROR;
             frequency = freqs[n];
         }
