@@ -128,9 +128,12 @@ UTEST(descriptors, only_the_decibel_quantities_carry_the_decibel_unit)
     {
         const xtract_unit_t result_unit = fd[f].is_scalar ? fd[f].result.scalar.unit : fd[f].result.vector.unit;
         const int gives_decibels = f == XTRACT_FLATNESS_DB || f == XTRACT_SMOOTHNESS;
+        /* An argc above XTRACT_MAXARGS is the length of one array, which
+         * the first entry describes. */
+        const int described = fd[f].argc > XTRACT_MAXARGS ? 1 : fd[f].argc;
 
         ASSERT_EQ_MSG(result_unit == XTRACT_DECIBELS, gives_decibels, fd[f].algo.name);
-        for (i = 0; i < fd[f].argc && i < XTRACT_MAXARGS; i++)
+        for (i = 0; i < described; i++)
         {
             const int takes_decibels = i == 0 && (f == XTRACT_TONALITY || f == XTRACT_SMOOTHNESS);
 
@@ -168,6 +171,18 @@ UTEST(descriptors, an_argument_has_the_unit_of_the_value_it_takes)
     ASSERT_EQ(fd[XTRACT_MEL_SPECTROGRAM].result.vector.unit, XTRACT_UNIT_NONE);
     ASSERT_EQ(fd[XTRACT_GAMMATONE_SPECTROGRAM].result.vector.unit, XTRACT_UNIT_NONE);
 
+    ASSERT_EQ(xtract_free_descriptors(fd), XTRACT_SUCCESS);
+}
+
+UTEST(descriptors, autocorrelation_fft_and_difference_vector_give_a_series_in_the_unit_of_the_data)
+{
+    xtract_function_descriptor_t *fd = xtract_make_descriptors();
+
+    ASSERT_TRUE(fd != NULL);
+    ASSERT_EQ(fd[XTRACT_AUTOCORRELATION_FFT].result.vector.format, XTRACT_ARBITRARY_SERIES);
+    ASSERT_EQ(fd[XTRACT_AUTOCORRELATION_FFT].result.vector.unit, XTRACT_UNIT_ANY);
+    ASSERT_EQ(fd[XTRACT_DIFFERENCE_VECTOR].result.vector.format, XTRACT_ARBITRARY_SERIES);
+    ASSERT_EQ(fd[XTRACT_DIFFERENCE_VECTOR].result.vector.unit, XTRACT_UNIT_ANY);
     ASSERT_EQ(xtract_free_descriptors(fd), XTRACT_SUCCESS);
 }
 

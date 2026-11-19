@@ -2520,6 +2520,8 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             case XTRACT_EWMA_VARIANCE:
             case XTRACT_CROSS_CORRELATION:
             case XTRACT_LAST_N:
+            case XTRACT_AUTOCORRELATION_FFT:
+            case XTRACT_DIFFERENCE_VECTOR:
                 *result_format = XTRACT_ARBITRARY_SERIES;
                 *result_unit = XTRACT_UNIT_ANY;
                 break;
@@ -2581,8 +2583,6 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             case XTRACT_CQT:
                 *result_format = XTRACT_SPECTRAL;
                 *result_unit = XTRACT_ANY_AMPLITUDE_HERTZ;
-                break;
-            case XTRACT_AUTOCORRELATION_FFT:
                 break;
             case XTRACT_MFCC:
                 /* DCT of log filterbank energies: dimensionless cepstral coefficients */
