@@ -865,6 +865,21 @@ UTEST(scalar, hps_considers_the_highest_fundamental_whose_harmonics_fit)
     CHECK_REL(result, 4200.0, 1e-3);
 }
 
+UTEST(scalar, hps_has_no_result_unless_two_fundamentals_have_their_harmonics_in_the_spectrum)
+{
+    /* With three harmonics, 4 coefficients fit bin 1 alone, with its
+     * harmonics at bins 2 and 3, which leaves nothing to choose between.
+     * 7 coefficients fit bins 1 and 2. */
+    double four[8] = {0.0, 1.0, 0.8, 0.5, 0.0, 100.0, 200.0, 300.0};
+    double seven[14] = {0.0, 0.1, 1.0, 0.1, 0.8, 0.0, 0.5, 0.0, 100.0, 200.0, 300.0, 400.0, 500.0, 600.0};
+    double result = 999.0;
+
+    ASSERT_EQ(xtract_hps(NULL, four, 8, &HPS_HARMONICS, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
+    ASSERT_EQ(xtract_hps(NULL, seven, 14, &HPS_HARMONICS, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 200.0, 1e-9);
+}
+
 UTEST(scalar, hps_through_xtract_spectrum_finds_the_correct_bin)
 {
     /* A harmonic tone through xtract_spectrum. The fundamental is placed on

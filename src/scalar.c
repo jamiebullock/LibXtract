@@ -1236,6 +1236,9 @@ int xtract_hps(xtract_context *ctx, const double *data, const int N, const void 
     /* Candidates are the coefficients whose harmonic R, coefficient R * i,
      * is still in range */
     count = (M - 1) / R + 1;
+
+    /* One candidate leaves nothing to choose between: the answer would be
+     * its frequency whatever the spectrum held */
     if (count - first <= 1)
     {
         *result = 0;
