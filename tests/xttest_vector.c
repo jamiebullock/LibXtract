@@ -821,37 +821,9 @@ static const double HPS_HARMONICS = 3.0;
 
 UTEST(scalar, hps_finds_fundamental_of_harmonic_signal)
 {
-    /* Create a synthetic spectrum with harmonics at bins 10, 20, 30.
-     * N must be large enough that N/2 > 30*3 = 90 => N >= 182.
-     * Use N = 256 (128 amplitude bins + 128 frequency bins). */
-    const int N = 256;
-    const int M = N / 2;
-    double data[256];
-    double result = 0.0;
-    double freq_res = 100.0; /* e.g. 12800 Hz / 128 bins */
-    int i;
-
-    memset(data, 0, sizeof(data));
-
-    /* The frequency grid starts at one bin: coefficient m is bin m + 1 at
-     * frequency (m + 1) * freq_res. A fundamental at 1000 Hz is coefficient
-     * 9; its second and third harmonics are coefficients 19 and 29. */
-    data[9] = 1.0;
-    data[19] = 0.8;
-    data[29] = 0.5;
-
-    for (i = 0; i < M; i++)
-        data[M + i] = (i + 1) * freq_res;
-
-    xtract_hps(NULL, data, N, &HPS_HARMONICS, &result);
-
-    CHECK_REL(result, 10.0 * freq_res, 1e-3);
-}
-
-UTEST(scalar, hps_finds_fundamental_on_a_grid_that_starts_at_zero)
-{
     /* Coefficient m is bin m at frequency m * freq_res, as xtract_spectrum
-     * gives it, so the same 1000 Hz tone sits at coefficients 10, 20 and 30. */
+     * gives it, so a 1000 Hz tone and its second and third harmonics sit at
+     * coefficients 10, 20 and 30. */
     const int N = 256;
     const int M = N / 2;
     double data[256];
@@ -867,9 +839,45 @@ UTEST(scalar, hps_finds_fundamental_on_a_grid_that_starts_at_zero)
     for (i = 0; i < M; i++)
         data[M + i] = i * freq_res;
 
-    xtract_hps(NULL, data, N, &HPS_HARMONICS, &result);
+    ASSERT_EQ(xtract_hps(NULL, data, N, &HPS_HARMONICS, &result), XTRACT_SUCCESS);
 
     CHECK_REL(result, 10.0 * freq_res, 1e-3);
+}
+
+UTEST(scalar, hps_considers_the_highest_fundamental_whose_harmonics_fit)
+{
+    /* With 128 coefficients and three harmonics, bin 42 is the highest
+     * fundamental whose third harmonic, bin 126, is in the spectrum */
+    const int N = 256;
+    const int M = N / 2;
+    double data[256];
+    double result = 0.0;
+    int i;
+
+    memset(data, 0, sizeof(data));
+    data[42] = 1.0;
+    data[84] = 0.8;
+    data[126] = 0.5;
+    for (i = 0; i < M; i++)
+        data[M + i] = i * 100.0;
+
+    ASSERT_EQ(xtract_hps(NULL, data, N, &HPS_HARMONICS, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 4200.0, 1e-3);
+}
+
+UTEST(scalar, hps_has_no_result_unless_two_fundamentals_have_their_harmonics_in_the_spectrum)
+{
+    /* With three harmonics, 4 coefficients fit bin 1 alone, with its
+     * harmonics at bins 2 and 3, which leaves nothing to choose between.
+     * 7 coefficients fit bins 1 and 2. */
+    double four[8] = {0.0, 1.0, 0.8, 0.5, 0.0, 100.0, 200.0, 300.0};
+    double seven[14] = {0.0, 0.1, 1.0, 0.1, 0.8, 0.0, 0.5, 0.0, 100.0, 200.0, 300.0, 400.0, 500.0, 600.0};
+    double result = 999.0;
+
+    ASSERT_EQ(xtract_hps(NULL, four, 8, &HPS_HARMONICS, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
+    ASSERT_EQ(xtract_hps(NULL, seven, 14, &HPS_HARMONICS, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 200.0, 1e-9);
 }
 
 UTEST(scalar, hps_through_xtract_spectrum_finds_the_correct_bin)
@@ -943,8 +951,8 @@ UTEST(scalar, hps_interpolates_a_fundamental_between_bins)
 
 UTEST(scalar, hps_harmonic_count_recovers_a_tone_with_a_missing_second_harmonic)
 {
-    /* A grid from one bin, q = 100 Hz. A weak fundamental at 1000 Hz (coefficient
-     * 9) whose second harmonic is only leakage, with the third to sixth
+    /* q = 100 Hz. A weak fundamental at 1000 Hz (coefficient 10) whose
+     * second harmonic is only leakage, with the third to sixth
      * harmonics present. With three terms the octave at 2000 Hz wins because
      * its own harmonics (2000, 4000, 6000) are all strong; with five terms
      * the octave's fourth and fifth harmonics are empty and the true
@@ -957,14 +965,14 @@ UTEST(scalar, hps_harmonic_count_recovers_a_tone_with_a_missing_second_harmonic)
     int i;
 
     memset(data, 0, sizeof(data));
-    data[9] = 0.05;
-    data[19] = 1e-3;
-    data[29] = 1.0;
-    data[39] = 1.0;
-    data[49] = 1.0;
-    data[59] = 1.0;
+    data[10] = 0.05;
+    data[20] = 1e-3;
+    data[30] = 1.0;
+    data[40] = 1.0;
+    data[50] = 1.0;
+    data[60] = 1.0;
     for (i = 0; i < M; i++)
-        data[M + i] = (i + 1) * 100.0;
+        data[M + i] = i * 100.0;
 
     harmonics = 3.0;
     ASSERT_EQ(xtract_hps(NULL, data, N, &harmonics, &result), XTRACT_SUCCESS);
@@ -994,23 +1002,44 @@ UTEST(scalar, hps_rejects_a_non_uniform_frequency_grid)
     ASSERT_EQ(result, 0.0);
 }
 
-UTEST(scalar, hps_rejects_a_grid_that_starts_at_neither_zero_nor_one_bin)
+UTEST(scalar, hps_rejects_a_grid_that_does_not_start_at_zero)
 {
+    static const int starts[] = {1, 2, -1};
     double data[64] = {0};
-    double result = 999.0;
+    double result;
+    size_t s;
     int i;
 
     data[5] = 1.0;
-    /* A grid starting two bins up matches neither spectrum layout */
-    for (i = 0; i < 32; i++)
-        data[32 + i] = (i + 2) * 100.0;
-    ASSERT_EQ(xtract_hps(NULL, data, 64, &HPS_HARMONICS, &result), XTRACT_ARGUMENT_ERROR);
-    ASSERT_EQ(result, 0.0);
+    for (s = 0; s < sizeof(starts) / sizeof(starts[0]); s++)
+    {
+        for (i = 0; i < 32; i++)
+            data[32 + i] = (i + starts[s]) * 100.0;
+        result = 999.0;
+        ASSERT_EQ(xtract_hps(NULL, data, 64, &HPS_HARMONICS, &result), XTRACT_ARGUMENT_ERROR);
+        ASSERT_EQ(result, 0.0);
+    }
+}
 
-    /* Nor does one that starts below zero */
-    for (i = 0; i < 32; i++)
-        data[32 + i] = (i - 1) * 100.0;
-    ASSERT_EQ(xtract_hps(NULL, data, 64, &HPS_HARMONICS, &result), XTRACT_ARGUMENT_ERROR);
+UTEST(scalar, hps_rejects_a_grid_that_holds_nan)
+{
+    static const int places[] = {0, 1, 20};
+    double data[64];
+    double result;
+    size_t p;
+    int i;
+
+    for (p = 0; p < sizeof(places) / sizeof(places[0]); p++)
+    {
+        memset(data, 0, sizeof(data));
+        data[5] = 1.0;
+        for (i = 0; i < 32; i++)
+            data[32 + i] = i * 100.0;
+        data[32 + places[p]] = NAN;
+        result = 999.0;
+        ASSERT_EQ(xtract_hps(NULL, data, 64, &HPS_HARMONICS, &result), XTRACT_ARGUMENT_ERROR);
+        ASSERT_EQ(result, 0.0);
+    }
 }
 
 UTEST(scalar, hps_rejects_a_grid_that_changes_spacing_after_the_first_two_bins)
@@ -1021,7 +1050,7 @@ UTEST(scalar, hps_rejects_a_grid_that_changes_spacing_after_the_first_two_bins)
 
     data[5] = 1.0;
     for (i = 0; i < 32; i++)
-        data[32 + i] = (i + 1) * 100.0;
+        data[32 + i] = i * 100.0;
     /* Valid so far; break the spacing further along */
     data[32 + 20] = 2150.0;
 
@@ -1036,11 +1065,11 @@ UTEST(scalar, hps_rejects_a_fractional_or_non_finite_harmonic_count)
     double harmonics;
     int i;
 
-    data[4] = 1.0;
-    data[9] = 0.8;
-    data[14] = 0.5;
+    data[5] = 1.0;
+    data[10] = 0.8;
+    data[15] = 0.5;
     for (i = 0; i < 32; i++)
-        data[32 + i] = (i + 1) * 1000.0;
+        data[32 + i] = i * 1000.0;
 
     harmonics = 2.9;
     ASSERT_EQ(xtract_hps(NULL, data, 64, &harmonics, &result), XTRACT_ARGUMENT_ERROR);
@@ -1059,11 +1088,11 @@ UTEST(scalar, hps_rejects_a_null_argv)
     double result = 999.0;
     int i;
 
-    data[4] = 1.0;
-    data[9] = 0.8;
-    data[14] = 0.5;
+    data[5] = 1.0;
+    data[10] = 0.8;
+    data[15] = 0.5;
     for (i = 0; i < 32; i++)
-        data[32 + i] = (i + 1) * 1000.0;
+        data[32 + i] = i * 1000.0;
 
     ASSERT_EQ(xtract_hps(NULL, data, 64, NULL, &result), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(result, 0.0);
@@ -1628,13 +1657,13 @@ UTEST(scalar, hps_second_loop_should_not_read_frequency_data_as_amplitudes)
     int i;
 
     memset(data, 0, sizeof(data));
-    /* A grid from one bin: 5000 Hz is coefficient 4, harmonics at 9 and 14 */
-    data[4] = 1.0;
-    data[9] = 0.8;
-    data[14] = 0.5;
+    /* 5000 Hz is coefficient 5, with harmonics at 10 and 15 */
+    data[5] = 1.0;
+    data[10] = 0.8;
+    data[15] = 0.5;
 
     for (i = 0; i < M; i++)
-        data[M + i] = (i + 1) * freq_res;
+        data[M + i] = i * freq_res;
 
     xtract_hps(NULL, data, N, &HPS_HARMONICS, &result);
 
