@@ -29,10 +29,10 @@ extern "C"
      * \param *ctx: a pointer to a context created for at least N elements
      * \param *data: a pointer to the first element in an array of doubles representing an audio vector
      * \param N: the number of array elements to be considered, a power of two of at least 2
-     * \param *argv: a pointer to an array of doubles, the first representing (samplerate / N), finite and above 0, the second will be cast to an integer and determines the spectrum type, a value of the enumeration xtract_spectrum_ (e.g. XTRACT_MAGNITUDE_SPECTRUM, XTRACT_LOG_POWER_SPECTRUM). The third argument determines whether the magnitude/power coefficients are to be normalised. If argv[2] == 1, then the coefficients are normalised. It must be 0 or 1.
-     * \param *result: a pointer to an array of size N containing N/2 magnitude/power/log magnitude/log power coefficients and N/2 bin frequencies. Coefficient m is bin m, from DC at m = 0 to the bin below the Nyquist bin, and its frequency is m * samplerate / N. For XTRACT_MAGNITUDE_PHASE_SPECTRUM the second N/2 elements are instead the bin phases in radians, in the convention where a cosine centred on a bin has phase 0 and a sine -pi/2, on every platform.
+     * \param *argv: a pointer to an array of doubles, the first representing (samplerate / N), finite and above 0, the second will be cast to an integer and determines the spectrum type, a value of the enumeration xtract_spectrum_ (e.g. XTRACT_MAGNITUDE_SPECTRUM, XTRACT_LOG_SPECTRUM). The third argument determines whether the coefficients are to be normalised. If argv[2] == 1, then every magnitude or power is divided by the largest, which for XTRACT_LOG_SPECTRUM is done before the logarithm is taken. It must be 0 or 1.
+     * \param *result: a pointer to an array of size N containing N/2 magnitude, power or log coefficients and N/2 bin frequencies. Coefficient m is bin m, from DC at m = 0 to the bin below the Nyquist bin, and its frequency is m * samplerate / N. For XTRACT_MAGNITUDE_PHASE_SPECTRUM the second N/2 elements are instead the bin phases in radians, in the convention where a cosine centred on a bin has phase 0 and a sine -pi/2, on every platform.
      *
-     * The magnitude/power coefficients are scaled to the range 0-1 so that for a given coefficient x, 0 <= x <= 1
+     * A magnitude coefficient is the magnitude of the bin divided by N, and a power coefficient is its square, so that for data from -1 to 1 both are from 0 to 1. A log coefficient is the natural logarithm of the magnitude coefficient on a scale where a magnitude of 1 gives 1 and a magnitude of DBL_EPSILON or less gives 0. It is never below 0, and is above 1 only for a magnitude above 1.
      */
     int xtract_spectrum(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
@@ -175,10 +175,10 @@ extern "C"
 
     /** \brief Extract the amplitude and frequency of spectral peaks from a magnitude spectrum
      * \param *ctx: a pointer to a context, or NULL
-     * \param *data: a pointer to an array of size N containing N magnitude/power/log magnitude/log power coefficients: the first half of the array pointed to by *result from xtract_spectrum(), so that coefficient n is bin n and the reported frequencies follow that layout
+     * \param *data: a pointer to an array of size N containing N magnitude, power or log coefficients: the first half of the array pointed to by *result from xtract_spectrum(), so that coefficient n is bin n and the reported frequencies follow that layout
      * \param N: the size of the input array, at least 1 (note: it is assumed that enough memory has been allocated for an output array twice the size)
      * \param *argv: a pointer to an array of doubles, the first representing the bin spacing in Hz, the sample rate divided by the transform length (twice N for the first half of an xtract_spectrum() output), finite and above 0, the second representing the peak threshold as percentage of the magnitude of the maximum peak found, from 0 to 100
-     * \param *result: a pointer to an array of size N * 2 containing N magnitude/power/log magnitude/log power coefficients and N bin frequencies.
+     * \param *result: a pointer to an array of size N * 2 containing N magnitude, power or log coefficients and N bin frequencies.
      *
      */
     int xtract_peak_spectrum(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
@@ -224,7 +224,7 @@ extern "C"
     /** \brief Extract subbands from a spectrum
      *
      * \param *ctx: a pointer to a context, or NULL
-     * \param *data: a pointer to an array of size N containing N magnitude/power/log magnitude/log power coefficients. (e.g. the first half of the array pointed to by *result from xtract_spectrum().
+     * \param *data: a pointer to an array of size N containing N magnitude, power or log coefficients. (e.g. the first half of the array pointed to by *result from xtract_spectrum().
      * \param N: the number of elements from the array pointed to by *data to be considered, at least 1
      * \param *argv: A pointer to an array containing four integers. The first represents the \a scalar extraction function to applied to each subband e.g. XTRACT_SUM or XTRACT_MEAN, one of the features listed below; the second represents the number of subbands required, at least 1; the third represents the frequency scale to be used for the subband bounds as defined in the enumeration xtract_subband_scales_ (libxtract.h). The fourth integer represent the start point of the subbands as a location in the input array as pointed to by *data (e.g. a value of 5 would start the subband extraction at bin 5), from 0 to N - 1. More linear bands than there are bins after the start, or an octave start of 0, gives a band of no bins and is an argument error
      * \param *result: A pointer to an array containing the resultant subband values. The calling function is responsible for allocating and freeing memory for *result. xtract_subbands() assumes that at least argv[1] * sizeof(double) bytes have been allocated. If the requested number of bands extends the subband range beyond N, then the remaining bands will be set to 0. If the array pointed to by *result has more than argv[1] elements, the superfluous elements will be unchanged.

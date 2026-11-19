@@ -691,58 +691,109 @@ UTEST(vector, spectrum_magnitude_and_power_match_the_dft_from_dc_to_the_bin_belo
     }
 }
 
-UTEST(vector, spectrum_log_magnitude_and_log_power_scale_the_occupied_bins_into_0_to_1)
+/* The log coefficient of a magnitude: 1 at a magnitude of 1, falling by the
+ * natural logarithm to 0 at DBL_EPSILON. */
+static double spec_log_coefficient(const double magnitude)
 {
-    /* A log coefficient is (log(x) + 96) / 96 for the magnitude or power x
-     * of the bin, so 1 corresponds to unity and 0 to -96 nepers. Empty bins
-     * hold only rounding noise, which is above the floor but far below the
-     * occupied bins. */
+    return 1.0 + log(magnitude) / -log(DBL_EPSILON);
+}
+
+/* The log spectrum of a constant signal, whose bin 0 has the magnitude of
+ * the constant and whose other bins are empty. */
+static double spec_log_of_constant(const double value, const int normalise)
+{
+    double data[SPEC_N];
+    double result[SPEC_N];
+    double argv[3];
+    xtract_context *ctx = xtract_context_new(SPEC_N);
+    int n;
+
+    argv[0] = SPEC_Q;
+    argv[1] = XTRACT_LOG_SPECTRUM;
+    argv[2] = normalise;
+    for (n = 0; n < SPEC_N; n++)
+        data[n] = value;
+    if (xtract_spectrum(ctx, data, SPEC_N, argv, result) != XTRACT_SUCCESS)
+        result[0] = -12345.0;
+    xtract_context_delete(ctx);
+
+    return result[0];
+}
+
+UTEST(vector, spectrum_log_coefficient_is_the_logarithm_of_the_magnitude_between_epsilon_and_1)
+{
+    /* The occupied bins have magnitudes 0.3, 0.5 and 0.25. The empty bins
+     * hold rounding noise, which is at or just above the floor. */
     double result[SPEC_N];
     int m;
 
-    ASSERT_EQ(spec_run(XTRACT_LOG_MAGNITUDE_SPECTRUM, 0, result), XTRACT_SUCCESS);
+    ASSERT_EQ(spec_run(XTRACT_LOG_SPECTRUM, 0, result), XTRACT_SUCCESS);
     for (m = 0; m < SPEC_M; m++)
     {
         const double mag = spec_bin_magnitude(m);
 
         if (mag > 0.0)
-            CHECK_REL(result[m], (log(mag) + 96.0) / 96.0, 1e-9);
+            CHECK_REL(result[m], spec_log_coefficient(mag), 1e-9);
         else
-            ASSERT_TRUE(result[m] >= 0.0 && result[m] < (log(1e-10) + 96.0) / 96.0);
-        CHECK_NEAR(result[SPEC_M + m], m * SPEC_Q, 1e-9);
-    }
-    ASSERT_EQ(spec_run(XTRACT_LOG_POWER_SPECTRUM, 0, result), XTRACT_SUCCESS);
-    for (m = 0; m < SPEC_M; m++)
-    {
-        const double mag = spec_bin_magnitude(m);
-
-        if (mag > 0.0)
-            CHECK_REL(result[m], (log(mag * mag) + 96.0) / 96.0, 1e-9);
-        else
-            ASSERT_TRUE(result[m] >= 0.0 && result[m] < (log(1e-20) + 96.0) / 96.0);
+            ASSERT_TRUE(result[m] >= 0.0 && result[m] < 0.1);
         CHECK_NEAR(result[SPEC_M + m], m * SPEC_Q, 1e-9);
     }
 }
 
-UTEST(vector, spectrum_log_types_floor_a_silent_signal_at_exactly_zero)
+UTEST(vector, spectrum_log_coefficient_is_1_for_a_magnitude_of_1_and_higher_above_it)
 {
-    /* Silence is the one input whose bins are exactly zero, with no
-     * rounding noise, so every log coefficient sits on the -96 floor,
-     * which scales to 0. */
+    CHECK_NEAR(spec_log_of_constant(1.0, 0), 1.0, 1e-12);
+    CHECK_REL(spec_log_of_constant(4.0, 0), spec_log_coefficient(4.0), 1e-12);
+    ASSERT_TRUE(spec_log_of_constant(4.0, 0) > 1.0);
+}
+
+UTEST(vector, spectrum_log_coefficient_reaches_0_at_epsilon_and_is_never_negative)
+{
+    /* A magnitude just above the floor gives a small positive coefficient,
+     * and the coefficient falls to 0 without passing below it. */
+    const double above = spec_log_of_constant(2.0 * DBL_EPSILON, 0);
+    const double at = spec_log_of_constant(DBL_EPSILON, 0);
+
+    CHECK_REL(above, spec_log_coefficient(2.0 * DBL_EPSILON), 1e-9);
+    ASSERT_TRUE(above > 0.0);
+    ASSERT_TRUE(at >= 0.0 && at < 1e-12);
+    ASSERT_EQ(spec_log_of_constant(0.5 * DBL_EPSILON, 0), 0.0);
+    ASSERT_EQ(spec_log_of_constant(1e-300, 0), 0.0);
+}
+
+UTEST(vector, spectrum_log_coefficient_of_silence_is_exactly_0_normalised_or_not)
+{
     double data[SPEC_N] = {0};
     double result[SPEC_N];
-    double argv[3] = {1000.0, 0, 0};
+    double argv[3] = {1000.0, XTRACT_LOG_SPECTRUM, 0};
     xtract_context *ctx = xtract_context_new(SPEC_N);
-    int type, m;
+    int normalise, m;
 
-    for (type = 0; type < 2; type++)
+    for (normalise = 0; normalise < 2; normalise++)
     {
-        argv[1] = type ? XTRACT_LOG_POWER_SPECTRUM : XTRACT_LOG_MAGNITUDE_SPECTRUM;
+        argv[2] = normalise;
         ASSERT_EQ(xtract_spectrum(ctx, data, SPEC_N, argv, result), XTRACT_SUCCESS);
         for (m = 0; m < SPEC_M; m++)
             ASSERT_EQ(result[m], 0.0);
     }
     xtract_context_delete(ctx);
+}
+
+UTEST(vector, spectrum_log_normalisation_puts_the_peak_at_1_whatever_the_level)
+{
+    /* The division by the largest power comes before the logarithm, so a
+     * signal and the same signal 40 dB lower give one log spectrum: the peak
+     * at 1 and the other occupied bins by their ratio to it. */
+    double result[SPEC_N];
+
+    CHECK_NEAR(spec_log_of_constant(1.0, 1), 1.0, 1e-12);
+    CHECK_NEAR(spec_log_of_constant(0.01, 1), 1.0, 1e-12);
+    CHECK_NEAR(spec_log_of_constant(100.0, 1), 1.0, 1e-12);
+
+    ASSERT_EQ(spec_run(XTRACT_LOG_SPECTRUM, 1, result), XTRACT_SUCCESS);
+    CHECK_NEAR(result[SPEC_COS_BIN], 1.0, 1e-12);
+    CHECK_REL(result[0], spec_log_coefficient(0.3 / 0.5), 1e-9);
+    CHECK_REL(result[SPEC_SIN_BIN], spec_log_coefficient(0.25 / 0.5), 1e-9);
 }
 
 UTEST(vector, spectrum_magnitude_phase_keeps_magnitudes_and_a_sine_bin_reads_minus_a_quarter_turn)

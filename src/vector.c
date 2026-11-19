@@ -6,6 +6,7 @@
 
 /* xtract_vector.c: defines functions that extract a feature as a single value from an input vector */
 
+#include <float.h>
 #include <math.h>
 #include <string.h>
 #include <stdlib.h>
@@ -44,7 +45,6 @@ int xtract_spectrum(xtract_context *ctx, const double *data, const int N, const 
     int normalise = 0;
     double type, norm;
     double q = 0.0;
-    double temp = 0.0;
     double max = 0.0;
     double NxN = XTRACT_SQ((double)N);
     double real = 0.0;
@@ -98,45 +98,12 @@ int xtract_spectrum(xtract_context *ctx, const double *data, const int N, const 
 
     switch (vector)
     {
-    case XTRACT_LOG_MAGNITUDE_SPECTRUM:
-        for (n = 0; n < M; ++n)
-        {
-            transform_bin(fft, n, &real, &imag);
-            temp = XTRACT_SQ(real) + XTRACT_SQ(imag);
-            if (temp > XTRACT_LOG_LIMIT)
-            {
-                temp = log(sqrt(temp) / (double)N);
-            }
-            else
-            {
-                temp = XTRACT_LOG_LIMIT_DB;
-            }
-            result[n] = (temp + XTRACT_DB_SCALE_OFFSET) / XTRACT_DB_SCALE_OFFSET;
-            result[M + n] = n * q;
-        }
-        break;
-
     case XTRACT_POWER_SPECTRUM:
+    case XTRACT_LOG_SPECTRUM:
         for (n = 0; n < M; ++n)
         {
             transform_bin(fft, n, &real, &imag);
             result[n] = (XTRACT_SQ(real) + XTRACT_SQ(imag)) / NxN;
-            result[M + n] = n * q;
-        }
-        break;
-
-    case XTRACT_LOG_POWER_SPECTRUM:
-        for (n = 0; n < M; ++n)
-        {
-            transform_bin(fft, n, &real, &imag);
-            if ((temp = XTRACT_SQ(real) + XTRACT_SQ(imag)) >
-                XTRACT_LOG_LIMIT)
-                temp = log(temp / NxN);
-            else
-                temp = XTRACT_LOG_LIMIT_DB;
-
-            result[n] = (temp + XTRACT_DB_SCALE_OFFSET) /
-                        XTRACT_DB_SCALE_OFFSET;
             result[M + n] = n * q;
         }
         break;
@@ -177,6 +144,18 @@ int xtract_spectrum(xtract_context *ctx, const double *data, const int N, const 
             for (n = 0; n < M; n++)
                 result[n] /= max;
         }
+    }
+
+    if (vector == XTRACT_LOG_SPECTRUM)
+    {
+        /* DBL_EPSILON is the step from 1 to the next double, so a magnitude
+         * below it is lost beside a magnitude of 1. Its square is the power
+         * that gives 0, and a power of 1 gives 1. */
+        const double lowest = DBL_EPSILON * DBL_EPSILON;
+        const double span = -log(lowest);
+
+        for (n = 0; n < M; n++)
+            result[n] = result[n] > lowest ? 1.0 + log(result[n]) / span : 0.0;
     }
 
     xtract_scratch_return(ctx, scratch, (size_t)N);

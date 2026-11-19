@@ -220,7 +220,7 @@ int main(void)
 
         /* compute Spectral Flux */
         argd[0] = SAMPLERATE / HALF_BLOCKSIZE;
-        argd[1] = XTRACT_LOG_POWER_SPECTRUM;
+        argd[1] = XTRACT_LOG_SPECTRUM;
         argd[2] = 1.f; /* Yes Normalisation */
 
         xtract_features_from_subframes(NULL, gated, BLOCKSIZE, XTRACT_WINDOWED, window_subframe, subframes_windowed);
