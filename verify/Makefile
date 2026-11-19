@@ -150,12 +150,17 @@ $(CBMC_FLAGS_STAMP): force
 
 # goto-cc links a call to a declared function that has no body without a
 # message, and each proof that reaches the call then fails when it runs.
-# The build fails here if the binary calls such a function of the library
-# or of the harnesses.
+# The build fails here if the binary calls such a function that this tree
+# declares. The symbol table gives a file of this tree by its relative path
+# and a system header by its full path. CBMC gives a function named nondet_
+# any value, and the harnesses declare theirs without a body.
 $(GOTO_BINARY): $(LIB_SRC) $(SORT_SRC) $(CONTEXT_SRC) $(HARNESS_SRC) $(HEADERS) $(CFLAGS_STAMP)
 	$(GOTO_CC) $(CFLAGS) -o $@ $(LIB_SRC) $(HARNESS_SRC)
+	@$(GOTO_INSTRUMENT) --show-symbol-table $@ > $(PROOF_DIR)/symbols
+	@awk '/^Symbol\.+: / { name = $$2 } /^Location\.+: file [^\/<]/ { print name }' \
+		$(PROOF_DIR)/symbols > $(PROOF_DIR)/declared
 	@$(GOTO_INSTRUMENT) --list-undefined-functions $@ > $(PROOF_DIR)/undefined
-	@if grep -E '^(xtract_|verify_)' $(PROOF_DIR)/undefined; then \
+	@if grep -v '^nondet_' $(PROOF_DIR)/undefined | grep -x -F -f $(PROOF_DIR)/declared; then \
 		echo "$@ calls the functions above, which have no body"; exit 1; \
 	fi
 
