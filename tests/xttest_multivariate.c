@@ -869,15 +869,16 @@ static double coherence_from_definition(const double *x, const double *y, int M,
 UTEST(coherence, four_half_overlapping_segments_of_four_elements)
 {
     /* With the Hann weights {0, 1/2, 1, 1/2} every sum is rational, and the
-     * two values worked in exact arithmetic are 54596/94997 and 25/5148 */
+     * two values worked in exact arithmetic are 76/111 at bin 0 and
+     * 54596/94997 at bin 1 */
     double data[] = {1.0, 3.0, 2.0, 5.0, 4.0, 1.0, 0.0, 2.0, 6.0, 3.0, 2.0, 1.0, 4.0, 3.0, 6.0, 2.0, 1.0, 0.0, 3.0, 5.0};
     double result[2] = {-1.0, -1.0};
     int L = 4;
     xtract_context *ctx = xtract_context_new(20);
 
     ASSERT_EQ(xtract_coherence(ctx, data, 20, &L, result), XTRACT_SUCCESS);
-    CHECK_REL(result[0], 54596.0 / 94997.0, EPSILON);
-    CHECK_REL(result[1], 25.0 / 5148.0, EPSILON);
+    CHECK_REL(result[0], 76.0 / 111.0, EPSILON);
+    CHECK_REL(result[1], 54596.0 / 94997.0, EPSILON);
     xtract_context_delete(ctx);
 }
 
@@ -891,15 +892,16 @@ UTEST(coherence, four_half_overlapping_segments_of_eight_elements)
     int k;
 
     ASSERT_EQ(xtract_coherence(ctx, data, 40, &L, result), XTRACT_SUCCESS);
-    for (k = 1; k <= 4; k++)
-        CHECK_REL(result[k - 1], coherence_from_definition(data, data + 20, 20, L, k), EPSILON);
+    for (k = 0; k < 4; k++)
+        CHECK_REL(result[k], coherence_from_definition(data, data + 20, 20, L, k), EPSILON);
     xtract_context_delete(ctx);
 }
 
 UTEST(coherence, a_small_coherence_between_series_of_distant_scales_is_not_zero)
 {
-    /* With segments of two elements the only bin is half the difference of
-     * each pair of neighbours, so the powers are (2e300 + 1e20) / 4 and
+    /* With segments of two elements the only bin is bin 0, which is half
+     * the difference of each pair of neighbours once the mean is removed and
+     * the window applied, so the powers are (2e300 + 1e20) / 4 and
      * 1e-100 / 4 and the cross spectrum is 1e-40 / 4 */
     double data[] = {0.0, 1e150, 1e150, 0.0, 0.0, 1e10, 0.0, 0.0, 0.0, 0.0, 0.0, 1e-50};
     double result = -1.0;
