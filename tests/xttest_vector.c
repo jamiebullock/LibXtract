@@ -411,6 +411,129 @@ UTEST(vector, harmonic_spectrum_zero_fundamental_yields_no_result_and_zeroed_out
         ASSERT_EQ(result[n], 0.0);
 }
 
+UTEST(vector, harmonic_spectrum_drops_a_peak_whose_nearest_harmonic_number_is_0)
+{
+    /* f0 = 1000 with a threshold of 0.2: 120 Hz is 0.12 of the fundamental,
+     * within the threshold of 0, which is no harmonic. 950 Hz is the first
+     * harmonic. */
+    double data[4] = {0.3, 0.5, 120.0, 950.0};
+    double result[4] = {999.0, 999.0, 999.0, 999.0};
+    double argv[2] = {1000.0, 0.2};
+
+    ASSERT_EQ(xtract_harmonic_spectrum(NULL, data, 4, argv, result), XTRACT_SUCCESS);
+
+    ASSERT_EQ(result[0], 0.0);
+    ASSERT_EQ(result[2], 0.0);
+    ASSERT_EQ(result[1], 0.5);
+    ASSERT_EQ(result[3], 950.0);
+}
+
+UTEST(vector, harmonic_spectrum_keeps_the_largest_of_the_peaks_nearest_to_one_harmonic_number)
+{
+    /* f0 = 1000 with a threshold of 0.2: 900, 1000 and 1100 Hz are all
+     * nearest to harmonic 1, and 2000 Hz is harmonic 2. Wherever the largest
+     * of the three stands, it alone is kept, and harmonic 2 is not weighed
+     * against it. */
+    const double amplitudes[3][3] = {{0.9, 0.5, 0.4}, {0.5, 0.9, 0.4}, {0.4, 0.5, 0.9}};
+    double data[8] = {0.0, 0.0, 0.0, 0.1, 900.0, 1000.0, 1100.0, 2000.0};
+    double result[8];
+    double argv[2] = {1000.0, 0.2};
+    int largest, n;
+
+    for (largest = 0; largest < 3; largest++)
+    {
+        for (n = 0; n < 3; n++)
+            data[n] = amplitudes[largest][n];
+        for (n = 0; n < 8; n++)
+            result[n] = 999.0;
+
+        ASSERT_EQ(xtract_harmonic_spectrum(NULL, data, 8, argv, result), XTRACT_SUCCESS);
+
+        for (n = 0; n < 3; n++)
+        {
+            ASSERT_EQ(result[n], n == largest ? 0.9 : 0.0);
+            ASSERT_EQ(result[4 + n], n == largest ? data[4 + n] : 0.0);
+        }
+        ASSERT_EQ(result[3], 0.1);
+        ASSERT_EQ(result[7], 2000.0);
+    }
+}
+
+UTEST(vector, harmonic_spectrum_keeps_the_lower_of_two_equal_peaks_nearest_to_one_harmonic_number)
+{
+    double data[4] = {0.5, 0.5, 950.0, 1050.0};
+    double result[4] = {999.0, 999.0, 999.0, 999.0};
+    double argv[2] = {1000.0, 0.2};
+
+    ASSERT_EQ(xtract_harmonic_spectrum(NULL, data, 4, argv, result), XTRACT_SUCCESS);
+
+    ASSERT_EQ(result[0], 0.5);
+    ASSERT_EQ(result[2], 950.0);
+    ASSERT_EQ(result[1], 0.0);
+    ASSERT_EQ(result[3], 0.0);
+}
+
+UTEST(vector, harmonic_spectrum_keeps_neighbouring_peaks_that_are_nearest_to_different_harmonic_numbers)
+{
+    /* f0 = 100 with a threshold of 0.45: 240 Hz is nearest to harmonic 2 and
+     * 260 Hz to harmonic 3, so neither displaces the other. */
+    double data[4] = {0.9, 0.1, 240.0, 260.0};
+    double result[4] = {999.0, 999.0, 999.0, 999.0};
+    double argv[2] = {100.0, 0.45};
+
+    ASSERT_EQ(xtract_harmonic_spectrum(NULL, data, 4, argv, result), XTRACT_SUCCESS);
+
+    ASSERT_EQ(result[0], 0.9);
+    ASSERT_EQ(result[2], 240.0);
+    ASSERT_EQ(result[1], 0.1);
+    ASSERT_EQ(result[3], 260.0);
+}
+
+UTEST(vector, harmonic_spectrum_takes_peaks_of_one_frequency_and_elements_that_hold_no_peak)
+{
+    /* Two peaks at 1000 Hz do not descend, and the empty element between
+     * them and the peak at 2000 Hz is passed over. */
+    double data[8] = {0.2, 0.7, 0.0, 0.4, 1000.0, 1000.0, 0.0, 2000.0};
+    double result[8];
+    double argv[2] = {1000.0, 0.2};
+    int n;
+
+    for (n = 0; n < 8; n++)
+        result[n] = 999.0;
+
+    ASSERT_EQ(xtract_harmonic_spectrum(NULL, data, 8, argv, result), XTRACT_SUCCESS);
+
+    ASSERT_EQ(result[0], 0.0);
+    ASSERT_EQ(result[4], 0.0);
+    ASSERT_EQ(result[1], 0.7);
+    ASSERT_EQ(result[5], 1000.0);
+    ASSERT_EQ(result[2], 0.0);
+    ASSERT_EQ(result[6], 0.0);
+    ASSERT_EQ(result[3], 0.4);
+    ASSERT_EQ(result[7], 2000.0);
+}
+
+UTEST(vector, harmonic_spectrum_rejects_a_frequency_that_is_negative_nan_or_lower_than_one_before_it)
+{
+    double descending[6] = {0.5, 0.5, 0.5, 1000.0, 3000.0, 2000.0};
+    double across_an_empty_element[6] = {0.5, 0.0, 0.5, 2000.0, 0.0, 1000.0};
+    double negative[4] = {0.5, 0.5, -1000.0, 1000.0};
+    double not_a_number[6] = {0.5, 0.5, 0.5, 1000.0, NAN, 2000.0};
+    double result[6] = {-1.0, -1.0, -1.0, -1.0, -1.0, -1.0};
+    double argv[2] = {1000.0, 0.2};
+    int n;
+
+    ASSERT_EQ(xtract_harmonic_spectrum(NULL, descending, 6, argv, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_harmonic_spectrum(NULL, across_an_empty_element, 6, argv, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_harmonic_spectrum(NULL, negative, 4, argv, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_harmonic_spectrum(NULL, not_a_number, 6, argv, result), XTRACT_ARGUMENT_ERROR);
+    argv[0] = 0.0;
+    ASSERT_EQ(xtract_harmonic_spectrum(NULL, descending, 6, argv, result), XTRACT_ARGUMENT_ERROR);
+
+    for (n = 0; n < 6; n++)
+        ASSERT_EQ(result[n], -1.0);
+}
+
 /* ===== xtract_amdf ===== */
 
 UTEST(vector, amdf_of_constant_signal_is_0_at_all_lags)

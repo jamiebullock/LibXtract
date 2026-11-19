@@ -627,21 +627,32 @@ int xtract_peak_spectrum(xtract_context *ctx, const double *data, const int N, c
 
 int xtract_harmonic_spectrum(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
-    int n = (N >> 1), M = n;
-
+    const int M = N >> 1;
     const double *freqs, *amps;
-    double f0, threshold, ratio, nearest, distance;
+    double f0, threshold, amplitude, frequency, ratio, harmonic, kept_harmonic;
+    int n, kept;
 
     if (N < 2 || (N & 1) || argv == NULL)
         return XTRACT_ARGUMENT_ERROR;
 
     amps = data;
-    freqs = data + n;
+    freqs = data + M;
     f0 = *((double *)argv);
     threshold = *((double *)argv + 1);
 
     if (!isfinite(f0) || f0 < 0.0 || !(threshold >= 0.0 && threshold <= 1.0))
         return XTRACT_ARGUMENT_ERROR;
+
+    frequency = 0.0;
+    for (n = 0; n < M; n++)
+    {
+        if (freqs[n])
+        {
+            if (!(freqs[n] >= frequency))
+                return XTRACT_ARGUMENT_ERROR;
+            frequency = freqs[n];
+        }
+    }
 
     if (f0 == 0.0)
     {
@@ -649,24 +660,39 @@ int xtract_harmonic_spectrum(xtract_context *ctx, const double *data, const int 
         return XTRACT_NO_RESULT;
     }
 
-    while (n--)
+    /* The frequencies do not descend, so the peaks nearest to one harmonic
+     * number follow one another, and the one kept so far for that number is
+     * the only one a later peak can displace. */
+    kept = -1;
+    kept_harmonic = 0.0;
+
+    for (n = 0; n < M; n++)
     {
-        if (freqs[n])
+        amplitude = amps[n];
+        frequency = freqs[n];
+        result[n] = result[M + n] = 0.0;
+
+        if (!frequency)
+            continue;
+
+        ratio = frequency / f0;
+        harmonic = round(ratio);
+        if (!(harmonic >= 1.0 && fabs(harmonic - ratio) <= threshold))
+            continue;
+
+        if (kept >= 0 && harmonic == kept_harmonic)
         {
-            ratio = freqs[n] / f0;
-            nearest = round(ratio);
-            distance = fabs(nearest - ratio);
-            if (distance > threshold)
-                result[n] = result[M + n] = 0.0;
-            else
-            {
-                result[n] = amps[n];
-                result[M + n] = freqs[n];
-            }
+            if (amplitude <= result[kept])
+                continue;
+            result[kept] = result[M + kept] = 0.0;
         }
-        else
-            result[n] = result[M + n] = 0.0;
+
+        result[n] = amplitude;
+        result[M + n] = frequency;
+        kept = n;
+        kept_harmonic = harmonic;
     }
+
     return XTRACT_SUCCESS;
 }
 
