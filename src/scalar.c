@@ -405,7 +405,7 @@ int xtract_irregularity_j(xtract_context *ctx, const double *data, const int N, 
 
     double num = 0.0, den = 0.0;
 
-    if (N < 2)
+    if (N < 1)
     {
         *result = 0.0;
         return XTRACT_ARGUMENT_ERROR;
@@ -413,6 +413,7 @@ int xtract_irregularity_j(xtract_context *ctx, const double *data, const int N, 
 
     for (n = 0; n < N - 1; n++)
         num += XTRACT_SQ(data[n] - data[n + 1]);
+    num += XTRACT_SQ(data[N - 1]);
 
     for (n = 0; n < N; n++)
         den += XTRACT_SQ(data[n]);

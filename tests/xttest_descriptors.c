@@ -904,7 +904,6 @@ static int conf_min_n(const xtract_function_descriptor_t *d)
     case XTRACT_TIME_REVERSAL_ASYMMETRY:
     case XTRACT_PERMUTATION_ENTROPY:
         return 3;
-    case XTRACT_IRREGULARITY_J:
     case XTRACT_TEMPORAL_CENTROID:
     case XTRACT_MAX_POSITION:
     case XTRACT_MIN_POSITION:

@@ -1658,25 +1658,58 @@ UTEST(scalar, irregularity_k_rejects_a_smoothness_that_is_negative_or_not_finite
     CHECK_REL(result, log10(DBL_MAX), 1e-12);
 }
 
-UTEST(scalar, irregularity_j_constant)
+UTEST(scalar, irregularity_j_of_equal_partials_is_one_over_their_number)
 {
-    /* All differences are 0 => 0/den = 0 */
-    double result = 0.0;
+    /* The one difference that is not 0 is from the last partial to the 0
+     * after it: 25 / (4 * 25) */
+    double result = -1.0;
     double data[] = {5.0, 5.0, 5.0, 5.0};
-    xtract_irregularity_j(NULL, data, 4, NULL, &result);
-    CHECK_NEAR(result, 0.0, EPSILON);
+
+    ASSERT_EQ(xtract_irregularity_j(NULL, data, 4, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 0.25, EPSILON);
 }
 
 UTEST(scalar, irregularity_j_known_value)
 {
-    /* J = sum((x[n] - x[n+1])^2) / sum(x[n]^2)
-     * numerator = (1-2)^2 = 1
-     * denominator = 1^2 + 2^2 = 5, which includes the last sample
-     * J = 1/5 = 0.2 */
-    double result = 0.0;
-    double data[] = {1.0, 2.0};
-    xtract_irregularity_j(NULL, data, 2, NULL, &result);
-    CHECK_REL(result, 0.2, EPSILON);
+    /* ((3 - 1)^2 + (1 - 0)^2) / (3^2 + 1^2) = 5 / 10 */
+    double result = -1.0;
+    double data[] = {3.0, 1.0};
+
+    ASSERT_EQ(xtract_irregularity_j(NULL, data, 2, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 0.5, EPSILON);
+}
+
+UTEST(scalar, irregularity_j_of_one_partial_is_one)
+{
+    double result = -1.0;
+    double data[] = {0.7};
+
+    ASSERT_EQ(xtract_irregularity_j(NULL, data, 1, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 1.0, EPSILON);
+}
+
+UTEST(scalar, irregularity_j_counts_the_fall_from_the_last_partial)
+{
+    /* Up to the partial and down from it: (1 + 1) / 1 */
+    double result = -1.0;
+    double data[] = {0.0, 1.0};
+
+    ASSERT_EQ(xtract_irregularity_j(NULL, data, 2, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 2.0, EPSILON);
+}
+
+UTEST(scalar, irregularity_j_does_not_depend_on_the_level)
+{
+    const double data[4] = {1.0, 0.25, 0.5, 0.125};
+    const double louder[4] = {10.0, 2.5, 5.0, 1.25};
+    double result = -1.0;
+    double result_louder = -1.0;
+
+    /* (0.5625 + 0.0625 + 0.140625 + 0.015625) / 1.328125 */
+    ASSERT_EQ(xtract_irregularity_j(NULL, data, 4, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_irregularity_j(NULL, louder, 4, NULL, &result_louder), XTRACT_SUCCESS);
+    CHECK_REL(result, 0.78125 / 1.328125, EPSILON);
+    CHECK_REL(result_louder, result, 1e-12);
 }
 
 UTEST(scalar, flatness_db_0db)
@@ -2921,7 +2954,7 @@ UTEST(scalar, magnitude_features_reject_too_few_elements_and_a_null_argv)
     double threshold = 0.0;
     double result;
 
-    ASSERT_REJECTED(xtract_irregularity_j(NULL, data, 1, NULL, &result));
+    ASSERT_REJECTED(xtract_irregularity_j(NULL, data, 0, NULL, &result));
     ASSERT_REJECTED(xtract_smoothness(NULL, data, 2, NULL, &result));
     ASSERT_REJECTED(xtract_zcr(NULL, data, 0, NULL, &result));
     ASSERT_REJECTED(xtract_flatness(NULL, data, 0, NULL, &result));
@@ -2932,7 +2965,7 @@ UTEST(scalar, magnitude_features_reject_too_few_elements_and_a_null_argv)
     ASSERT_REJECTED(xtract_lowest_value(NULL, data, 3, NULL, &result));
     ASSERT_REJECTED(xtract_peak(NULL, data, 3, NULL, &result));
 
-    ASSERT_EQ(xtract_irregularity_j(NULL, data, 2, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_irregularity_j(NULL, data, 1, NULL, &result), XTRACT_SUCCESS);
     ASSERT_EQ(xtract_smoothness(NULL, data, 3, NULL, &result), XTRACT_SUCCESS);
     ASSERT_EQ(xtract_zcr(NULL, data, 1, NULL, &result), XTRACT_SUCCESS);
     ASSERT_EQ(xtract_flatness(NULL, data, 1, NULL, &result), XTRACT_SUCCESS);
