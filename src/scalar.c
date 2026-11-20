@@ -1474,7 +1474,31 @@ static int mcleod_lags(const int N)
     return XTRACT_MIN(N / 2 + 1, N - 1);
 }
 
-static void mcleod_nsdf(const double *data, const int N, const int lags, double *nsdf)
+/* A power of two that brings the largest element of data into [0.5, 1), or
+ * as near to it as a double allows. The NSDF is a ratio of sums of products
+ * of two elements, so it is the same for the elements times any factor, and
+ * multiplying by a power of two is exact. With it every product and sum of
+ * the elements stays in the range of a double. */
+static double mcleod_unit_scale(const double *data, const int N)
+{
+    double largest = 0.0;
+    int n, exponent;
+
+    for (n = 0; n < N; n++)
+    {
+        if (fabs(data[n]) > largest)
+            largest = fabs(data[n]);
+    }
+
+    if (largest == 0.0 || !isfinite(largest))
+        return 1.0;
+
+    (void)frexp(largest, &exponent);
+
+    return ldexp(1.0, exponent < DBL_MIN_EXP ? -DBL_MIN_EXP : -exponent);
+}
+
+static void mcleod_nsdf(const double *data, const int N, const int lags, const double unit, double *nsdf)
 {
     int tau, n;
 
@@ -1485,8 +1509,10 @@ static void mcleod_nsdf(const double *data, const int N, const int lags, double 
 
         for (n = 0; n < N - tau; n++)
         {
-            r_tau += data[n] * data[n + tau];
-            m_tau += data[n] * data[n] + data[n + tau] * data[n + tau];
+            const double a = unit * data[n], b = unit * data[n + tau];
+
+            r_tau += a * b;
+            m_tau += a * a + b * b;
         }
         nsdf[tau] = (m_tau > 0.0) ? 2.0 * r_tau / m_tau : 0.0;
     }
@@ -1499,32 +1525,28 @@ static void mcleod_nsdf(const double *data, const int N, const int lags, double 
  * N - tau. The NSDF takes the place of the autocorrelation from the last
  * lag down, each element being written after the ones that hold what it
  * is made from have been read. */
-static void mcleod_nsdf_by_transform(xtract_context *ctx, const double *data, const int N, const int lags, const int length, double *work)
+static void mcleod_nsdf_by_transform(xtract_context *ctx, const double *data, const int N, const int lags, const double unit, const int length, double *work)
 {
-    /* A coefficient of the transform can be as large as the sum of the
-     * input. Divided by the length, a power of two, it is no larger than
-     * an element, and its square is in range whenever theirs are. */
-    const double shrink = 1.0 / length;
     double first = 0.0, last = 0.0, scale, r, m;
     int tau, n;
 #ifdef USE_OOURA
-    memcpy(work, data, N * sizeof(double));
+    for (n = 0; n < N; n++)
+        work[n] = unit * data[n];
     memset(work + N, 0, (size_t)(length - N) * sizeof(double));
     xtract_transform(ctx, length, 1, work);
 
     for (n = 2; n < length; n += 2)
     {
-        work[n] = XTRACT_SQ(shrink * work[n]) + XTRACT_SQ(shrink * work[n + 1]);
+        work[n] = XTRACT_SQ(work[n]) + XTRACT_SQ(work[n + 1]);
         work[n + 1] = 0.0;
     }
-    work[0] = XTRACT_SQ(shrink * work[0]);
-    work[1] = XTRACT_SQ(shrink * work[1]);
+    work[0] = XTRACT_SQ(work[0]);
+    work[1] = XTRACT_SQ(work[1]);
 
     xtract_transform(ctx, length, -1, work);
 
-    /* A forward and an inverse rdft() together scale by length / 2, and
-     * the squares by the square of `shrink` */
-    scale = 2.0 * length;
+    /* A forward and an inverse rdft() together scale by length / 2 */
+    scale = 2.0 / length;
 #else
     DSPDoubleSplitComplex split;
     double dc, nyquist;
@@ -1535,18 +1557,17 @@ static void mcleod_nsdf_by_transform(xtract_context *ctx, const double *data, co
     for (n = 0; n < N; n++)
     {
         if (n & 1)
-            split.imagp[n >> 1] = data[n];
+            split.imagp[n >> 1] = unit * data[n];
         else
-            split.realp[n >> 1] = data[n];
+            split.realp[n >> 1] = unit * data[n];
     }
     xtract_transform(ctx, length, FFT_FORWARD, &split);
 
-    /* The forward transform is scaled by 2 relative to the DFT */
-    dc = .5 * shrink * split.realp[0];
-    nyquist = .5 * shrink * split.imagp[0];
+    dc = split.realp[0];
+    nyquist = split.imagp[0];
     for (n = 1; n < length / 2; n++)
     {
-        split.realp[n] = XTRACT_SQ(.5 * shrink * split.realp[n]) + XTRACT_SQ(.5 * shrink * split.imagp[n]);
+        split.realp[n] = XTRACT_SQ(split.realp[n]) + XTRACT_SQ(split.imagp[n]);
         split.imagp[n] = 0.0;
     }
     split.realp[0] = XTRACT_SQ(dc);
@@ -1554,22 +1575,22 @@ static void mcleod_nsdf_by_transform(xtract_context *ctx, const double *data, co
 
     xtract_transform(ctx, length, FFT_INVERSE, &split);
 
-    /* The inverse transform scales by the length, and the squares by the
-     * square of `shrink` */
-    scale = (double)length;
+    /* The forward transform is scaled by 2 relative to the DFT, 4 after
+     * squaring, and the inverse by the length */
+    scale = 1.0 / (4.0 * length);
 #endif
 
     for (n = 0; n < N - lags; n++)
-        first += XTRACT_SQ(data[n]);
+        first += XTRACT_SQ(unit * data[n]);
     for (n = lags; n < N; n++)
-        last += XTRACT_SQ(data[n]);
+        last += XTRACT_SQ(unit * data[n]);
 
     for (tau = lags; tau >= 0; tau--)
     {
         if (tau < lags)
         {
-            first += XTRACT_SQ(data[N - tau - 1]);
-            last += XTRACT_SQ(data[tau]);
+            first += XTRACT_SQ(unit * data[N - tau - 1]);
+            last += XTRACT_SQ(unit * data[tau]);
         }
 
 #ifdef USE_OOURA
@@ -1589,6 +1610,7 @@ static void mcleod_nsdf_by_transform(xtract_context *ctx, const double *data, co
 static double *mcleod_nsdf_take(xtract_context *ctx, const double *data, const int N, const int lags, size_t *taken)
 {
     const int limit = xtract_transform_limit(ctx);
+    const double unit = mcleod_unit_scale(data, N);
     double *nsdf;
     int length = 2;
 
@@ -1601,7 +1623,7 @@ static double *mcleod_nsdf_take(xtract_context *ctx, const double *data, const i
         nsdf = xtract_scratch_take(ctx, N, *taken);
         if (nsdf != NULL)
         {
-            mcleod_nsdf_by_transform(ctx, data, N, lags, length, nsdf);
+            mcleod_nsdf_by_transform(ctx, data, N, lags, unit, length, nsdf);
             return nsdf;
         }
     }
@@ -1609,7 +1631,7 @@ static double *mcleod_nsdf_take(xtract_context *ctx, const double *data, const i
     *taken = (size_t)lags + 1;
     nsdf = xtract_scratch_take(ctx, N, *taken);
     if (nsdf != NULL)
-        mcleod_nsdf(data, N, lags, nsdf);
+        mcleod_nsdf(data, N, lags, unit, nsdf);
 
     return nsdf;
 }

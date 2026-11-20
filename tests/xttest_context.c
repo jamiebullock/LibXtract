@@ -389,38 +389,105 @@ UTEST(context, the_transform_and_the_sums_over_every_lag_give_one_periodicity_co
     }
 }
 
-UTEST(context, the_transform_takes_elements_whose_squares_are_near_the_largest_double)
+/* The periodicity of a series by the transform and by the sums over every
+ * lag, the second taken while the context has no scratch free for the
+ * transform */
+static void periodicity_by_both_routes(const double *data, const int N, double *by_transform, double *by_sums, int *rv_transform, int *rv_sums)
 {
-    /* The sum of the 32 squares of 1e153 is in range, and the square of
-     * the sum of the 32 elements is not. Both routes give the periodicity
-     * of a series that repeats every four elements. */
+    xtract_context *ctx = xtract_context_new(N);
+    const size_t rest = 3 * (size_t)N - (size_t)(N / 2 + 2);
+    double *held;
+
+    *rv_transform = xtract_periodicity(ctx, data, N, NULL, by_transform);
+
+    held = xtract_scratch_take(ctx, N, rest);
+    *rv_sums = held != NULL ? xtract_periodicity(ctx, data, N, NULL, by_sums) : XTRACT_BAD_STATE;
+    xtract_scratch_return(ctx, held, rest);
+
+    xtract_context_delete(ctx);
+}
+
+UTEST(context, the_lags_take_elements_whose_squares_are_near_the_largest_double_or_beyond_it)
+{
+    /* At 1e153 the sum of the 32 squares is in range and the square of
+     * the sum of the 32 elements is not. At 1e200 no square is. The
+     * series repeats every four elements either way. */
+    enum
+    {
+        N = 64
+    };
+    static const double sizes[2] = {1e153, 1e200};
+    double data[N];
+    double by_transform, by_sums;
+    int rv_transform, rv_sums, n, i;
+
+    for (i = 0; i < 2; i++)
+    {
+        for (n = 0; n < N; n++)
+            data[n] = (n & 1) ? 0.0 : ((n & 2) ? -sizes[i] : sizes[i]);
+        by_transform = by_sums = 0.0;
+
+        periodicity_by_both_routes(data, N, &by_transform, &by_sums, &rv_transform, &rv_sums);
+
+        ASSERT_EQ(rv_transform, XTRACT_SUCCESS);
+        ASSERT_EQ(rv_sums, XTRACT_SUCCESS);
+        CHECK_NEAR(by_sums, 1.0, 1e-9);
+        CHECK_NEAR(by_transform, 1.0, 1e-9);
+    }
+}
+
+UTEST(context, the_lags_take_elements_whose_squares_are_near_the_smallest_double_or_below_it)
+{
+    /* Two equal elements half the series apart. At 2^-511 their squares
+     * are the smallest normal doubles, and at 1e-200 they are 0. */
+    enum
+    {
+        N = 64
+    };
+    double sizes[2];
+    double data[N] = {0.0};
+    double by_transform, by_sums;
+    int rv_transform, rv_sums, i;
+
+    sizes[0] = ldexp(1.0 + ldexp(1.0, -23), -511);
+    sizes[1] = 1e-200;
+
+    for (i = 0; i < 2; i++)
+    {
+        data[0] = data[N / 2] = sizes[i];
+        by_transform = by_sums = 0.0;
+
+        periodicity_by_both_routes(data, N, &by_transform, &by_sums, &rv_transform, &rv_sums);
+
+        ASSERT_EQ(rv_transform, XTRACT_SUCCESS);
+        ASSERT_EQ(rv_sums, XTRACT_SUCCESS);
+        CHECK_NEAR(by_sums, 1.0, 1e-12);
+        CHECK_NEAR(by_transform, 1.0, 1e-12);
+    }
+}
+
+UTEST(context, the_lags_of_a_series_of_subnormal_elements_or_with_one_that_is_not_finite_are_the_same_by_both_routes)
+{
     enum
     {
         N = 64
     };
     double data[N];
-    xtract_context *ctx = xtract_context_new(N);
-    const size_t rest = 3 * (size_t)N - (N / 2 + 2);
-    double by_transform = 0.0, by_sums = 0.0;
-    double *held;
-    int n;
+    double by_transform, by_sums;
+    int rv_transform, rv_sums, n;
 
-    ASSERT_TRUE(ctx != NULL);
     for (n = 0; n < N; n++)
-        data[n] = (n & 1) ? 0.0 : ((n & 2) ? -1e153 : 1e153);
-
-    ASSERT_EQ(xtract_periodicity(ctx, data, N, NULL, &by_transform), XTRACT_SUCCESS);
-
-    held = xtract_scratch_take(ctx, N, rest);
-    ASSERT_TRUE(held != NULL);
-    ASSERT_EQ(xtract_periodicity(ctx, data, N, NULL, &by_sums), XTRACT_SUCCESS);
-    xtract_scratch_return(ctx, held, rest);
-
-    ASSERT_TRUE(isfinite(by_transform));
+        data[n] = (n & 1) ? 0.0 : ((n & 2) ? -4e-320 : 4e-320);
+    by_transform = by_sums = 0.0;
+    periodicity_by_both_routes(data, N, &by_transform, &by_sums, &rv_transform, &rv_sums);
+    ASSERT_EQ(rv_transform, XTRACT_SUCCESS);
+    ASSERT_EQ(rv_sums, XTRACT_SUCCESS);
     CHECK_NEAR(by_sums, 1.0, 1e-9);
-    CHECK_NEAR(by_transform, by_sums, 1e-9);
+    CHECK_NEAR(by_transform, 1.0, 1e-9);
 
-    xtract_context_delete(ctx);
+    data[5] = INFINITY;
+    periodicity_by_both_routes(data, N, &by_transform, &by_sums, &rv_transform, &rv_sums);
+    ASSERT_EQ(rv_transform, rv_sums);
 }
 
 UTEST(context, the_lags_of_a_length_that_is_no_power_of_two_are_served_by_its_own_context)

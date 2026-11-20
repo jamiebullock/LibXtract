@@ -36,3 +36,15 @@ int __builtin_isfinite(double x)
 {
     return __CPROVER_isfinited(x);
 }
+
+double frexp(double x, int *exponent)
+{
+    *exponent = nondet_int();
+
+    return nondet_double();
+}
+
+double ldexp(double x, int exponent)
+{
+    return nondet_double();
+}

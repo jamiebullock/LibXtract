@@ -15,8 +15,9 @@
 # arbitrary values, so the transform-based proofs cover the library's handling
 # of any transform output and say nothing about the transform.
 # math_stub.c does the same for pow, whose CBMC model needs a floating-point
-# remainder the SMT backend cannot encode, and cbrt and atan2, which CBMC has
-# no model of: all three return any value.
+# remainder the SMT backend cannot encode, and for cbrt, atan2, frexp and
+# ldexp, which CBMC has no model of: each returns any value, and frexp writes
+# any exponent.
 # The library's sort is proved once, in verify_sort.c, which compiles it under
 # another name. The proofs of the functions that call it take sort_stub.c in
 # its place, which fills the buffer with arbitrary values, so that the cost of
