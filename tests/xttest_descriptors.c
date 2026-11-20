@@ -135,7 +135,7 @@ UTEST(descriptors, only_the_decibel_quantities_carry_the_decibel_unit)
         ASSERT_EQ_MSG(result_unit == XTRACT_DECIBELS, gives_decibels, fd[f].algo.name);
         for (i = 0; i < described; i++)
         {
-            const int takes_decibels = i == 0 && (f == XTRACT_TONALITY || f == XTRACT_SMOOTHNESS);
+            const int takes_decibels = i == 0 && f == XTRACT_TONALITY;
 
             ASSERT_EQ_MSG(fd[f].argv.unit[i] == XTRACT_DECIBELS, takes_decibels, fd[f].algo.name);
         }

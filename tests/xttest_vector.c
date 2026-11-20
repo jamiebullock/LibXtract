@@ -185,6 +185,20 @@ UTEST(vector, subbands_rejects_invalid_arguments)
     CHECK_REL(result[1], 1.0, EPSILON);
 }
 
+UTEST(vector, subbands_gives_the_smoothness_of_each_band)
+{
+    /* The first band has the levels 0, 40, 0 and 40 dB, whose two interior
+     * elements each lie 80/3 from the mean of their three; the second lies
+     * on a straight line. */
+    double data[8] = {1.0, 100.0, 1.0, 100.0, 1.0, 10.0, 100.0, 1000.0};
+    double result[2] = {-1.0, -1.0};
+    int argv[4] = {XTRACT_SMOOTHNESS, 2, XTRACT_LINEAR_SUBBANDS, 0};
+
+    ASSERT_EQ(xtract_subbands(NULL, data, 8, argv, result), XTRACT_SUCCESS);
+    CHECK_REL(result[0], 160.0 / 3.0, 1e-9);
+    CHECK_NEAR(result[1], 0.0, 1e-9);
+}
+
 UTEST(vector, subbands_last_band_computed_when_linear_bands_tile_exactly)
 {
     const int N = 16;
@@ -2937,11 +2951,11 @@ UTEST(vector, harmonic_spectrum_rejects_an_odd_or_short_input_a_null_argv_and_ou
 UTEST(vector, subbands_accepts_only_features_that_reduce_a_plain_vector_to_one_scalar)
 {
     static const int allowed[] = {
-        XTRACT_MEAN, XTRACT_IRREGULARITY_K, XTRACT_IRREGULARITY_J, XTRACT_ZCR,
-        XTRACT_LOUDNESS, XTRACT_FLATNESS, XTRACT_RMS_AMPLITUDE, XTRACT_SHARPNESS,
-        XTRACT_HIGHEST_VALUE, XTRACT_SUM, XTRACT_NONZERO_COUNT};
+        XTRACT_MEAN, XTRACT_IRREGULARITY_K, XTRACT_IRREGULARITY_J, XTRACT_SMOOTHNESS,
+        XTRACT_ZCR, XTRACT_LOUDNESS, XTRACT_FLATNESS, XTRACT_RMS_AMPLITUDE,
+        XTRACT_SHARPNESS, XTRACT_HIGHEST_VALUE, XTRACT_SUM, XTRACT_NONZERO_COUNT};
     static const int rejected[] = {
-        XTRACT_VARIANCE, XTRACT_SMOOTHNESS, XTRACT_SPECTRAL_CENTROID, XTRACT_SPECTRAL_SLOPE,
+        XTRACT_VARIANCE, XTRACT_SPECTRAL_CENTROID, XTRACT_SPECTRAL_SLOPE,
         XTRACT_SPECTRUM, XTRACT_DIFFERENCE_VECTOR, XTRACT_SUBBANDS};
     xtract_function_descriptor_t *fd = xtract_make_descriptors();
     double data[8] = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};

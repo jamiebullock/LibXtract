@@ -1706,13 +1706,18 @@ UTEST(scalar, spread_delegates_to_variance)
     CHECK_REL(result, 7500.0, EPSILON);
 }
 
+/* An element counts as no lower than this many decibels below the largest. */
+static double smoothness_range(void)
+{
+    return -20.0 * log10(DBL_EPSILON);
+}
+
 UTEST(scalar, smoothness_is_zero_for_a_constant_spectrum)
 {
     double result = 1.0;
     double data[] = {10.0, 10.0, 10.0, 10.0, 10.0};
-    double range = 120.0;
 
-    ASSERT_EQ(xtract_smoothness(NULL, data, 5, &range, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_smoothness(NULL, data, 5, NULL, &result), XTRACT_SUCCESS);
     CHECK_NEAR(result, 0.0, 1e-9);
 }
 
@@ -1722,9 +1727,8 @@ UTEST(scalar, smoothness_is_zero_when_the_levels_lie_on_a_straight_line)
      * of itself and its neighbours. */
     double result = 1.0;
     double data[] = {1.0, 10.0, 100.0, 1000.0, 10000.0};
-    double range = 120.0;
 
-    ASSERT_EQ(xtract_smoothness(NULL, data, 5, &range, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_smoothness(NULL, data, 5, NULL, &result), XTRACT_SUCCESS);
     CHECK_NEAR(result, 0.0, 1e-9);
 }
 
@@ -1736,110 +1740,111 @@ UTEST(scalar, smoothness_sums_the_distance_of_each_level_from_the_mean_of_three_
      * neighbour goes unnoticed. */
     double result = 0.0;
     double data[] = {1.0, 100.0, 1.0, 1000.0, 1.0};
-    double range = 120.0;
 
-    ASSERT_EQ(xtract_smoothness(NULL, data, 5, &range, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_smoothness(NULL, data, 5, NULL, &result), XTRACT_SUCCESS);
     CHECK_REL(result, 100.0, 1e-9);
 }
 
-UTEST(scalar, smoothness_counts_a_level_below_the_range_as_the_foot_of_the_range)
+UTEST(scalar, smoothness_counts_an_element_below_epsilon_times_the_largest_as_that_level)
 {
-    /* Levels 0, -200 and 0 dB in a range of 60 count as 0, -60 and 0, and
-     * the middle one lies 40 from their mean. */
+    /* Levels 0, -400 and 0 dB count as 0, the lowest level and 0, and the
+     * middle one lies two thirds of the range from their mean. */
     double result = 0.0;
-    double data[] = {1.0, 1e-10, 1.0};
-    double range = 60.0;
+    double data[] = {1.0, 1e-20, 1.0};
 
-    ASSERT_EQ(xtract_smoothness(NULL, data, 3, &range, &result), XTRACT_SUCCESS);
-    CHECK_REL(result, 40.0, 1e-9);
+    ASSERT_EQ(xtract_smoothness(NULL, data, 3, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 2.0 * smoothness_range() / 3.0, 1e-9);
 }
 
-UTEST(scalar, smoothness_counts_an_element_that_is_not_above_zero_as_the_foot_of_the_range)
+UTEST(scalar, smoothness_counts_an_element_that_is_not_above_zero_as_epsilon_times_the_largest)
 {
     double result = 0.0;
     double data[] = {1.0, 0.0, 1.0};
-    double range = 60.0;
 
-    ASSERT_EQ(xtract_smoothness(NULL, data, 3, &range, &result), XTRACT_SUCCESS);
-    CHECK_REL(result, 40.0, 1e-9);
+    ASSERT_EQ(xtract_smoothness(NULL, data, 3, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 2.0 * smoothness_range() / 3.0, 1e-9);
 
     data[1] = -5.0;
-    ASSERT_EQ(xtract_smoothness(NULL, data, 3, &range, &result), XTRACT_SUCCESS);
-    CHECK_REL(result, 40.0, 1e-9);
+    ASSERT_EQ(xtract_smoothness(NULL, data, 3, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 2.0 * smoothness_range() / 3.0, 1e-9);
 }
 
-UTEST(scalar, smoothness_leaves_a_level_inside_the_range_as_it_is)
+UTEST(scalar, smoothness_leaves_an_element_above_epsilon_times_the_largest_as_it_is)
 {
-    /* Levels 0, -40 and 0 dB in a range of 60: the middle one lies 80/3 from
-     * the mean. */
+    /* Levels 0, -300 and 0 dB: the middle one lies 200 from the mean. */
     double result = 0.0;
-    double data[] = {1.0, 0.01, 1.0};
-    double range = 60.0;
+    double data[] = {1.0, 1e-15, 1.0};
 
-    ASSERT_EQ(xtract_smoothness(NULL, data, 3, &range, &result), XTRACT_SUCCESS);
-    CHECK_REL(result, 80.0 / 3.0, 1e-9);
+    ASSERT_EQ(xtract_smoothness(NULL, data, 3, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 200.0, 1e-9);
 }
 
-UTEST(scalar, smoothness_measures_the_range_from_the_largest_element_wherever_it_is)
+UTEST(scalar, smoothness_measures_the_lowest_level_from_the_largest_element_wherever_it_is)
 {
-    /* Levels 0, -20 and 60 dB in a range of 60: the foot is 0 dB, so the
-     * middle element counts as 0 and lies 20 from the mean of 0, 0 and 60.
-     * A range measured from any other element would leave it at -20. */
+    /* Levels 0, -200 and 200 dB. The middle element is 400 below the
+     * largest, so it counts as the range below 200 and lies a third of twice
+     * the range less 200 from the mean of the three. Measured from any other
+     * element it would stay at -200. */
+    const double expected = (2.0 * smoothness_range() - 200.0) / 3.0;
     double result = 0.0;
-    double last[] = {1.0, 0.1, 1000.0};
-    double first[] = {1000.0, 0.1, 1.0};
-    double range = 60.0;
+    double last[] = {1.0, 1e-10, 1e10};
+    double first[] = {1e10, 1e-10, 1.0};
 
-    ASSERT_EQ(xtract_smoothness(NULL, last, 3, &range, &result), XTRACT_SUCCESS);
-    CHECK_REL(result, 20.0, 1e-9);
-    ASSERT_EQ(xtract_smoothness(NULL, first, 3, &range, &result), XTRACT_SUCCESS);
-    CHECK_REL(result, 20.0, 1e-9);
+    ASSERT_EQ(xtract_smoothness(NULL, last, 3, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, expected, 1e-9);
+    ASSERT_EQ(xtract_smoothness(NULL, first, 3, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, expected, 1e-9);
 }
 
 UTEST(scalar, smoothness_takes_each_element_at_its_own_level_between_two_others)
 {
-    /* Levels -60, -40, the foot of the range at -120, -20 and 0 dB. The
-     * interior elements lie 100/3, 60 and 80/3 from the mean of their three,
-     * which sum to 120: an element taken for its neighbour would move the
-     * foot of the range to another place. */
+    /* Levels 0, 20, the lowest level, 40 and 60 dB, the lowest being the
+     * range below 60. The interior elements lie (range - 20) / 3,
+     * (2 range - 60) / 3 and (range - 40) / 3 from the mean of their three:
+     * an element taken for its neighbour would move the lowest level to
+     * another place. */
     double result = 0.0;
     double data[] = {1.0, 10.0, 0.0, 100.0, 1000.0};
-    double range = 120.0;
 
-    ASSERT_EQ(xtract_smoothness(NULL, data, 5, &range, &result), XTRACT_SUCCESS);
-    ASSERT_TRUE(isfinite(result));
-    CHECK_REL(result, 120.0, 1e-9);
+    ASSERT_EQ(xtract_smoothness(NULL, data, 5, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, (4.0 * smoothness_range() - 120.0) / 3.0, 1e-9);
 }
 
-UTEST(scalar, smoothness_is_finite_for_a_range_near_the_largest_double)
+UTEST(scalar, smoothness_is_finite_for_the_largest_double)
 {
-    /* Levels 0, -1.2e308 and -1.2e308: the middle one lies a third of the
-     * range from the mean, and the sum of the three levels is beyond a
-     * double. */
     double result = 0.0;
-    double data[] = {1.0, 0.0, 0.0};
-    double range = 1.2e308;
+    double data[] = {DBL_MAX, 0.0, DBL_MAX};
 
-    ASSERT_EQ(xtract_smoothness(NULL, data, 3, &range, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_smoothness(NULL, data, 3, NULL, &result), XTRACT_SUCCESS);
     ASSERT_TRUE(isfinite(result));
-    CHECK_REL(result, 4e307, 1e-9);
+    CHECK_REL(result, 2.0 * smoothness_range() / 3.0, 1e-9);
 }
 
 UTEST(scalar, smoothness_does_not_depend_on_the_level_of_the_input)
 {
     double quiet = 0.0, loud = 0.0;
-    double data[] = {1.0, 1e-10, 0.01, 1.0, 0.5};
+    double data[] = {1.0, 1e-20, 0.01, 1.0, 0.5};
     double scaled[5];
-    double range = 60.0;
     int n;
 
     for (n = 0; n < 5; n++)
         scaled[n] = data[n] * 4096.0;
 
-    ASSERT_EQ(xtract_smoothness(NULL, data, 5, &range, &quiet), XTRACT_SUCCESS);
-    ASSERT_EQ(xtract_smoothness(NULL, scaled, 5, &range, &loud), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_smoothness(NULL, data, 5, NULL, &quiet), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_smoothness(NULL, scaled, 5, NULL, &loud), XTRACT_SUCCESS);
     ASSERT_GT(quiet, 0.0);
     CHECK_REL(loud, quiet, 1e-9);
+}
+
+UTEST(scalar, smoothness_ignores_its_argv)
+{
+    double with = 0.0, without = 1.0;
+    double data[] = {1.0, 0.0, 100.0, 1.0};
+    double argv = 60.0;
+
+    ASSERT_EQ(xtract_smoothness(NULL, data, 4, &argv, &with), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_smoothness(NULL, data, 4, NULL, &without), XTRACT_SUCCESS);
+    ASSERT_EQ(with, without);
 }
 
 UTEST(scalar, smoothness_has_no_result_when_no_element_is_above_zero)
@@ -1847,13 +1852,12 @@ UTEST(scalar, smoothness_has_no_result_when_no_element_is_above_zero)
     double result = 1.0;
     double silent[] = {0.0, 0.0, 0.0};
     double negative[] = {-1.0, -2.0, -3.0};
-    double range = 60.0;
 
-    ASSERT_EQ(xtract_smoothness(NULL, silent, 3, &range, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(xtract_smoothness(NULL, silent, 3, NULL, &result), XTRACT_NO_RESULT);
     ASSERT_EQ(result, 0.0);
 
     result = 1.0;
-    ASSERT_EQ(xtract_smoothness(NULL, negative, 3, &range, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(xtract_smoothness(NULL, negative, 3, NULL, &result), XTRACT_NO_RESULT);
     ASSERT_EQ(result, 0.0);
 }
 
@@ -2862,13 +2866,11 @@ UTEST(scalar, magnitude_features_reject_too_few_elements_and_a_null_argv)
 {
     double data[3] = {1.0, 2.0, 3.0};
     double threshold = 0.0;
-    double range = 60.0;
     double result;
 
     ASSERT_REJECTED(xtract_irregularity_k(NULL, data, 2, NULL, &result));
     ASSERT_REJECTED(xtract_irregularity_j(NULL, data, 1, NULL, &result));
-    ASSERT_REJECTED(xtract_smoothness(NULL, data, 2, &range, &result));
-    ASSERT_REJECTED(xtract_smoothness(NULL, data, 3, NULL, &result));
+    ASSERT_REJECTED(xtract_smoothness(NULL, data, 2, NULL, &result));
     ASSERT_REJECTED(xtract_zcr(NULL, data, 0, NULL, &result));
     ASSERT_REJECTED(xtract_flatness(NULL, data, 0, NULL, &result));
     ASSERT_REJECTED(xtract_rms_amplitude(NULL, data, 0, NULL, &result));
@@ -2880,24 +2882,13 @@ UTEST(scalar, magnitude_features_reject_too_few_elements_and_a_null_argv)
 
     ASSERT_EQ(xtract_irregularity_k(NULL, data, 3, NULL, &result), XTRACT_SUCCESS);
     ASSERT_EQ(xtract_irregularity_j(NULL, data, 2, NULL, &result), XTRACT_SUCCESS);
-    ASSERT_EQ(xtract_smoothness(NULL, data, 3, &range, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_smoothness(NULL, data, 3, NULL, &result), XTRACT_SUCCESS);
     ASSERT_EQ(xtract_zcr(NULL, data, 1, NULL, &result), XTRACT_SUCCESS);
     ASSERT_EQ(xtract_flatness(NULL, data, 1, NULL, &result), XTRACT_SUCCESS);
     ASSERT_EQ(xtract_rms_amplitude(NULL, data, 1, NULL, &result), XTRACT_SUCCESS);
     ASSERT_EQ(xtract_sum(NULL, data, 1, NULL, &result), XTRACT_SUCCESS);
     ASSERT_EQ(xtract_nonzero_count(NULL, data, 1, NULL, &result), XTRACT_SUCCESS);
     ASSERT_EQ(xtract_lowest_value(NULL, data, 1, &threshold, &result), XTRACT_SUCCESS);
-}
-
-UTEST(scalar, smoothness_rejects_a_range_that_is_not_finite_and_above_zero)
-{
-    const double ranges[4] = {0.0, -60.0, NAN, INFINITY};
-    double data[3] = {1.0, 2.0, 3.0};
-    double result;
-    int i;
-
-    for (i = 0; i < 4; i++)
-        ASSERT_REJECTED(xtract_smoothness(NULL, data, 3, &ranges[i], &result));
 }
 
 UTEST(scalar, rolloff_rejects_a_percentile_outside_0_to_100_and_a_null_argv)

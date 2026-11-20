@@ -200,10 +200,10 @@ extern "C"
     /** \brief Extract the smoothness of an input vector using a method described by McAdams (1999): the sum, over every element but the first and the last, of the distance in decibels between the level of the element and the mean level of the element and its two neighbours
      *
      * \param *ctx: a pointer to a context, or NULL
-     * \param *data: a pointer to the first element in an array of doubles representing the amplitudes of the partials of a sound in order of frequency, or the magnitude coefficients from the spectrum of an audio vector (e.g. the first half of the array pointed to by *result from xtract_spectrum())
+     * \param *data: a pointer to the first element in an array of doubles representing the amplitudes of the partials of a sound in order of frequency (e.g. the amplitudes at the start of the array pointed to by *result from xtract_packed(), of which xtract_nonzero_count() gives the number), or the magnitude coefficients from the spectrum of an audio vector (e.g. the first half of the array pointed to by *result from xtract_spectrum()). An element that is 0 or less, or that is less than DBL_EPSILON times the largest element, counts as DBL_EPSILON times the largest element, so the result of xtract_peak_spectrum() or xtract_harmonic_spectrum(), which has elements of 0 between its peaks, goes through xtract_packed() first. A partial left out of *data, such as one below the peak threshold of xtract_peak_spectrum(), leaves its two neighbours next to one another
      * \param N: the number of elements to be considered, at least 3
-     * \param *argv: a pointer to a double representing the range of levels in decibels, finite and above 0: an element whose level is more than the range below the level of the largest element, or which is not above 0, counts as that far below it
-     * \param *result: the smoothness of N values from the array pointed to by *data in decibels, or 0 with no result when no element is above 0. It is 0 when the levels lie on a straight line, and the more jagged the levels the higher it is. It grows with N, so two results compare only for the same N
+     * \param *argv: a pointer to NULL
+     * \param *result: the smoothness of N values from the array pointed to by *data in decibels, or 0 with no result when the largest element is 0 or less. It is 0 when the levels lie on a straight line, and the more jagged the levels the higher it is. It grows with N, so two results compare only for the same N
      */
     int xtract_smoothness(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
