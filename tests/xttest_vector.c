@@ -2951,11 +2951,11 @@ UTEST(vector, harmonic_spectrum_rejects_an_odd_or_short_input_a_null_argv_and_ou
 UTEST(vector, subbands_accepts_only_features_that_reduce_a_plain_vector_to_one_scalar)
 {
     static const int allowed[] = {
-        XTRACT_MEAN, XTRACT_IRREGULARITY_K, XTRACT_IRREGULARITY_J, XTRACT_SMOOTHNESS,
-        XTRACT_ZCR, XTRACT_LOUDNESS, XTRACT_FLATNESS, XTRACT_RMS_AMPLITUDE,
-        XTRACT_SHARPNESS, XTRACT_HIGHEST_VALUE, XTRACT_SUM, XTRACT_NONZERO_COUNT};
+        XTRACT_MEAN, XTRACT_IRREGULARITY_J, XTRACT_SMOOTHNESS, XTRACT_ZCR,
+        XTRACT_LOUDNESS, XTRACT_FLATNESS, XTRACT_RMS_AMPLITUDE, XTRACT_SHARPNESS,
+        XTRACT_HIGHEST_VALUE, XTRACT_SUM, XTRACT_NONZERO_COUNT};
     static const int rejected[] = {
-        XTRACT_VARIANCE, XTRACT_SPECTRAL_CENTROID, XTRACT_SPECTRAL_SLOPE,
+        XTRACT_VARIANCE, XTRACT_IRREGULARITY_K, XTRACT_SPECTRAL_CENTROID, XTRACT_SPECTRAL_SLOPE,
         XTRACT_SPECTRUM, XTRACT_DIFFERENCE_VECTOR, XTRACT_SUBBANDS};
     xtract_function_descriptor_t *fd = xtract_make_descriptors();
     double data[8] = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};

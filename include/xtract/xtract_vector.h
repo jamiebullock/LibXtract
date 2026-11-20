@@ -244,7 +244,7 @@ extern "C"
      * Specifying XTRACT_LINEAR_SUBBANDS will extract argv[1] equal sized subbands between the start bin and N
      *
      *
-     * argv[0] must be a feature that reduces a plain vector to one scalar with a NULL argv: XTRACT_MEAN, XTRACT_SUM, XTRACT_HIGHEST_VALUE, XTRACT_NONZERO_COUNT, XTRACT_RMS_AMPLITUDE, XTRACT_ZCR, XTRACT_FLATNESS, XTRACT_IRREGULARITY_K, XTRACT_IRREGULARITY_J, XTRACT_SMOOTHNESS, XTRACT_LOUDNESS or XTRACT_SHARPNESS. Any other feature is an argument error. The feature is called on each band with a NULL argv, and its own argument checks apply to the band
+     * argv[0] must be a feature that reduces a plain vector to one scalar with a NULL argv: XTRACT_MEAN, XTRACT_SUM, XTRACT_HIGHEST_VALUE, XTRACT_NONZERO_COUNT, XTRACT_RMS_AMPLITUDE, XTRACT_ZCR, XTRACT_FLATNESS, XTRACT_IRREGULARITY_J, XTRACT_SMOOTHNESS, XTRACT_LOUDNESS or XTRACT_SHARPNESS. Any other feature is an argument error. The feature is called on each band with a NULL argv, and its own argument checks apply to the band
      *
      */
     int xtract_subbands(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);

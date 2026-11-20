@@ -135,7 +135,7 @@ UTEST(descriptors, only_the_decibel_quantities_carry_the_decibel_unit)
         ASSERT_EQ_MSG(result_unit == XTRACT_DECIBELS, gives_decibels, fd[f].algo.name);
         for (i = 0; i < described; i++)
         {
-            const int takes_decibels = i == 0 && f == XTRACT_TONALITY;
+            const int takes_decibels = i == 0 && (f == XTRACT_TONALITY || f == XTRACT_IRREGULARITY_K);
 
             ASSERT_EQ_MSG(fd[f].argv.unit[i] == XTRACT_DECIBELS, takes_decibels, fd[f].algo.name);
         }
@@ -171,6 +171,25 @@ UTEST(descriptors, an_argument_has_the_unit_of_the_value_it_takes)
     ASSERT_EQ(fd[XTRACT_MEL_SPECTROGRAM].result.vector.unit, XTRACT_UNIT_NONE);
     ASSERT_EQ(fd[XTRACT_GAMMATONE_SPECTROGRAM].result.vector.unit, XTRACT_UNIT_NONE);
 
+    ASSERT_EQ(xtract_free_descriptors(fd), XTRACT_SUCCESS);
+}
+
+UTEST(descriptors, irregularity_k_takes_the_smoothness_and_no_data)
+{
+    xtract_function_descriptor_t *fd = xtract_make_descriptors();
+
+    ASSERT_TRUE(fd != NULL);
+    ASSERT_EQ(fd[XTRACT_IRREGULARITY_K].data.format, XTRACT_NO_DATA);
+    ASSERT_EQ(fd[XTRACT_IRREGULARITY_K].argc, 1);
+    ASSERT_EQ(fd[XTRACT_IRREGULARITY_K].argv.type, XTRACT_FLOAT);
+    ASSERT_EQ(fd[XTRACT_IRREGULARITY_K].argv.donor[0], XTRACT_SMOOTHNESS);
+    ASSERT_EQ(fd[XTRACT_IRREGULARITY_K].argv.unit[0], fd[XTRACT_SMOOTHNESS].result.scalar.unit);
+    ASSERT_EQ(fd[XTRACT_IRREGULARITY_K].argv.min[0], 0.0);
+    ASSERT_EQ(fd[XTRACT_IRREGULARITY_K].argv.max[0], XTRACT_UNBOUNDED_MAX);
+    ASSERT_EQ(fd[XTRACT_IRREGULARITY_K].is_scalar, XTRACT_TRUE);
+    ASSERT_EQ(fd[XTRACT_IRREGULARITY_K].result.scalar.unit, XTRACT_UNIT_NONE);
+    ASSERT_EQ(fd[XTRACT_IRREGULARITY_K].result.scalar.min, XTRACT_UNBOUNDED_MIN);
+    ASSERT_EQ(fd[XTRACT_IRREGULARITY_K].result.scalar.max, XTRACT_UNBOUNDED_MAX);
     ASSERT_EQ(xtract_free_descriptors(fd), XTRACT_SUCCESS);
 }
 
@@ -880,7 +899,6 @@ static int conf_min_n(const xtract_function_descriptor_t *d)
     case XTRACT_COVARIANCE_MATRIX:
     case XTRACT_AVERAGE_CORRELATION:
         return 4;
-    case XTRACT_IRREGULARITY_K:
     case XTRACT_SMOOTHNESS:
     case XTRACT_HJORTH_COMPLEXITY:
     case XTRACT_TIME_REVERSAL_ASYMMETRY:

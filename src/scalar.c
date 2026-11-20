@@ -373,19 +373,28 @@ int xtract_spectral_kurtosis(xtract_context *ctx, const double *data, const int 
 
 int xtract_irregularity_k(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
-    int n,
-        M = N - 1;
+    double smoothness;
 
-    if (N < 3)
+    if (argv == NULL)
     {
         *result = 0.0;
         return XTRACT_ARGUMENT_ERROR;
     }
 
-    *result = 0.0;
+    smoothness = *(const double *)argv;
+    if (!isfinite(smoothness) || smoothness < 0.0)
+    {
+        *result = 0.0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
 
-    for (n = 1; n < M; n++)
-        *result += fabs(data[n] - (data[n - 1] + data[n] + data[n + 1]) / 3.0);
+    if (smoothness == 0.0)
+    {
+        *result = 0.0;
+        return XTRACT_NO_RESULT;
+    }
+
+    *result = log10(smoothness);
 
     return XTRACT_SUCCESS;
 }
