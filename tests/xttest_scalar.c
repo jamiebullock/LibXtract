@@ -2025,6 +2025,34 @@ UTEST(scalar, spectral_slope_of_frequencies_that_are_large_beside_their_spread)
     CHECK_REL(result, 8192.0 / 3.0, 1e-9);
 }
 
+UTEST(scalar, spectral_slope_of_equal_coefficients_at_close_frequencies_is_zero)
+{
+    /* Three points 2^-26 and 2^-25 Hz apart at 16384 Hz. The mean of the
+     * frequencies themselves is rounded by more than their deviations
+     * sum to. */
+    const double d = 1.0 / 67108864.0;
+    double data[] = {1.0, 1.0, 1.0,
+                     16384.0, 0.0, 0.0};
+    double result = 99.0;
+
+    data[4] = 16384.0 + d;
+    data[5] = 16384.0 + 3.0 * d;
+
+    ASSERT_EQ(xtract_spectral_slope(NULL, data, 6, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(result, 0.0);
+}
+
+UTEST(scalar, spectral_slope_of_points_at_one_frequency_gives_no_result)
+{
+    /* A third of the sum of three 0.1s is not 0.1. */
+    double data[] = {1.0, 2.0, 3.0,
+                     0.1, 0.1, 0.1};
+    double result = 99.0;
+
+    ASSERT_EQ(xtract_spectral_slope(NULL, data, 6, NULL, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
+}
+
 UTEST(scalar, spectral_slope_of_one_point_after_the_empty_elements_gives_no_result)
 {
     double data[] = {2.0, 0.0, 0.0,

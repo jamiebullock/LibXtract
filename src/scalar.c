@@ -1050,9 +1050,9 @@ int xtract_spectral_slope(xtract_context *ctx, const double *data, const int N, 
 {
     const int M = N >> 1;
     const double *freqs, *amps;
-    double points, mean, deviation;
-    double F, A;           /* sums of the frequencies and of the coefficients */
-    double FA, FXTRACT_SQ; /* sums of deviation * coefficient and of deviation squared */
+    double points, mean_offset, mean_amp, deviation;
+    double F, A;           /* sums of the frequency offsets and of the coefficients */
+    double FA, FXTRACT_SQ; /* sums of the products of the deviations and of the squared frequency deviations */
     int n;
 
     F = A = FA = FXTRACT_SQ = points = 0.0;
@@ -1066,28 +1066,31 @@ int xtract_spectral_slope(xtract_context *ctx, const double *data, const int N, 
     amps = data;
     freqs = data + M;
 
+    /* The line is fitted to deviations from the two means, and the
+     * frequencies are first taken as offsets from the first. Sums of the
+     * frequencies or of their squares lose the spread of frequencies that
+     * are large beside it, and a rounded mean of equal frequencies can
+     * differ from them. */
     for (n = 0; n < M; n++)
     {
         if (!slope_has_point(amps, freqs, n))
             continue;
 
         points += 1.0;
-        F += freqs[n];
+        F += freqs[n] - freqs[0];
         A += amps[n];
     }
 
-    /* The deviations are taken from the mean before they are multiplied:
-     * frequencies that are large beside their spread lose that spread in
-     * sums of their squares */
-    mean = F / points;
+    mean_offset = F / points;
+    mean_amp = A / points;
 
     for (n = 0; n < M; n++)
     {
         if (!slope_has_point(amps, freqs, n))
             continue;
 
-        deviation = freqs[n] - mean;
-        FA += deviation * amps[n];
+        deviation = (freqs[n] - freqs[0]) - mean_offset;
+        FA += deviation * (amps[n] - mean_amp);
         FXTRACT_SQ += deviation * deviation;
     }
 
