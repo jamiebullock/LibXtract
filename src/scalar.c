@@ -843,7 +843,7 @@ int xtract_noisiness(xtract_context *ctx, const double *data, const int N, const
 {
     const int M = N >> 1;
     const double *amps, *freqs;
-    double f0, threshold, frequency, ratio, harmonic, kept_harmonic, kept, harmonics, partials;
+    double f0, threshold, frequency, ratio, harmonic, kept_harmonic, kept, others, partials;
     int n;
 
     *result = 0.0;
@@ -874,8 +874,10 @@ int xtract_noisiness(xtract_context *ctx, const double *data, const int N, const
         return XTRACT_NO_RESULT;
 
     /* The frequencies do not descend, so the peaks nearest to one harmonic
-     * number follow one another, and `kept` is the largest of them so far */
-    harmonics = partials = kept = kept_harmonic = 0.0;
+     * number follow one another, and `kept` is the largest of them so far.
+     * The peaks that are not harmonics are summed as they are met: taking
+     * the harmonics from the sum of the peaks would lose a small remainder. */
+    others = partials = kept = kept_harmonic = 0.0;
 
     for (n = 0; n < M; n++)
     {
@@ -887,23 +889,29 @@ int xtract_noisiness(xtract_context *ctx, const double *data, const int N, const
         ratio = freqs[n] / f0;
         harmonic = round(ratio);
         if (!(harmonic >= 1.0 && fabs(harmonic - ratio) <= threshold))
+        {
+            others += amps[n];
             continue;
+        }
 
         if (harmonic != kept_harmonic)
         {
-            harmonics += kept;
             kept = amps[n];
             kept_harmonic = harmonic;
         }
         else if (amps[n] > kept)
+        {
+            others += kept;
             kept = amps[n];
+        }
+        else
+            others += amps[n];
     }
-    harmonics += kept;
 
     if (partials == 0.0)
         return XTRACT_NO_RESULT;
 
-    *result = (partials - harmonics) / partials;
+    *result = others / partials;
 
     return XTRACT_SUCCESS;
 }

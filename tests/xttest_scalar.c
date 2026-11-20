@@ -1782,6 +1782,21 @@ UTEST(scalar, noisiness_is_the_part_of_the_sum_of_the_peaks_that_is_not_in_harmo
     CHECK_REL(result, 0.5, EPSILON);
 }
 
+UTEST(scalar, noisiness_keeps_a_peak_that_is_lost_beside_the_sum_of_the_peaks)
+{
+    /* The peak at 150 Hz is not a harmonic and is 2^-54 of the one at
+     * 100 Hz, below the spacing of the doubles at 1. */
+    double data[] = {1.0, 0.0,
+                     100.0, 150.0};
+    double argv[] = {100.0, 0.1};
+    double result = 0.0;
+
+    data[1] = ldexp(1.0, -54);
+
+    ASSERT_EQ(xtract_noisiness(NULL, data, 4, argv, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, ldexp(1.0, -54), 1e-12);
+}
+
 UTEST(scalar, noisiness_keeps_a_peak_exactly_at_the_threshold_as_a_harmonic)
 {
     /* 125 Hz is 0.25 of the fundamental above harmonic 1. */
