@@ -1963,6 +1963,65 @@ UTEST(scalar, spectral_slope_known_value)
     CHECK_REL(result, 1.0 / 600.0, 1e-9);
 }
 
+UTEST(scalar, spectral_slope_of_packed_peaks_is_that_of_the_peaks_alone)
+{
+    /* Three peaks among empty elements, as xtract_peak_spectrum() gives
+     * them. xtract_packed() moves them to the start and leaves elements of
+     * 0 after them, which hold no point of the line. */
+    double sparse[] = {0.0, 3.0, 0.0, 2.0, 0.0, 0.0, 0.5, 0.0,
+                       0.0, 100.0, 0.0, 250.0, 0.0, 0.0, 700.0, 0.0};
+    double peaks[] = {3.0, 2.0, 0.5,
+                      100.0, 250.0, 700.0};
+    double packed[16];
+    double alone = 0.0, result = 0.0;
+
+    ASSERT_EQ(xtract_packed(NULL, sparse, 16, NULL, packed), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_spectral_slope(NULL, peaks, 6, NULL, &alone), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_spectral_slope(NULL, packed, 16, NULL, &result), XTRACT_SUCCESS);
+
+    ASSERT_LT(alone, 0.0);
+    CHECK_REL(result, alone, 1e-12);
+}
+
+UTEST(scalar, spectral_slope_counts_an_element_with_a_frequency_and_a_coefficient_of_0)
+{
+    /* The bin at 300 Hz holds 0 and is a point of the line:
+     * F = 600, A = 3, FA = 100 + 400 = 500, sum of f^2 = 140000
+     * slope = (1/3) * (4 * 500 - 600 * 3) / (4 * 140000 - 600 * 600)
+     *       = (1/3) * 200 / 200000 = 1/3000 */
+    double data[] = {0.0, 1.0, 2.0, 0.0,
+                     0.0, 100.0, 200.0, 300.0};
+    double result = 0.0;
+
+    ASSERT_EQ(xtract_spectral_slope(NULL, data, 8, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 1.0 / 3000.0, 1e-9);
+}
+
+UTEST(scalar, spectral_slope_counts_a_first_element_that_is_0_in_both_halves)
+{
+    /* The point at 0 Hz with a coefficient of 0 pulls the line up from
+     * the flat one through the other two points. */
+    double data[] = {0.0, 1.0, 1.0,
+                     0.0, 100.0, 200.0};
+    double result = 0.0;
+
+    ASSERT_EQ(xtract_spectral_slope(NULL, data, 6, NULL, &result), XTRACT_SUCCESS);
+
+    /* F = 300, A = 2, FA = 300, sum of f^2 = 50000
+     * slope = (1/2) * (3 * 300 - 300 * 2) / (3 * 50000 - 300 * 300) = 1/400 */
+    CHECK_REL(result, 1.0 / 400.0, 1e-9);
+}
+
+UTEST(scalar, spectral_slope_of_one_point_after_the_empty_elements_gives_no_result)
+{
+    double data[] = {2.0, 0.0, 0.0,
+                     100.0, 0.0, 0.0};
+    double result = 99.0;
+
+    ASSERT_EQ(xtract_spectral_slope(NULL, data, 6, NULL, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
+}
+
 /* ===== McLeod F0: sine wave ===== */
 
 UTEST(mcleod_f0, sine_1024_44100_86hz_nearest_cent)

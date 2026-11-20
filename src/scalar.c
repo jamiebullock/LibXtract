@@ -1043,11 +1043,11 @@ int xtract_spectral_slope(xtract_context *ctx, const double *data, const int N, 
     const double *freqs, *amps;
     double f, a,
         F, A, FA, FXTRACT_SQ; /* sums of freqs, amps, freq * amps, freq squared */
-    double temp;
-    int n, M;
+    double temp, points;
+    int n;
 
-    F = A = FA = FXTRACT_SQ = 0.0;
-    n = M = N >> 1;
+    F = A = FA = FXTRACT_SQ = points = 0.0;
+    n = N >> 1;
 
     if (N < 2 || (N & 1))
     {
@@ -1062,13 +1062,21 @@ int xtract_spectral_slope(xtract_context *ctx, const double *data, const int N, 
     {
         f = freqs[n];
         a = amps[n];
+
+        /* An element after the first that is 0 in both halves holds no
+         * point. The first is the bin at 0 Hz of a spectrum, which may
+         * have a coefficient of 0. */
+        if (n > 0 && f == 0.0 && a == 0.0)
+            continue;
+
+        points += 1.0;
         F += f;
         A += a;
         FA += f * a;
         FXTRACT_SQ += f * f;
     }
 
-    temp = (double)M * FXTRACT_SQ - F * F;
+    temp = points * FXTRACT_SQ - F * F;
 
     if (A == 0 || temp == 0)
     {
@@ -1076,7 +1084,7 @@ int xtract_spectral_slope(xtract_context *ctx, const double *data, const int N, 
         return XTRACT_NO_RESULT;
     }
 
-    *result = (1.0 / A) * ((double)M * FA - F * A) / temp;
+    *result = (1.0 / A) * (points * FA - F * A) / temp;
 
     return XTRACT_SUCCESS;
 }

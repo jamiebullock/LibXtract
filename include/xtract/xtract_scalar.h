@@ -363,10 +363,10 @@ extern "C"
     /** \brief Extract the Slope of an input vector using a method described by Peeters(2003)
      *
      * \param *ctx: a pointer to a context, or NULL
-     * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector, (e.g. the array pointed to by *result from xtract_spectrum(), xtract_peak_spectrum() or xtract_harmonic_spectrum()).
+     * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector: N/2 coefficients and then their N/2 frequencies (e.g. the array pointed to by *result from xtract_spectrum(), or from xtract_packed() for the peaks of xtract_peak_spectrum() or the harmonics of xtract_harmonic_spectrum()). An element after the first that is 0 in both halves is passed over, so the elements of 0 that follow the peaks in the result of xtract_packed() do not count. The first element always counts
      * \param N: the number of elements to be considered, at least 2 and even
      * \param *argv: a pointer to NULL
-     * \param *result: the Slope of N values from the array pointed to by *data
+     * \param *result: the Slope of the N/2 coefficients over their frequencies, or 0 with no result when the coefficients sum to 0 or fewer than two frequencies differ
      */
     int xtract_spectral_slope(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
