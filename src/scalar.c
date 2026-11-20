@@ -1038,16 +1038,24 @@ int xtract_sharpness(xtract_context *ctx, const double *data, const int N, const
     return XTRACT_SUCCESS;
 }
 
+/* An element after the first that is 0 in both halves holds no point. The
+ * first is the bin at 0 Hz of a spectrum, which may have a coefficient
+ * of 0. */
+static int slope_has_point(const double *amps, const double *freqs, const int n)
+{
+    return n == 0 || freqs[n] != 0.0 || amps[n] != 0.0;
+}
+
 int xtract_spectral_slope(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
+    const int M = N >> 1;
     const double *freqs, *amps;
-    double f, a,
-        F, A, FA, FXTRACT_SQ; /* sums of freqs, amps, freq * amps, freq squared */
-    double temp;
-    int n, M;
+    double points, mean_offset, mean_amp, deviation;
+    double F, A;           /* sums of the frequency offsets and of the coefficients */
+    double FA, FXTRACT_SQ; /* sums of the products of the deviations and of the squared frequency deviations */
+    int n;
 
-    F = A = FA = FXTRACT_SQ = 0.0;
-    n = M = N >> 1;
+    F = A = FA = FXTRACT_SQ = points = 0.0;
 
     if (N < 2 || (N & 1))
     {
@@ -1056,27 +1064,43 @@ int xtract_spectral_slope(xtract_context *ctx, const double *data, const int N, 
     }
 
     amps = data;
-    freqs = data + n;
+    freqs = data + M;
 
-    while (n--)
+    /* The line is fitted to deviations from the two means, and the
+     * frequencies are first taken as offsets from the first. Sums of the
+     * frequencies or of their squares lose the spread of frequencies that
+     * are large beside it, and a rounded mean of equal frequencies can
+     * differ from them. */
+    for (n = 0; n < M; n++)
     {
-        f = freqs[n];
-        a = amps[n];
-        F += f;
-        A += a;
-        FA += f * a;
-        FXTRACT_SQ += f * f;
+        if (!slope_has_point(amps, freqs, n))
+            continue;
+
+        points += 1.0;
+        F += freqs[n] - freqs[0];
+        A += amps[n];
     }
 
-    temp = (double)M * FXTRACT_SQ - F * F;
+    mean_offset = F / points;
+    mean_amp = A / points;
 
-    if (A == 0 || temp == 0)
+    for (n = 0; n < M; n++)
+    {
+        if (!slope_has_point(amps, freqs, n))
+            continue;
+
+        deviation = (freqs[n] - freqs[0]) - mean_offset;
+        FA += deviation * (amps[n] - mean_amp);
+        FXTRACT_SQ += deviation * deviation;
+    }
+
+    if (A == 0 || FXTRACT_SQ == 0)
     {
         *result = 0.0;
         return XTRACT_NO_RESULT;
     }
 
-    *result = (1.0 / A) * ((double)M * FA - F * A) / temp;
+    *result = (1.0 / A) * FA / FXTRACT_SQ;
 
     return XTRACT_SUCCESS;
 }
