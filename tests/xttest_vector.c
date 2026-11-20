@@ -604,7 +604,7 @@ UTEST(vector, harmonic_spectrum_measures_a_local_maximum_of_coefficients_near_th
     ASSERT_EQ(xtract_harmonic_spectrum(NULL, data, 8, argv, result), XTRACT_SUCCESS);
 
     CHECK_REL(result[4 + 1], 10.0 + 10.0 / 6.0, EPSILON);
-    CHECK_REL(result[1], 1e308 * 49.0 / 48.0, EPSILON);
+    CHECK_REL(result[1], 1e308 * (49.0 / 48.0), EPSILON);
 }
 
 UTEST(vector, harmonic_spectrum_passes_over_a_local_maximum_outside_the_threshold)
@@ -2399,7 +2399,7 @@ UTEST(vector, peak_spectrum_measures_a_peak_of_coefficients_near_the_largest_dou
     ASSERT_EQ(xtract_peak_spectrum(NULL, data, 4, argv, result), XTRACT_SUCCESS);
 
     CHECK_REL(result[4 + 1], 10.0 + 10.0 / 6.0, EPSILON);
-    CHECK_REL(result[1], 1e308 * 49.0 / 48.0, EPSILON);
+    CHECK_REL(result[1], 1e308 * (49.0 / 48.0), EPSILON);
 }
 
 UTEST(vector, peak_spectrum_small_peaks_below_threshold_excluded)
