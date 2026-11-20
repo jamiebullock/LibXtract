@@ -160,10 +160,10 @@ extern "C"
     /** \brief Calculate the Irregularity of an input vector using a method described by Jensen (1999)
      *
      * \param *ctx: a pointer to a context, or NULL
-     * \param *data: a pointer to the first element in an array of doubles representing the magnitude coefficients from the spectrum of an audio vector, (e.g. the first half of the array pointed to by *result from xtract_spectrum().
-     * \param N: the number of elements to be considered, at least 2
+     * \param *data: a pointer to the first element in an array of doubles representing the amplitudes of the partials of a sound in order of frequency (e.g. the amplitudes at the start of the array pointed to by *result from xtract_packed(), of which xtract_nonzero_count() gives the number), or the magnitude coefficients from the spectrum of an audio vector (e.g. the first half of the array pointed to by *result from xtract_spectrum()). The result of xtract_peak_spectrum() or xtract_harmonic_spectrum(), which has elements of 0 between its peaks, goes through xtract_packed() first
+     * \param N: the number of elements to be considered, at least 1
      * \param *argv: a pointer to NULL
-     * \param *result: the irregularity of N values from the array pointed to by *data
+     * \param *result: the irregularity of N values from the array pointed to by *data, where the partial after the last counts as 0, or 0 with no result when every element is 0
      */
     int xtract_irregularity_j(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
