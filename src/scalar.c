@@ -841,26 +841,77 @@ int xtract_crest(xtract_context *ctx, const double *data, const int N, const voi
 
 int xtract_noisiness(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
-    double h, i, p; /*harmonics, inharmonics, partials */
+    const int M = N >> 1;
+    const double *amps, *freqs;
+    double f0, threshold, frequency, ratio, harmonic, kept_harmonic, kept, others, partials;
+    int n;
 
-    if (argv == NULL)
-    {
-        *result = 0.0;
+    *result = 0.0;
+
+    if (N < 2 || (N & 1) || argv == NULL)
         return XTRACT_ARGUMENT_ERROR;
-    }
 
-    h = *(double *)argv;
-    p = *((double *)argv + 1);
+    amps = data;
+    freqs = data + M;
+    f0 = *(const double *)argv;
+    threshold = *((const double *)argv + 1);
 
-    if (p == 0)
+    if (!isfinite(f0) || f0 < 0.0 || !(threshold >= 0.0 && threshold <= 1.0))
+        return XTRACT_ARGUMENT_ERROR;
+
+    frequency = 0.0;
+    for (n = 0; n < M; n++)
     {
-        *result = 0;
-        return XTRACT_NO_RESULT;
+        if (freqs[n])
+        {
+            if (!(freqs[n] >= frequency))
+                return XTRACT_ARGUMENT_ERROR;
+            frequency = freqs[n];
+        }
     }
 
-    i = p - h;
+    if (f0 == 0.0)
+        return XTRACT_NO_RESULT;
 
-    *result = i / p;
+    /* The frequencies do not descend, so the peaks nearest to one harmonic
+     * number follow one another, and `kept` is the largest of them so far.
+     * The peaks that are not harmonics are summed as they are met: taking
+     * the harmonics from the sum of the peaks would lose a small remainder. */
+    others = partials = kept = kept_harmonic = 0.0;
+
+    for (n = 0; n < M; n++)
+    {
+        if (!freqs[n])
+            continue;
+
+        partials += amps[n];
+
+        ratio = freqs[n] / f0;
+        harmonic = round(ratio);
+        if (!(harmonic >= 1.0 && fabs(harmonic - ratio) <= threshold))
+        {
+            others += amps[n];
+            continue;
+        }
+
+        if (harmonic != kept_harmonic)
+        {
+            kept = amps[n];
+            kept_harmonic = harmonic;
+        }
+        else if (amps[n] > kept)
+        {
+            others += kept;
+            kept = amps[n];
+        }
+        else
+            others += amps[n];
+    }
+
+    if (partials == 0.0)
+        return XTRACT_NO_RESULT;
+
+    *result = others / partials;
 
     return XTRACT_SUCCESS;
 }

@@ -287,13 +287,17 @@ extern "C"
      */
     int xtract_tonality(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
-    /** \brief Extract the noisiness of an input vector using a method described by Tae Hong Park (2000)
+    /** \brief Extract the noisiness of a peak spectrum using a method described by Tae Hong Park (2000): the part of the sum of its peaks that is not in its harmonics. The harmonic number of a peak is the whole number nearest to its frequency divided by the fundamental. A peak is a harmonic when its harmonic number is at least 1 and that quotient is within a threshold of it, and of several such peaks with one harmonic number only the largest is
      *
      * \param *ctx: a pointer to a context, or NULL
-     * \param *data: a pointer to NULL
-     * \param N:
-     * \param *argv: a pointer to an array containing a double representing the number of harmonic partials in a spectrum, and a double representing the number of partials in a spectrum
-     * \param *result: the noisiness coefficient as calculated from argv
+     * \param *data: a pointer to the first element in an array of doubles representing the peak spectrum of an audio vector (e.g. *result from xtract_peak_spectrum()). It is expected that the first half of the array pointed to by *data will contain amplitudes for each peak considered, and the second half will contain the respective frequencies. A frequency of 0 marks an element that holds no peak. No frequency may be negative or NaN, and the frequency of a peak may not be lower than that of a peak before it
+     * \param N: the size of the array pointed to by *data, at least 2 and even
+     * \param *argv: a pointer to an array containing the fundamental (f0) of the spectrum, finite and at least 0 (0 gives no result), and a threshold (t) where 0<=t<=1.0, and t determines the distance from the nearest harmonic number within which a peak can be considered harmonic
+     * \param *result: the sum of the peaks that are not harmonics divided by the sum of the peaks, or 0 with no result when the peaks sum to 0
+     *
+     * The sums are of the coefficients in whatever unit they are given:
+     * the peaks of XTRACT_POWER_SPECTRUM give the energy of the partials
+     * that are not harmonics as a part of the energy of the partials.
      */
     int xtract_noisiness(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 

@@ -263,6 +263,25 @@ UTEST(descriptors, harmonic_spectrum_takes_a_spectrum_and_gives_one)
     xtract_free_descriptors(fd);
 }
 
+UTEST(descriptors, noisiness_takes_a_peak_spectrum_a_fundamental_and_a_threshold)
+{
+    xtract_function_descriptor_t *fd = xtract_make_descriptors();
+    ASSERT_TRUE(fd != NULL);
+
+    ASSERT_EQ(fd[XTRACT_NOISINESS].data.format, XTRACT_SPECTRAL_PEAKS);
+    ASSERT_EQ(fd[XTRACT_NOISINESS].data.unit, XTRACT_ANY_AMPLITUDE_HERTZ);
+    ASSERT_EQ(fd[XTRACT_NOISINESS].argc, 2);
+    ASSERT_EQ(fd[XTRACT_NOISINESS].argv.min[0], 0.0);
+    ASSERT_EQ(fd[XTRACT_NOISINESS].argv.unit[0], XTRACT_HERTZ);
+    ASSERT_EQ(fd[XTRACT_NOISINESS].argv.donor[0], XTRACT_FAILSAFE_F0);
+    ASSERT_EQ(fd[XTRACT_NOISINESS].argv.min[1], 0.0);
+    ASSERT_EQ(fd[XTRACT_NOISINESS].argv.max[1], 1.0);
+    ASSERT_EQ(fd[XTRACT_NOISINESS].argv.unit[1], XTRACT_UNIT_NONE);
+    ASSERT_EQ(fd[XTRACT_NOISINESS].argv.donor[1], XTRACT_ANY);
+
+    xtract_free_descriptors(fd);
+}
+
 UTEST(descriptors, appended_features_are_fully_described)
 {
     xtract_function_descriptor_t *fd = xtract_make_descriptors();
