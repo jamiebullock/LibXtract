@@ -222,6 +222,12 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *argv_def = XTRACT_NO_DEFAULT;
             *argv_unit = XTRACT_UNIT_NONE;
             break;
+        case XTRACT_IRREGULARITY_K:
+            *argv_min = 0.0;
+            *argv_max = XTRACT_UNBOUNDED_MAX;
+            *argv_def = XTRACT_NO_DEFAULT;
+            *argv_unit = XTRACT_DECIBELS;
+            break;
             /* argc = 2 */;
         case XTRACT_ROLLOFF:
             *argv_min = 0.0;
@@ -495,6 +501,9 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_FLATNESS_DB:
             *argv_donor = XTRACT_FLATNESS;
             break;
+        case XTRACT_IRREGULARITY_K:
+            *argv_donor = XTRACT_SMOOTHNESS;
+            break;
         case XTRACT_TONALITY:
             *argv_donor = XTRACT_FLATNESS_DB;
             break;
@@ -662,7 +671,6 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             break;
         case XTRACT_ROLLOFF:
         case XTRACT_BARK_COEFFICIENTS:
-        case XTRACT_IRREGULARITY_K:
         case XTRACT_IRREGULARITY_J:
         case XTRACT_SMOOTHNESS:
         case XTRACT_SPECTRAL_ENTROPY:
@@ -707,6 +715,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             break;
         case XTRACT_TONALITY:
         case XTRACT_FLATNESS_DB:
+        case XTRACT_IRREGULARITY_K:
         case XTRACT_STANDARD_DEVIATION:
         case XTRACT_SPECTRAL_STANDARD_DEVIATION:
         case XTRACT_CREST:
@@ -1926,6 +1935,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_MCLEOD_F0:
         case XTRACT_MIDICENT:
         case XTRACT_FLATNESS_DB:
+        case XTRACT_IRREGULARITY_K:
         case XTRACT_TONALITY:
         case XTRACT_PEAK:
         case XTRACT_CROSS_CORRELATION:
@@ -2052,7 +2062,6 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_SIGNAL_CONFIDENCE:
         case XTRACT_SPECTRAL_MEAN:
         case XTRACT_SPECTRAL_CENTROID:
-        case XTRACT_IRREGULARITY_K:
         case XTRACT_IRREGULARITY_J:
         case XTRACT_SMOOTHNESS:
         case XTRACT_FLATNESS:
@@ -2347,8 +2356,12 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
                 *result_max = 1.0;
                 break;
             case XTRACT_IRREGULARITY_K:
+                *result_unit = XTRACT_UNIT_NONE;
+                *result_min = XTRACT_UNBOUNDED_MIN;
+                *result_max = XTRACT_UNBOUNDED_MAX;
+                break;
             case XTRACT_IRREGULARITY_J:
-                /* sums/ratios of non-negative deviations: >= 0, no upper bound */
+                /* a ratio of sums of squares: >= 0, no upper bound */
                 *result_unit = XTRACT_UNIT_NONE;
                 *result_min = 0.0;
                 *result_max = XTRACT_UNBOUNDED_MAX;

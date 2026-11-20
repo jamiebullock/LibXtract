@@ -147,13 +147,13 @@ extern "C"
      */
     int xtract_spectral_centroid(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
-    /** \brief Calculate the Irregularity of an input vector using a method described by Krimphoff (1994)
+    /** \brief Calculate the Irregularity of a spectrum from its smoothness using a method described by Krimphoff, McAdams and Winsberg (1994)
      *
      * \param *ctx: a pointer to a context, or NULL
-     * \param *data: a pointer to the first element in an array of doubles representing the magnitude coefficients from the spectrum of an audio vector, (e.g. the first half of the array pointed to by *result from xtract_spectrum().
-     * \param N: the number of elements to be considered, at least 3
-     * \param *argv: a pointer to NULL
-     * \param *result: the irregularity of N values from the array pointed to by *data
+     * \param *data: a pointer to NULL.
+     * \param N: not used - can safely be set to 0.
+     * \param *argv: a pointer to a double representing the smoothness of the amplitudes of the partials of a sound, 0 or more and finite (e.g. the value pointed to by *result from xtract_smoothness())
+     * \param *result: the base 10 logarithm of the smoothness, or 0 with no result when the smoothness is 0
      */
     int xtract_irregularity_k(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 

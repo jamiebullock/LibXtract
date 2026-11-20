@@ -1584,25 +1584,78 @@ UTEST(scalar, mean_return_value)
 
 /* ===== More Scalar Features ===== */
 
-UTEST(scalar, irregularity_k_constant)
+UTEST(scalar, irregularity_k_is_the_base_10_logarithm_of_the_smoothness)
 {
-    /* Each bin equals the average of its neighbours => 0 */
-    double result = 0.0;
-    double data[] = {5.0, 5.0, 5.0, 5.0, 5.0};
-    xtract_irregularity_k(NULL, data, 5, NULL, &result);
-    CHECK_NEAR(result, 0.0, EPSILON);
+    double smoothness = 100.0;
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_irregularity_k(NULL, NULL, 0, &smoothness, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 2.0, EPSILON);
+
+    smoothness = 0.01;
+    ASSERT_EQ(xtract_irregularity_k(NULL, NULL, 0, &smoothness, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, -2.0, EPSILON);
+
+    smoothness = 1.0;
+    ASSERT_EQ(xtract_irregularity_k(NULL, NULL, 0, &smoothness, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(result, 0.0);
 }
 
-UTEST(scalar, irregularity_k_known_value)
+UTEST(scalar, irregularity_k_of_partials_whose_even_ones_are_20_db_lower)
 {
-    /* For n=1: |3 - (1+3+1)/3| = |3 - 5/3| = 4/3
-     * For n=2: |1 - (3+1+3)/3| = |1 - 7/3| = 4/3
-     * For n=3: |3 - (1+3+1)/3| = |3 - 5/3| = 4/3
-     * total = 4 */
-    double result = 0.0;
-    double data[] = {1.0, 3.0, 1.0, 3.0, 1.0};
-    xtract_irregularity_k(NULL, data, 5, NULL, &result);
-    CHECK_REL(result, 4.0, EPSILON);
+    /* Each of the three interior levels is 40 / 3 dB from the mean of
+     * itself and its two neighbours, so the smoothness is 40 dB. */
+    const double partials[5] = {1.0, 0.1, 1.0, 0.1, 1.0};
+    double smoothness = -1.0;
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_smoothness(NULL, partials, 5, NULL, &smoothness), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_irregularity_k(NULL, NULL, 0, &smoothness, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, log10(40.0), 1e-12);
+}
+
+UTEST(scalar, irregularity_k_reads_neither_its_data_nor_its_N)
+{
+    const double data[3] = {1.0, 2.0, 3.0};
+    double smoothness = 1000.0;
+    double from_null = -1.0;
+    double from_data = -1.0;
+
+    ASSERT_EQ(xtract_irregularity_k(NULL, NULL, 0, &smoothness, &from_null), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_irregularity_k(NULL, data, 3, &smoothness, &from_data), XTRACT_SUCCESS);
+    CHECK_REL(from_null, 3.0, EPSILON);
+    ASSERT_EQ(from_data, from_null);
+}
+
+UTEST(scalar, irregularity_k_of_a_smoothness_of_zero_gives_no_result)
+{
+    double smoothness = 0.0;
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_irregularity_k(NULL, NULL, 0, &smoothness, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
+
+    smoothness = DBL_MIN;
+    ASSERT_EQ(xtract_irregularity_k(NULL, NULL, 0, &smoothness, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, log10(DBL_MIN), 1e-12);
+}
+
+UTEST(scalar, irregularity_k_rejects_a_smoothness_that_is_negative_or_not_finite)
+{
+    const double rejected[4] = {-DBL_MIN, -1.0, NAN, INFINITY};
+    double smoothness = DBL_MAX;
+    double result = -1.0;
+    int i;
+
+    for (i = 0; i < 4; i++)
+    {
+        result = -1.0;
+        ASSERT_EQ(xtract_irregularity_k(NULL, NULL, 0, &rejected[i], &result), XTRACT_ARGUMENT_ERROR);
+        ASSERT_EQ(result, 0.0);
+    }
+
+    ASSERT_EQ(xtract_irregularity_k(NULL, NULL, 0, &smoothness, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, log10(DBL_MAX), 1e-12);
 }
 
 UTEST(scalar, irregularity_j_constant)
@@ -2868,7 +2921,6 @@ UTEST(scalar, magnitude_features_reject_too_few_elements_and_a_null_argv)
     double threshold = 0.0;
     double result;
 
-    ASSERT_REJECTED(xtract_irregularity_k(NULL, data, 2, NULL, &result));
     ASSERT_REJECTED(xtract_irregularity_j(NULL, data, 1, NULL, &result));
     ASSERT_REJECTED(xtract_smoothness(NULL, data, 2, NULL, &result));
     ASSERT_REJECTED(xtract_zcr(NULL, data, 0, NULL, &result));
@@ -2880,7 +2932,6 @@ UTEST(scalar, magnitude_features_reject_too_few_elements_and_a_null_argv)
     ASSERT_REJECTED(xtract_lowest_value(NULL, data, 3, NULL, &result));
     ASSERT_REJECTED(xtract_peak(NULL, data, 3, NULL, &result));
 
-    ASSERT_EQ(xtract_irregularity_k(NULL, data, 3, NULL, &result), XTRACT_SUCCESS);
     ASSERT_EQ(xtract_irregularity_j(NULL, data, 2, NULL, &result), XTRACT_SUCCESS);
     ASSERT_EQ(xtract_smoothness(NULL, data, 3, NULL, &result), XTRACT_SUCCESS);
     ASSERT_EQ(xtract_zcr(NULL, data, 1, NULL, &result), XTRACT_SUCCESS);
@@ -2913,6 +2964,7 @@ UTEST(scalar, argv_only_features_reject_a_null_argv)
     double result;
 
     ASSERT_REJECTED(xtract_flatness_db(NULL, NULL, 0, NULL, &result));
+    ASSERT_REJECTED(xtract_irregularity_k(NULL, NULL, 0, NULL, &result));
     ASSERT_REJECTED(xtract_tonality(NULL, NULL, 0, NULL, &result));
     ASSERT_REJECTED(xtract_crest(NULL, NULL, 0, NULL, &result));
     ASSERT_REJECTED(xtract_noisiness(NULL, NULL, 0, NULL, &result));
