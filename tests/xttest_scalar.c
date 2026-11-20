@@ -1756,30 +1756,174 @@ UTEST(scalar, tonality_half)
     CHECK_REL(result, 0.5, EPSILON);
 }
 
-UTEST(scalar, noisiness_all_harmonic)
+UTEST(scalar, noisiness_of_harmonic_peaks_is_zero)
 {
-    /* harmonics=10, partials=10 => inharmonics=0, noisiness=0/10=0 */
-    double result = 0.0;
-    double argv[] = {10.0, 10.0};
-    xtract_noisiness(NULL, NULL, 0, argv, &result);
-    CHECK_NEAR(result, 0.0, EPSILON);
+    /* f0 = 100 with a threshold of 0.1: every peak is a harmonic. */
+    double data[] = {1.0, 0.5, 0.25,
+                     100.0, 205.0, 300.0};
+    double argv[] = {100.0, 0.1};
+    double result = 99.0;
+
+    ASSERT_EQ(xtract_noisiness(NULL, data, 6, argv, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(result, 0.0);
 }
 
-UTEST(scalar, noisiness_half_harmonic)
+UTEST(scalar, noisiness_is_the_part_of_the_sum_of_the_peaks_that_is_not_in_harmonics)
 {
-    /* harmonics=5, partials=10 => inharmonics=5, noisiness=5/10=0.5 */
+    /* f0 = 100 with a threshold of 0.1: the peaks at 100 and 305 Hz are
+     * harmonics and the ones at 150 and 260 Hz are not.
+     * (1.5 + 0.5) / (1.0 + 1.5 + 0.5 + 1.0) = 0.5 */
+    double data[] = {1.0, 1.5, 0.5, 1.0,
+                     100.0, 150.0, 260.0, 305.0};
+    double argv[] = {100.0, 0.1};
     double result = 0.0;
-    double argv[] = {5.0, 10.0};
-    xtract_noisiness(NULL, NULL, 0, argv, &result);
+
+    ASSERT_EQ(xtract_noisiness(NULL, data, 8, argv, &result), XTRACT_SUCCESS);
     CHECK_REL(result, 0.5, EPSILON);
 }
 
-UTEST(scalar, noisiness_zero_partials)
+UTEST(scalar, noisiness_keeps_a_peak_exactly_at_the_threshold_as_a_harmonic)
 {
+    /* 125 Hz is 0.25 of the fundamental above harmonic 1. */
+    double data[] = {1.0, 3.0,
+                     125.0, 250.0};
+    double argv[] = {100.0, 0.25};
     double result = 0.0;
-    double argv[] = {0.0, 0.0};
-    int rv = xtract_noisiness(NULL, NULL, 0, argv, &result);
-    ASSERT_EQ(rv, XTRACT_NO_RESULT);
+
+    ASSERT_EQ(xtract_noisiness(NULL, data, 4, argv, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 0.75, EPSILON);
+}
+
+UTEST(scalar, noisiness_counts_only_the_largest_of_the_peaks_nearest_to_one_harmonic_number)
+{
+    /* 95 and 105 Hz are both within the threshold of harmonic 1. The
+     * larger is the harmonic and the other is not, whichever comes first,
+     * and of two that are equal one is. */
+    const double sizes[3][2] = {{1.0, 3.0}, {3.0, 1.0}, {2.0, 2.0}};
+    const double expected[3] = {0.2, 0.2, 0.4};
+    double data[] = {0.0, 0.0, 1.0,
+                     95.0, 105.0, 200.0};
+    double argv[] = {100.0, 0.1};
+    double result;
+    int i;
+
+    for (i = 0; i < 3; i++)
+    {
+        data[0] = sizes[i][0];
+        data[1] = sizes[i][1];
+        result = 0.0;
+
+        ASSERT_EQ(xtract_noisiness(NULL, data, 6, argv, &result), XTRACT_SUCCESS);
+        CHECK_REL(result, expected[i], EPSILON);
+    }
+}
+
+UTEST(scalar, noisiness_does_not_count_a_peak_nearest_to_harmonic_number_0_as_a_harmonic)
+{
+    /* 20 Hz is 0.2 of the fundamental, within the threshold of 0. */
+    double data[] = {1.0, 1.0,
+                     20.0, 100.0};
+    double argv[] = {100.0, 0.3};
+    double result = 0.0;
+
+    ASSERT_EQ(xtract_noisiness(NULL, data, 4, argv, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 0.5, EPSILON);
+}
+
+UTEST(scalar, noisiness_passes_over_elements_that_hold_no_peak)
+{
+    /* The peaks of the test above in the layout of xtract_peak_spectrum(),
+     * with an amplitude left in an element that has no frequency. */
+    double data[] = {0.0, 1.0, 9.0, 1.5, 0.0, 0.5, 1.0, 0.0,
+                     0.0, 100.0, 0.0, 150.0, 0.0, 260.0, 305.0, 0.0};
+    double argv[] = {100.0, 0.1};
+    double result = 0.0;
+
+    ASSERT_EQ(xtract_noisiness(NULL, data, 16, argv, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 0.5, EPSILON);
+}
+
+UTEST(scalar, noisiness_of_no_peaks_or_a_fundamental_of_0_gives_no_result)
+{
+    double empty[] = {0.0, 0.0, 0.0, 0.0};
+    double silent[] = {0.0, 0.0, 100.0, 200.0};
+    double peaks[] = {1.0, 1.0, 100.0, 150.0};
+    double argv[] = {100.0, 0.1};
+    double result = 99.0;
+
+    ASSERT_EQ(xtract_noisiness(NULL, empty, 4, argv, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
+
+    result = 99.0;
+    ASSERT_EQ(xtract_noisiness(NULL, silent, 4, argv, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
+
+    result = 99.0;
+    argv[0] = 0.0;
+    ASSERT_EQ(xtract_noisiness(NULL, peaks, 4, argv, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
+}
+
+UTEST(scalar, noisiness_rejects_an_odd_or_short_input_and_out_of_range_arguments)
+{
+    double data[] = {1.0, 1.0, 100.0, 200.0};
+    double argv[] = {100.0, 0.1};
+    double result = 99.0;
+
+    ASSERT_EQ(xtract_noisiness(NULL, data, 3, argv, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    result = 99.0;
+    ASSERT_EQ(xtract_noisiness(NULL, data, 0, argv, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    result = 99.0;
+    argv[0] = -100.0;
+    ASSERT_EQ(xtract_noisiness(NULL, data, 4, argv, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    result = 99.0;
+    argv[0] = INFINITY;
+    ASSERT_EQ(xtract_noisiness(NULL, data, 4, argv, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    result = 99.0;
+    argv[0] = NAN;
+    ASSERT_EQ(xtract_noisiness(NULL, data, 4, argv, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    result = 99.0;
+    argv[0] = 100.0;
+    argv[1] = 1.5;
+    ASSERT_EQ(xtract_noisiness(NULL, data, 4, argv, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    result = 99.0;
+    argv[1] = -0.1;
+    ASSERT_EQ(xtract_noisiness(NULL, data, 4, argv, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    result = 99.0;
+    argv[1] = NAN;
+    ASSERT_EQ(xtract_noisiness(NULL, data, 4, argv, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    result = 99.0;
+}
+
+UTEST(scalar, noisiness_rejects_a_frequency_that_is_negative_nan_or_lower_than_one_before_it)
+{
+    double descending[] = {1.0, 1.0, 1.0, 100.0, 300.0, 200.0};
+    double across_an_empty_element[] = {1.0, 0.0, 1.0, 300.0, 0.0, 200.0};
+    double negative[] = {1.0, 1.0, -100.0, 200.0};
+    double not_a_number[] = {1.0, 1.0, 1.0, 100.0, NAN, 200.0};
+    double argv[] = {100.0, 0.1};
+    double result = 99.0;
+
+    ASSERT_EQ(xtract_noisiness(NULL, descending, 6, argv, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    result = 99.0;
+    ASSERT_EQ(xtract_noisiness(NULL, across_an_empty_element, 6, argv, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    result = 99.0;
+    ASSERT_EQ(xtract_noisiness(NULL, negative, 4, argv, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    result = 99.0;
+    ASSERT_EQ(xtract_noisiness(NULL, not_a_number, 6, argv, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    result = 99.0;
 }
 
 UTEST(scalar, spread_delegates_to_variance)

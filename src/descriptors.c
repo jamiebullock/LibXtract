@@ -250,6 +250,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *(argv_unit + 1) = XTRACT_PERCENT;
             break;
         case XTRACT_HARMONIC_SPECTRUM:
+        case XTRACT_NOISINESS:
             *argv_min = 0.0;
             *argv_max = XTRACT_UNBOUNDED_MAX;
             *argv_def = XTRACT_FUNDAMENTAL_DEFAULT;
@@ -259,7 +260,6 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *(argv_def + 1) = .1;
             *(argv_unit + 1) = XTRACT_UNIT_NONE;
             break;
-        case XTRACT_NOISINESS:
         case XTRACT_SKEWNESS:
         case XTRACT_KURTOSIS:
         case XTRACT_SPECTRAL_SKEWNESS:
@@ -551,12 +551,9 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *(argv_donor + 1) = XTRACT_SPECTRAL_STANDARD_DEVIATION;
             break;
         case XTRACT_HARMONIC_SPECTRUM:
+        case XTRACT_NOISINESS:
             *argv_donor = XTRACT_FAILSAFE_F0;
             *(argv_donor + 1) = XTRACT_ANY;
-            break;
-        case XTRACT_NOISINESS:
-            *argv_donor = XTRACT_SUM;
-            *(argv_donor + 1) = XTRACT_SUM;
             break;
         case XTRACT_CREST:
             *argv_donor = XTRACT_HIGHEST_VALUE;
@@ -692,6 +689,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             break;
         case XTRACT_SPECTRAL_INHARMONICITY:
         case XTRACT_PACKED:
+        case XTRACT_NOISINESS:
             *data_format = XTRACT_SPECTRAL_PEAKS;
             break;
         case XTRACT_NONZERO_COUNT:
@@ -719,7 +717,6 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_STANDARD_DEVIATION:
         case XTRACT_SPECTRAL_STANDARD_DEVIATION:
         case XTRACT_CREST:
-        case XTRACT_NOISINESS:
             *data_format = XTRACT_NO_DATA;
             break;
         case XTRACT_TRISTIMULUS_1:
@@ -849,7 +846,6 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_AUTOCORRELATION:
         case XTRACT_AUTOCORRELATION_FFT:
         case XTRACT_ROLLOFF:
-        case XTRACT_NOISINESS:
         case XTRACT_CREST:
         case XTRACT_FLATNESS:
         case XTRACT_FLATNESS_DB:
@@ -904,6 +900,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_PACKED:
         case XTRACT_SPECTRAL_INHARMONICITY:
         case XTRACT_ODD_EVEN_RATIO:
+        case XTRACT_NOISINESS:
         case XTRACT_SPECTRAL_SUBBAND_CENTROIDS:
         case XTRACT_CHROMA:
         case XTRACT_SPECTRAL_CONTRAST:
@@ -1135,8 +1132,8 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_NOISINESS:
             copy_name(name, "noisiness");
             copy_name(p_name, "Noisiness");
-            copy_desc(desc, "Extract the noisiness of a spectrum");
-            copy_desc(p_desc, "Extract the noisiness of an audio  spectrum");
+            copy_desc(desc, "Extract the noisiness of a peak spectrum");
+            copy_desc(p_desc, "Extract the noisiness of an audio peak spectrum");
             copy_author(author, "Tae Hong Park");
             *year = 2000;
             break;
