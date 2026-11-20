@@ -662,6 +662,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_HPS:
         case XTRACT_SPECTRAL_SUBBAND_CENTROIDS:
         case XTRACT_SPECTRAL_CONTRAST:
+        case XTRACT_HARMONIC_SPECTRUM:
         case XTRACT_CHROMA:
             *data_format = XTRACT_SPECTRAL;
             break;
@@ -690,7 +691,6 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *data_format = XTRACT_LPC_COEFFS;
             break;
         case XTRACT_SPECTRAL_INHARMONICITY:
-        case XTRACT_HARMONIC_SPECTRUM:
         case XTRACT_PACKED:
             *data_format = XTRACT_SPECTRAL_PEAKS;
             break;
