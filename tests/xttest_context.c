@@ -389,6 +389,40 @@ UTEST(context, the_transform_and_the_sums_over_every_lag_give_one_periodicity_co
     }
 }
 
+UTEST(context, the_transform_takes_elements_whose_squares_are_near_the_largest_double)
+{
+    /* The sum of the 32 squares of 1e153 is in range, and the square of
+     * the sum of the 32 elements is not. Both routes give the periodicity
+     * of a series that repeats every four elements. */
+    enum
+    {
+        N = 64
+    };
+    double data[N];
+    xtract_context *ctx = xtract_context_new(N);
+    const size_t rest = 3 * (size_t)N - (N / 2 + 2);
+    double by_transform = 0.0, by_sums = 0.0;
+    double *held;
+    int n;
+
+    ASSERT_TRUE(ctx != NULL);
+    for (n = 0; n < N; n++)
+        data[n] = (n & 1) ? 0.0 : ((n & 2) ? -1e153 : 1e153);
+
+    ASSERT_EQ(xtract_periodicity(ctx, data, N, NULL, &by_transform), XTRACT_SUCCESS);
+
+    held = xtract_scratch_take(ctx, N, rest);
+    ASSERT_TRUE(held != NULL);
+    ASSERT_EQ(xtract_periodicity(ctx, data, N, NULL, &by_sums), XTRACT_SUCCESS);
+    xtract_scratch_return(ctx, held, rest);
+
+    ASSERT_TRUE(isfinite(by_transform));
+    CHECK_NEAR(by_sums, 1.0, 1e-9);
+    CHECK_NEAR(by_transform, by_sums, 1e-9);
+
+    xtract_context_delete(ctx);
+}
+
 UTEST(context, the_lags_of_a_length_that_is_no_power_of_two_are_served_by_its_own_context)
 {
     /* 1367 elements and 684 lags need a transform of 4096, four times the

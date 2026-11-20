@@ -1501,6 +1501,10 @@ static void mcleod_nsdf(const double *data, const int N, const int lags, double 
  * is made from have been read. */
 static void mcleod_nsdf_by_transform(xtract_context *ctx, const double *data, const int N, const int lags, const int length, double *work)
 {
+    /* A coefficient of the transform can be as large as the sum of the
+     * input. Divided by the length, a power of two, it is no larger than
+     * an element, and its square is in range whenever theirs are. */
+    const double shrink = 1.0 / length;
     double first = 0.0, last = 0.0, scale, r, m;
     int tau, n;
 #ifdef USE_OOURA
@@ -1510,16 +1514,17 @@ static void mcleod_nsdf_by_transform(xtract_context *ctx, const double *data, co
 
     for (n = 2; n < length; n += 2)
     {
-        work[n] = XTRACT_SQ(work[n]) + XTRACT_SQ(work[n + 1]);
+        work[n] = XTRACT_SQ(shrink * work[n]) + XTRACT_SQ(shrink * work[n + 1]);
         work[n + 1] = 0.0;
     }
-    work[0] = XTRACT_SQ(work[0]);
-    work[1] = XTRACT_SQ(work[1]);
+    work[0] = XTRACT_SQ(shrink * work[0]);
+    work[1] = XTRACT_SQ(shrink * work[1]);
 
     xtract_transform(ctx, length, -1, work);
 
-    /* A forward and an inverse rdft() together scale by length / 2 */
-    scale = 2.0 / length;
+    /* A forward and an inverse rdft() together scale by length / 2, and
+     * the squares by the square of `shrink` */
+    scale = 2.0 * length;
 #else
     DSPDoubleSplitComplex split;
     double dc, nyquist;
@@ -1536,11 +1541,12 @@ static void mcleod_nsdf_by_transform(xtract_context *ctx, const double *data, co
     }
     xtract_transform(ctx, length, FFT_FORWARD, &split);
 
-    dc = split.realp[0];
-    nyquist = split.imagp[0];
+    /* The forward transform is scaled by 2 relative to the DFT */
+    dc = .5 * shrink * split.realp[0];
+    nyquist = .5 * shrink * split.imagp[0];
     for (n = 1; n < length / 2; n++)
     {
-        split.realp[n] = XTRACT_SQ(split.realp[n]) + XTRACT_SQ(split.imagp[n]);
+        split.realp[n] = XTRACT_SQ(.5 * shrink * split.realp[n]) + XTRACT_SQ(.5 * shrink * split.imagp[n]);
         split.imagp[n] = 0.0;
     }
     split.realp[0] = XTRACT_SQ(dc);
@@ -1548,9 +1554,9 @@ static void mcleod_nsdf_by_transform(xtract_context *ctx, const double *data, co
 
     xtract_transform(ctx, length, FFT_INVERSE, &split);
 
-    /* The forward transform is scaled by 2 relative to the DFT, 4 after
-     * squaring, and the inverse by the length */
-    scale = 1.0 / (4.0 * length);
+    /* The inverse transform scales by the length, and the squares by the
+     * square of `shrink` */
+    scale = (double)length;
 #endif
 
     for (n = 0; n < N - lags; n++)
