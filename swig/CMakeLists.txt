@@ -17,6 +17,10 @@ if(NOT SWIG_FOUND)
     message(STATUS "SWIG not found: no bindings")
     return()
 endif()
+# Each run of SWIG first removes the support files its last run wrote, so
+# the Java file of a type that is no longer wrapped does not stay in the
+# package directory, where the test would compile it
+set(UseSWIG_MODULE_VERSION 2)
 include(UseSWIG)
 
 set_property(SOURCE xtract.i PROPERTY SWIG_MODULE_NAME xtract)
