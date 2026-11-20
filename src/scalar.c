@@ -429,170 +429,46 @@ int xtract_irregularity_j(xtract_context *ctx, const double *data, const int N, 
     return XTRACT_SUCCESS;
 }
 
+/* The sum of the harmonics numbered from `first` to `last` as a part of the
+ * sum of all N, where element 0 is harmonic 1 */
+static int tristimulus(const double *data, const int N, const int first, const int last, double *result)
+{
+    double den = 0.0, num = 0.0;
+    int n;
+
+    *result = 0.0;
+
+    if (N < 1)
+        return XTRACT_ARGUMENT_ERROR;
+
+    for (n = 0; n < N; n++)
+    {
+        den += data[n];
+        if (n + 1 >= first && n + 1 <= last)
+            num += data[n];
+    }
+
+    if (den == 0.0 || num == 0.0)
+        return XTRACT_NO_RESULT;
+
+    *result = num / den;
+
+    return XTRACT_SUCCESS;
+}
+
 int xtract_tristimulus_1(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
-    int n = N >> 1, i;
-    double den = 0.0, p1 = 0.0, fund = 0.0, temp = 0.0, h = 0.0;
-    const double *freqs;
-
-    if (N < 2 || (N & 1) || argv == NULL)
-    {
-        *result = 0.0;
-        return XTRACT_ARGUMENT_ERROR;
-    }
-
-    fund = *(double *)argv;
-    freqs = data + n;
-
-    if (!isfinite(fund) || fund < 0.0)
-    {
-        *result = 0.0;
-        return XTRACT_ARGUMENT_ERROR;
-    }
-    if (fund == 0.0)
-    {
-        *result = 0.0;
-        return XTRACT_NO_RESULT;
-    }
-
-    for (i = 0; i < n; i++)
-    {
-        if ((temp = data[i]))
-        {
-            den += temp;
-            h = xtract_argv_int(floor(freqs[i] / fund + 0.5));
-            if (h == 1)
-                p1 += temp;
-        }
-    }
-
-    if (den == 0.0 || p1 == 0.0)
-    {
-        *result = 0.0;
-        return XTRACT_NO_RESULT;
-    }
-    else
-    {
-        *result = p1 / den;
-        return XTRACT_SUCCESS;
-    }
+    return tristimulus(data, N, 1, 1, result);
 }
 
 int xtract_tristimulus_2(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
-    int n = N >> 1, i;
-    double den, p2, p3, p4, ps, fund, temp, h;
-    const double *freqs;
-
-    den = p2 = p3 = p4 = 0.0;
-
-    if (N < 2 || (N & 1) || argv == NULL)
-    {
-        *result = 0.0;
-        return XTRACT_ARGUMENT_ERROR;
-    }
-
-    fund = *(double *)argv;
-    freqs = data + n;
-
-    if (!isfinite(fund) || fund < 0.0)
-    {
-        *result = 0.0;
-        return XTRACT_ARGUMENT_ERROR;
-    }
-    if (fund == 0.0)
-    {
-        *result = 0.0;
-        return XTRACT_NO_RESULT;
-    }
-
-    for (i = 0; i < n; i++)
-    {
-        if ((temp = data[i]))
-        {
-            den += temp;
-            h = xtract_argv_int(floor(freqs[i] / fund + 0.5));
-            switch ((int)h)
-            {
-            case 2:
-                p2 += temp;
-                break;
-
-            case 3:
-                p3 += temp;
-                break;
-
-            case 4:
-                p4 += temp;
-                break;
-
-            default:
-                break;
-            }
-        }
-    }
-
-    ps = p2 + p3 + p4;
-
-    if (den == 0.0 || ps == 0.0)
-    {
-        *result = 0.0;
-        return XTRACT_NO_RESULT;
-    }
-    else
-    {
-        *result = ps / den;
-        return XTRACT_SUCCESS;
-    }
+    return tristimulus(data, N, 2, 4, result);
 }
 
 int xtract_tristimulus_3(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
-    int n = N >> 1, i;
-    double den = 0.0, num = 0.0, fund = 0.0, temp = 0.0, h = 0.0;
-    const double *freqs;
-
-    if (N < 2 || (N & 1) || argv == NULL)
-    {
-        *result = 0.0;
-        return XTRACT_ARGUMENT_ERROR;
-    }
-
-    fund = *(double *)argv;
-    freqs = data + n;
-
-    if (!isfinite(fund) || fund < 0.0)
-    {
-        *result = 0.0;
-        return XTRACT_ARGUMENT_ERROR;
-    }
-    if (fund == 0.0)
-    {
-        *result = 0.0;
-        return XTRACT_NO_RESULT;
-    }
-
-    for (i = 0; i < n; i++)
-    {
-        if ((temp = data[i]))
-        {
-            den += temp;
-            h = xtract_argv_int(floor(freqs[i] / fund + 0.5));
-            if (h >= 5)
-                num += temp;
-        }
-    }
-
-    if (den == 0.0 || num == 0.0)
-    {
-        *result = 0.0;
-        return XTRACT_NO_RESULT;
-    }
-    else
-    {
-        *result = num / den;
-        return XTRACT_SUCCESS;
-    }
+    return tristimulus(data, N, 5, N, result);
 }
 
 static double level_no_lower_than(const double lowest, const double amplitude)
@@ -992,62 +868,29 @@ int xtract_spectral_inharmonicity(xtract_context *ctx, const double *data, const
 
 int xtract_odd_even_ratio(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
-    int n = N >> 1, h = 0;
-    double odd = 0.0, even = 0.0, fund, temp;
-    const double *freqs;
+    double odd = 0.0, even = 0.0;
+    int n;
 
-    if (N < 2 || (N & 1) || argv == NULL)
-    {
-        *result = 0.0;
+    *result = 0.0;
+
+    if (N < 1)
         return XTRACT_ARGUMENT_ERROR;
-    }
 
-    fund = *(double *)argv;
-    freqs = data + n;
-
-    if (!isfinite(fund) || fund < 0.0)
+    /* Element 0 is harmonic 1 */
+    for (n = 0; n < N; n++)
     {
-        *result = 0.0;
-        return XTRACT_ARGUMENT_ERROR;
-    }
-    if (fund == 0.0)
-    {
-        *result = 0.0;
-        return XTRACT_NO_RESULT;
-    }
-
-    while (n--)
-    {
-        if ((temp = data[n]))
-        {
-            h = xtract_argv_int(floor(freqs[n] / fund + 0.5));
-
-            /* Harmonics are numbered from 1: a bin nearest to harmonic
-             * zero is below the first harmonic and belongs to neither sum */
-            if (h == 0)
-                continue;
-
-            if (XTRACT_IS_ODD(h))
-            {
-                odd += temp;
-            }
-            else
-            {
-                even += temp;
-            }
-        }
+        if (n & 1)
+            even += data[n];
+        else
+            odd += data[n];
     }
 
     if (odd == 0.0 || even == 0.0)
-    {
-        *result = 0.0;
         return XTRACT_NO_RESULT;
-    }
-    else
-    {
-        *result = odd / even;
-        return XTRACT_SUCCESS;
-    }
+
+    *result = odd / even;
+
+    return XTRACT_SUCCESS;
 }
 
 int xtract_sharpness(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)

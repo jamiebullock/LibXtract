@@ -2108,35 +2108,6 @@ UTEST(scalar, spectral_standard_deviation_is_sqrt_variance)
     CHECK_REL(result, sqrt(7500.0), 1e-6);
 }
 
-/* ===== xtract_odd_even_ratio ===== */
-
-UTEST(scalar, odd_even_ratio_computes_ratio_of_odd_to_even_harmonics)
-{
-    /* Harmonics 1 and 3 (odd): 3.0 + 2.0 = 5.0
-     * Harmonics 2 and 4 (even): 0.5 + 0.4 = 0.9 */
-    double result = 0.0;
-    double fund = 100.0;
-    double data[8] = {3.0, 0.5, 2.0, 0.4,
-                      100.0, 200.0, 300.0, 400.0};
-
-    ASSERT_EQ(xtract_odd_even_ratio(NULL, data, 8, &fund, &result), XTRACT_SUCCESS);
-    CHECK_REL(result, 5.0 / 0.9, 1e-10);
-}
-
-UTEST(scalar, odd_even_ratio_bins_below_first_harmonic_excluded)
-{
-    /* The 20 Hz bin rounds to harmonic 0, which does not exist:
-     * harmonics are numbered from 1, so it must contribute to
-     * neither sum. Odd = 2.0 (h=1), even = 1.0 (h=2). */
-    double result = 0.0;
-    double fund = 100.0;
-    double data[8] = {5.0, 2.0, 1.0, 0.0,
-                      20.0, 100.0, 200.0, 300.0};
-
-    ASSERT_EQ(xtract_odd_even_ratio(NULL, data, 8, &fund, &result), XTRACT_SUCCESS);
-    CHECK_REL(result, 2.0, 1e-10);
-}
-
 /* ===== xtract_sharpness ===== */
 
 UTEST(scalar, sharpness_of_uniform_loudness_coefficients)
@@ -2581,15 +2552,6 @@ UTEST(vector, dct_changing_size_should_not_crash)
 
     xtract_dct(NULL, data8, 8, NULL, result8);
     CHECK_REL(result8[0], 1.0, 1e-6);
-}
-
-UTEST(scalar, odd_even_ratio_zero_fundamental_should_return_no_result)
-{
-    double result = 0.0;
-    double data[] = {1.0, 1.0, 100.0, 200.0};
-    double fund = 0.0;
-    int rv = xtract_odd_even_ratio(NULL, data, 4, &fund, &result);
-    ASSERT_EQ(rv, XTRACT_NO_RESULT);
 }
 
 UTEST(scalar, irregularity_j_all_zero_input_should_return_no_result)

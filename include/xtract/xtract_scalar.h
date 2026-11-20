@@ -167,33 +167,33 @@ extern "C"
      */
     int xtract_irregularity_j(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
-    /** \brief Calculate the first order Tristimulus of an input vector using a method described by Pollard and Jansson (1982)
+    /** \brief Calculate the first order Tristimulus of the harmonics of a sound using a method described by Pollard and Jansson (1982)
      *
      * \param *ctx: a pointer to a context, or NULL
-     * \param *data: a pointer to the first element in an array of doubles representing a harmonic spectrum of size N/2, and a frequency spectrum of size N/2 (This is the output format of xtract_harmonic_spectrum())
-     * \param N: the number of elements to be considered, at least 2 and even
-     * \param *argv: a pointer to a double representing the fundamental frequency of the input vector, finite and at least 0; 0 gives no result
-     * \param *result: the coefficient at the fundamental as a fraction of the sum of all coefficients, in whatever unit the coefficients are given: magnitudes give an amplitude ratio, power coefficients an energy ratio
+     * \param *data: a pointer to the first element in an array of doubles representing the coefficients of the harmonics of a sound in order of harmonic number, the fundamental first (e.g. the first half of the array pointed to by *result from xtract_packed() when it is given the result of xtract_harmonic_spectrum()). The elements of 0 that xtract_packed() leaves after the harmonics do not change the result
+     * \param N: the number of elements to be considered, at least 1
+     * \param *argv: a pointer to NULL
+     * \param *result: the coefficient of the first harmonic as a fraction of the sum of all N coefficients, in whatever unit the coefficients are given: magnitudes give an amplitude ratio, power coefficients an energy ratio. 0 with no result when either is 0
      */
     int xtract_tristimulus_1(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
-    /** \brief Calculate the second order Tristimulus of an input vector using a method described by Pollard and Jansson (1982)
+    /** \brief Calculate the second order Tristimulus of the harmonics of a sound using a method described by Pollard and Jansson (1982)
      *
      * \param *ctx: a pointer to a context, or NULL
-     * \param *data: a pointer to the first element in an array of doubles representing a harmonic spectrum of size N/2, and a frequency spectrum of size N/2 (This is the output format of xtract_harmonic_spectrum())
-     * \param N: the number of elements to be considered, at least 2 and even
-     * \param *argv: a pointer to a double representing the fundamental frequency of the input vector, finite and at least 0; 0 gives no result
-     * \param *result: the sum of the coefficients at the second, third and fourth harmonics as a fraction of the sum of all coefficients, in whatever unit the coefficients are given
+     * \param *data: a pointer to the first element in an array of doubles representing the coefficients of the harmonics of a sound in order of harmonic number, the fundamental first (e.g. the first half of the array pointed to by *result from xtract_packed() when it is given the result of xtract_harmonic_spectrum()). The elements of 0 that xtract_packed() leaves after the harmonics do not change the result
+     * \param N: the number of elements to be considered, at least 1
+     * \param *argv: a pointer to NULL
+     * \param *result: the sum of the coefficients of the second, third and fourth harmonics as a fraction of the sum of all N coefficients, in whatever unit the coefficients are given. 0 with no result when either sum is 0
      */
     int xtract_tristimulus_2(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
-    /** \brief Calculate the third order Tristimulus of an input vector using a method described by Pollard and Jansson (1982)
+    /** \brief Calculate the third order Tristimulus of the harmonics of a sound using a method described by Pollard and Jansson (1982)
      *
      * \param *ctx: a pointer to a context, or NULL
-     * \param *data: a pointer to the first element in an array of doubles representing a harmonic spectrum of size N/2, and a frequency spectrum of size N/2 (This is the output format of xtract_harmonic_spectrum())
-     * \param N: the number of elements to be considered, at least 2 and even
-     * \param *argv: a pointer to a double representing the fundamental frequency of the input vector, finite and at least 0; 0 gives no result
-     * \param *result: the sum of the coefficients at the fifth and higher harmonics as a fraction of the sum of all coefficients, in whatever unit the coefficients are given
+     * \param *data: a pointer to the first element in an array of doubles representing the coefficients of the harmonics of a sound in order of harmonic number, the fundamental first (e.g. the first half of the array pointed to by *result from xtract_packed() when it is given the result of xtract_harmonic_spectrum()). The elements of 0 that xtract_packed() leaves after the harmonics do not change the result
+     * \param N: the number of elements to be considered, at least 1
+     * \param *argv: a pointer to NULL
+     * \param *result: the sum of the coefficients of the fifth and higher harmonics as a fraction of the sum of all N coefficients, in whatever unit the coefficients are given. 0 with no result when either sum is 0
      */
     int xtract_tristimulus_3(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
@@ -332,20 +332,18 @@ extern "C"
     int xtract_crest(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /* Odd to even harmonic ratio */
-    /** \brief Extract the Odd to even harmonic ratio of an input vector
+    /** \brief Extract the Odd to even harmonic ratio of the harmonics of a sound
      *
      * \param *ctx: a pointer to a context, or NULL
-     * \param *data: a pointer to the first element in an array of doubles representing a harmonic spectrum of size N/2, and a frequency spectrum of size N/2 (This is the output format of xtract_harmonic_spectrum())
-     * \param N: the number of elements to be considered, at least 2 and even
-     * \param *argv: a pointer to a double representing the fundamental frequency of the input vector, finite and at least 0; 0 gives no result
-     * \param *result: the odd/even harmonic ratio of N values from the array pointed to by *data
+     * \param *data: a pointer to the first element in an array of doubles representing the coefficients of the harmonics of a sound in order of harmonic number, the fundamental first (e.g. the first half of the array pointed to by *result from xtract_packed() when it is given the result of xtract_harmonic_spectrum()). The elements of 0 that xtract_packed() leaves after the harmonics do not change the result
+     * \param N: the number of elements to be considered, at least 1
+     * \param *argv: a pointer to NULL
+     * \param *result: the sum of the coefficients of the odd harmonics divided by the sum of those of the even harmonics, or 0 with no result when either sum is 0
      *
-     * Harmonics are numbered from 1 (the fundamental); bins nearest to harmonic
-     * zero (below half the fundamental) contribute to neither sum. The ratio is
-     * computed in whatever unit the coefficients are given: magnitude
-     * coefficients give an amplitude ratio, while coefficients derived from
-     * XTRACT_POWER_SPECTRUM give the odd-to-even harmonic energy ratio of
-     * Peeters (2004).
+     * The ratio is computed in whatever unit the coefficients are given:
+     * magnitude coefficients give an amplitude ratio, while coefficients
+     * derived from XTRACT_POWER_SPECTRUM give the odd-to-even harmonic energy
+     * ratio of Peeters (2004).
      */
     int xtract_odd_even_ratio(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
