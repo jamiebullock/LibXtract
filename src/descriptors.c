@@ -186,10 +186,6 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *argv_unit = (xtract_unit_t)XTRACT_NONE;
             break;
         case XTRACT_SPECTRAL_INHARMONICITY:
-        case XTRACT_TRISTIMULUS_1:
-        case XTRACT_TRISTIMULUS_2:
-        case XTRACT_TRISTIMULUS_3:
-        case XTRACT_ODD_EVEN_RATIO:
             *argv_min = 0.0;
             *argv_max = XTRACT_UNBOUNDED_MAX;
             *argv_def = XTRACT_FUNDAMENTAL_DEFAULT;
@@ -492,10 +488,6 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
                 *argv_donor = XTRACT_SPECTRAL_MEAN;
                 break; */
         case XTRACT_SPECTRAL_INHARMONICITY:
-        case XTRACT_TRISTIMULUS_1:
-        case XTRACT_TRISTIMULUS_2:
-        case XTRACT_TRISTIMULUS_3:
-        case XTRACT_ODD_EVEN_RATIO:
             *argv_donor = XTRACT_FAILSAFE_F0;
             break;
         case XTRACT_FLATNESS_DB:
@@ -723,8 +715,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_TRISTIMULUS_2:
         case XTRACT_TRISTIMULUS_3:
         case XTRACT_ODD_EVEN_RATIO:
-            /* These read N/2 amplitudes followed by N/2 frequencies */
-            *data_format = XTRACT_SPECTRAL_HARMONICS;
+            *data_format = XTRACT_SPECTRAL_HARMONICS_MAGNITUDES;
             break;
         case XTRACT_LOUDNESS:
         case XTRACT_SHARPNESS:
@@ -804,6 +795,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_TRISTIMULUS_1:
         case XTRACT_TRISTIMULUS_2:
         case XTRACT_TRISTIMULUS_3:
+        case XTRACT_ODD_EVEN_RATIO:
         case XTRACT_DCT:
         case XTRACT_AMDF:
         case XTRACT_ASDF:
@@ -899,7 +891,6 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_HARMONIC_SPECTRUM:
         case XTRACT_PACKED:
         case XTRACT_SPECTRAL_INHARMONICITY:
-        case XTRACT_ODD_EVEN_RATIO:
         case XTRACT_NOISINESS:
         case XTRACT_SPECTRAL_SUBBAND_CENTROIDS:
         case XTRACT_CHROMA:
@@ -1922,10 +1913,6 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_SPREAD:
             /* case XTRACT_SPECTRAL_AVERAGE_DEVIATION: */
         case XTRACT_SPECTRAL_INHARMONICITY:
-        case XTRACT_TRISTIMULUS_1:
-        case XTRACT_TRISTIMULUS_2:
-        case XTRACT_TRISTIMULUS_3:
-        case XTRACT_ODD_EVEN_RATIO:
         case XTRACT_LOWEST_VALUE:
         case XTRACT_F0:
         case XTRACT_FAILSAFE_F0:
@@ -2397,7 +2384,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             case XTRACT_ODD_EVEN_RATIO:
                 *result_unit = XTRACT_UNIT_NONE;
                 *result_min = 0.0;
-                *result_max = 1.0;
+                *result_max = XTRACT_UNBOUNDED_MAX;
                 break;
             case XTRACT_FLATNESS_DB:
                 /* 10*log10(flatness), flatness in (0, 1]: <= 0 dB, no true floor */

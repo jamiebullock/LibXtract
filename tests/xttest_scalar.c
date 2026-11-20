@@ -2985,73 +2985,178 @@ UTEST(scalar, flatness_stability_all_zero)
     ASSERT_EQ(rv, XTRACT_NO_RESULT);
 }
 
-/* The tristimulus features partition harmonic energy into three bands by
- * harmonic number h = round(freq / fundamental): band 1 is h == 1, band 2 is
- * h in {2,3,4}, band 3 is h >= 5. Each is the band energy over the total
- * energy. Input follows the xtract_spectrum() layout: amplitudes in
- * data[0..N/2), frequencies in data[N/2..N). The shared spectrum below has six
- * harmonics of a 100 Hz fundamental with amplitudes {4,3,2,1,5,2}, so the total
- * is 17 and the three bands hold 4, (3+2+1)=6 and (5+2)=7 respectively. */
+/* The tristimulus features divide the sum of the harmonics into three parts
+ * by harmonic number: the first harmonic, the second to the fourth, and the
+ * fifth upwards. The input is the harmonics in order, element 0 the first.
+ * The six harmonics below sum to 17 and the three parts hold 4, 3 + 2 + 1 = 6
+ * and 5 + 2 = 7. */
+static const double TRISTIMULUS_HARMONICS[6] = {4.0, 3.0, 2.0, 1.0, 5.0, 2.0};
 
-UTEST(scalar, tristimulus_1_fundamental_ratio)
+UTEST(scalar, tristimulus_1_is_the_part_of_the_sum_in_the_first_harmonic)
 {
-    double fund = 100.0;
     double result = -1.0;
-    double data[] = {4, 3, 2, 1, 5, 2, 100, 200, 300, 400, 500, 600};
-    int rv = xtract_tristimulus_1(NULL, data, 12, &fund, &result);
-    ASSERT_EQ(rv, XTRACT_SUCCESS);
+
+    ASSERT_EQ(xtract_tristimulus_1(NULL, TRISTIMULUS_HARMONICS, 6, NULL, &result), XTRACT_SUCCESS);
     CHECK_REL(result, 4.0 / 17.0, EPSILON);
 }
 
-UTEST(scalar, tristimulus_1_no_fundamental)
+UTEST(scalar, tristimulus_2_is_the_part_of_the_sum_in_harmonics_two_to_four)
 {
-    /* amplitude at 100 Hz (h == 1) is zero, so band 1 is empty */
-    double fund = 100.0;
     double result = -1.0;
-    double data[] = {0, 3, 2, 1, 5, 2, 100, 200, 300, 400, 500, 600};
-    int rv = xtract_tristimulus_1(NULL, data, 12, &fund, &result);
-    ASSERT_EQ(rv, XTRACT_NO_RESULT);
-    ASSERT_EQ(result, 0.0);
-}
 
-UTEST(scalar, tristimulus_2_mid_ratio)
-{
-    double fund = 100.0;
-    double result = -1.0;
-    double data[] = {4, 3, 2, 1, 5, 2, 100, 200, 300, 400, 500, 600};
-    int rv = xtract_tristimulus_2(NULL, data, 12, &fund, &result);
-    ASSERT_EQ(rv, XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_tristimulus_2(NULL, TRISTIMULUS_HARMONICS, 6, NULL, &result), XTRACT_SUCCESS);
     CHECK_REL(result, 6.0 / 17.0, EPSILON);
 }
 
-UTEST(scalar, tristimulus_2_no_mid_harmonics)
+UTEST(scalar, tristimulus_3_is_the_part_of_the_sum_in_harmonics_five_and_above)
 {
-    double fund = 100.0;
     double result = -1.0;
-    double data[] = {4, 0, 0, 0, 5, 2, 100, 200, 300, 400, 500, 600};
-    int rv = xtract_tristimulus_2(NULL, data, 12, &fund, &result);
-    ASSERT_EQ(rv, XTRACT_NO_RESULT);
-    ASSERT_EQ(result, 0.0);
-}
 
-UTEST(scalar, tristimulus_3_high_ratio)
-{
-    double fund = 100.0;
-    double result = -1.0;
-    double data[] = {4, 3, 2, 1, 5, 2, 100, 200, 300, 400, 500, 600};
-    int rv = xtract_tristimulus_3(NULL, data, 12, &fund, &result);
-    ASSERT_EQ(rv, XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_tristimulus_3(NULL, TRISTIMULUS_HARMONICS, 6, NULL, &result), XTRACT_SUCCESS);
     CHECK_REL(result, 7.0 / 17.0, EPSILON);
 }
 
-UTEST(scalar, tristimulus_3_no_high_harmonics)
+UTEST(scalar, tristimulus_parts_sum_to_one)
 {
-    double fund = 100.0;
+    double t1 = 0.0, t2 = 0.0, t3 = 0.0;
+
+    ASSERT_EQ(xtract_tristimulus_1(NULL, TRISTIMULUS_HARMONICS, 6, NULL, &t1), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_tristimulus_2(NULL, TRISTIMULUS_HARMONICS, 6, NULL, &t2), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_tristimulus_3(NULL, TRISTIMULUS_HARMONICS, 6, NULL, &t3), XTRACT_SUCCESS);
+    CHECK_REL(t1 + t2 + t3, 1.0, EPSILON);
+}
+
+UTEST(scalar, tristimulus_takes_fewer_harmonics_than_a_part_spans)
+{
+    /* Three harmonics: the second part holds the second and third. */
+    double data[] = {4.0, 3.0, 2.0};
     double result = -1.0;
-    double data[] = {4, 3, 2, 1, 0, 0, 100, 200, 300, 400, 500, 600};
-    int rv = xtract_tristimulus_3(NULL, data, 12, &fund, &result);
-    ASSERT_EQ(rv, XTRACT_NO_RESULT);
+
+    ASSERT_EQ(xtract_tristimulus_2(NULL, data, 3, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 5.0 / 9.0, EPSILON);
+
+    ASSERT_EQ(xtract_tristimulus_1(NULL, data, 1, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(result, 1.0);
+}
+
+UTEST(scalar, tristimulus_is_not_changed_by_the_elements_of_0_after_the_harmonics)
+{
+    /* The first half of what xtract_packed() gives for six harmonics in an
+     * array of ten. */
+    double data[] = {4.0, 3.0, 2.0, 1.0, 5.0, 2.0, 0.0, 0.0, 0.0, 0.0};
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_tristimulus_1(NULL, data, 10, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 4.0 / 17.0, EPSILON);
+    ASSERT_EQ(xtract_tristimulus_2(NULL, data, 10, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 6.0 / 17.0, EPSILON);
+    ASSERT_EQ(xtract_tristimulus_3(NULL, data, 10, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 7.0 / 17.0, EPSILON);
+}
+
+UTEST(scalar, tristimulus_gives_no_result_when_its_part_or_the_sum_is_0)
+{
+    double no_fundamental[] = {0.0, 3.0, 2.0, 1.0, 5.0, 2.0};
+    double no_middle[] = {4.0, 0.0, 0.0, 0.0, 5.0, 2.0};
+    double four_harmonics[] = {4.0, 3.0, 2.0, 1.0};
+    double silent[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_tristimulus_1(NULL, no_fundamental, 6, NULL, &result), XTRACT_NO_RESULT);
     ASSERT_EQ(result, 0.0);
+    result = -1.0;
+    ASSERT_EQ(xtract_tristimulus_2(NULL, no_middle, 6, NULL, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
+    result = -1.0;
+    ASSERT_EQ(xtract_tristimulus_3(NULL, four_harmonics, 4, NULL, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
+    result = -1.0;
+    ASSERT_EQ(xtract_tristimulus_1(NULL, silent, 6, NULL, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
+    result = -1.0;
+    ASSERT_EQ(xtract_tristimulus_2(NULL, silent, 6, NULL, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
+    result = -1.0;
+    ASSERT_EQ(xtract_tristimulus_3(NULL, silent, 6, NULL, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
+}
+
+UTEST(scalar, tristimulus_and_odd_even_ratio_reject_an_empty_input)
+{
+    double data[] = {4.0, 3.0};
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_tristimulus_1(NULL, data, 0, NULL, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    result = -1.0;
+    ASSERT_EQ(xtract_tristimulus_2(NULL, data, 0, NULL, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    result = -1.0;
+    ASSERT_EQ(xtract_tristimulus_3(NULL, data, -1, NULL, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    result = -1.0;
+    ASSERT_EQ(xtract_odd_even_ratio(NULL, data, 0, NULL, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+}
+
+/* ===== xtract_odd_even_ratio ===== */
+
+UTEST(scalar, odd_even_ratio_divides_the_odd_harmonics_by_the_even_ones)
+{
+    /* Harmonics 1, 3 and 5: 3.0 + 2.0 + 1.0 = 6.0
+     * Harmonics 2 and 4: 0.5 + 0.25 = 0.75 */
+    double data[] = {3.0, 0.5, 2.0, 0.25, 1.0};
+    double result = 0.0;
+
+    ASSERT_EQ(xtract_odd_even_ratio(NULL, data, 5, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 8.0, EPSILON);
+}
+
+UTEST(scalar, odd_even_ratio_is_not_changed_by_the_elements_of_0_after_the_harmonics)
+{
+    double data[] = {3.0, 0.5, 2.0, 0.25, 1.0, 0.0, 0.0, 0.0};
+    double result = 0.0;
+
+    ASSERT_EQ(xtract_odd_even_ratio(NULL, data, 8, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 8.0, EPSILON);
+}
+
+UTEST(scalar, odd_even_ratio_gives_no_result_when_either_sum_is_0)
+{
+    double one_harmonic[] = {3.0};
+    double no_odd[] = {0.0, 0.5, 0.0, 0.25};
+    double no_even[] = {3.0, 0.0, 2.0, 0.0};
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_odd_even_ratio(NULL, one_harmonic, 1, NULL, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
+    result = -1.0;
+    ASSERT_EQ(xtract_odd_even_ratio(NULL, no_odd, 4, NULL, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
+    result = -1.0;
+    ASSERT_EQ(xtract_odd_even_ratio(NULL, no_even, 4, NULL, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
+}
+
+UTEST(scalar, tristimulus_and_odd_even_ratio_of_a_packed_harmonic_spectrum)
+{
+    /* Bins 100 Hz apart and a fundamental of 200 Hz: harmonics of 1, 0.5
+     * and 0.25 at bins 2, 4 and 6. */
+    double spectrum[16] = {0.0, 0.2, 1.0, 0.2, 0.5, 0.2, 0.25, 0.2,
+                           0.0, 100.0, 200.0, 300.0, 400.0, 500.0, 600.0, 700.0};
+    double harmonics[16], packed[16];
+    double argv[2] = {200.0, 0.2};
+    double result = 0.0;
+
+    ASSERT_EQ(xtract_harmonic_spectrum(NULL, spectrum, 16, argv, harmonics), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_packed(NULL, harmonics, 16, NULL, packed), XTRACT_SUCCESS);
+
+    ASSERT_EQ(xtract_tristimulus_1(NULL, packed, 8, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 1.0 / 1.75, EPSILON);
+    ASSERT_EQ(xtract_tristimulus_2(NULL, packed, 8, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 0.75 / 1.75, EPSILON);
+    ASSERT_EQ(xtract_odd_even_ratio(NULL, packed, 8, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 1.25 / 0.5, EPSILON);
 }
 
 UTEST(scalar, spectral_inharmonicity_harmonic)
@@ -3142,18 +3247,6 @@ UTEST(scalar, peak_below_threshold)
     double threshold = 5.0;
     int rv = xtract_peak(NULL, data, 4, &threshold, &result);
     ASSERT_EQ(rv, XTRACT_NO_RESULT);
-}
-
-UTEST(scalar, harmonic_number_no_ub_on_zero_fundamental)
-{
-    /* The harmonic number round(freq/fund) must not invoke undefined
-     * double->int conversion when fund is 0 (the ratio is infinite); the bin
-     * maps to no finite harmonic, so no fundamental energy is found.
-     * Regression for a fuzzer-found UB in the tristimulus/harmonic features. */
-    double data[] = {1.0, 2.0, 100.0, 200.0}; /* amplitudes, frequencies */
-    double fund0 = 0.0;
-    double result = -1.0;
-    ASSERT_EQ(xtract_tristimulus_1(NULL, data, 4, &fund0, &result), XTRACT_NO_RESULT);
 }
 
 /* ===== Argument contract ===== */
@@ -3296,16 +3389,8 @@ UTEST(scalar, spectral_features_reject_an_odd_or_too_short_input_and_a_null_argv
     ASSERT_REJECTED(xtract_spectral_kurtosis(NULL, data, 3, moments, &result));
     ASSERT_REJECTED(xtract_spectral_kurtosis(NULL, data, 4, NULL, &result));
     ASSERT_REJECTED(xtract_spectral_slope(NULL, data, 3, NULL, &result));
-    ASSERT_REJECTED(xtract_tristimulus_1(NULL, data, 3, &f0, &result));
-    ASSERT_REJECTED(xtract_tristimulus_1(NULL, data, 4, NULL, &result));
-    ASSERT_REJECTED(xtract_tristimulus_2(NULL, data, 3, &f0, &result));
-    ASSERT_REJECTED(xtract_tristimulus_2(NULL, data, 4, NULL, &result));
-    ASSERT_REJECTED(xtract_tristimulus_3(NULL, data, 3, &f0, &result));
-    ASSERT_REJECTED(xtract_tristimulus_3(NULL, data, 4, NULL, &result));
     ASSERT_REJECTED(xtract_spectral_inharmonicity(NULL, data, 3, &f0, &result));
     ASSERT_REJECTED(xtract_spectral_inharmonicity(NULL, data, 4, NULL, &result));
-    ASSERT_REJECTED(xtract_odd_even_ratio(NULL, data, 3, &f0, &result));
-    ASSERT_REJECTED(xtract_odd_even_ratio(NULL, data, 4, NULL, &result));
     ASSERT_REJECTED(xtract_hps(NULL, data, 3, &harmonics, &result));
     ASSERT_REJECTED(xtract_hps(NULL, data, 2, &harmonics, &result));
     ASSERT_REJECTED(xtract_hps(NULL, data, 4, NULL, &result));
@@ -3313,7 +3398,6 @@ UTEST(scalar, spectral_features_reject_an_odd_or_too_short_input_and_a_null_argv
     ASSERT_EQ(xtract_spectral_centroid(NULL, data, 2, NULL, &result), XTRACT_SUCCESS);
     CHECK_REL(result, 2.0, EPSILON);
     ASSERT_EQ(xtract_spectral_variance(NULL, data, 2, moments, &result), XTRACT_SUCCESS);
-    ASSERT_EQ(xtract_tristimulus_1(NULL, data, 2, &f0, &result), XTRACT_NO_RESULT);
 }
 
 UTEST(scalar, spectral_centroid_of_a_silent_spectrum_has_no_result)
@@ -3328,7 +3412,7 @@ UTEST(scalar, spectral_centroid_of_a_silent_spectrum_has_no_result)
     ASSERT_EQ(result, 0.0);
 }
 
-UTEST(scalar, harmonic_features_treat_a_zero_fundamental_as_no_result_and_a_negative_or_infinite_one_as_an_error)
+UTEST(scalar, spectral_inharmonicity_treats_a_zero_fundamental_as_no_result_and_a_negative_or_infinite_one_as_an_error)
 {
     double data[4] = {1.0, 2.0, 100.0, 200.0};
     double zero = 0.0;
@@ -3337,29 +3421,11 @@ UTEST(scalar, harmonic_features_treat_a_zero_fundamental_as_no_result_and_a_nega
     double result;
 
     result = 1.0;
-    ASSERT_EQ(xtract_tristimulus_1(NULL, data, 4, &zero, &result), XTRACT_NO_RESULT);
-    ASSERT_EQ(result, 0.0);
-    result = 1.0;
-    ASSERT_EQ(xtract_tristimulus_2(NULL, data, 4, &zero, &result), XTRACT_NO_RESULT);
-    ASSERT_EQ(result, 0.0);
-    result = 1.0;
-    ASSERT_EQ(xtract_tristimulus_3(NULL, data, 4, &zero, &result), XTRACT_NO_RESULT);
-    ASSERT_EQ(result, 0.0);
-    result = 1.0;
-    ASSERT_EQ(xtract_odd_even_ratio(NULL, data, 4, &zero, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(xtract_spectral_inharmonicity(NULL, data, 4, &zero, &result), XTRACT_NO_RESULT);
     ASSERT_EQ(result, 0.0);
 
-    ASSERT_REJECTED(xtract_tristimulus_1(NULL, data, 4, &negative, &result));
-    ASSERT_REJECTED(xtract_tristimulus_2(NULL, data, 4, &negative, &result));
-    ASSERT_REJECTED(xtract_tristimulus_3(NULL, data, 4, &negative, &result));
     ASSERT_REJECTED(xtract_spectral_inharmonicity(NULL, data, 4, &negative, &result));
-    ASSERT_REJECTED(xtract_odd_even_ratio(NULL, data, 4, &negative, &result));
-
-    ASSERT_REJECTED(xtract_tristimulus_1(NULL, data, 4, &infinite, &result));
-    ASSERT_REJECTED(xtract_tristimulus_2(NULL, data, 4, &infinite, &result));
-    ASSERT_REJECTED(xtract_tristimulus_3(NULL, data, 4, &infinite, &result));
     ASSERT_REJECTED(xtract_spectral_inharmonicity(NULL, data, 4, &infinite, &result));
-    ASSERT_REJECTED(xtract_odd_even_ratio(NULL, data, 4, &infinite, &result));
 }
 
 UTEST(scalar, peak_sets_the_result_to_zero_when_there_is_no_peak)
