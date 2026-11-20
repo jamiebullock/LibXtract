@@ -549,6 +549,64 @@ UTEST(vector, harmonic_spectrum_takes_the_largest_local_maximum_within_the_thres
     }
 }
 
+UTEST(vector, harmonic_spectrum_ranks_local_maxima_by_the_amplitude_of_their_peaks)
+{
+    /* Bins 3 and 5 are local maxima within 0.5 of harmonic 1. Bin 3 holds
+     * the larger coefficient, 1. The peak at bin 5 lies between bins 5 and
+     * 6 and its amplitude is 0.99 + 0.25 * 0.98 * 0.49 = 1.11005. */
+    double amps[HS_M] = {0.0};
+    double data[HS_N], result[HS_N];
+    double argv[2] = {40.0, 0.5};
+
+    amps[3] = 1.0;
+    amps[5] = 0.99;
+    amps[6] = 0.98;
+    hs_spectrum(amps, data);
+    hs_fill(result);
+
+    ASSERT_EQ(xtract_harmonic_spectrum(NULL, data, HS_N, argv, result), XTRACT_SUCCESS);
+
+    ASSERT_EQ(result[3], 0.0);
+    ASSERT_EQ(result[HS_M + 3], 0.0);
+    CHECK_REL(result[5], 1.11005, EPSILON);
+    CHECK_REL(result[HS_M + 5], 54.9, EPSILON);
+}
+
+UTEST(vector, harmonic_spectrum_gives_no_element_to_a_local_maximum_of_a_harmonic_beyond_the_elements)
+{
+    /* The last bin is at 150 Hz. Bin 14, 140 Hz, is a local maximum
+     * within 0.5 of harmonic 4, which is at 160 Hz, more than half a bin
+     * beyond the last. Harmonics 1 to 3 take bins 4, 8 and 12. */
+    double amps[HS_M] = {0.0};
+    double data[HS_N], result[HS_N];
+    double argv[2] = {40.0, 0.5};
+
+    amps[14] = 1.0;
+    hs_spectrum(amps, data);
+    hs_fill(result);
+
+    ASSERT_EQ(xtract_harmonic_spectrum(NULL, data, HS_N, argv, result), XTRACT_SUCCESS);
+
+    ASSERT_EQ(hs_elements(result), 3);
+    ASSERT_EQ(result[14], 0.0);
+    ASSERT_EQ(result[HS_M + 14], 0.0);
+    ASSERT_EQ(result[12], DBL_MIN);
+}
+
+UTEST(vector, harmonic_spectrum_measures_a_local_maximum_of_coefficients_near_the_largest_double)
+{
+    /* Twice the middle coefficient is beyond DBL_MAX. The peak is a sixth
+     * of a bin above 10 Hz with an amplitude of 49/48 of 1e308. */
+    double data[8] = {0.0, 1e308, 5e307, 0.0, 0.0, 10.0, 20.0, 30.0};
+    double result[8];
+    double argv[2] = {10.0, 0.2};
+
+    ASSERT_EQ(xtract_harmonic_spectrum(NULL, data, 8, argv, result), XTRACT_SUCCESS);
+
+    CHECK_REL(result[4 + 1], 10.0 + 10.0 / 6.0, EPSILON);
+    CHECK_REL(result[1], 1e308 * 49.0 / 48.0, EPSILON);
+}
+
 UTEST(vector, harmonic_spectrum_passes_over_a_local_maximum_outside_the_threshold)
 {
     /* The local maximum at bin 6, 60 Hz, is 0.5 of the fundamental from
@@ -2328,6 +2386,20 @@ UTEST(scalar, flatness_of_sparse_constant_data_should_be_1)
     double data[] = {0.0, 0.0, 5.0, 5.0};
     xtract_flatness(NULL, data, 4, NULL, &result);
     CHECK_REL(result, 1.0, 1e-6);
+}
+
+UTEST(vector, peak_spectrum_measures_a_peak_of_coefficients_near_the_largest_double)
+{
+    /* Twice the middle coefficient is beyond DBL_MAX. The peak is a sixth
+     * of a bin above bin 1 with an amplitude of 49/48 of 1e308. */
+    double data[4] = {0.0, 1e308, 5e307, 0.0};
+    double result[8];
+    double argv[2] = {10.0, 0.0};
+
+    ASSERT_EQ(xtract_peak_spectrum(NULL, data, 4, argv, result), XTRACT_SUCCESS);
+
+    CHECK_REL(result[4 + 1], 10.0 + 10.0 / 6.0, EPSILON);
+    CHECK_REL(result[1], 1e308 * 49.0 / 48.0, EPSILON);
 }
 
 UTEST(vector, peak_spectrum_small_peaks_below_threshold_excluded)

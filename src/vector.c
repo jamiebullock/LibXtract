@@ -573,6 +573,16 @@ int xtract_bark_coefficients(xtract_context *ctx, const double *data, const int 
     return XTRACT_SUCCESS;
 }
 
+/* Where the parabola through three neighbouring coefficients has its
+ * vertex, in elements from the middle one, which is the largest. The
+ * halves keep the sums of coefficients near DBL_MAX in range. */
+static double parabola_offset(const double below, const double middle, const double above)
+{
+    const double half_below = .5 * below, half_above = .5 * above;
+
+    return .5 * (half_below - half_above) / (half_below - middle + half_above);
+}
+
 int xtract_peak_spectrum(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
     double threshold, max, y, y2, y3, p, q;
@@ -606,7 +616,11 @@ int xtract_peak_spectrum(xtract_context *ctx, const double *data, const int N, c
         {
             if (data[n] > data[n - 1] && n + 1 < N && data[n] > data[n + 1])
             {
-                result[N + n] = q * (n + (p = .5 * ((y = data[n - 1]) - (y3 = data[n + 1])) / (data[n - 1] - 2 * (y2 = data[n]) + data[n + 1])));
+                y = data[n - 1];
+                y2 = data[n];
+                y3 = data[n + 1];
+                p = parabola_offset(y, y2, y3);
+                result[N + n] = q * (n + p);
                 result[n] = y2 - .25 * (y - y3) * p;
             }
             else
@@ -641,38 +655,41 @@ static double spacing_towards(const double *freqs, const int n, const int M, con
     return freqs[n + 1] - freqs[n];
 }
 
-static void write_element(const double *data, const int M, const int n, double *result)
+/* The amplitude and frequency element n stands for: those of the parabola
+ * through it and its neighbours when it is a local maximum, as
+ * xtract_peak_spectrum() gives a peak, and its own otherwise */
+static void measure_element(const double *data, const int M, const int n, double *amplitude, double *frequency)
 {
     const double *amps = data, *freqs = data + M;
-    double amplitude = amps[n], frequency = freqs[n], below, above, p;
+    double below, above, p;
 
-    if (is_local_maximum(amps, n, M))
-    {
-        below = amps[n - 1];
-        above = amps[n + 1];
-        p = .5 * (below - above) / (below - 2 * amplitude + above);
-        frequency += p * spacing_towards(freqs, n, M, p < 0.0 ? freqs[n - 1] : freqs[n + 1]);
-        amplitude -= .25 * (below - above) * p;
-    }
+    *amplitude = amps[n];
+    *frequency = freqs[n];
 
-    result[n] = amplitude == 0.0 ? DBL_MIN : amplitude;
-    result[M + n] = frequency;
+    if (!is_local_maximum(amps, n, M))
+        return;
+
+    below = amps[n - 1];
+    above = amps[n + 1];
+    p = parabola_offset(below, *amplitude, above);
+    *frequency += p * spacing_towards(freqs, n, M, p < 0.0 ? freqs[n - 1] : freqs[n + 1]);
+    *amplitude -= .25 * (below - above) * p;
 }
 
-/* Gives a harmonic its element: the local maximum found for it, or the
- * element nearest to its frequency when that frequency lies among the
- * elements. Returns whether one was written. */
-static int write_harmonic(const double *data, const int M, const int peak, const int nearest, const double nearest_distance, const double frequency, double *result)
+/* Gives a harmonic whose frequency lies among the elements its element:
+ * the local maximum found for it, or the element nearest to its frequency.
+ * Returns whether one was written. */
+static int write_harmonic(const double *data, const int M, const int peak, const int nearest, const double nearest_distance, const double harmonic_frequency, double *result)
 {
-    const double *freqs = data + M;
-    int chosen = peak;
+    const int chosen = peak >= 0 ? peak : nearest;
+    double amplitude, frequency;
 
-    if (chosen < 0 && nearest_distance <= spacing_towards(freqs, nearest, M, frequency) / 2.0)
-        chosen = nearest;
-    if (chosen < 0)
+    if (nearest_distance > spacing_towards(data + M, nearest, M, harmonic_frequency) / 2.0)
         return 0;
 
-    write_element(data, M, chosen, result);
+    measure_element(data, M, chosen, &amplitude, &frequency);
+    result[chosen] = amplitude == 0.0 ? DBL_MIN : amplitude;
+    result[M + chosen] = frequency;
 
     return 1;
 }
@@ -682,6 +699,7 @@ int xtract_harmonic_spectrum(xtract_context *ctx, const double *data, const int 
     const int M = N >> 1;
     const double *freqs, *amps;
     double f0, threshold, ratio, harmonic, current, distance, nearest_distance;
+    double amplitude, frequency, peak_amplitude;
     int n, peak, nearest, written;
 
     if (N < 2 || (N & 1) || argv == NULL)
@@ -714,7 +732,7 @@ int xtract_harmonic_spectrum(xtract_context *ctx, const double *data, const int 
      * the element closest to the harmonic's own frequency. */
     current = 0.0;
     peak = nearest = -1;
-    nearest_distance = 0.0;
+    nearest_distance = peak_amplitude = 0.0;
     written = 0;
 
     for (n = 0; n < M; n++)
@@ -737,9 +755,15 @@ int xtract_harmonic_spectrum(xtract_context *ctx, const double *data, const int 
             peak = nearest = -1;
         }
 
-        if (fabs(harmonic - ratio) <= threshold && is_local_maximum(amps, n, M) &&
-            (peak < 0 || amps[n] > amps[peak]))
-            peak = n;
+        if (fabs(harmonic - ratio) <= threshold && is_local_maximum(amps, n, M))
+        {
+            measure_element(data, M, n, &amplitude, &frequency);
+            if (peak < 0 || amplitude > peak_amplitude)
+            {
+                peak = n;
+                peak_amplitude = amplitude;
+            }
+        }
 
         distance = fabs(freqs[n] - harmonic * f0);
         if (nearest < 0 || distance < nearest_distance)
