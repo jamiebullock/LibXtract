@@ -66,7 +66,12 @@ static void mark_taken(const double *scratch, const size_t count)
 #endif
 }
 
-/* xtract_autocorrelation_fft() transforms twice the length of its input */
+/* The smallest power of two at or above twice the length, or the largest
+ * power of two an int holds when that is lower. xtract_autocorrelation_fft()
+ * transforms twice the length of its input, and the lags that
+ * xtract_mcleod_f0() scans need a power of two of at least one and a half
+ * times its input, which for a length that is no power of two can be all of
+ * this. */
 static int transform_limit_for(const int max_N)
 {
     int power = 2;
@@ -74,10 +79,10 @@ static int transform_limit_for(const int max_N)
     if (max_N < 2)
         return 0;
 
-    while (power <= max_N / 2)
+    while (power < max_N)
         power *= 2;
 
-    return 2 * power;
+    return power > INT_MAX / 2 ? power : 2 * power;
 }
 
 #ifdef USE_OOURA
@@ -191,7 +196,7 @@ void xtract_context_delete(xtract_context *ctx)
 
 int xtract_transform_limit(const xtract_context *ctx)
 {
-    return ctx->transform_limit;
+    return ctx == NULL ? 0 : ctx->transform_limit;
 }
 
 /* Scratch is handed out as untyped storage: a call may keep doubles in it and

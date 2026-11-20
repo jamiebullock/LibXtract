@@ -30,6 +30,11 @@ void xtract_scratch_return_ints(xtract_context *ctx, int *scratch, const size_t 
     free(scratch);
 }
 
+int xtract_transform_limit(const xtract_context *ctx)
+{
+    return nondet_int();
+}
+
 void xtract_transform(xtract_context *ctx, const int n, const int direction, double *values)
 {
     __CPROVER_havoc_object(values);

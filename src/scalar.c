@@ -1492,6 +1492,122 @@ static void mcleod_nsdf(const double *data, const int N, const int lags, double 
     }
 }
 
+/* The NSDF by one transform of `length` elements, a power of two of at least
+ * N + lags, in work of that many doubles. The autocorrelation of the input
+ * padded with zeros to that length holds r for every lag, and m for a lag
+ * is the sum of the squares of the first N - tau elements and of the last
+ * N - tau. The NSDF takes the place of the autocorrelation from the last
+ * lag down, each element being written after the ones that hold what it
+ * is made from have been read. */
+static void mcleod_nsdf_by_transform(xtract_context *ctx, const double *data, const int N, const int lags, const int length, double *work)
+{
+    double first = 0.0, last = 0.0, scale, r, m;
+    int tau, n;
+#ifdef USE_OOURA
+    memcpy(work, data, N * sizeof(double));
+    memset(work + N, 0, (size_t)(length - N) * sizeof(double));
+    xtract_transform(ctx, length, 1, work);
+
+    for (n = 2; n < length; n += 2)
+    {
+        work[n] = XTRACT_SQ(work[n]) + XTRACT_SQ(work[n + 1]);
+        work[n + 1] = 0.0;
+    }
+    work[0] = XTRACT_SQ(work[0]);
+    work[1] = XTRACT_SQ(work[1]);
+
+    xtract_transform(ctx, length, -1, work);
+
+    /* A forward and an inverse rdft() together scale by length / 2 */
+    scale = 2.0 / length;
+#else
+    DSPDoubleSplitComplex split;
+    double dc, nyquist;
+
+    split.realp = work;
+    split.imagp = work + length / 2;
+    memset(work, 0, (size_t)length * sizeof(double));
+    for (n = 0; n < N; n++)
+    {
+        if (n & 1)
+            split.imagp[n >> 1] = data[n];
+        else
+            split.realp[n >> 1] = data[n];
+    }
+    xtract_transform(ctx, length, FFT_FORWARD, &split);
+
+    dc = split.realp[0];
+    nyquist = split.imagp[0];
+    for (n = 1; n < length / 2; n++)
+    {
+        split.realp[n] = XTRACT_SQ(split.realp[n]) + XTRACT_SQ(split.imagp[n]);
+        split.imagp[n] = 0.0;
+    }
+    split.realp[0] = XTRACT_SQ(dc);
+    split.imagp[0] = XTRACT_SQ(nyquist);
+
+    xtract_transform(ctx, length, FFT_INVERSE, &split);
+
+    /* The forward transform is scaled by 2 relative to the DFT, 4 after
+     * squaring, and the inverse by the length */
+    scale = 1.0 / (4.0 * length);
+#endif
+
+    for (n = 0; n < N - lags; n++)
+        first += XTRACT_SQ(data[n]);
+    for (n = lags; n < N; n++)
+        last += XTRACT_SQ(data[n]);
+
+    for (tau = lags; tau >= 0; tau--)
+    {
+        if (tau < lags)
+        {
+            first += XTRACT_SQ(data[N - tau - 1]);
+            last += XTRACT_SQ(data[tau]);
+        }
+
+#ifdef USE_OOURA
+        r = scale * work[tau];
+#else
+        r = scale * ((tau & 1) ? split.imagp[tau >> 1] : split.realp[tau >> 1]);
+#endif
+        m = first + last;
+        work[tau] = (m > 0.0) ? 2.0 * r / m : 0.0;
+    }
+}
+
+/* Takes scratch that holds the NSDF of data at lags 0 to `lags` in its
+ * first elements, and gives the number of doubles taken in *taken. The
+ * transform is used when the context serves its length and has that much
+ * scratch free, and the sums over every lag otherwise. */
+static double *mcleod_nsdf_take(xtract_context *ctx, const double *data, const int N, const int lags, size_t *taken)
+{
+    const int limit = xtract_transform_limit(ctx);
+    double *nsdf;
+    int length = 2;
+
+    while (length < N + lags && length < limit)
+        length *= 2;
+
+    if (length >= N + lags && length <= limit)
+    {
+        *taken = (size_t)length;
+        nsdf = xtract_scratch_take(ctx, N, *taken);
+        if (nsdf != NULL)
+        {
+            mcleod_nsdf_by_transform(ctx, data, N, lags, length, nsdf);
+            return nsdf;
+        }
+    }
+
+    *taken = (size_t)lags + 1;
+    nsdf = xtract_scratch_take(ctx, N, *taken);
+    if (nsdf != NULL)
+        mcleod_nsdf(data, N, lags, nsdf);
+
+    return nsdf;
+}
+
 /* Key maxima (McLeod and Wyvill 2005): each positive region of the NSDF,
  * from a positively sloped zero crossing to the next negatively sloped one,
  * contributes its highest sample. The lag at tau = 0 lies before the first
@@ -1560,6 +1676,7 @@ int xtract_mcleod_f0(xtract_context *ctx, const double *data, const int N, const
 {
     double sr;
     double *nsdf;
+    size_t taken;
     int lags, best_tau;
     double offset, height;
 
@@ -1577,16 +1694,14 @@ int xtract_mcleod_f0(xtract_context *ctx, const double *data, const int N, const
     }
 
     lags = mcleod_lags(N);
-    nsdf = xtract_scratch_take(ctx, N, (size_t)lags + 1);
+    nsdf = mcleod_nsdf_take(ctx, data, N, lags, &taken);
     if (nsdf == NULL)
         return XTRACT_BAD_STATE;
-
-    mcleod_nsdf(data, N, lags, nsdf);
 
     if (!mcleod_pitch_peak(nsdf, lags, &best_tau))
     {
         *result = 0.0;
-        xtract_scratch_return(ctx, nsdf, (size_t)lags + 1);
+        xtract_scratch_return(ctx, nsdf, taken);
         return XTRACT_NO_RESULT;
     }
 
@@ -1594,7 +1709,7 @@ int xtract_mcleod_f0(xtract_context *ctx, const double *data, const int N, const
 
     *result = sr / (best_tau + offset);
 
-    xtract_scratch_return(ctx, nsdf, (size_t)lags + 1);
+    xtract_scratch_return(ctx, nsdf, taken);
 
     return XTRACT_SUCCESS;
 }
@@ -2268,6 +2383,7 @@ int xtract_periodicity(xtract_context *ctx, const double *data, const int N, con
 {
     double *nsdf;
     double highest;
+    size_t taken;
     int lags, found;
 
     if (N < 1)
@@ -2277,13 +2393,11 @@ int xtract_periodicity(xtract_context *ctx, const double *data, const int N, con
     }
 
     lags = mcleod_lags(N);
-    nsdf = xtract_scratch_take(ctx, N, (size_t)lags + 1);
+    nsdf = mcleod_nsdf_take(ctx, data, N, lags, &taken);
     if (nsdf == NULL)
         return XTRACT_BAD_STATE;
-
-    mcleod_nsdf(data, N, lags, nsdf);
     found = mcleod_highest_key_maximum(nsdf, lags, &highest);
-    xtract_scratch_return(ctx, nsdf, (size_t)lags + 1);
+    xtract_scratch_return(ctx, nsdf, taken);
 
     if (!found)
     {
@@ -2300,6 +2414,7 @@ int xtract_signal_confidence(xtract_context *ctx, const double *data, const int 
 {
     double *nsdf;
     double height;
+    size_t taken;
     int lags, peak, found;
 
     if (N < 1)
@@ -2309,14 +2424,12 @@ int xtract_signal_confidence(xtract_context *ctx, const double *data, const int 
     }
 
     lags = mcleod_lags(N);
-    nsdf = xtract_scratch_take(ctx, N, (size_t)lags + 1);
+    nsdf = mcleod_nsdf_take(ctx, data, N, lags, &taken);
     if (nsdf == NULL)
         return XTRACT_BAD_STATE;
-
-    mcleod_nsdf(data, N, lags, nsdf);
     found = mcleod_pitch_peak(nsdf, lags, &peak);
     height = found ? mcleod_peak_height(nsdf, peak) : 0.0;
-    xtract_scratch_return(ctx, nsdf, (size_t)lags + 1);
+    xtract_scratch_return(ctx, nsdf, taken);
 
     if (!found)
     {
