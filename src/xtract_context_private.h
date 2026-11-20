@@ -30,7 +30,7 @@ int *xtract_scratch_take_ints(xtract_context *ctx, const int N, const size_t cou
 /** \brief Give back the count ints at scratch, on the terms of xtract_scratch_return() */
 void xtract_scratch_return_ints(xtract_context *ctx, int *scratch, const size_t count);
 
-/** \brief The longest transform the context serves: twice the largest power of two no greater than the length it was created for, or 0 when that length is below 2 */
+/** \brief The longest transform the context serves: the smallest power of two at or above twice the length it was created for (the largest power of two an int holds, when that is lower), or 0 when that length is below 2 or there is no context */
 int xtract_transform_limit(const xtract_context *ctx);
 
 #ifdef USE_OOURA

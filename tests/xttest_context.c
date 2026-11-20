@@ -175,10 +175,10 @@ UTEST(context, wavelet_f0_holds_no_scratch_after_a_caller_left_room_for_only_par
     xtract_context_delete(ctx);
 }
 
-UTEST(context, serves_transforms_up_to_twice_the_largest_power_of_two_within_its_size)
+UTEST(context, serves_transforms_up_to_the_power_of_two_at_or_above_twice_its_size)
 {
-    static const int sizes[] = {0, 1, 2, 3, 4, 7, 8, 1000, 1024, 1025};
-    static const int limits[] = {0, 0, 4, 4, 8, 8, 16, 1024, 2048, 2048};
+    static const int sizes[] = {0, 1, 2, 3, 4, 5, 7, 8, 9, 1000, 1024, 1025};
+    static const int limits[] = {0, 0, 4, 8, 8, 16, 16, 16, 32, 2048, 2048, 4096};
     xtract_context *ctx;
     size_t i;
 
@@ -316,5 +316,246 @@ UTEST(context, transforms_of_different_lengths_can_alternate)
     transform_of_signal(ctx, LONGEST, other);
     transform_of_signal(ctx, 64, again);
     ASSERT_EQ(memcmp(first, again, 64 * sizeof(double)), 0);
+    xtract_context_delete(ctx);
+}
+
+/* xtract_periodicity(), xtract_signal_confidence() and xtract_mcleod_f0()
+ * compute one function of the lags by a transform, and by sums over every
+ * lag when the context has too little scratch free for the transform. The
+ * second call of each pair below is made while all but the scratch the sums
+ * need is held, so it takes that route. */
+enum
+{
+    LAGS_LONGEST = 1500
+};
+
+static void lags_signal(const int kind, const int N, double *data)
+{
+    unsigned long long state = 88172645463325252ULL + (unsigned)kind;
+    int n;
+
+    for (n = 0; n < N; n++)
+    {
+        state ^= state << 13;
+        state ^= state >> 7;
+        state ^= state << 17;
+        data[n] = (double)(state >> 11) / 9007199254740992.0 - 0.5;
+        if (kind == 1)
+            data[n] = sin(2.0 * M_PI * n / 37.3);
+        if (kind == 2)
+            data[n] = sin(2.0 * M_PI * n / 50.0) + 0.4 * sin(2.0 * M_PI * n / 12.5) + 0.1 * data[n];
+    }
+}
+
+UTEST(context, the_transform_and_the_sums_over_every_lag_give_one_periodicity_confidence_and_pitch)
+{
+    static const int sizes[] = {2, 3, 5, 64, 1000, 1024, 1366, 1367, LAGS_LONGEST};
+    static double data[LAGS_LONGEST];
+    int (*const features[3])(xtract_context *, const double *, const int, const void *, double *) = {
+        xtract_periodicity, xtract_signal_confidence, xtract_mcleod_f0};
+    double sample_rate = 44100.0;
+    size_t i;
+    int kind, f;
+
+    for (i = 0; i < sizeof(sizes) / sizeof(sizes[0]); i++)
+    {
+        const int N = sizes[i];
+        const size_t lags_and_one = (size_t)(N / 2 + 1 < N - 1 ? N / 2 + 1 : N - 1) + 1;
+        const size_t rest = 3 * (size_t)N - lags_and_one;
+        xtract_context *ctx = xtract_context_new(N);
+
+        ASSERT_TRUE(ctx != NULL);
+        for (kind = 0; kind < 3; kind++)
+        {
+            lags_signal(kind, N, data);
+            for (f = 0; f < 3; f++)
+            {
+                double by_transform = -1.0, by_sums = -2.0;
+                double *held;
+                int rv_transform, rv_sums;
+
+                rv_transform = features[f](ctx, data, N, &sample_rate, &by_transform);
+
+                held = xtract_scratch_take(ctx, N, rest);
+                ASSERT_TRUE(held != NULL);
+                rv_sums = features[f](ctx, data, N, &sample_rate, &by_sums);
+                xtract_scratch_return(ctx, held, rest);
+
+                ASSERT_EQ(rv_transform, rv_sums);
+                CHECK_NEAR(by_transform, by_sums, 1e-9 * fmax(1.0, fabs(by_sums)));
+            }
+        }
+        xtract_context_delete(ctx);
+    }
+}
+
+/* The periodicity of a series by the transform and by the sums over every
+ * lag, the second taken while the context has no scratch free for the
+ * transform */
+static void periodicity_by_both_routes(const double *data, const int N, double *by_transform, double *by_sums, int *rv_transform, int *rv_sums)
+{
+    xtract_context *ctx = xtract_context_new(N);
+    const size_t rest = 3 * (size_t)N - (size_t)(N / 2 + 2);
+    double *held;
+
+    *rv_transform = xtract_periodicity(ctx, data, N, NULL, by_transform);
+
+    held = xtract_scratch_take(ctx, N, rest);
+    *rv_sums = held != NULL ? xtract_periodicity(ctx, data, N, NULL, by_sums) : XTRACT_BAD_STATE;
+    xtract_scratch_return(ctx, held, rest);
+
+    xtract_context_delete(ctx);
+}
+
+UTEST(context, the_lags_take_elements_whose_squares_are_near_the_largest_double_or_beyond_it)
+{
+    /* At 1e153 the sum of the 32 squares is in range and the square of
+     * the sum of the 32 elements is not. At 1e200 no square is. The
+     * series repeats every four elements either way. */
+    enum
+    {
+        N = 64
+    };
+    static const double sizes[2] = {1e153, 1e200};
+    double data[N];
+    double by_transform, by_sums;
+    int rv_transform, rv_sums, n, i;
+
+    for (i = 0; i < 2; i++)
+    {
+        for (n = 0; n < N; n++)
+            data[n] = (n & 1) ? 0.0 : ((n & 2) ? -sizes[i] : sizes[i]);
+        by_transform = by_sums = 0.0;
+
+        periodicity_by_both_routes(data, N, &by_transform, &by_sums, &rv_transform, &rv_sums);
+
+        ASSERT_EQ(rv_transform, XTRACT_SUCCESS);
+        ASSERT_EQ(rv_sums, XTRACT_SUCCESS);
+        CHECK_NEAR(by_sums, 1.0, 1e-9);
+        CHECK_NEAR(by_transform, 1.0, 1e-9);
+    }
+}
+
+UTEST(context, the_lags_take_elements_whose_squares_are_near_the_smallest_double_or_below_it)
+{
+    /* Two equal elements half the series apart. At 2^-511 their squares
+     * are the smallest normal doubles, and at 1e-200 they are 0. */
+    enum
+    {
+        N = 64
+    };
+    double sizes[2];
+    double data[N] = {0.0};
+    double by_transform, by_sums;
+    int rv_transform, rv_sums, i;
+
+    sizes[0] = ldexp(1.0 + ldexp(1.0, -23), -511);
+    sizes[1] = 1e-200;
+
+    for (i = 0; i < 2; i++)
+    {
+        data[0] = data[N / 2] = sizes[i];
+        by_transform = by_sums = 0.0;
+
+        periodicity_by_both_routes(data, N, &by_transform, &by_sums, &rv_transform, &rv_sums);
+
+        ASSERT_EQ(rv_transform, XTRACT_SUCCESS);
+        ASSERT_EQ(rv_sums, XTRACT_SUCCESS);
+        CHECK_NEAR(by_sums, 1.0, 1e-12);
+        CHECK_NEAR(by_transform, 1.0, 1e-12);
+    }
+}
+
+UTEST(context, the_lags_of_a_series_of_subnormal_elements_or_with_one_that_is_not_finite_are_the_same_by_both_routes)
+{
+    enum
+    {
+        N = 64
+    };
+    double data[N];
+    double by_transform, by_sums;
+    int rv_transform, rv_sums, n;
+
+    for (n = 0; n < N; n++)
+        data[n] = (n & 1) ? 0.0 : ((n & 2) ? -4e-320 : 4e-320);
+    by_transform = by_sums = 0.0;
+    periodicity_by_both_routes(data, N, &by_transform, &by_sums, &rv_transform, &rv_sums);
+    ASSERT_EQ(rv_transform, XTRACT_SUCCESS);
+    ASSERT_EQ(rv_sums, XTRACT_SUCCESS);
+    CHECK_NEAR(by_sums, 1.0, 1e-9);
+    CHECK_NEAR(by_transform, 1.0, 1e-9);
+
+    data[5] = INFINITY;
+    periodicity_by_both_routes(data, N, &by_transform, &by_sums, &rv_transform, &rv_sums);
+    ASSERT_EQ(rv_transform, rv_sums);
+}
+
+UTEST(context, a_series_with_no_product_of_two_elements_at_any_lag_has_no_periodicity_by_both_routes)
+{
+    /* One element; two further apart than the last lag; three of one sign
+     * at the start, whose lags fall to 0 and never rise again. */
+    static const int sizes[] = {8, 64, 100, 1000, 1024};
+    double data[1024];
+    double by_transform, by_sums;
+    int rv_transform, rv_sums, kind;
+    size_t i;
+
+    for (i = 0; i < sizeof(sizes) / sizeof(sizes[0]); i++)
+    {
+        const int N = sizes[i];
+
+        for (kind = 0; kind < 3; kind++)
+        {
+            memset(data, 0, sizeof(data));
+            if (kind == 0)
+                data[N / 3] = 0.7;
+            else if (kind == 1)
+            {
+                data[1] = 0.37;
+                data[N - 2] = -0.91;
+            }
+            else
+            {
+                data[0] = 0.1;
+                data[1] = 0.4;
+                data[2] = 0.7;
+            }
+            by_transform = by_sums = 1.0;
+
+            periodicity_by_both_routes(data, N, &by_transform, &by_sums, &rv_transform, &rv_sums);
+
+            ASSERT_EQ(rv_transform, XTRACT_NO_RESULT);
+            ASSERT_EQ(rv_sums, XTRACT_NO_RESULT);
+            ASSERT_EQ(by_transform, 0.0);
+            ASSERT_EQ(by_sums, 0.0);
+        }
+    }
+}
+
+UTEST(context, the_lags_of_a_length_that_is_no_power_of_two_are_served_by_its_own_context)
+{
+    /* 1367 elements and 684 lags need a transform of 4096, four times the
+     * largest power of two below 1367. The call is made while 5 of the
+     * 4101 doubles of scratch are held, which leaves the 4096 the
+     * transform works in. */
+    enum
+    {
+        N = 1367
+    };
+    static double data[N];
+    xtract_context *ctx = xtract_context_new(N);
+    double result = 0.0;
+    double *held;
+
+    ASSERT_TRUE(ctx != NULL);
+    ASSERT_EQ(xtract_transform_limit(ctx), 4096);
+
+    lags_signal(1, N, data);
+    held = xtract_scratch_take(ctx, N, 3 * (size_t)N - 4096);
+    ASSERT_TRUE(held != NULL);
+    ASSERT_EQ(xtract_periodicity(ctx, data, N, NULL, &result), XTRACT_SUCCESS);
+    CHECK_NEAR(result, 1.0, 1e-3);
+    xtract_scratch_return(ctx, held, 3 * (size_t)N - 4096);
+
     xtract_context_delete(ctx);
 }
