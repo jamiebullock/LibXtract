@@ -1498,8 +1498,30 @@ static double mcleod_unit_scale(const double *data, const int N)
     return ldexp(1.0, exponent < DBL_MIN_EXP ? -DBL_MIN_EXP : -exponent);
 }
 
+/* The size at or below which the cross term of a lag counts as 0: 4 N
+ * DBL_EPSILON of the sum of the squares of the elements. A cross term that
+ * is 0 comes out of a transform, which is of fewer than 4 N elements, with
+ * a rounding residue of either sign well within that, and a lobe of the
+ * NSDF made of such residues is no period of the input. */
+static double mcleod_rounding(const double *data, const int N, const double unit)
+{
+    double energy = 0.0;
+    int n;
+
+    for (n = 0; n < N; n++)
+        energy += XTRACT_SQ(unit * data[n]);
+
+    return 4.0 * N * DBL_EPSILON * energy;
+}
+
+static double mcleod_nsdf_of(const double r, const double m, const double rounding)
+{
+    return (m > 0.0 && !(fabs(r) <= rounding)) ? 2.0 * r / m : 0.0;
+}
+
 static void mcleod_nsdf(const double *data, const int N, const int lags, const double unit, double *nsdf)
 {
+    const double rounding = mcleod_rounding(data, N, unit);
     int tau, n;
 
     for (tau = 0; tau <= lags; tau++)
@@ -1514,7 +1536,7 @@ static void mcleod_nsdf(const double *data, const int N, const int lags, const d
             r_tau += a * b;
             m_tau += a * a + b * b;
         }
-        nsdf[tau] = (m_tau > 0.0) ? 2.0 * r_tau / m_tau : 0.0;
+        nsdf[tau] = mcleod_nsdf_of(r_tau, m_tau, rounding);
     }
 }
 
@@ -1527,7 +1549,8 @@ static void mcleod_nsdf(const double *data, const int N, const int lags, const d
  * is made from have been read. */
 static void mcleod_nsdf_by_transform(xtract_context *ctx, const double *data, const int N, const int lags, const double unit, const int length, double *work)
 {
-    double first = 0.0, last = 0.0, scale, r, m;
+    const double rounding = mcleod_rounding(data, N, unit);
+    double first = 0.0, last = 0.0, scale, r;
     int tau, n;
 #ifdef USE_OOURA
     for (n = 0; n < N; n++)
@@ -1598,8 +1621,7 @@ static void mcleod_nsdf_by_transform(xtract_context *ctx, const double *data, co
 #else
         r = scale * ((tau & 1) ? split.imagp[tau >> 1] : split.realp[tau >> 1]);
 #endif
-        m = first + last;
-        work[tau] = (m > 0.0) ? 2.0 * r / m : 0.0;
+        work[tau] = mcleod_nsdf_of(r, first + last, rounding);
     }
 }
 

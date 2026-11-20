@@ -490,6 +490,48 @@ UTEST(context, the_lags_of_a_series_of_subnormal_elements_or_with_one_that_is_no
     ASSERT_EQ(rv_transform, rv_sums);
 }
 
+UTEST(context, a_series_with_no_product_of_two_elements_at_any_lag_has_no_periodicity_by_both_routes)
+{
+    /* One element; two further apart than the last lag; three of one sign
+     * at the start, whose lags fall to 0 and never rise again. */
+    static const int sizes[] = {8, 64, 100, 1000, 1024};
+    double data[1024];
+    double by_transform, by_sums;
+    int rv_transform, rv_sums, kind;
+    size_t i;
+
+    for (i = 0; i < sizeof(sizes) / sizeof(sizes[0]); i++)
+    {
+        const int N = sizes[i];
+
+        for (kind = 0; kind < 3; kind++)
+        {
+            memset(data, 0, sizeof(data));
+            if (kind == 0)
+                data[N / 3] = 0.7;
+            else if (kind == 1)
+            {
+                data[1] = 0.37;
+                data[N - 2] = -0.91;
+            }
+            else
+            {
+                data[0] = 0.1;
+                data[1] = 0.4;
+                data[2] = 0.7;
+            }
+            by_transform = by_sums = 1.0;
+
+            periodicity_by_both_routes(data, N, &by_transform, &by_sums, &rv_transform, &rv_sums);
+
+            ASSERT_EQ(rv_transform, XTRACT_NO_RESULT);
+            ASSERT_EQ(rv_sums, XTRACT_NO_RESULT);
+            ASSERT_EQ(by_transform, 0.0);
+            ASSERT_EQ(by_sums, 0.0);
+        }
+    }
+}
+
 UTEST(context, the_lags_of_a_length_that_is_no_power_of_two_are_served_by_its_own_context)
 {
     /* 1367 elements and 684 lags need a transform of 4096, four times the
