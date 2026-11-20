@@ -2012,6 +2012,19 @@ UTEST(scalar, spectral_slope_counts_a_first_element_that_is_0_in_both_halves)
     CHECK_REL(result, 1.0 / 400.0, 1e-9);
 }
 
+UTEST(scalar, spectral_slope_of_frequencies_that_are_large_beside_their_spread)
+{
+    /* Two points 2^-13 Hz apart at 16384 Hz. The sum of the squares of
+     * the frequencies cannot hold their spread; their deviations from the
+     * mean can. slope = (1/3) * (d/2) / (d^2/2) = 1 / (3d) = 8192 / 3 */
+    double data[] = {1.0, 2.0, 0.0,
+                     16384.0, 16384.0001220703125, 0.0};
+    double result = 0.0;
+
+    ASSERT_EQ(xtract_spectral_slope(NULL, data, 6, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 8192.0 / 3.0, 1e-9);
+}
+
 UTEST(scalar, spectral_slope_of_one_point_after_the_empty_elements_gives_no_result)
 {
     double data[] = {2.0, 0.0, 0.0,

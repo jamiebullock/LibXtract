@@ -1038,16 +1038,24 @@ int xtract_sharpness(xtract_context *ctx, const double *data, const int N, const
     return XTRACT_SUCCESS;
 }
 
+/* An element after the first that is 0 in both halves holds no point. The
+ * first is the bin at 0 Hz of a spectrum, which may have a coefficient
+ * of 0. */
+static int slope_has_point(const double *amps, const double *freqs, const int n)
+{
+    return n == 0 || freqs[n] != 0.0 || amps[n] != 0.0;
+}
+
 int xtract_spectral_slope(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
+    const int M = N >> 1;
     const double *freqs, *amps;
-    double f, a,
-        F, A, FA, FXTRACT_SQ; /* sums of freqs, amps, freq * amps, freq squared */
-    double temp, points;
+    double points, mean, deviation;
+    double F, A;           /* sums of the frequencies and of the coefficients */
+    double FA, FXTRACT_SQ; /* sums of deviation * coefficient and of deviation squared */
     int n;
 
     F = A = FA = FXTRACT_SQ = points = 0.0;
-    n = N >> 1;
 
     if (N < 2 || (N & 1))
     {
@@ -1056,35 +1064,40 @@ int xtract_spectral_slope(xtract_context *ctx, const double *data, const int N, 
     }
 
     amps = data;
-    freqs = data + n;
+    freqs = data + M;
 
-    while (n--)
+    for (n = 0; n < M; n++)
     {
-        f = freqs[n];
-        a = amps[n];
-
-        /* An element after the first that is 0 in both halves holds no
-         * point. The first is the bin at 0 Hz of a spectrum, which may
-         * have a coefficient of 0. */
-        if (n > 0 && f == 0.0 && a == 0.0)
+        if (!slope_has_point(amps, freqs, n))
             continue;
 
         points += 1.0;
-        F += f;
-        A += a;
-        FA += f * a;
-        FXTRACT_SQ += f * f;
+        F += freqs[n];
+        A += amps[n];
     }
 
-    temp = points * FXTRACT_SQ - F * F;
+    /* The deviations are taken from the mean before they are multiplied:
+     * frequencies that are large beside their spread lose that spread in
+     * sums of their squares */
+    mean = F / points;
 
-    if (A == 0 || temp == 0)
+    for (n = 0; n < M; n++)
+    {
+        if (!slope_has_point(amps, freqs, n))
+            continue;
+
+        deviation = freqs[n] - mean;
+        FA += deviation * amps[n];
+        FXTRACT_SQ += deviation * deviation;
+    }
+
+    if (A == 0 || FXTRACT_SQ == 0)
     {
         *result = 0.0;
         return XTRACT_NO_RESULT;
     }
 
-    *result = (1.0 / A) * (points * FA - F * A) / temp;
+    *result = (1.0 / A) * FA / FXTRACT_SQ;
 
     return XTRACT_SUCCESS;
 }
