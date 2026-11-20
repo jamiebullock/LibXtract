@@ -188,7 +188,7 @@ int main(void)
 
         argd[0] = f0;
         argd[1] = .3; /* harmonic threshold */
-        xtract[XTRACT_HARMONIC_SPECTRUM](NULL, peaks, BLOCKSIZE, argd, harmonics);
+        xtract[XTRACT_HARMONIC_SPECTRUM](NULL, spectrum, BLOCKSIZE, argd, harmonics);
 
         /* compute the MFCCs from the power spectrum taken above */
         xtract_mfcc(ctx, power_spectrum, BLOCKSIZE >> 1, mel_filters, mfccs);

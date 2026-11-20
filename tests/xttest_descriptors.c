@@ -250,6 +250,19 @@ UTEST(descriptors, argv_ranges_match_the_functions)
     ASSERT_EQ(xtract_free_descriptors(fd), XTRACT_SUCCESS);
 }
 
+UTEST(descriptors, harmonic_spectrum_takes_a_spectrum_and_gives_one)
+{
+    xtract_function_descriptor_t *fd = xtract_make_descriptors();
+    ASSERT_TRUE(fd != NULL);
+
+    ASSERT_EQ(fd[XTRACT_HARMONIC_SPECTRUM].data.format, XTRACT_SPECTRAL);
+    ASSERT_EQ(fd[XTRACT_HARMONIC_SPECTRUM].data.unit, XTRACT_ANY_AMPLITUDE_HERTZ);
+    ASSERT_EQ(fd[XTRACT_HARMONIC_SPECTRUM].result.vector.format, XTRACT_SPECTRAL);
+    ASSERT_EQ(fd[XTRACT_HARMONIC_SPECTRUM].result.vector.unit, XTRACT_ANY_AMPLITUDE_HERTZ);
+
+    xtract_free_descriptors(fd);
+}
+
 UTEST(descriptors, appended_features_are_fully_described)
 {
     xtract_function_descriptor_t *fd = xtract_make_descriptors();

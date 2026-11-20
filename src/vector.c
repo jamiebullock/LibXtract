@@ -625,12 +625,64 @@ int xtract_peak_spectrum(xtract_context *ctx, const double *data, const int N, c
     return XTRACT_SUCCESS;
 }
 
+static int is_local_maximum(const double *amps, const int n, const int M)
+{
+    return n >= 1 && n + 1 < M && amps[n] > amps[n - 1] && amps[n] > amps[n + 1];
+}
+
+/* The spacing of the elements on the side of element n that a frequency
+ * of `towards` lies on, or 0 when element n has no neighbour */
+static double spacing_towards(const double *freqs, const int n, const int M, const double towards)
+{
+    if (M < 2)
+        return 0.0;
+    if ((towards < freqs[n] && n > 0) || n + 1 == M)
+        return freqs[n] - freqs[n - 1];
+    return freqs[n + 1] - freqs[n];
+}
+
+static void write_element(const double *data, const int M, const int n, double *result)
+{
+    const double *amps = data, *freqs = data + M;
+    double amplitude = amps[n], frequency = freqs[n], below, above, p;
+
+    if (is_local_maximum(amps, n, M))
+    {
+        below = amps[n - 1];
+        above = amps[n + 1];
+        p = .5 * (below - above) / (below - 2 * amplitude + above);
+        frequency += p * spacing_towards(freqs, n, M, p < 0.0 ? freqs[n - 1] : freqs[n + 1]);
+        amplitude -= .25 * (below - above) * p;
+    }
+
+    result[n] = amplitude == 0.0 ? DBL_MIN : amplitude;
+    result[M + n] = frequency;
+}
+
+/* Gives a harmonic its element: the local maximum found for it, or the
+ * element nearest to its frequency when that frequency lies among the
+ * elements. Returns whether one was written. */
+static int write_harmonic(const double *data, const int M, const int peak, const int nearest, const double nearest_distance, const double frequency, double *result)
+{
+    const double *freqs = data + M;
+    int chosen = peak;
+
+    if (chosen < 0 && nearest_distance <= spacing_towards(freqs, nearest, M, frequency) / 2.0)
+        chosen = nearest;
+    if (chosen < 0)
+        return 0;
+
+    write_element(data, M, chosen, result);
+
+    return 1;
+}
+
 int xtract_harmonic_spectrum(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
     const int M = N >> 1;
     const double *freqs, *amps;
-    double f0, threshold, amplitude, frequency, ratio, harmonic, kept_harmonic;
-    int n, kept;
+    double f0, threshold, ratio, harmonic, current, distance, nearest_distance;
+    int n, peak, nearest, written;
 
     if (N < 2 || (N & 1) || argv == NULL)
         return XTRACT_ARGUMENT_ERROR;
@@ -643,54 +695,67 @@ int xtract_harmonic_spectrum(xtract_context *ctx, const double *data, const int 
     if (!isfinite(f0) || f0 < 0.0 || !(threshold >= 0.0 && threshold <= 1.0))
         return XTRACT_ARGUMENT_ERROR;
 
-    frequency = 0.0;
+    if (!(freqs[0] >= 0.0) || !isfinite(freqs[M - 1]))
+        return XTRACT_ARGUMENT_ERROR;
+    for (n = 1; n < M; n++)
+    {
+        if (!(freqs[n] > freqs[n - 1]))
+            return XTRACT_ARGUMENT_ERROR;
+    }
+
+    memset(result, 0, N * sizeof(double));
+
+    if (f0 == 0.0)
+        return XTRACT_NO_RESULT;
+
+    /* The frequencies ascend, so the elements nearest to one harmonic
+     * number follow one another. `current` is the number being gathered,
+     * `peak` its largest local maximum within the threshold and `nearest`
+     * the element closest to the harmonic's own frequency. */
+    current = 0.0;
+    peak = nearest = -1;
+    nearest_distance = 0.0;
+    written = 0;
+
     for (n = 0; n < M; n++)
     {
-        if (freqs[n])
+        ratio = freqs[n] / f0;
+        harmonic = round(ratio);
+        if (harmonic < 1.0)
+            continue;
+
+        if (harmonic != current)
         {
-            if (!(freqs[n] >= frequency))
-                return XTRACT_ARGUMENT_ERROR;
-            frequency = freqs[n];
+            /* Every harmonic below the highest needs an element of its own */
+            if (harmonic != current + 1.0)
+                break;
+            if (current >= 1.0 && !write_harmonic(data, M, peak, nearest, nearest_distance, current * f0, result))
+                break;
+
+            written = current >= 1.0;
+            current = harmonic;
+            peak = nearest = -1;
+        }
+
+        if (fabs(harmonic - ratio) <= threshold && is_local_maximum(amps, n, M) &&
+            (peak < 0 || amps[n] > amps[peak]))
+            peak = n;
+
+        distance = fabs(freqs[n] - harmonic * f0);
+        if (nearest < 0 || distance < nearest_distance)
+        {
+            nearest = n;
+            nearest_distance = distance;
         }
     }
 
-    if (f0 == 0.0)
+    if (n == M && current >= 1.0 && write_harmonic(data, M, peak, nearest, nearest_distance, current * f0, result))
+        written = 1;
+
+    if (n < M || !written)
     {
         memset(result, 0, N * sizeof(double));
         return XTRACT_NO_RESULT;
-    }
-
-    /* The frequencies do not descend, so the peaks nearest to one harmonic
-     * number follow one another, and the one kept so far for that number is
-     * the only one a later peak can displace. */
-    kept = -1;
-    kept_harmonic = 0.0;
-
-    for (n = 0; n < M; n++)
-    {
-        amplitude = amps[n];
-        frequency = freqs[n];
-        result[n] = result[M + n] = 0.0;
-
-        if (!frequency)
-            continue;
-
-        ratio = frequency / f0;
-        harmonic = round(ratio);
-        if (!(harmonic >= 1.0 && fabs(harmonic - ratio) <= threshold))
-            continue;
-
-        if (kept >= 0 && harmonic == kept_harmonic)
-        {
-            if (amplitude <= result[kept])
-                continue;
-            result[kept] = result[M + kept] = 0.0;
-        }
-
-        result[n] = amplitude;
-        result[M + n] = frequency;
-        kept = n;
-        kept_harmonic = harmonic;
     }
 
     return XTRACT_SUCCESS;
