@@ -4,6 +4,9 @@
  * SPDX-License-Identifier: Zlib
  */
 
+#include <math.h>
+#include <stdlib.h>
+
 #include "xtract/libxtract.h"
 
 #include "xttest_approx.h"
@@ -136,10 +139,10 @@ UTEST(descriptors, a_variance_is_in_the_square_of_the_unit_it_is_taken_of)
     }
 
     /* A standard deviation is in the unit its variance is the square of. */
-    ASSERT_EQ(xtract_descriptor(XTRACT_STANDARD_DEVIATION)->argv.unit[0], XTRACT_UNIT_ANY_SQUARED);
+    ASSERT_EQ(xtract_descriptor(XTRACT_STANDARD_DEVIATION)->argv[0].unit, XTRACT_UNIT_ANY_SQUARED);
     ASSERT_EQ(xtract_descriptor(XTRACT_STANDARD_DEVIATION)->result.scalar.unit, XTRACT_UNIT_ANY);
     ASSERT_EQ(xtract_descriptor(XTRACT_MOVING_STANDARD_DEVIATION)->result.vector.unit, XTRACT_UNIT_ANY);
-    ASSERT_EQ(xtract_descriptor(XTRACT_SPECTRAL_STANDARD_DEVIATION)->argv.unit[0], XTRACT_HERTZ_SQUARED);
+    ASSERT_EQ(xtract_descriptor(XTRACT_SPECTRAL_STANDARD_DEVIATION)->argv[0].unit, XTRACT_HERTZ_SQUARED);
     ASSERT_EQ(xtract_descriptor(XTRACT_SPECTRAL_STANDARD_DEVIATION)->result.scalar.unit, XTRACT_HERTZ);
 }
 
@@ -190,16 +193,13 @@ UTEST(descriptors, only_the_decibel_quantities_carry_the_decibel_unit)
     {
         const xtract_unit_t result_unit = xtract_descriptor(f)->is_scalar ? xtract_descriptor(f)->result.scalar.unit : xtract_descriptor(f)->result.vector.unit;
         const int gives_decibels = f == XTRACT_FLATNESS_DB || f == XTRACT_SMOOTHNESS;
-        /* An argc above XTRACT_MAXARGS is the length of one array, which
-         * the first entry describes. */
-        const int described = xtract_descriptor(f)->argc > XTRACT_MAXARGS ? 1 : xtract_descriptor(f)->argc;
 
         ASSERT_EQ_MSG(result_unit == XTRACT_DECIBELS, gives_decibels, xtract_descriptor(f)->name);
-        for (i = 0; i < described; i++)
+        for (i = 0; i < xtract_descriptor(f)->argc; i++)
         {
             const int takes_decibels = i == 0 && (f == XTRACT_TONALITY || f == XTRACT_IRREGULARITY_K);
 
-            ASSERT_EQ_MSG(xtract_descriptor(f)->argv.unit[i] == XTRACT_DECIBELS, takes_decibels, xtract_descriptor(f)->name);
+            ASSERT_EQ_MSG(xtract_descriptor(f)->argv[i].unit == XTRACT_DECIBELS, takes_decibels, xtract_descriptor(f)->name);
         }
     }
 }
@@ -226,11 +226,11 @@ UTEST(descriptors, a_ratio_or_a_count_has_no_unit_and_its_arguments_have_theirs)
     /* A mean and a standard deviation, or a maximum and a mean. */
     for (i = 0; i < 2; i++)
     {
-        ASSERT_EQ(xtract_descriptor(XTRACT_SKEWNESS)->argv.unit[i], XTRACT_UNIT_ANY);
-        ASSERT_EQ(xtract_descriptor(XTRACT_KURTOSIS)->argv.unit[i], XTRACT_UNIT_ANY);
-        ASSERT_EQ(xtract_descriptor(XTRACT_CREST)->argv.unit[i], XTRACT_UNIT_ANY);
-        ASSERT_EQ(xtract_descriptor(XTRACT_SPECTRAL_SKEWNESS)->argv.unit[i], XTRACT_HERTZ);
-        ASSERT_EQ(xtract_descriptor(XTRACT_SPECTRAL_KURTOSIS)->argv.unit[i], XTRACT_HERTZ);
+        ASSERT_EQ(xtract_descriptor(XTRACT_SKEWNESS)->argv[i].unit, XTRACT_UNIT_ANY);
+        ASSERT_EQ(xtract_descriptor(XTRACT_KURTOSIS)->argv[i].unit, XTRACT_UNIT_ANY);
+        ASSERT_EQ(xtract_descriptor(XTRACT_CREST)->argv[i].unit, XTRACT_UNIT_ANY);
+        ASSERT_EQ(xtract_descriptor(XTRACT_SPECTRAL_SKEWNESS)->argv[i].unit, XTRACT_HERTZ);
+        ASSERT_EQ(xtract_descriptor(XTRACT_SPECTRAL_KURTOSIS)->argv[i].unit, XTRACT_HERTZ);
     }
 
     /* A slope of amplitude over frequency, divided by the sum of the amplitudes. */
@@ -252,11 +252,11 @@ UTEST(descriptors, an_argument_has_the_unit_of_the_value_it_takes)
     size_t i;
 
     for (i = 0; i < sizeof(unit_of_the_data) / sizeof(unit_of_the_data[0]); i++)
-        ASSERT_EQ_MSG(xtract_descriptor(unit_of_the_data[i])->argv.unit[0], XTRACT_UNIT_ANY, xtract_descriptor(unit_of_the_data[i])->name);
+        ASSERT_EQ_MSG(xtract_descriptor(unit_of_the_data[i])->argv[0].unit, XTRACT_UNIT_ANY, xtract_descriptor(unit_of_the_data[i])->name);
     for (i = 0; i < sizeof(hertz) / sizeof(hertz[0]); i++)
-        ASSERT_EQ_MSG(xtract_descriptor(hertz[i])->argv.unit[0], XTRACT_HERTZ, xtract_descriptor(hertz[i])->name);
+        ASSERT_EQ_MSG(xtract_descriptor(hertz[i])->argv[0].unit, XTRACT_HERTZ, xtract_descriptor(hertz[i])->name);
     for (i = 0; i < sizeof(no_unit) / sizeof(no_unit[0]); i++)
-        ASSERT_EQ_MSG(xtract_descriptor(no_unit[i])->argv.unit[0], XTRACT_UNIT_NONE, xtract_descriptor(no_unit[i])->name);
+        ASSERT_EQ_MSG(xtract_descriptor(no_unit[i])->argv[0].unit, XTRACT_UNIT_NONE, xtract_descriptor(no_unit[i])->name);
 
     /* The log of a band energy is a natural logarithm. */
     ASSERT_EQ(xtract_descriptor(XTRACT_MEL_SPECTROGRAM)->result.vector.unit, XTRACT_UNIT_NONE);
@@ -267,11 +267,11 @@ UTEST(descriptors, irregularity_k_takes_the_smoothness_and_no_data)
 {
     ASSERT_EQ(xtract_descriptor(XTRACT_IRREGULARITY_K)->data.format, XTRACT_NO_DATA);
     ASSERT_EQ(xtract_descriptor(XTRACT_IRREGULARITY_K)->argc, 1);
-    ASSERT_EQ(xtract_descriptor(XTRACT_IRREGULARITY_K)->argv.type, XTRACT_FLOAT);
-    ASSERT_EQ(xtract_descriptor(XTRACT_IRREGULARITY_K)->argv.donor[0], XTRACT_SMOOTHNESS);
-    ASSERT_EQ(xtract_descriptor(XTRACT_IRREGULARITY_K)->argv.unit[0], xtract_descriptor(XTRACT_SMOOTHNESS)->result.scalar.unit);
-    ASSERT_EQ(xtract_descriptor(XTRACT_IRREGULARITY_K)->argv.min[0], 0.0);
-    ASSERT_EQ(xtract_descriptor(XTRACT_IRREGULARITY_K)->argv.max[0], XTRACT_UNBOUNDED_MAX);
+    ASSERT_EQ(xtract_descriptor(XTRACT_IRREGULARITY_K)->argv[0].type, XTRACT_FLOAT);
+    ASSERT_EQ(xtract_descriptor(XTRACT_IRREGULARITY_K)->argv[0].accepts->providers[0].feature, XTRACT_SMOOTHNESS);
+    ASSERT_EQ(xtract_descriptor(XTRACT_IRREGULARITY_K)->argv[0].unit, xtract_descriptor(XTRACT_SMOOTHNESS)->result.scalar.unit);
+    ASSERT_EQ(xtract_descriptor(XTRACT_IRREGULARITY_K)->argv[0].min, 0.0);
+    ASSERT_EQ(xtract_descriptor(XTRACT_IRREGULARITY_K)->argv[0].max, XTRACT_UNBOUNDED_MAX);
     ASSERT_EQ(xtract_descriptor(XTRACT_IRREGULARITY_K)->is_scalar, XTRACT_TRUE);
     ASSERT_EQ(xtract_descriptor(XTRACT_IRREGULARITY_K)->result.scalar.unit, XTRACT_UNIT_NONE);
     ASSERT_EQ(xtract_descriptor(XTRACT_IRREGULARITY_K)->result.scalar.min, XTRACT_UNBOUNDED_MIN);
@@ -288,22 +288,22 @@ UTEST(descriptors, autocorrelation_fft_and_difference_vector_give_a_series)
 
 UTEST(descriptors, argv_ranges_match_the_functions)
 {
-    CHECK_REL(xtract_descriptor(XTRACT_ROLLOFF)->argv.min[0], 0.0, EPSILON);
-    ASSERT_EQ(xtract_descriptor(XTRACT_ROLLOFF)->argv.max[0], XTRACT_UNBOUNDED_MAX);
-    ASSERT_EQ(xtract_descriptor(XTRACT_ROLLOFF)->argv.unit[0], XTRACT_HERTZ);
-    CHECK_REL(xtract_descriptor(XTRACT_ROLLOFF)->argv.min[1], 0.0, EPSILON);
-    CHECK_REL(xtract_descriptor(XTRACT_ROLLOFF)->argv.max[1], 100.0, EPSILON);
+    CHECK_REL(xtract_descriptor(XTRACT_ROLLOFF)->argv[0].min, 0.0, EPSILON);
+    ASSERT_EQ(xtract_descriptor(XTRACT_ROLLOFF)->argv[0].max, XTRACT_UNBOUNDED_MAX);
+    ASSERT_EQ(xtract_descriptor(XTRACT_ROLLOFF)->argv[0].unit, XTRACT_HERTZ);
+    CHECK_REL(xtract_descriptor(XTRACT_ROLLOFF)->argv[1].min, 0.0, EPSILON);
+    CHECK_REL(xtract_descriptor(XTRACT_ROLLOFF)->argv[1].max, 100.0, EPSILON);
 
-    ASSERT_EQ(xtract_descriptor(XTRACT_SKEWNESS)->argv.min[0], XTRACT_UNBOUNDED_MIN);
-    ASSERT_EQ(xtract_descriptor(XTRACT_SKEWNESS)->argv.max[1], XTRACT_UNBOUNDED_MAX);
-    ASSERT_EQ(xtract_descriptor(XTRACT_CREST)->argv.min[1], XTRACT_UNBOUNDED_MIN);
-    ASSERT_EQ(xtract_descriptor(XTRACT_NOISINESS)->argv.max[0], XTRACT_UNBOUNDED_MAX);
+    ASSERT_EQ(xtract_descriptor(XTRACT_SKEWNESS)->argv[0].min, XTRACT_UNBOUNDED_MIN);
+    ASSERT_EQ(xtract_descriptor(XTRACT_SKEWNESS)->argv[1].max, XTRACT_UNBOUNDED_MAX);
+    ASSERT_EQ(xtract_descriptor(XTRACT_CREST)->argv[1].min, XTRACT_UNBOUNDED_MIN);
+    ASSERT_EQ(xtract_descriptor(XTRACT_NOISINESS)->argv[0].max, XTRACT_UNBOUNDED_MAX);
 
-    ASSERT_EQ(xtract_descriptor(XTRACT_F0)->argv.min[0], DBL_MIN);
-    ASSERT_EQ(xtract_descriptor(XTRACT_MCLEOD_F0)->argv.min[0], DBL_MIN);
-    CHECK_REL(xtract_descriptor(XTRACT_MIDICENT)->argv.min[0], 0.0, EPSILON);
-    ASSERT_EQ(xtract_descriptor(XTRACT_MIDICENT)->argv.max[0], XTRACT_UNBOUNDED_MAX);
-    ASSERT_EQ(xtract_descriptor(XTRACT_MIDICENT)->argv.unit[0], XTRACT_HERTZ);
+    ASSERT_EQ(xtract_descriptor(XTRACT_F0)->argv[0].min, DBL_MIN);
+    ASSERT_EQ(xtract_descriptor(XTRACT_MCLEOD_F0)->argv[0].min, DBL_MIN);
+    CHECK_REL(xtract_descriptor(XTRACT_MIDICENT)->argv[0].min, 0.0, EPSILON);
+    ASSERT_EQ(xtract_descriptor(XTRACT_MIDICENT)->argv[0].max, XTRACT_UNBOUNDED_MAX);
+    ASSERT_EQ(xtract_descriptor(XTRACT_MIDICENT)->argv[0].unit, XTRACT_HERTZ);
     ASSERT_EQ(xtract_descriptor(XTRACT_MIDICENT)->data.format, XTRACT_NO_DATA);
     ASSERT_EQ(xtract_descriptor(XTRACT_MIDICENT)->data.unit, XTRACT_UNIT_NONE);
 
@@ -319,16 +319,16 @@ UTEST(descriptors, argv_ranges_match_the_functions)
     ASSERT_EQ(xtract_descriptor(XTRACT_ODD_EVEN_RATIO)->result.scalar.min, 0.0);
     ASSERT_EQ(xtract_descriptor(XTRACT_ODD_EVEN_RATIO)->result.scalar.max, XTRACT_UNBOUNDED_MAX);
 
-    ASSERT_EQ(xtract_descriptor(XTRACT_SPECTRUM)->argv.min[0], DBL_MIN);
-    ASSERT_EQ(xtract_descriptor(XTRACT_SPECTRUM)->argv.max[0], XTRACT_UNBOUNDED_MAX);
-    CHECK_REL(xtract_descriptor(XTRACT_SPECTRUM)->argv.max[1], (double)XTRACT_MAGNITUDE_PHASE_SPECTRUM, EPSILON);
+    ASSERT_EQ(xtract_descriptor(XTRACT_SPECTRUM)->argv[0].min, DBL_MIN);
+    ASSERT_EQ(xtract_descriptor(XTRACT_SPECTRUM)->argv[0].max, XTRACT_UNBOUNDED_MAX);
+    CHECK_REL(xtract_descriptor(XTRACT_SPECTRUM)->argv[1].max, (double)XTRACT_MAGNITUDE_PHASE_SPECTRUM, EPSILON);
     ASSERT_EQ(xtract_descriptor(XTRACT_SPECTRUM)->argc, 3);
-    CHECK_REL(xtract_descriptor(XTRACT_SPECTRUM)->argv.max[2], 1.0, EPSILON);
+    CHECK_REL(xtract_descriptor(XTRACT_SPECTRUM)->argv[2].max, 1.0, EPSILON);
 
-    CHECK_REL(xtract_descriptor(XTRACT_SUBBANDS)->argv.max[0], (double)(XTRACT_FEATURES - 1), EPSILON);
-    CHECK_REL(xtract_descriptor(XTRACT_SUBBANDS)->argv.max[2], (double)XTRACT_LINEAR_SUBBANDS, EPSILON);
+    CHECK_REL(xtract_descriptor(XTRACT_SUBBANDS)->argv[0].max, (double)(XTRACT_FEATURES - 1), EPSILON);
+    CHECK_REL(xtract_descriptor(XTRACT_SUBBANDS)->argv[2].max, (double)XTRACT_LINEAR_SUBBANDS, EPSILON);
     ASSERT_EQ(xtract_descriptor(XTRACT_SPREAD)->argc, 1);
-    ASSERT_EQ(xtract_descriptor(XTRACT_SPREAD)->argv.donor[0], XTRACT_SPECTRAL_MEAN);
+    ASSERT_EQ(xtract_descriptor(XTRACT_SPREAD)->argv[0].accepts->providers[0].feature, XTRACT_SPECTRAL_MEAN);
 
     ASSERT_EQ(xtract_descriptor(XTRACT_SPREAD)->data.format, XTRACT_SPECTRAL);
     ASSERT_EQ(xtract_descriptor(XTRACT_HPS)->data.format, XTRACT_SPECTRAL);
@@ -347,13 +347,12 @@ UTEST(descriptors, noisiness_takes_a_peak_spectrum_a_fundamental_and_a_threshold
     ASSERT_EQ(xtract_descriptor(XTRACT_NOISINESS)->data.format, XTRACT_SPECTRAL_PEAKS);
     ASSERT_EQ(xtract_descriptor(XTRACT_NOISINESS)->data.unit, XTRACT_ANY_AMPLITUDE_HERTZ);
     ASSERT_EQ(xtract_descriptor(XTRACT_NOISINESS)->argc, 2);
-    ASSERT_EQ(xtract_descriptor(XTRACT_NOISINESS)->argv.min[0], 0.0);
-    ASSERT_EQ(xtract_descriptor(XTRACT_NOISINESS)->argv.unit[0], XTRACT_HERTZ);
-    ASSERT_EQ(xtract_descriptor(XTRACT_NOISINESS)->argv.donor[0], XTRACT_FAILSAFE_F0);
-    ASSERT_EQ(xtract_descriptor(XTRACT_NOISINESS)->argv.min[1], 0.0);
-    ASSERT_EQ(xtract_descriptor(XTRACT_NOISINESS)->argv.max[1], 1.0);
-    ASSERT_EQ(xtract_descriptor(XTRACT_NOISINESS)->argv.unit[1], XTRACT_UNIT_NONE);
-    ASSERT_EQ(xtract_descriptor(XTRACT_NOISINESS)->argv.donor[1], XTRACT_ANY);
+    ASSERT_EQ(xtract_descriptor(XTRACT_NOISINESS)->argv[0].min, 0.0);
+    ASSERT_EQ(xtract_descriptor(XTRACT_NOISINESS)->argv[0].unit, XTRACT_HERTZ);
+    ASSERT_EQ(xtract_descriptor(XTRACT_NOISINESS)->argv[0].accepts->providers[0].feature, XTRACT_FAILSAFE_F0);
+    ASSERT_EQ(xtract_descriptor(XTRACT_NOISINESS)->argv[1].min, 0.0);
+    ASSERT_EQ(xtract_descriptor(XTRACT_NOISINESS)->argv[1].max, 1.0);
+    ASSERT_EQ(xtract_descriptor(XTRACT_NOISINESS)->argv[1].unit, XTRACT_UNIT_NONE);
 }
 
 UTEST(descriptors, appended_features_are_fully_described)
@@ -361,24 +360,23 @@ UTEST(descriptors, appended_features_are_fully_described)
     int f, i;
 
     ASSERT_EQ(xtract_descriptor(XTRACT_PEAK)->argc, 1);
-    ASSERT_EQ(xtract_descriptor(XTRACT_PEAK)->argv.type, XTRACT_FLOAT);
-    ASSERT_EQ(xtract_descriptor(XTRACT_PEAK)->argv.donor[0], XTRACT_ANY);
+    ASSERT_EQ(xtract_descriptor(XTRACT_PEAK)->argv[0].type, XTRACT_FLOAT);
     ASSERT_EQ(xtract_descriptor(XTRACT_PEAK)->data.format, XTRACT_ARBITRARY_SERIES);
     ASSERT_EQ(xtract_descriptor(XTRACT_PEAK)->result.scalar.unit, XTRACT_UNIT_ANY);
     ASSERT_EQ(xtract_descriptor(XTRACT_PEAK)->is_delta, XTRACT_FALSE);
     ASSERT_TRUE(xtract_descriptor(XTRACT_PEAK)->name[0] != 0);
 
     ASSERT_EQ(xtract_descriptor(XTRACT_MMBSES)->argc, 1);
-    ASSERT_EQ(xtract_descriptor(XTRACT_MMBSES)->argv.type, XTRACT_FILTERBANK);
-    ASSERT_EQ(xtract_descriptor(XTRACT_MMBSES)->argv.donor[0], XTRACT_INIT_MFCC);
+    ASSERT_EQ(xtract_descriptor(XTRACT_MMBSES)->argv[0].type, XTRACT_FILTERBANK);
+    ASSERT_STREQ(xtract_descriptor(XTRACT_MMBSES)->argv[0].builder->name, "init_mfcc");
     ASSERT_EQ(xtract_descriptor(XTRACT_MMBSES)->data.format, XTRACT_SPECTRAL_MAGNITUDE_PHASE);
     ASSERT_EQ(xtract_descriptor(XTRACT_MMBSES)->result.vector.format, XTRACT_MEL_COEFFS);
     ASSERT_EQ(xtract_descriptor(XTRACT_MMBSES)->result.vector.unit, XTRACT_UNIT_NONE);
     ASSERT_EQ(xtract_descriptor(XTRACT_MMBSES)->year, 2013);
 
     ASSERT_EQ(xtract_descriptor(XTRACT_SPECTRAL_SUBBAND_CENTROIDS)->argc, 1);
-    ASSERT_EQ(xtract_descriptor(XTRACT_SPECTRAL_SUBBAND_CENTROIDS)->argv.type, XTRACT_FILTERBANK);
-    ASSERT_EQ(xtract_descriptor(XTRACT_SPECTRAL_SUBBAND_CENTROIDS)->argv.donor[0], XTRACT_INIT_MFCC);
+    ASSERT_EQ(xtract_descriptor(XTRACT_SPECTRAL_SUBBAND_CENTROIDS)->argv[0].type, XTRACT_FILTERBANK);
+    ASSERT_STREQ(xtract_descriptor(XTRACT_SPECTRAL_SUBBAND_CENTROIDS)->argv[0].builder->name, "init_mfcc");
     ASSERT_EQ(xtract_descriptor(XTRACT_SPECTRAL_SUBBAND_CENTROIDS)->data.format, XTRACT_SPECTRAL);
     ASSERT_EQ(xtract_descriptor(XTRACT_SPECTRAL_SUBBAND_CENTROIDS)->data.unit, XTRACT_ANY_AMPLITUDE_HERTZ);
     ASSERT_EQ(xtract_descriptor(XTRACT_SPECTRAL_SUBBAND_CENTROIDS)->result.vector.format, XTRACT_MEL_COEFFS);
@@ -387,9 +385,8 @@ UTEST(descriptors, appended_features_are_fully_described)
     for (f = XTRACT_MOVING_SUM; f <= XTRACT_MOVING_MIN; f++)
     {
         ASSERT_EQ_MSG(xtract_descriptor(f)->argc, 1, xtract_descriptor(f)->name);
-        ASSERT_EQ_MSG(xtract_descriptor(f)->argv.type, XTRACT_INT, xtract_descriptor(f)->name);
-        ASSERT_EQ_MSG(xtract_descriptor(f)->argv.donor[0], XTRACT_ANY, xtract_descriptor(f)->name);
-        ASSERT_EQ_MSG(xtract_descriptor(f)->argv.max[0], XTRACT_UNBOUNDED_MAX, xtract_descriptor(f)->name);
+        ASSERT_EQ_MSG(xtract_descriptor(f)->argv[0].type, XTRACT_INT, xtract_descriptor(f)->name);
+        ASSERT_EQ_MSG(xtract_descriptor(f)->argv[0].max, XTRACT_UNBOUNDED_MAX, xtract_descriptor(f)->name);
         ASSERT_EQ_MSG(xtract_descriptor(f)->data.format, XTRACT_ARBITRARY_SERIES, xtract_descriptor(f)->name);
         ASSERT_EQ_MSG(xtract_descriptor(f)->data.unit, XTRACT_UNIT_ANY, xtract_descriptor(f)->name);
         ASSERT_EQ_MSG(xtract_descriptor(f)->result.vector.format, XTRACT_ARBITRARY_SERIES, xtract_descriptor(f)->name);
@@ -398,20 +395,19 @@ UTEST(descriptors, appended_features_are_fully_described)
         ASSERT_EQ_MSG(xtract_descriptor(f)->is_delta, XTRACT_FALSE, xtract_descriptor(f)->name);
         ASSERT_TRUE_MSG(xtract_descriptor(f)->name[0] != 0, "moving feature without a name");
     }
-    CHECK_REL(xtract_descriptor(XTRACT_MOVING_SUM)->argv.min[0], 1.0, EPSILON);
-    CHECK_REL(xtract_descriptor(XTRACT_MOVING_AVERAGE)->argv.min[0], 1.0, EPSILON);
-    CHECK_REL(xtract_descriptor(XTRACT_MOVING_VARIANCE)->argv.min[0], 2.0, EPSILON);
-    CHECK_REL(xtract_descriptor(XTRACT_MOVING_STANDARD_DEVIATION)->argv.min[0], 2.0, EPSILON);
-    CHECK_REL(xtract_descriptor(XTRACT_MOVING_MAX)->argv.min[0], 1.0, EPSILON);
-    CHECK_REL(xtract_descriptor(XTRACT_MOVING_MIN)->argv.min[0], 1.0, EPSILON);
+    CHECK_REL(xtract_descriptor(XTRACT_MOVING_SUM)->argv[0].min, 1.0, EPSILON);
+    CHECK_REL(xtract_descriptor(XTRACT_MOVING_AVERAGE)->argv[0].min, 1.0, EPSILON);
+    CHECK_REL(xtract_descriptor(XTRACT_MOVING_VARIANCE)->argv[0].min, 2.0, EPSILON);
+    CHECK_REL(xtract_descriptor(XTRACT_MOVING_STANDARD_DEVIATION)->argv[0].min, 2.0, EPSILON);
+    CHECK_REL(xtract_descriptor(XTRACT_MOVING_MAX)->argv[0].min, 1.0, EPSILON);
+    CHECK_REL(xtract_descriptor(XTRACT_MOVING_MIN)->argv[0].min, 1.0, EPSILON);
 
     for (f = XTRACT_EWMA_AVERAGE; f <= XTRACT_EWMA_VARIANCE; f++)
     {
         ASSERT_EQ_MSG(xtract_descriptor(f)->argc, 1, xtract_descriptor(f)->name);
-        ASSERT_EQ_MSG(xtract_descriptor(f)->argv.type, XTRACT_FLOAT, xtract_descriptor(f)->name);
-        ASSERT_EQ_MSG(xtract_descriptor(f)->argv.donor[0], XTRACT_ANY, xtract_descriptor(f)->name);
-        CHECK_NEAR(xtract_descriptor(f)->argv.min[0], 0.0, EPSILON);
-        CHECK_REL(xtract_descriptor(f)->argv.max[0], 1.0, EPSILON);
+        ASSERT_EQ_MSG(xtract_descriptor(f)->argv[0].type, XTRACT_FLOAT, xtract_descriptor(f)->name);
+        CHECK_NEAR(xtract_descriptor(f)->argv[0].min, 0.0, EPSILON);
+        CHECK_REL(xtract_descriptor(f)->argv[0].max, 1.0, EPSILON);
         ASSERT_EQ_MSG(xtract_descriptor(f)->data.format, XTRACT_ARBITRARY_SERIES, xtract_descriptor(f)->name);
         ASSERT_EQ_MSG(xtract_descriptor(f)->data.unit, XTRACT_UNIT_ANY, xtract_descriptor(f)->name);
         ASSERT_EQ_MSG(xtract_descriptor(f)->result.vector.format, XTRACT_ARBITRARY_SERIES, xtract_descriptor(f)->name);
@@ -427,8 +423,8 @@ UTEST(descriptors, appended_features_are_fully_described)
     ASSERT_EQ(xtract_descriptor(XTRACT_MEDIAN)->result.scalar.unit, XTRACT_UNIT_ANY);
     ASSERT_EQ(xtract_descriptor(XTRACT_MEDIAN)->is_delta, XTRACT_FALSE);
     ASSERT_EQ(xtract_descriptor(XTRACT_MEDIAN_ABSOLUTE_DEVIATION)->argc, 1);
-    ASSERT_EQ(xtract_descriptor(XTRACT_MEDIAN_ABSOLUTE_DEVIATION)->argv.type, XTRACT_FLOAT);
-    ASSERT_EQ(xtract_descriptor(XTRACT_MEDIAN_ABSOLUTE_DEVIATION)->argv.donor[0], XTRACT_MEDIAN);
+    ASSERT_EQ(xtract_descriptor(XTRACT_MEDIAN_ABSOLUTE_DEVIATION)->argv[0].type, XTRACT_FLOAT);
+    ASSERT_EQ(xtract_descriptor(XTRACT_MEDIAN_ABSOLUTE_DEVIATION)->argv[0].accepts->providers[0].feature, XTRACT_MEDIAN);
     ASSERT_EQ(xtract_descriptor(XTRACT_MEDIAN_ABSOLUTE_DEVIATION)->data.format, XTRACT_ARBITRARY_SERIES);
     ASSERT_EQ(xtract_descriptor(XTRACT_MEDIAN_ABSOLUTE_DEVIATION)->data.unit, XTRACT_UNIT_ANY);
     ASSERT_EQ(xtract_descriptor(XTRACT_MEDIAN_ABSOLUTE_DEVIATION)->result.scalar.unit, XTRACT_UNIT_ANY);
@@ -448,10 +444,9 @@ UTEST(descriptors, appended_features_are_fully_described)
     ASSERT_EQ(xtract_descriptor(XTRACT_HJORTH_COMPLEXITY)->result.scalar.unit, XTRACT_UNIT_NONE);
 
     ASSERT_EQ(xtract_descriptor(XTRACT_TIME_REVERSAL_ASYMMETRY)->argc, 1);
-    ASSERT_EQ(xtract_descriptor(XTRACT_TIME_REVERSAL_ASYMMETRY)->argv.type, XTRACT_INT);
-    ASSERT_EQ(xtract_descriptor(XTRACT_TIME_REVERSAL_ASYMMETRY)->argv.donor[0], XTRACT_ANY);
-    CHECK_REL(xtract_descriptor(XTRACT_TIME_REVERSAL_ASYMMETRY)->argv.min[0], 1.0, EPSILON);
-    ASSERT_EQ(xtract_descriptor(XTRACT_TIME_REVERSAL_ASYMMETRY)->argv.max[0], XTRACT_UNBOUNDED_MAX);
+    ASSERT_EQ(xtract_descriptor(XTRACT_TIME_REVERSAL_ASYMMETRY)->argv[0].type, XTRACT_INT);
+    CHECK_REL(xtract_descriptor(XTRACT_TIME_REVERSAL_ASYMMETRY)->argv[0].min, 1.0, EPSILON);
+    ASSERT_EQ(xtract_descriptor(XTRACT_TIME_REVERSAL_ASYMMETRY)->argv[0].max, XTRACT_UNBOUNDED_MAX);
     ASSERT_EQ(xtract_descriptor(XTRACT_TIME_REVERSAL_ASYMMETRY)->data.format, XTRACT_ARBITRARY_SERIES);
     ASSERT_EQ(xtract_descriptor(XTRACT_TIME_REVERSAL_ASYMMETRY)->data.unit, XTRACT_UNIT_ANY);
     ASSERT_EQ(xtract_descriptor(XTRACT_TIME_REVERSAL_ASYMMETRY)->result.scalar.unit, XTRACT_UNIT_ANY_CUBED);
@@ -476,18 +471,18 @@ UTEST(descriptors, appended_features_are_fully_described)
     ASSERT_EQ(xtract_descriptor(XTRACT_PETROSIAN_FRACTAL_DIMENSION)->argc, 0);
     ASSERT_EQ(xtract_descriptor(XTRACT_KATZ_FRACTAL_DIMENSION)->argc, 0);
     ASSERT_EQ(xtract_descriptor(XTRACT_HIGUCHI_FRACTAL_DIMENSION)->argc, 1);
-    ASSERT_EQ(xtract_descriptor(XTRACT_HIGUCHI_FRACTAL_DIMENSION)->argv.type, XTRACT_INT);
-    CHECK_REL(xtract_descriptor(XTRACT_HIGUCHI_FRACTAL_DIMENSION)->argv.min[0], 2.0, EPSILON);
-    CHECK_REL(xtract_descriptor(XTRACT_HIGUCHI_FRACTAL_DIMENSION)->argv.def[0], 10.0, EPSILON);
+    ASSERT_EQ(xtract_descriptor(XTRACT_HIGUCHI_FRACTAL_DIMENSION)->argv[0].type, XTRACT_INT);
+    CHECK_REL(xtract_descriptor(XTRACT_HIGUCHI_FRACTAL_DIMENSION)->argv[0].min, 2.0, EPSILON);
+    CHECK_REL(xtract_descriptor(XTRACT_HIGUCHI_FRACTAL_DIMENSION)->argv[0].default_value, 10.0, EPSILON);
 
     ASSERT_EQ(xtract_descriptor(XTRACT_PERMUTATION_ENTROPY)->argc, 2);
-    ASSERT_EQ(xtract_descriptor(XTRACT_PERMUTATION_ENTROPY)->argv.type, XTRACT_INT);
-    CHECK_REL(xtract_descriptor(XTRACT_PERMUTATION_ENTROPY)->argv.min[0], 2.0, EPSILON);
-    CHECK_REL(xtract_descriptor(XTRACT_PERMUTATION_ENTROPY)->argv.max[0], 8.0, EPSILON);
-    CHECK_REL(xtract_descriptor(XTRACT_PERMUTATION_ENTROPY)->argv.def[0], 3.0, EPSILON);
-    CHECK_REL(xtract_descriptor(XTRACT_PERMUTATION_ENTROPY)->argv.min[1], 1.0, EPSILON);
-    ASSERT_EQ(xtract_descriptor(XTRACT_PERMUTATION_ENTROPY)->argv.max[1], XTRACT_UNBOUNDED_MAX);
-    CHECK_REL(xtract_descriptor(XTRACT_PERMUTATION_ENTROPY)->argv.def[1], 1.0, EPSILON);
+    ASSERT_EQ(xtract_descriptor(XTRACT_PERMUTATION_ENTROPY)->argv[0].type, XTRACT_INT);
+    CHECK_REL(xtract_descriptor(XTRACT_PERMUTATION_ENTROPY)->argv[0].min, 2.0, EPSILON);
+    CHECK_REL(xtract_descriptor(XTRACT_PERMUTATION_ENTROPY)->argv[0].max, 8.0, EPSILON);
+    CHECK_REL(xtract_descriptor(XTRACT_PERMUTATION_ENTROPY)->argv[0].default_value, 3.0, EPSILON);
+    CHECK_REL(xtract_descriptor(XTRACT_PERMUTATION_ENTROPY)->argv[1].min, 1.0, EPSILON);
+    ASSERT_EQ(xtract_descriptor(XTRACT_PERMUTATION_ENTROPY)->argv[1].max, XTRACT_UNBOUNDED_MAX);
+    CHECK_REL(xtract_descriptor(XTRACT_PERMUTATION_ENTROPY)->argv[1].default_value, 1.0, EPSILON);
     ASSERT_EQ(xtract_descriptor(XTRACT_PERMUTATION_ENTROPY)->data.format, XTRACT_ARBITRARY_SERIES);
     ASSERT_EQ(xtract_descriptor(XTRACT_PERMUTATION_ENTROPY)->data.unit, XTRACT_UNIT_ANY);
     ASSERT_EQ(xtract_descriptor(XTRACT_PERMUTATION_ENTROPY)->result.scalar.unit, XTRACT_UNIT_NONE);
@@ -496,8 +491,8 @@ UTEST(descriptors, appended_features_are_fully_described)
     ASSERT_EQ(xtract_descriptor(XTRACT_PERMUTATION_ENTROPY)->is_delta, XTRACT_FALSE);
 
     ASSERT_EQ(xtract_descriptor(XTRACT_LEMPEL_ZIV_COMPLEXITY)->argc, 1);
-    ASSERT_EQ(xtract_descriptor(XTRACT_LEMPEL_ZIV_COMPLEXITY)->argv.type, XTRACT_FLOAT);
-    ASSERT_EQ(xtract_descriptor(XTRACT_LEMPEL_ZIV_COMPLEXITY)->argv.donor[0], XTRACT_MEDIAN);
+    ASSERT_EQ(xtract_descriptor(XTRACT_LEMPEL_ZIV_COMPLEXITY)->argv[0].type, XTRACT_FLOAT);
+    ASSERT_EQ(xtract_descriptor(XTRACT_LEMPEL_ZIV_COMPLEXITY)->argv[0].accepts->providers[0].feature, XTRACT_MEDIAN);
     ASSERT_EQ(xtract_descriptor(XTRACT_LEMPEL_ZIV_COMPLEXITY)->data.format, XTRACT_ARBITRARY_SERIES);
     ASSERT_EQ(xtract_descriptor(XTRACT_LEMPEL_ZIV_COMPLEXITY)->data.unit, XTRACT_UNIT_ANY);
     ASSERT_EQ(xtract_descriptor(XTRACT_LEMPEL_ZIV_COMPLEXITY)->result.scalar.unit, XTRACT_UNIT_NONE);
@@ -507,12 +502,12 @@ UTEST(descriptors, appended_features_are_fully_described)
     for (f = XTRACT_SAMPLE_ENTROPY; f <= XTRACT_APPROXIMATE_ENTROPY; f++)
     {
         ASSERT_EQ_MSG(xtract_descriptor(f)->argc, 2, xtract_descriptor(f)->name);
-        ASSERT_EQ_MSG(xtract_descriptor(f)->argv.type, XTRACT_FLOAT, xtract_descriptor(f)->name);
-        CHECK_REL(xtract_descriptor(f)->argv.min[0], 1.0, EPSILON);
-        CHECK_REL(xtract_descriptor(f)->argv.def[0], 2.0, EPSILON);
-        CHECK_NEAR(xtract_descriptor(f)->argv.min[1], 0.0, EPSILON);
-        ASSERT_EQ_MSG(xtract_descriptor(f)->argv.max[1], XTRACT_UNBOUNDED_MAX, xtract_descriptor(f)->name);
-        ASSERT_EQ_MSG(xtract_descriptor(f)->argv.unit[1], XTRACT_UNIT_ANY, xtract_descriptor(f)->name);
+        ASSERT_EQ_MSG(xtract_descriptor(f)->argv[0].type, XTRACT_FLOAT, xtract_descriptor(f)->name);
+        CHECK_REL(xtract_descriptor(f)->argv[0].min, 1.0, EPSILON);
+        CHECK_REL(xtract_descriptor(f)->argv[0].default_value, 2.0, EPSILON);
+        CHECK_NEAR(xtract_descriptor(f)->argv[1].min, 0.0, EPSILON);
+        ASSERT_EQ_MSG(xtract_descriptor(f)->argv[1].max, XTRACT_UNBOUNDED_MAX, xtract_descriptor(f)->name);
+        ASSERT_EQ_MSG(xtract_descriptor(f)->argv[1].unit, XTRACT_UNIT_ANY, xtract_descriptor(f)->name);
         ASSERT_EQ_MSG(xtract_descriptor(f)->data.format, XTRACT_ARBITRARY_SERIES, xtract_descriptor(f)->name);
         ASSERT_EQ_MSG(xtract_descriptor(f)->data.unit, XTRACT_UNIT_ANY, xtract_descriptor(f)->name);
         ASSERT_EQ_MSG(xtract_descriptor(f)->result.scalar.unit, XTRACT_UNIT_NONE, xtract_descriptor(f)->name);
@@ -534,14 +529,14 @@ UTEST(descriptors, appended_features_are_fully_described)
     ASSERT_EQ(xtract_descriptor(XTRACT_SIGNAL_CONFIDENCE)->data.format, XTRACT_AUDIO_SAMPLES);
 
     ASSERT_EQ(xtract_descriptor(XTRACT_ATTACK_TIME)->argc, 3);
-    CHECK_REL(xtract_descriptor(XTRACT_ATTACK_TIME)->argv.def[1], 0.2, EPSILON);
-    CHECK_REL(xtract_descriptor(XTRACT_ATTACK_TIME)->argv.def[2], 0.9, EPSILON);
-    CHECK_NEAR(xtract_descriptor(XTRACT_ATTACK_TIME)->argv.min[2], 0.0, EPSILON);
-    CHECK_REL(xtract_descriptor(XTRACT_ATTACK_TIME)->argv.max[2], 1.0, EPSILON);
+    CHECK_REL(xtract_descriptor(XTRACT_ATTACK_TIME)->argv[1].default_value, 0.2, EPSILON);
+    CHECK_REL(xtract_descriptor(XTRACT_ATTACK_TIME)->argv[2].default_value, 0.9, EPSILON);
+    CHECK_NEAR(xtract_descriptor(XTRACT_ATTACK_TIME)->argv[2].min, 0.0, EPSILON);
+    CHECK_REL(xtract_descriptor(XTRACT_ATTACK_TIME)->argv[2].max, 1.0, EPSILON);
     ASSERT_EQ(xtract_descriptor(XTRACT_DECAY_TIME)->argc, 2);
     ASSERT_EQ(xtract_descriptor(XTRACT_DECAY_RATE)->argc, 2);
-    CHECK_REL(xtract_descriptor(XTRACT_DECAY_TIME)->argv.def[1], 0.4, EPSILON);
-    CHECK_REL(xtract_descriptor(XTRACT_DECAY_RATE)->argv.def[1], 0.4, EPSILON);
+    CHECK_REL(xtract_descriptor(XTRACT_DECAY_TIME)->argv[1].default_value, 0.4, EPSILON);
+    CHECK_REL(xtract_descriptor(XTRACT_DECAY_RATE)->argv[1].default_value, 0.4, EPSILON);
     for (f = XTRACT_ATTACK_TIME; f <= XTRACT_DECAY_TIME; f++)
     {
         ASSERT_EQ_MSG(xtract_descriptor(f)->result.scalar.unit, XTRACT_SECONDS, xtract_descriptor(f)->name);
@@ -553,12 +548,10 @@ UTEST(descriptors, appended_features_are_fully_described)
     {
         f = i == 0 ? XTRACT_ATTACK_TIME : i == 1 ? XTRACT_DECAY_TIME
                                                  : XTRACT_DECAY_RATE;
-        ASSERT_EQ_MSG(xtract_descriptor(f)->argv.type, XTRACT_FLOAT, xtract_descriptor(f)->name);
-        ASSERT_EQ_MSG(xtract_descriptor(f)->argv.unit[0], XTRACT_HERTZ, xtract_descriptor(f)->name);
-        CHECK_REL(xtract_descriptor(f)->argv.def[0], 44100.0, EPSILON);
-        CHECK_NEAR(xtract_descriptor(f)->argv.min[1], 0.0, EPSILON);
-        CHECK_REL(xtract_descriptor(f)->argv.max[1], 1.0, EPSILON);
-        ASSERT_EQ_MSG(xtract_descriptor(f)->argv.donor[1], XTRACT_ANY, xtract_descriptor(f)->name);
+        ASSERT_EQ_MSG(xtract_descriptor(f)->argv[0].type, XTRACT_FLOAT, xtract_descriptor(f)->name);
+        ASSERT_EQ_MSG(xtract_descriptor(f)->argv[0].unit, XTRACT_HERTZ, xtract_descriptor(f)->name);
+        CHECK_NEAR(xtract_descriptor(f)->argv[1].min, 0.0, EPSILON);
+        CHECK_REL(xtract_descriptor(f)->argv[1].max, 1.0, EPSILON);
         ASSERT_EQ_MSG(xtract_descriptor(f)->data.format, XTRACT_ARBITRARY_SERIES, xtract_descriptor(f)->name);
         ASSERT_EQ_MSG(xtract_descriptor(f)->data.unit, XTRACT_UNIT_ANY, xtract_descriptor(f)->name);
         ASSERT_EQ_MSG(xtract_descriptor(f)->is_scalar, XTRACT_TRUE, xtract_descriptor(f)->name);
@@ -580,9 +573,9 @@ UTEST(descriptors, appended_features_are_fully_described)
     ASSERT_EQ(xtract_descriptor(XTRACT_PEAK_ASYMMETRY)->result.scalar.max, XTRACT_UNBOUNDED_MAX);
 
     ASSERT_EQ(xtract_descriptor(XTRACT_CROSS_CORRELATION)->argc, 1);
-    ASSERT_EQ(xtract_descriptor(XTRACT_CROSS_CORRELATION)->argv.type, XTRACT_FLOAT);
-    CHECK_NEAR(xtract_descriptor(XTRACT_CROSS_CORRELATION)->argv.min[0], 0.0, EPSILON);
-    CHECK_REL(xtract_descriptor(XTRACT_CROSS_CORRELATION)->argv.max[0], 1.0, EPSILON);
+    ASSERT_EQ(xtract_descriptor(XTRACT_CROSS_CORRELATION)->argv[0].type, XTRACT_FLOAT);
+    CHECK_NEAR(xtract_descriptor(XTRACT_CROSS_CORRELATION)->argv[0].min, 0.0, EPSILON);
+    CHECK_REL(xtract_descriptor(XTRACT_CROSS_CORRELATION)->argv[0].max, 1.0, EPSILON);
     ASSERT_EQ(xtract_descriptor(XTRACT_CROSS_CORRELATION)->is_scalar, XTRACT_FALSE);
     ASSERT_EQ(xtract_descriptor(XTRACT_CROSS_CORRELATION)->result.vector.format, XTRACT_ARBITRARY_SERIES);
     ASSERT_EQ(xtract_descriptor(XTRACT_CROSS_CORRELATION)->result.vector.unit, XTRACT_UNIT_UNKNOWN);
@@ -610,10 +603,9 @@ UTEST(descriptors, appended_features_are_fully_described)
 
     ASSERT_STREQ(xtract_descriptor(XTRACT_COVARIANCE_MATRIX)->name, "covariance_matrix");
     ASSERT_EQ(xtract_descriptor(XTRACT_COVARIANCE_MATRIX)->argc, 1);
-    ASSERT_EQ(xtract_descriptor(XTRACT_COVARIANCE_MATRIX)->argv.type, XTRACT_INT);
-    CHECK_REL(xtract_descriptor(XTRACT_COVARIANCE_MATRIX)->argv.min[0], 1.0, EPSILON);
-    ASSERT_EQ(xtract_descriptor(XTRACT_COVARIANCE_MATRIX)->argv.max[0], XTRACT_UNBOUNDED_MAX);
-    CHECK_REL(xtract_descriptor(XTRACT_COVARIANCE_MATRIX)->argv.def[0], 2.0, EPSILON);
+    ASSERT_EQ(xtract_descriptor(XTRACT_COVARIANCE_MATRIX)->argv[0].type, XTRACT_INT);
+    CHECK_REL(xtract_descriptor(XTRACT_COVARIANCE_MATRIX)->argv[0].min, 1.0, EPSILON);
+    ASSERT_EQ(xtract_descriptor(XTRACT_COVARIANCE_MATRIX)->argv[0].max, XTRACT_UNBOUNDED_MAX);
     ASSERT_EQ(xtract_descriptor(XTRACT_COVARIANCE_MATRIX)->data.format, XTRACT_CHANNELS);
     ASSERT_EQ(xtract_descriptor(XTRACT_COVARIANCE_MATRIX)->data.unit, XTRACT_UNIT_ANY);
     ASSERT_EQ(xtract_descriptor(XTRACT_COVARIANCE_MATRIX)->is_scalar, XTRACT_FALSE);
@@ -651,10 +643,10 @@ UTEST(descriptors, appended_features_are_fully_described)
 
     ASSERT_STREQ(xtract_descriptor(XTRACT_COHERENCE)->name, "coherence");
     ASSERT_EQ(xtract_descriptor(XTRACT_COHERENCE)->argc, 1);
-    ASSERT_EQ(xtract_descriptor(XTRACT_COHERENCE)->argv.type, XTRACT_INT);
-    CHECK_REL(xtract_descriptor(XTRACT_COHERENCE)->argv.min[0], 2.0, EPSILON);
-    ASSERT_EQ(xtract_descriptor(XTRACT_COHERENCE)->argv.max[0], XTRACT_UNBOUNDED_MAX);
-    CHECK_REL(xtract_descriptor(XTRACT_COHERENCE)->argv.def[0], 256.0, EPSILON);
+    ASSERT_EQ(xtract_descriptor(XTRACT_COHERENCE)->argv[0].type, XTRACT_INT);
+    CHECK_REL(xtract_descriptor(XTRACT_COHERENCE)->argv[0].min, 2.0, EPSILON);
+    ASSERT_EQ(xtract_descriptor(XTRACT_COHERENCE)->argv[0].max, XTRACT_UNBOUNDED_MAX);
+    CHECK_REL(xtract_descriptor(XTRACT_COHERENCE)->argv[0].default_value, 256.0, EPSILON);
     ASSERT_EQ(xtract_descriptor(XTRACT_COHERENCE)->data.format, XTRACT_SUBFRAMES);
     ASSERT_EQ(xtract_descriptor(XTRACT_COHERENCE)->data.unit, XTRACT_UNIT_ANY);
     ASSERT_EQ(xtract_descriptor(XTRACT_COHERENCE)->is_scalar, XTRACT_FALSE);
@@ -664,9 +656,9 @@ UTEST(descriptors, appended_features_are_fully_described)
 
     ASSERT_STREQ(xtract_descriptor(XTRACT_GRID_MOMENTS)->name, "grid_moments");
     ASSERT_EQ(xtract_descriptor(XTRACT_GRID_MOMENTS)->argc, 1);
-    ASSERT_EQ(xtract_descriptor(XTRACT_GRID_MOMENTS)->argv.type, XTRACT_INT);
-    CHECK_REL(xtract_descriptor(XTRACT_GRID_MOMENTS)->argv.min[0], 1.0, EPSILON);
-    ASSERT_EQ(xtract_descriptor(XTRACT_GRID_MOMENTS)->argv.max[0], XTRACT_UNBOUNDED_MAX);
+    ASSERT_EQ(xtract_descriptor(XTRACT_GRID_MOMENTS)->argv[0].type, XTRACT_INT);
+    CHECK_REL(xtract_descriptor(XTRACT_GRID_MOMENTS)->argv[0].min, 1.0, EPSILON);
+    ASSERT_EQ(xtract_descriptor(XTRACT_GRID_MOMENTS)->argv[0].max, XTRACT_UNBOUNDED_MAX);
     ASSERT_EQ(xtract_descriptor(XTRACT_GRID_MOMENTS)->data.format, XTRACT_GRID);
     ASSERT_EQ(xtract_descriptor(XTRACT_GRID_MOMENTS)->data.unit, XTRACT_UNIT_ANY);
     ASSERT_EQ(xtract_descriptor(XTRACT_GRID_MOMENTS)->is_scalar, XTRACT_FALSE);
@@ -676,9 +668,9 @@ UTEST(descriptors, appended_features_are_fully_described)
 
     ASSERT_STREQ(xtract_descriptor(XTRACT_GRID_CENTRAL_MOMENTS)->name, "grid_central_moments");
     ASSERT_EQ(xtract_descriptor(XTRACT_GRID_CENTRAL_MOMENTS)->argc, 1);
-    ASSERT_EQ(xtract_descriptor(XTRACT_GRID_CENTRAL_MOMENTS)->argv.type, XTRACT_INT);
-    CHECK_REL(xtract_descriptor(XTRACT_GRID_CENTRAL_MOMENTS)->argv.min[0], 1.0, EPSILON);
-    ASSERT_EQ(xtract_descriptor(XTRACT_GRID_CENTRAL_MOMENTS)->argv.max[0], XTRACT_UNBOUNDED_MAX);
+    ASSERT_EQ(xtract_descriptor(XTRACT_GRID_CENTRAL_MOMENTS)->argv[0].type, XTRACT_INT);
+    CHECK_REL(xtract_descriptor(XTRACT_GRID_CENTRAL_MOMENTS)->argv[0].min, 1.0, EPSILON);
+    ASSERT_EQ(xtract_descriptor(XTRACT_GRID_CENTRAL_MOMENTS)->argv[0].max, XTRACT_UNBOUNDED_MAX);
     ASSERT_EQ(xtract_descriptor(XTRACT_GRID_CENTRAL_MOMENTS)->data.format, XTRACT_GRID);
     ASSERT_EQ(xtract_descriptor(XTRACT_GRID_CENTRAL_MOMENTS)->data.unit, XTRACT_UNIT_ANY);
     ASSERT_EQ(xtract_descriptor(XTRACT_GRID_CENTRAL_MOMENTS)->is_scalar, XTRACT_FALSE);
@@ -707,13 +699,13 @@ UTEST(descriptors, appended_features_are_fully_described)
 
     ASSERT_STREQ(xtract_descriptor(XTRACT_QUANTISE)->name, "quantise");
     ASSERT_EQ(xtract_descriptor(XTRACT_QUANTISE)->argc, 3);
-    ASSERT_EQ(xtract_descriptor(XTRACT_QUANTISE)->argv.type, XTRACT_FLOAT);
-    ASSERT_EQ(xtract_descriptor(XTRACT_QUANTISE)->argv.min[0], XTRACT_UNBOUNDED_MIN);
-    ASSERT_EQ(xtract_descriptor(XTRACT_QUANTISE)->argv.max[1], XTRACT_UNBOUNDED_MAX);
-    CHECK_REL(xtract_descriptor(XTRACT_QUANTISE)->argv.min[2], 1.0, EPSILON);
-    CHECK_REL(xtract_descriptor(XTRACT_QUANTISE)->argv.max[2], 2147483647.0, EPSILON);
-    ASSERT_EQ(xtract_descriptor(XTRACT_QUANTISE)->argv.donor[0], XTRACT_LOWEST_VALUE);
-    ASSERT_EQ(xtract_descriptor(XTRACT_QUANTISE)->argv.donor[1], XTRACT_HIGHEST_VALUE);
+    ASSERT_EQ(xtract_descriptor(XTRACT_QUANTISE)->argv[0].type, XTRACT_FLOAT);
+    ASSERT_EQ(xtract_descriptor(XTRACT_QUANTISE)->argv[0].min, XTRACT_UNBOUNDED_MIN);
+    ASSERT_EQ(xtract_descriptor(XTRACT_QUANTISE)->argv[1].max, XTRACT_UNBOUNDED_MAX);
+    CHECK_REL(xtract_descriptor(XTRACT_QUANTISE)->argv[2].min, 1.0, EPSILON);
+    CHECK_REL(xtract_descriptor(XTRACT_QUANTISE)->argv[2].max, 2147483647.0, EPSILON);
+    ASSERT_EQ(xtract_descriptor(XTRACT_QUANTISE)->argv[0].accepts->providers[0].feature, XTRACT_LOWEST_VALUE);
+    ASSERT_EQ(xtract_descriptor(XTRACT_QUANTISE)->argv[1].accepts->providers[0].feature, XTRACT_HIGHEST_VALUE);
     ASSERT_EQ(xtract_descriptor(XTRACT_QUANTISE)->data.format, XTRACT_ARBITRARY_SERIES);
     ASSERT_EQ(xtract_descriptor(XTRACT_QUANTISE)->data.unit, XTRACT_UNIT_ANY);
     ASSERT_EQ(xtract_descriptor(XTRACT_QUANTISE)->is_scalar, XTRACT_FALSE);
@@ -722,9 +714,9 @@ UTEST(descriptors, appended_features_are_fully_described)
 
     ASSERT_STREQ(xtract_descriptor(XTRACT_HISTOGRAM)->name, "histogram");
     ASSERT_EQ(xtract_descriptor(XTRACT_HISTOGRAM)->argc, 1);
-    ASSERT_EQ(xtract_descriptor(XTRACT_HISTOGRAM)->argv.type, XTRACT_INT);
-    CHECK_REL(xtract_descriptor(XTRACT_HISTOGRAM)->argv.min[0], 1.0, EPSILON);
-    ASSERT_EQ(xtract_descriptor(XTRACT_HISTOGRAM)->argv.max[0], XTRACT_UNBOUNDED_MAX);
+    ASSERT_EQ(xtract_descriptor(XTRACT_HISTOGRAM)->argv[0].type, XTRACT_INT);
+    CHECK_REL(xtract_descriptor(XTRACT_HISTOGRAM)->argv[0].min, 1.0, EPSILON);
+    ASSERT_EQ(xtract_descriptor(XTRACT_HISTOGRAM)->argv[0].max, XTRACT_UNBOUNDED_MAX);
     ASSERT_EQ(xtract_descriptor(XTRACT_HISTOGRAM)->data.format, XTRACT_ARBITRARY_SERIES);
     ASSERT_EQ(xtract_descriptor(XTRACT_HISTOGRAM)->data.unit, XTRACT_UNIT_NONE);
     ASSERT_EQ(xtract_descriptor(XTRACT_HISTOGRAM)->is_scalar, XTRACT_FALSE);
@@ -734,17 +726,16 @@ UTEST(descriptors, appended_features_are_fully_described)
     ASSERT_STREQ(xtract_descriptor(XTRACT_COOCCURRENCE_MATRIX)->name, "cooccurrence_matrix");
     ASSERT_EQ(xtract_descriptor(XTRACT_COOCCURRENCE_MATRIX)->year, 1973);
     ASSERT_EQ(xtract_descriptor(XTRACT_COOCCURRENCE_MATRIX)->argc, 5);
-    ASSERT_EQ(xtract_descriptor(XTRACT_COOCCURRENCE_MATRIX)->argv.type, XTRACT_INT);
-    CHECK_REL(xtract_descriptor(XTRACT_COOCCURRENCE_MATRIX)->argv.min[0], 1.0, EPSILON);
-    CHECK_REL(xtract_descriptor(XTRACT_COOCCURRENCE_MATRIX)->argv.min[1], 1.0, EPSILON);
-    CHECK_REL(xtract_descriptor(XTRACT_COOCCURRENCE_MATRIX)->argv.max[1], 46340.0, EPSILON);
-    ASSERT_EQ(xtract_descriptor(XTRACT_COOCCURRENCE_MATRIX)->argv.min[2], XTRACT_UNBOUNDED_MIN);
-    ASSERT_EQ(xtract_descriptor(XTRACT_COOCCURRENCE_MATRIX)->argv.max[3], XTRACT_UNBOUNDED_MAX);
-    ASSERT_EQ(xtract_descriptor(XTRACT_COOCCURRENCE_MATRIX)->argv.min[4], 0.0);
-    CHECK_REL(xtract_descriptor(XTRACT_COOCCURRENCE_MATRIX)->argv.max[4], 1.0, EPSILON);
+    ASSERT_EQ(xtract_descriptor(XTRACT_COOCCURRENCE_MATRIX)->argv[0].type, XTRACT_INT);
+    CHECK_REL(xtract_descriptor(XTRACT_COOCCURRENCE_MATRIX)->argv[0].min, 1.0, EPSILON);
+    CHECK_REL(xtract_descriptor(XTRACT_COOCCURRENCE_MATRIX)->argv[1].min, 1.0, EPSILON);
+    CHECK_REL(xtract_descriptor(XTRACT_COOCCURRENCE_MATRIX)->argv[1].max, 46340.0, EPSILON);
+    ASSERT_EQ(xtract_descriptor(XTRACT_COOCCURRENCE_MATRIX)->argv[2].min, XTRACT_UNBOUNDED_MIN);
+    ASSERT_EQ(xtract_descriptor(XTRACT_COOCCURRENCE_MATRIX)->argv[3].max, XTRACT_UNBOUNDED_MAX);
+    ASSERT_EQ(xtract_descriptor(XTRACT_COOCCURRENCE_MATRIX)->argv[4].min, 0.0);
+    CHECK_REL(xtract_descriptor(XTRACT_COOCCURRENCE_MATRIX)->argv[4].max, 1.0, EPSILON);
     for (i = 0; i < 5; i++)
-        ASSERT_EQ(xtract_descriptor(XTRACT_COOCCURRENCE_MATRIX)->argv.donor[i], XTRACT_ANY);
-    ASSERT_EQ(xtract_descriptor(XTRACT_COOCCURRENCE_MATRIX)->data.format, XTRACT_GRID);
+        ASSERT_EQ(xtract_descriptor(XTRACT_COOCCURRENCE_MATRIX)->data.format, XTRACT_GRID);
     ASSERT_EQ(xtract_descriptor(XTRACT_COOCCURRENCE_MATRIX)->data.unit, XTRACT_UNIT_NONE);
     ASSERT_EQ(xtract_descriptor(XTRACT_COOCCURRENCE_MATRIX)->is_scalar, XTRACT_FALSE);
     ASSERT_EQ(xtract_descriptor(XTRACT_COOCCURRENCE_MATRIX)->result.vector.format, XTRACT_SQUARE_MATRIX);
@@ -776,8 +767,8 @@ UTEST(descriptors, appended_features_are_fully_described)
     ASSERT_STREQ(xtract_descriptor(XTRACT_LOCAL_BINARY_PATTERNS)->name, "local_binary_patterns");
     ASSERT_EQ(xtract_descriptor(XTRACT_LOCAL_BINARY_PATTERNS)->year, 2002);
     ASSERT_EQ(xtract_descriptor(XTRACT_LOCAL_BINARY_PATTERNS)->argc, 1);
-    ASSERT_EQ(xtract_descriptor(XTRACT_LOCAL_BINARY_PATTERNS)->argv.type, XTRACT_INT);
-    CHECK_REL(xtract_descriptor(XTRACT_LOCAL_BINARY_PATTERNS)->argv.min[0], 1.0, EPSILON);
+    ASSERT_EQ(xtract_descriptor(XTRACT_LOCAL_BINARY_PATTERNS)->argv[0].type, XTRACT_INT);
+    CHECK_REL(xtract_descriptor(XTRACT_LOCAL_BINARY_PATTERNS)->argv[0].min, 1.0, EPSILON);
     ASSERT_EQ(xtract_descriptor(XTRACT_LOCAL_BINARY_PATTERNS)->data.format, XTRACT_GRID);
     ASSERT_EQ(xtract_descriptor(XTRACT_LOCAL_BINARY_PATTERNS)->data.unit, XTRACT_UNIT_ANY);
     ASSERT_EQ(xtract_descriptor(XTRACT_LOCAL_BINARY_PATTERNS)->is_scalar, XTRACT_FALSE);
@@ -797,22 +788,21 @@ UTEST(descriptors, appended_features_are_fully_described)
     ASSERT_EQ(xtract_descriptor(XTRACT_KULLBACK_LEIBLER_DIVERGENCE)->argc, 0);
     ASSERT_EQ(xtract_descriptor(XTRACT_ITAKURA_SAITO_DIVERGENCE)->argc, 0);
     ASSERT_EQ(xtract_descriptor(XTRACT_MODIFIED_KULLBACK_LEIBLER)->argc, 1);
-    ASSERT_EQ(xtract_descriptor(XTRACT_MODIFIED_KULLBACK_LEIBLER)->argv.type, XTRACT_FLOAT);
-    CHECK_NEAR(xtract_descriptor(XTRACT_MODIFIED_KULLBACK_LEIBLER)->argv.min[0], 0.0, EPSILON);
-    ASSERT_EQ(xtract_descriptor(XTRACT_MODIFIED_KULLBACK_LEIBLER)->argv.max[0], XTRACT_UNBOUNDED_MAX);
-    ASSERT_EQ(xtract_descriptor(XTRACT_MODIFIED_KULLBACK_LEIBLER)->argv.unit[0], XTRACT_UNIT_ANY);
-    ASSERT_EQ(xtract_descriptor(XTRACT_MODIFIED_KULLBACK_LEIBLER)->argv.donor[0], XTRACT_ANY);
+    ASSERT_EQ(xtract_descriptor(XTRACT_MODIFIED_KULLBACK_LEIBLER)->argv[0].type, XTRACT_FLOAT);
+    CHECK_NEAR(xtract_descriptor(XTRACT_MODIFIED_KULLBACK_LEIBLER)->argv[0].min, 0.0, EPSILON);
+    ASSERT_EQ(xtract_descriptor(XTRACT_MODIFIED_KULLBACK_LEIBLER)->argv[0].max, XTRACT_UNBOUNDED_MAX);
+    ASSERT_EQ(xtract_descriptor(XTRACT_MODIFIED_KULLBACK_LEIBLER)->argv[0].unit, XTRACT_UNIT_ANY);
 
     ASSERT_EQ(xtract_descriptor(XTRACT_SPECTRAL_CONTRAST)->argc, 3);
-    ASSERT_EQ(xtract_descriptor(XTRACT_SPECTRAL_CONTRAST)->argv.type, XTRACT_FLOAT);
-    CHECK_REL(xtract_descriptor(XTRACT_SPECTRAL_CONTRAST)->argv.min[0], 1.0, EPSILON);
-    CHECK_REL(xtract_descriptor(XTRACT_SPECTRAL_CONTRAST)->argv.def[0], 6.0, EPSILON);
-    CHECK_NEAR(xtract_descriptor(XTRACT_SPECTRAL_CONTRAST)->argv.min[1], 0.0, EPSILON);
-    CHECK_REL(xtract_descriptor(XTRACT_SPECTRAL_CONTRAST)->argv.def[1], 200.0, EPSILON);
-    ASSERT_EQ(xtract_descriptor(XTRACT_SPECTRAL_CONTRAST)->argv.unit[1], XTRACT_HERTZ);
-    CHECK_NEAR(xtract_descriptor(XTRACT_SPECTRAL_CONTRAST)->argv.min[2], 0.0, EPSILON);
-    CHECK_REL(xtract_descriptor(XTRACT_SPECTRAL_CONTRAST)->argv.max[2], 1.0, EPSILON);
-    CHECK_REL(xtract_descriptor(XTRACT_SPECTRAL_CONTRAST)->argv.def[2], 0.02, EPSILON);
+    ASSERT_EQ(xtract_descriptor(XTRACT_SPECTRAL_CONTRAST)->argv[0].type, XTRACT_FLOAT);
+    CHECK_REL(xtract_descriptor(XTRACT_SPECTRAL_CONTRAST)->argv[0].min, 1.0, EPSILON);
+    CHECK_REL(xtract_descriptor(XTRACT_SPECTRAL_CONTRAST)->argv[0].default_value, 6.0, EPSILON);
+    CHECK_NEAR(xtract_descriptor(XTRACT_SPECTRAL_CONTRAST)->argv[1].min, 0.0, EPSILON);
+    CHECK_REL(xtract_descriptor(XTRACT_SPECTRAL_CONTRAST)->argv[1].default_value, 200.0, EPSILON);
+    ASSERT_EQ(xtract_descriptor(XTRACT_SPECTRAL_CONTRAST)->argv[1].unit, XTRACT_HERTZ);
+    CHECK_NEAR(xtract_descriptor(XTRACT_SPECTRAL_CONTRAST)->argv[2].min, 0.0, EPSILON);
+    CHECK_REL(xtract_descriptor(XTRACT_SPECTRAL_CONTRAST)->argv[2].max, 1.0, EPSILON);
+    CHECK_REL(xtract_descriptor(XTRACT_SPECTRAL_CONTRAST)->argv[2].default_value, 0.02, EPSILON);
     ASSERT_EQ(xtract_descriptor(XTRACT_SPECTRAL_CONTRAST)->data.format, XTRACT_SPECTRAL);
     ASSERT_EQ(xtract_descriptor(XTRACT_SPECTRAL_CONTRAST)->data.unit, XTRACT_ANY_AMPLITUDE_HERTZ);
     ASSERT_EQ(xtract_descriptor(XTRACT_SPECTRAL_CONTRAST)->is_scalar, XTRACT_FALSE);
@@ -821,18 +811,17 @@ UTEST(descriptors, appended_features_are_fully_described)
     ASSERT_EQ(xtract_descriptor(XTRACT_SPECTRAL_CONTRAST)->result.vector.unit, XTRACT_UNIT_NONE);
 
     ASSERT_EQ(xtract_descriptor(XTRACT_CHROMA)->argc, 3);
-    ASSERT_EQ(xtract_descriptor(XTRACT_CHROMA)->argv.type, XTRACT_FLOAT);
-    CHECK_REL(xtract_descriptor(XTRACT_CHROMA)->argv.def[0], 440.0, EPSILON);
-    CHECK_REL(xtract_descriptor(XTRACT_CHROMA)->argv.def[1], 40.0, EPSILON);
-    CHECK_REL(xtract_descriptor(XTRACT_CHROMA)->argv.def[2], 5000.0, EPSILON);
-    ASSERT_EQ(xtract_descriptor(XTRACT_CHROMA)->argv.min[0], DBL_MIN);
-    ASSERT_EQ(xtract_descriptor(XTRACT_CHROMA)->argv.min[1], 0.0);
-    ASSERT_EQ(xtract_descriptor(XTRACT_CHROMA)->argv.min[2], 0.0);
+    ASSERT_EQ(xtract_descriptor(XTRACT_CHROMA)->argv[0].type, XTRACT_FLOAT);
+    CHECK_REL(xtract_descriptor(XTRACT_CHROMA)->argv[0].default_value, 440.0, EPSILON);
+    CHECK_REL(xtract_descriptor(XTRACT_CHROMA)->argv[1].default_value, 40.0, EPSILON);
+    CHECK_REL(xtract_descriptor(XTRACT_CHROMA)->argv[2].default_value, 5000.0, EPSILON);
+    ASSERT_EQ(xtract_descriptor(XTRACT_CHROMA)->argv[0].min, DBL_MIN);
+    ASSERT_EQ(xtract_descriptor(XTRACT_CHROMA)->argv[1].min, 0.0);
+    ASSERT_EQ(xtract_descriptor(XTRACT_CHROMA)->argv[2].min, 0.0);
     for (i = 0; i < 3; i++)
     {
-        ASSERT_EQ(xtract_descriptor(XTRACT_CHROMA)->argv.max[i], XTRACT_UNBOUNDED_MAX);
-        ASSERT_EQ(xtract_descriptor(XTRACT_CHROMA)->argv.unit[i], XTRACT_HERTZ);
-        ASSERT_EQ(xtract_descriptor(XTRACT_CHROMA)->argv.donor[i], XTRACT_ANY);
+        ASSERT_EQ(xtract_descriptor(XTRACT_CHROMA)->argv[i].max, XTRACT_UNBOUNDED_MAX);
+        ASSERT_EQ(xtract_descriptor(XTRACT_CHROMA)->argv[i].unit, XTRACT_HERTZ);
     }
     ASSERT_EQ(xtract_descriptor(XTRACT_CHROMA)->data.format, XTRACT_SPECTRAL);
     ASSERT_EQ(xtract_descriptor(XTRACT_CHROMA)->data.unit, XTRACT_ANY_AMPLITUDE_HERTZ);
@@ -842,8 +831,8 @@ UTEST(descriptors, appended_features_are_fully_described)
     ASSERT_EQ(xtract_descriptor(XTRACT_CHROMA)->result.vector.unit, XTRACT_UNIT_NONE);
 
     ASSERT_EQ(xtract_descriptor(XTRACT_CQT)->argc, 1);
-    ASSERT_EQ(xtract_descriptor(XTRACT_CQT)->argv.type, XTRACT_CQT_KERNEL);
-    ASSERT_EQ(xtract_descriptor(XTRACT_CQT)->argv.donor[0], XTRACT_INIT_CQT);
+    ASSERT_EQ(xtract_descriptor(XTRACT_CQT)->argv[0].type, XTRACT_CQT_KERNEL);
+    ASSERT_STREQ(xtract_descriptor(XTRACT_CQT)->argv[0].builder->name, "init_cqt");
     ASSERT_EQ(xtract_descriptor(XTRACT_CQT)->data.format, XTRACT_SPECTRAL_MAGNITUDE_PHASE);
     ASSERT_EQ(xtract_descriptor(XTRACT_CQT)->data.unit, XTRACT_UNIT_ANY);
     ASSERT_EQ(xtract_descriptor(XTRACT_CQT)->is_scalar, XTRACT_FALSE);
@@ -853,18 +842,17 @@ UTEST(descriptors, appended_features_are_fully_described)
     ASSERT_EQ(xtract_descriptor(XTRACT_CQT)->year, 1992);
 
     ASSERT_EQ(xtract_descriptor(XTRACT_WAVELET_F0)->argc, 1);
-    ASSERT_EQ(xtract_descriptor(XTRACT_WAVELET_F0)->argv.type, XTRACT_WAVELET_F0_STATE);
-    ASSERT_EQ(xtract_descriptor(XTRACT_WAVELET_F0)->argv.min[0], XTRACT_UNBOUNDED_MIN);
-    ASSERT_EQ(xtract_descriptor(XTRACT_WAVELET_F0)->argv.max[0], XTRACT_UNBOUNDED_MAX);
-    ASSERT_EQ(xtract_descriptor(XTRACT_WAVELET_F0)->argv.unit[0], XTRACT_UNIT_NONE);
+    ASSERT_EQ(xtract_descriptor(XTRACT_WAVELET_F0)->argv[0].type, XTRACT_WAVELET_F0_STATE);
+    ASSERT_EQ(xtract_descriptor(XTRACT_WAVELET_F0)->argv[0].min, XTRACT_UNBOUNDED_MIN);
+    ASSERT_EQ(xtract_descriptor(XTRACT_WAVELET_F0)->argv[0].max, XTRACT_UNBOUNDED_MAX);
+    ASSERT_EQ(xtract_descriptor(XTRACT_WAVELET_F0)->argv[0].unit, XTRACT_UNIT_NONE);
 
     ASSERT_STREQ(xtract_descriptor(XTRACT_LAST_N)->name, "last_n");
     ASSERT_EQ(xtract_descriptor(XTRACT_LAST_N)->argc, 1);
-    ASSERT_EQ(xtract_descriptor(XTRACT_LAST_N)->argv.type, XTRACT_LAST_N_STATE);
-    ASSERT_EQ(xtract_descriptor(XTRACT_LAST_N)->argv.min[0], XTRACT_UNBOUNDED_MIN);
-    ASSERT_EQ(xtract_descriptor(XTRACT_LAST_N)->argv.max[0], XTRACT_UNBOUNDED_MAX);
-    ASSERT_EQ(xtract_descriptor(XTRACT_LAST_N)->argv.unit[0], XTRACT_UNIT_NONE);
-    ASSERT_EQ(xtract_descriptor(XTRACT_LAST_N)->argv.donor[0], XTRACT_ANY);
+    ASSERT_EQ(xtract_descriptor(XTRACT_LAST_N)->argv[0].type, XTRACT_LAST_N_STATE);
+    ASSERT_EQ(xtract_descriptor(XTRACT_LAST_N)->argv[0].min, XTRACT_UNBOUNDED_MIN);
+    ASSERT_EQ(xtract_descriptor(XTRACT_LAST_N)->argv[0].max, XTRACT_UNBOUNDED_MAX);
+    ASSERT_EQ(xtract_descriptor(XTRACT_LAST_N)->argv[0].unit, XTRACT_UNIT_NONE);
     ASSERT_EQ(xtract_descriptor(XTRACT_LAST_N)->data.format, XTRACT_ARBITRARY_SERIES);
     ASSERT_EQ(xtract_descriptor(XTRACT_LAST_N)->data.unit, XTRACT_UNIT_ANY);
     ASSERT_EQ(xtract_descriptor(XTRACT_LAST_N)->is_scalar, XTRACT_FALSE);
@@ -967,15 +955,280 @@ UTEST(dispatch, slots_map_to_the_expected_function)
     ASSERT_TRUE(xtract[XTRACT_PACKED] == xtract_packed);
 }
 
+/* ===== Arguments ===== */
+
+/* The size of the arrays the tests keep the parameters of a builder in */
+enum
+{
+    MOST_PARAMETERS = 16
+};
+
+UTEST(descriptors, an_argument_is_described_according_to_its_kind)
+{
+    int f, i, j;
+
+    for (f = 0; f < XTRACT_FEATURES; f++)
+    {
+        const xtract_function_descriptor_t *d = xtract_descriptor(f);
+
+        ASSERT_TRUE_MSG(d->argc >= 0 && d->argc <= XTRACT_MAXARGS, d->name);
+        ASSERT_EQ_MSG(d->argv == NULL, d->argc == 0, d->name);
+        for (i = 0; i < d->argc; i++)
+        {
+            const xtract_argument_descriptor_t *a = &d->argv[i];
+
+            ASSERT_TRUE_MSG(a->name != NULL && a->name[0] != 0, d->name);
+            for (j = 0; j < i; j++)
+                ASSERT_STRNE_MSG(a->name, d->argv[j].name, d->name);
+            ASSERT_TRUE_MSG(a->min <= a->max, d->name);
+            /* argv is an array of values of one type, or one object */
+            if (a->kind == XTRACT_ARGUMENT_OBJECT)
+                ASSERT_EQ_MSG(d->argc, 1, d->name);
+            else
+                ASSERT_EQ_MSG(a->type, d->argv[0].type, d->name);
+
+            switch (a->kind)
+            {
+            case XTRACT_ARGUMENT_RESULT:
+                ASSERT_TRUE_MSG(a->accepts != NULL && a->accepts->provider_count > 0, d->name);
+                for (j = 0; j < a->accepts->provider_count; j++)
+                {
+                    const xtract_function_descriptor_t *provider = xtract_descriptor(a->accepts->providers[j].feature);
+
+                    ASSERT_TRUE_MSG(provider != NULL && provider->is_scalar, d->name);
+                    ASSERT_EQ_MSG(provider->result.scalar.unit, a->unit, d->name);
+                }
+                break;
+            case XTRACT_ARGUMENT_PROPERTY:
+                ASSERT_TRUE_MSG(a->type == XTRACT_FLOAT || a->type == XTRACT_INT, d->name);
+                ASSERT_NE_MSG(a->data_property, XTRACT_PROPERTY_NONE, d->name);
+                break;
+            case XTRACT_ARGUMENT_OBJECT:
+                ASSERT_TRUE_MSG(a->builder != NULL, d->name);
+                ASSERT_EQ_MSG(a->type, a->builder->type, d->name);
+                ASSERT_TRUE_MSG(a->builder->argc > 0 && a->builder->build != NULL && a->builder->release != NULL, d->name);
+                for (j = 0; j < a->builder->argc; j++)
+                    ASSERT_TRUE_MSG(a->builder->argv[j].kind == XTRACT_ARGUMENT_PROPERTY || a->builder->argv[j].kind == XTRACT_ARGUMENT_SETTING, d->name);
+                break;
+            case XTRACT_ARGUMENT_SETTING:
+                ASSERT_TRUE_MSG(a->default_value >= a->min && a->default_value <= a->max, d->name);
+                if (a->type == XTRACT_INT || a->value_count > 0)
+                    ASSERT_EQ_MSG(a->is_whole, XTRACT_TRUE, d->name);
+                if (a->value_count > 0)
+                {
+                    ASSERT_TRUE_MSG(a->values != NULL && a->values[(int)a->default_value] != NULL, d->name);
+                    ASSERT_EQ_MSG(a->min, 0.0, d->name);
+                    ASSERT_EQ_MSG(a->max, a->value_count - 1.0, d->name);
+                }
+                break;
+            }
+            if (a->kind != XTRACT_ARGUMENT_RESULT)
+                ASSERT_TRUE_MSG(a->accepts == NULL, d->name);
+            if (a->kind != XTRACT_ARGUMENT_PROPERTY)
+                ASSERT_EQ_MSG(a->data_property, XTRACT_PROPERTY_NONE, d->name);
+            if (a->kind != XTRACT_ARGUMENT_OBJECT)
+                ASSERT_TRUE_MSG(a->builder == NULL && a->is_optional == XTRACT_FALSE, d->name);
+            if (a->kind != XTRACT_ARGUMENT_SETTING)
+                ASSERT_TRUE_MSG(a->values == NULL && a->value_count == 0, d->name);
+        }
+    }
+}
+
+UTEST(descriptors, a_named_value_of_a_setting_is_the_value_of_its_enumerator)
+{
+    const xtract_argument_descriptor_t *type = &xtract_descriptor(XTRACT_SPECTRUM)->argv[1];
+    const xtract_argument_descriptor_t *filter = &xtract_descriptor(XTRACT_LNORM)->argv[1];
+    const xtract_argument_descriptor_t *scale = &xtract_descriptor(XTRACT_SUBBANDS)->argv[2];
+    const xtract_argument_descriptor_t *feature = &xtract_descriptor(XTRACT_SUBBANDS)->argv[0];
+    const xtract_argument_descriptor_t *scaling = &xtract_descriptor(XTRACT_CROSS_CORRELATION)->argv[0];
+    const xtract_builder_descriptor_t *window = xtract_descriptor(XTRACT_WINDOWED)->argv[0].builder;
+    const xtract_builder_descriptor_t *mel = xtract_descriptor(XTRACT_MFCC)->argv[0].builder;
+
+    ASSERT_EQ(type->value_count, 4);
+    ASSERT_STREQ(type->values[XTRACT_MAGNITUDE_SPECTRUM], "magnitude");
+    ASSERT_STREQ(type->values[XTRACT_LOG_SPECTRUM], "log");
+    ASSERT_STREQ(type->values[XTRACT_POWER_SPECTRUM], "power");
+    ASSERT_STREQ(type->values[XTRACT_MAGNITUDE_PHASE_SPECTRUM], "magnitude_phase");
+
+    ASSERT_EQ(filter->value_count, 3);
+    ASSERT_STREQ(filter->values[XTRACT_NO_LNORM_FILTER], "none");
+    ASSERT_STREQ(filter->values[XTRACT_POSITIVE_SLOPE], "positive_slope");
+    ASSERT_STREQ(filter->values[XTRACT_NEGATIVE_SLOPE], "negative_slope");
+    ASSERT_TRUE(xtract_descriptor(XTRACT_FLUX)->argv[1].values == filter->values);
+
+    ASSERT_EQ(scale->value_count, 2);
+    ASSERT_STREQ(scale->values[XTRACT_OCTAVE_SUBBANDS], "octave");
+    ASSERT_STREQ(scale->values[XTRACT_LINEAR_SUBBANDS], "linear");
+
+    ASSERT_EQ(scaling->value_count, 2);
+    ASSERT_STREQ(scaling->values[0], "covariance");
+    ASSERT_STREQ(scaling->values[1], "coefficient");
+
+    ASSERT_EQ(feature->value_count, XTRACT_FEATURES);
+    ASSERT_EQ(feature->max, XTRACT_FEATURES - 1.0);
+    ASSERT_STREQ(feature->values[XTRACT_SUM], "sum");
+    ASSERT_TRUE(feature->values[XTRACT_PACKED] == NULL);
+
+    ASSERT_STREQ(window->argv[1].name, "type");
+    ASSERT_EQ(window->argv[1].value_count, 9);
+    ASSERT_STREQ(window->argv[1].values[XTRACT_GAUSS], "gauss");
+    ASSERT_STREQ(window->argv[1].values[XTRACT_HANN], "hann");
+    ASSERT_STREQ(window->argv[1].values[XTRACT_BARTLETT_HANN], "bartlett_hann");
+    ASSERT_STREQ(window->argv[1].values[XTRACT_KAISER], "kaiser");
+    ASSERT_STREQ(window->argv[1].values[XTRACT_BLACKMAN_HARRIS], "blackman_harris");
+
+    ASSERT_STREQ(mel->argv[2].name, "style");
+    ASSERT_STREQ(mel->argv[2].values[XTRACT_EQUAL_GAIN], "equal_gain");
+    ASSERT_STREQ(mel->argv[2].values[XTRACT_EQUAL_AREA], "equal_area");
+}
+
+UTEST(descriptors, subbands_takes_the_features_its_descriptor_names_and_no_other)
+{
+    const xtract_argument_descriptor_t *feature = &xtract_descriptor(XTRACT_SUBBANDS)->argv[0];
+    const double data[8] = {1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0};
+    double result[2];
+    int argv[4] = {0, 2, XTRACT_LINEAR_SUBBANDS, 0};
+    int f, named = 0;
+
+    for (f = 0; f < XTRACT_FEATURES; f++)
+    {
+        const int rv = (argv[0] = f, xtract_subbands(NULL, data, 8, argv, result));
+
+        named += feature->values[f] != NULL;
+        if (feature->values[f] != NULL)
+        {
+            ASSERT_STREQ_MSG(feature->values[f], xtract_descriptor(f)->name, xtract_descriptor(f)->name);
+            ASSERT_NE_MSG(rv, XTRACT_ARGUMENT_ERROR, xtract_descriptor(f)->name);
+        }
+        else
+            ASSERT_EQ_MSG(rv, XTRACT_ARGUMENT_ERROR, xtract_descriptor(f)->name);
+    }
+    ASSERT_EQ(named, 11);
+}
+
+UTEST(descriptors, a_fundamental_comes_from_any_pitch_feature_and_first_from_the_one_that_always_answers)
+{
+    static const int takers[] = {XTRACT_NOISINESS, XTRACT_SPECTRAL_INHARMONICITY, XTRACT_HARMONIC_SPECTRUM, XTRACT_MIDICENT};
+    static const int pitch_features[] = {XTRACT_F0, XTRACT_FAILSAFE_F0, XTRACT_WAVELET_F0, XTRACT_MCLEOD_F0, XTRACT_HPS};
+    const xtract_quantity_t *fundamental = xtract_descriptor(XTRACT_NOISINESS)->argv[0].accepts;
+    size_t t, p;
+    int i;
+
+    ASSERT_STREQ(fundamental->name, "fundamental");
+    ASSERT_EQ(fundamental->provider_count, 5);
+    ASSERT_EQ(fundamental->providers[0].feature, XTRACT_FAILSAFE_F0);
+    for (p = 0; p < sizeof(pitch_features) / sizeof(pitch_features[0]); p++)
+    {
+        int found = 0;
+
+        for (i = 0; i < fundamental->provider_count; i++)
+            found += fundamental->providers[i].feature == pitch_features[p];
+        ASSERT_EQ_MSG(found, 1, xtract_descriptor(pitch_features[p])->name);
+    }
+    for (t = 0; t < sizeof(takers) / sizeof(takers[0]); t++)
+        ASSERT_TRUE_MSG(xtract_descriptor(takers[t])->argv[0].accepts == fundamental, xtract_descriptor(takers[t])->name);
+    /* The spectrum is given to the three that take one, and the fundamental is that of the signal behind it */
+    ASSERT_EQ(xtract_descriptor(XTRACT_NOISINESS)->argv[0].subject, XTRACT_SUBJECT_SOURCE);
+    ASSERT_EQ(xtract_descriptor(XTRACT_MIDICENT)->argv[0].subject, XTRACT_SUBJECT_ANY);
+}
+
+UTEST(descriptors, a_quantity_named_after_a_feature_comes_first_from_that_feature)
+{
+    const xtract_quantity_t *mean = xtract_descriptor(XTRACT_VARIANCE)->argv[0].accepts;
+    const xtract_quantity_t *spectral_mean = xtract_descriptor(XTRACT_SPECTRAL_VARIANCE)->argv[0].accepts;
+    const xtract_quantity_t *spectral_variance = xtract_descriptor(XTRACT_SPECTRAL_STANDARD_DEVIATION)->argv[0].accepts;
+
+    ASSERT_STREQ(mean->name, "mean");
+    ASSERT_EQ(mean->provider_count, 1);
+    ASSERT_EQ(mean->providers[0].feature, XTRACT_MEAN);
+    ASSERT_EQ(xtract_descriptor(XTRACT_VARIANCE)->argv[0].subject, XTRACT_SUBJECT_INPUT);
+
+    ASSERT_STREQ(spectral_mean->name, "spectral_mean");
+    ASSERT_EQ(spectral_mean->provider_count, 2);
+    ASSERT_EQ(spectral_mean->providers[0].feature, XTRACT_SPECTRAL_MEAN);
+    ASSERT_EQ(spectral_mean->providers[1].feature, XTRACT_SPECTRAL_CENTROID);
+
+    ASSERT_EQ(spectral_variance->provider_count, 2);
+    ASSERT_EQ(spectral_variance->providers[0].feature, XTRACT_SPECTRAL_VARIANCE);
+    ASSERT_EQ(spectral_variance->providers[1].feature, XTRACT_SPREAD);
+}
+
+UTEST(descriptors, a_builder_gives_what_its_function_gives)
+{
+    const xtract_builder_descriptor_t *builder = xtract_descriptor(XTRACT_WINDOWED)->argv[0].builder;
+    const double parameters[2] = {8.0, XTRACT_BLACKMAN};
+    double *built = (double *)builder->build(parameters);
+    double *made = xtract_init_window(8, XTRACT_BLACKMAN);
+    int i;
+
+    ASSERT_STREQ(builder->name, "init_window");
+    ASSERT_EQ(builder->type, XTRACT_FLOATARRAY);
+    ASSERT_EQ(builder->argc, 2);
+    ASSERT_TRUE(built != NULL && made != NULL);
+    for (i = 0; i < 8; i++)
+        ASSERT_EQ(built[i], made[i]);
+    builder->release(built);
+    xtract_free_window(made);
+}
+
+UTEST(descriptors, a_builder_refuses_values_its_function_cannot_take)
+{
+    static const int built_for[] = {XTRACT_MFCC, XTRACT_GFCC, XTRACT_BARK_COEFFICIENTS, XTRACT_WINDOWED, XTRACT_DCT, XTRACT_CQT, XTRACT_LAST_N, XTRACT_WAVELET_F0};
+    double parameters[MOST_PARAMETERS];
+    size_t b;
+    int i;
+
+    for (b = 0; b < sizeof(built_for) / sizeof(built_for[0]); b++)
+    {
+        const xtract_builder_descriptor_t *builder = xtract_descriptor(built_for[b])->argv[0].builder;
+
+        ASSERT_TRUE_MSG(builder->argc <= MOST_PARAMETERS, builder->name);
+        ASSERT_TRUE_MSG(builder->build(NULL) == NULL, builder->name);
+        for (i = 0; i < builder->argc; i++)
+            parameters[i] = NAN;
+        ASSERT_TRUE_MSG(builder->build(parameters) == NULL, builder->name);
+        for (i = 0; i < builder->argc; i++)
+            parameters[i] = builder->argv[i].type == XTRACT_INT ? 8.5 : 44100.0;
+        if (builder->argv[0].type == XTRACT_INT)
+            ASSERT_TRUE_MSG(builder->build(parameters) == NULL, builder->name);
+        builder->release(NULL);
+    }
+}
+
+UTEST(descriptors, a_state_belongs_to_one_stream_and_any_other_object_is_shared)
+{
+    int f;
+
+    for (f = 0; f < XTRACT_FEATURES; f++)
+    {
+        const xtract_function_descriptor_t *d = xtract_descriptor(f);
+
+        if (d->argc == 1 && d->argv[0].kind == XTRACT_ARGUMENT_OBJECT)
+            ASSERT_EQ_MSG(d->argv[0].builder->is_per_stream == XTRACT_TRUE, f == XTRACT_LAST_N || f == XTRACT_WAVELET_F0, d->name);
+    }
+}
+
+UTEST(descriptors, dct_takes_a_table_or_none)
+{
+    const xtract_function_descriptor_t *d = xtract_descriptor(XTRACT_DCT);
+
+    ASSERT_EQ(d->argc, 1);
+    ASSERT_EQ(d->argv[0].kind, XTRACT_ARGUMENT_OBJECT);
+    ASSERT_EQ(d->argv[0].is_optional, XTRACT_TRUE);
+    ASSERT_STREQ(d->argv[0].builder->name, "init_dct");
+    ASSERT_EQ(xtract_descriptor(XTRACT_WINDOWED)->argv[0].is_optional, XTRACT_FALSE);
+}
+
 /* ===== Descriptor conformance ===== */
 
 enum
 {
     CONF_N = 16,
-    CONF_FILTERS = 2,
     CONF_COHERENCE_SEGMENT = 256,
-    CONF_LONGEST = 3 * CONF_COHERENCE_SEGMENT + 1,
-    CONF_SCALING_N = 64
+    CONF_CQT_N = 32768,
+    CONF_LONGEST = CONF_CQT_N,
+    CONF_SCALING_N = 64,
+    CONF_SAMPLE_RATE = 44100
 };
 
 static int conf_two_half(const xtract_function_descriptor_t *d)
@@ -1015,8 +1268,6 @@ static int conf_min_n(const xtract_function_descriptor_t *d)
     case XTRACT_VARIANCE:
     case XTRACT_LPC:
     case XTRACT_LPCC:
-    case XTRACT_MOVING_VARIANCE:
-    case XTRACT_MOVING_STANDARD_DEVIATION:
     case XTRACT_HJORTH_MOBILITY:
     case XTRACT_SPECTRAL_ENTROPY:
     case XTRACT_PETROSIAN_FRACTAL_DIMENSION:
@@ -1025,6 +1276,14 @@ static int conf_min_n(const xtract_function_descriptor_t *d)
     case XTRACT_SPECTRUM:
     case XTRACT_AUTOCORRELATION_FFT:
         return 2;
+    case XTRACT_MOVING_SUM:
+    case XTRACT_MOVING_AVERAGE:
+    case XTRACT_MOVING_VARIANCE:
+    case XTRACT_MOVING_STANDARD_DEVIATION:
+    case XTRACT_MOVING_MAX:
+    case XTRACT_MOVING_MIN:
+        /* at least the window, which the test leaves at its default */
+        return (int)d->argv[0].default_value;
     case XTRACT_HIGUCHI_FRACTAL_DIMENSION:
         return 20;
     case XTRACT_NORMALISED_MOMENTS:
@@ -1034,7 +1293,7 @@ static int conf_min_n(const xtract_function_descriptor_t *d)
     case XTRACT_COHERENCE:
         return 3 * CONF_COHERENCE_SEGMENT;
     case XTRACT_CQT:
-        return CONF_N;
+        return CONF_CQT_N;
     default:
         break;
     }
@@ -1047,6 +1306,12 @@ static int conf_call_n(const xtract_function_descriptor_t *d)
 {
     switch (d->id)
     {
+    case XTRACT_WINDOWED:
+    /* the standard deviation these take is that of the data, and the
+     * variance it comes from needs two elements */
+    case XTRACT_SKEWNESS:
+    case XTRACT_KURTOSIS:
+        return 2;
     case XTRACT_SUBBANDS:
         return 8;
     case XTRACT_PERMUTATION_ENTROPY:
@@ -1069,61 +1334,28 @@ static int conf_call_n(const xtract_function_descriptor_t *d)
 
 static int conf_null_argv_allowed(const xtract_function_descriptor_t *d)
 {
-    return d->argc == 0;
+    return d->argc == 0 || d->argv[0].is_optional;
+}
+
+/* A value in the range of an argument is one the feature takes unless the
+ * values have names and this one has none */
+static int conf_is_taken(const xtract_argument_descriptor_t *argument, double value)
+{
+    return argument->values == NULL || argument->values[(int)(value - argument->min)] != NULL;
+}
+
+static int conf_takes_values(const xtract_function_descriptor_t *d)
+{
+    return d->argc > 0 && d->argv[0].kind != XTRACT_ARGUMENT_OBJECT;
 }
 
 static int conf_bounds_checkable(const xtract_function_descriptor_t *d, int i)
 {
-    if (d->argc < 1 || d->argc > XTRACT_MAXARGS)
+    /* xtract_lnorm() and xtract_flux() take a filter or a flag outside its
+     * named values as the first of them */
+    if ((d->id == XTRACT_LNORM || d->id == XTRACT_FLUX) && i > 0)
         return 0;
-    if (d->argv.type != XTRACT_FLOAT && d->argv.type != XTRACT_INT)
-        return 0;
-    return !(d->id == XTRACT_SUBBANDS && i == 0) && !(d->id == XTRACT_COOCCURRENCE_MATRIX && i == 1);
-}
-
-static double conf_default(const xtract_function_descriptor_t *d, int i)
-{
-    double v = d->argv.def[i];
-
-    if (d->argv.min[i] != XTRACT_UNBOUNDED_MIN && v < d->argv.min[i])
-        v = d->argv.min[i];
-    if (d->argv.max[i] != XTRACT_UNBOUNDED_MAX && v > d->argv.max[i])
-        v = d->argv.max[i];
-    return v;
-}
-
-static void conf_set(const xtract_function_descriptor_t *d, double *argf, int *argi, int i, double v)
-{
-    if (d->argv.type == XTRACT_INT)
-        argi[i] = (int)v;
-    else
-        argf[i] = v;
-}
-
-static const void *conf_argv(const xtract_function_descriptor_t *d, double *argf, int *argi,
-                             const xtract_filterbank *mel, const int *bark, const double *window,
-                             const xtract_cqt_kernel *cqt, const xtract_last_n_state *last_n,
-                             const xtract_wavelet_f0_state *wavelet_f0)
-{
-    int i;
-
-    if (d->argc == 0)
-        return NULL;
-    if (d->argv.type == XTRACT_FILTERBANK)
-        return mel;
-    if (d->argv.type == XTRACT_CQT_KERNEL)
-        return cqt;
-    if (d->argv.type == XTRACT_LAST_N_STATE)
-        return last_n;
-    if (d->argv.type == XTRACT_WAVELET_F0_STATE)
-        return wavelet_f0;
-    if (d->id == XTRACT_BARK_COEFFICIENTS)
-        return bark;
-    if (d->id == XTRACT_WINDOWED)
-        return window;
-    for (i = 0; i < d->argc && i < XTRACT_MAXARGS; i++)
-        conf_set(d, argf, argi, i, conf_default(d, i));
-    return d->argv.type == XTRACT_INT ? (const void *)argi : (const void *)argf;
+    return !(d->id == XTRACT_COOCCURRENCE_MATRIX && i == 1);
 }
 
 static void conf_fill_data(const xtract_function_descriptor_t *d, double *data, int n)
@@ -1145,30 +1377,147 @@ static int conf_call(int f, xtract_context *ctx, const double *data, int N, cons
     return xtract[f](ctx, data, N, argv, result);
 }
 
+/* What the test knows about the data it makes for a feature, which is what
+ * a caller knows about its own data. */
+static double conf_property(const xtract_function_descriptor_t *d, xtract_property_t property, int N)
+{
+    const int transform_size = d->data.format == XTRACT_SPECTRAL_MAGNITUDES ? 2 * N : N;
+
+    switch (property)
+    {
+    case XTRACT_PROPERTY_LENGTH:
+        return N;
+    case XTRACT_PROPERTY_SAMPLE_RATE:
+        return CONF_SAMPLE_RATE;
+    case XTRACT_PROPERTY_TRANSFORM_SIZE:
+        return transform_size;
+    case XTRACT_PROPERTY_BIN_SPACING:
+        return (double)CONF_SAMPLE_RATE / transform_size;
+    case XTRACT_PROPERTY_WIDTH:
+        return 1.0;
+    case XTRACT_PROPERTY_SERIES:
+        return 2.0;
+    case XTRACT_PROPERTY_LEVELS:
+        return 8.0;
+    case XTRACT_PROPERTY_NONE:
+        break;
+    }
+    return 0.0;
+}
+
+/* The argv of one call, made from the descriptor of the feature alone. */
+typedef struct conf_arguments_
+{
+    double f[XTRACT_MAXARGS];
+    int i[XTRACT_MAXARGS];
+    void *object;
+    const xtract_builder_descriptor_t *builder;
+    const void *argv;
+    int failures;
+} conf_arguments;
+
+static void conf_set(const xtract_function_descriptor_t *d, conf_arguments *a, int i, double v)
+{
+    if (d->argv[i].type == XTRACT_INT)
+        a->i[i] = (int)v;
+    else
+        a->f[i] = v;
+}
+
+static void conf_arguments_make(const xtract_function_descriptor_t *d, xtract_context *ctx, const double *data, int N, int of, conf_arguments *a);
+
+static void conf_arguments_free(conf_arguments *a)
+{
+    if (a->builder != NULL)
+        a->builder->release(a->object);
+}
+
+/* The result of a feature that another takes as an argument: of the data
+ * given, or of data made for the feature when none is given. A result of
+ * the data given has that data for each argument of its own that is a
+ * result of the caller's choice of data. */
+static double conf_result_of(int feature, xtract_context *ctx, const double *data, int N, int *failures)
+{
+    const xtract_function_descriptor_t *d = xtract_descriptor(feature);
+    const int of = data != NULL;
+    double *own = NULL;
+    conf_arguments a;
+    double result = 0.0;
+    int rv;
+
+    if (data == NULL)
+    {
+        N = conf_call_n(d);
+        own = (double *)malloc((N > 0 ? N : 1) * sizeof(double));
+        conf_fill_data(d, own, N);
+        data = own;
+    }
+    conf_arguments_make(d, ctx, data, N, of, &a);
+    rv = conf_call(feature, ctx, data, N, a.argv, &result);
+    *failures += a.failures + (rv == XTRACT_ARGUMENT_ERROR || rv == XTRACT_BAD_STATE);
+    conf_arguments_free(&a);
+    free(own);
+
+    return result;
+}
+
+static double conf_value(const xtract_function_descriptor_t *d, const xtract_argument_descriptor_t *argument,
+                         xtract_context *ctx, const double *data, int N, int of, int *failures)
+{
+    switch (argument->kind)
+    {
+    case XTRACT_ARGUMENT_RESULT:
+        if (argument->subject == XTRACT_SUBJECT_INPUT || (argument->subject == XTRACT_SUBJECT_ANY && of))
+            return conf_result_of(argument->accepts->providers[0].feature, ctx, data, N, failures);
+        return conf_result_of(argument->accepts->providers[0].feature, ctx, NULL, 0, failures);
+    case XTRACT_ARGUMENT_PROPERTY:
+        return conf_property(d, argument->data_property, N);
+    default:
+        return argument->default_value;
+    }
+}
+
+static void conf_arguments_make(const xtract_function_descriptor_t *d, xtract_context *ctx, const double *data, int N, int of, conf_arguments *a)
+{
+    double parameters[MOST_PARAMETERS];
+    int i;
+
+    a->object = NULL;
+    a->builder = NULL;
+    a->argv = NULL;
+    a->failures = 0;
+    if (d->argc == 0)
+        return;
+    if (d->argv[0].kind == XTRACT_ARGUMENT_OBJECT)
+    {
+        a->builder = d->argv[0].builder;
+        if (a->builder->argc > MOST_PARAMETERS)
+        {
+            a->builder = NULL;
+            a->failures++;
+            return;
+        }
+        for (i = 0; i < a->builder->argc; i++)
+            parameters[i] = conf_value(d, &a->builder->argv[i], ctx, data, N, of, &a->failures);
+        a->object = a->builder->build(parameters);
+        a->failures += a->object == NULL;
+        a->argv = a->object;
+        return;
+    }
+    for (i = 0; i < d->argc; i++)
+        conf_set(d, a, i, conf_value(d, &d->argv[i], ctx, data, N, of, &a->failures));
+    a->argv = d->argv[0].type == XTRACT_INT ? (const void *)a->i : (const void *)a->f;
+}
+
 UTEST(descriptors, every_feature_conforms_to_its_descriptor)
 {
-    double data[CONF_LONGEST];
-    double result[CONF_LONGEST];
-    double argf[XTRACT_MAXARGS];
-    int argi[XTRACT_MAXARGS];
-    double window[XTRACT_WINDOW_SIZE];
-    xtract_filterbank *mel = xtract_init_mfcc(CONF_N, 44100.0, XTRACT_EQUAL_GAIN, 100.0, 8000.0, CONF_FILTERS);
-    xtract_cqt_kernel *cqt = xtract_init_cqt(CONF_N, 1000.0, 100.0, 1, 2, 0.01);
+    static double data[CONF_LONGEST];
+    static double result[CONF_LONGEST];
     xtract_context *ctx = xtract_context_new(CONF_LONGEST);
-    xtract_last_n_state *last_n = xtract_last_n_state_new(CONF_N);
-    xtract_wavelet_f0_state *wavelet_f0 = xtract_wavelet_f0_state_new(44100.0);
-    int bark[XTRACT_BARK_BANDS];
+    conf_arguments a;
     int f, i, rv;
-    const void *argv;
 
-    ASSERT_TRUE(mel != NULL);
-    ASSERT_TRUE(cqt != NULL);
     ASSERT_TRUE(ctx != NULL);
-    ASSERT_TRUE(last_n != NULL);
-    ASSERT_TRUE(wavelet_f0 != NULL);
-    xtract_init_bark(2 * CONF_N, 44100.0, bark);
-    for (i = 0; i < XTRACT_WINDOW_SIZE; i++)
-        window[i] = 1.0;
 
     for (f = 0; f < XTRACT_FEATURES; f++)
     {
@@ -1177,9 +1526,10 @@ UTEST(descriptors, every_feature_conforms_to_its_descriptor)
         const int call_n = conf_call_n(d);
 
         conf_fill_data(d, data, call_n);
-        argv = conf_argv(d, argf, argi, mel, bark, window, cqt, last_n, wavelet_f0);
+        conf_arguments_make(d, ctx, data, call_n, 0, &a);
+        ASSERT_EQ_MSG(a.failures, 0, d->name);
 
-        rv = conf_call(f, ctx, data, call_n, argv, result);
+        rv = conf_call(f, ctx, data, call_n, a.argv, result);
         ASSERT_NE_MSG(rv, XTRACT_ARGUMENT_ERROR, d->name);
         ASSERT_NE_MSG(rv, XTRACT_BAD_STATE, d->name);
 
@@ -1189,52 +1539,54 @@ UTEST(descriptors, every_feature_conforms_to_its_descriptor)
             ASSERT_EQ_MSG(conf_call(f, ctx, data, call_n, NULL, result), XTRACT_ARGUMENT_ERROR, d->name);
 
         if (min_n > 0)
-            ASSERT_EQ_MSG(conf_call(f, ctx, data, min_n - 1, argv, result), XTRACT_ARGUMENT_ERROR, d->name);
+            ASSERT_EQ_MSG(conf_call(f, ctx, data, min_n - 1, a.argv, result), XTRACT_ARGUMENT_ERROR, d->name);
         if (conf_two_half(d))
-            ASSERT_EQ_MSG(conf_call(f, ctx, data, min_n + 1, argv, result), XTRACT_ARGUMENT_ERROR, d->name);
+            ASSERT_EQ_MSG(conf_call(f, ctx, data, min_n + 1, a.argv, result), XTRACT_ARGUMENT_ERROR, d->name);
         if (d->data.format == XTRACT_SQUARE_MATRIX)
-            ASSERT_EQ_MSG(conf_call(f, ctx, data, 2, argv, result), XTRACT_ARGUMENT_ERROR, d->name);
+            ASSERT_EQ_MSG(conf_call(f, ctx, data, 2, a.argv, result), XTRACT_ARGUMENT_ERROR, d->name);
         if (d->data.format == XTRACT_CHANNELS)
-            ASSERT_EQ_MSG(conf_call(f, ctx, data, call_n + 1, argv, result), XTRACT_ARGUMENT_ERROR, d->name);
+            ASSERT_EQ_MSG(conf_call(f, ctx, data, call_n + 1, a.argv, result), XTRACT_ARGUMENT_ERROR, d->name);
         if (d->data.format == XTRACT_GRID)
         {
-            conf_set(d, argf, argi, 0, 2.0);
-            ASSERT_NE_MSG(conf_call(f, ctx, data, 4, argv, result), XTRACT_ARGUMENT_ERROR, d->name);
-            ASSERT_EQ_MSG(conf_call(f, ctx, data, 3, argv, result), XTRACT_ARGUMENT_ERROR, d->name);
-            conf_set(d, argf, argi, 0, conf_default(d, 0));
+            conf_set(d, &a, 0, 2.0);
+            ASSERT_NE_MSG(conf_call(f, ctx, data, 4, a.argv, result), XTRACT_ARGUMENT_ERROR, d->name);
+            ASSERT_EQ_MSG(conf_call(f, ctx, data, 3, a.argv, result), XTRACT_ARGUMENT_ERROR, d->name);
+            conf_set(d, &a, 0, conf_property(d, XTRACT_PROPERTY_WIDTH, call_n));
         }
         if (d->data.format == XTRACT_BARK_COEFFS)
-            ASSERT_EQ_MSG(conf_call(f, ctx, data, XTRACT_BARK_BANDS + 1, argv, result), XTRACT_ARGUMENT_ERROR, d->name);
+            ASSERT_EQ_MSG(conf_call(f, ctx, data, XTRACT_BARK_BANDS + 1, a.argv, result), XTRACT_ARGUMENT_ERROR, d->name);
         if (d->data.format == XTRACT_CENTRAL_MOMENT_COEFFS || d->data.format == XTRACT_NORMALISED_MOMENT_COEFFS)
-            ASSERT_EQ_MSG(conf_call(f, ctx, data, min_n + 1, argv, result), XTRACT_ARGUMENT_ERROR, d->name);
+            ASSERT_EQ_MSG(conf_call(f, ctx, data, min_n + 1, a.argv, result), XTRACT_ARGUMENT_ERROR, d->name);
 
-        for (i = 0; i < d->argc && i < XTRACT_MAXARGS; i++)
+        for (i = 0; conf_takes_values(d) && i < d->argc; i++)
         {
+            const xtract_argument_descriptor_t *argument = &d->argv[i];
+            const double value = argument->type == XTRACT_INT ? a.i[i] : a.f[i];
+
             if (!conf_bounds_checkable(d, i))
                 continue;
-            if (d->argv.min[i] != XTRACT_UNBOUNDED_MIN)
+            if (argument->min != XTRACT_UNBOUNDED_MIN)
             {
-                conf_set(d, argf, argi, i, d->argv.min[i] - 1.0);
-                ASSERT_EQ_MSG(conf_call(f, ctx, data, call_n, argv, result), XTRACT_ARGUMENT_ERROR, d->name);
-                conf_set(d, argf, argi, i, d->argv.min[i]);
-                ASSERT_NE_MSG(conf_call(f, ctx, data, call_n, argv, result), XTRACT_ARGUMENT_ERROR, d->name);
+                conf_set(d, &a, i, argument->min - 1.0);
+                ASSERT_EQ_MSG(conf_call(f, ctx, data, call_n, a.argv, result), XTRACT_ARGUMENT_ERROR, d->name);
+                conf_set(d, &a, i, argument->min);
+                if (conf_is_taken(argument, argument->min))
+                    ASSERT_NE_MSG(conf_call(f, ctx, data, call_n, a.argv, result), XTRACT_ARGUMENT_ERROR, d->name);
             }
-            if (d->argv.max[i] != XTRACT_UNBOUNDED_MAX)
+            if (argument->max != XTRACT_UNBOUNDED_MAX)
             {
-                conf_set(d, argf, argi, i, d->argv.max[i] + 1.0);
-                ASSERT_EQ_MSG(conf_call(f, ctx, data, call_n, argv, result), XTRACT_ARGUMENT_ERROR, d->name);
-                conf_set(d, argf, argi, i, d->argv.max[i]);
-                ASSERT_NE_MSG(conf_call(f, ctx, data, call_n, argv, result), XTRACT_ARGUMENT_ERROR, d->name);
+                conf_set(d, &a, i, argument->max + 1.0);
+                ASSERT_EQ_MSG(conf_call(f, ctx, data, call_n, a.argv, result), XTRACT_ARGUMENT_ERROR, d->name);
+                conf_set(d, &a, i, argument->max);
+                if (conf_is_taken(argument, argument->max))
+                    ASSERT_NE_MSG(conf_call(f, ctx, data, call_n, a.argv, result), XTRACT_ARGUMENT_ERROR, d->name);
             }
-            conf_set(d, argf, argi, i, conf_default(d, i));
+            conf_set(d, &a, i, value);
         }
+        conf_arguments_free(&a);
     }
 
-    xtract_wavelet_f0_state_delete(wavelet_f0);
-    xtract_last_n_state_delete(last_n);
     xtract_context_delete(ctx);
-    xtract_free_cqt(cqt);
-    xtract_free_filterbank(mel);
 }
 
 /* The power of a scale of the input that a value in the unit grows by, or 0
@@ -1269,40 +1621,22 @@ static int conf_scaling_n(const xtract_function_descriptor_t *d)
         return 0;
     if (d->id == XTRACT_BARK_COEFFICIENTS)
         return 2 * CONF_N;
+    if (d->id == XTRACT_WINDOWED)
+        return CONF_SCALING_N;
     return conf_call_n(d) > conf_min_n(d) ? conf_call_n(d) : CONF_SCALING_N;
 }
 
 UTEST(descriptors, a_result_scales_with_its_input_by_the_power_its_unit_states)
 {
     static const double scale = 4.0;
-    double data[CONF_LONGEST];
-    double plain[CONF_LONGEST];
-    double scaled[CONF_LONGEST];
-    double argf[XTRACT_MAXARGS];
-    int argi[XTRACT_MAXARGS];
-    double window[XTRACT_WINDOW_SIZE];
-    xtract_filterbank *mel = xtract_init_mfcc(CONF_N, 44100.0, XTRACT_EQUAL_GAIN, 100.0, 8000.0, CONF_FILTERS);
-    xtract_cqt_kernel *cqt = xtract_init_cqt(CONF_N, 1000.0, 100.0, 1, 2, 0.01);
+    static double data[CONF_LONGEST];
+    static double plain[CONF_LONGEST];
+    static double scaled[CONF_LONGEST];
     xtract_context *ctx = xtract_context_new(CONF_LONGEST);
-    /* A state for each of the two calls, which must not see each other's input. */
-    xtract_last_n_state *last_n[2];
-    xtract_wavelet_f0_state *wavelet_f0 = xtract_wavelet_f0_state_new(44100.0);
-    int bark[XTRACT_BARK_BANDS];
+    conf_arguments a;
     int f, i, pass, checked = 0;
-    const void *argv;
 
-    ASSERT_TRUE(mel != NULL);
-    ASSERT_TRUE(cqt != NULL);
     ASSERT_TRUE(ctx != NULL);
-    for (pass = 0; pass < 2; pass++)
-    {
-        last_n[pass] = xtract_last_n_state_new(CONF_N);
-        ASSERT_TRUE(last_n[pass] != NULL);
-    }
-    ASSERT_TRUE(wavelet_f0 != NULL);
-    xtract_init_bark(2 * CONF_N, 44100.0, bark);
-    for (i = 0; i < XTRACT_WINDOW_SIZE; i++)
-        window[i] = 1.0;
 
     for (f = 0; f < XTRACT_FEATURES; f++)
     {
@@ -1327,22 +1661,23 @@ UTEST(descriptors, a_result_scales_with_its_input_by_the_power_its_unit_states)
             for (i = 0; i < CONF_LONGEST; i++)
                 result[i] = 0.0;
 
-            argv = conf_argv(d, argf, argi, mel, bark, window, cqt, last_n[pass], wavelet_f0);
-            /* An argc above XTRACT_MAXARGS is the length of one array
-             * argument, and only its first entry is described. */
-            if (d->argc > 0 && d->argc <= XTRACT_MAXARGS && d->argv.type == XTRACT_FLOAT)
+            /* A state is built for each call, so that neither call sees the
+             * other's input. */
+            conf_arguments_make(d, ctx, data, n, 0, &a);
+            ASSERT_EQ_MSG(a.failures, 0, d->name);
+            /* An argument in the unit of the data scales with the data. One
+             * that is a result of the data given already has. */
+            for (i = 0; conf_takes_values(d) && i < d->argc; i++)
             {
-                for (i = 0; i < d->argc && i < XTRACT_MAXARGS; i++)
-                {
-                    if (conf_power(d->argv.unit[i]) > 0)
-                        argf[i] = conf_scale_to_the(conf_power(d->argv.unit[i]), input_scale);
-                }
-            }
-            /* The default weight of 0 gives a variance of 0 for any input. */
-            if (d->id == XTRACT_EWMA_AVERAGE || d->id == XTRACT_EWMA_VARIANCE)
-                argf[0] = 0.5;
+                const xtract_argument_descriptor_t *argument = &d->argv[i];
+                const int taken_of_the_data = argument->kind == XTRACT_ARGUMENT_RESULT && argument->subject == XTRACT_SUBJECT_INPUT;
 
-            ASSERT_EQ_MSG(conf_call(f, ctx, data, n, argv, result), XTRACT_SUCCESS, d->name);
+                if (conf_power(argument->unit) > 0 && !taken_of_the_data)
+                    conf_set(d, &a, i, conf_scale_to_the(conf_power(argument->unit), input_scale));
+            }
+
+            ASSERT_EQ_MSG(conf_call(f, ctx, data, n, a.argv, result), XTRACT_SUCCESS, d->name);
+            conf_arguments_free(&a);
         }
 
         for (i = 0; i < CONF_LONGEST; i++)
@@ -1355,10 +1690,5 @@ UTEST(descriptors, a_result_scales_with_its_input_by_the_power_its_unit_states)
     }
     ASSERT_GT(checked, 30);
 
-    xtract_wavelet_f0_state_delete(wavelet_f0);
-    xtract_last_n_state_delete(last_n[1]);
-    xtract_last_n_state_delete(last_n[0]);
     xtract_context_delete(ctx);
-    xtract_free_cqt(cqt);
-    xtract_free_filterbank(mel);
 }

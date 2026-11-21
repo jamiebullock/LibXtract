@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: Zlib
 
 set(XTRACT_SOURCES
+    builders.c
     context.c
     delta.c
     descriptors.c

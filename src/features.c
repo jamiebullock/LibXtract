@@ -141,6 +141,453 @@ int (*xtract[])(xtract_context *, const double *, const int, const void *, doubl
         xtract_packed,
 };
 
+static const char *const values_0[] = {"equal_gain", "equal_area"};
+static const char *const values_1[] = {"gauss", "hamming", "hann", "bartlett", "triangular", "bartlett_hann", "blackman", "kaiser", "blackman_harris"};
+static const char *const values_2[] = {"none", "positive_slope", "negative_slope"};
+static const char *const values_3[] = {"off", "on"};
+static const char *const values_4[] = {"magnitude", "log", "power", "magnitude_phase"};
+static const char *const values_5[XTRACT_FEATURES] = {
+    [XTRACT_MEAN] = "mean",
+    [XTRACT_IRREGULARITY_J] = "irregularity_j",
+    [XTRACT_SMOOTHNESS] = "smoothness",
+    [XTRACT_ZCR] = "zcr",
+    [XTRACT_LOUDNESS] = "loudness",
+    [XTRACT_FLATNESS] = "flatness",
+    [XTRACT_RMS_AMPLITUDE] = "rms_amplitude",
+    [XTRACT_SHARPNESS] = "sharpness",
+    [XTRACT_HIGHEST_VALUE] = "highest_value",
+    [XTRACT_SUM] = "sum",
+    [XTRACT_NONZERO_COUNT] = "nonzero_count",
+};
+static const char *const values_6[] = {"octave", "linear"};
+static const char *const values_7[] = {"covariance", "coefficient"};
+
+static const xtract_argument_descriptor_t parameters_init_mfcc[] = {
+    {.name = "transform_size", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_TRANSFORM_SIZE},
+    {.name = "sample_rate", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_SAMPLE_RATE},
+    {.name = "style", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = 0, .max = 1, .value_count = 2, .values = values_0, .default_value = 0, .is_whole = XTRACT_TRUE},
+    {.name = "freq_min", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = 0, .max = XTRACT_UNBOUNDED_MAX, .default_value = 20},
+    {.name = "freq_max", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = 0, .max = XTRACT_UNBOUNDED_MAX, .default_value = 20000},
+    {.name = "n_filters", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = 2, .max = XTRACT_UNBOUNDED_MAX, .default_value = 13, .is_whole = XTRACT_TRUE},
+};
+static const xtract_builder_descriptor_t builder_init_mfcc = {"init_mfcc", XTRACT_FILTERBANK, XTRACT_FALSE, 6, parameters_init_mfcc, xtract_build_init_mfcc, xtract_release_init_mfcc};
+
+static const xtract_argument_descriptor_t parameters_init_gfcc[] = {
+    {.name = "transform_size", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_TRANSFORM_SIZE},
+    {.name = "sample_rate", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_SAMPLE_RATE},
+    {.name = "freq_min", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = 0, .max = XTRACT_UNBOUNDED_MAX, .default_value = 20},
+    {.name = "freq_max", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = 0, .max = XTRACT_UNBOUNDED_MAX, .default_value = 20000},
+    {.name = "n_filters", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = 2, .max = XTRACT_UNBOUNDED_MAX, .default_value = 13, .is_whole = XTRACT_TRUE},
+};
+static const xtract_builder_descriptor_t builder_init_gfcc = {"init_gfcc", XTRACT_FILTERBANK, XTRACT_FALSE, 5, parameters_init_gfcc, xtract_build_init_gfcc, xtract_release_init_gfcc};
+
+static const xtract_argument_descriptor_t parameters_init_bark[] = {
+    {.name = "transform_size", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_TRANSFORM_SIZE},
+    {.name = "sample_rate", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_SAMPLE_RATE},
+};
+static const xtract_builder_descriptor_t builder_init_bark = {"init_bark", XTRACT_INTARRAY, XTRACT_FALSE, 2, parameters_init_bark, xtract_build_init_bark, xtract_release_init_bark};
+
+static const xtract_argument_descriptor_t parameters_init_window[] = {
+    {.name = "length", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_LENGTH},
+    {.name = "type", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = 0, .max = 8, .value_count = 9, .values = values_1, .default_value = 2, .is_whole = XTRACT_TRUE},
+};
+static const xtract_builder_descriptor_t builder_init_window = {"init_window", XTRACT_FLOATARRAY, XTRACT_FALSE, 2, parameters_init_window, xtract_build_init_window, xtract_release_init_window};
+
+static const xtract_argument_descriptor_t parameters_init_dct[] = {
+    {.name = "length", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_LENGTH},
+};
+static const xtract_builder_descriptor_t builder_init_dct = {"init_dct", XTRACT_FLOATARRAY, XTRACT_FALSE, 1, parameters_init_dct, xtract_build_init_dct, xtract_release_init_dct};
+
+static const xtract_argument_descriptor_t parameters_init_cqt[] = {
+    {.name = "transform_size", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_TRANSFORM_SIZE},
+    {.name = "sample_rate", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_SAMPLE_RATE},
+    {.name = "fmin", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = 2.2250738585072014e-308, .max = XTRACT_UNBOUNDED_MAX, .default_value = 32.700000000000003},
+    {.name = "bins_per_octave", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = 1, .max = XTRACT_UNBOUNDED_MAX, .default_value = 12, .is_whole = XTRACT_TRUE},
+    {.name = "n_bins", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = 1, .max = XTRACT_UNBOUNDED_MAX, .default_value = 84, .is_whole = XTRACT_TRUE},
+    {.name = "threshold", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_NONE, .min = 0, .max = 1, .default_value = 0.01},
+};
+static const xtract_builder_descriptor_t builder_init_cqt = {"init_cqt", XTRACT_CQT_KERNEL, XTRACT_FALSE, 6, parameters_init_cqt, xtract_build_init_cqt, xtract_release_init_cqt};
+
+static const xtract_argument_descriptor_t parameters_last_n_state_new[] = {
+    {.name = "capacity", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_LENGTH},
+};
+static const xtract_builder_descriptor_t builder_last_n_state_new = {"last_n_state_new", XTRACT_LAST_N_STATE, XTRACT_TRUE, 1, parameters_last_n_state_new, xtract_build_last_n_state_new, xtract_release_last_n_state_new};
+
+static const xtract_argument_descriptor_t parameters_wavelet_f0_state_new[] = {
+    {.name = "sample_rate", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_SAMPLE_RATE},
+};
+static const xtract_builder_descriptor_t builder_wavelet_f0_state_new = {"wavelet_f0_state_new", XTRACT_WAVELET_F0_STATE, XTRACT_TRUE, 1, parameters_wavelet_f0_state_new, xtract_build_wavelet_f0_state_new, xtract_release_wavelet_f0_state_new};
+
+static const xtract_provider_t providers_mean[] = {{XTRACT_MEAN}};
+static const xtract_quantity_t quantity_mean = {"mean", 1, providers_mean};
+
+static const xtract_provider_t providers_variance[] = {{XTRACT_VARIANCE}};
+static const xtract_quantity_t quantity_variance = {"variance", 1, providers_variance};
+
+static const xtract_provider_t providers_standard_deviation[] = {{XTRACT_STANDARD_DEVIATION}};
+static const xtract_quantity_t quantity_standard_deviation = {"standard_deviation", 1, providers_standard_deviation};
+
+static const xtract_provider_t providers_spectral_mean[] = {{XTRACT_SPECTRAL_MEAN}, {XTRACT_SPECTRAL_CENTROID}};
+static const xtract_quantity_t quantity_spectral_mean = {"spectral_mean", 2, providers_spectral_mean};
+
+static const xtract_provider_t providers_spectral_variance[] = {{XTRACT_SPECTRAL_VARIANCE}, {XTRACT_SPREAD}};
+static const xtract_quantity_t quantity_spectral_variance = {"spectral_variance", 2, providers_spectral_variance};
+
+static const xtract_provider_t providers_spectral_standard_deviation[] = {{XTRACT_SPECTRAL_STANDARD_DEVIATION}};
+static const xtract_quantity_t quantity_spectral_standard_deviation = {"spectral_standard_deviation", 1, providers_spectral_standard_deviation};
+
+static const xtract_provider_t providers_smoothness[] = {{XTRACT_SMOOTHNESS}};
+static const xtract_quantity_t quantity_smoothness = {"smoothness", 1, providers_smoothness};
+
+static const xtract_provider_t providers_flatness[] = {{XTRACT_FLATNESS}};
+static const xtract_quantity_t quantity_flatness = {"flatness", 1, providers_flatness};
+
+static const xtract_provider_t providers_flatness_db[] = {{XTRACT_FLATNESS_DB}};
+static const xtract_quantity_t quantity_flatness_db = {"flatness_db", 1, providers_flatness_db};
+
+static const xtract_provider_t providers_highest_value[] = {{XTRACT_HIGHEST_VALUE}};
+static const xtract_quantity_t quantity_highest_value = {"highest_value", 1, providers_highest_value};
+
+static const xtract_provider_t providers_fundamental[] = {{XTRACT_FAILSAFE_F0}, {XTRACT_HPS}, {XTRACT_F0}, {XTRACT_WAVELET_F0}, {XTRACT_MCLEOD_F0}};
+static const xtract_quantity_t quantity_fundamental = {"fundamental", 5, providers_fundamental};
+
+static const xtract_provider_t providers_median[] = {{XTRACT_MEDIAN}};
+static const xtract_quantity_t quantity_median = {"median", 1, providers_median};
+
+static const xtract_provider_t providers_lowest_value[] = {{XTRACT_LOWEST_VALUE}};
+static const xtract_quantity_t quantity_lowest_value = {"lowest_value", 1, providers_lowest_value};
+
+static const xtract_argument_descriptor_t arguments_variance[] = {
+    {.name = "mean", .kind = XTRACT_ARGUMENT_RESULT, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_ANY, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .accepts = &quantity_mean, .subject = XTRACT_SUBJECT_INPUT},
+};
+
+static const xtract_argument_descriptor_t arguments_standard_deviation[] = {
+    {.name = "variance", .kind = XTRACT_ARGUMENT_RESULT, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_ANY_SQUARED, .min = 0, .max = XTRACT_UNBOUNDED_MAX, .accepts = &quantity_variance},
+};
+
+static const xtract_argument_descriptor_t arguments_average_deviation[] = {
+    {.name = "mean", .kind = XTRACT_ARGUMENT_RESULT, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_ANY, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .accepts = &quantity_mean, .subject = XTRACT_SUBJECT_INPUT},
+};
+
+static const xtract_argument_descriptor_t arguments_skewness[] = {
+    {.name = "mean", .kind = XTRACT_ARGUMENT_RESULT, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_ANY, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .accepts = &quantity_mean, .subject = XTRACT_SUBJECT_INPUT},
+    {.name = "standard_deviation", .kind = XTRACT_ARGUMENT_RESULT, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_ANY, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .accepts = &quantity_standard_deviation, .subject = XTRACT_SUBJECT_INPUT},
+};
+
+static const xtract_argument_descriptor_t arguments_kurtosis[] = {
+    {.name = "mean", .kind = XTRACT_ARGUMENT_RESULT, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_ANY, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .accepts = &quantity_mean, .subject = XTRACT_SUBJECT_INPUT},
+    {.name = "standard_deviation", .kind = XTRACT_ARGUMENT_RESULT, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_ANY, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .accepts = &quantity_standard_deviation, .subject = XTRACT_SUBJECT_INPUT},
+};
+
+static const xtract_argument_descriptor_t arguments_spectral_variance[] = {
+    {.name = "mean", .kind = XTRACT_ARGUMENT_RESULT, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .accepts = &quantity_spectral_mean, .subject = XTRACT_SUBJECT_INPUT},
+};
+
+static const xtract_argument_descriptor_t arguments_spectral_standard_deviation[] = {
+    {.name = "variance", .kind = XTRACT_ARGUMENT_RESULT, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ_SQUARED, .min = 0, .max = XTRACT_UNBOUNDED_MAX, .accepts = &quantity_spectral_variance},
+};
+
+static const xtract_argument_descriptor_t arguments_spectral_skewness[] = {
+    {.name = "mean", .kind = XTRACT_ARGUMENT_RESULT, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .accepts = &quantity_spectral_mean, .subject = XTRACT_SUBJECT_INPUT},
+    {.name = "standard_deviation", .kind = XTRACT_ARGUMENT_RESULT, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .accepts = &quantity_spectral_standard_deviation, .subject = XTRACT_SUBJECT_INPUT},
+};
+
+static const xtract_argument_descriptor_t arguments_spectral_kurtosis[] = {
+    {.name = "mean", .kind = XTRACT_ARGUMENT_RESULT, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .accepts = &quantity_spectral_mean, .subject = XTRACT_SUBJECT_INPUT},
+    {.name = "standard_deviation", .kind = XTRACT_ARGUMENT_RESULT, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .accepts = &quantity_spectral_standard_deviation, .subject = XTRACT_SUBJECT_INPUT},
+};
+
+static const xtract_argument_descriptor_t arguments_irregularity_k[] = {
+    {.name = "smoothness", .kind = XTRACT_ARGUMENT_RESULT, .type = XTRACT_FLOAT, .unit = XTRACT_DECIBELS, .min = 0, .max = XTRACT_UNBOUNDED_MAX, .accepts = &quantity_smoothness},
+};
+
+static const xtract_argument_descriptor_t arguments_spread[] = {
+    {.name = "mean", .kind = XTRACT_ARGUMENT_RESULT, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .accepts = &quantity_spectral_mean, .subject = XTRACT_SUBJECT_INPUT},
+};
+
+static const xtract_argument_descriptor_t arguments_rolloff[] = {
+    {.name = "bin_spacing", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = 0, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_BIN_SPACING},
+    {.name = "threshold", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_PERCENT, .min = 0, .max = 100, .default_value = 95},
+};
+
+static const xtract_argument_descriptor_t arguments_flatness_db[] = {
+    {.name = "flatness", .kind = XTRACT_ARGUMENT_RESULT, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_NONE, .min = 0, .max = 1, .accepts = &quantity_flatness},
+};
+
+static const xtract_argument_descriptor_t arguments_tonality[] = {
+    {.name = "flatness_db", .kind = XTRACT_ARGUMENT_RESULT, .type = XTRACT_FLOAT, .unit = XTRACT_DECIBELS, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .accepts = &quantity_flatness_db},
+};
+
+static const xtract_argument_descriptor_t arguments_crest[] = {
+    {.name = "maximum", .kind = XTRACT_ARGUMENT_RESULT, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_ANY, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .accepts = &quantity_highest_value},
+    {.name = "mean", .kind = XTRACT_ARGUMENT_RESULT, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_ANY, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .accepts = &quantity_mean},
+};
+
+static const xtract_argument_descriptor_t arguments_noisiness[] = {
+    {.name = "fundamental", .kind = XTRACT_ARGUMENT_RESULT, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = 0, .max = XTRACT_UNBOUNDED_MAX, .accepts = &quantity_fundamental, .subject = XTRACT_SUBJECT_SOURCE},
+    {.name = "threshold", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_NONE, .min = 0, .max = 1, .default_value = 0.10000000000000001},
+};
+
+static const xtract_argument_descriptor_t arguments_spectral_inharmonicity[] = {
+    {.name = "fundamental", .kind = XTRACT_ARGUMENT_RESULT, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = 0, .max = XTRACT_UNBOUNDED_MAX, .accepts = &quantity_fundamental, .subject = XTRACT_SUBJECT_SOURCE},
+};
+
+static const xtract_argument_descriptor_t arguments_lowest_value[] = {
+    {.name = "threshold", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_ANY, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .default_value = -1.7976931348623157e+308},
+};
+
+static const xtract_argument_descriptor_t arguments_hps[] = {
+    {.name = "harmonics", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_NONE, .min = 2, .max = 16, .default_value = 3, .is_whole = XTRACT_TRUE},
+};
+
+static const xtract_argument_descriptor_t arguments_f0[] = {
+    {.name = "sample_rate", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = 2.2250738585072014e-308, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_SAMPLE_RATE},
+};
+
+static const xtract_argument_descriptor_t arguments_failsafe_f0[] = {
+    {.name = "sample_rate", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = 2.2250738585072014e-308, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_SAMPLE_RATE},
+};
+
+static const xtract_argument_descriptor_t arguments_wavelet_f0[] = {
+    {.name = "state", .kind = XTRACT_ARGUMENT_OBJECT, .type = XTRACT_WAVELET_F0_STATE, .unit = XTRACT_UNIT_NONE, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .builder = &builder_wavelet_f0_state_new},
+};
+
+static const xtract_argument_descriptor_t arguments_mcleod_f0[] = {
+    {.name = "sample_rate", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = 2.2250738585072014e-308, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_SAMPLE_RATE},
+};
+
+static const xtract_argument_descriptor_t arguments_midicent[] = {
+    {.name = "frequency", .kind = XTRACT_ARGUMENT_RESULT, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = 0, .max = XTRACT_UNBOUNDED_MAX, .accepts = &quantity_fundamental},
+};
+
+static const xtract_argument_descriptor_t arguments_lnorm[] = {
+    {.name = "order", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_NONE, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .default_value = 2},
+    {.name = "filter", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_NONE, .min = 0, .max = 2, .value_count = 3, .values = values_2, .default_value = 0, .is_whole = XTRACT_TRUE},
+    {.name = "normalise", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_NONE, .min = 0, .max = 1, .value_count = 2, .values = values_3, .default_value = 0, .is_whole = XTRACT_TRUE},
+};
+
+static const xtract_argument_descriptor_t arguments_flux[] = {
+    {.name = "order", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_NONE, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .default_value = 2},
+    {.name = "filter", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_NONE, .min = 0, .max = 2, .value_count = 3, .values = values_2, .default_value = 0, .is_whole = XTRACT_TRUE},
+    {.name = "normalise", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_NONE, .min = 0, .max = 1, .value_count = 2, .values = values_3, .default_value = 0, .is_whole = XTRACT_TRUE},
+};
+
+static const xtract_argument_descriptor_t arguments_attack_time[] = {
+    {.name = "sample_rate", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = 2.2250738585072014e-308, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_SAMPLE_RATE},
+    {.name = "start", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_NONE, .min = 0, .max = 1, .default_value = 0.20000000000000001},
+    {.name = "stop", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_NONE, .min = 0, .max = 1, .default_value = 0.90000000000000002},
+};
+
+static const xtract_argument_descriptor_t arguments_decay_time[] = {
+    {.name = "sample_rate", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = 2.2250738585072014e-308, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_SAMPLE_RATE},
+    {.name = "threshold", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_NONE, .min = 0, .max = 1, .default_value = 0.40000000000000002},
+};
+
+static const xtract_argument_descriptor_t arguments_bark_coefficients[] = {
+    {.name = "band_limits", .kind = XTRACT_ARGUMENT_OBJECT, .type = XTRACT_INTARRAY, .unit = XTRACT_UNIT_NONE, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .builder = &builder_init_bark},
+};
+
+static const xtract_argument_descriptor_t arguments_peak_spectrum[] = {
+    {.name = "bin_spacing", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = 2.2250738585072014e-308, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_BIN_SPACING},
+    {.name = "threshold", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_PERCENT, .min = 0, .max = 100, .default_value = 10},
+};
+
+static const xtract_argument_descriptor_t arguments_spectrum[] = {
+    {.name = "bin_spacing", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = 2.2250738585072014e-308, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_BIN_SPACING},
+    {.name = "type", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_NONE, .min = 0, .max = 3, .value_count = 4, .values = values_4, .default_value = 0, .is_whole = XTRACT_TRUE},
+    {.name = "normalise", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_NONE, .min = 0, .max = 1, .value_count = 2, .values = values_3, .default_value = 0, .is_whole = XTRACT_TRUE},
+};
+
+static const xtract_argument_descriptor_t arguments_mfcc[] = {
+    {.name = "filterbank", .kind = XTRACT_ARGUMENT_OBJECT, .type = XTRACT_FILTERBANK, .unit = XTRACT_UNIT_NONE, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .builder = &builder_init_mfcc},
+};
+
+static const xtract_argument_descriptor_t arguments_dct[] = {
+    {.name = "table", .kind = XTRACT_ARGUMENT_OBJECT, .type = XTRACT_FLOATARRAY, .unit = XTRACT_UNIT_NONE, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .builder = &builder_init_dct, .is_optional = XTRACT_TRUE},
+};
+
+static const xtract_argument_descriptor_t arguments_harmonic_spectrum[] = {
+    {.name = "fundamental", .kind = XTRACT_ARGUMENT_RESULT, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = 0, .max = XTRACT_UNBOUNDED_MAX, .accepts = &quantity_fundamental, .subject = XTRACT_SUBJECT_SOURCE},
+    {.name = "threshold", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_NONE, .min = 0, .max = 1, .default_value = 0.10000000000000001},
+};
+
+static const xtract_argument_descriptor_t arguments_lpcc[] = {
+    {.name = "order", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = 1, .max = XTRACT_UNBOUNDED_MAX, .default_value = 12, .is_whole = XTRACT_TRUE},
+};
+
+static const xtract_argument_descriptor_t arguments_subbands[] = {
+    {.name = "feature", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = 0, .max = XTRACT_FEATURES - 1, .value_count = XTRACT_FEATURES, .values = values_5, .default_value = 0, .is_whole = XTRACT_TRUE},
+    {.name = "bands", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = 1, .max = XTRACT_UNBOUNDED_MAX, .default_value = 4, .is_whole = XTRACT_TRUE},
+    {.name = "scale", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = 0, .max = 1, .value_count = 2, .values = values_6, .default_value = 1, .is_whole = XTRACT_TRUE},
+    {.name = "start", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_INT, .unit = XTRACT_BINS, .min = 0, .max = XTRACT_UNBOUNDED_MAX, .default_value = 1, .is_whole = XTRACT_TRUE},
+};
+
+static const xtract_argument_descriptor_t arguments_mel_spectrogram[] = {
+    {.name = "filterbank", .kind = XTRACT_ARGUMENT_OBJECT, .type = XTRACT_FILTERBANK, .unit = XTRACT_UNIT_NONE, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .builder = &builder_init_mfcc},
+};
+
+static const xtract_argument_descriptor_t arguments_gfcc[] = {
+    {.name = "filterbank", .kind = XTRACT_ARGUMENT_OBJECT, .type = XTRACT_FILTERBANK, .unit = XTRACT_UNIT_NONE, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .builder = &builder_init_gfcc},
+};
+
+static const xtract_argument_descriptor_t arguments_gammatone_spectrogram[] = {
+    {.name = "filterbank", .kind = XTRACT_ARGUMENT_OBJECT, .type = XTRACT_FILTERBANK, .unit = XTRACT_UNIT_NONE, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .builder = &builder_init_gfcc},
+};
+
+static const xtract_argument_descriptor_t arguments_windowed[] = {
+    {.name = "window", .kind = XTRACT_ARGUMENT_OBJECT, .type = XTRACT_FLOATARRAY, .unit = XTRACT_UNIT_NONE, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .builder = &builder_init_window},
+};
+
+static const xtract_argument_descriptor_t arguments_smoothed[] = {
+    {.name = "gain", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_NONE, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .default_value = 0.5},
+};
+
+static const xtract_argument_descriptor_t arguments_peak[] = {
+    {.name = "threshold", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_ANY, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .default_value = 0},
+};
+
+static const xtract_argument_descriptor_t arguments_mmbses[] = {
+    {.name = "filterbank", .kind = XTRACT_ARGUMENT_OBJECT, .type = XTRACT_FILTERBANK, .unit = XTRACT_UNIT_NONE, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .builder = &builder_init_mfcc},
+};
+
+static const xtract_argument_descriptor_t arguments_spectral_subband_centroids[] = {
+    {.name = "filterbank", .kind = XTRACT_ARGUMENT_OBJECT, .type = XTRACT_FILTERBANK, .unit = XTRACT_UNIT_NONE, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .builder = &builder_init_mfcc},
+};
+
+static const xtract_argument_descriptor_t arguments_moving_sum[] = {
+    {.name = "window", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = 1, .max = XTRACT_UNBOUNDED_MAX, .default_value = 5, .is_whole = XTRACT_TRUE},
+};
+
+static const xtract_argument_descriptor_t arguments_moving_average[] = {
+    {.name = "window", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = 1, .max = XTRACT_UNBOUNDED_MAX, .default_value = 5, .is_whole = XTRACT_TRUE},
+};
+
+static const xtract_argument_descriptor_t arguments_moving_variance[] = {
+    {.name = "window", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = 2, .max = XTRACT_UNBOUNDED_MAX, .default_value = 5, .is_whole = XTRACT_TRUE},
+};
+
+static const xtract_argument_descriptor_t arguments_moving_standard_deviation[] = {
+    {.name = "window", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = 2, .max = XTRACT_UNBOUNDED_MAX, .default_value = 5, .is_whole = XTRACT_TRUE},
+};
+
+static const xtract_argument_descriptor_t arguments_moving_max[] = {
+    {.name = "window", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = 1, .max = XTRACT_UNBOUNDED_MAX, .default_value = 5, .is_whole = XTRACT_TRUE},
+};
+
+static const xtract_argument_descriptor_t arguments_moving_min[] = {
+    {.name = "window", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = 1, .max = XTRACT_UNBOUNDED_MAX, .default_value = 5, .is_whole = XTRACT_TRUE},
+};
+
+static const xtract_argument_descriptor_t arguments_ewma_average[] = {
+    {.name = "weight", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_NONE, .min = 0, .max = 1, .default_value = 0.10000000000000001},
+};
+
+static const xtract_argument_descriptor_t arguments_ewma_variance[] = {
+    {.name = "weight", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_NONE, .min = 0, .max = 1, .default_value = 0.10000000000000001},
+};
+
+static const xtract_argument_descriptor_t arguments_median_absolute_deviation[] = {
+    {.name = "median", .kind = XTRACT_ARGUMENT_RESULT, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_ANY, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .accepts = &quantity_median, .subject = XTRACT_SUBJECT_INPUT},
+};
+
+static const xtract_argument_descriptor_t arguments_time_reversal_asymmetry[] = {
+    {.name = "lag", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = 1, .max = XTRACT_UNBOUNDED_MAX, .default_value = 1, .is_whole = XTRACT_TRUE},
+};
+
+static const xtract_argument_descriptor_t arguments_higuchi_fractal_dimension[] = {
+    {.name = "k_max", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = 2, .max = XTRACT_UNBOUNDED_MAX, .default_value = 10, .is_whole = XTRACT_TRUE},
+};
+
+static const xtract_argument_descriptor_t arguments_permutation_entropy[] = {
+    {.name = "order", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = 2, .max = 8, .default_value = 3, .is_whole = XTRACT_TRUE},
+    {.name = "delay", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = 1, .max = XTRACT_UNBOUNDED_MAX, .default_value = 1, .is_whole = XTRACT_TRUE},
+};
+
+static const xtract_argument_descriptor_t arguments_lempel_ziv_complexity[] = {
+    {.name = "threshold", .kind = XTRACT_ARGUMENT_RESULT, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_ANY, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .accepts = &quantity_median, .subject = XTRACT_SUBJECT_INPUT},
+};
+
+static const xtract_argument_descriptor_t arguments_sample_entropy[] = {
+    {.name = "template_length", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_NONE, .min = 1, .max = XTRACT_UNBOUNDED_MAX, .default_value = 2, .is_whole = XTRACT_TRUE},
+    {.name = "tolerance", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_ANY, .min = 0, .max = XTRACT_UNBOUNDED_MAX, .default_value = 0.20000000000000001},
+};
+
+static const xtract_argument_descriptor_t arguments_approximate_entropy[] = {
+    {.name = "template_length", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_NONE, .min = 1, .max = XTRACT_UNBOUNDED_MAX, .default_value = 2, .is_whole = XTRACT_TRUE},
+    {.name = "tolerance", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_ANY, .min = 0, .max = XTRACT_UNBOUNDED_MAX, .default_value = 0.20000000000000001},
+};
+
+static const xtract_argument_descriptor_t arguments_decay_rate[] = {
+    {.name = "sample_rate", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = 2.2250738585072014e-308, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_SAMPLE_RATE},
+    {.name = "threshold", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_NONE, .min = 0, .max = 1, .default_value = 0.40000000000000002},
+};
+
+static const xtract_argument_descriptor_t arguments_cross_correlation[] = {
+    {.name = "scaling", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_NONE, .min = 0, .max = 1, .value_count = 2, .values = values_7, .default_value = 0, .is_whole = XTRACT_TRUE},
+};
+
+static const xtract_argument_descriptor_t arguments_modified_kullback_leibler[] = {
+    {.name = "offset", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_ANY, .min = 0, .max = XTRACT_UNBOUNDED_MAX, .default_value = 9.9999999999999995e-07},
+};
+
+static const xtract_argument_descriptor_t arguments_spectral_contrast[] = {
+    {.name = "bands", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_NONE, .min = 1, .max = XTRACT_UNBOUNDED_MAX, .default_value = 6, .is_whole = XTRACT_TRUE},
+    {.name = "lower_edge", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = 0, .max = XTRACT_UNBOUNDED_MAX, .default_value = 200},
+    {.name = "fraction", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_NONE, .min = 0, .max = 1, .default_value = 0.02},
+};
+
+static const xtract_argument_descriptor_t arguments_chroma[] = {
+    {.name = "tuning", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = 2.2250738585072014e-308, .max = XTRACT_UNBOUNDED_MAX, .default_value = 440},
+    {.name = "lowest", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = 0, .max = XTRACT_UNBOUNDED_MAX, .default_value = 40},
+    {.name = "highest", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = 0, .max = XTRACT_UNBOUNDED_MAX, .default_value = 5000},
+};
+
+static const xtract_argument_descriptor_t arguments_cqt[] = {
+    {.name = "kernel", .kind = XTRACT_ARGUMENT_OBJECT, .type = XTRACT_CQT_KERNEL, .unit = XTRACT_UNIT_NONE, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .builder = &builder_init_cqt},
+};
+
+static const xtract_argument_descriptor_t arguments_covariance_matrix[] = {
+    {.name = "series", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = 1, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_SERIES},
+};
+
+static const xtract_argument_descriptor_t arguments_coherence[] = {
+    {.name = "segment_length", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = 2, .max = XTRACT_UNBOUNDED_MAX, .default_value = 256, .is_whole = XTRACT_TRUE},
+};
+
+static const xtract_argument_descriptor_t arguments_grid_moments[] = {
+    {.name = "width", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = 1, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_WIDTH},
+};
+
+static const xtract_argument_descriptor_t arguments_grid_central_moments[] = {
+    {.name = "width", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = 1, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_WIDTH},
+};
+
+static const xtract_argument_descriptor_t arguments_quantise[] = {
+    {.name = "lower", .kind = XTRACT_ARGUMENT_RESULT, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_ANY, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .accepts = &quantity_lowest_value, .subject = XTRACT_SUBJECT_INPUT},
+    {.name = "upper", .kind = XTRACT_ARGUMENT_RESULT, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_ANY, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .accepts = &quantity_highest_value, .subject = XTRACT_SUBJECT_INPUT},
+    {.name = "levels", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_NONE, .min = 1, .max = 2147483647, .default_value = 256, .is_whole = XTRACT_TRUE},
+};
+
+static const xtract_argument_descriptor_t arguments_histogram[] = {
+    {.name = "levels", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = 1, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_LEVELS},
+};
+
+static const xtract_argument_descriptor_t arguments_cooccurrence_matrix[] = {
+    {.name = "width", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = 1, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_WIDTH},
+    {.name = "levels", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = 1, .max = 46340, .data_property = XTRACT_PROPERTY_LEVELS},
+    {.name = "column_offset", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .default_value = 1, .is_whole = XTRACT_TRUE},
+    {.name = "row_offset", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .default_value = 0, .is_whole = XTRACT_TRUE},
+    {.name = "symmetric", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = 0, .max = 1, .value_count = 2, .values = values_3, .default_value = 0, .is_whole = XTRACT_TRUE},
+};
+
+static const xtract_argument_descriptor_t arguments_local_binary_patterns[] = {
+    {.name = "width", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = 1, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_WIDTH},
+};
+
+static const xtract_argument_descriptor_t arguments_last_n[] = {
+    {.name = "state", .kind = XTRACT_ARGUMENT_OBJECT, .type = XTRACT_LAST_N_STATE, .unit = XTRACT_UNIT_NONE, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .builder = &builder_last_n_state_new},
+};
+
 const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
     [XTRACT_MEAN] = {
         .id = XTRACT_MEAN,
@@ -151,7 +598,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY},
         .argc = 0,
-        .argv = {XTRACT_FLOAT, {XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argv = NULL,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
         .result = {.scalar = {XTRACT_UNBOUNDED_MIN, XTRACT_UNBOUNDED_MAX, XTRACT_UNIT_ANY}},
@@ -165,7 +612,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY},
         .argc = 1,
-        .argv = {XTRACT_FLOAT, {XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_ANY}, {XTRACT_MEAN}},
+        .argv = arguments_variance,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
         .result = {.scalar = {XTRACT_UNBOUNDED_MIN, XTRACT_UNBOUNDED_MAX, XTRACT_UNIT_ANY_SQUARED}},
@@ -179,7 +626,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_NO_DATA, XTRACT_UNIT_ANY},
         .argc = 1,
-        .argv = {XTRACT_FLOAT, {0}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_ANY_SQUARED}, {XTRACT_VARIANCE}},
+        .argv = arguments_standard_deviation,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
         .result = {.scalar = {XTRACT_UNBOUNDED_MIN, XTRACT_UNBOUNDED_MAX, XTRACT_UNIT_ANY}},
@@ -193,7 +640,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY},
         .argc = 1,
-        .argv = {XTRACT_FLOAT, {XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_ANY}, {XTRACT_MEAN}},
+        .argv = arguments_average_deviation,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
         .result = {.scalar = {XTRACT_UNBOUNDED_MIN, XTRACT_UNBOUNDED_MAX, XTRACT_UNIT_ANY}},
@@ -207,7 +654,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY},
         .argc = 2,
-        .argv = {XTRACT_FLOAT, {XTRACT_UNBOUNDED_MIN, XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX, XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT, XTRACT_NO_DEFAULT}, {XTRACT_UNIT_ANY, XTRACT_UNIT_ANY}, {XTRACT_MEAN, XTRACT_STANDARD_DEVIATION}},
+        .argv = arguments_skewness,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
         .result = {.scalar = {XTRACT_UNBOUNDED_MIN, XTRACT_UNBOUNDED_MAX, XTRACT_UNIT_NONE}},
@@ -221,7 +668,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY},
         .argc = 2,
-        .argv = {XTRACT_FLOAT, {XTRACT_UNBOUNDED_MIN, XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX, XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT, XTRACT_NO_DEFAULT}, {XTRACT_UNIT_ANY, XTRACT_UNIT_ANY}, {XTRACT_MEAN, XTRACT_STANDARD_DEVIATION}},
+        .argv = arguments_kurtosis,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
         .result = {.scalar = {XTRACT_UNBOUNDED_MIN, XTRACT_UNBOUNDED_MAX, XTRACT_UNIT_NONE}},
@@ -235,7 +682,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_SPECTRAL, XTRACT_ANY_AMPLITUDE_HERTZ},
         .argc = 0,
-        .argv = {XTRACT_FLOAT, {XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argv = NULL,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
         .result = {.scalar = {0, 96000, XTRACT_HERTZ}},
@@ -249,7 +696,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_SPECTRAL, XTRACT_ANY_AMPLITUDE_HERTZ},
         .argc = 1,
-        .argv = {XTRACT_FLOAT, {XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_HERTZ}, {XTRACT_SPECTRAL_MEAN}},
+        .argv = arguments_spectral_variance,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
         .result = {.scalar = {0, 2304000000, XTRACT_HERTZ_SQUARED}},
@@ -263,7 +710,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_NO_DATA, XTRACT_ANY_AMPLITUDE_HERTZ},
         .argc = 1,
-        .argv = {XTRACT_FLOAT, {0}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_HERTZ_SQUARED}, {XTRACT_SPECTRAL_VARIANCE}},
+        .argv = arguments_spectral_standard_deviation,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
         .result = {.scalar = {0, 96000, XTRACT_HERTZ}},
@@ -277,7 +724,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_SPECTRAL, XTRACT_ANY_AMPLITUDE_HERTZ},
         .argc = 2,
-        .argv = {XTRACT_FLOAT, {XTRACT_UNBOUNDED_MIN, XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX, XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT, XTRACT_NO_DEFAULT}, {XTRACT_HERTZ, XTRACT_HERTZ}, {XTRACT_SPECTRAL_MEAN, XTRACT_SPECTRAL_STANDARD_DEVIATION}},
+        .argv = arguments_spectral_skewness,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
         .result = {.scalar = {XTRACT_UNBOUNDED_MIN, XTRACT_UNBOUNDED_MAX, XTRACT_UNIT_NONE}},
@@ -291,7 +738,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_SPECTRAL, XTRACT_ANY_AMPLITUDE_HERTZ},
         .argc = 2,
-        .argv = {XTRACT_FLOAT, {XTRACT_UNBOUNDED_MIN, XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX, XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT, XTRACT_NO_DEFAULT}, {XTRACT_HERTZ, XTRACT_HERTZ}, {XTRACT_SPECTRAL_MEAN, XTRACT_SPECTRAL_STANDARD_DEVIATION}},
+        .argv = arguments_spectral_kurtosis,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
         .result = {.scalar = {-2, XTRACT_UNBOUNDED_MAX, XTRACT_UNIT_NONE}},
@@ -305,7 +752,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_SPECTRAL, XTRACT_ANY_AMPLITUDE_HERTZ},
         .argc = 0,
-        .argv = {XTRACT_FLOAT, {XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argv = NULL,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
         .result = {.scalar = {0, 96000, XTRACT_HERTZ}},
@@ -319,7 +766,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 1994,
         .data = {XTRACT_NO_DATA, XTRACT_UNIT_ANY},
         .argc = 1,
-        .argv = {XTRACT_FLOAT, {0}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_DECIBELS}, {XTRACT_SMOOTHNESS}},
+        .argv = arguments_irregularity_k,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
         .result = {.scalar = {XTRACT_UNBOUNDED_MIN, XTRACT_UNBOUNDED_MAX, XTRACT_UNIT_NONE}},
@@ -333,7 +780,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 1999,
         .data = {XTRACT_SPECTRAL_MAGNITUDES, XTRACT_UNIT_ANY},
         .argc = 0,
-        .argv = {XTRACT_FLOAT, {XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argv = NULL,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
         .result = {.scalar = {0, XTRACT_UNBOUNDED_MAX, XTRACT_UNIT_NONE}},
@@ -347,7 +794,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 1982,
         .data = {XTRACT_SPECTRAL_HARMONICS_MAGNITUDES, XTRACT_UNIT_ANY},
         .argc = 0,
-        .argv = {XTRACT_FLOAT, {XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argv = NULL,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
         .result = {.scalar = {0, 1, XTRACT_UNIT_NONE}},
@@ -361,7 +808,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 1982,
         .data = {XTRACT_SPECTRAL_HARMONICS_MAGNITUDES, XTRACT_UNIT_ANY},
         .argc = 0,
-        .argv = {XTRACT_FLOAT, {XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argv = NULL,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
         .result = {.scalar = {0, 1, XTRACT_UNIT_NONE}},
@@ -375,7 +822,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 1982,
         .data = {XTRACT_SPECTRAL_HARMONICS_MAGNITUDES, XTRACT_UNIT_ANY},
         .argc = 0,
-        .argv = {XTRACT_FLOAT, {XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argv = NULL,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
         .result = {.scalar = {0, 1, XTRACT_UNIT_NONE}},
@@ -389,7 +836,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 1999,
         .data = {XTRACT_SPECTRAL_MAGNITUDES, XTRACT_UNIT_ANY},
         .argc = 0,
-        .argv = {XTRACT_FLOAT, {XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argv = NULL,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
         .result = {.scalar = {0, XTRACT_UNBOUNDED_MAX, XTRACT_DECIBELS}},
@@ -403,7 +850,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 2005,
         .data = {XTRACT_SPECTRAL, XTRACT_UNIT_ANY},
         .argc = 1,
-        .argv = {XTRACT_FLOAT, {XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_HERTZ}, {XTRACT_SPECTRAL_MEAN}},
+        .argv = arguments_spread,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
         .result = {.scalar = {0, 2304000000, XTRACT_HERTZ_SQUARED}},
@@ -417,7 +864,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_AUDIO_SAMPLES, XTRACT_UNIT_ANY},
         .argc = 0,
-        .argv = {XTRACT_FLOAT, {XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argv = NULL,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
         .result = {.scalar = {0, XTRACT_UNBOUNDED_MAX, XTRACT_UNIT_NONE}},
@@ -431,7 +878,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 2005,
         .data = {XTRACT_SPECTRAL_MAGNITUDES, XTRACT_UNIT_ANY},
         .argc = 2,
-        .argv = {XTRACT_FLOAT, {0, 0}, {XTRACT_UNBOUNDED_MAX, 100}, {43.066000000000003, 95}, {XTRACT_HERTZ, XTRACT_PERCENT}, {XTRACT_ANY, XTRACT_ANY}},
+        .argv = arguments_rolloff,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
         .result = {.scalar = {0, 96000, XTRACT_HERTZ}},
@@ -445,7 +892,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 2005,
         .data = {XTRACT_BARK_COEFFS, XTRACT_UNIT_ANY},
         .argc = 0,
-        .argv = {XTRACT_FLOAT, {XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argv = NULL,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
         .result = {.scalar = {0, XTRACT_UNBOUNDED_MAX, XTRACT_SONE}},
@@ -459,7 +906,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 2005,
         .data = {XTRACT_SPECTRAL_MAGNITUDES, XTRACT_UNIT_ANY},
         .argc = 0,
-        .argv = {XTRACT_FLOAT, {XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argv = NULL,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
         .result = {.scalar = {0, 1, XTRACT_UNIT_NONE}},
@@ -473,7 +920,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 2003,
         .data = {XTRACT_NO_DATA, XTRACT_UNIT_ANY},
         .argc = 1,
-        .argv = {XTRACT_FLOAT, {0}, {1}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_FLATNESS}},
+        .argv = arguments_flatness_db,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
         .result = {.scalar = {XTRACT_UNBOUNDED_MIN, 0, XTRACT_DECIBELS}},
@@ -487,7 +934,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 1988,
         .data = {XTRACT_NO_DATA, XTRACT_UNIT_ANY},
         .argc = 1,
-        .argv = {XTRACT_FLOAT, {XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_DECIBELS}, {XTRACT_FLATNESS_DB}},
+        .argv = arguments_tonality,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
         .result = {.scalar = {0, 1, XTRACT_UNIT_NONE}},
@@ -501,7 +948,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 2003,
         .data = {XTRACT_NO_DATA, XTRACT_UNIT_ANY},
         .argc = 2,
-        .argv = {XTRACT_FLOAT, {XTRACT_UNBOUNDED_MIN, XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX, XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT, XTRACT_NO_DEFAULT}, {XTRACT_UNIT_ANY, XTRACT_UNIT_ANY}, {XTRACT_HIGHEST_VALUE, XTRACT_MEAN}},
+        .argv = arguments_crest,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
         .result = {.scalar = {1, XTRACT_UNBOUNDED_MAX, XTRACT_UNIT_NONE}},
@@ -515,7 +962,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 2000,
         .data = {XTRACT_SPECTRAL_PEAKS, XTRACT_ANY_AMPLITUDE_HERTZ},
         .argc = 2,
-        .argv = {XTRACT_FLOAT, {0, 0}, {XTRACT_UNBOUNDED_MAX, 1}, {440, 0.10000000000000001}, {XTRACT_HERTZ, XTRACT_UNIT_NONE}, {XTRACT_FAILSAFE_F0, XTRACT_ANY}},
+        .argv = arguments_noisiness,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
         .result = {.scalar = {0, 1, XTRACT_UNIT_NONE}},
@@ -529,7 +976,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_AUDIO_SAMPLES, XTRACT_UNIT_ANY},
         .argc = 0,
-        .argv = {XTRACT_FLOAT, {XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argv = NULL,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
         .result = {.scalar = {XTRACT_UNBOUNDED_MIN, XTRACT_UNBOUNDED_MAX, XTRACT_UNIT_ANY}},
@@ -543,7 +990,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_SPECTRAL_PEAKS, XTRACT_ANY_AMPLITUDE_HERTZ},
         .argc = 1,
-        .argv = {XTRACT_FLOAT, {0}, {XTRACT_UNBOUNDED_MAX}, {440}, {XTRACT_HERTZ}, {XTRACT_FAILSAFE_F0}},
+        .argv = arguments_spectral_inharmonicity,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
         .result = {.scalar = {0, 1, XTRACT_UNIT_NONE}},
@@ -557,7 +1004,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_SPECTRAL_HARMONICS_MAGNITUDES, XTRACT_UNIT_ANY},
         .argc = 0,
-        .argv = {XTRACT_FLOAT, {XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argv = NULL,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
         .result = {.scalar = {0, XTRACT_UNBOUNDED_MAX, XTRACT_UNIT_NONE}},
@@ -571,7 +1018,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 1974,
         .data = {XTRACT_BARK_COEFFS, XTRACT_UNIT_ANY},
         .argc = 0,
-        .argv = {XTRACT_FLOAT, {XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argv = NULL,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
         .result = {.scalar = {0, XTRACT_UNBOUNDED_MAX, XTRACT_ACUM}},
@@ -585,7 +1032,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_SPECTRAL, XTRACT_ANY_AMPLITUDE_HERTZ},
         .argc = 0,
-        .argv = {XTRACT_FLOAT, {XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argv = NULL,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
         .result = {.scalar = {XTRACT_UNBOUNDED_MIN, XTRACT_UNBOUNDED_MAX, XTRACT_PER_HERTZ}},
@@ -599,7 +1046,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY},
         .argc = 1,
-        .argv = {XTRACT_FLOAT, {XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_ANY}, {XTRACT_ANY}},
+        .argv = arguments_lowest_value,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
         .result = {.scalar = {XTRACT_UNBOUNDED_MIN, XTRACT_UNBOUNDED_MAX, XTRACT_UNIT_ANY}},
@@ -613,7 +1060,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY},
         .argc = 0,
-        .argv = {XTRACT_FLOAT, {XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argv = NULL,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
         .result = {.scalar = {XTRACT_UNBOUNDED_MIN, XTRACT_UNBOUNDED_MAX, XTRACT_UNIT_ANY}},
@@ -627,7 +1074,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY},
         .argc = 0,
-        .argv = {XTRACT_FLOAT, {XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argv = NULL,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
         .result = {.scalar = {XTRACT_UNBOUNDED_MIN, XTRACT_UNBOUNDED_MAX, XTRACT_UNIT_ANY}},
@@ -641,7 +1088,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_SPECTRAL_PEAKS_MAGNITUDES, XTRACT_UNIT_ANY},
         .argc = 0,
-        .argv = {XTRACT_FLOAT, {XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argv = NULL,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
         .result = {.scalar = {XTRACT_UNBOUNDED_MIN, XTRACT_UNBOUNDED_MAX, XTRACT_UNIT_NONE}},
@@ -655,7 +1102,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_SPECTRAL, XTRACT_UNIT_ANY},
         .argc = 1,
-        .argv = {XTRACT_FLOAT, {2}, {16}, {3}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argv = arguments_hps,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
         .result = {.scalar = {0, 96000, XTRACT_HERTZ}},
@@ -669,7 +1116,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_AUDIO_SAMPLES, XTRACT_UNIT_ANY},
         .argc = 1,
-        .argv = {XTRACT_FLOAT, {2.2250738585072014e-308}, {XTRACT_UNBOUNDED_MAX}, {44100}, {XTRACT_HERTZ}, {XTRACT_ANY}},
+        .argv = arguments_f0,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
         .result = {.scalar = {0, 96000, XTRACT_HERTZ}},
@@ -683,7 +1130,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_AUDIO_SAMPLES, XTRACT_UNIT_ANY},
         .argc = 1,
-        .argv = {XTRACT_FLOAT, {2.2250738585072014e-308}, {XTRACT_UNBOUNDED_MAX}, {44100}, {XTRACT_HERTZ}, {XTRACT_ANY}},
+        .argv = arguments_failsafe_f0,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
         .result = {.scalar = {0, 96000, XTRACT_HERTZ}},
@@ -697,7 +1144,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_AUDIO_SAMPLES, XTRACT_UNIT_ANY},
         .argc = 1,
-        .argv = {XTRACT_WAVELET_F0_STATE, {XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argv = arguments_wavelet_f0,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
         .result = {.scalar = {0, 96000, XTRACT_HERTZ}},
@@ -711,7 +1158,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 2005,
         .data = {XTRACT_AUDIO_SAMPLES, XTRACT_UNIT_ANY},
         .argc = 1,
-        .argv = {XTRACT_FLOAT, {2.2250738585072014e-308}, {XTRACT_UNBOUNDED_MAX}, {44100}, {XTRACT_HERTZ}, {XTRACT_ANY}},
+        .argv = arguments_mcleod_f0,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
         .result = {.scalar = {0, 96000, XTRACT_HERTZ}},
@@ -725,7 +1172,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_NO_DATA, XTRACT_UNIT_NONE},
         .argc = 1,
-        .argv = {XTRACT_FLOAT, {0}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_HERTZ}, {XTRACT_ANY}},
+        .argv = arguments_midicent,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
         .result = {.scalar = {0, 12700, XTRACT_MIDI_CENT}},
@@ -739,7 +1186,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_AUDIO_SAMPLES, XTRACT_UNIT_ANY},
         .argc = 3,
-        .argv = {XTRACT_FLOAT, {XTRACT_UNBOUNDED_MIN, XTRACT_UNBOUNDED_MIN, XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX, XTRACT_UNBOUNDED_MAX, XTRACT_UNBOUNDED_MAX}, {2, XTRACT_NO_DEFAULT, XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE, XTRACT_UNIT_NONE, XTRACT_UNIT_NONE}, {XTRACT_ANY, XTRACT_ANY, XTRACT_ANY}},
+        .argv = arguments_lnorm,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_TRUE,
         .result = {.scalar = {XTRACT_UNBOUNDED_MIN, XTRACT_UNBOUNDED_MAX, XTRACT_UNIT_UNKNOWN}},
@@ -753,7 +1200,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_SUBFRAMES, XTRACT_UNIT_ANY},
         .argc = 3,
-        .argv = {XTRACT_FLOAT, {XTRACT_UNBOUNDED_MIN, XTRACT_UNBOUNDED_MIN, XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX, XTRACT_UNBOUNDED_MAX, XTRACT_UNBOUNDED_MAX}, {2, XTRACT_NO_DEFAULT, XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE, XTRACT_UNIT_NONE, XTRACT_UNIT_NONE}, {XTRACT_ANY, XTRACT_ANY, XTRACT_ANY}},
+        .argv = arguments_flux,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_TRUE,
         .result = {.scalar = {XTRACT_UNBOUNDED_MIN, XTRACT_UNBOUNDED_MAX, XTRACT_UNIT_UNKNOWN}},
@@ -767,7 +1214,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY},
         .argc = 3,
-        .argv = {XTRACT_FLOAT, {2.2250738585072014e-308, 0, 0}, {XTRACT_UNBOUNDED_MAX, 1, 1}, {44100, 0.20000000000000001, 0.90000000000000002}, {XTRACT_HERTZ, XTRACT_UNIT_NONE, XTRACT_UNIT_NONE}, {XTRACT_ANY, XTRACT_ANY, XTRACT_ANY}},
+        .argv = arguments_attack_time,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
         .result = {.scalar = {0, XTRACT_UNBOUNDED_MAX, XTRACT_SECONDS}},
@@ -781,7 +1228,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY},
         .argc = 2,
-        .argv = {XTRACT_FLOAT, {2.2250738585072014e-308, 0}, {XTRACT_UNBOUNDED_MAX, 1}, {44100, 0.40000000000000002}, {XTRACT_HERTZ, XTRACT_UNIT_NONE}, {XTRACT_ANY, XTRACT_ANY}},
+        .argv = arguments_decay_time,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
         .result = {.scalar = {0, XTRACT_UNBOUNDED_MAX, XTRACT_SECONDS}},
@@ -795,7 +1242,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_SUBFRAMES, XTRACT_UNIT_ANY},
         .argc = 0,
-        .argv = {XTRACT_FLOAT, {XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argv = NULL,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_TRUE,
         .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY}},
@@ -809,7 +1256,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_AUDIO_SAMPLES, XTRACT_UNIT_ANY},
         .argc = 0,
-        .argv = {XTRACT_FLOAT, {XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argv = NULL,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
         .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY_SQUARED}},
@@ -823,7 +1270,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_AUDIO_SAMPLES, XTRACT_UNIT_ANY},
         .argc = 0,
-        .argv = {XTRACT_FLOAT, {XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argv = NULL,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
         .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY}},
@@ -837,7 +1284,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_AUDIO_SAMPLES, XTRACT_UNIT_ANY},
         .argc = 0,
-        .argv = {XTRACT_FLOAT, {XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argv = NULL,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
         .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY_SQUARED}},
@@ -850,8 +1297,8 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .data = {XTRACT_SPECTRAL_MAGNITUDES, XTRACT_UNIT_ANY},
-        .argc = 26,
-        .argv = {XTRACT_INT, {XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_INIT_BARK}},
+        .argc = 1,
+        .argv = arguments_bark_coefficients,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
         .result = {.vector = {XTRACT_BARK_COEFFS, XTRACT_UNIT_ANY}},
@@ -865,7 +1312,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_SPECTRAL_MAGNITUDES, XTRACT_UNIT_ANY},
         .argc = 2,
-        .argv = {XTRACT_FLOAT, {2.2250738585072014e-308, 0}, {XTRACT_UNBOUNDED_MAX, 100}, {22050, 10}, {XTRACT_HERTZ, XTRACT_PERCENT}, {XTRACT_ANY, XTRACT_ANY}},
+        .argv = arguments_peak_spectrum,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
         .result = {.vector = {XTRACT_SPECTRAL, XTRACT_ANY_AMPLITUDE_HERTZ}},
@@ -879,7 +1326,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_AUDIO_SAMPLES, XTRACT_UNIT_ANY},
         .argc = 3,
-        .argv = {XTRACT_FLOAT, {2.2250738585072014e-308, 0, 0}, {XTRACT_UNBOUNDED_MAX, 3, 1}, {43.06640625, XTRACT_NO_DEFAULT, XTRACT_NO_DEFAULT}, {XTRACT_HERTZ, XTRACT_UNIT_NONE, XTRACT_UNIT_NONE}, {XTRACT_ANY, XTRACT_ANY, XTRACT_ANY}},
+        .argv = arguments_spectrum,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
         .result = {.vector = {XTRACT_SPECTRAL, XTRACT_ANY_AMPLITUDE_HERTZ}},
@@ -893,7 +1340,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_AUDIO_SAMPLES, XTRACT_UNIT_ANY},
         .argc = 0,
-        .argv = {XTRACT_FLOAT, {XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argv = NULL,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
         .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY_SQUARED}},
@@ -907,7 +1354,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_SPECTRAL_MAGNITUDES, XTRACT_UNIT_ANY},
         .argc = 1,
-        .argv = {XTRACT_FILTERBANK, {XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_INIT_MFCC}},
+        .argv = arguments_mfcc,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
         .result = {.vector = {XTRACT_MEL_COEFFS, XTRACT_UNIT_NONE}},
@@ -920,8 +1367,8 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .data = {XTRACT_AUDIO_SAMPLES, XTRACT_UNIT_ANY},
-        .argc = 0,
-        .argv = {XTRACT_FLOAT, {XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argc = 1,
+        .argv = arguments_dct,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
         .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY}},
@@ -935,7 +1382,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_SPECTRAL, XTRACT_ANY_AMPLITUDE_HERTZ},
         .argc = 2,
-        .argv = {XTRACT_FLOAT, {0, 0}, {XTRACT_UNBOUNDED_MAX, 1}, {440, 0.10000000000000001}, {XTRACT_HERTZ, XTRACT_UNIT_NONE}, {XTRACT_FAILSAFE_F0, XTRACT_ANY}},
+        .argv = arguments_harmonic_spectrum,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
         .result = {.vector = {XTRACT_SPECTRAL, XTRACT_ANY_AMPLITUDE_HERTZ}},
@@ -949,7 +1396,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 1994,
         .data = {XTRACT_AUTOCORRELATION_COEFFS, XTRACT_UNIT_ANY},
         .argc = 0,
-        .argv = {XTRACT_FLOAT, {XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argv = NULL,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
         .result = {.vector = {XTRACT_LPC_COEFFS, XTRACT_UNIT_NONE}},
@@ -963,7 +1410,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 1993,
         .data = {XTRACT_LPC_COEFFS, XTRACT_UNIT_ANY},
         .argc = 1,
-        .argv = {XTRACT_INT, {1}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argv = arguments_lpcc,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
         .result = {.vector = {XTRACT_LPCC_COEFFS, XTRACT_UNIT_NONE}},
@@ -977,7 +1424,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_SPECTRAL_MAGNITUDES, XTRACT_UNIT_ANY},
         .argc = 4,
-        .argv = {XTRACT_INT, {0, 1, 0, 0}, {124, XTRACT_UNBOUNDED_MAX, 1, XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT, 4, 1, 1}, {XTRACT_UNIT_NONE, XTRACT_UNIT_NONE, XTRACT_UNIT_NONE, XTRACT_BINS}, {XTRACT_ANY, XTRACT_ANY, XTRACT_ANY, XTRACT_ANY}},
+        .argv = arguments_subbands,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
         .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY}},
@@ -991,7 +1438,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_SPECTRAL_MAGNITUDES, XTRACT_UNIT_ANY},
         .argc = 1,
-        .argv = {XTRACT_FILTERBANK, {XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_INIT_MFCC}},
+        .argv = arguments_mel_spectrogram,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
         .result = {.vector = {XTRACT_MEL_COEFFS, XTRACT_UNIT_NONE}},
@@ -1005,7 +1452,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_SPECTRAL_MAGNITUDES, XTRACT_UNIT_ANY},
         .argc = 1,
-        .argv = {XTRACT_FILTERBANK, {XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_INIT_GFCC}},
+        .argv = arguments_gfcc,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
         .result = {.vector = {XTRACT_MEL_COEFFS, XTRACT_UNIT_NONE}},
@@ -1019,7 +1466,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_SPECTRAL_MAGNITUDES, XTRACT_UNIT_ANY},
         .argc = 1,
-        .argv = {XTRACT_FILTERBANK, {XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_INIT_GFCC}},
+        .argv = arguments_gammatone_spectrogram,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
         .result = {.vector = {XTRACT_MEL_COEFFS, XTRACT_UNIT_NONE}},
@@ -1032,8 +1479,8 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY},
-        .argc = 1024,
-        .argv = {XTRACT_FLOAT, {XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_INIT_WINDOWED}},
+        .argc = 1,
+        .argv = arguments_windowed,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
         .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY}},
@@ -1047,7 +1494,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY},
         .argc = 1,
-        .argv = {XTRACT_FLOAT, {XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argv = arguments_smoothed,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
         .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY}},
@@ -1061,7 +1508,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY},
         .argc = 1,
-        .argv = {XTRACT_FLOAT, {XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_ANY}, {XTRACT_ANY}},
+        .argv = arguments_peak,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
         .result = {.scalar = {XTRACT_UNBOUNDED_MIN, XTRACT_UNBOUNDED_MAX, XTRACT_UNIT_ANY}},
@@ -1075,7 +1522,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 2013,
         .data = {XTRACT_SPECTRAL_MAGNITUDE_PHASE, XTRACT_UNIT_ANY},
         .argc = 1,
-        .argv = {XTRACT_FILTERBANK, {XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_INIT_MFCC}},
+        .argv = arguments_mmbses,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
         .result = {.vector = {XTRACT_MEL_COEFFS, XTRACT_UNIT_NONE}},
@@ -1089,7 +1536,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_SPECTRAL, XTRACT_ANY_AMPLITUDE_HERTZ},
         .argc = 1,
-        .argv = {XTRACT_FILTERBANK, {XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_INIT_MFCC}},
+        .argv = arguments_spectral_subband_centroids,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
         .result = {.vector = {XTRACT_MEL_COEFFS, XTRACT_HERTZ}},
@@ -1103,7 +1550,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY},
         .argc = 1,
-        .argv = {XTRACT_INT, {1}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argv = arguments_moving_sum,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
         .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY}},
@@ -1117,7 +1564,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY},
         .argc = 1,
-        .argv = {XTRACT_INT, {1}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argv = arguments_moving_average,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
         .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY}},
@@ -1131,7 +1578,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY},
         .argc = 1,
-        .argv = {XTRACT_INT, {2}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argv = arguments_moving_variance,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
         .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY_SQUARED}},
@@ -1145,7 +1592,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY},
         .argc = 1,
-        .argv = {XTRACT_INT, {2}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argv = arguments_moving_standard_deviation,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
         .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY}},
@@ -1159,7 +1606,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY},
         .argc = 1,
-        .argv = {XTRACT_INT, {1}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argv = arguments_moving_max,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
         .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY}},
@@ -1173,7 +1620,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY},
         .argc = 1,
-        .argv = {XTRACT_INT, {1}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argv = arguments_moving_min,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
         .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY}},
@@ -1187,7 +1634,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY},
         .argc = 1,
-        .argv = {XTRACT_FLOAT, {0}, {1}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argv = arguments_ewma_average,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
         .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY}},
@@ -1201,7 +1648,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY},
         .argc = 1,
-        .argv = {XTRACT_FLOAT, {0}, {1}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argv = arguments_ewma_variance,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
         .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY_SQUARED}},
@@ -1215,7 +1662,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY},
         .argc = 0,
-        .argv = {XTRACT_FLOAT, {XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argv = NULL,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
         .result = {.scalar = {XTRACT_UNBOUNDED_MIN, XTRACT_UNBOUNDED_MAX, XTRACT_UNIT_ANY}},
@@ -1229,7 +1676,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY},
         .argc = 1,
-        .argv = {XTRACT_FLOAT, {XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_ANY}, {XTRACT_MEDIAN}},
+        .argv = arguments_median_absolute_deviation,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
         .result = {.scalar = {XTRACT_UNBOUNDED_MIN, XTRACT_UNBOUNDED_MAX, XTRACT_UNIT_ANY}},
@@ -1243,7 +1690,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 1970,
         .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY},
         .argc = 0,
-        .argv = {XTRACT_FLOAT, {XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argv = NULL,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
         .result = {.scalar = {0, XTRACT_UNBOUNDED_MAX, XTRACT_UNIT_ANY_SQUARED}},
@@ -1257,7 +1704,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 1970,
         .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY},
         .argc = 0,
-        .argv = {XTRACT_FLOAT, {XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argv = NULL,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
         .result = {.scalar = {0, XTRACT_UNBOUNDED_MAX, XTRACT_UNIT_NONE}},
@@ -1271,7 +1718,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 1970,
         .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY},
         .argc = 0,
-        .argv = {XTRACT_FLOAT, {XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argv = NULL,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
         .result = {.scalar = {0, XTRACT_UNBOUNDED_MAX, XTRACT_UNIT_NONE}},
@@ -1285,7 +1732,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY},
         .argc = 1,
-        .argv = {XTRACT_INT, {1}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argv = arguments_time_reversal_asymmetry,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
         .result = {.scalar = {XTRACT_UNBOUNDED_MIN, XTRACT_UNBOUNDED_MAX, XTRACT_UNIT_ANY_CUBED}},
@@ -1299,7 +1746,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_SPECTRAL_MAGNITUDES, XTRACT_UNIT_ANY},
         .argc = 0,
-        .argv = {XTRACT_FLOAT, {XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argv = NULL,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
         .result = {.scalar = {0, 1, XTRACT_UNIT_NONE}},
@@ -1313,7 +1760,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 1995,
         .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY},
         .argc = 0,
-        .argv = {XTRACT_FLOAT, {XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argv = NULL,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
         .result = {.scalar = {XTRACT_UNBOUNDED_MIN, XTRACT_UNBOUNDED_MAX, XTRACT_UNIT_NONE}},
@@ -1327,7 +1774,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 1988,
         .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY},
         .argc = 0,
-        .argv = {XTRACT_FLOAT, {XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argv = NULL,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
         .result = {.scalar = {XTRACT_UNBOUNDED_MIN, XTRACT_UNBOUNDED_MAX, XTRACT_UNIT_NONE}},
@@ -1341,7 +1788,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 1988,
         .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY},
         .argc = 1,
-        .argv = {XTRACT_INT, {2}, {XTRACT_UNBOUNDED_MAX}, {10}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argv = arguments_higuchi_fractal_dimension,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
         .result = {.scalar = {XTRACT_UNBOUNDED_MIN, XTRACT_UNBOUNDED_MAX, XTRACT_UNIT_NONE}},
@@ -1355,7 +1802,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 2002,
         .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY},
         .argc = 2,
-        .argv = {XTRACT_INT, {2, 1}, {8, XTRACT_UNBOUNDED_MAX}, {3, 1}, {XTRACT_UNIT_NONE, XTRACT_UNIT_NONE}, {XTRACT_ANY, XTRACT_ANY}},
+        .argv = arguments_permutation_entropy,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
         .result = {.scalar = {0, 1, XTRACT_UNIT_NONE}},
@@ -1369,7 +1816,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 1976,
         .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY},
         .argc = 1,
-        .argv = {XTRACT_FLOAT, {XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_ANY}, {XTRACT_MEDIAN}},
+        .argv = arguments_lempel_ziv_complexity,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
         .result = {.scalar = {0, XTRACT_UNBOUNDED_MAX, XTRACT_UNIT_NONE}},
@@ -1383,7 +1830,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 2000,
         .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY},
         .argc = 2,
-        .argv = {XTRACT_FLOAT, {1, 0}, {XTRACT_UNBOUNDED_MAX, XTRACT_UNBOUNDED_MAX}, {2, XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE, XTRACT_UNIT_ANY}, {XTRACT_ANY, XTRACT_ANY}},
+        .argv = arguments_sample_entropy,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
         .result = {.scalar = {0, XTRACT_UNBOUNDED_MAX, XTRACT_UNIT_NONE}},
@@ -1397,7 +1844,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 1991,
         .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY},
         .argc = 2,
-        .argv = {XTRACT_FLOAT, {1, 0}, {XTRACT_UNBOUNDED_MAX, XTRACT_UNBOUNDED_MAX}, {2, XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE, XTRACT_UNIT_ANY}, {XTRACT_ANY, XTRACT_ANY}},
+        .argv = arguments_approximate_entropy,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
         .result = {.scalar = {XTRACT_UNBOUNDED_MIN, XTRACT_UNBOUNDED_MAX, XTRACT_UNIT_NONE}},
@@ -1411,7 +1858,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 2005,
         .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY},
         .argc = 0,
-        .argv = {XTRACT_FLOAT, {XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argv = NULL,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
         .result = {.scalar = {0, 1, XTRACT_UNIT_NONE}},
@@ -1425,7 +1872,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 2005,
         .data = {XTRACT_AUDIO_SAMPLES, XTRACT_UNIT_ANY},
         .argc = 0,
-        .argv = {XTRACT_FLOAT, {XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argv = NULL,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
         .result = {.scalar = {0, 1, XTRACT_UNIT_NONE}},
@@ -1439,7 +1886,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY},
         .argc = 2,
-        .argv = {XTRACT_FLOAT, {2.2250738585072014e-308, 0}, {XTRACT_UNBOUNDED_MAX, 1}, {44100, 0.40000000000000002}, {XTRACT_HERTZ, XTRACT_UNIT_NONE}, {XTRACT_ANY, XTRACT_ANY}},
+        .argv = arguments_decay_rate,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
         .result = {.scalar = {XTRACT_UNBOUNDED_MIN, XTRACT_UNBOUNDED_MAX, XTRACT_PER_SECOND}},
@@ -1453,7 +1900,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY},
         .argc = 0,
-        .argv = {XTRACT_FLOAT, {XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argv = NULL,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
         .result = {.scalar = {0, 1, XTRACT_UNIT_NONE}},
@@ -1467,7 +1914,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY},
         .argc = 0,
-        .argv = {XTRACT_FLOAT, {XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argv = NULL,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
         .result = {.scalar = {0, 1, XTRACT_UNIT_NONE}},
@@ -1481,7 +1928,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY},
         .argc = 0,
-        .argv = {XTRACT_FLOAT, {XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argv = NULL,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
         .result = {.scalar = {0, 1, XTRACT_UNIT_NONE}},
@@ -1495,7 +1942,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY},
         .argc = 0,
-        .argv = {XTRACT_FLOAT, {XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argv = NULL,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
         .result = {.scalar = {0, XTRACT_UNBOUNDED_MAX, XTRACT_UNIT_NONE}},
@@ -1509,7 +1956,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_SUBFRAMES, XTRACT_UNIT_ANY},
         .argc = 1,
-        .argv = {XTRACT_FLOAT, {0}, {1}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argv = arguments_cross_correlation,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
         .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_UNKNOWN}},
@@ -1523,7 +1970,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_SUBFRAMES, XTRACT_UNIT_ANY},
         .argc = 0,
-        .argv = {XTRACT_FLOAT, {XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argv = NULL,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
         .result = {.scalar = {XTRACT_UNBOUNDED_MIN, XTRACT_UNBOUNDED_MAX, XTRACT_UNIT_NONE}},
@@ -1537,7 +1984,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 1951,
         .data = {XTRACT_SUBFRAMES, XTRACT_UNIT_ANY},
         .argc = 0,
-        .argv = {XTRACT_FLOAT, {XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argv = NULL,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_TRUE,
         .result = {.scalar = {0, XTRACT_UNBOUNDED_MAX, XTRACT_UNIT_NONE}},
@@ -1551,7 +1998,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 1968,
         .data = {XTRACT_SUBFRAMES, XTRACT_UNIT_ANY},
         .argc = 0,
-        .argv = {XTRACT_FLOAT, {XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argv = NULL,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_TRUE,
         .result = {.scalar = {0, XTRACT_UNBOUNDED_MAX, XTRACT_UNIT_NONE}},
@@ -1565,7 +2012,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 2003,
         .data = {XTRACT_SUBFRAMES, XTRACT_UNIT_ANY},
         .argc = 1,
-        .argv = {XTRACT_FLOAT, {0}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_ANY}, {XTRACT_ANY}},
+        .argv = arguments_modified_kullback_leibler,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_TRUE,
         .result = {.scalar = {0, XTRACT_UNBOUNDED_MAX, XTRACT_UNIT_NONE}},
@@ -1579,7 +2026,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 2002,
         .data = {XTRACT_SPECTRAL, XTRACT_ANY_AMPLITUDE_HERTZ},
         .argc = 3,
-        .argv = {XTRACT_FLOAT, {1, 0, 0}, {XTRACT_UNBOUNDED_MAX, XTRACT_UNBOUNDED_MAX, 1}, {6, 200, 0.02}, {XTRACT_UNIT_NONE, XTRACT_HERTZ, XTRACT_UNIT_NONE}, {XTRACT_ANY, XTRACT_ANY, XTRACT_ANY}},
+        .argv = arguments_spectral_contrast,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
         .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_NONE}},
@@ -1593,7 +2040,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 1999,
         .data = {XTRACT_SPECTRAL, XTRACT_ANY_AMPLITUDE_HERTZ},
         .argc = 3,
-        .argv = {XTRACT_FLOAT, {2.2250738585072014e-308, 0, 0}, {XTRACT_UNBOUNDED_MAX, XTRACT_UNBOUNDED_MAX, XTRACT_UNBOUNDED_MAX}, {440, 40, 5000}, {XTRACT_HERTZ, XTRACT_HERTZ, XTRACT_HERTZ}, {XTRACT_ANY, XTRACT_ANY, XTRACT_ANY}},
+        .argv = arguments_chroma,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
         .result = {.vector = {XTRACT_CHROMA_COEFFS, XTRACT_UNIT_NONE}},
@@ -1607,7 +2054,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 1992,
         .data = {XTRACT_SPECTRAL_MAGNITUDE_PHASE, XTRACT_UNIT_ANY},
         .argc = 1,
-        .argv = {XTRACT_CQT_KERNEL, {XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_INIT_CQT}},
+        .argv = arguments_cqt,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
         .result = {.vector = {XTRACT_SPECTRAL, XTRACT_ANY_AMPLITUDE_HERTZ}},
@@ -1621,7 +2068,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_SUBFRAMES, XTRACT_UNIT_ANY},
         .argc = 0,
-        .argv = {XTRACT_FLOAT, {XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argv = NULL,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
         .result = {.scalar = {-1, 1, XTRACT_UNIT_NONE}},
@@ -1635,7 +2082,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_CHANNELS, XTRACT_UNIT_ANY},
         .argc = 1,
-        .argv = {XTRACT_INT, {1}, {XTRACT_UNBOUNDED_MAX}, {2}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argv = arguments_covariance_matrix,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
         .result = {.vector = {XTRACT_SQUARE_MATRIX, XTRACT_UNIT_ANY_SQUARED}},
@@ -1649,7 +2096,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_SQUARE_MATRIX, XTRACT_UNIT_ANY},
         .argc = 0,
-        .argv = {XTRACT_FLOAT, {XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argv = NULL,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
         .result = {.vector = {XTRACT_SQUARE_MATRIX, XTRACT_UNIT_NONE}},
@@ -1663,7 +2110,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_SQUARE_MATRIX, XTRACT_UNIT_ANY},
         .argc = 0,
-        .argv = {XTRACT_FLOAT, {XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argv = NULL,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
         .result = {.scalar = {-1, 1, XTRACT_UNIT_NONE}},
@@ -1677,7 +2124,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_SQUARE_MATRIX, XTRACT_UNIT_ANY},
         .argc = 0,
-        .argv = {XTRACT_FLOAT, {XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argv = NULL,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
         .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY}},
@@ -1691,7 +2138,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_SUBFRAMES, XTRACT_UNIT_ANY},
         .argc = 1,
-        .argv = {XTRACT_INT, {2}, {XTRACT_UNBOUNDED_MAX}, {256}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argv = arguments_coherence,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
         .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_NONE}},
@@ -1705,7 +2152,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_GRID, XTRACT_UNIT_ANY},
         .argc = 1,
-        .argv = {XTRACT_INT, {1}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argv = arguments_grid_moments,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
         .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY}},
@@ -1719,7 +2166,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_GRID, XTRACT_UNIT_ANY},
         .argc = 1,
-        .argv = {XTRACT_INT, {1}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argv = arguments_grid_central_moments,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
         .result = {.vector = {XTRACT_CENTRAL_MOMENT_COEFFS, XTRACT_UNIT_ANY}},
@@ -1733,7 +2180,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_CENTRAL_MOMENT_COEFFS, XTRACT_UNIT_ANY},
         .argc = 0,
-        .argv = {XTRACT_FLOAT, {XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argv = NULL,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
         .result = {.vector = {XTRACT_NORMALISED_MOMENT_COEFFS, XTRACT_UNIT_NONE}},
@@ -1747,7 +2194,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 1962,
         .data = {XTRACT_NORMALISED_MOMENT_COEFFS, XTRACT_UNIT_ANY},
         .argc = 0,
-        .argv = {XTRACT_FLOAT, {XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argv = NULL,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
         .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_NONE}},
@@ -1761,7 +2208,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY},
         .argc = 3,
-        .argv = {XTRACT_FLOAT, {XTRACT_UNBOUNDED_MIN, XTRACT_UNBOUNDED_MIN, 1}, {XTRACT_UNBOUNDED_MAX, XTRACT_UNBOUNDED_MAX, 2147483647}, {XTRACT_NO_DEFAULT, XTRACT_NO_DEFAULT, 256}, {XTRACT_UNIT_ANY, XTRACT_UNIT_ANY, XTRACT_UNIT_NONE}, {XTRACT_LOWEST_VALUE, XTRACT_HIGHEST_VALUE, XTRACT_ANY}},
+        .argv = arguments_quantise,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
         .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_NONE}},
@@ -1775,7 +2222,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_NONE},
         .argc = 1,
-        .argv = {XTRACT_INT, {1}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argv = arguments_histogram,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
         .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_NONE}},
@@ -1789,7 +2236,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 1973,
         .data = {XTRACT_GRID, XTRACT_UNIT_NONE},
         .argc = 5,
-        .argv = {XTRACT_INT, {1, 1, XTRACT_UNBOUNDED_MIN, XTRACT_UNBOUNDED_MIN, 0}, {XTRACT_UNBOUNDED_MAX, 46340, XTRACT_UNBOUNDED_MAX, XTRACT_UNBOUNDED_MAX, 1}, {XTRACT_NO_DEFAULT, 8, 1, XTRACT_NO_DEFAULT, XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE, XTRACT_UNIT_NONE, XTRACT_UNIT_NONE, XTRACT_UNIT_NONE, XTRACT_UNIT_NONE}, {XTRACT_ANY, XTRACT_ANY, XTRACT_ANY, XTRACT_ANY, XTRACT_ANY}},
+        .argv = arguments_cooccurrence_matrix,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
         .result = {.vector = {XTRACT_SQUARE_MATRIX, XTRACT_UNIT_NONE}},
@@ -1803,7 +2250,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 1973,
         .data = {XTRACT_SQUARE_MATRIX, XTRACT_UNIT_NONE},
         .argc = 0,
-        .argv = {XTRACT_FLOAT, {XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argv = NULL,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
         .result = {.scalar = {0, XTRACT_UNBOUNDED_MAX, XTRACT_UNIT_NONE}},
@@ -1817,7 +2264,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 1973,
         .data = {XTRACT_SQUARE_MATRIX, XTRACT_UNIT_NONE},
         .argc = 0,
-        .argv = {XTRACT_FLOAT, {XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argv = NULL,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
         .result = {.scalar = {-1, 1, XTRACT_UNIT_NONE}},
@@ -1831,7 +2278,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 1973,
         .data = {XTRACT_SQUARE_MATRIX, XTRACT_UNIT_NONE},
         .argc = 0,
-        .argv = {XTRACT_FLOAT, {XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argv = NULL,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
         .result = {.scalar = {0, 1, XTRACT_UNIT_NONE}},
@@ -1845,7 +2292,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 1973,
         .data = {XTRACT_SQUARE_MATRIX, XTRACT_UNIT_NONE},
         .argc = 0,
-        .argv = {XTRACT_FLOAT, {XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argv = NULL,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
         .result = {.scalar = {0, 1, XTRACT_UNIT_NONE}},
@@ -1859,7 +2306,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 2002,
         .data = {XTRACT_GRID, XTRACT_UNIT_ANY},
         .argc = 1,
-        .argv = {XTRACT_INT, {1}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argv = arguments_local_binary_patterns,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
         .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_NONE}},
@@ -1873,7 +2320,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY},
         .argc = 1,
-        .argv = {XTRACT_LAST_N_STATE, {XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argv = arguments_last_n,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
         .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY}},
@@ -1887,7 +2334,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .data = {XTRACT_SPECTRAL_PEAKS, XTRACT_ANY_AMPLITUDE_HERTZ},
         .argc = 0,
-        .argv = {XTRACT_FLOAT, {XTRACT_UNBOUNDED_MIN}, {XTRACT_UNBOUNDED_MAX}, {XTRACT_NO_DEFAULT}, {XTRACT_UNIT_NONE}, {XTRACT_ANY}},
+        .argv = NULL,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
         .result = {.vector = {XTRACT_SPECTRAL_PEAKS, XTRACT_ANY_AMPLITUDE_HERTZ}},

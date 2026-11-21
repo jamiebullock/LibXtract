@@ -64,16 +64,6 @@ extern "C"
 
 #define XTRACT_FEATURES XTRACT_FEATURE_COUNT
 
-    /** \brief Enumeration of feature initialisation functions */
-    enum xtract_feature_init_
-    {
-        XTRACT_INIT_MFCC = 100,
-        XTRACT_INIT_BARK,
-        XTRACT_INIT_WINDOWED,
-        XTRACT_INIT_GFCC,
-        XTRACT_INIT_CQT
-    };
-
     /** \brief Enumeration of feature types */
     enum xtract_feature_types_
     {
@@ -131,16 +121,17 @@ extern "C"
         XTRACT_LINEAR_SUBBANDS
     };
 
-    /** \brief Enumeration of data types*/
+    /** \brief Enumeration of the types of what argv points to: an array of XTRACT_FLOAT or XTRACT_INT values with one element for each argument, or one object of another type, which is then the only argument */
     typedef enum type_
     {
-        XTRACT_FLOAT,
-        XTRACT_FLOATARRAY,
+        XTRACT_FLOAT,      /* a double */
+        XTRACT_FLOATARRAY, /* an array of doubles that a function of the library fills */
         XTRACT_INT,
         XTRACT_FILTERBANK,
         XTRACT_CQT_KERNEL,
         XTRACT_LAST_N_STATE,
-        XTRACT_WAVELET_F0_STATE
+        XTRACT_WAVELET_F0_STATE,
+        XTRACT_INTARRAY /* an array of ints that a function of the library fills */
     } xtract_type_t;
 
     /** \brief Enumeration of units*/
@@ -235,6 +226,95 @@ extern "C"
         XTRACT_NORMALISED_MOMENT_COEFFS
     } xtract_vector_t;
 
+    /** \brief Enumeration of the kinds of argument, which say where the value of an argument comes from */
+    typedef enum xtract_argument_kind_
+    {
+        XTRACT_ARGUMENT_RESULT,   /* the result of another feature */
+        XTRACT_ARGUMENT_PROPERTY, /* a property of the data, which whoever made the data knows */
+        XTRACT_ARGUMENT_OBJECT,   /* an object that a function of the library builds */
+        XTRACT_ARGUMENT_SETTING   /* a value the caller chooses */
+    } xtract_argument_kind_t;
+
+    /** \brief Enumeration of the properties of data that an argument can be */
+    typedef enum xtract_property_
+    {
+        XTRACT_PROPERTY_NONE,           /* not a property */
+        XTRACT_PROPERTY_LENGTH,         /* the number of elements, the N of the call */
+        XTRACT_PROPERTY_SAMPLE_RATE,    /* in hertz */
+        XTRACT_PROPERTY_TRANSFORM_SIZE, /* the number of samples a spectrum was made from */
+        XTRACT_PROPERTY_BIN_SPACING,    /* the sample rate divided by the transform size, in hertz */
+        XTRACT_PROPERTY_WIDTH,          /* the number of elements in each row of a grid */
+        XTRACT_PROPERTY_SERIES,         /* the number of series the data comprises */
+        XTRACT_PROPERTY_LEVELS          /* the number of levels the elements were quantised to */
+    } xtract_property_t;
+
+    /** \brief Enumeration of the data a result that a feature takes as an argument is the result of
+     *
+     * When a feature is called to give such a result, the data that result is to be of is the data of each XTRACT_SUBJECT_ANY argument the feature has in turn: the variance that xtract_standard_deviation() takes is the variance of the data the standard deviation is wanted of.
+     */
+    typedef enum xtract_subject_
+    {
+        XTRACT_SUBJECT_ANY,   /* the data the caller wants the feature's own result to be of, the same for each such argument of one feature */
+        XTRACT_SUBJECT_INPUT, /* the data the feature itself is given */
+        XTRACT_SUBJECT_SOURCE /* the data the feature's input was made from, e.g. the signal behind a spectrum */
+    } xtract_subject_t;
+
+    /** \brief A feature whose result is a quantity */
+    typedef struct xtract_provider_
+    {
+        int feature; /**< the feature, as given in the enumeration xtract_features_ */
+    } xtract_provider_t;
+
+    /** \brief Something an argument accepts, and the features that provide it */
+    typedef struct xtract_quantity_
+    {
+        const char *name;                   /**< the name of a feature, or a name several features provide, e.g. "fundamental" */
+        int provider_count;                 /**< the number of features that provide it, at least 1 */
+        const xtract_provider_t *providers; /**< the features whose result is this quantity, the usual one first */
+    } xtract_quantity_t;
+
+    struct xtract_argument_descriptor_;
+
+    /** \brief What the library records about one function that builds an object for a feature */
+    typedef struct xtract_builder_descriptor_
+    {
+        const char *name;                               /**< the name of the function without the xtract_ prefix, e.g. "init_mfcc" */
+        xtract_type_t type;                             /**< the type of the object */
+        xtract_bool_t is_per_stream;                    /**< the object is the state of one stream of data, which the feature changes; any other object can be shared */
+        int argc;                                       /**< the number of parameters the function takes */
+        const struct xtract_argument_descriptor_ *argv; /**< the parameters of the function in order, each a property or a setting */
+
+        void *(*build)(const double *parameters); /**< calls the function with the argc values of parameters, one for each parameter in order. Returns the object, or NULL if a value is out of range, a value for a parameter of type XTRACT_INT is not a whole number, or allocation fails */
+        void (*release)(void *object);            /**< frees an object that build returned; NULL is allowed */
+    } xtract_builder_descriptor_t;
+
+    /** \brief What the library records about one argument of a feature, or one parameter of a function that builds an object
+     *
+     * The fields after max are read according to kind: accepts and subject for XTRACT_ARGUMENT_RESULT, data_property for XTRACT_ARGUMENT_PROPERTY, builder and is_optional for XTRACT_ARGUMENT_OBJECT, and the rest for XTRACT_ARGUMENT_SETTING.
+     */
+    typedef struct xtract_argument_descriptor_
+    {
+        const char *name;            /**< a name for the argument, which no other argument of the feature has */
+        xtract_argument_kind_t kind; /**< where its value comes from */
+        xtract_type_t type;          /**< the type of the element of argv that holds it, or of the object argv points to */
+        xtract_unit_t unit;          /**< the unit of its value */
+        double min;                  /**< the least value, or XTRACT_UNBOUNDED_MIN when it has no lower bound */
+        double max;                  /**< the greatest value, or XTRACT_UNBOUNDED_MAX when it has no upper bound */
+
+        const xtract_quantity_t *accepts; /**< what the argument accepts. Its providers are where the value usually comes from: the function takes any value in the range */
+        xtract_subject_t subject;         /**< the data that the result is the result of */
+
+        xtract_property_t data_property; /**< which property of the data it is */
+
+        const xtract_builder_descriptor_t *builder; /**< the function that builds the object */
+        xtract_bool_t is_optional;                  /**< argv may be NULL in place of the object */
+
+        double default_value;      /**< the value to use when the caller has none of its own */
+        xtract_bool_t is_whole;    /**< only whole numbers are values */
+        int value_count;           /**< the number of values that have names, or 0 */
+        const char *const *values; /**< the name of each value from min to max, with NULL for a value in that range that the feature does not take; or NULL when no value has a name */
+    } xtract_argument_descriptor_t;
+
     /** \brief What the library records about one feature, as xtract_descriptor() gives it */
     typedef struct xtract_function_descriptor_
     {
@@ -256,17 +336,8 @@ extern "C"
             xtract_unit_t unit;
         } data;
 
-        int argc;
-
-        struct
-        {
-            xtract_type_t type; /* type of the array/value pointed to by argv */
-            double min[XTRACT_MAXARGS];
-            double max[XTRACT_MAXARGS];
-            double def[XTRACT_MAXARGS]; /* defaults */
-            xtract_unit_t unit[XTRACT_MAXARGS];
-            int donor[XTRACT_MAXARGS]; /* suggested donor functions for argv */
-        } argv;
+        int argc;                                 /* the number of arguments */
+        const xtract_argument_descriptor_t *argv; /* one record for each argument in order, or NULL when argc is 0 */
 
         xtract_bool_t is_scalar;
         xtract_bool_t is_delta; /* features in xtract_delta.h can be scalar or vector */
