@@ -64,14 +64,64 @@ UTEST(descriptors, free_descriptors_accepts_null)
     ASSERT_EQ(xtract_free_descriptors(NULL), XTRACT_SUCCESS);
 }
 
-UTEST(descriptors, unit_sentinels_have_expected_values)
+UTEST(descriptors, units_keep_their_values)
 {
-    /* The NONE/ANY/UNKNOWN unit members carry the sentinel values the
-     * descriptor metadata relies on; the dimensioned units stay >= 2. */
-    ASSERT_EQ((int)XTRACT_UNIT_UNKNOWN, -2);
-    ASSERT_EQ((int)XTRACT_UNIT_ANY, -1);
-    ASSERT_EQ((int)XTRACT_UNIT_NONE, 0);
-    ASSERT_EQ((int)XTRACT_HERTZ, 2);
+    ASSERT_EQ((int)XTRACT_UNIT_UNKNOWN, 0);
+    ASSERT_EQ((int)XTRACT_UNIT_NONE, 1);
+    ASSERT_EQ((int)XTRACT_UNIT_ANY, 2);
+    ASSERT_EQ((int)XTRACT_UNIT_ANY_SQUARED, 3);
+    ASSERT_EQ((int)XTRACT_UNIT_ANY_CUBED, 4);
+    ASSERT_EQ((int)XTRACT_HERTZ, 5);
+    ASSERT_EQ((int)XTRACT_HERTZ_SQUARED, 6);
+    ASSERT_EQ((int)XTRACT_PER_HERTZ, 7);
+    ASSERT_EQ((int)XTRACT_ANY_AMPLITUDE_HERTZ, 8);
+    ASSERT_EQ((int)XTRACT_SECONDS, 9);
+    ASSERT_EQ((int)XTRACT_PER_SECOND, 10);
+    ASSERT_EQ((int)XTRACT_DECIBELS, 11);
+    ASSERT_EQ((int)XTRACT_PERCENT, 12);
+    ASSERT_EQ((int)XTRACT_BINS, 13);
+    ASSERT_EQ((int)XTRACT_MIDI_CENT, 14);
+    ASSERT_EQ((int)XTRACT_SONE, 15);
+    ASSERT_EQ((int)XTRACT_ACUM, 16);
+}
+
+UTEST(descriptors, a_variance_is_in_the_square_of_the_unit_it_is_taken_of)
+{
+    static const int scalars[] = {XTRACT_VARIANCE, XTRACT_HJORTH_ACTIVITY};
+    /* Each element is a mean of products of two values of the data. */
+    static const int vectors[] = {
+        XTRACT_MOVING_VARIANCE, XTRACT_EWMA_VARIANCE, XTRACT_AUTOCORRELATION,
+        XTRACT_AUTOCORRELATION_FFT, XTRACT_ASDF, XTRACT_COVARIANCE_MATRIX};
+    static const int in_hertz[] = {XTRACT_SPECTRAL_VARIANCE, XTRACT_SPREAD};
+    xtract_function_descriptor_t *fd = xtract_make_descriptors();
+    size_t i;
+
+    ASSERT_TRUE(fd != NULL);
+    for (i = 0; i < sizeof(scalars) / sizeof(scalars[0]); i++)
+    {
+        ASSERT_EQ_MSG(fd[scalars[i]].data.unit, XTRACT_UNIT_ANY, fd[scalars[i]].algo.name);
+        ASSERT_EQ_MSG(fd[scalars[i]].result.scalar.unit, XTRACT_UNIT_ANY_SQUARED, fd[scalars[i]].algo.name);
+    }
+    for (i = 0; i < sizeof(vectors) / sizeof(vectors[0]); i++)
+    {
+        ASSERT_EQ_MSG(fd[vectors[i]].data.unit, XTRACT_UNIT_ANY, fd[vectors[i]].algo.name);
+        ASSERT_EQ_MSG(fd[vectors[i]].result.vector.unit, XTRACT_UNIT_ANY_SQUARED, fd[vectors[i]].algo.name);
+    }
+    for (i = 0; i < sizeof(in_hertz) / sizeof(in_hertz[0]); i++)
+    {
+        ASSERT_EQ_MSG(fd[in_hertz[i]].result.scalar.unit, XTRACT_HERTZ_SQUARED, fd[in_hertz[i]].algo.name);
+        ASSERT_EQ_MSG(fd[in_hertz[i]].result.scalar.min, 0.0, fd[in_hertz[i]].algo.name);
+        ASSERT_EQ_MSG(fd[in_hertz[i]].result.scalar.max, 48000.0 * 48000.0, fd[in_hertz[i]].algo.name);
+    }
+
+    /* A standard deviation is in the unit its variance is the square of. */
+    ASSERT_EQ(fd[XTRACT_STANDARD_DEVIATION].argv.unit[0], XTRACT_UNIT_ANY_SQUARED);
+    ASSERT_EQ(fd[XTRACT_STANDARD_DEVIATION].result.scalar.unit, XTRACT_UNIT_ANY);
+    ASSERT_EQ(fd[XTRACT_MOVING_STANDARD_DEVIATION].result.vector.unit, XTRACT_UNIT_ANY);
+    ASSERT_EQ(fd[XTRACT_SPECTRAL_STANDARD_DEVIATION].argv.unit[0], XTRACT_HERTZ_SQUARED);
+    ASSERT_EQ(fd[XTRACT_SPECTRAL_STANDARD_DEVIATION].result.scalar.unit, XTRACT_HERTZ);
+
+    ASSERT_EQ(xtract_free_descriptors(fd), XTRACT_SUCCESS);
 }
 
 UTEST(descriptors, scalar_result_ranges_are_ordered)
@@ -145,13 +195,12 @@ UTEST(descriptors, only_the_decibel_quantities_carry_the_decibel_unit)
 
 UTEST(descriptors, an_argument_has_the_unit_of_the_value_it_takes)
 {
-    /* A mean, a median, a threshold or a variance of the data. */
+    /* A mean, a median or a threshold of the data. */
     static const int unit_of_the_data[] = {
-        XTRACT_VARIANCE, XTRACT_STANDARD_DEVIATION, XTRACT_AVERAGE_DEVIATION,
-        XTRACT_MEDIAN_ABSOLUTE_DEVIATION, XTRACT_LEMPEL_ZIV_COMPLEXITY, XTRACT_LOWEST_VALUE};
-    /* A spectral mean, centroid or variance. */
-    static const int hertz[] = {
-        XTRACT_SPECTRAL_VARIANCE, XTRACT_SPECTRAL_STANDARD_DEVIATION, XTRACT_SPREAD};
+        XTRACT_VARIANCE, XTRACT_AVERAGE_DEVIATION, XTRACT_MEDIAN_ABSOLUTE_DEVIATION,
+        XTRACT_LEMPEL_ZIV_COMPLEXITY, XTRACT_LOWEST_VALUE};
+    /* A spectral mean or centroid. */
+    static const int hertz[] = {XTRACT_SPECTRAL_VARIANCE, XTRACT_SPREAD};
     /* A flatness from 0 to 1, a filterbank or a kernel. */
     static const int no_unit[] = {
         XTRACT_FLATNESS_DB, XTRACT_MFCC, XTRACT_MEL_SPECTROGRAM, XTRACT_GFCC,
@@ -193,13 +242,13 @@ UTEST(descriptors, irregularity_k_takes_the_smoothness_and_no_data)
     ASSERT_EQ(xtract_free_descriptors(fd), XTRACT_SUCCESS);
 }
 
-UTEST(descriptors, autocorrelation_fft_and_difference_vector_give_a_series_in_the_unit_of_the_data)
+UTEST(descriptors, autocorrelation_fft_and_difference_vector_give_a_series)
 {
     xtract_function_descriptor_t *fd = xtract_make_descriptors();
 
     ASSERT_TRUE(fd != NULL);
     ASSERT_EQ(fd[XTRACT_AUTOCORRELATION_FFT].result.vector.format, XTRACT_ARBITRARY_SERIES);
-    ASSERT_EQ(fd[XTRACT_AUTOCORRELATION_FFT].result.vector.unit, XTRACT_UNIT_ANY);
+    ASSERT_EQ(fd[XTRACT_AUTOCORRELATION_FFT].result.vector.unit, fd[XTRACT_AUTOCORRELATION].result.vector.unit);
     ASSERT_EQ(fd[XTRACT_DIFFERENCE_VECTOR].result.vector.format, XTRACT_ARBITRARY_SERIES);
     ASSERT_EQ(fd[XTRACT_DIFFERENCE_VECTOR].result.vector.unit, XTRACT_UNIT_ANY);
     ASSERT_EQ(xtract_free_descriptors(fd), XTRACT_SUCCESS);
@@ -327,7 +376,8 @@ UTEST(descriptors, appended_features_are_fully_described)
         ASSERT_EQ_MSG(fd[f].data.format, XTRACT_ARBITRARY_SERIES, fd[f].algo.name);
         ASSERT_EQ_MSG(fd[f].data.unit, XTRACT_UNIT_ANY, fd[f].algo.name);
         ASSERT_EQ_MSG(fd[f].result.vector.format, XTRACT_ARBITRARY_SERIES, fd[f].algo.name);
-        ASSERT_EQ_MSG(fd[f].result.vector.unit, XTRACT_UNIT_ANY, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].result.vector.unit, f == XTRACT_MOVING_VARIANCE ? XTRACT_UNIT_ANY_SQUARED : XTRACT_UNIT_ANY,
+                      fd[f].algo.name);
         ASSERT_EQ_MSG(fd[f].is_delta, XTRACT_FALSE, fd[f].algo.name);
         ASSERT_TRUE_MSG(fd[f].algo.name[0] != 0, "moving feature without a name");
     }
@@ -348,7 +398,8 @@ UTEST(descriptors, appended_features_are_fully_described)
         ASSERT_EQ_MSG(fd[f].data.format, XTRACT_ARBITRARY_SERIES, fd[f].algo.name);
         ASSERT_EQ_MSG(fd[f].data.unit, XTRACT_UNIT_ANY, fd[f].algo.name);
         ASSERT_EQ_MSG(fd[f].result.vector.format, XTRACT_ARBITRARY_SERIES, fd[f].algo.name);
-        ASSERT_EQ_MSG(fd[f].result.vector.unit, XTRACT_UNIT_ANY, fd[f].algo.name);
+        ASSERT_EQ_MSG(fd[f].result.vector.unit, f == XTRACT_EWMA_VARIANCE ? XTRACT_UNIT_ANY_SQUARED : XTRACT_UNIT_ANY,
+                      fd[f].algo.name);
         ASSERT_EQ_MSG(fd[f].is_delta, XTRACT_FALSE, fd[f].algo.name);
         ASSERT_TRUE_MSG(fd[f].algo.name[0] != 0, "ewma feature without a name");
     }
@@ -375,7 +426,7 @@ UTEST(descriptors, appended_features_are_fully_described)
         ASSERT_EQ_MSG(fd[f].algo.year, 1970, fd[f].algo.name);
         CHECK_NEAR(fd[f].result.scalar.min, 0.0, EPSILON);
     }
-    ASSERT_EQ(fd[XTRACT_HJORTH_ACTIVITY].result.scalar.unit, XTRACT_UNIT_ANY);
+    ASSERT_EQ(fd[XTRACT_HJORTH_ACTIVITY].result.scalar.unit, XTRACT_UNIT_ANY_SQUARED);
     ASSERT_EQ(fd[XTRACT_HJORTH_MOBILITY].result.scalar.unit, XTRACT_UNIT_NONE);
     ASSERT_EQ(fd[XTRACT_HJORTH_COMPLEXITY].result.scalar.unit, XTRACT_UNIT_NONE);
 
@@ -551,7 +602,7 @@ UTEST(descriptors, appended_features_are_fully_described)
     ASSERT_EQ(fd[XTRACT_COVARIANCE_MATRIX].is_scalar, XTRACT_FALSE);
     ASSERT_EQ(fd[XTRACT_COVARIANCE_MATRIX].is_delta, XTRACT_FALSE);
     ASSERT_EQ(fd[XTRACT_COVARIANCE_MATRIX].result.vector.format, XTRACT_SQUARE_MATRIX);
-    ASSERT_EQ(fd[XTRACT_COVARIANCE_MATRIX].result.vector.unit, XTRACT_UNIT_ANY);
+    ASSERT_EQ(fd[XTRACT_COVARIANCE_MATRIX].result.vector.unit, XTRACT_UNIT_ANY_SQUARED);
 
     ASSERT_STREQ(fd[XTRACT_CORRELATION_MATRIX].algo.name, "correlation_matrix");
     ASSERT_EQ(fd[XTRACT_CORRELATION_MATRIX].argc, 0);

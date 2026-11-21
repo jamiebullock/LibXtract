@@ -121,44 +121,44 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *argv_min = 1;
             *argv_max = XTRACT_UNBOUNDED_MAX;
             *argv_def = XTRACT_NO_DEFAULT;
-            *argv_unit = (xtract_unit_t)XTRACT_NONE;
+            *argv_unit = XTRACT_UNIT_NONE;
             break;
         case XTRACT_MOVING_VARIANCE:
         case XTRACT_MOVING_STANDARD_DEVIATION:
             *argv_min = 2;
             *argv_max = XTRACT_UNBOUNDED_MAX;
             *argv_def = XTRACT_NO_DEFAULT;
-            *argv_unit = (xtract_unit_t)XTRACT_NONE;
+            *argv_unit = XTRACT_UNIT_NONE;
             break;
         case XTRACT_EWMA_AVERAGE:
         case XTRACT_EWMA_VARIANCE:
             *argv_min = 0;
             *argv_max = 1;
             *argv_def = XTRACT_NO_DEFAULT;
-            *argv_unit = (xtract_unit_t)XTRACT_NONE;
+            *argv_unit = XTRACT_UNIT_NONE;
             break;
         case XTRACT_HIGUCHI_FRACTAL_DIMENSION:
             *argv_min = 2;
             *argv_max = XTRACT_UNBOUNDED_MAX;
             *argv_def = 10;
-            *argv_unit = (xtract_unit_t)XTRACT_NONE;
+            *argv_unit = XTRACT_UNIT_NONE;
             break;
         case XTRACT_PERMUTATION_ENTROPY:
             *argv_min = 2;
             *argv_max = 8;
             *argv_def = 3;
-            *argv_unit = (xtract_unit_t)XTRACT_NONE;
+            *argv_unit = XTRACT_UNIT_NONE;
             *(argv_min + 1) = 1;
             *(argv_max + 1) = XTRACT_UNBOUNDED_MAX;
             *(argv_def + 1) = 1;
-            *(argv_unit + 1) = (xtract_unit_t)XTRACT_NONE;
+            *(argv_unit + 1) = XTRACT_UNIT_NONE;
             break;
         case XTRACT_SAMPLE_ENTROPY:
         case XTRACT_APPROXIMATE_ENTROPY:
             *argv_min = 1;
             *argv_max = XTRACT_UNBOUNDED_MAX;
             *argv_def = 2;
-            *argv_unit = (xtract_unit_t)XTRACT_NONE;
+            *argv_unit = XTRACT_UNIT_NONE;
             *(argv_min + 1) = 0;
             *(argv_max + 1) = XTRACT_UNBOUNDED_MAX;
             *(argv_def + 1) = XTRACT_NO_DEFAULT;
@@ -168,13 +168,13 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *argv_min = 0.0;
             *argv_max = XTRACT_UNBOUNDED_MAX;
             *argv_def = XTRACT_NO_DEFAULT;
-            *argv_unit = XTRACT_UNIT_ANY;
+            *argv_unit = XTRACT_UNIT_ANY_SQUARED;
             break;
         case XTRACT_SPECTRAL_STANDARD_DEVIATION:
             *argv_min = 0.0;
             *argv_max = XTRACT_UNBOUNDED_MAX;
             *argv_def = XTRACT_NO_DEFAULT;
-            *argv_unit = XTRACT_HERTZ;
+            *argv_unit = XTRACT_HERTZ_SQUARED;
             break;
         case XTRACT_LPCC:
             /* argv[0] is the cepstrum length (Q). The recommended value,
@@ -183,7 +183,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *argv_min = 1;
             *argv_max = XTRACT_UNBOUNDED_MAX;
             *argv_def = XTRACT_NO_DEFAULT;
-            *argv_unit = (xtract_unit_t)XTRACT_NONE;
+            *argv_unit = XTRACT_UNIT_NONE;
             break;
         case XTRACT_SPECTRAL_INHARMONICITY:
             *argv_min = 0.0;
@@ -350,23 +350,23 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *argv_min = 1;
             *argv_max = XTRACT_UNBOUNDED_MAX;
             *argv_def = XTRACT_NO_DEFAULT;
-            *argv_unit = (xtract_unit_t)XTRACT_NONE;
+            *argv_unit = XTRACT_UNIT_NONE;
             *(argv_min + 1) = 1;
             *(argv_max + 1) = 46340;
             *(argv_def + 1) = 8;
-            *(argv_unit + 1) = (xtract_unit_t)XTRACT_NONE;
+            *(argv_unit + 1) = XTRACT_UNIT_NONE;
             *(argv_min + 2) = XTRACT_UNBOUNDED_MIN;
             *(argv_max + 2) = XTRACT_UNBOUNDED_MAX;
             *(argv_def + 2) = 1;
-            *(argv_unit + 2) = (xtract_unit_t)XTRACT_NONE;
+            *(argv_unit + 2) = XTRACT_UNIT_NONE;
             *(argv_min + 3) = XTRACT_UNBOUNDED_MIN;
             *(argv_max + 3) = XTRACT_UNBOUNDED_MAX;
             *(argv_def + 3) = 0;
-            *(argv_unit + 3) = (xtract_unit_t)XTRACT_NONE;
+            *(argv_unit + 3) = XTRACT_UNIT_NONE;
             *(argv_min + 4) = 0;
             *(argv_max + 4) = 1;
             *(argv_def + 4) = 0;
-            *(argv_unit + 4) = (xtract_unit_t)XTRACT_NONE;
+            *(argv_unit + 4) = XTRACT_UNIT_NONE;
             break;
         case XTRACT_QUANTISE:
             *argv_min = XTRACT_UNBOUNDED_MIN;
@@ -389,19 +389,19 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             *argv_min = 1;
             *argv_max = XTRACT_UNBOUNDED_MAX;
             *argv_def = XTRACT_NO_DEFAULT;
-            *argv_unit = (xtract_unit_t)XTRACT_NONE;
+            *argv_unit = XTRACT_UNIT_NONE;
             break;
         case XTRACT_COVARIANCE_MATRIX:
             *argv_min = 1;
             *argv_max = XTRACT_UNBOUNDED_MAX;
             *argv_def = 2;
-            *argv_unit = (xtract_unit_t)XTRACT_NONE;
+            *argv_unit = XTRACT_UNIT_NONE;
             break;
         case XTRACT_COHERENCE:
             *argv_min = 2;
             *argv_max = XTRACT_UNBOUNDED_MAX;
             *argv_def = 256;
-            *argv_unit = (xtract_unit_t)XTRACT_NONE;
+            *argv_unit = XTRACT_UNIT_NONE;
             break;
         case XTRACT_SPECTRAL_CONTRAST:
             *argv_min = 1.0;
@@ -2297,7 +2297,6 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             switch (f)
             {
             case XTRACT_MEAN:
-            case XTRACT_VARIANCE:
             case XTRACT_STANDARD_DEVIATION:
             case XTRACT_AVERAGE_DEVIATION:
             case XTRACT_MEDIAN:
@@ -2315,6 +2314,11 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             case XTRACT_WINDOWED:
             case XTRACT_PEAK:
                 *result_unit = XTRACT_UNIT_ANY;
+                *result_min = XTRACT_UNBOUNDED_MIN;
+                *result_max = XTRACT_UNBOUNDED_MAX;
+                break;
+            case XTRACT_VARIANCE:
+                *result_unit = XTRACT_UNIT_ANY_SQUARED;
                 *result_min = XTRACT_UNBOUNDED_MIN;
                 *result_max = XTRACT_UNBOUNDED_MAX;
                 break;
@@ -2355,12 +2359,18 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
                 *result_min = 0.0;
                 *result_max = XTRACT_UNBOUNDED_MAX;
                 break;
-            case XTRACT_SPECTRAL_MEAN:
             case XTRACT_SPECTRAL_VARIANCE:
+            case XTRACT_SPREAD:
+                /* the variance of frequencies between 0 and a ceiling is at
+                 * most the square of half the ceiling */
+                *result_unit = XTRACT_HERTZ_SQUARED;
+                *result_min = 0.0;
+                *result_max = XTRACT_SQ(XTRACT_SR_UPPER_LIMIT / 4.0);
+                break;
+            case XTRACT_SPECTRAL_MEAN:
             case XTRACT_SPECTRAL_STANDARD_DEVIATION:
                 /* case XTRACT_SPECTRAL_AVERAGE_DEVIATION: */
             case XTRACT_SPECTRAL_CENTROID:
-            case XTRACT_SPREAD:
             case XTRACT_F0:
             case XTRACT_FAILSAFE_F0:
             case XTRACT_WAVELET_F0:
@@ -2422,7 +2432,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
                 *result_max = XTRACT_UNBOUNDED_MAX;
                 break;
             case XTRACT_HJORTH_ACTIVITY:
-                *result_unit = XTRACT_UNIT_ANY;
+                *result_unit = XTRACT_UNIT_ANY_SQUARED;
                 *result_min = 0.0;
                 *result_max = XTRACT_UNBOUNDED_MAX;
                 break;
@@ -2504,27 +2514,30 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
 
             switch (f)
             {
-            case XTRACT_AUTOCORRELATION:
             case XTRACT_AMDF:
-            case XTRACT_ASDF:
             case XTRACT_DCT:
             case XTRACT_SUBBANDS:
             case XTRACT_WINDOWED:
             case XTRACT_SMOOTHED:
             case XTRACT_MOVING_SUM:
             case XTRACT_MOVING_AVERAGE:
-            case XTRACT_MOVING_VARIANCE:
             case XTRACT_MOVING_STANDARD_DEVIATION:
             case XTRACT_MOVING_MAX:
             case XTRACT_MOVING_MIN:
             case XTRACT_EWMA_AVERAGE:
-            case XTRACT_EWMA_VARIANCE:
             case XTRACT_CROSS_CORRELATION:
             case XTRACT_LAST_N:
-            case XTRACT_AUTOCORRELATION_FFT:
             case XTRACT_DIFFERENCE_VECTOR:
                 *result_format = XTRACT_ARBITRARY_SERIES;
                 *result_unit = XTRACT_UNIT_ANY;
+                break;
+            case XTRACT_AUTOCORRELATION:
+            case XTRACT_AUTOCORRELATION_FFT:
+            case XTRACT_ASDF:
+            case XTRACT_MOVING_VARIANCE:
+            case XTRACT_EWMA_VARIANCE:
+                *result_format = XTRACT_ARBITRARY_SERIES;
+                *result_unit = XTRACT_UNIT_ANY_SQUARED;
                 break;
             case XTRACT_SPECTRAL_CONTRAST:
                 *result_format = XTRACT_ARBITRARY_SERIES;
@@ -2532,7 +2545,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
                 break;
             case XTRACT_COVARIANCE_MATRIX:
                 *result_format = XTRACT_SQUARE_MATRIX;
-                *result_unit = XTRACT_UNIT_ANY;
+                *result_unit = XTRACT_UNIT_ANY_SQUARED;
                 break;
             case XTRACT_CORRELATION_MATRIX:
                 *result_format = XTRACT_SQUARE_MATRIX;
