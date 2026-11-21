@@ -75,7 +75,7 @@ void verify_spectrum(void)
     double *argv = nondet_doubles(XTRACT_MAXARGS);
     double *result = nondet_doubles(N);
 
-    verify_any_sqrt = 1;
+    stub_any_sqrt = 1;
     (void)xtract_spectrum(NULL, data, N, nondet_argv(argv), result);
     free(data);
     free(argv);

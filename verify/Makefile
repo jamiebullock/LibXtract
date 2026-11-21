@@ -26,8 +26,8 @@
 # a take of scratch is an allocation of exactly the size asked for, which may
 # fail, so that a proof reports a function that writes one element past what
 # it took, and covers the context refusing.
-# The library is compiled with sqrt renamed to verify_sqrt, which math_stub.c
-# defines. It calls sqrt unless a harness sets verify_any_sqrt, and then it
+# The library is compiled with sqrt renamed to stub_sqrt, which math_stub.c
+# defines. It calls sqrt unless a harness sets stub_any_sqrt, and then it
 # returns any value. CBMC models sqrt with assumptions on two products of
 # doubles, which formula slicing cannot drop, and a proof that takes a
 # spectrum pays for them once per bin and unwinding. A harness sets the flag
@@ -83,7 +83,7 @@ HEADERS := verify.h $(wildcard ../include/xtract/*.h ../src/*.h ../src/ooura/*.h
 # which -Wall prints and -Werror makes an error.
 CFLAGS = -Wall -Werror -U__APPLE__ -DUSE_OOURA -DVERIFY_MAX_N=$(VERIFY_MAX_N) -DVERIFY_SMALL_N=$(VERIFY_SMALL_N) \
 	-DVERIFY_MAX_FILTERS=$(VERIFY_MAX_FILTERS) -DXTRACT_JACOBI_MAX_SWEEPS=$(VERIFY_MAX_SWEEPS) \
-	-Dsqrt=verify_sqrt -std=c99 -I../include -I../src
+	-Dsqrt=stub_sqrt -std=c99 -I../include -I../src
 
 # Every loop may run once per input element, and the bark band loop runs
 # XTRACT_BARK_BANDS times whatever N is, so the bound is the larger of the two

@@ -15,11 +15,11 @@ double pow(double x, double y)
     return nondet_double();
 }
 
-_Bool verify_any_sqrt;
+_Bool stub_any_sqrt;
 
-double verify_sqrt(double x)
+double stub_sqrt(double x)
 {
-    return verify_any_sqrt ? nondet_double() : sqrt(x);
+    return stub_any_sqrt ? nondet_double() : sqrt(x);
 }
 
 double atan2(double y, double x)
