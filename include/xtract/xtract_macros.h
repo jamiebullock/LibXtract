@@ -33,9 +33,6 @@ extern "C"
  * (and keeps Q > p for all p >= 1). Pass the result as xtract_lpcc's argv[0]
  * to request this many cepstral coefficients. */
 #define XTRACT_LPCC_CEPSTRUM_ORDER(p) ((3 * (p) + 1) / 2)
-#define XTRACT_MAX_NAME_LENGTH 64
-#define XTRACT_MAX_AUTHOR_LENGTH 128
-#define XTRACT_MAX_DESC_LENGTH 256
 
 #ifdef __cplusplus
 }

@@ -51,12 +51,6 @@
         return (void *)filterbank;
     }
 
-    xtract_function_descriptor_t 
-            *get_descriptor(xtract_function_descriptor_t *fd, int i){
-
-        return &fd[i];
-    }
-
 %}
 
 %array_class(double, doubleArray);
@@ -108,6 +102,9 @@
 %include "xtract/xtract_helper.h"
 %include "xtract/xtract_macros.h"
 %include "xtract/xtract_features.h"
+
+/* A descriptor belongs to the library and is read only */
+%immutable;
 %include "xtract/libxtract.h"
 
 

@@ -81,4 +81,14 @@ console.log('last_n after two values: ' + lastN.getitem(N - 2).toFixed(1) + ', '
 
 xtract.xtract_last_n_state_delete(state);
 
+console.log('Reading a descriptor...');
+
+const feature = xtract.xtract_feature_by_name('spectral_centroid');
+const descriptor = xtract.xtract_descriptor(feature);
+if (feature !== xtract.XTRACT_SPECTRAL_CENTROID || descriptor.name !== 'spectral_centroid') {
+    console.log('The spectral centroid is not found by its name');
+    process.exit(1);
+}
+console.log(descriptor.title + ': ' + descriptor.description);
+
 console.log('\nFinished!\n');
