@@ -279,21 +279,25 @@ extern "C"
     /** \brief Enumeration of units*/
     typedef enum unit_
     {
-        XTRACT_UNIT_UNKNOWN = -2, /* unit has not been determined */
-        XTRACT_UNIT_ANY = -1,     /* result inherits the input's unit */
-        XTRACT_UNIT_NONE = 0,     /* dimensionless */
-        /* value 1 is reserved; the dimensioned units start at 2 so their
-         * values stay stable across releases */
-        XTRACT_HERTZ = 2,
+        /* a unit added later goes at the end, so that the values stay stable
+         * across releases */
+        XTRACT_UNIT_UNKNOWN,     /* unit has not been determined */
+        XTRACT_UNIT_NONE,        /* dimensionless */
+        XTRACT_UNIT_ANY,         /* the unit of the input, whatever that is */
+        XTRACT_UNIT_ANY_SQUARED, /* the square of the input's unit */
+        XTRACT_UNIT_ANY_CUBED,   /* the cube of the input's unit */
+        XTRACT_HERTZ,
+        XTRACT_HERTZ_SQUARED,
+        XTRACT_PER_HERTZ,
         XTRACT_ANY_AMPLITUDE_HERTZ,
+        XTRACT_SECONDS,
+        XTRACT_PER_SECOND,
         XTRACT_DECIBELS,
         XTRACT_PERCENT,
         XTRACT_BINS,
-        XTRACT_SONE,
         XTRACT_MIDI_CENT,
-        XTRACT_ACUM,
-        XTRACT_SECONDS,
-        XTRACT_PER_SECOND
+        XTRACT_SONE,
+        XTRACT_ACUM
     } xtract_unit_t;
 
     /** \brief Boolean */
