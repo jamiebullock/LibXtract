@@ -94,7 +94,7 @@ void verify_failsafe_f0(void)
     double *argv = nondet_doubles(XTRACT_MAXARGS);
     double result;
 
-    verify_any_sqrt = 1;
+    stub_any_sqrt = 1;
     (void)xtract_failsafe_f0(NULL, data, N, nondet_argv(argv), &result);
     free(data);
     free(argv);

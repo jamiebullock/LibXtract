@@ -124,7 +124,7 @@ void verify_cooccurrence_correlation(void)
     double *data = nondet_doubles(N);
     double result;
 
-    verify_any_sqrt = 1;
+    stub_any_sqrt = 1;
     (void)xtract_cooccurrence_correlation(NULL, data, N, NULL, &result);
     free(data);
 }
