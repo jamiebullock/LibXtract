@@ -487,7 +487,7 @@
       "arguments": [
         {"unit": "none", "default": 2},
         {"unit": "none"},
-        {"unit": "none", "donor": "mean"}
+        {"unit": "none"}
       ],
       "delta": true,
       "result": {"kind": "scalar", "unit": "unknown"}
@@ -502,7 +502,7 @@
       "arguments": [
         {"unit": "none", "default": 2},
         {"unit": "none"},
-        {"unit": "none", "donor": "mean"}
+        {"unit": "none"}
       ],
       "delta": true,
       "result": {"kind": "scalar", "unit": "unknown"}
@@ -1002,7 +1002,7 @@
       "argument_type": "int",
       "arguments": [
         {"unit": "none", "min": 2, "max": 8, "default": 3},
-        {"unit": "none", "min": 1, "default": 1, "donor": "mean"}
+        {"unit": "none", "min": 1, "default": 1}
       ],
       "result": {"kind": "scalar", "unit": "none", "min": 0, "max": 1}
     },
@@ -1029,7 +1029,7 @@
       "argument_type": "float",
       "arguments": [
         {"unit": "none", "min": 1, "default": 2},
-        {"unit": "any", "min": 0, "donor": "mean"}
+        {"unit": "any", "min": 0}
       ],
       "result": {"kind": "scalar", "unit": "none", "min": 0}
     },
@@ -1043,7 +1043,7 @@
       "argument_type": "float",
       "arguments": [
         {"unit": "none", "min": 1, "default": 2},
-        {"unit": "any", "min": 0, "donor": "mean"}
+        {"unit": "any", "min": 0}
       ],
       "result": {"kind": "scalar", "unit": "none"}
     },
