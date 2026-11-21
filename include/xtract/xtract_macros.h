@@ -21,7 +21,6 @@ extern "C"
 #define XTRACT_WINDOW_SIZE 1024 /* dummy macro for descriptors where argc is window size */
 #define XTRACT_NONE 0
 #define XTRACT_ANY -1                   /* sentinel for int/enum fields (donor) */
-#define XTRACT_UNKNOWN -2               /* sentinel for int/enum fields */
 #define XTRACT_UNBOUNDED_MIN (-DBL_MAX) /* result/argv has no lower bound */
 #define XTRACT_UNBOUNDED_MAX DBL_MAX    /* result/argv has no upper bound */
 #define XTRACT_UNKNOWN_MIN (-DBL_MAX)   /* lower bound has not been determined */
