@@ -107,6 +107,7 @@
 %include "xtract/xtract_context.h"
 %include "xtract/xtract_helper.h"
 %include "xtract/xtract_macros.h"
+%include "xtract/xtract_features.h"
 %include "xtract/libxtract.h"
 
 

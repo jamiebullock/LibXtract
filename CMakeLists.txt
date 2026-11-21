@@ -93,6 +93,9 @@ if(PROJECT_IS_TOP_LEVEL)
         COMMAND ${CMAKE_COMMAND} "-DVALE=${XTRACT_VALE}"
             -P ${PROJECT_SOURCE_DIR}/cmake/prose.cmake
         VERBATIM)
+    add_custom_target(features
+        COMMAND ${CMAKE_COMMAND} -P ${PROJECT_SOURCE_DIR}/cmake/features.cmake
+        VERBATIM)
     add_custom_target(version-check
         COMMAND ${CMAKE_COMMAND} -P ${PROJECT_SOURCE_DIR}/cmake/version.cmake
         VERBATIM)
