@@ -72,7 +72,7 @@ with `-DXTRACT_CLANG_FORMAT=<path>` to run the targets with a chosen binary.
 - Feature functions share the signature
   `int xtract_foo(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)`
   and return an `XTRACT_` status code.
-- `src/features.json` holds one record for each feature. The `features`
+- `src/features.json` has one record for each feature. The `features`
   target writes the feature enumeration (`include/xtract/xtract_features.h`)
   and the dispatch and descriptor tables (`src/features.c`) from it. To add
   or change a feature, edit the JSON file, build the target and commit the
