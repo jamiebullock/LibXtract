@@ -258,17 +258,26 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             break;
         case XTRACT_SKEWNESS:
         case XTRACT_KURTOSIS:
-        case XTRACT_SPECTRAL_SKEWNESS:
-        case XTRACT_SPECTRAL_KURTOSIS:
         case XTRACT_CREST:
             *argv_min = XTRACT_UNBOUNDED_MIN;
             *argv_max = XTRACT_UNBOUNDED_MAX;
             *argv_def = XTRACT_NO_DEFAULT;
-            *argv_unit = XTRACT_UNIT_NONE;
+            *argv_unit = XTRACT_UNIT_ANY;
             *(argv_min + 1) = XTRACT_UNBOUNDED_MIN;
             *(argv_max + 1) = XTRACT_UNBOUNDED_MAX;
             *(argv_def + 1) = XTRACT_NO_DEFAULT;
-            *(argv_unit + 1) = XTRACT_UNIT_NONE;
+            *(argv_unit + 1) = XTRACT_UNIT_ANY;
+            break;
+        case XTRACT_SPECTRAL_SKEWNESS:
+        case XTRACT_SPECTRAL_KURTOSIS:
+            *argv_min = XTRACT_UNBOUNDED_MIN;
+            *argv_max = XTRACT_UNBOUNDED_MAX;
+            *argv_def = XTRACT_NO_DEFAULT;
+            *argv_unit = XTRACT_HERTZ;
+            *(argv_min + 1) = XTRACT_UNBOUNDED_MIN;
+            *(argv_max + 1) = XTRACT_UNBOUNDED_MAX;
+            *(argv_def + 1) = XTRACT_NO_DEFAULT;
+            *(argv_unit + 1) = XTRACT_HERTZ;
             break;
         case XTRACT_SPECTRUM:
             *argv_min = DBL_MIN;
@@ -2301,19 +2310,33 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             case XTRACT_AVERAGE_DEVIATION:
             case XTRACT_MEDIAN:
             case XTRACT_MEDIAN_ABSOLUTE_DEVIATION:
-            case XTRACT_TIME_REVERSAL_ASYMMETRY:
-            case XTRACT_SKEWNESS:
-            case XTRACT_KURTOSIS:
             case XTRACT_RMS_AMPLITUDE:
             case XTRACT_LOWEST_VALUE:
             case XTRACT_HIGHEST_VALUE:
             case XTRACT_SUM:
-            case XTRACT_FLUX:
-            case XTRACT_LNORM:
-            case XTRACT_NONZERO_COUNT:
             case XTRACT_WINDOWED:
             case XTRACT_PEAK:
                 *result_unit = XTRACT_UNIT_ANY;
+                *result_min = XTRACT_UNBOUNDED_MIN;
+                *result_max = XTRACT_UNBOUNDED_MAX;
+                break;
+            case XTRACT_TIME_REVERSAL_ASYMMETRY:
+                *result_unit = XTRACT_UNIT_ANY_CUBED;
+                *result_min = XTRACT_UNBOUNDED_MIN;
+                *result_max = XTRACT_UNBOUNDED_MAX;
+                break;
+            case XTRACT_SKEWNESS:
+            case XTRACT_KURTOSIS:
+            case XTRACT_NONZERO_COUNT:
+                *result_unit = XTRACT_UNIT_NONE;
+                *result_min = XTRACT_UNBOUNDED_MIN;
+                *result_max = XTRACT_UNBOUNDED_MAX;
+                break;
+            case XTRACT_FLUX:
+            case XTRACT_LNORM:
+                /* the unit of the data, or with the normalise argument set a
+                 * logarithm, which has none */
+                *result_unit = XTRACT_UNIT_UNKNOWN;
                 *result_min = XTRACT_UNBOUNDED_MIN;
                 *result_max = XTRACT_UNBOUNDED_MAX;
                 break;
@@ -2387,7 +2410,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
                 *result_max = 12700;
                 break;
             case XTRACT_ZCR:
-                *result_unit = XTRACT_HERTZ;
+                *result_unit = XTRACT_UNIT_NONE;
                 *result_min = 0.0;
                 *result_max = XTRACT_UNBOUNDED_MAX;
                 break;
@@ -2483,7 +2506,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
                 break;
             case XTRACT_SPECTRAL_SLOPE:
                 /* least-squares regression slope: any real sign and magnitude */
-                *result_unit = XTRACT_UNIT_NONE;
+                *result_unit = XTRACT_PER_HERTZ;
                 *result_min = XTRACT_UNBOUNDED_MIN;
                 *result_max = XTRACT_UNBOUNDED_MAX;
                 break;
@@ -2525,7 +2548,6 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             case XTRACT_MOVING_MAX:
             case XTRACT_MOVING_MIN:
             case XTRACT_EWMA_AVERAGE:
-            case XTRACT_CROSS_CORRELATION:
             case XTRACT_LAST_N:
             case XTRACT_DIFFERENCE_VECTOR:
                 *result_format = XTRACT_ARBITRARY_SERIES;
@@ -2538,6 +2560,12 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
             case XTRACT_EWMA_VARIANCE:
                 *result_format = XTRACT_ARBITRARY_SERIES;
                 *result_unit = XTRACT_UNIT_ANY_SQUARED;
+                break;
+            case XTRACT_CROSS_CORRELATION:
+                /* the product of the units of the two series, or none with
+                 * the scaling argument set */
+                *result_format = XTRACT_ARBITRARY_SERIES;
+                *result_unit = XTRACT_UNIT_UNKNOWN;
                 break;
             case XTRACT_SPECTRAL_CONTRAST:
                 *result_format = XTRACT_ARBITRARY_SERIES;
@@ -2587,9 +2615,8 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
                 *result_unit = XTRACT_UNIT_NONE;
                 break;
             case XTRACT_BARK_COEFFICIENTS:
-                /* per-band sums on a Bark-band (not Hz) axis: dimensionless */
                 *result_format = XTRACT_BARK_COEFFS;
-                *result_unit = XTRACT_UNIT_NONE;
+                *result_unit = XTRACT_UNIT_ANY;
                 break;
             case XTRACT_PEAK_SPECTRUM:
             case XTRACT_SPECTRUM:

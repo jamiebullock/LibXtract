@@ -281,7 +281,7 @@ extern "C"
     {
         /* a unit added later goes at the end, so that the values stay stable
          * across releases */
-        XTRACT_UNIT_UNKNOWN,     /* unit has not been determined */
+        XTRACT_UNIT_UNKNOWN,     /* not determined, or decided by an argument */
         XTRACT_UNIT_NONE,        /* dimensionless */
         XTRACT_UNIT_ANY,         /* the unit of the input, whatever that is */
         XTRACT_UNIT_ANY_SQUARED, /* the square of the input's unit */
@@ -405,7 +405,8 @@ extern "C"
         xtract_bool_t is_delta; /* features in xtract_delta.h can be scalar or vector */
 
         /* a result range/unit of XTRACT_UNKNOWN_MIN/MAX or XTRACT_UNIT_UNKNOWN
-         * means its range is genuinely undetermined, not merely unverified */
+         * means its range is genuinely undetermined, not merely unverified,
+         * or that an argument of the feature decides its unit */
         union {
             struct
             {
