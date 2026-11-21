@@ -317,6 +317,8 @@ UTEST(descriptors, argv_ranges_match_the_functions)
     CHECK_REL(fd[XTRACT_MIDICENT].argv.min[0], 0.0, EPSILON);
     ASSERT_EQ(fd[XTRACT_MIDICENT].argv.max[0], XTRACT_UNBOUNDED_MAX);
     ASSERT_EQ(fd[XTRACT_MIDICENT].argv.unit[0], XTRACT_HERTZ);
+    ASSERT_EQ(fd[XTRACT_MIDICENT].data.format, XTRACT_NO_DATA);
+    ASSERT_EQ(fd[XTRACT_MIDICENT].data.unit, XTRACT_UNIT_NONE);
 
     ASSERT_EQ(fd[XTRACT_TRISTIMULUS_1].argc, 0);
     ASSERT_EQ(fd[XTRACT_TRISTIMULUS_2].argc, 0);

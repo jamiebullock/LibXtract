@@ -881,6 +881,7 @@ xtract_function_descriptor_t *xtract_make_descriptors(void)
         case XTRACT_LAST_N:
             *data_unit = XTRACT_UNIT_ANY;
             break;
+        case XTRACT_MIDICENT:
         case XTRACT_HISTOGRAM:
         case XTRACT_COOCCURRENCE_MATRIX:
         case XTRACT_COOCCURRENCE_CONTRAST:
