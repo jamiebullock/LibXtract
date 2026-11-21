@@ -30,6 +30,7 @@ set(PROPERTIES length sample_rate transform_size bin_spacing width series levels
 set(SUBJECTS input source)
 set(PARTS whole first_half from_one_before_the_second_half)
 set(TAGS sound)
+set(RULE_FUNCTIONS is_power_of_two is_square root filter_count filterbank_size band_count kernel_size)
 set(MAXARGS 5)
 foreach(list VALUE_TYPES OBJECT_TYPES PROPERTIES SUBJECTS PARTS TAGS)
     list(JOIN ${list} ", " ${list}_TEXT)
@@ -379,6 +380,41 @@ function(argument_initialiser out where argument shared_type)
         PARENT_SCOPE)
 endfunction()
 
+# Sets ${out} to the C form of an expression in N and the arguments of the
+# feature, and ${uses_argv_out} to whether it reads an argument. The
+# expression is evaluated as long long, so that it cannot overflow for any
+# int. ${argument_accessors} has, for each argument of the feature in order,
+# the C expression that reads it from argv
+function(c_expression out uses_argv_out where key expression)
+    if(NOT expression MATCHES "^[A-Za-z0-9_ ()<>=!&|+*/%-]+$")
+        fail("${where}" "'${key}' is '${expression}', which has a character an expression cannot have")
+    endif()
+    string(REGEX MATCHALL "[A-Za-z_][A-Za-z0-9_]*|[^A-Za-z_]+" tokens "${expression}")
+    set(text "")
+    set(uses_argv OFF)
+    foreach(token IN LISTS tokens)
+        if(NOT token MATCHES "^[A-Za-z_]")
+            string(APPEND text "${token}")
+        elseif(token STREQUAL "N")
+            string(APPEND text "n")
+        elseif(token IN_LIST RULE_FUNCTIONS)
+            string(APPEND text "xtract_rule_${token}")
+        elseif(token MATCHES "^XTRACT_[A-Z_]+$")
+            string(APPEND text "${token}")
+        else()
+            list(FIND argument_names "${token}" index)
+            if(index EQUAL -1)
+                fail("${where}" "'${key}' is '${expression}', and '${token}' is not N, an argument of the feature or a function")
+            endif()
+            list(GET argument_accessors ${index} accessor)
+            string(APPEND text "${accessor}")
+            set(uses_argv ON)
+        endif()
+    endforeach()
+    set(${out} "${text}" PARENT_SCOPE)
+    set(${uses_argv_out} ${uses_argv} PARENT_SCOPE)
+endfunction()
+
 file(READ "${data_file}" doc)
 only_keys("the file" "${doc}" quantities builders features)
 string(JSON count LENGTH "${doc}" features)
@@ -545,6 +581,8 @@ set(enumeration "")
 set(dispatch "")
 set(argument_text "")
 set(accepted_text "")
+set(rule_cases "")
+set(length_cases "")
 set(table "")
 foreach(i RANGE ${last})
     string(JSON feature GET "${doc}" features ${i})
@@ -596,7 +634,7 @@ foreach(i RANGE ${last})
     endif()
 
     required(input "${where}" "${feature}" OBJECT input)
-    only_keys("${where}" "${input}" format unit accepts frames)
+    only_keys("${where}" "${input}" format unit accepts frames length)
     required(input_format "${where}" "${input}" STRING format)
     required(input_unit "${where}" "${input}" STRING unit)
     format_enumerator(input_format "${where}" input.format "${input_format}")
@@ -647,10 +685,11 @@ foreach(i RANGE ${last})
         fail("${where}" "'argument_type' is '${argument_type}', which is not one of ${VALUE_TYPES_TEXT}")
     endif()
     set(argv NULL)
+    set(argument_names "")
+    set(argument_accessors "")
     if(argc GREATER 0)
         set(rows "")
         set(objects 0)
-        set(argument_names "")
         math(EXPR last_argument "${argc} - 1")
         foreach(a RANGE ${last_argument})
             string(JSON argument GET "${arguments}" ${a})
@@ -659,11 +698,19 @@ foreach(i RANGE ${last})
             if(argument_name IN_LIST argument_names)
                 fail("${where}" "two arguments are named '${argument_name}'")
             endif()
+            if(argument_name STREQUAL "N" OR argument_name IN_LIST RULE_FUNCTIONS)
+                fail("${where}" "the argument '${argument_name}' has the name an expression for a length uses")
+            endif()
             list(APPEND argument_names "${argument_name}")
             if(argument_kind STREQUAL "object")
                 math(EXPR objects "${objects} + 1")
+                list(APPEND argument_accessors "argv")
             elseif(argument_type STREQUAL "")
                 fail("${where}" "it takes values and has no 'argument_type'")
+            elseif(argument_type STREQUAL "int")
+                list(APPEND argument_accessors "(long long)((const int *)argv)[${a}]")
+            else()
+                list(APPEND argument_accessors "(long long)xtract_argv_int(((const double *)argv)[${a}])")
             endif()
             argument_initialiser(row "${where}" "${argument}" "${argument_type}" result property object setting)
             string(APPEND rows "${row}")
@@ -677,6 +724,18 @@ foreach(i RANGE ${last})
     elseif(NOT argument_type STREQUAL "")
         fail("${where}" "it has an 'argument_type' and no arguments")
     endif()
+
+    if(input_format STREQUAL "XTRACT_NO_DATA")
+        set(default_rule "N >= 0")
+    else()
+        set(default_rule "N >= 1")
+    endif()
+    optional(length_rule "${where}" "${input}" STRING length "${default_rule}")
+    c_expression(rule_c rule_uses_argv "${where}" input.length "${length_rule}")
+    if(rule_uses_argv)
+        set(rule_c "argv != NULL && ${rule_c}")
+    endif()
+    string(APPEND rule_cases "    case ${id}:\n        return ${rule_c};\n")
 
     optional_flag(delta "${where}" "${feature}" delta)
     if(delta)
@@ -694,11 +753,14 @@ foreach(i RANGE ${last})
         set(is_scalar XTRACT_TRUE)
         set(result_c ".scalar = {${result_minimum}, ${result_maximum}, ${result_unit_${name}}}")
     else()
-        only_keys("${where}" "${result}" kind unit format)
+        only_keys("${where}" "${result}" kind unit format length)
         required(result_format "${where}" "${result}" STRING format)
         format_enumerator(result_format "${where}" result.format "${result_format}")
+        required(result_length "${where}" "${result}" STRING length)
+        c_expression(length_c length_uses_argv "${where}" result.length "${result_length}")
+        string(APPEND length_cases "    case ${id}:\n        length = ${length_c};\n        break;\n")
         set(is_scalar XTRACT_FALSE)
-        set(result_c ".vector = {${result_format}, ${result_unit_${name}}}")
+        set(result_c ".vector = {${result_format}, ${result_unit_${name}}, \"${result_length}\"}")
     endif()
 
     string(APPEND table
@@ -710,7 +772,7 @@ foreach(i RANGE ${last})
         "        .author = ${author_c},\n"
         "        .year = ${year},\n"
         "        .tags = ${tag_flags},\n"
-        "        .data = {${input_format}, ${input_unit}, ${accepted_count}, ${accepted}, ${frames}},\n"
+        "        .data = {${input_format}, ${input_unit}, ${accepted_count}, ${accepted}, ${frames}, \"${length_rule}\"},\n"
         "        .argc = ${argc},\n"
         "        .argv = ${argv},\n"
         "        .is_scalar = ${is_scalar},\n"
@@ -832,9 +894,11 @@ string(CONCAT header_text
 string(CONCAT source_text
     "${licence}\n"
     "/* The dispatch table and the descriptor table, ${notice} */\n\n"
+    "#include <limits.h>\n"
     "#include <stddef.h>\n\n"
     "#include \"xtract/libxtract.h\"\n\n"
-    "#include \"xtract_descriptors_private.h\"\n\n"
+    "#include \"xtract_descriptors_private.h\"\n"
+    "#include \"xtract_macros_private.h\"\n\n"
     "int (*xtract[])(xtract_context *, const double *, const int, const void *, double *) =\n    {\n"
     "${dispatch}"
     "};\n\n"
@@ -845,7 +909,20 @@ string(CONCAT source_text
     "${argument_text}"
     "const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {\n"
     "${table}"
-    "};\n")
+    "};\n\n"
+    "int xtract_length_is_accepted(const int feature, const int N, const void *argv)\n{\n"
+    "    const long long n = N;\n\n"
+    "    switch (feature)\n    {\n"
+    "${rule_cases}"
+    "    default:\n        return 0;\n    }\n}\n\n"
+    "int xtract_result_length(const int feature, const int N, const void *argv)\n{\n"
+    "    const long long n = N;\n"
+    "    long long length;\n\n"
+    "    if (!xtract_length_is_accepted(feature, N, argv))\n        return -1;\n"
+    "    switch (feature)\n    {\n"
+    "${length_cases}"
+    "    default:\n        length = 1;\n        break;\n    }\n\n"
+    "    return length >= 0 && length <= INT_MAX ? (int)length : -1;\n}\n")
 
 if(CHECK)
     if(NOT WORK)

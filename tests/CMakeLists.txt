@@ -8,6 +8,7 @@ add_executable(xttest
     xttest_context.c
     xttest_delta.c
     xttest_descriptors.c
+    xttest_driver.c
     xttest_grid.c
     xttest_init.c
     xttest_multivariate.c
@@ -49,6 +50,11 @@ add_test(NAME version_check
         -DSCRIPT=${PROJECT_SOURCE_DIR}/cmake/version.cmake
         -DWORK=${CMAKE_CURRENT_BINARY_DIR}/version_check
         -P ${CMAKE_CURRENT_SOURCE_DIR}/version_check.cmake)
+add_test(NAME driver_names_no_feature
+    COMMAND ${CMAKE_COMMAND}
+        -DFEATURES=${PROJECT_SOURCE_DIR}/include/xtract/xtract_features.h
+        -DDRIVER=${CMAKE_CURRENT_SOURCE_DIR}/xttest_driver.c
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/driver_names_no_feature.cmake)
 add_test(NAME features_are_generated
     COMMAND ${CMAKE_COMMAND}
         -DCHECK=ON

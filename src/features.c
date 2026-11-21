@@ -6,11 +6,13 @@
 
 /* The dispatch table and the descriptor table, written from src/features.json by the build target "features" */
 
+#include <limits.h>
 #include <stddef.h>
 
 #include "xtract/libxtract.h"
 
 #include "xtract_descriptors_private.h"
+#include "xtract_macros_private.h"
 
 int (*xtract[])(xtract_context *, const double *, const int, const void *, double *) =
     {
@@ -823,7 +825,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1},
+        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 1"},
         .argc = 0,
         .argv = NULL,
         .is_scalar = XTRACT_TRUE,
@@ -838,7 +840,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1},
+        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 2"},
         .argc = 1,
         .argv = arguments_variance,
         .is_scalar = XTRACT_TRUE,
@@ -853,7 +855,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_NO_DATA, XTRACT_UNIT_ANY, 0, NULL, 1},
+        .data = {XTRACT_NO_DATA, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 0"},
         .argc = 1,
         .argv = arguments_standard_deviation,
         .is_scalar = XTRACT_TRUE,
@@ -868,7 +870,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1},
+        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 1"},
         .argc = 1,
         .argv = arguments_average_deviation,
         .is_scalar = XTRACT_TRUE,
@@ -883,7 +885,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1},
+        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 1"},
         .argc = 2,
         .argv = arguments_skewness,
         .is_scalar = XTRACT_TRUE,
@@ -898,7 +900,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1},
+        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 1"},
         .argc = 2,
         .argv = arguments_kurtosis,
         .is_scalar = XTRACT_TRUE,
@@ -913,7 +915,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_SPECTRAL, XTRACT_UNIT_ANY, 1, accepted_spectral_mean, 1},
+        .data = {XTRACT_SPECTRAL, XTRACT_UNIT_ANY, 1, accepted_spectral_mean, 1, "N >= 2 && N % 2 == 0"},
         .argc = 0,
         .argv = NULL,
         .is_scalar = XTRACT_TRUE,
@@ -928,7 +930,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_SPECTRAL, XTRACT_UNIT_ANY, 1, accepted_spectral_variance, 1},
+        .data = {XTRACT_SPECTRAL, XTRACT_UNIT_ANY, 1, accepted_spectral_variance, 1, "N >= 2 && N % 2 == 0"},
         .argc = 1,
         .argv = arguments_spectral_variance,
         .is_scalar = XTRACT_TRUE,
@@ -943,7 +945,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_NO_DATA, XTRACT_UNIT_ANY, 0, NULL, 1},
+        .data = {XTRACT_NO_DATA, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 0"},
         .argc = 1,
         .argv = arguments_spectral_standard_deviation,
         .is_scalar = XTRACT_TRUE,
@@ -958,7 +960,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_SPECTRAL, XTRACT_UNIT_ANY, 1, accepted_spectral_skewness, 1},
+        .data = {XTRACT_SPECTRAL, XTRACT_UNIT_ANY, 1, accepted_spectral_skewness, 1, "N >= 2 && N % 2 == 0"},
         .argc = 2,
         .argv = arguments_spectral_skewness,
         .is_scalar = XTRACT_TRUE,
@@ -973,7 +975,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_SPECTRAL, XTRACT_UNIT_ANY, 1, accepted_spectral_kurtosis, 1},
+        .data = {XTRACT_SPECTRAL, XTRACT_UNIT_ANY, 1, accepted_spectral_kurtosis, 1, "N >= 2 && N % 2 == 0"},
         .argc = 2,
         .argv = arguments_spectral_kurtosis,
         .is_scalar = XTRACT_TRUE,
@@ -988,7 +990,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_SPECTRAL, XTRACT_UNIT_ANY, 1, accepted_spectral_centroid, 1},
+        .data = {XTRACT_SPECTRAL, XTRACT_UNIT_ANY, 1, accepted_spectral_centroid, 1, "N >= 2 && N % 2 == 0"},
         .argc = 0,
         .argv = NULL,
         .is_scalar = XTRACT_TRUE,
@@ -1003,7 +1005,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = "Krimphoff",
         .year = 1994,
         .tags = 0,
-        .data = {XTRACT_NO_DATA, XTRACT_UNIT_ANY, 0, NULL, 1},
+        .data = {XTRACT_NO_DATA, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 0"},
         .argc = 1,
         .argv = arguments_irregularity_k,
         .is_scalar = XTRACT_TRUE,
@@ -1018,7 +1020,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = "Jensen",
         .year = 1999,
         .tags = 0,
-        .data = {XTRACT_SPECTRAL_MAGNITUDES, XTRACT_UNIT_ANY, 2, accepted_irregularity_j, 1},
+        .data = {XTRACT_SPECTRAL_MAGNITUDES, XTRACT_UNIT_ANY, 2, accepted_irregularity_j, 1, "N >= 1"},
         .argc = 0,
         .argv = NULL,
         .is_scalar = XTRACT_TRUE,
@@ -1033,7 +1035,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = "Pollard and Jansson",
         .year = 1982,
         .tags = 0,
-        .data = {XTRACT_SPECTRAL_HARMONICS_MAGNITUDES, XTRACT_UNIT_ANY, 1, accepted_tristimulus_1, 1},
+        .data = {XTRACT_SPECTRAL_HARMONICS_MAGNITUDES, XTRACT_UNIT_ANY, 1, accepted_tristimulus_1, 1, "N >= 1"},
         .argc = 0,
         .argv = NULL,
         .is_scalar = XTRACT_TRUE,
@@ -1048,7 +1050,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = "Pollard and Jansson",
         .year = 1982,
         .tags = 0,
-        .data = {XTRACT_SPECTRAL_HARMONICS_MAGNITUDES, XTRACT_UNIT_ANY, 1, accepted_tristimulus_2, 1},
+        .data = {XTRACT_SPECTRAL_HARMONICS_MAGNITUDES, XTRACT_UNIT_ANY, 1, accepted_tristimulus_2, 1, "N >= 1"},
         .argc = 0,
         .argv = NULL,
         .is_scalar = XTRACT_TRUE,
@@ -1063,7 +1065,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = "Pollard and Jansson",
         .year = 1982,
         .tags = 0,
-        .data = {XTRACT_SPECTRAL_HARMONICS_MAGNITUDES, XTRACT_UNIT_ANY, 1, accepted_tristimulus_3, 1},
+        .data = {XTRACT_SPECTRAL_HARMONICS_MAGNITUDES, XTRACT_UNIT_ANY, 1, accepted_tristimulus_3, 1, "N >= 1"},
         .argc = 0,
         .argv = NULL,
         .is_scalar = XTRACT_TRUE,
@@ -1078,7 +1080,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = "McAdams",
         .year = 1999,
         .tags = 0,
-        .data = {XTRACT_SPECTRAL_MAGNITUDES, XTRACT_UNIT_ANY, 1, accepted_smoothness, 1},
+        .data = {XTRACT_SPECTRAL_MAGNITUDES, XTRACT_UNIT_ANY, 1, accepted_smoothness, 1, "N >= 3"},
         .argc = 0,
         .argv = NULL,
         .is_scalar = XTRACT_TRUE,
@@ -1093,7 +1095,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = "Norman Casagrande",
         .year = 2005,
         .tags = 0,
-        .data = {XTRACT_SPECTRAL, XTRACT_UNIT_ANY, 1, accepted_spread, 1},
+        .data = {XTRACT_SPECTRAL, XTRACT_UNIT_ANY, 1, accepted_spread, 1, "N >= 2 && N % 2 == 0"},
         .argc = 1,
         .argv = arguments_spread,
         .is_scalar = XTRACT_TRUE,
@@ -1108,7 +1110,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_AUDIO_SAMPLES, XTRACT_UNIT_ANY, 0, NULL, 1},
+        .data = {XTRACT_AUDIO_SAMPLES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 1"},
         .argc = 0,
         .argv = NULL,
         .is_scalar = XTRACT_TRUE,
@@ -1123,7 +1125,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = "Bee Suan Ong",
         .year = 2005,
         .tags = 0,
-        .data = {XTRACT_SPECTRAL_MAGNITUDES, XTRACT_UNIT_ANY, 1, accepted_rolloff, 1},
+        .data = {XTRACT_SPECTRAL_MAGNITUDES, XTRACT_UNIT_ANY, 1, accepted_rolloff, 1, "N >= 1"},
         .argc = 2,
         .argv = arguments_rolloff,
         .is_scalar = XTRACT_TRUE,
@@ -1138,7 +1140,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = "Moore, Glasberg et al",
         .year = 2005,
         .tags = XTRACT_TAG_SOUND,
-        .data = {XTRACT_BARK_COEFFS, XTRACT_UNIT_ANY, 1, accepted_loudness, 1},
+        .data = {XTRACT_BARK_COEFFS, XTRACT_UNIT_ANY, 1, accepted_loudness, 1, "N >= 1 && N <= XTRACT_BARK_BANDS"},
         .argc = 0,
         .argv = NULL,
         .is_scalar = XTRACT_TRUE,
@@ -1153,7 +1155,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = "Tristan Jehan",
         .year = 2005,
         .tags = 0,
-        .data = {XTRACT_SPECTRAL_MAGNITUDES, XTRACT_UNIT_ANY, 2, accepted_flatness, 1},
+        .data = {XTRACT_SPECTRAL_MAGNITUDES, XTRACT_UNIT_ANY, 2, accepted_flatness, 1, "N >= 1"},
         .argc = 0,
         .argv = NULL,
         .is_scalar = XTRACT_TRUE,
@@ -1168,7 +1170,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = "Peeters",
         .year = 2003,
         .tags = 0,
-        .data = {XTRACT_NO_DATA, XTRACT_UNIT_ANY, 0, NULL, 1},
+        .data = {XTRACT_NO_DATA, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 0"},
         .argc = 1,
         .argv = arguments_flatness_db,
         .is_scalar = XTRACT_TRUE,
@@ -1183,7 +1185,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = "J. D. Johnston",
         .year = 1988,
         .tags = 0,
-        .data = {XTRACT_NO_DATA, XTRACT_UNIT_ANY, 0, NULL, 1},
+        .data = {XTRACT_NO_DATA, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 0"},
         .argc = 1,
         .argv = arguments_tonality,
         .is_scalar = XTRACT_TRUE,
@@ -1198,7 +1200,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = "Peeters",
         .year = 2003,
         .tags = 0,
-        .data = {XTRACT_NO_DATA, XTRACT_UNIT_ANY, 0, NULL, 1},
+        .data = {XTRACT_NO_DATA, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 0"},
         .argc = 2,
         .argv = arguments_crest,
         .is_scalar = XTRACT_TRUE,
@@ -1213,7 +1215,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = "Tae Hong Park",
         .year = 2000,
         .tags = 0,
-        .data = {XTRACT_SPECTRAL_PEAKS, XTRACT_UNIT_ANY, 1, accepted_noisiness, 1},
+        .data = {XTRACT_SPECTRAL_PEAKS, XTRACT_UNIT_ANY, 1, accepted_noisiness, 1, "N >= 2 && N % 2 == 0"},
         .argc = 2,
         .argv = arguments_noisiness,
         .is_scalar = XTRACT_TRUE,
@@ -1228,7 +1230,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_AUDIO_SAMPLES, XTRACT_UNIT_ANY, 0, NULL, 1},
+        .data = {XTRACT_AUDIO_SAMPLES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 1"},
         .argc = 0,
         .argv = NULL,
         .is_scalar = XTRACT_TRUE,
@@ -1243,7 +1245,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_SPECTRAL_PEAKS, XTRACT_UNIT_ANY, 1, accepted_spectral_inharmonicity, 1},
+        .data = {XTRACT_SPECTRAL_PEAKS, XTRACT_UNIT_ANY, 1, accepted_spectral_inharmonicity, 1, "N >= 2 && N % 2 == 0"},
         .argc = 1,
         .argv = arguments_spectral_inharmonicity,
         .is_scalar = XTRACT_TRUE,
@@ -1258,7 +1260,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_SPECTRAL_HARMONICS_MAGNITUDES, XTRACT_UNIT_ANY, 1, accepted_odd_even_ratio, 1},
+        .data = {XTRACT_SPECTRAL_HARMONICS_MAGNITUDES, XTRACT_UNIT_ANY, 1, accepted_odd_even_ratio, 1, "N >= 1"},
         .argc = 0,
         .argv = NULL,
         .is_scalar = XTRACT_TRUE,
@@ -1273,7 +1275,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = "von Bismarck",
         .year = 1974,
         .tags = XTRACT_TAG_SOUND,
-        .data = {XTRACT_BARK_COEFFS, XTRACT_UNIT_ANY, 1, accepted_sharpness, 1},
+        .data = {XTRACT_BARK_COEFFS, XTRACT_UNIT_ANY, 1, accepted_sharpness, 1, "N >= 1 && N <= XTRACT_BARK_BANDS"},
         .argc = 0,
         .argv = NULL,
         .is_scalar = XTRACT_TRUE,
@@ -1288,7 +1290,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_SPECTRAL, XTRACT_UNIT_ANY, 1, accepted_spectral_slope, 1},
+        .data = {XTRACT_SPECTRAL, XTRACT_UNIT_ANY, 1, accepted_spectral_slope, 1, "N >= 2 && N % 2 == 0"},
         .argc = 0,
         .argv = NULL,
         .is_scalar = XTRACT_TRUE,
@@ -1303,7 +1305,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1},
+        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 1"},
         .argc = 1,
         .argv = arguments_lowest_value,
         .is_scalar = XTRACT_TRUE,
@@ -1318,7 +1320,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1},
+        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 1"},
         .argc = 0,
         .argv = NULL,
         .is_scalar = XTRACT_TRUE,
@@ -1333,7 +1335,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1},
+        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 1"},
         .argc = 0,
         .argv = NULL,
         .is_scalar = XTRACT_TRUE,
@@ -1348,7 +1350,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1},
+        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 1"},
         .argc = 0,
         .argv = NULL,
         .is_scalar = XTRACT_TRUE,
@@ -1363,7 +1365,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_SPECTRAL, XTRACT_UNIT_ANY, 1, accepted_hps, 1},
+        .data = {XTRACT_SPECTRAL, XTRACT_UNIT_ANY, 1, accepted_hps, 1, "N >= 4 && N % 2 == 0"},
         .argc = 1,
         .argv = arguments_hps,
         .is_scalar = XTRACT_TRUE,
@@ -1378,7 +1380,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = "Jamie Bullock",
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_AUDIO_SAMPLES, XTRACT_UNIT_ANY, 0, NULL, 1},
+        .data = {XTRACT_AUDIO_SAMPLES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 1"},
         .argc = 1,
         .argv = arguments_f0,
         .is_scalar = XTRACT_TRUE,
@@ -1393,7 +1395,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = "Jamie Bullock",
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_AUDIO_SAMPLES, XTRACT_UNIT_ANY, 0, NULL, 1},
+        .data = {XTRACT_AUDIO_SAMPLES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 1"},
         .argc = 1,
         .argv = arguments_failsafe_f0,
         .is_scalar = XTRACT_TRUE,
@@ -1408,7 +1410,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = "Antoine Schmitt",
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_AUDIO_SAMPLES, XTRACT_UNIT_ANY, 0, NULL, 1},
+        .data = {XTRACT_AUDIO_SAMPLES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 1"},
         .argc = 1,
         .argv = arguments_wavelet_f0,
         .is_scalar = XTRACT_TRUE,
@@ -1423,7 +1425,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = "Philip McLeod",
         .year = 2005,
         .tags = 0,
-        .data = {XTRACT_AUDIO_SAMPLES, XTRACT_UNIT_ANY, 0, NULL, 1},
+        .data = {XTRACT_AUDIO_SAMPLES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 1"},
         .argc = 1,
         .argv = arguments_mcleod_f0,
         .is_scalar = XTRACT_TRUE,
@@ -1438,7 +1440,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = "Jamie Bullock",
         .year = 0,
         .tags = XTRACT_TAG_SOUND,
-        .data = {XTRACT_NO_DATA, XTRACT_UNIT_NONE, 0, NULL, 1},
+        .data = {XTRACT_NO_DATA, XTRACT_UNIT_NONE, 0, NULL, 1, "N >= 0"},
         .argc = 1,
         .argv = arguments_midicent,
         .is_scalar = XTRACT_TRUE,
@@ -1453,7 +1455,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 1, accepted_lnorm, 1},
+        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 1, accepted_lnorm, 1, "N >= 1"},
         .argc = 2,
         .argv = arguments_lnorm,
         .is_scalar = XTRACT_TRUE,
@@ -1468,7 +1470,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_SUBFRAMES, XTRACT_UNIT_ANY, 2, accepted_flux, 2},
+        .data = {XTRACT_SUBFRAMES, XTRACT_UNIT_ANY, 2, accepted_flux, 2, "N >= 2 && N % 2 == 0"},
         .argc = 2,
         .argv = arguments_flux,
         .is_scalar = XTRACT_TRUE,
@@ -1483,7 +1485,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1},
+        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 1"},
         .argc = 3,
         .argv = arguments_attack_time,
         .is_scalar = XTRACT_TRUE,
@@ -1498,7 +1500,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1},
+        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 1"},
         .argc = 2,
         .argv = arguments_decay_time,
         .is_scalar = XTRACT_TRUE,
@@ -1513,12 +1515,12 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_SUBFRAMES, XTRACT_UNIT_ANY, 1, accepted_difference_vector, 2},
+        .data = {XTRACT_SUBFRAMES, XTRACT_UNIT_ANY, 1, accepted_difference_vector, 2, "N >= 2 && N % 2 == 0"},
         .argc = 0,
         .argv = NULL,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_TRUE,
-        .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY}},
+        .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, "N / 2"}},
     },
     [XTRACT_AUTOCORRELATION] = {
         .id = XTRACT_AUTOCORRELATION,
@@ -1528,12 +1530,12 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_AUDIO_SAMPLES, XTRACT_UNIT_ANY, 0, NULL, 1},
+        .data = {XTRACT_AUDIO_SAMPLES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 1"},
         .argc = 0,
         .argv = NULL,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
-        .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY_SQUARED}},
+        .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY_SQUARED, "N"}},
     },
     [XTRACT_AMDF] = {
         .id = XTRACT_AMDF,
@@ -1543,12 +1545,12 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_AUDIO_SAMPLES, XTRACT_UNIT_ANY, 0, NULL, 1},
+        .data = {XTRACT_AUDIO_SAMPLES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 1"},
         .argc = 0,
         .argv = NULL,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
-        .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY}},
+        .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, "N"}},
     },
     [XTRACT_ASDF] = {
         .id = XTRACT_ASDF,
@@ -1558,12 +1560,12 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_AUDIO_SAMPLES, XTRACT_UNIT_ANY, 0, NULL, 1},
+        .data = {XTRACT_AUDIO_SAMPLES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 1"},
         .argc = 0,
         .argv = NULL,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
-        .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY_SQUARED}},
+        .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY_SQUARED, "N"}},
     },
     [XTRACT_BARK_COEFFICIENTS] = {
         .id = XTRACT_BARK_COEFFICIENTS,
@@ -1573,12 +1575,12 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = XTRACT_TAG_SOUND,
-        .data = {XTRACT_SPECTRAL_MAGNITUDES, XTRACT_UNIT_ANY, 1, accepted_bark_coefficients, 1},
+        .data = {XTRACT_SPECTRAL_MAGNITUDES, XTRACT_UNIT_ANY, 1, accepted_bark_coefficients, 1, "N >= 1"},
         .argc = 1,
         .argv = arguments_bark_coefficients,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
-        .result = {.vector = {XTRACT_BARK_COEFFS, XTRACT_UNIT_ANY}},
+        .result = {.vector = {XTRACT_BARK_COEFFS, XTRACT_UNIT_ANY, "XTRACT_BARK_BANDS"}},
     },
     [XTRACT_PEAK_SPECTRUM] = {
         .id = XTRACT_PEAK_SPECTRUM,
@@ -1588,12 +1590,12 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_SPECTRAL_MAGNITUDES, XTRACT_UNIT_ANY, 1, accepted_peak_spectrum, 1},
+        .data = {XTRACT_SPECTRAL_MAGNITUDES, XTRACT_UNIT_ANY, 1, accepted_peak_spectrum, 1, "N >= 1"},
         .argc = 2,
         .argv = arguments_peak_spectrum,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
-        .result = {.vector = {XTRACT_SPECTRAL, XTRACT_UNIT_ANY}},
+        .result = {.vector = {XTRACT_SPECTRAL, XTRACT_UNIT_ANY, "2 * N"}},
     },
     [XTRACT_SPECTRUM] = {
         .id = XTRACT_SPECTRUM,
@@ -1603,12 +1605,12 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_AUDIO_SAMPLES, XTRACT_UNIT_ANY, 0, NULL, 1},
+        .data = {XTRACT_AUDIO_SAMPLES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 2 && is_power_of_two(N)"},
         .argc = 0,
         .argv = NULL,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
-        .result = {.vector = {XTRACT_SPECTRAL_COMPLEX, XTRACT_UNIT_ANY}},
+        .result = {.vector = {XTRACT_SPECTRAL_COMPLEX, XTRACT_UNIT_ANY, "N"}},
     },
     [XTRACT_AUTOCORRELATION_FFT] = {
         .id = XTRACT_AUTOCORRELATION_FFT,
@@ -1618,12 +1620,12 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_AUDIO_SAMPLES, XTRACT_UNIT_ANY, 0, NULL, 1},
+        .data = {XTRACT_AUDIO_SAMPLES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 2 && is_power_of_two(N)"},
         .argc = 0,
         .argv = NULL,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
-        .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY_SQUARED}},
+        .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY_SQUARED, "N"}},
     },
     [XTRACT_MFCC] = {
         .id = XTRACT_MFCC,
@@ -1633,12 +1635,12 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = "Rabiner",
         .year = 0,
         .tags = XTRACT_TAG_SOUND,
-        .data = {XTRACT_SPECTRAL_MAGNITUDES, XTRACT_UNIT_ANY, 2, accepted_mfcc, 1},
+        .data = {XTRACT_SPECTRAL_MAGNITUDES, XTRACT_UNIT_ANY, 2, accepted_mfcc, 1, "N >= 1 && 2 * N == filterbank_size(filterbank)"},
         .argc = 1,
         .argv = arguments_mfcc,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
-        .result = {.vector = {XTRACT_MEL_COEFFS, XTRACT_UNIT_NONE}},
+        .result = {.vector = {XTRACT_MEL_COEFFS, XTRACT_UNIT_NONE, "filter_count(filterbank)"}},
     },
     [XTRACT_DCT] = {
         .id = XTRACT_DCT,
@@ -1648,12 +1650,12 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_AUDIO_SAMPLES, XTRACT_UNIT_ANY, 0, NULL, 1},
+        .data = {XTRACT_AUDIO_SAMPLES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 1"},
         .argc = 1,
         .argv = arguments_dct,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
-        .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY}},
+        .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, "N"}},
     },
     [XTRACT_HARMONIC_SPECTRUM] = {
         .id = XTRACT_HARMONIC_SPECTRUM,
@@ -1663,12 +1665,12 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_SPECTRAL, XTRACT_UNIT_ANY, 1, accepted_harmonic_spectrum, 1},
+        .data = {XTRACT_SPECTRAL, XTRACT_UNIT_ANY, 1, accepted_harmonic_spectrum, 1, "N >= 2 && N % 2 == 0"},
         .argc = 2,
         .argv = arguments_harmonic_spectrum,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
-        .result = {.vector = {XTRACT_SPECTRAL, XTRACT_UNIT_ANY}},
+        .result = {.vector = {XTRACT_SPECTRAL, XTRACT_UNIT_ANY, "N"}},
     },
     [XTRACT_LPC] = {
         .id = XTRACT_LPC,
@@ -1678,12 +1680,12 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = "Rabiner and Juang as implemented by Jutta Degener",
         .year = 1994,
         .tags = 0,
-        .data = {XTRACT_AUTOCORRELATION_COEFFS, XTRACT_UNIT_ANY, 1, accepted_lpc, 1},
+        .data = {XTRACT_AUTOCORRELATION_COEFFS, XTRACT_UNIT_ANY, 1, accepted_lpc, 1, "N >= 2"},
         .argc = 0,
         .argv = NULL,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
-        .result = {.vector = {XTRACT_LPC_COEFFS, XTRACT_UNIT_NONE}},
+        .result = {.vector = {XTRACT_LPC_COEFFS, XTRACT_UNIT_NONE, "2 * (N - 1)"}},
     },
     [XTRACT_LPCC] = {
         .id = XTRACT_LPCC,
@@ -1693,12 +1695,12 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = "Rabiner and Juang",
         .year = 1993,
         .tags = 0,
-        .data = {XTRACT_LPC_COEFFS, XTRACT_UNIT_ANY, 1, accepted_lpcc, 1},
+        .data = {XTRACT_LPC_COEFFS, XTRACT_UNIT_ANY, 1, accepted_lpcc, 1, "N >= 2"},
         .argc = 1,
         .argv = arguments_lpcc,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
-        .result = {.vector = {XTRACT_LPCC_COEFFS, XTRACT_UNIT_NONE}},
+        .result = {.vector = {XTRACT_LPCC_COEFFS, XTRACT_UNIT_NONE, "order"}},
     },
     [XTRACT_SUBBANDS] = {
         .id = XTRACT_SUBBANDS,
@@ -1708,12 +1710,12 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_SPECTRAL_MAGNITUDES, XTRACT_UNIT_ANY, 1, accepted_subbands, 1},
+        .data = {XTRACT_SPECTRAL_MAGNITUDES, XTRACT_UNIT_ANY, 1, accepted_subbands, 1, "N >= 1"},
         .argc = 4,
         .argv = arguments_subbands,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
-        .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY}},
+        .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, "bands"}},
     },
     [XTRACT_MEL_SPECTROGRAM] = {
         .id = XTRACT_MEL_SPECTROGRAM,
@@ -1723,12 +1725,12 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = XTRACT_TAG_SOUND,
-        .data = {XTRACT_SPECTRAL_MAGNITUDES, XTRACT_UNIT_ANY, 2, accepted_mel_spectrogram, 1},
+        .data = {XTRACT_SPECTRAL_MAGNITUDES, XTRACT_UNIT_ANY, 2, accepted_mel_spectrogram, 1, "N >= 1 && 2 * N == filterbank_size(filterbank)"},
         .argc = 1,
         .argv = arguments_mel_spectrogram,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
-        .result = {.vector = {XTRACT_MEL_COEFFS, XTRACT_UNIT_NONE}},
+        .result = {.vector = {XTRACT_MEL_COEFFS, XTRACT_UNIT_NONE, "filter_count(filterbank)"}},
     },
     [XTRACT_GFCC] = {
         .id = XTRACT_GFCC,
@@ -1738,12 +1740,12 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = XTRACT_TAG_SOUND,
-        .data = {XTRACT_SPECTRAL_MAGNITUDES, XTRACT_UNIT_ANY, 2, accepted_gfcc, 1},
+        .data = {XTRACT_SPECTRAL_MAGNITUDES, XTRACT_UNIT_ANY, 2, accepted_gfcc, 1, "N >= 1 && 2 * N == filterbank_size(filterbank)"},
         .argc = 1,
         .argv = arguments_gfcc,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
-        .result = {.vector = {XTRACT_MEL_COEFFS, XTRACT_UNIT_NONE}},
+        .result = {.vector = {XTRACT_MEL_COEFFS, XTRACT_UNIT_NONE, "filter_count(filterbank)"}},
     },
     [XTRACT_GAMMATONE_SPECTROGRAM] = {
         .id = XTRACT_GAMMATONE_SPECTROGRAM,
@@ -1753,12 +1755,12 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = XTRACT_TAG_SOUND,
-        .data = {XTRACT_SPECTRAL_MAGNITUDES, XTRACT_UNIT_ANY, 2, accepted_gammatone_spectrogram, 1},
+        .data = {XTRACT_SPECTRAL_MAGNITUDES, XTRACT_UNIT_ANY, 2, accepted_gammatone_spectrogram, 1, "N >= 1 && 2 * N == filterbank_size(filterbank)"},
         .argc = 1,
         .argv = arguments_gammatone_spectrogram,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
-        .result = {.vector = {XTRACT_MEL_COEFFS, XTRACT_UNIT_NONE}},
+        .result = {.vector = {XTRACT_MEL_COEFFS, XTRACT_UNIT_NONE, "filter_count(filterbank)"}},
     },
     [XTRACT_WINDOWED] = {
         .id = XTRACT_WINDOWED,
@@ -1768,12 +1770,12 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1},
+        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 1"},
         .argc = 1,
         .argv = arguments_windowed,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
-        .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY}},
+        .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, "N"}},
     },
     [XTRACT_SMOOTHED] = {
         .id = XTRACT_SMOOTHED,
@@ -1783,12 +1785,12 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1},
+        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 1"},
         .argc = 1,
         .argv = arguments_smoothed,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
-        .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY}},
+        .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, "N"}},
     },
     [XTRACT_PEAK] = {
         .id = XTRACT_PEAK,
@@ -1798,7 +1800,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 1, accepted_peak, 1},
+        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 1, accepted_peak, 1, "N >= 1"},
         .argc = 1,
         .argv = arguments_peak,
         .is_scalar = XTRACT_TRUE,
@@ -1813,12 +1815,12 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = "Rincon et al.",
         .year = 2013,
         .tags = XTRACT_TAG_SOUND,
-        .data = {XTRACT_SPECTRAL_COMPLEX, XTRACT_UNIT_ANY, 1, accepted_mmbses, 1},
+        .data = {XTRACT_SPECTRAL_COMPLEX, XTRACT_UNIT_ANY, 1, accepted_mmbses, 1, "N >= 2 && N % 2 == 0 && N == filterbank_size(filterbank)"},
         .argc = 1,
         .argv = arguments_mmbses,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
-        .result = {.vector = {XTRACT_MEL_COEFFS, XTRACT_UNIT_NONE}},
+        .result = {.vector = {XTRACT_MEL_COEFFS, XTRACT_UNIT_NONE, "filter_count(filterbank)"}},
     },
     [XTRACT_SPECTRAL_SUBBAND_CENTROIDS] = {
         .id = XTRACT_SPECTRAL_SUBBAND_CENTROIDS,
@@ -1828,12 +1830,12 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = XTRACT_TAG_SOUND,
-        .data = {XTRACT_SPECTRAL, XTRACT_UNIT_ANY, 2, accepted_spectral_subband_centroids, 1},
+        .data = {XTRACT_SPECTRAL, XTRACT_UNIT_ANY, 2, accepted_spectral_subband_centroids, 1, "N >= 2 && N % 2 == 0 && N == filterbank_size(filterbank)"},
         .argc = 1,
         .argv = arguments_spectral_subband_centroids,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
-        .result = {.vector = {XTRACT_MEL_COEFFS, XTRACT_HERTZ}},
+        .result = {.vector = {XTRACT_MEL_COEFFS, XTRACT_HERTZ, "filter_count(filterbank)"}},
     },
     [XTRACT_MOVING_SUM] = {
         .id = XTRACT_MOVING_SUM,
@@ -1843,12 +1845,12 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1},
+        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= window"},
         .argc = 1,
         .argv = arguments_moving_sum,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
-        .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY}},
+        .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, "N - window + 1"}},
     },
     [XTRACT_MOVING_AVERAGE] = {
         .id = XTRACT_MOVING_AVERAGE,
@@ -1858,12 +1860,12 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1},
+        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= window"},
         .argc = 1,
         .argv = arguments_moving_average,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
-        .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY}},
+        .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, "N - window + 1"}},
     },
     [XTRACT_MOVING_VARIANCE] = {
         .id = XTRACT_MOVING_VARIANCE,
@@ -1873,12 +1875,12 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1},
+        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= window"},
         .argc = 1,
         .argv = arguments_moving_variance,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
-        .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY_SQUARED}},
+        .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY_SQUARED, "N - window + 1"}},
     },
     [XTRACT_MOVING_STANDARD_DEVIATION] = {
         .id = XTRACT_MOVING_STANDARD_DEVIATION,
@@ -1888,12 +1890,12 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1},
+        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= window"},
         .argc = 1,
         .argv = arguments_moving_standard_deviation,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
-        .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY}},
+        .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, "N - window + 1"}},
     },
     [XTRACT_MOVING_MAX] = {
         .id = XTRACT_MOVING_MAX,
@@ -1903,12 +1905,12 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1},
+        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= window"},
         .argc = 1,
         .argv = arguments_moving_max,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
-        .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY}},
+        .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, "N - window + 1"}},
     },
     [XTRACT_MOVING_MIN] = {
         .id = XTRACT_MOVING_MIN,
@@ -1918,12 +1920,12 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1},
+        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= window"},
         .argc = 1,
         .argv = arguments_moving_min,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
-        .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY}},
+        .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, "N - window + 1"}},
     },
     [XTRACT_EWMA_AVERAGE] = {
         .id = XTRACT_EWMA_AVERAGE,
@@ -1933,12 +1935,12 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1},
+        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 1"},
         .argc = 1,
         .argv = arguments_ewma_average,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
-        .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY}},
+        .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, "N"}},
     },
     [XTRACT_EWMA_VARIANCE] = {
         .id = XTRACT_EWMA_VARIANCE,
@@ -1948,12 +1950,12 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1},
+        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 1"},
         .argc = 1,
         .argv = arguments_ewma_variance,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
-        .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY_SQUARED}},
+        .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY_SQUARED, "N"}},
     },
     [XTRACT_MEDIAN] = {
         .id = XTRACT_MEDIAN,
@@ -1963,7 +1965,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1},
+        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 1"},
         .argc = 0,
         .argv = NULL,
         .is_scalar = XTRACT_TRUE,
@@ -1978,7 +1980,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1},
+        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 1"},
         .argc = 1,
         .argv = arguments_median_absolute_deviation,
         .is_scalar = XTRACT_TRUE,
@@ -1993,7 +1995,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = "Bo Hjorth",
         .year = 1970,
         .tags = 0,
-        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1},
+        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 1"},
         .argc = 0,
         .argv = NULL,
         .is_scalar = XTRACT_TRUE,
@@ -2008,7 +2010,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = "Bo Hjorth",
         .year = 1970,
         .tags = 0,
-        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1},
+        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 2"},
         .argc = 0,
         .argv = NULL,
         .is_scalar = XTRACT_TRUE,
@@ -2023,7 +2025,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = "Bo Hjorth",
         .year = 1970,
         .tags = 0,
-        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1},
+        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 3"},
         .argc = 0,
         .argv = NULL,
         .is_scalar = XTRACT_TRUE,
@@ -2038,7 +2040,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1},
+        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 2 * lag + 1"},
         .argc = 1,
         .argv = arguments_time_reversal_asymmetry,
         .is_scalar = XTRACT_TRUE,
@@ -2053,7 +2055,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_SPECTRAL_MAGNITUDES, XTRACT_UNIT_ANY, 2, accepted_spectral_entropy, 1},
+        .data = {XTRACT_SPECTRAL_MAGNITUDES, XTRACT_UNIT_ANY, 2, accepted_spectral_entropy, 1, "N >= 2"},
         .argc = 0,
         .argv = NULL,
         .is_scalar = XTRACT_TRUE,
@@ -2068,7 +2070,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = "A. Petrosian",
         .year = 1995,
         .tags = 0,
-        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1},
+        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 2"},
         .argc = 0,
         .argv = NULL,
         .is_scalar = XTRACT_TRUE,
@@ -2083,7 +2085,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = "Michael J. Katz",
         .year = 1988,
         .tags = 0,
-        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1},
+        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 2"},
         .argc = 0,
         .argv = NULL,
         .is_scalar = XTRACT_TRUE,
@@ -2098,7 +2100,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = "T. Higuchi",
         .year = 1988,
         .tags = 0,
-        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1},
+        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 2 * k_max"},
         .argc = 1,
         .argv = arguments_higuchi_fractal_dimension,
         .is_scalar = XTRACT_TRUE,
@@ -2113,7 +2115,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = "Christoph Bandt, Bernd Pompe",
         .year = 2002,
         .tags = 0,
-        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1},
+        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= (order - 1) * delay + 1"},
         .argc = 2,
         .argv = arguments_permutation_entropy,
         .is_scalar = XTRACT_TRUE,
@@ -2128,7 +2130,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = "Abraham Lempel, Jacob Ziv",
         .year = 1976,
         .tags = 0,
-        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1},
+        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 2"},
         .argc = 1,
         .argv = arguments_lempel_ziv_complexity,
         .is_scalar = XTRACT_TRUE,
@@ -2143,7 +2145,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = "Joshua S. Richman, J. Randall Moorman",
         .year = 2000,
         .tags = 0,
-        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1},
+        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= template_length + 2"},
         .argc = 2,
         .argv = arguments_sample_entropy,
         .is_scalar = XTRACT_TRUE,
@@ -2158,7 +2160,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = "Steven M. Pincus",
         .year = 1991,
         .tags = 0,
-        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1},
+        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= template_length + 2"},
         .argc = 2,
         .argv = arguments_approximate_entropy,
         .is_scalar = XTRACT_TRUE,
@@ -2173,7 +2175,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = "Philip McLeod",
         .year = 2005,
         .tags = 0,
-        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1},
+        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 1"},
         .argc = 0,
         .argv = NULL,
         .is_scalar = XTRACT_TRUE,
@@ -2188,7 +2190,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = "Philip McLeod",
         .year = 2005,
         .tags = 0,
-        .data = {XTRACT_AUDIO_SAMPLES, XTRACT_UNIT_ANY, 0, NULL, 1},
+        .data = {XTRACT_AUDIO_SAMPLES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 1"},
         .argc = 0,
         .argv = NULL,
         .is_scalar = XTRACT_TRUE,
@@ -2203,7 +2205,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1},
+        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 1"},
         .argc = 2,
         .argv = arguments_decay_rate,
         .is_scalar = XTRACT_TRUE,
@@ -2218,7 +2220,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1},
+        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 2"},
         .argc = 0,
         .argv = NULL,
         .is_scalar = XTRACT_TRUE,
@@ -2233,7 +2235,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1},
+        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 2"},
         .argc = 0,
         .argv = NULL,
         .is_scalar = XTRACT_TRUE,
@@ -2248,7 +2250,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1},
+        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 2"},
         .argc = 0,
         .argv = NULL,
         .is_scalar = XTRACT_TRUE,
@@ -2263,7 +2265,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1},
+        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 1"},
         .argc = 0,
         .argv = NULL,
         .is_scalar = XTRACT_TRUE,
@@ -2278,12 +2280,12 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_SUBFRAMES, XTRACT_UNIT_ANY, 0, NULL, 1},
+        .data = {XTRACT_SUBFRAMES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 2 && N % 2 == 0"},
         .argc = 0,
         .argv = NULL,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
-        .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY_SQUARED}},
+        .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY_SQUARED, "N - 1"}},
     },
     [XTRACT_CROSS_CORRELATION_LAG] = {
         .id = XTRACT_CROSS_CORRELATION_LAG,
@@ -2293,7 +2295,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_SUBFRAMES, XTRACT_UNIT_ANY, 0, NULL, 1},
+        .data = {XTRACT_SUBFRAMES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 2 && N % 2 == 0"},
         .argc = 0,
         .argv = NULL,
         .is_scalar = XTRACT_TRUE,
@@ -2308,7 +2310,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = "Solomon Kullback and Richard Leibler",
         .year = 1951,
         .tags = 0,
-        .data = {XTRACT_SUBFRAMES, XTRACT_UNIT_ANY, 1, accepted_kullback_leibler_divergence, 2},
+        .data = {XTRACT_SUBFRAMES, XTRACT_UNIT_ANY, 1, accepted_kullback_leibler_divergence, 2, "N >= 2 && N % 2 == 0"},
         .argc = 0,
         .argv = NULL,
         .is_scalar = XTRACT_TRUE,
@@ -2323,7 +2325,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = "Fumitada Itakura and Shuzo Saito",
         .year = 1968,
         .tags = 0,
-        .data = {XTRACT_SUBFRAMES, XTRACT_UNIT_ANY, 1, accepted_itakura_saito_divergence, 2},
+        .data = {XTRACT_SUBFRAMES, XTRACT_UNIT_ANY, 1, accepted_itakura_saito_divergence, 2, "N >= 2 && N % 2 == 0"},
         .argc = 0,
         .argv = NULL,
         .is_scalar = XTRACT_TRUE,
@@ -2338,7 +2340,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = "Stephen Hainsworth and Malcolm Macleod",
         .year = 2003,
         .tags = 0,
-        .data = {XTRACT_SUBFRAMES, XTRACT_UNIT_ANY, 1, accepted_modified_kullback_leibler, 2},
+        .data = {XTRACT_SUBFRAMES, XTRACT_UNIT_ANY, 1, accepted_modified_kullback_leibler, 2, "N >= 2 && N % 2 == 0"},
         .argc = 1,
         .argv = arguments_modified_kullback_leibler,
         .is_scalar = XTRACT_TRUE,
@@ -2353,12 +2355,12 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = "Dan-Ning Jiang, Lie Lu, Hong-Jiang Zhang, Jian-Hua Tao and Lian-Hong Cai",
         .year = 2002,
         .tags = 0,
-        .data = {XTRACT_SPECTRAL, XTRACT_UNIT_ANY, 2, accepted_spectral_contrast, 1},
+        .data = {XTRACT_SPECTRAL, XTRACT_UNIT_ANY, 2, accepted_spectral_contrast, 1, "N >= 2 && N % 2 == 0"},
         .argc = 3,
         .argv = arguments_spectral_contrast,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
-        .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_NONE}},
+        .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_NONE, "bands + 1"}},
     },
     [XTRACT_CHROMA] = {
         .id = XTRACT_CHROMA,
@@ -2368,12 +2370,12 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = "Takuya Fujishima",
         .year = 1999,
         .tags = XTRACT_TAG_SOUND,
-        .data = {XTRACT_SPECTRAL, XTRACT_UNIT_ANY, 2, accepted_chroma, 1},
+        .data = {XTRACT_SPECTRAL, XTRACT_UNIT_ANY, 2, accepted_chroma, 1, "N >= 2 && N % 2 == 0"},
         .argc = 3,
         .argv = arguments_chroma,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
-        .result = {.vector = {XTRACT_CHROMA_COEFFS, XTRACT_UNIT_NONE}},
+        .result = {.vector = {XTRACT_CHROMA_COEFFS, XTRACT_UNIT_NONE, "XTRACT_PITCH_CLASSES"}},
     },
     [XTRACT_CQT] = {
         .id = XTRACT_CQT,
@@ -2383,12 +2385,12 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = "Judith C. Brown and Miller S. Puckette",
         .year = 1992,
         .tags = 0,
-        .data = {XTRACT_SPECTRAL_COMPLEX, XTRACT_UNIT_ANY, 1, accepted_cqt, 1},
+        .data = {XTRACT_SPECTRAL_COMPLEX, XTRACT_UNIT_ANY, 1, accepted_cqt, 1, "N >= 2 && N % 2 == 0 && N == kernel_size(kernel)"},
         .argc = 1,
         .argv = arguments_cqt,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
-        .result = {.vector = {XTRACT_SPECTRAL, XTRACT_UNIT_ANY}},
+        .result = {.vector = {XTRACT_SPECTRAL, XTRACT_UNIT_ANY, "2 * band_count(kernel)"}},
     },
     [XTRACT_PEARSON_CORRELATION] = {
         .id = XTRACT_PEARSON_CORRELATION,
@@ -2398,7 +2400,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_SUBFRAMES, XTRACT_UNIT_ANY, 0, NULL, 1},
+        .data = {XTRACT_SUBFRAMES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 4 && N % 2 == 0"},
         .argc = 0,
         .argv = NULL,
         .is_scalar = XTRACT_TRUE,
@@ -2413,12 +2415,12 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_CHANNELS, XTRACT_UNIT_ANY, 0, NULL, 1},
+        .data = {XTRACT_CHANNELS, XTRACT_UNIT_ANY, 0, NULL, 1, "series >= 1 && N >= 2 * series && N % series == 0"},
         .argc = 1,
         .argv = arguments_covariance_matrix,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
-        .result = {.vector = {XTRACT_SQUARE_MATRIX, XTRACT_UNIT_ANY_SQUARED}},
+        .result = {.vector = {XTRACT_SQUARE_MATRIX, XTRACT_UNIT_ANY_SQUARED, "series * series"}},
     },
     [XTRACT_CORRELATION_MATRIX] = {
         .id = XTRACT_CORRELATION_MATRIX,
@@ -2428,12 +2430,12 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_SQUARE_MATRIX, XTRACT_UNIT_ANY, 1, accepted_correlation_matrix, 1},
+        .data = {XTRACT_SQUARE_MATRIX, XTRACT_UNIT_ANY, 1, accepted_correlation_matrix, 1, "N >= 1 && is_square(N)"},
         .argc = 0,
         .argv = NULL,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
-        .result = {.vector = {XTRACT_SQUARE_MATRIX, XTRACT_UNIT_NONE}},
+        .result = {.vector = {XTRACT_SQUARE_MATRIX, XTRACT_UNIT_NONE, "N"}},
     },
     [XTRACT_AVERAGE_CORRELATION] = {
         .id = XTRACT_AVERAGE_CORRELATION,
@@ -2443,7 +2445,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_SQUARE_MATRIX, XTRACT_UNIT_ANY, 1, accepted_average_correlation, 1},
+        .data = {XTRACT_SQUARE_MATRIX, XTRACT_UNIT_ANY, 1, accepted_average_correlation, 1, "N >= 4 && is_square(N)"},
         .argc = 0,
         .argv = NULL,
         .is_scalar = XTRACT_TRUE,
@@ -2458,12 +2460,12 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_SQUARE_MATRIX, XTRACT_UNIT_ANY, 2, accepted_principal_variances, 1},
+        .data = {XTRACT_SQUARE_MATRIX, XTRACT_UNIT_ANY, 2, accepted_principal_variances, 1, "N >= 1 && is_square(N)"},
         .argc = 0,
         .argv = NULL,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
-        .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY}},
+        .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, "root(N)"}},
     },
     [XTRACT_COHERENCE] = {
         .id = XTRACT_COHERENCE,
@@ -2473,12 +2475,12 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_SUBFRAMES, XTRACT_UNIT_ANY, 0, NULL, 1},
+        .data = {XTRACT_SUBFRAMES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 3 * segment_length && N % 2 == 0"},
         .argc = 1,
         .argv = arguments_coherence,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
-        .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_NONE}},
+        .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_NONE, "segment_length / 2"}},
     },
     [XTRACT_GRID_MOMENTS] = {
         .id = XTRACT_GRID_MOMENTS,
@@ -2488,12 +2490,12 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_GRID, XTRACT_UNIT_ANY, 0, NULL, 1},
+        .data = {XTRACT_GRID, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 1 && width >= 1 && N % width == 0"},
         .argc = 1,
         .argv = arguments_grid_moments,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
-        .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY}},
+        .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, "10"}},
     },
     [XTRACT_GRID_CENTRAL_MOMENTS] = {
         .id = XTRACT_GRID_CENTRAL_MOMENTS,
@@ -2503,12 +2505,12 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_GRID, XTRACT_UNIT_ANY, 0, NULL, 1},
+        .data = {XTRACT_GRID, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 1 && width >= 1 && N % width == 0"},
         .argc = 1,
         .argv = arguments_grid_central_moments,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
-        .result = {.vector = {XTRACT_CENTRAL_MOMENT_COEFFS, XTRACT_UNIT_ANY}},
+        .result = {.vector = {XTRACT_CENTRAL_MOMENT_COEFFS, XTRACT_UNIT_ANY, "8"}},
     },
     [XTRACT_NORMALISED_MOMENTS] = {
         .id = XTRACT_NORMALISED_MOMENTS,
@@ -2518,12 +2520,12 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_CENTRAL_MOMENT_COEFFS, XTRACT_UNIT_ANY, 1, accepted_normalised_moments, 1},
+        .data = {XTRACT_CENTRAL_MOMENT_COEFFS, XTRACT_UNIT_ANY, 1, accepted_normalised_moments, 1, "N == 8"},
         .argc = 0,
         .argv = NULL,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
-        .result = {.vector = {XTRACT_NORMALISED_MOMENT_COEFFS, XTRACT_UNIT_NONE}},
+        .result = {.vector = {XTRACT_NORMALISED_MOMENT_COEFFS, XTRACT_UNIT_NONE, "7"}},
     },
     [XTRACT_HU_MOMENTS] = {
         .id = XTRACT_HU_MOMENTS,
@@ -2533,12 +2535,12 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = "Ming-Kuei Hu",
         .year = 1962,
         .tags = 0,
-        .data = {XTRACT_NORMALISED_MOMENT_COEFFS, XTRACT_UNIT_ANY, 1, accepted_hu_moments, 1},
+        .data = {XTRACT_NORMALISED_MOMENT_COEFFS, XTRACT_UNIT_ANY, 1, accepted_hu_moments, 1, "N == 7"},
         .argc = 0,
         .argv = NULL,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
-        .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_NONE}},
+        .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_NONE, "7"}},
     },
     [XTRACT_QUANTISE] = {
         .id = XTRACT_QUANTISE,
@@ -2548,12 +2550,12 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1},
+        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 1"},
         .argc = 3,
         .argv = arguments_quantise,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
-        .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_NONE}},
+        .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_NONE, "N"}},
     },
     [XTRACT_HISTOGRAM] = {
         .id = XTRACT_HISTOGRAM,
@@ -2563,12 +2565,12 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_NONE, 1, accepted_histogram, 1},
+        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_NONE, 1, accepted_histogram, 1, "N >= 1"},
         .argc = 1,
         .argv = arguments_histogram,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
-        .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_NONE}},
+        .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_NONE, "levels"}},
     },
     [XTRACT_COOCCURRENCE_MATRIX] = {
         .id = XTRACT_COOCCURRENCE_MATRIX,
@@ -2578,12 +2580,12 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = "Robert Haralick",
         .year = 1973,
         .tags = 0,
-        .data = {XTRACT_GRID, XTRACT_UNIT_NONE, 1, accepted_cooccurrence_matrix, 1},
+        .data = {XTRACT_GRID, XTRACT_UNIT_NONE, 1, accepted_cooccurrence_matrix, 1, "N >= 1 && width >= 1 && N % width == 0"},
         .argc = 5,
         .argv = arguments_cooccurrence_matrix,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
-        .result = {.vector = {XTRACT_SQUARE_MATRIX, XTRACT_UNIT_NONE}},
+        .result = {.vector = {XTRACT_SQUARE_MATRIX, XTRACT_UNIT_NONE, "levels * levels"}},
     },
     [XTRACT_COOCCURRENCE_CONTRAST] = {
         .id = XTRACT_COOCCURRENCE_CONTRAST,
@@ -2593,7 +2595,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = "Robert Haralick",
         .year = 1973,
         .tags = 0,
-        .data = {XTRACT_SQUARE_MATRIX, XTRACT_UNIT_NONE, 1, accepted_cooccurrence_contrast, 1},
+        .data = {XTRACT_SQUARE_MATRIX, XTRACT_UNIT_NONE, 1, accepted_cooccurrence_contrast, 1, "N >= 1 && is_square(N)"},
         .argc = 0,
         .argv = NULL,
         .is_scalar = XTRACT_TRUE,
@@ -2608,7 +2610,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = "Robert Haralick",
         .year = 1973,
         .tags = 0,
-        .data = {XTRACT_SQUARE_MATRIX, XTRACT_UNIT_NONE, 1, accepted_cooccurrence_correlation, 1},
+        .data = {XTRACT_SQUARE_MATRIX, XTRACT_UNIT_NONE, 1, accepted_cooccurrence_correlation, 1, "N >= 1 && is_square(N)"},
         .argc = 0,
         .argv = NULL,
         .is_scalar = XTRACT_TRUE,
@@ -2623,7 +2625,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = "Robert Haralick",
         .year = 1973,
         .tags = 0,
-        .data = {XTRACT_SQUARE_MATRIX, XTRACT_UNIT_NONE, 1, accepted_angular_second_moment, 1},
+        .data = {XTRACT_SQUARE_MATRIX, XTRACT_UNIT_NONE, 1, accepted_angular_second_moment, 1, "N >= 1 && is_square(N)"},
         .argc = 0,
         .argv = NULL,
         .is_scalar = XTRACT_TRUE,
@@ -2638,7 +2640,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = "Robert Haralick",
         .year = 1973,
         .tags = 0,
-        .data = {XTRACT_SQUARE_MATRIX, XTRACT_UNIT_NONE, 1, accepted_inverse_difference_moment, 1},
+        .data = {XTRACT_SQUARE_MATRIX, XTRACT_UNIT_NONE, 1, accepted_inverse_difference_moment, 1, "N >= 1 && is_square(N)"},
         .argc = 0,
         .argv = NULL,
         .is_scalar = XTRACT_TRUE,
@@ -2653,12 +2655,12 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = "Timo Ojala",
         .year = 2002,
         .tags = 0,
-        .data = {XTRACT_GRID, XTRACT_UNIT_ANY, 0, NULL, 1},
+        .data = {XTRACT_GRID, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 1 && width >= 1 && N % width == 0"},
         .argc = 1,
         .argv = arguments_local_binary_patterns,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
-        .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_NONE}},
+        .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_NONE, "10"}},
     },
     [XTRACT_LAST_N] = {
         .id = XTRACT_LAST_N,
@@ -2668,12 +2670,12 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1},
+        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 1"},
         .argc = 1,
         .argv = arguments_last_n,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
-        .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY}},
+        .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, "N"}},
     },
     [XTRACT_PACKED] = {
         .id = XTRACT_PACKED,
@@ -2683,12 +2685,12 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_SPECTRAL_PEAKS, XTRACT_UNIT_ANY, 2, accepted_packed, 1},
+        .data = {XTRACT_SPECTRAL_PEAKS, XTRACT_UNIT_ANY, 2, accepted_packed, 1, "N >= 2 && N % 2 == 0"},
         .argc = 0,
         .argv = NULL,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
-        .result = {.vector = {XTRACT_SPECTRAL_PEAKS, XTRACT_UNIT_ANY}},
+        .result = {.vector = {XTRACT_SPECTRAL_PEAKS, XTRACT_UNIT_ANY, "N"}},
     },
     [XTRACT_MAGNITUDE_SPECTRUM] = {
         .id = XTRACT_MAGNITUDE_SPECTRUM,
@@ -2698,12 +2700,12 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_SPECTRAL_COMPLEX, XTRACT_UNIT_ANY, 1, accepted_magnitude_spectrum, 1},
+        .data = {XTRACT_SPECTRAL_COMPLEX, XTRACT_UNIT_ANY, 1, accepted_magnitude_spectrum, 1, "N >= 2 && N % 2 == 0"},
         .argc = 1,
         .argv = arguments_magnitude_spectrum,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
-        .result = {.vector = {XTRACT_SPECTRAL, XTRACT_UNIT_ANY}},
+        .result = {.vector = {XTRACT_SPECTRAL, XTRACT_UNIT_ANY, "N"}},
     },
     [XTRACT_POWER_SPECTRUM] = {
         .id = XTRACT_POWER_SPECTRUM,
@@ -2713,12 +2715,12 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_SPECTRAL_COMPLEX, XTRACT_UNIT_ANY, 1, accepted_power_spectrum, 1},
+        .data = {XTRACT_SPECTRAL_COMPLEX, XTRACT_UNIT_ANY, 1, accepted_power_spectrum, 1, "N >= 2 && N % 2 == 0"},
         .argc = 1,
         .argv = arguments_power_spectrum,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
-        .result = {.vector = {XTRACT_SPECTRAL, XTRACT_UNIT_ANY_SQUARED}},
+        .result = {.vector = {XTRACT_SPECTRAL, XTRACT_UNIT_ANY_SQUARED, "N"}},
     },
     [XTRACT_LOG_SPECTRUM] = {
         .id = XTRACT_LOG_SPECTRUM,
@@ -2728,12 +2730,12 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_SPECTRAL_COMPLEX, XTRACT_UNIT_ANY, 1, accepted_log_spectrum, 1},
+        .data = {XTRACT_SPECTRAL_COMPLEX, XTRACT_UNIT_ANY, 1, accepted_log_spectrum, 1, "N >= 2 && N % 2 == 0"},
         .argc = 1,
         .argv = arguments_log_spectrum,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
-        .result = {.vector = {XTRACT_SPECTRAL, XTRACT_UNIT_NONE}},
+        .result = {.vector = {XTRACT_SPECTRAL, XTRACT_UNIT_NONE, "N"}},
     },
     [XTRACT_PHASE_SPECTRUM] = {
         .id = XTRACT_PHASE_SPECTRUM,
@@ -2743,12 +2745,12 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_SPECTRAL_COMPLEX, XTRACT_UNIT_ANY, 1, accepted_phase_spectrum, 1},
+        .data = {XTRACT_SPECTRAL_COMPLEX, XTRACT_UNIT_ANY, 1, accepted_phase_spectrum, 1, "N >= 2 && N % 2 == 0"},
         .argc = 1,
         .argv = arguments_phase_spectrum,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
-        .result = {.vector = {XTRACT_SPECTRAL, XTRACT_RADIANS}},
+        .result = {.vector = {XTRACT_SPECTRAL, XTRACT_RADIANS, "N"}},
     },
     [XTRACT_LOG] = {
         .id = XTRACT_LOG,
@@ -2758,12 +2760,12 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = "Sebastian Boeck, Florian Krebs, Markus Schedl",
         .year = 2012,
         .tags = 0,
-        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 1, accepted_log, 1},
+        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 1, accepted_log, 1, "N >= 1"},
         .argc = 1,
         .argv = arguments_log,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
-        .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_NONE}},
+        .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_NONE, "N"}},
     },
     [XTRACT_NORMALISED_CROSS_CORRELATION] = {
         .id = XTRACT_NORMALISED_CROSS_CORRELATION,
@@ -2773,11 +2775,460 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_SUBFRAMES, XTRACT_UNIT_ANY, 0, NULL, 1},
+        .data = {XTRACT_SUBFRAMES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 2 && N % 2 == 0"},
         .argc = 0,
         .argv = NULL,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
-        .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_NONE}},
+        .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_NONE, "N - 1"}},
     },
 };
+
+int xtract_length_is_accepted(const int feature, const int N, const void *argv)
+{
+    const long long n = N;
+
+    switch (feature)
+    {
+    case XTRACT_MEAN:
+        return n >= 1;
+    case XTRACT_VARIANCE:
+        return n >= 2;
+    case XTRACT_STANDARD_DEVIATION:
+        return n >= 0;
+    case XTRACT_AVERAGE_DEVIATION:
+        return n >= 1;
+    case XTRACT_SKEWNESS:
+        return n >= 1;
+    case XTRACT_KURTOSIS:
+        return n >= 1;
+    case XTRACT_SPECTRAL_MEAN:
+        return n >= 2 && n % 2 == 0;
+    case XTRACT_SPECTRAL_VARIANCE:
+        return n >= 2 && n % 2 == 0;
+    case XTRACT_SPECTRAL_STANDARD_DEVIATION:
+        return n >= 0;
+    case XTRACT_SPECTRAL_SKEWNESS:
+        return n >= 2 && n % 2 == 0;
+    case XTRACT_SPECTRAL_KURTOSIS:
+        return n >= 2 && n % 2 == 0;
+    case XTRACT_SPECTRAL_CENTROID:
+        return n >= 2 && n % 2 == 0;
+    case XTRACT_IRREGULARITY_K:
+        return n >= 0;
+    case XTRACT_IRREGULARITY_J:
+        return n >= 1;
+    case XTRACT_TRISTIMULUS_1:
+        return n >= 1;
+    case XTRACT_TRISTIMULUS_2:
+        return n >= 1;
+    case XTRACT_TRISTIMULUS_3:
+        return n >= 1;
+    case XTRACT_SMOOTHNESS:
+        return n >= 3;
+    case XTRACT_SPREAD:
+        return n >= 2 && n % 2 == 0;
+    case XTRACT_ZCR:
+        return n >= 1;
+    case XTRACT_ROLLOFF:
+        return n >= 1;
+    case XTRACT_LOUDNESS:
+        return n >= 1 && n <= XTRACT_BARK_BANDS;
+    case XTRACT_FLATNESS:
+        return n >= 1;
+    case XTRACT_FLATNESS_DB:
+        return n >= 0;
+    case XTRACT_TONALITY:
+        return n >= 0;
+    case XTRACT_CREST:
+        return n >= 0;
+    case XTRACT_NOISINESS:
+        return n >= 2 && n % 2 == 0;
+    case XTRACT_RMS_AMPLITUDE:
+        return n >= 1;
+    case XTRACT_SPECTRAL_INHARMONICITY:
+        return n >= 2 && n % 2 == 0;
+    case XTRACT_ODD_EVEN_RATIO:
+        return n >= 1;
+    case XTRACT_SHARPNESS:
+        return n >= 1 && n <= XTRACT_BARK_BANDS;
+    case XTRACT_SPECTRAL_SLOPE:
+        return n >= 2 && n % 2 == 0;
+    case XTRACT_LOWEST_VALUE:
+        return n >= 1;
+    case XTRACT_HIGHEST_VALUE:
+        return n >= 1;
+    case XTRACT_SUM:
+        return n >= 1;
+    case XTRACT_NONZERO_COUNT:
+        return n >= 1;
+    case XTRACT_HPS:
+        return n >= 4 && n % 2 == 0;
+    case XTRACT_F0:
+        return n >= 1;
+    case XTRACT_FAILSAFE_F0:
+        return n >= 1;
+    case XTRACT_WAVELET_F0:
+        return n >= 1;
+    case XTRACT_MCLEOD_F0:
+        return n >= 1;
+    case XTRACT_MIDICENT:
+        return n >= 0;
+    case XTRACT_LNORM:
+        return n >= 1;
+    case XTRACT_FLUX:
+        return n >= 2 && n % 2 == 0;
+    case XTRACT_ATTACK_TIME:
+        return n >= 1;
+    case XTRACT_DECAY_TIME:
+        return n >= 1;
+    case XTRACT_DIFFERENCE_VECTOR:
+        return n >= 2 && n % 2 == 0;
+    case XTRACT_AUTOCORRELATION:
+        return n >= 1;
+    case XTRACT_AMDF:
+        return n >= 1;
+    case XTRACT_ASDF:
+        return n >= 1;
+    case XTRACT_BARK_COEFFICIENTS:
+        return n >= 1;
+    case XTRACT_PEAK_SPECTRUM:
+        return n >= 1;
+    case XTRACT_SPECTRUM:
+        return n >= 2 && xtract_rule_is_power_of_two(n);
+    case XTRACT_AUTOCORRELATION_FFT:
+        return n >= 2 && xtract_rule_is_power_of_two(n);
+    case XTRACT_MFCC:
+        return argv != NULL && n >= 1 && 2 * n == xtract_rule_filterbank_size(argv);
+    case XTRACT_DCT:
+        return n >= 1;
+    case XTRACT_HARMONIC_SPECTRUM:
+        return n >= 2 && n % 2 == 0;
+    case XTRACT_LPC:
+        return n >= 2;
+    case XTRACT_LPCC:
+        return n >= 2;
+    case XTRACT_SUBBANDS:
+        return n >= 1;
+    case XTRACT_MEL_SPECTROGRAM:
+        return argv != NULL && n >= 1 && 2 * n == xtract_rule_filterbank_size(argv);
+    case XTRACT_GFCC:
+        return argv != NULL && n >= 1 && 2 * n == xtract_rule_filterbank_size(argv);
+    case XTRACT_GAMMATONE_SPECTROGRAM:
+        return argv != NULL && n >= 1 && 2 * n == xtract_rule_filterbank_size(argv);
+    case XTRACT_WINDOWED:
+        return n >= 1;
+    case XTRACT_SMOOTHED:
+        return n >= 1;
+    case XTRACT_PEAK:
+        return n >= 1;
+    case XTRACT_MMBSES:
+        return argv != NULL && n >= 2 && n % 2 == 0 && n == xtract_rule_filterbank_size(argv);
+    case XTRACT_SPECTRAL_SUBBAND_CENTROIDS:
+        return argv != NULL && n >= 2 && n % 2 == 0 && n == xtract_rule_filterbank_size(argv);
+    case XTRACT_MOVING_SUM:
+        return argv != NULL && n >= (long long)((const int *)argv)[0];
+    case XTRACT_MOVING_AVERAGE:
+        return argv != NULL && n >= (long long)((const int *)argv)[0];
+    case XTRACT_MOVING_VARIANCE:
+        return argv != NULL && n >= (long long)((const int *)argv)[0];
+    case XTRACT_MOVING_STANDARD_DEVIATION:
+        return argv != NULL && n >= (long long)((const int *)argv)[0];
+    case XTRACT_MOVING_MAX:
+        return argv != NULL && n >= (long long)((const int *)argv)[0];
+    case XTRACT_MOVING_MIN:
+        return argv != NULL && n >= (long long)((const int *)argv)[0];
+    case XTRACT_EWMA_AVERAGE:
+        return n >= 1;
+    case XTRACT_EWMA_VARIANCE:
+        return n >= 1;
+    case XTRACT_MEDIAN:
+        return n >= 1;
+    case XTRACT_MEDIAN_ABSOLUTE_DEVIATION:
+        return n >= 1;
+    case XTRACT_HJORTH_ACTIVITY:
+        return n >= 1;
+    case XTRACT_HJORTH_MOBILITY:
+        return n >= 2;
+    case XTRACT_HJORTH_COMPLEXITY:
+        return n >= 3;
+    case XTRACT_TIME_REVERSAL_ASYMMETRY:
+        return argv != NULL && n >= 2 * (long long)((const int *)argv)[0] + 1;
+    case XTRACT_SPECTRAL_ENTROPY:
+        return n >= 2;
+    case XTRACT_PETROSIAN_FRACTAL_DIMENSION:
+        return n >= 2;
+    case XTRACT_KATZ_FRACTAL_DIMENSION:
+        return n >= 2;
+    case XTRACT_HIGUCHI_FRACTAL_DIMENSION:
+        return argv != NULL && n >= 2 * (long long)((const int *)argv)[0];
+    case XTRACT_PERMUTATION_ENTROPY:
+        return argv != NULL && n >= ((long long)((const int *)argv)[0] - 1) * (long long)((const int *)argv)[1] + 1;
+    case XTRACT_LEMPEL_ZIV_COMPLEXITY:
+        return n >= 2;
+    case XTRACT_SAMPLE_ENTROPY:
+        return argv != NULL && n >= (long long)xtract_argv_int(((const double *)argv)[0]) + 2;
+    case XTRACT_APPROXIMATE_ENTROPY:
+        return argv != NULL && n >= (long long)xtract_argv_int(((const double *)argv)[0]) + 2;
+    case XTRACT_PERIODICITY:
+        return n >= 1;
+    case XTRACT_SIGNAL_CONFIDENCE:
+        return n >= 1;
+    case XTRACT_DECAY_RATE:
+        return n >= 1;
+    case XTRACT_TEMPORAL_CENTROID:
+        return n >= 2;
+    case XTRACT_MAX_POSITION:
+        return n >= 2;
+    case XTRACT_MIN_POSITION:
+        return n >= 2;
+    case XTRACT_PEAK_ASYMMETRY:
+        return n >= 1;
+    case XTRACT_CROSS_CORRELATION:
+        return n >= 2 && n % 2 == 0;
+    case XTRACT_CROSS_CORRELATION_LAG:
+        return n >= 2 && n % 2 == 0;
+    case XTRACT_KULLBACK_LEIBLER_DIVERGENCE:
+        return n >= 2 && n % 2 == 0;
+    case XTRACT_ITAKURA_SAITO_DIVERGENCE:
+        return n >= 2 && n % 2 == 0;
+    case XTRACT_MODIFIED_KULLBACK_LEIBLER:
+        return n >= 2 && n % 2 == 0;
+    case XTRACT_SPECTRAL_CONTRAST:
+        return n >= 2 && n % 2 == 0;
+    case XTRACT_CHROMA:
+        return n >= 2 && n % 2 == 0;
+    case XTRACT_CQT:
+        return argv != NULL && n >= 2 && n % 2 == 0 && n == xtract_rule_kernel_size(argv);
+    case XTRACT_PEARSON_CORRELATION:
+        return n >= 4 && n % 2 == 0;
+    case XTRACT_COVARIANCE_MATRIX:
+        return argv != NULL && (long long)((const int *)argv)[0] >= 1 && n >= 2 * (long long)((const int *)argv)[0] && n % (long long)((const int *)argv)[0] == 0;
+    case XTRACT_CORRELATION_MATRIX:
+        return n >= 1 && xtract_rule_is_square(n);
+    case XTRACT_AVERAGE_CORRELATION:
+        return n >= 4 && xtract_rule_is_square(n);
+    case XTRACT_PRINCIPAL_VARIANCES:
+        return n >= 1 && xtract_rule_is_square(n);
+    case XTRACT_COHERENCE:
+        return argv != NULL && n >= 3 * (long long)((const int *)argv)[0] && n % 2 == 0;
+    case XTRACT_GRID_MOMENTS:
+        return argv != NULL && n >= 1 && (long long)((const int *)argv)[0] >= 1 && n % (long long)((const int *)argv)[0] == 0;
+    case XTRACT_GRID_CENTRAL_MOMENTS:
+        return argv != NULL && n >= 1 && (long long)((const int *)argv)[0] >= 1 && n % (long long)((const int *)argv)[0] == 0;
+    case XTRACT_NORMALISED_MOMENTS:
+        return n == 8;
+    case XTRACT_HU_MOMENTS:
+        return n == 7;
+    case XTRACT_QUANTISE:
+        return n >= 1;
+    case XTRACT_HISTOGRAM:
+        return n >= 1;
+    case XTRACT_COOCCURRENCE_MATRIX:
+        return argv != NULL && n >= 1 && (long long)((const int *)argv)[0] >= 1 && n % (long long)((const int *)argv)[0] == 0;
+    case XTRACT_COOCCURRENCE_CONTRAST:
+        return n >= 1 && xtract_rule_is_square(n);
+    case XTRACT_COOCCURRENCE_CORRELATION:
+        return n >= 1 && xtract_rule_is_square(n);
+    case XTRACT_ANGULAR_SECOND_MOMENT:
+        return n >= 1 && xtract_rule_is_square(n);
+    case XTRACT_INVERSE_DIFFERENCE_MOMENT:
+        return n >= 1 && xtract_rule_is_square(n);
+    case XTRACT_LOCAL_BINARY_PATTERNS:
+        return argv != NULL && n >= 1 && (long long)((const int *)argv)[0] >= 1 && n % (long long)((const int *)argv)[0] == 0;
+    case XTRACT_LAST_N:
+        return n >= 1;
+    case XTRACT_PACKED:
+        return n >= 2 && n % 2 == 0;
+    case XTRACT_MAGNITUDE_SPECTRUM:
+        return n >= 2 && n % 2 == 0;
+    case XTRACT_POWER_SPECTRUM:
+        return n >= 2 && n % 2 == 0;
+    case XTRACT_LOG_SPECTRUM:
+        return n >= 2 && n % 2 == 0;
+    case XTRACT_PHASE_SPECTRUM:
+        return n >= 2 && n % 2 == 0;
+    case XTRACT_LOG:
+        return n >= 1;
+    case XTRACT_NORMALISED_CROSS_CORRELATION:
+        return n >= 2 && n % 2 == 0;
+    default:
+        return 0;
+    }
+}
+
+int xtract_result_length(const int feature, const int N, const void *argv)
+{
+    const long long n = N;
+    long long length;
+
+    if (!xtract_length_is_accepted(feature, N, argv))
+        return -1;
+    switch (feature)
+    {
+    case XTRACT_DIFFERENCE_VECTOR:
+        length = n / 2;
+        break;
+    case XTRACT_AUTOCORRELATION:
+        length = n;
+        break;
+    case XTRACT_AMDF:
+        length = n;
+        break;
+    case XTRACT_ASDF:
+        length = n;
+        break;
+    case XTRACT_BARK_COEFFICIENTS:
+        length = XTRACT_BARK_BANDS;
+        break;
+    case XTRACT_PEAK_SPECTRUM:
+        length = 2 * n;
+        break;
+    case XTRACT_SPECTRUM:
+        length = n;
+        break;
+    case XTRACT_AUTOCORRELATION_FFT:
+        length = n;
+        break;
+    case XTRACT_MFCC:
+        length = xtract_rule_filter_count(argv);
+        break;
+    case XTRACT_DCT:
+        length = n;
+        break;
+    case XTRACT_HARMONIC_SPECTRUM:
+        length = n;
+        break;
+    case XTRACT_LPC:
+        length = 2 * (n - 1);
+        break;
+    case XTRACT_LPCC:
+        length = (long long)((const int *)argv)[0];
+        break;
+    case XTRACT_SUBBANDS:
+        length = (long long)((const int *)argv)[1];
+        break;
+    case XTRACT_MEL_SPECTROGRAM:
+        length = xtract_rule_filter_count(argv);
+        break;
+    case XTRACT_GFCC:
+        length = xtract_rule_filter_count(argv);
+        break;
+    case XTRACT_GAMMATONE_SPECTROGRAM:
+        length = xtract_rule_filter_count(argv);
+        break;
+    case XTRACT_WINDOWED:
+        length = n;
+        break;
+    case XTRACT_SMOOTHED:
+        length = n;
+        break;
+    case XTRACT_MMBSES:
+        length = xtract_rule_filter_count(argv);
+        break;
+    case XTRACT_SPECTRAL_SUBBAND_CENTROIDS:
+        length = xtract_rule_filter_count(argv);
+        break;
+    case XTRACT_MOVING_SUM:
+        length = n - (long long)((const int *)argv)[0] + 1;
+        break;
+    case XTRACT_MOVING_AVERAGE:
+        length = n - (long long)((const int *)argv)[0] + 1;
+        break;
+    case XTRACT_MOVING_VARIANCE:
+        length = n - (long long)((const int *)argv)[0] + 1;
+        break;
+    case XTRACT_MOVING_STANDARD_DEVIATION:
+        length = n - (long long)((const int *)argv)[0] + 1;
+        break;
+    case XTRACT_MOVING_MAX:
+        length = n - (long long)((const int *)argv)[0] + 1;
+        break;
+    case XTRACT_MOVING_MIN:
+        length = n - (long long)((const int *)argv)[0] + 1;
+        break;
+    case XTRACT_EWMA_AVERAGE:
+        length = n;
+        break;
+    case XTRACT_EWMA_VARIANCE:
+        length = n;
+        break;
+    case XTRACT_CROSS_CORRELATION:
+        length = n - 1;
+        break;
+    case XTRACT_SPECTRAL_CONTRAST:
+        length = (long long)xtract_argv_int(((const double *)argv)[0]) + 1;
+        break;
+    case XTRACT_CHROMA:
+        length = XTRACT_PITCH_CLASSES;
+        break;
+    case XTRACT_CQT:
+        length = 2 * xtract_rule_band_count(argv);
+        break;
+    case XTRACT_COVARIANCE_MATRIX:
+        length = (long long)((const int *)argv)[0] * (long long)((const int *)argv)[0];
+        break;
+    case XTRACT_CORRELATION_MATRIX:
+        length = n;
+        break;
+    case XTRACT_PRINCIPAL_VARIANCES:
+        length = xtract_rule_root(n);
+        break;
+    case XTRACT_COHERENCE:
+        length = (long long)((const int *)argv)[0] / 2;
+        break;
+    case XTRACT_GRID_MOMENTS:
+        length = 10;
+        break;
+    case XTRACT_GRID_CENTRAL_MOMENTS:
+        length = 8;
+        break;
+    case XTRACT_NORMALISED_MOMENTS:
+        length = 7;
+        break;
+    case XTRACT_HU_MOMENTS:
+        length = 7;
+        break;
+    case XTRACT_QUANTISE:
+        length = n;
+        break;
+    case XTRACT_HISTOGRAM:
+        length = (long long)((const int *)argv)[0];
+        break;
+    case XTRACT_COOCCURRENCE_MATRIX:
+        length = (long long)((const int *)argv)[1] * (long long)((const int *)argv)[1];
+        break;
+    case XTRACT_LOCAL_BINARY_PATTERNS:
+        length = 10;
+        break;
+    case XTRACT_LAST_N:
+        length = n;
+        break;
+    case XTRACT_PACKED:
+        length = n;
+        break;
+    case XTRACT_MAGNITUDE_SPECTRUM:
+        length = n;
+        break;
+    case XTRACT_POWER_SPECTRUM:
+        length = n;
+        break;
+    case XTRACT_LOG_SPECTRUM:
+        length = n;
+        break;
+    case XTRACT_PHASE_SPECTRUM:
+        length = n;
+        break;
+    case XTRACT_LOG:
+        length = n;
+        break;
+    case XTRACT_NORMALISED_CROSS_CORRELATION:
+        length = n - 1;
+        break;
+    default:
+        length = 1;
+        break;
+    }
+
+    return length >= 0 && length <= INT_MAX ? (int)length : -1;
+}

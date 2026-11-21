@@ -98,7 +98,7 @@
       "name": "variance",
       "title": "Variance",
       "description": "Extract the variance of an input vector",
-      "input": {"format": "arbitrary_series", "unit": "any"},
+      "input": {"format": "arbitrary_series", "unit": "any", "length": "N >= 2"},
       "argument_type": "float",
       "arguments": [
         {"name": "mean", "kind": "result", "accepts": "mean", "of": "input", "unit": "any"}
@@ -155,7 +155,7 @@
       "name": "spectral_mean",
       "title": "Spectral Mean",
       "description": "Extract the mean of an input spectrum",
-      "input": {"format": "spectral", "unit": "any", "accepts": ["coefficients_and_frequencies"]},
+      "input": {"format": "spectral", "unit": "any", "accepts": ["coefficients_and_frequencies"], "length": "N >= 2 && N % 2 == 0"},
       "arguments": [],
       "result": {"kind": "scalar", "unit": "hertz", "min": 0}
     },
@@ -163,7 +163,7 @@
       "name": "spectral_variance",
       "title": "Spectral Variance",
       "description": "Extract the variance of an input spectrum",
-      "input": {"format": "spectral", "unit": "any", "accepts": ["coefficients_and_frequencies"]},
+      "input": {"format": "spectral", "unit": "any", "accepts": ["coefficients_and_frequencies"], "length": "N >= 2 && N % 2 == 0"},
       "argument_type": "float",
       "arguments": [
         {"name": "mean", "kind": "result", "accepts": "spectral_mean", "of": "input", "unit": "hertz"}
@@ -185,7 +185,7 @@
       "name": "spectral_skewness",
       "title": "Spectral Skewness",
       "description": "Extract the skewness of an input spectrum",
-      "input": {"format": "spectral", "unit": "any", "accepts": ["coefficients_and_frequencies"]},
+      "input": {"format": "spectral", "unit": "any", "accepts": ["coefficients_and_frequencies"], "length": "N >= 2 && N % 2 == 0"},
       "argument_type": "float",
       "arguments": [
         {"name": "mean", "kind": "result", "accepts": "spectral_mean", "of": "input", "unit": "hertz"},
@@ -197,7 +197,7 @@
       "name": "spectral_kurtosis",
       "title": "Spectral Kurtosis",
       "description": "Extract the kurtosis of an input spectrum",
-      "input": {"format": "spectral", "unit": "any", "accepts": ["coefficients_and_frequencies"]},
+      "input": {"format": "spectral", "unit": "any", "accepts": ["coefficients_and_frequencies"], "length": "N >= 2 && N % 2 == 0"},
       "argument_type": "float",
       "arguments": [
         {"name": "mean", "kind": "result", "accepts": "spectral_mean", "of": "input", "unit": "hertz"},
@@ -210,7 +210,7 @@
       "title": "Spectral Centroid",
       "description": "Extract the spectral centroid of a spectrum",
       "provides": ["spectral_mean"],
-      "input": {"format": "spectral", "unit": "any", "accepts": ["coefficients_and_frequencies"]},
+      "input": {"format": "spectral", "unit": "any", "accepts": ["coefficients_and_frequencies"], "length": "N >= 2 && N % 2 == 0"},
       "arguments": [],
       "result": {"kind": "scalar", "unit": "hertz", "min": 0}
     },
@@ -267,7 +267,7 @@
       "title": "Spectral Smoothness",
       "description": "Extract the spectral smoothness of a spectrum",
       "reference": {"author": "McAdams", "year": 1999},
-      "input": {"format": "spectral_magnitudes", "unit": "any", "accepts": ["partial_amplitudes"]},
+      "input": {"format": "spectral_magnitudes", "unit": "any", "accepts": ["partial_amplitudes"], "length": "N >= 3"},
       "arguments": [],
       "result": {"kind": "scalar", "unit": "decibels", "min": 0}
     },
@@ -277,7 +277,7 @@
       "description": "Extract the spectral spread of a spectrum",
       "reference": {"author": "Norman Casagrande", "year": 2005},
       "provides": ["spectral_variance"],
-      "input": {"format": "spectral", "unit": "any", "accepts": ["coefficients_and_frequencies"]},
+      "input": {"format": "spectral", "unit": "any", "accepts": ["coefficients_and_frequencies"], "length": "N >= 2 && N % 2 == 0"},
       "argument_type": "float",
       "arguments": [
         {"name": "mean", "kind": "result", "accepts": "spectral_mean", "of": "input", "unit": "hertz"}
@@ -311,7 +311,7 @@
       "description": "Extract the loudness of a signal from its spectrum",
       "reference": {"author": "Moore, Glasberg et al", "year": 2005},
       "tags": ["sound"],
-      "input": {"format": "bark_coeffs", "unit": "any", "accepts": ["bark_coefficients"]},
+      "input": {"format": "bark_coeffs", "unit": "any", "accepts": ["bark_coefficients"], "length": "N >= 1 && N <= XTRACT_BARK_BANDS"},
       "arguments": [],
       "result": {"kind": "scalar", "unit": "sone", "min": 0}
     },
@@ -366,7 +366,7 @@
       "title": "Noisiness",
       "description": "Extract the noisiness of a peak spectrum",
       "reference": {"author": "Tae Hong Park", "year": 2000},
-      "input": {"format": "spectral_peaks", "unit": "any", "accepts": ["peak_spectrum"]},
+      "input": {"format": "spectral_peaks", "unit": "any", "accepts": ["peak_spectrum"], "length": "N >= 2 && N % 2 == 0"},
       "argument_type": "float",
       "arguments": [
         {"name": "fundamental", "kind": "result", "accepts": "fundamental", "of": "source", "unit": "hertz", "min": 0},
@@ -386,7 +386,7 @@
       "name": "spectral_inharmonicity",
       "title": "Inharmonicity",
       "description": "Extract the inharmonicity of a spectrum",
-      "input": {"format": "spectral_peaks", "unit": "any", "accepts": ["peak_spectrum"]},
+      "input": {"format": "spectral_peaks", "unit": "any", "accepts": ["peak_spectrum"], "length": "N >= 2 && N % 2 == 0"},
       "argument_type": "float",
       "arguments": [
         {"name": "fundamental", "kind": "result", "accepts": "fundamental", "of": "source", "unit": "hertz", "min": 0}
@@ -407,7 +407,7 @@
       "description": "Extract the spectral sharpness of a spectrum",
       "reference": {"author": "von Bismarck", "year": 1974},
       "tags": ["sound"],
-      "input": {"format": "bark_coeffs", "unit": "any", "accepts": ["bark_coefficients"]},
+      "input": {"format": "bark_coeffs", "unit": "any", "accepts": ["bark_coefficients"], "length": "N >= 1 && N <= XTRACT_BARK_BANDS"},
       "arguments": [],
       "result": {"kind": "scalar", "unit": "acum", "min": 0}
     },
@@ -415,7 +415,7 @@
       "name": "spectral_slope",
       "title": "Spectral Slope",
       "description": "Extract the spectral slope of a spectrum",
-      "input": {"format": "spectral", "unit": "any", "accepts": ["coefficients_and_frequencies"]},
+      "input": {"format": "spectral", "unit": "any", "accepts": ["coefficients_and_frequencies"], "length": "N >= 2 && N % 2 == 0"},
       "arguments": [],
       "result": {"kind": "scalar", "unit": "per_hertz"}
     },
@@ -459,7 +459,7 @@
       "title": "Harmonic Product Spectrum",
       "description": "Extract the harmonic product spectrum of a spectrum",
       "provides": ["fundamental"],
-      "input": {"format": "spectral", "unit": "any", "accepts": ["magnitude_spectrum"]},
+      "input": {"format": "spectral", "unit": "any", "accepts": ["magnitude_spectrum"], "length": "N >= 4 && N % 2 == 0"},
       "argument_type": "float",
       "arguments": [
         {"name": "harmonics", "kind": "setting", "unit": "none", "min": 2, "max": 16, "default": 3, "whole": true}
@@ -547,7 +547,7 @@
       "name": "flux",
       "title": "Spectral Flux",
       "description": "Extract the spectral flux of a spectrum",
-      "input": {"format": "subframes", "unit": "any", "accepts": ["bins", "log"], "frames": 2},
+      "input": {"format": "subframes", "unit": "any", "accepts": ["bins", "log"], "frames": 2, "length": "N >= 2 && N % 2 == 0"},
       "argument_type": "float",
       "arguments": [
         {"name": "order", "kind": "setting", "unit": "none", "default": 2},
@@ -585,10 +585,10 @@
       "name": "difference_vector",
       "title": "Difference vector",
       "description": "Extract the difference between two vectors",
-      "input": {"format": "subframes", "unit": "any", "accepts": ["bins"], "frames": 2},
+      "input": {"format": "subframes", "unit": "any", "accepts": ["bins"], "frames": 2, "length": "N >= 2 && N % 2 == 0"},
       "arguments": [],
       "delta": true,
-      "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any"}
+      "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any", "length": "N / 2"}
     },
     {
       "name": "autocorrelation",
@@ -596,7 +596,7 @@
       "description": "Extract the autocorrelation of a signal",
       "input": {"format": "audio_samples", "unit": "any"},
       "arguments": [],
-      "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any_squared"}
+      "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any_squared", "length": "N"}
     },
     {
       "name": "amdf",
@@ -604,7 +604,7 @@
       "description": "Extract the AMDF of a signal",
       "input": {"format": "audio_samples", "unit": "any"},
       "arguments": [],
-      "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any"}
+      "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any", "length": "N"}
     },
     {
       "name": "asdf",
@@ -612,7 +612,7 @@
       "description": "Extract the ASDF of a signal",
       "input": {"format": "audio_samples", "unit": "any"},
       "arguments": [],
-      "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any_squared"}
+      "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any_squared", "length": "N"}
     },
     {
       "name": "bark_coefficients",
@@ -623,7 +623,7 @@
       "arguments": [
         {"name": "band_limits", "kind": "object", "built_by": "init_bark"}
       ],
-      "result": {"kind": "vector", "format": "bark_coeffs", "unit": "any"}
+      "result": {"kind": "vector", "format": "bark_coeffs", "unit": "any", "length": "XTRACT_BARK_BANDS"}
     },
     {
       "name": "peak_spectrum",
@@ -636,24 +636,24 @@
         {"name": "bin_spacing", "kind": "property", "property": "bin_spacing", "unit": "hertz", "min": 2.2250738585072014e-308},
         {"name": "threshold", "kind": "setting", "unit": "percent", "min": 0, "max": 100, "default": 10}
       ],
-      "result": {"kind": "vector", "format": "spectral", "unit": "any"}
+      "result": {"kind": "vector", "format": "spectral", "unit": "any", "length": "2 * N"}
     },
     {
       "name": "spectrum",
       "title": "Spectrum",
       "description": "Extract the complex spectrum of an input vector",
-      "input": {"format": "audio_samples", "unit": "any"},
+      "input": {"format": "audio_samples", "unit": "any", "length": "N >= 2 && is_power_of_two(N)"},
       "arguments": [],
-      "result": {"kind": "vector", "format": "spectral_complex", "unit": "any"}
+      "result": {"kind": "vector", "format": "spectral_complex", "unit": "any", "length": "N"}
     },
     {
       "name": "autocorrelation_fft",
       "title": "Autocorrelation (FFT method)",
       "description": "Extract the autocorrelation of a signal (fft method)",
       "provides": ["autocorrelation"],
-      "input": {"format": "audio_samples", "unit": "any"},
+      "input": {"format": "audio_samples", "unit": "any", "length": "N >= 2 && is_power_of_two(N)"},
       "arguments": [],
-      "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any_squared"}
+      "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any_squared", "length": "N"}
     },
     {
       "name": "mfcc",
@@ -661,11 +661,11 @@
       "description": "Extract MFCC from a spectrum",
       "reference": {"author": "Rabiner"},
       "tags": ["sound"],
-      "input": {"format": "spectral_magnitudes", "unit": "any", "accepts": ["power_bins", "magnitude_bins"]},
+      "input": {"format": "spectral_magnitudes", "unit": "any", "accepts": ["power_bins", "magnitude_bins"], "length": "N >= 1 && 2 * N == filterbank_size(filterbank)"},
       "arguments": [
         {"name": "filterbank", "kind": "object", "built_by": "init_mfcc"}
       ],
-      "result": {"kind": "vector", "format": "mel_coeffs", "unit": "none"}
+      "result": {"kind": "vector", "format": "mel_coeffs", "unit": "none", "length": "filter_count(filterbank)"}
     },
     {
       "name": "dct",
@@ -675,20 +675,20 @@
       "arguments": [
         {"name": "table", "kind": "object", "built_by": "init_dct", "optional": true}
       ],
-      "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any"}
+      "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any", "length": "N"}
     },
     {
       "name": "harmonic_spectrum",
       "title": "Harmonic Spectrum",
       "description": "Extract the harmonics from a spectrum",
       "provides": ["coefficients_and_frequencies"],
-      "input": {"format": "spectral", "unit": "any", "accepts": ["magnitude_spectrum"]},
+      "input": {"format": "spectral", "unit": "any", "accepts": ["magnitude_spectrum"], "length": "N >= 2 && N % 2 == 0"},
       "argument_type": "float",
       "arguments": [
         {"name": "fundamental", "kind": "result", "accepts": "fundamental", "of": "source", "unit": "hertz", "min": 0},
         {"name": "threshold", "kind": "setting", "unit": "none", "min": 0, "max": 1, "default": 0.1}
       ],
-      "result": {"kind": "vector", "format": "spectral", "unit": "any"}
+      "result": {"kind": "vector", "format": "spectral", "unit": "any", "length": "N"}
     },
     {
       "name": "lpc",
@@ -698,21 +698,21 @@
       "provides": [
         {"quantity": "lpc_coefficients", "part": "from_one_before_the_second_half"}
       ],
-      "input": {"format": "autocorrelation_coeffs", "unit": "any", "accepts": ["autocorrelation"]},
+      "input": {"format": "autocorrelation_coeffs", "unit": "any", "accepts": ["autocorrelation"], "length": "N >= 2"},
       "arguments": [],
-      "result": {"kind": "vector", "format": "lpc_coeffs", "unit": "none"}
+      "result": {"kind": "vector", "format": "lpc_coeffs", "unit": "none", "length": "2 * (N - 1)"}
     },
     {
       "name": "lpcc",
       "title": "Linear predictive coding cepstral coefficients",
       "description": "Extract LPC cepstrum from LPC coefficients",
       "reference": {"author": "Rabiner and Juang", "year": 1993},
-      "input": {"format": "lpc_coeffs", "unit": "any", "accepts": ["lpc_coefficients"]},
+      "input": {"format": "lpc_coeffs", "unit": "any", "accepts": ["lpc_coefficients"], "length": "N >= 2"},
       "argument_type": "int",
       "arguments": [
         {"name": "order", "kind": "setting", "unit": "none", "min": 1, "default": 12}
       ],
-      "result": {"kind": "vector", "format": "lpcc_coeffs", "unit": "none"}
+      "result": {"kind": "vector", "format": "lpcc_coeffs", "unit": "none", "length": "order"}
     },
     {
       "name": "subbands",
@@ -726,40 +726,40 @@
         {"name": "scale", "kind": "setting", "unit": "none", "default": 1, "values": ["octave", "linear"]},
         {"name": "start", "kind": "setting", "unit": "bins", "min": 0, "default": 1}
       ],
-      "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any"}
+      "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any", "length": "bands"}
     },
     {
       "name": "mel_spectrogram",
       "title": "Mel Spectrogram",
       "description": "Extract log mel energies from a spectrum",
       "tags": ["sound"],
-      "input": {"format": "spectral_magnitudes", "unit": "any", "accepts": ["power_bins", "magnitude_bins"]},
+      "input": {"format": "spectral_magnitudes", "unit": "any", "accepts": ["power_bins", "magnitude_bins"], "length": "N >= 1 && 2 * N == filterbank_size(filterbank)"},
       "arguments": [
         {"name": "filterbank", "kind": "object", "built_by": "init_mfcc"}
       ],
-      "result": {"kind": "vector", "format": "mel_coeffs", "unit": "none"}
+      "result": {"kind": "vector", "format": "mel_coeffs", "unit": "none", "length": "filter_count(filterbank)"}
     },
     {
       "name": "gfcc",
       "title": "Gammatone Frequency Cepstral Coefficients",
       "description": "Extract GFCC from a spectrum",
       "tags": ["sound"],
-      "input": {"format": "spectral_magnitudes", "unit": "any", "accepts": ["power_bins", "magnitude_bins"]},
+      "input": {"format": "spectral_magnitudes", "unit": "any", "accepts": ["power_bins", "magnitude_bins"], "length": "N >= 1 && 2 * N == filterbank_size(filterbank)"},
       "arguments": [
         {"name": "filterbank", "kind": "object", "built_by": "init_gfcc"}
       ],
-      "result": {"kind": "vector", "format": "mel_coeffs", "unit": "none"}
+      "result": {"kind": "vector", "format": "mel_coeffs", "unit": "none", "length": "filter_count(filterbank)"}
     },
     {
       "name": "gammatone_spectrogram",
       "title": "Gammatone Spectrogram",
       "description": "Extract log gammatone energies from a spectrum",
       "tags": ["sound"],
-      "input": {"format": "spectral_magnitudes", "unit": "any", "accepts": ["power_bins", "magnitude_bins"]},
+      "input": {"format": "spectral_magnitudes", "unit": "any", "accepts": ["power_bins", "magnitude_bins"], "length": "N >= 1 && 2 * N == filterbank_size(filterbank)"},
       "arguments": [
         {"name": "filterbank", "kind": "object", "built_by": "init_gfcc"}
       ],
-      "result": {"kind": "vector", "format": "mel_coeffs", "unit": "none"}
+      "result": {"kind": "vector", "format": "mel_coeffs", "unit": "none", "length": "filter_count(filterbank)"}
     },
     {
       "name": "windowed",
@@ -769,7 +769,7 @@
       "arguments": [
         {"name": "window", "kind": "object", "built_by": "init_window"}
       ],
-      "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any"}
+      "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any", "length": "N"}
     },
     {
       "name": "smoothed",
@@ -780,7 +780,7 @@
       "arguments": [
         {"name": "gain", "kind": "setting", "unit": "none", "default": 0.5}
       ],
-      "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any"}
+      "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any", "length": "N"}
     },
     {
       "name": "peak",
@@ -799,88 +799,88 @@
       "description": "Extract mel band spectral entropies from a complex spectrum",
       "reference": {"author": "Rincon et al.", "year": 2013},
       "tags": ["sound"],
-      "input": {"format": "spectral_complex", "unit": "any", "accepts": ["spectrum"]},
+      "input": {"format": "spectral_complex", "unit": "any", "accepts": ["spectrum"], "length": "N >= 2 && N % 2 == 0 && N == filterbank_size(filterbank)"},
       "arguments": [
         {"name": "filterbank", "kind": "object", "built_by": "init_mfcc"}
       ],
-      "result": {"kind": "vector", "format": "mel_coeffs", "unit": "none"}
+      "result": {"kind": "vector", "format": "mel_coeffs", "unit": "none", "length": "filter_count(filterbank)"}
     },
     {
       "name": "spectral_subband_centroids",
       "title": "Spectral Subband Centroids",
       "description": "Extract the centroid of each mel band from a spectrum",
       "tags": ["sound"],
-      "input": {"format": "spectral", "unit": "any", "accepts": ["magnitude_spectrum", "power_spectrum"]},
+      "input": {"format": "spectral", "unit": "any", "accepts": ["magnitude_spectrum", "power_spectrum"], "length": "N >= 2 && N % 2 == 0 && N == filterbank_size(filterbank)"},
       "arguments": [
         {"name": "filterbank", "kind": "object", "built_by": "init_mfcc"}
       ],
-      "result": {"kind": "vector", "format": "mel_coeffs", "unit": "hertz"}
+      "result": {"kind": "vector", "format": "mel_coeffs", "unit": "hertz", "length": "filter_count(filterbank)"}
     },
     {
       "name": "moving_sum",
       "title": "Moving Sum",
       "description": "Extract the sum of a series over a sliding window",
-      "input": {"format": "arbitrary_series", "unit": "any"},
+      "input": {"format": "arbitrary_series", "unit": "any", "length": "N >= window"},
       "argument_type": "int",
       "arguments": [
         {"name": "window", "kind": "setting", "unit": "none", "min": 1, "default": 5}
       ],
-      "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any"}
+      "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any", "length": "N - window + 1"}
     },
     {
       "name": "moving_average",
       "title": "Moving Average",
       "description": "Extract the mean of a series over a sliding window",
-      "input": {"format": "arbitrary_series", "unit": "any"},
+      "input": {"format": "arbitrary_series", "unit": "any", "length": "N >= window"},
       "argument_type": "int",
       "arguments": [
         {"name": "window", "kind": "setting", "unit": "none", "min": 1, "default": 5}
       ],
-      "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any"}
+      "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any", "length": "N - window + 1"}
     },
     {
       "name": "moving_variance",
       "title": "Moving Variance",
       "description": "Extract the variance of a series over a sliding window",
-      "input": {"format": "arbitrary_series", "unit": "any"},
+      "input": {"format": "arbitrary_series", "unit": "any", "length": "N >= window"},
       "argument_type": "int",
       "arguments": [
         {"name": "window", "kind": "setting", "unit": "none", "min": 2, "default": 5}
       ],
-      "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any_squared"}
+      "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any_squared", "length": "N - window + 1"}
     },
     {
       "name": "moving_standard_deviation",
       "title": "Moving Standard Deviation",
       "description": "Extract the standard deviation of a series over a sliding window",
-      "input": {"format": "arbitrary_series", "unit": "any"},
+      "input": {"format": "arbitrary_series", "unit": "any", "length": "N >= window"},
       "argument_type": "int",
       "arguments": [
         {"name": "window", "kind": "setting", "unit": "none", "min": 2, "default": 5}
       ],
-      "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any"}
+      "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any", "length": "N - window + 1"}
     },
     {
       "name": "moving_max",
       "title": "Moving Maximum",
       "description": "Extract the largest value of a series over a sliding window",
-      "input": {"format": "arbitrary_series", "unit": "any"},
+      "input": {"format": "arbitrary_series", "unit": "any", "length": "N >= window"},
       "argument_type": "int",
       "arguments": [
         {"name": "window", "kind": "setting", "unit": "none", "min": 1, "default": 5}
       ],
-      "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any"}
+      "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any", "length": "N - window + 1"}
     },
     {
       "name": "moving_min",
       "title": "Moving Minimum",
       "description": "Extract the smallest value of a series over a sliding window",
-      "input": {"format": "arbitrary_series", "unit": "any"},
+      "input": {"format": "arbitrary_series", "unit": "any", "length": "N >= window"},
       "argument_type": "int",
       "arguments": [
         {"name": "window", "kind": "setting", "unit": "none", "min": 1, "default": 5}
       ],
-      "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any"}
+      "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any", "length": "N - window + 1"}
     },
     {
       "name": "ewma_average",
@@ -891,7 +891,7 @@
       "arguments": [
         {"name": "weight", "kind": "setting", "unit": "none", "min": 0, "max": 1, "default": 0.1}
       ],
-      "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any"}
+      "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any", "length": "N"}
     },
     {
       "name": "ewma_variance",
@@ -902,7 +902,7 @@
       "arguments": [
         {"name": "weight", "kind": "setting", "unit": "none", "min": 0, "max": 1, "default": 0.1}
       ],
-      "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any_squared"}
+      "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any_squared", "length": "N"}
     },
     {
       "name": "median",
@@ -937,7 +937,7 @@
       "title": "Hjorth Mobility",
       "description": "Extract the Hjorth mobility of an input vector",
       "reference": {"author": "Bo Hjorth", "year": 1970},
-      "input": {"format": "arbitrary_series", "unit": "any"},
+      "input": {"format": "arbitrary_series", "unit": "any", "length": "N >= 2"},
       "arguments": [],
       "result": {"kind": "scalar", "unit": "none", "min": 0}
     },
@@ -946,7 +946,7 @@
       "title": "Hjorth Complexity",
       "description": "Extract the Hjorth complexity of an input vector",
       "reference": {"author": "Bo Hjorth", "year": 1970},
-      "input": {"format": "arbitrary_series", "unit": "any"},
+      "input": {"format": "arbitrary_series", "unit": "any", "length": "N >= 3"},
       "arguments": [],
       "result": {"kind": "scalar", "unit": "none", "min": 0}
     },
@@ -954,7 +954,7 @@
       "name": "time_reversal_asymmetry",
       "title": "Time Reversal Asymmetry",
       "description": "Extract the time reversal asymmetry statistic of an input vector",
-      "input": {"format": "arbitrary_series", "unit": "any"},
+      "input": {"format": "arbitrary_series", "unit": "any", "length": "N >= 2 * lag + 1"},
       "argument_type": "int",
       "arguments": [
         {"name": "lag", "kind": "setting", "unit": "none", "min": 1, "default": 1}
@@ -965,7 +965,7 @@
       "name": "spectral_entropy",
       "title": "Spectral Entropy",
       "description": "Extract the normalised Shannon entropy of a spectrum",
-      "input": {"format": "spectral_magnitudes", "unit": "any", "accepts": ["power_bins", "bins"]},
+      "input": {"format": "spectral_magnitudes", "unit": "any", "accepts": ["power_bins", "bins"], "length": "N >= 2"},
       "arguments": [],
       "result": {"kind": "scalar", "unit": "none", "min": 0, "max": 1}
     },
@@ -974,7 +974,7 @@
       "title": "Petrosian Fractal Dimension",
       "description": "Extract the Petrosian fractal dimension of an input vector",
       "reference": {"author": "A. Petrosian", "year": 1995},
-      "input": {"format": "arbitrary_series", "unit": "any"},
+      "input": {"format": "arbitrary_series", "unit": "any", "length": "N >= 2"},
       "arguments": [],
       "result": {"kind": "scalar", "unit": "none"}
     },
@@ -983,7 +983,7 @@
       "title": "Katz Fractal Dimension",
       "description": "Extract the Katz fractal dimension of an input vector",
       "reference": {"author": "Michael J. Katz", "year": 1988},
-      "input": {"format": "arbitrary_series", "unit": "any"},
+      "input": {"format": "arbitrary_series", "unit": "any", "length": "N >= 2"},
       "arguments": [],
       "result": {"kind": "scalar", "unit": "none"}
     },
@@ -992,7 +992,7 @@
       "title": "Higuchi Fractal Dimension",
       "description": "Extract the Higuchi fractal dimension of an input vector",
       "reference": {"author": "T. Higuchi", "year": 1988},
-      "input": {"format": "arbitrary_series", "unit": "any"},
+      "input": {"format": "arbitrary_series", "unit": "any", "length": "N >= 2 * k_max"},
       "argument_type": "int",
       "arguments": [
         {"name": "k_max", "kind": "setting", "unit": "none", "min": 2, "default": 10}
@@ -1004,7 +1004,7 @@
       "title": "Permutation Entropy",
       "description": "Extract the normalised permutation entropy of an input vector",
       "reference": {"author": "Christoph Bandt, Bernd Pompe", "year": 2002},
-      "input": {"format": "arbitrary_series", "unit": "any"},
+      "input": {"format": "arbitrary_series", "unit": "any", "length": "N >= (order - 1) * delay + 1"},
       "argument_type": "int",
       "arguments": [
         {"name": "order", "kind": "setting", "unit": "none", "min": 2, "max": 8, "default": 3},
@@ -1017,7 +1017,7 @@
       "title": "Lempel-Ziv Complexity",
       "description": "Extract the normalised Lempel-Ziv complexity of an input vector",
       "reference": {"author": "Abraham Lempel, Jacob Ziv", "year": 1976},
-      "input": {"format": "arbitrary_series", "unit": "any"},
+      "input": {"format": "arbitrary_series", "unit": "any", "length": "N >= 2"},
       "argument_type": "float",
       "arguments": [
         {"name": "threshold", "kind": "result", "accepts": "median", "of": "input", "unit": "any"}
@@ -1029,7 +1029,7 @@
       "title": "Sample Entropy",
       "description": "Extract the sample entropy of an input vector",
       "reference": {"author": "Joshua S. Richman, J. Randall Moorman", "year": 2000},
-      "input": {"format": "arbitrary_series", "unit": "any"},
+      "input": {"format": "arbitrary_series", "unit": "any", "length": "N >= template_length + 2"},
       "argument_type": "float",
       "arguments": [
         {"name": "template_length", "kind": "setting", "unit": "none", "min": 1, "default": 2, "whole": true},
@@ -1042,7 +1042,7 @@
       "title": "Approximate Entropy",
       "description": "Extract the approximate entropy of an input vector",
       "reference": {"author": "Steven M. Pincus", "year": 1991},
-      "input": {"format": "arbitrary_series", "unit": "any"},
+      "input": {"format": "arbitrary_series", "unit": "any", "length": "N >= template_length + 2"},
       "argument_type": "float",
       "arguments": [
         {"name": "template_length", "kind": "setting", "unit": "none", "min": 1, "default": 2, "whole": true},
@@ -1084,7 +1084,7 @@
       "name": "temporal_centroid",
       "title": "Temporal Centroid",
       "description": "Extract the temporal centroid of an envelope",
-      "input": {"format": "arbitrary_series", "unit": "any"},
+      "input": {"format": "arbitrary_series", "unit": "any", "length": "N >= 2"},
       "arguments": [],
       "result": {"kind": "scalar", "unit": "none", "min": 0, "max": 1}
     },
@@ -1092,7 +1092,7 @@
       "name": "max_position",
       "title": "Maximum Position",
       "description": "Extract the position of the largest value in an input vector",
-      "input": {"format": "arbitrary_series", "unit": "any"},
+      "input": {"format": "arbitrary_series", "unit": "any", "length": "N >= 2"},
       "arguments": [],
       "result": {"kind": "scalar", "unit": "none", "min": 0, "max": 1}
     },
@@ -1100,7 +1100,7 @@
       "name": "min_position",
       "title": "Minimum Position",
       "description": "Extract the position of the smallest value in an input vector",
-      "input": {"format": "arbitrary_series", "unit": "any"},
+      "input": {"format": "arbitrary_series", "unit": "any", "length": "N >= 2"},
       "arguments": [],
       "result": {"kind": "scalar", "unit": "none", "min": 0, "max": 1}
     },
@@ -1116,15 +1116,15 @@
       "name": "cross_correlation",
       "title": "Cross-correlation",
       "description": "Extract the cross-correlation of two series at every lag",
-      "input": {"format": "subframes", "unit": "any"},
+      "input": {"format": "subframes", "unit": "any", "length": "N >= 2 && N % 2 == 0"},
       "arguments": [],
-      "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any_squared"}
+      "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any_squared", "length": "N - 1"}
     },
     {
       "name": "cross_correlation_lag",
       "title": "Cross-correlation Lag",
       "description": "Extract the lag at which two series are most correlated",
-      "input": {"format": "subframes", "unit": "any"},
+      "input": {"format": "subframes", "unit": "any", "length": "N >= 2 && N % 2 == 0"},
       "arguments": [],
       "result": {"kind": "scalar", "unit": "none"}
     },
@@ -1133,7 +1133,7 @@
       "title": "Kullback-Leibler Divergence",
       "description": "Extract the Kullback-Leibler divergence between two spectral frames",
       "reference": {"author": "Solomon Kullback and Richard Leibler", "year": 1951},
-      "input": {"format": "subframes", "unit": "any", "accepts": ["magnitude_bins"], "frames": 2},
+      "input": {"format": "subframes", "unit": "any", "accepts": ["magnitude_bins"], "frames": 2, "length": "N >= 2 && N % 2 == 0"},
       "arguments": [],
       "delta": true,
       "result": {"kind": "scalar", "unit": "none", "min": 0}
@@ -1143,7 +1143,7 @@
       "title": "Itakura-Saito Divergence",
       "description": "Extract the Itakura-Saito divergence between two spectral frames",
       "reference": {"author": "Fumitada Itakura and Shuzo Saito", "year": 1968},
-      "input": {"format": "subframes", "unit": "any", "accepts": ["magnitude_bins"], "frames": 2},
+      "input": {"format": "subframes", "unit": "any", "accepts": ["magnitude_bins"], "frames": 2, "length": "N >= 2 && N % 2 == 0"},
       "arguments": [],
       "delta": true,
       "result": {"kind": "scalar", "unit": "none", "min": 0}
@@ -1153,7 +1153,7 @@
       "title": "Modified Kullback-Leibler",
       "description": "Extract the modified Kullback-Leibler onset function between two spectral frames",
       "reference": {"author": "Stephen Hainsworth and Malcolm Macleod", "year": 2003},
-      "input": {"format": "subframes", "unit": "any", "accepts": ["magnitude_bins"], "frames": 2},
+      "input": {"format": "subframes", "unit": "any", "accepts": ["magnitude_bins"], "frames": 2, "length": "N >= 2 && N % 2 == 0"},
       "argument_type": "float",
       "arguments": [
         {"name": "offset", "kind": "setting", "unit": "any", "min": 0, "default": 1e-06}
@@ -1166,14 +1166,14 @@
       "title": "Spectral Contrast",
       "description": "Extract the spectral contrast of a spectrum",
       "reference": {"author": "Dan-Ning Jiang, Lie Lu, Hong-Jiang Zhang, Jian-Hua Tao and Lian-Hong Cai", "year": 2002},
-      "input": {"format": "spectral", "unit": "any", "accepts": ["magnitude_spectrum", "power_spectrum"]},
+      "input": {"format": "spectral", "unit": "any", "accepts": ["magnitude_spectrum", "power_spectrum"], "length": "N >= 2 && N % 2 == 0"},
       "argument_type": "float",
       "arguments": [
         {"name": "bands", "kind": "setting", "unit": "none", "min": 1, "default": 6, "whole": true},
         {"name": "lower_edge", "kind": "setting", "unit": "hertz", "min": 0, "default": 200},
         {"name": "fraction", "kind": "setting", "unit": "none", "min": 0, "max": 1, "default": 0.02}
       ],
-      "result": {"kind": "vector", "format": "arbitrary_series", "unit": "none"}
+      "result": {"kind": "vector", "format": "arbitrary_series", "unit": "none", "length": "bands + 1"}
     },
     {
       "name": "chroma",
@@ -1181,31 +1181,31 @@
       "description": "Extract the chroma of a spectrum",
       "reference": {"author": "Takuya Fujishima", "year": 1999},
       "tags": ["sound"],
-      "input": {"format": "spectral", "unit": "any", "accepts": ["magnitude_spectrum", "power_spectrum"]},
+      "input": {"format": "spectral", "unit": "any", "accepts": ["magnitude_spectrum", "power_spectrum"], "length": "N >= 2 && N % 2 == 0"},
       "argument_type": "float",
       "arguments": [
         {"name": "tuning", "kind": "setting", "unit": "hertz", "min": 2.2250738585072014e-308, "default": 440},
         {"name": "lowest", "kind": "setting", "unit": "hertz", "min": 0, "default": 40},
         {"name": "highest", "kind": "setting", "unit": "hertz", "min": 0, "default": 5000}
       ],
-      "result": {"kind": "vector", "format": "chroma_coeffs", "unit": "none"}
+      "result": {"kind": "vector", "format": "chroma_coeffs", "unit": "none", "length": "XTRACT_PITCH_CLASSES"}
     },
     {
       "name": "cqt",
       "title": "Constant-Q Transform",
       "description": "Extract the constant-Q spectrum of a complex spectrum",
       "reference": {"author": "Judith C. Brown and Miller S. Puckette", "year": 1992},
-      "input": {"format": "spectral_complex", "unit": "any", "accepts": ["spectrum"]},
+      "input": {"format": "spectral_complex", "unit": "any", "accepts": ["spectrum"], "length": "N >= 2 && N % 2 == 0 && N == kernel_size(kernel)"},
       "arguments": [
         {"name": "kernel", "kind": "object", "built_by": "init_cqt"}
       ],
-      "result": {"kind": "vector", "format": "spectral", "unit": "any"}
+      "result": {"kind": "vector", "format": "spectral", "unit": "any", "length": "2 * band_count(kernel)"}
     },
     {
       "name": "pearson_correlation",
       "title": "Pearson Correlation",
       "description": "Extract the Pearson correlation coefficient of two series",
-      "input": {"format": "subframes", "unit": "any"},
+      "input": {"format": "subframes", "unit": "any", "length": "N >= 4 && N % 2 == 0"},
       "arguments": [],
       "result": {"kind": "scalar", "unit": "none", "min": -1, "max": 1}
     },
@@ -1213,26 +1213,26 @@
       "name": "covariance_matrix",
       "title": "Covariance Matrix",
       "description": "Extract the covariance matrix of a set of series",
-      "input": {"format": "channels", "unit": "any"},
+      "input": {"format": "channels", "unit": "any", "length": "series >= 1 && N >= 2 * series && N % series == 0"},
       "argument_type": "int",
       "arguments": [
         {"name": "series", "kind": "property", "property": "series", "unit": "none", "min": 1}
       ],
-      "result": {"kind": "vector", "format": "square_matrix", "unit": "any_squared"}
+      "result": {"kind": "vector", "format": "square_matrix", "unit": "any_squared", "length": "series * series"}
     },
     {
       "name": "correlation_matrix",
       "title": "Correlation Matrix",
       "description": "Extract the correlation matrix of a set of series from their covariance matrix",
-      "input": {"format": "square_matrix", "unit": "any", "accepts": ["covariance_matrix"]},
+      "input": {"format": "square_matrix", "unit": "any", "accepts": ["covariance_matrix"], "length": "N >= 1 && is_square(N)"},
       "arguments": [],
-      "result": {"kind": "vector", "format": "square_matrix", "unit": "none"}
+      "result": {"kind": "vector", "format": "square_matrix", "unit": "none", "length": "N"}
     },
     {
       "name": "average_correlation",
       "title": "Average Correlation",
       "description": "Extract the average correlation of a set of series from their correlation matrix",
-      "input": {"format": "square_matrix", "unit": "any", "accepts": ["correlation_matrix"]},
+      "input": {"format": "square_matrix", "unit": "any", "accepts": ["correlation_matrix"], "length": "N >= 4 && is_square(N)"},
       "arguments": [],
       "result": {"kind": "scalar", "unit": "none", "min": -1, "max": 1}
     },
@@ -1240,59 +1240,59 @@
       "name": "principal_variances",
       "title": "Principal Variances",
       "description": "Extract the variances of the principal components of a set of series from their covariance matrix",
-      "input": {"format": "square_matrix", "unit": "any", "accepts": ["covariance_matrix", "correlation_matrix"]},
+      "input": {"format": "square_matrix", "unit": "any", "accepts": ["covariance_matrix", "correlation_matrix"], "length": "N >= 1 && is_square(N)"},
       "arguments": [],
-      "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any"}
+      "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any", "length": "root(N)"}
     },
     {
       "name": "coherence",
       "title": "Coherence",
       "description": "Extract the magnitude-squared coherence of two series",
-      "input": {"format": "subframes", "unit": "any"},
+      "input": {"format": "subframes", "unit": "any", "length": "N >= 3 * segment_length && N % 2 == 0"},
       "argument_type": "int",
       "arguments": [
         {"name": "segment_length", "kind": "setting", "unit": "none", "min": 2, "default": 256}
       ],
-      "result": {"kind": "vector", "format": "arbitrary_series", "unit": "none"}
+      "result": {"kind": "vector", "format": "arbitrary_series", "unit": "none", "length": "segment_length / 2"}
     },
     {
       "name": "grid_moments",
       "title": "Grid Moments",
       "description": "Extract the moments of a grid up to the third order",
-      "input": {"format": "grid", "unit": "any"},
+      "input": {"format": "grid", "unit": "any", "length": "N >= 1 && width >= 1 && N % width == 0"},
       "argument_type": "int",
       "arguments": [
         {"name": "width", "kind": "property", "property": "width", "unit": "none", "min": 1}
       ],
-      "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any"}
+      "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any", "length": "10"}
     },
     {
       "name": "grid_central_moments",
       "title": "Grid Central Moments",
       "description": "Extract the central moments of a grid up to the third order",
-      "input": {"format": "grid", "unit": "any"},
+      "input": {"format": "grid", "unit": "any", "length": "N >= 1 && width >= 1 && N % width == 0"},
       "argument_type": "int",
       "arguments": [
         {"name": "width", "kind": "property", "property": "width", "unit": "none", "min": 1}
       ],
-      "result": {"kind": "vector", "format": "central_moment_coeffs", "unit": "any"}
+      "result": {"kind": "vector", "format": "central_moment_coeffs", "unit": "any", "length": "8"}
     },
     {
       "name": "normalised_moments",
       "title": "Normalised Moments",
       "description": "Extract the normalised moments of a grid from its central moments",
-      "input": {"format": "central_moment_coeffs", "unit": "any", "accepts": ["grid_central_moments"]},
+      "input": {"format": "central_moment_coeffs", "unit": "any", "accepts": ["grid_central_moments"], "length": "N == 8"},
       "arguments": [],
-      "result": {"kind": "vector", "format": "normalised_moment_coeffs", "unit": "none"}
+      "result": {"kind": "vector", "format": "normalised_moment_coeffs", "unit": "none", "length": "7"}
     },
     {
       "name": "hu_moments",
       "title": "Hu Moments",
       "description": "Extract the seven Hu moments of a grid from its normalised moments",
       "reference": {"author": "Ming-Kuei Hu", "year": 1962},
-      "input": {"format": "normalised_moment_coeffs", "unit": "any", "accepts": ["normalised_moments"]},
+      "input": {"format": "normalised_moment_coeffs", "unit": "any", "accepts": ["normalised_moments"], "length": "N == 7"},
       "arguments": [],
-      "result": {"kind": "vector", "format": "arbitrary_series", "unit": "none"}
+      "result": {"kind": "vector", "format": "arbitrary_series", "unit": "none", "length": "7"}
     },
     {
       "name": "quantise",
@@ -1305,7 +1305,7 @@
         {"name": "upper", "kind": "result", "accepts": "highest_value", "of": "input", "unit": "any"},
         {"name": "levels", "kind": "setting", "unit": "none", "min": 1, "max": 2147483647, "default": 256, "whole": true, "sets": "levels"}
       ],
-      "result": {"kind": "vector", "format": "arbitrary_series", "unit": "none"}
+      "result": {"kind": "vector", "format": "arbitrary_series", "unit": "none", "length": "N"}
     },
     {
       "name": "histogram",
@@ -1316,14 +1316,14 @@
       "arguments": [
         {"name": "levels", "kind": "property", "property": "levels", "unit": "none", "min": 1}
       ],
-      "result": {"kind": "vector", "format": "arbitrary_series", "unit": "none"}
+      "result": {"kind": "vector", "format": "arbitrary_series", "unit": "none", "length": "levels"}
     },
     {
       "name": "cooccurrence_matrix",
       "title": "Co-occurrence Matrix",
       "description": "Extract the co-occurrence matrix of the levels of a grid at an offset",
       "reference": {"author": "Robert Haralick", "year": 1973},
-      "input": {"format": "grid", "unit": "none", "accepts": ["quantise"]},
+      "input": {"format": "grid", "unit": "none", "accepts": ["quantise"], "length": "N >= 1 && width >= 1 && N % width == 0"},
       "argument_type": "int",
       "arguments": [
         {"name": "width", "kind": "property", "property": "width", "unit": "none", "min": 1},
@@ -1332,14 +1332,14 @@
         {"name": "row_offset", "kind": "setting", "unit": "none", "default": 0},
         {"name": "symmetric", "kind": "setting", "unit": "none", "default": 0, "values": ["off", "on"]}
       ],
-      "result": {"kind": "vector", "format": "square_matrix", "unit": "none"}
+      "result": {"kind": "vector", "format": "square_matrix", "unit": "none", "length": "levels * levels"}
     },
     {
       "name": "cooccurrence_contrast",
       "title": "Co-occurrence Contrast",
       "description": "Extract the contrast of a co-occurrence matrix",
       "reference": {"author": "Robert Haralick", "year": 1973},
-      "input": {"format": "square_matrix", "unit": "none", "accepts": ["cooccurrence_matrix"]},
+      "input": {"format": "square_matrix", "unit": "none", "accepts": ["cooccurrence_matrix"], "length": "N >= 1 && is_square(N)"},
       "arguments": [],
       "result": {"kind": "scalar", "unit": "none", "min": 0}
     },
@@ -1348,7 +1348,7 @@
       "title": "Co-occurrence Correlation",
       "description": "Extract the correlation of a co-occurrence matrix",
       "reference": {"author": "Robert Haralick", "year": 1973},
-      "input": {"format": "square_matrix", "unit": "none", "accepts": ["cooccurrence_matrix"]},
+      "input": {"format": "square_matrix", "unit": "none", "accepts": ["cooccurrence_matrix"], "length": "N >= 1 && is_square(N)"},
       "arguments": [],
       "result": {"kind": "scalar", "unit": "none", "min": -1, "max": 1}
     },
@@ -1357,7 +1357,7 @@
       "title": "Angular Second Moment",
       "description": "Extract the angular second moment of a co-occurrence matrix",
       "reference": {"author": "Robert Haralick", "year": 1973},
-      "input": {"format": "square_matrix", "unit": "none", "accepts": ["cooccurrence_matrix"]},
+      "input": {"format": "square_matrix", "unit": "none", "accepts": ["cooccurrence_matrix"], "length": "N >= 1 && is_square(N)"},
       "arguments": [],
       "result": {"kind": "scalar", "unit": "none", "min": 0, "max": 1}
     },
@@ -1366,7 +1366,7 @@
       "title": "Inverse Difference Moment",
       "description": "Extract the inverse difference moment of a co-occurrence matrix",
       "reference": {"author": "Robert Haralick", "year": 1973},
-      "input": {"format": "square_matrix", "unit": "none", "accepts": ["cooccurrence_matrix"]},
+      "input": {"format": "square_matrix", "unit": "none", "accepts": ["cooccurrence_matrix"], "length": "N >= 1 && is_square(N)"},
       "arguments": [],
       "result": {"kind": "scalar", "unit": "none", "min": 0, "max": 1}
     },
@@ -1375,12 +1375,12 @@
       "title": "Local Binary Patterns",
       "description": "Extract the histogram of the rotation-invariant uniform local binary patterns of a grid",
       "reference": {"author": "Timo Ojala", "year": 2002},
-      "input": {"format": "grid", "unit": "any"},
+      "input": {"format": "grid", "unit": "any", "length": "N >= 1 && width >= 1 && N % width == 0"},
       "argument_type": "int",
       "arguments": [
         {"name": "width", "kind": "property", "property": "width", "unit": "none", "min": 1}
       ],
-      "result": {"kind": "vector", "format": "arbitrary_series", "unit": "none"}
+      "result": {"kind": "vector", "format": "arbitrary_series", "unit": "none", "length": "10"}
     },
     {
       "name": "last_n",
@@ -1390,7 +1390,7 @@
       "arguments": [
         {"name": "state", "kind": "object", "built_by": "last_n_state_new"}
       ],
-      "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any"}
+      "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any", "length": "N"}
     },
     {
       "name": "packed",
@@ -1401,9 +1401,9 @@
         {"quantity": "partial_amplitudes", "part": "first_half"},
         {"quantity": "harmonic_amplitudes", "part": "first_half", "given": "harmonic_spectrum"}
       ],
-      "input": {"format": "spectral_peaks", "unit": "any", "accepts": ["peak_spectrum", "harmonic_spectrum"]},
+      "input": {"format": "spectral_peaks", "unit": "any", "accepts": ["peak_spectrum", "harmonic_spectrum"], "length": "N >= 2 && N % 2 == 0"},
       "arguments": [],
-      "result": {"kind": "vector", "format": "spectral_peaks", "unit": "any"}
+      "result": {"kind": "vector", "format": "spectral_peaks", "unit": "any", "length": "N"}
     },
     {
       "name": "magnitude_spectrum",
@@ -1414,12 +1414,12 @@
         {"quantity": "bins", "part": "first_half"},
         {"quantity": "magnitude_bins", "part": "first_half"}
       ],
-      "input": {"format": "spectral_complex", "unit": "any", "accepts": ["spectrum"]},
+      "input": {"format": "spectral_complex", "unit": "any", "accepts": ["spectrum"], "length": "N >= 2 && N % 2 == 0"},
       "argument_type": "float",
       "arguments": [
         {"name": "bin_spacing", "kind": "property", "property": "bin_spacing", "unit": "hertz", "min": 2.2250738585072014e-308}
       ],
-      "result": {"kind": "vector", "format": "spectral", "unit": "any"}
+      "result": {"kind": "vector", "format": "spectral", "unit": "any", "length": "N"}
     },
     {
       "name": "power_spectrum",
@@ -1430,12 +1430,12 @@
         {"quantity": "bins", "part": "first_half"},
         {"quantity": "power_bins", "part": "first_half"}
       ],
-      "input": {"format": "spectral_complex", "unit": "any", "accepts": ["spectrum"]},
+      "input": {"format": "spectral_complex", "unit": "any", "accepts": ["spectrum"], "length": "N >= 2 && N % 2 == 0"},
       "argument_type": "float",
       "arguments": [
         {"name": "bin_spacing", "kind": "property", "property": "bin_spacing", "unit": "hertz", "min": 2.2250738585072014e-308}
       ],
-      "result": {"kind": "vector", "format": "spectral", "unit": "any_squared"}
+      "result": {"kind": "vector", "format": "spectral", "unit": "any_squared", "length": "N"}
     },
     {
       "name": "log_spectrum",
@@ -1445,23 +1445,23 @@
         "coefficients_and_frequencies",
         {"quantity": "bins", "part": "first_half"}
       ],
-      "input": {"format": "spectral_complex", "unit": "any", "accepts": ["spectrum"]},
+      "input": {"format": "spectral_complex", "unit": "any", "accepts": ["spectrum"], "length": "N >= 2 && N % 2 == 0"},
       "argument_type": "float",
       "arguments": [
         {"name": "bin_spacing", "kind": "property", "property": "bin_spacing", "unit": "hertz", "min": 2.2250738585072014e-308}
       ],
-      "result": {"kind": "vector", "format": "spectral", "unit": "none"}
+      "result": {"kind": "vector", "format": "spectral", "unit": "none", "length": "N"}
     },
     {
       "name": "phase_spectrum",
       "title": "Phase Spectrum",
       "description": "Extract the phase spectrum from a complex spectrum",
-      "input": {"format": "spectral_complex", "unit": "any", "accepts": ["spectrum"]},
+      "input": {"format": "spectral_complex", "unit": "any", "accepts": ["spectrum"], "length": "N >= 2 && N % 2 == 0"},
       "argument_type": "float",
       "arguments": [
         {"name": "bin_spacing", "kind": "property", "property": "bin_spacing", "unit": "hertz", "min": 2.2250738585072014e-308}
       ],
-      "result": {"kind": "vector", "format": "spectral", "unit": "radians"}
+      "result": {"kind": "vector", "format": "spectral", "unit": "radians", "length": "N"}
     },
     {
       "name": "log",
@@ -1473,15 +1473,15 @@
       "arguments": [
         {"name": "lambda", "kind": "setting", "unit": "none", "min": 2.2250738585072014e-308, "default": 1}
       ],
-      "result": {"kind": "vector", "format": "arbitrary_series", "unit": "none"}
+      "result": {"kind": "vector", "format": "arbitrary_series", "unit": "none", "length": "N"}
     },
     {
       "name": "normalised_cross_correlation",
       "title": "Normalised Cross-Correlation",
       "description": "Extract the correlation coefficient of two series at every lag",
-      "input": {"format": "subframes", "unit": "any"},
+      "input": {"format": "subframes", "unit": "any", "length": "N >= 2 && N % 2 == 0"},
       "arguments": [],
-      "result": {"kind": "vector", "format": "arbitrary_series", "unit": "none"}
+      "result": {"kind": "vector", "format": "arbitrary_series", "unit": "none", "length": "N - 1"}
     }
   ]
 }

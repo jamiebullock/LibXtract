@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Zlib
  */
 
+#include <limits.h>
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
@@ -11,6 +12,7 @@
 #include "xtract/libxtract.h"
 
 #include "xttest_approx.h"
+#include "xttest_driver.h"
 #include "xttest_util.h"
 
 static const double EPSILON = 1e-10;
@@ -1484,122 +1486,104 @@ UTEST(descriptors, a_result_in_hertz_has_no_upper_bound)
     }
 }
 
+/* ===== Lengths ===== */
+
+UTEST(descriptors, a_length_is_accepted_when_it_meets_the_rule_the_descriptor_states)
+{
+    const int window = 5;
+    const int no_series = 0;
+    const int grid[5] = {0, 8, 1, 0, 0};
+
+    ASSERT_STREQ(xtract_descriptor(XTRACT_MEAN)->data.lengths, "N >= 1");
+    ASSERT_EQ(xtract_length_is_accepted(XTRACT_MEAN, 1, NULL), 1);
+    ASSERT_EQ(xtract_length_is_accepted(XTRACT_MEAN, 0, NULL), 0);
+    ASSERT_EQ(xtract_length_is_accepted(XTRACT_MEAN, -1, NULL), 0);
+
+    ASSERT_STREQ(xtract_descriptor(XTRACT_SPECTRUM)->data.lengths, "N >= 2 && is_power_of_two(N)");
+    ASSERT_EQ(xtract_length_is_accepted(XTRACT_SPECTRUM, 1024, NULL), 1);
+    ASSERT_EQ(xtract_length_is_accepted(XTRACT_SPECTRUM, 1000, NULL), 0);
+    ASSERT_EQ(xtract_length_is_accepted(XTRACT_SPECTRUM, 1, NULL), 0);
+
+    ASSERT_STREQ(xtract_descriptor(XTRACT_MOVING_SUM)->data.lengths, "N >= window");
+    ASSERT_EQ(xtract_length_is_accepted(XTRACT_MOVING_SUM, 5, &window), 1);
+    ASSERT_EQ(xtract_length_is_accepted(XTRACT_MOVING_SUM, 4, &window), 0);
+    ASSERT_EQ(xtract_length_is_accepted(XTRACT_MOVING_SUM, 5, NULL), 0);
+
+    ASSERT_EQ(xtract_length_is_accepted(XTRACT_AVERAGE_CORRELATION, 9, NULL), 1);
+    ASSERT_EQ(xtract_length_is_accepted(XTRACT_AVERAGE_CORRELATION, 8, NULL), 0);
+    ASSERT_EQ(xtract_length_is_accepted(XTRACT_AVERAGE_CORRELATION, 1, NULL), 0);
+    ASSERT_EQ(xtract_length_is_accepted(XTRACT_HU_MOMENTS, 7, NULL), 1);
+    ASSERT_EQ(xtract_length_is_accepted(XTRACT_HU_MOMENTS, 8, NULL), 0);
+
+    /* A feature that takes no data takes any N */
+    ASSERT_EQ(xtract_length_is_accepted(XTRACT_MIDICENT, 0, NULL), 1);
+
+    /* An argument that a rule divides by is tested first */
+    ASSERT_EQ(xtract_length_is_accepted(XTRACT_COVARIANCE_MATRIX, 8, &no_series), 0);
+    ASSERT_EQ(xtract_length_is_accepted(XTRACT_COOCCURRENCE_MATRIX, 8, grid), 0);
+
+    ASSERT_EQ(xtract_length_is_accepted(-1, 8, NULL), 0);
+    ASSERT_EQ(xtract_length_is_accepted(XTRACT_FEATURES, 8, NULL), 0);
+}
+
+UTEST(descriptors, a_result_has_the_length_the_descriptor_states)
+{
+    const int window = 5;
+    const double contrast[3] = {6.0, 200.0, 0.02};
+    xtract_filterbank *filterbank = xtract_init_mfcc(64, 44100.0, XTRACT_EQUAL_GAIN, 20.0, 20000.0, 13);
+
+    ASSERT_TRUE(filterbank != NULL);
+
+    ASSERT_EQ(xtract_result_length(XTRACT_MEAN, 100, NULL), 1);
+    ASSERT_EQ(xtract_result_length(XTRACT_MEAN, 0, NULL), -1);
+
+    ASSERT_STREQ(xtract_descriptor(XTRACT_MOVING_SUM)->result.vector.length, "N - window + 1");
+    ASSERT_EQ(xtract_result_length(XTRACT_MOVING_SUM, 10, &window), 6);
+    ASSERT_EQ(xtract_result_length(XTRACT_MOVING_SUM, 4, &window), -1);
+
+    ASSERT_EQ(xtract_result_length(XTRACT_SPECTRUM, 1024, NULL), 1024);
+    ASSERT_EQ(xtract_result_length(XTRACT_PEAK_SPECTRUM, 512, NULL), 1024);
+    ASSERT_EQ(xtract_result_length(XTRACT_LPC, 9, NULL), 16);
+    ASSERT_EQ(xtract_result_length(XTRACT_PRINCIPAL_VARIANCES, 9, NULL), 3);
+    ASSERT_EQ(xtract_result_length(XTRACT_BARK_COEFFICIENTS, 32, NULL), XTRACT_BARK_BANDS);
+    ASSERT_EQ(xtract_result_length(XTRACT_SPECTRAL_CONTRAST, 64, contrast), 7);
+
+    /* The number of filters is the filterbank's, and the length must be the one it was built for */
+    ASSERT_STREQ(xtract_descriptor(XTRACT_MFCC)->result.vector.length, "filter_count(filterbank)");
+    ASSERT_EQ(xtract_result_length(XTRACT_MFCC, 32, filterbank), 13);
+    ASSERT_EQ(xtract_result_length(XTRACT_MFCC, 16, filterbank), -1);
+    ASSERT_EQ(xtract_result_length(XTRACT_MFCC, 32, NULL), -1);
+
+    /* A length that an int cannot hold is not given */
+    ASSERT_EQ(xtract_length_is_accepted(XTRACT_PEAK_SPECTRUM, INT_MAX, NULL), 1);
+    ASSERT_EQ(xtract_result_length(XTRACT_PEAK_SPECTRUM, INT_MAX, NULL), -1);
+
+    ASSERT_EQ(xtract_result_length(-1, 8, NULL), -1);
+    ASSERT_EQ(xtract_result_length(XTRACT_FEATURES, 8, NULL), -1);
+
+    xtract_free_filterbank(filterbank);
+}
+
 /* ===== Descriptor conformance ===== */
 
-enum
+static int conf_bounds_checkable(const xtract_function_descriptor_t *d, int i)
 {
-    CONF_N = 16,
-    CONF_COHERENCE_SEGMENT = 256,
-    CONF_CQT_N = 32768,
-    CONF_LONGEST = CONF_CQT_N,
-    CONF_SCALING_N = 64,
-    CONF_SAMPLE_RATE = 44100
-};
-
-static int conf_two_half(const xtract_function_descriptor_t *d)
-{
-    switch (d->data.format)
-    {
-    case XTRACT_SPECTRAL:
-    case XTRACT_SPECTRAL_PEAKS:
-    case XTRACT_SPECTRAL_HARMONICS:
-    case XTRACT_SPECTRAL_COMPLEX:
-    case XTRACT_SUBFRAMES:
-        return 1;
-    default:
+    /* xtract_lnorm() and xtract_flux() take a filter or a flag outside its
+     * named values as the first of them */
+    if ((d->id == XTRACT_LNORM || d->id == XTRACT_FLUX) && i > 0)
         return 0;
-    }
+    return !(d->id == XTRACT_COOCCURRENCE_MATRIX && i == 1);
 }
 
-static int conf_min_n(const xtract_function_descriptor_t *d)
+static int conf_call(int f, xtract_context *ctx, const double *data, int N, const void *argv, double *result) XTTEST_REALTIME;
+static int conf_call(int f, xtract_context *ctx, const double *data, int N, const void *argv, double *result)
 {
-    switch (d->id)
-    {
-    case XTRACT_HPS:
-    case XTRACT_SAMPLE_ENTROPY:
-    case XTRACT_APPROXIMATE_ENTROPY:
-    case XTRACT_PEARSON_CORRELATION:
-    case XTRACT_COVARIANCE_MATRIX:
-    case XTRACT_AVERAGE_CORRELATION:
-        return 4;
-    case XTRACT_SMOOTHNESS:
-    case XTRACT_HJORTH_COMPLEXITY:
-    case XTRACT_TIME_REVERSAL_ASYMMETRY:
-    case XTRACT_PERMUTATION_ENTROPY:
-        return 3;
-    case XTRACT_TEMPORAL_CENTROID:
-    case XTRACT_MAX_POSITION:
-    case XTRACT_MIN_POSITION:
-    case XTRACT_VARIANCE:
-    case XTRACT_LPC:
-    case XTRACT_LPCC:
-    case XTRACT_HJORTH_MOBILITY:
-    case XTRACT_SPECTRAL_ENTROPY:
-    case XTRACT_PETROSIAN_FRACTAL_DIMENSION:
-    case XTRACT_KATZ_FRACTAL_DIMENSION:
-    case XTRACT_LEMPEL_ZIV_COMPLEXITY:
-    case XTRACT_SPECTRUM:
-    case XTRACT_AUTOCORRELATION_FFT:
-        return 2;
-    case XTRACT_MOVING_SUM:
-    case XTRACT_MOVING_AVERAGE:
-    case XTRACT_MOVING_VARIANCE:
-    case XTRACT_MOVING_STANDARD_DEVIATION:
-    case XTRACT_MOVING_MAX:
-    case XTRACT_MOVING_MIN:
-        /* at least the window, which the test leaves at its default */
-        return (int)d->argv[0].default_value;
-    case XTRACT_HIGUCHI_FRACTAL_DIMENSION:
-        return 20;
-    case XTRACT_NORMALISED_MOMENTS:
-        return 8;
-    case XTRACT_HU_MOMENTS:
-        return 7;
-    case XTRACT_COHERENCE:
-        return 3 * CONF_COHERENCE_SEGMENT;
-    case XTRACT_CQT:
-        return CONF_CQT_N;
-    default:
-        break;
-    }
-    if (conf_two_half(d))
-        return 2;
-    return d->data.format == XTRACT_NO_DATA ? 0 : 1;
+    return xtract[f](ctx, data, N, argv, result);
 }
 
-static int conf_call_n(const xtract_function_descriptor_t *d)
+static int conf_refuses(int rv)
 {
-    switch (d->id)
-    {
-    case XTRACT_WINDOWED:
-    /* the standard deviation these take is that of the data, and the
-     * variance it comes from needs two elements */
-    case XTRACT_SKEWNESS:
-    case XTRACT_KURTOSIS:
-        return 2;
-    case XTRACT_SUBBANDS:
-        return 8;
-    case XTRACT_PERMUTATION_ENTROPY:
-        return 16;
-    case XTRACT_FAILSAFE_F0:
-    case XTRACT_WAVELET_F0:
-    case XTRACT_LAST_N:
-    case XTRACT_MMBSES:
-    case XTRACT_SPECTRAL_SUBBAND_CENTROIDS:
-        return CONF_N;
-    case XTRACT_MFCC:
-    case XTRACT_MEL_SPECTROGRAM:
-    case XTRACT_GFCC:
-    case XTRACT_GAMMATONE_SPECTROGRAM:
-        return CONF_N / 2;
-    default:
-        return conf_min_n(d);
-    }
-}
-
-static int conf_null_argv_allowed(const xtract_function_descriptor_t *d)
-{
-    return d->argc == 0 || d->argv[0].is_optional;
+    return rv == XTRACT_ARGUMENT_ERROR || rv == XTRACT_BAD_STATE;
 }
 
 /* A value in the range of an argument is one the feature takes unless the
@@ -1614,237 +1598,91 @@ static int conf_takes_values(const xtract_function_descriptor_t *d)
     return d->argc > 0 && d->argv[0].kind != XTRACT_ARGUMENT_OBJECT;
 }
 
-static int conf_bounds_checkable(const xtract_function_descriptor_t *d, int i)
+static double conf_get(const xtract_function_descriptor_t *d, const xttest_call *call, int i)
 {
-    return !(d->id == XTRACT_COOCCURRENCE_MATRIX && i == 1);
+    return d->argv[i].type == XTRACT_INT ? call->ints[i] : call->doubles[i];
 }
 
-static void conf_fill_data(const xtract_function_descriptor_t *d, double *data, int n)
-{
-    int i;
-
-    for (i = 0; i < n; i++)
-        data[i] = d->id == XTRACT_HISTOGRAM || d->id == XTRACT_COOCCURRENCE_MATRIX ? 0.0 : 1.0;
-    if (conf_two_half(d))
-    {
-        for (i = n / 2; i < n; i++)
-            data[i] = (i - n / 2) * 100.0;
-    }
-}
-
-static int conf_call(int f, xtract_context *ctx, const double *data, int N, const void *argv, double *result) XTTEST_REALTIME;
-static int conf_call(int f, xtract_context *ctx, const double *data, int N, const void *argv, double *result)
-{
-    return xtract[f](ctx, data, N, argv, result);
-}
-
-/* What the test knows about the data it makes for a feature, which is what
- * a caller knows about its own data. */
-static double conf_property(const xtract_function_descriptor_t *d, xtract_property_t property, int N)
-{
-    const int transform_size = d->data.format == XTRACT_SPECTRAL_MAGNITUDES ? 2 * N : N;
-
-    switch (property)
-    {
-    case XTRACT_PROPERTY_LENGTH:
-        return N;
-    case XTRACT_PROPERTY_SAMPLE_RATE:
-        return CONF_SAMPLE_RATE;
-    case XTRACT_PROPERTY_TRANSFORM_SIZE:
-        return transform_size;
-    case XTRACT_PROPERTY_BIN_SPACING:
-        return (double)CONF_SAMPLE_RATE / transform_size;
-    case XTRACT_PROPERTY_WIDTH:
-        return 1.0;
-    case XTRACT_PROPERTY_SERIES:
-        return 2.0;
-    case XTRACT_PROPERTY_LEVELS:
-        return 8.0;
-    case XTRACT_PROPERTY_NONE:
-        break;
-    }
-    return 0.0;
-}
-
-/* The argv of one call, made from the descriptor of the feature alone. */
-typedef struct conf_arguments_
-{
-    double f[XTRACT_MAXARGS];
-    int i[XTRACT_MAXARGS];
-    void *object;
-    const xtract_builder_descriptor_t *builder;
-    const void *argv;
-    int failures;
-} conf_arguments;
-
-static void conf_set(const xtract_function_descriptor_t *d, conf_arguments *a, int i, double v)
+static void conf_set(const xtract_function_descriptor_t *d, xttest_call *call, int i, double v)
 {
     if (d->argv[i].type == XTRACT_INT)
-        a->i[i] = (int)v;
+        call->ints[i] = (int)v;
     else
-        a->f[i] = v;
-}
-
-static void conf_arguments_make(const xtract_function_descriptor_t *d, xtract_context *ctx, const double *data, int N, int of, conf_arguments *a);
-
-static void conf_arguments_free(conf_arguments *a)
-{
-    if (a->builder != NULL)
-        a->builder->release(a->object);
-}
-
-/* The result of a feature that another takes as an argument: of the data
- * given, or of data made for the feature when none is given. A result of
- * the data given has that data for each argument of its own that is a
- * result of the caller's choice of data. */
-static double conf_result_of(int feature, xtract_context *ctx, const double *data, int N, int *failures)
-{
-    const xtract_function_descriptor_t *d = xtract_descriptor(feature);
-    const int of = data != NULL;
-    double *own = NULL;
-    conf_arguments a;
-    double result = 0.0;
-    int rv;
-
-    if (data == NULL)
-    {
-        N = conf_call_n(d);
-        own = (double *)malloc((N > 0 ? N : 1) * sizeof(double));
-        conf_fill_data(d, own, N);
-        data = own;
-    }
-    conf_arguments_make(d, ctx, data, N, of, &a);
-    rv = conf_call(feature, ctx, data, N, a.argv, &result);
-    *failures += a.failures + (rv == XTRACT_ARGUMENT_ERROR || rv == XTRACT_BAD_STATE);
-    conf_arguments_free(&a);
-    free(own);
-
-    return result;
-}
-
-static double conf_value(const xtract_function_descriptor_t *d, const xtract_argument_descriptor_t *argument,
-                         xtract_context *ctx, const double *data, int N, int of, int *failures)
-{
-    switch (argument->kind)
-    {
-    case XTRACT_ARGUMENT_RESULT:
-        if (argument->subject == XTRACT_SUBJECT_INPUT || (argument->subject == XTRACT_SUBJECT_ANY && of))
-            return conf_result_of(argument->accepts->providers[0].feature, ctx, data, N, failures);
-        return conf_result_of(argument->accepts->providers[0].feature, ctx, NULL, 0, failures);
-    case XTRACT_ARGUMENT_PROPERTY:
-        return conf_property(d, argument->data_property, N);
-    default:
-        return argument->default_value;
-    }
-}
-
-static void conf_arguments_make(const xtract_function_descriptor_t *d, xtract_context *ctx, const double *data, int N, int of, conf_arguments *a)
-{
-    double parameters[MOST_PARAMETERS];
-    int i;
-
-    a->object = NULL;
-    a->builder = NULL;
-    a->argv = NULL;
-    a->failures = 0;
-    if (d->argc == 0)
-        return;
-    if (d->argv[0].kind == XTRACT_ARGUMENT_OBJECT)
-    {
-        a->builder = d->argv[0].builder;
-        if (a->builder->argc > MOST_PARAMETERS)
-        {
-            a->builder = NULL;
-            a->failures++;
-            return;
-        }
-        for (i = 0; i < a->builder->argc; i++)
-            parameters[i] = conf_value(d, &a->builder->argv[i], ctx, data, N, of, &a->failures);
-        a->object = a->builder->build(parameters);
-        a->failures += a->object == NULL;
-        a->argv = a->object;
-        return;
-    }
-    for (i = 0; i < d->argc; i++)
-        conf_set(d, a, i, conf_value(d, &d->argv[i], ctx, data, N, of, &a->failures));
-    a->argv = d->argv[0].type == XTRACT_INT ? (const void *)a->i : (const void *)a->f;
+        call->doubles[i] = v;
 }
 
 UTEST(descriptors, every_feature_conforms_to_its_descriptor)
 {
-    static double data[CONF_LONGEST];
-    static double result[CONF_LONGEST];
-    xtract_context *ctx = xtract_context_new(CONF_LONGEST);
-    conf_arguments a;
-    int f, i, rv;
+    enum
+    {
+        CONF_SHORT = 40
+    };
+    xtract_context *ctx = xtract_context_new(XTTEST_DRIVER_LIMIT);
+    xttest_call call;
+    int f, i, n;
 
     ASSERT_TRUE(ctx != NULL);
 
     for (f = 0; f < XTRACT_FEATURES; f++)
     {
         const xtract_function_descriptor_t *d = xtract_descriptor(f);
-        const int min_n = conf_min_n(d);
-        const int call_n = conf_call_n(d);
+        int N, smallest = -1;
 
-        conf_fill_data(d, data, call_n);
-        conf_arguments_make(d, ctx, data, call_n, 0, &a);
-        ASSERT_EQ_MSG(a.failures, 0, d->name);
+        ASSERT_TRUE_MSG(xttest_call_reach(&call, f, ctx, 1.0), d->name);
+        N = call.data.n;
+        ASSERT_TRUE_MSG(xtract_length_is_accepted(f, N, call.argv), d->name);
+        ASSERT_EQ_MSG(xttest_call_run(&call, ctx), XTRACT_SUCCESS, d->name);
 
-        rv = conf_call(f, ctx, data, call_n, a.argv, result);
-        ASSERT_NE_MSG(rv, XTRACT_ARGUMENT_ERROR, d->name);
-        ASSERT_NE_MSG(rv, XTRACT_BAD_STATE, d->name);
-
-        if (conf_null_argv_allowed(d))
-            ASSERT_NE_MSG(conf_call(f, ctx, data, call_n, NULL, result), XTRACT_ARGUMENT_ERROR, d->name);
+        if (d->argc == 0 || d->argv[0].is_optional)
+            ASSERT_NE_MSG(conf_call(f, ctx, call.data.values, N, NULL, call.result), XTRACT_ARGUMENT_ERROR, d->name);
         else
-            ASSERT_EQ_MSG(conf_call(f, ctx, data, call_n, NULL, result), XTRACT_ARGUMENT_ERROR, d->name);
+            ASSERT_EQ_MSG(conf_call(f, ctx, call.data.values, N, NULL, call.result), XTRACT_ARGUMENT_ERROR, d->name);
 
-        if (min_n > 0)
-            ASSERT_EQ_MSG(conf_call(f, ctx, data, min_n - 1, a.argv, result), XTRACT_ARGUMENT_ERROR, d->name);
-        if (conf_two_half(d))
-            ASSERT_EQ_MSG(conf_call(f, ctx, data, min_n + 1, a.argv, result), XTRACT_ARGUMENT_ERROR, d->name);
-        if (d->data.format == XTRACT_SQUARE_MATRIX)
-            ASSERT_EQ_MSG(conf_call(f, ctx, data, 2, a.argv, result), XTRACT_ARGUMENT_ERROR, d->name);
-        if (d->data.format == XTRACT_CHANNELS)
-            ASSERT_EQ_MSG(conf_call(f, ctx, data, call_n + 1, a.argv, result), XTRACT_ARGUMENT_ERROR, d->name);
-        if (d->data.format == XTRACT_GRID)
+        /* The feature refuses every length that its rule for N does, among
+         * the short ones and those either side of the one it was given */
+        for (n = 0; n <= N + 1; n++)
         {
-            conf_set(d, &a, 0, 2.0);
-            ASSERT_NE_MSG(conf_call(f, ctx, data, 4, a.argv, result), XTRACT_ARGUMENT_ERROR, d->name);
-            ASSERT_EQ_MSG(conf_call(f, ctx, data, 3, a.argv, result), XTRACT_ARGUMENT_ERROR, d->name);
-            conf_set(d, &a, 0, conf_property(d, XTRACT_PROPERTY_WIDTH, call_n));
+            if (n > CONF_SHORT && n < N - 1)
+                n = N - 1;
+            if (xtract_length_is_accepted(f, n, call.argv))
+            {
+                if (smallest < 0)
+                    smallest = n;
+                continue;
+            }
+            ASSERT_TRUE_MSG(conf_refuses(conf_call(f, ctx, call.data.values, n, call.argv, call.result)), d->name);
         }
-        if (d->data.format == XTRACT_BARK_COEFFS)
-            ASSERT_EQ_MSG(conf_call(f, ctx, data, XTRACT_BARK_BANDS + 1, a.argv, result), XTRACT_ARGUMENT_ERROR, d->name);
-        if (d->data.format == XTRACT_CENTRAL_MOMENT_COEFFS || d->data.format == XTRACT_NORMALISED_MOMENT_COEFFS)
-            ASSERT_EQ_MSG(conf_call(f, ctx, data, min_n + 1, a.argv, result), XTRACT_ARGUMENT_ERROR, d->name);
+        ASSERT_TRUE_MSG(smallest >= 0, d->name);
 
         for (i = 0; conf_takes_values(d) && i < d->argc; i++)
         {
             const xtract_argument_descriptor_t *argument = &d->argv[i];
-            const double value = argument->type == XTRACT_INT ? a.i[i] : a.f[i];
+            const double value = conf_get(d, &call, i);
 
             if (!conf_bounds_checkable(d, i))
                 continue;
+            /* A value outside the range is refused. A setting at either
+             * end of its range is taken; a property or a result at the end
+             * of its range may not be that of the data given */
             if (argument->min != XTRACT_UNBOUNDED_MIN)
             {
-                conf_set(d, &a, i, argument->min - 1.0);
-                ASSERT_EQ_MSG(conf_call(f, ctx, data, call_n, a.argv, result), XTRACT_ARGUMENT_ERROR, d->name);
-                conf_set(d, &a, i, argument->min);
-                if (conf_is_taken(argument, argument->min))
-                    ASSERT_NE_MSG(conf_call(f, ctx, data, call_n, a.argv, result), XTRACT_ARGUMENT_ERROR, d->name);
+                conf_set(d, &call, i, argument->min - 1.0);
+                ASSERT_EQ_MSG(conf_call(f, ctx, call.data.values, N, call.argv, call.result), XTRACT_ARGUMENT_ERROR, d->name);
+                conf_set(d, &call, i, argument->min);
+                if (argument->kind == XTRACT_ARGUMENT_SETTING && conf_is_taken(argument, argument->min))
+                    ASSERT_NE_MSG(conf_call(f, ctx, call.data.values, N, call.argv, call.result), XTRACT_ARGUMENT_ERROR, d->name);
             }
             if (argument->max != XTRACT_UNBOUNDED_MAX)
             {
-                conf_set(d, &a, i, argument->max + 1.0);
-                ASSERT_EQ_MSG(conf_call(f, ctx, data, call_n, a.argv, result), XTRACT_ARGUMENT_ERROR, d->name);
-                conf_set(d, &a, i, argument->max);
-                if (conf_is_taken(argument, argument->max))
-                    ASSERT_NE_MSG(conf_call(f, ctx, data, call_n, a.argv, result), XTRACT_ARGUMENT_ERROR, d->name);
+                conf_set(d, &call, i, argument->max + 1.0);
+                ASSERT_EQ_MSG(conf_call(f, ctx, call.data.values, N, call.argv, call.result), XTRACT_ARGUMENT_ERROR, d->name);
+                conf_set(d, &call, i, argument->max);
+                if (argument->kind == XTRACT_ARGUMENT_SETTING && conf_is_taken(argument, argument->max))
+                    ASSERT_NE_MSG(conf_call(f, ctx, call.data.values, N, call.argv, call.result), XTRACT_ARGUMENT_ERROR, d->name);
             }
-            conf_set(d, &a, i, value);
+            conf_set(d, &call, i, value);
         }
-        conf_arguments_free(&a);
+        xttest_call_free(&call);
     }
 
     xtract_context_delete(ctx);
@@ -1876,25 +1714,37 @@ static double conf_scale_to_the(int power, double scale)
     return factor;
 }
 
-static int conf_scaling_n(const xtract_function_descriptor_t *d)
+/* How many times larger every element of the second array is than the same
+ * element of the first, or 0 when the elements do not share one ratio. */
+static double conf_ratio(const xttest_data *first, const xttest_data *second)
 {
-    if (d->data.format == XTRACT_NO_DATA)
-        return 0;
-    if (d->id == XTRACT_BARK_COEFFICIENTS)
-        return 2 * CONF_N;
-    if (d->id == XTRACT_WINDOWED)
-        return CONF_SCALING_N;
-    return conf_call_n(d) > conf_min_n(d) ? conf_call_n(d) : CONF_SCALING_N;
+    double ratio = 0.0, largest = 0.0;
+    int i;
+
+    if (first->n != second->n)
+        return 0.0;
+    for (i = 0; i < first->n; i++)
+    {
+        if (fabs(first->values[i]) > largest)
+        {
+            largest = fabs(first->values[i]);
+            ratio = second->values[i] / first->values[i];
+        }
+    }
+    for (i = 0; i < first->n; i++)
+    {
+        if (fabs(second->values[i] - ratio * first->values[i]) > 1e-9 * fabs(ratio * first->values[i]))
+            return 0.0;
+    }
+
+    return ratio;
 }
 
 UTEST(descriptors, a_result_scales_with_its_input_by_the_power_its_unit_states)
 {
     static const double scale = 4.0;
-    static double data[CONF_LONGEST];
-    static double plain[CONF_LONGEST];
-    static double scaled[CONF_LONGEST];
-    xtract_context *ctx = xtract_context_new(CONF_LONGEST);
-    conf_arguments a;
+    xtract_context *ctx = xtract_context_new(XTTEST_DRIVER_LIMIT);
+    xttest_call call[2];
     int f, i, pass, checked = 0;
 
     ASSERT_TRUE(ctx != NULL);
@@ -1903,8 +1753,7 @@ UTEST(descriptors, a_result_scales_with_its_input_by_the_power_its_unit_states)
     {
         const xtract_function_descriptor_t *d = xtract_descriptor(f);
         const int power = conf_power(d->is_scalar ? d->result.scalar.unit : d->result.vector.unit);
-        const double factor = conf_scale_to_the(power, scale);
-        const int n = conf_scaling_n(d);
+        double ratio;
         int nonzero = 0;
 
         if (power == 0 || d->data.unit != XTRACT_UNIT_ANY)
@@ -1915,44 +1764,38 @@ UTEST(descriptors, a_result_scales_with_its_input_by_the_power_its_unit_states)
                               d->result.vector.format == XTRACT_SPECTRAL_HARMONICS))
             continue;
 
+        /* The same call twice, the second from a series at four times the
+         * level, each with a state of its own where the feature keeps one.
+         * The data of the second is then the data of the first at some
+         * multiple of its level: 4 for a series, 16 for a covariance */
         for (pass = 0; pass < 2; pass++)
+            ASSERT_TRUE_MSG(xttest_call_reach(&call[pass], f, ctx, pass == 0 ? 1.0 : scale), d->name);
+        ratio = call[0].data.n > 0 ? conf_ratio(&call[0].data, &call[1].data) : scale;
+        ASSERT_TRUE_MSG(ratio > 1.0, d->name);
+
+        /* A setting in the unit of the data scales with the data */
+        for (i = 0; conf_takes_values(d) && i < d->argc; i++)
         {
-            const double input_scale = pass == 0 ? 1.0 : scale;
-            double *result = pass == 0 ? plain : scaled;
+            const xtract_argument_descriptor_t *argument = &d->argv[i];
 
-            /* A rising series with values on both sides of 0 and no two
-             * steps alike, so that no feature here gives 0 for it. */
-            for (i = 0; i < n; i++)
-                data[i] = input_scale * (0.75 * i + 0.25 * (i % 3) - 3.0);
-            for (i = 0; i < CONF_LONGEST; i++)
-                result[i] = 0.0;
-
-            /* A state is built for each call, so that neither call sees the
-             * other's input. */
-            conf_arguments_make(d, ctx, data, n, 0, &a);
-            ASSERT_EQ_MSG(a.failures, 0, d->name);
-            /* An argument in the unit of the data scales with the data. One
-             * that is a result of the data given already has. */
-            for (i = 0; conf_takes_values(d) && i < d->argc; i++)
-            {
-                const xtract_argument_descriptor_t *argument = &d->argv[i];
-                const int taken_of_the_data = argument->kind == XTRACT_ARGUMENT_RESULT && argument->subject == XTRACT_SUBJECT_INPUT;
-
-                if (conf_power(argument->unit) > 0 && !taken_of_the_data)
-                    conf_set(d, &a, i, conf_scale_to_the(conf_power(argument->unit), input_scale));
-            }
-
-            ASSERT_EQ_MSG(conf_call(f, ctx, data, n, a.argv, result), XTRACT_SUCCESS, d->name);
-            conf_arguments_free(&a);
+            if (argument->kind == XTRACT_ARGUMENT_SETTING && conf_power(argument->unit) > 0)
+                conf_set(d, &call[1], i, argument->default_value * conf_scale_to_the(conf_power(argument->unit), ratio));
         }
+        for (pass = 0; pass < 2; pass++)
+            ASSERT_EQ_MSG(xttest_call_run(&call[pass], ctx), XTRACT_SUCCESS, d->name);
 
-        for (i = 0; i < CONF_LONGEST; i++)
+        ASSERT_EQ_MSG(call[0].result_length, call[1].result_length, d->name);
+        for (i = 0; i < call[0].result_length; i++)
         {
-            nonzero += plain[i] != 0.0;
-            ASSERT_NEAR_MSG(scaled[i], factor * plain[i], 1e-9 * fabs(factor * plain[i]), d->name);
+            const double expected = conf_scale_to_the(power, ratio) * call[0].result[i];
+
+            nonzero += expected != 0.0;
+            ASSERT_NEAR_MSG(call[1].result[i], expected, 1e-9 * fabs(expected), d->name);
         }
         ASSERT_GT_MSG(nonzero, 0, d->name);
         checked++;
+        xttest_call_free(&call[0]);
+        xttest_call_free(&call[1]);
     }
     ASSERT_GT(checked, 30);
 
