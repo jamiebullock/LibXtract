@@ -79,12 +79,12 @@ function(optional out feature json type key default)
     set(${out} "${value}" PARENT_SCOPE)
 endfunction()
 
-# Sets ${out} to the number at the key, which must be a whole number of at
-# least 0, or to the default when the member is absent
+# Sets ${out} to the number at the key, which must be a whole number from 0
+# to the largest int, or to the default when the member is absent
 function(optional_count out feature json key default)
     optional(value "${feature}" "${json}" NUMBER "${key}" "${default}")
-    if(NOT value MATCHES "^[0-9]+$")
-        fail("${feature}" "'${key}' is ${value}, expected a whole number of at least 0")
+    if(NOT value MATCHES "^[0-9]+$" OR value GREATER 2147483647)
+        fail("${feature}" "'${key}' is ${value}, expected a whole number from 0 to 2147483647")
     endif()
     set(${out} "${value}" PARENT_SCOPE)
 endfunction()
