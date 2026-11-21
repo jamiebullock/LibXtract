@@ -18,14 +18,10 @@ extern "C"
 
 #define XTRACT_BARK_BANDS 26
 #define XTRACT_PITCH_CLASSES 12
-#define XTRACT_WINDOW_SIZE 1024 /* dummy macro for descriptors where argc is window size */
-#define XTRACT_NONE 0
-#define XTRACT_ANY -1                   /* sentinel for int/enum fields (donor) */
 #define XTRACT_UNBOUNDED_MIN (-DBL_MAX) /* result/argv has no lower bound */
 #define XTRACT_UNBOUNDED_MAX DBL_MAX    /* result/argv has no upper bound */
 #define XTRACT_UNKNOWN_MIN (-DBL_MAX)   /* lower bound has not been determined */
 #define XTRACT_UNKNOWN_MAX DBL_MAX      /* upper bound has not been determined */
-#define XTRACT_NO_DEFAULT 0             /* no default value defined */
 #define XTRACT_MAXARGS 5
 
 /* Recommended LPC cepstrum order Q for a given LPC order p. Rabiner & Juang

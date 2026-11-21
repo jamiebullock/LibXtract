@@ -1,4 +1,83 @@
 {
+  "quantities": [
+    {"name": "fundamental", "default": "failsafe_f0"}
+  ],
+  "builders": [
+    {
+      "name": "init_mfcc",
+      "type": "filterbank",
+      "parameters": [
+        {"name": "transform_size", "kind": "property", "property": "transform_size", "type": "int"},
+        {"name": "sample_rate", "kind": "property", "property": "sample_rate", "type": "float", "unit": "hertz"},
+        {"name": "style", "kind": "setting", "type": "int", "values": ["equal_gain", "equal_area"], "default": 0},
+        {"name": "freq_min", "kind": "setting", "type": "float", "unit": "hertz", "min": 0, "default": 20},
+        {"name": "freq_max", "kind": "setting", "type": "float", "unit": "hertz", "min": 0, "default": 20000},
+        {"name": "n_filters", "kind": "setting", "type": "int", "min": 2, "default": 13}
+      ]
+    },
+    {
+      "name": "init_gfcc",
+      "type": "filterbank",
+      "parameters": [
+        {"name": "transform_size", "kind": "property", "property": "transform_size", "type": "int"},
+        {"name": "sample_rate", "kind": "property", "property": "sample_rate", "type": "float", "unit": "hertz"},
+        {"name": "freq_min", "kind": "setting", "type": "float", "unit": "hertz", "min": 0, "default": 20},
+        {"name": "freq_max", "kind": "setting", "type": "float", "unit": "hertz", "min": 0, "default": 20000},
+        {"name": "n_filters", "kind": "setting", "type": "int", "min": 2, "default": 13}
+      ]
+    },
+    {
+      "name": "init_bark",
+      "type": "intarray",
+      "parameters": [
+        {"name": "transform_size", "kind": "property", "property": "transform_size", "type": "int"},
+        {"name": "sample_rate", "kind": "property", "property": "sample_rate", "type": "float", "unit": "hertz"}
+      ]
+    },
+    {
+      "name": "init_window",
+      "type": "floatarray",
+      "parameters": [
+        {"name": "length", "kind": "property", "property": "length", "type": "int"},
+        {"name": "type", "kind": "setting", "type": "int", "values": ["gauss", "hamming", "hann", "bartlett", "triangular", "bartlett_hann", "blackman", "kaiser", "blackman_harris"], "default": 2}
+      ]
+    },
+    {
+      "name": "init_dct",
+      "type": "floatarray",
+      "parameters": [
+        {"name": "length", "kind": "property", "property": "length", "type": "int"}
+      ]
+    },
+    {
+      "name": "init_cqt",
+      "type": "cqt_kernel",
+      "parameters": [
+        {"name": "transform_size", "kind": "property", "property": "transform_size", "type": "int"},
+        {"name": "sample_rate", "kind": "property", "property": "sample_rate", "type": "float", "unit": "hertz"},
+        {"name": "fmin", "kind": "setting", "type": "float", "unit": "hertz", "min": 2.2250738585072014e-308, "default": 32.7},
+        {"name": "bins_per_octave", "kind": "setting", "type": "int", "min": 1, "default": 12},
+        {"name": "n_bins", "kind": "setting", "type": "int", "min": 1, "default": 84},
+        {"name": "threshold", "kind": "setting", "type": "float", "min": 0, "max": 1, "default": 0.01}
+      ]
+    },
+    {
+      "name": "last_n_state_new",
+      "type": "last_n_state",
+      "per_stream": true,
+      "parameters": [
+        {"name": "capacity", "kind": "property", "property": "length", "type": "int"}
+      ]
+    },
+    {
+      "name": "wavelet_f0_state_new",
+      "type": "wavelet_f0_state",
+      "per_stream": true,
+      "parameters": [
+        {"name": "sample_rate", "kind": "property", "property": "sample_rate", "type": "float", "unit": "hertz"}
+      ]
+    }
+  ],
   "features": [
     {
       "name": "mean",
@@ -15,7 +94,7 @@
       "input": {"format": "arbitrary_series", "unit": "any"},
       "argument_type": "float",
       "arguments": [
-        {"unit": "any", "donor": "mean"}
+        {"name": "mean", "kind": "result", "accepts": "mean", "of": "input", "unit": "any"}
       ],
       "result": {"kind": "scalar", "unit": "any_squared"}
     },
@@ -26,7 +105,7 @@
       "input": {"format": "no_data", "unit": "any"},
       "argument_type": "float",
       "arguments": [
-        {"unit": "any_squared", "min": 0, "donor": "variance"}
+        {"name": "variance", "kind": "result", "accepts": "variance", "unit": "any_squared", "min": 0}
       ],
       "result": {"kind": "scalar", "unit": "any"}
     },
@@ -37,7 +116,7 @@
       "input": {"format": "arbitrary_series", "unit": "any"},
       "argument_type": "float",
       "arguments": [
-        {"unit": "any", "donor": "mean"}
+        {"name": "mean", "kind": "result", "accepts": "mean", "of": "input", "unit": "any"}
       ],
       "result": {"kind": "scalar", "unit": "any"}
     },
@@ -48,8 +127,8 @@
       "input": {"format": "arbitrary_series", "unit": "any"},
       "argument_type": "float",
       "arguments": [
-        {"unit": "any", "donor": "mean"},
-        {"unit": "any", "donor": "standard_deviation"}
+        {"name": "mean", "kind": "result", "accepts": "mean", "of": "input", "unit": "any"},
+        {"name": "standard_deviation", "kind": "result", "accepts": "standard_deviation", "of": "input", "unit": "any"}
       ],
       "result": {"kind": "scalar", "unit": "none"}
     },
@@ -60,8 +139,8 @@
       "input": {"format": "arbitrary_series", "unit": "any"},
       "argument_type": "float",
       "arguments": [
-        {"unit": "any", "donor": "mean"},
-        {"unit": "any", "donor": "standard_deviation"}
+        {"name": "mean", "kind": "result", "accepts": "mean", "of": "input", "unit": "any"},
+        {"name": "standard_deviation", "kind": "result", "accepts": "standard_deviation", "of": "input", "unit": "any"}
       ],
       "result": {"kind": "scalar", "unit": "none"}
     },
@@ -80,7 +159,7 @@
       "input": {"format": "spectral", "unit": "any_amplitude_hertz"},
       "argument_type": "float",
       "arguments": [
-        {"unit": "hertz", "donor": "spectral_mean"}
+        {"name": "mean", "kind": "result", "accepts": "spectral_mean", "of": "input", "unit": "hertz"}
       ],
       "result": {"kind": "scalar", "unit": "hertz_squared", "min": 0, "max": 2304000000}
     },
@@ -91,7 +170,7 @@
       "input": {"format": "no_data", "unit": "any_amplitude_hertz"},
       "argument_type": "float",
       "arguments": [
-        {"unit": "hertz_squared", "min": 0, "donor": "spectral_variance"}
+        {"name": "variance", "kind": "result", "accepts": "spectral_variance", "unit": "hertz_squared", "min": 0}
       ],
       "result": {"kind": "scalar", "unit": "hertz", "min": 0, "max": 96000}
     },
@@ -102,8 +181,8 @@
       "input": {"format": "spectral", "unit": "any_amplitude_hertz"},
       "argument_type": "float",
       "arguments": [
-        {"unit": "hertz", "donor": "spectral_mean"},
-        {"unit": "hertz", "donor": "spectral_standard_deviation"}
+        {"name": "mean", "kind": "result", "accepts": "spectral_mean", "of": "input", "unit": "hertz"},
+        {"name": "standard_deviation", "kind": "result", "accepts": "spectral_standard_deviation", "of": "input", "unit": "hertz"}
       ],
       "result": {"kind": "scalar", "unit": "none"}
     },
@@ -114,8 +193,8 @@
       "input": {"format": "spectral", "unit": "any_amplitude_hertz"},
       "argument_type": "float",
       "arguments": [
-        {"unit": "hertz", "donor": "spectral_mean"},
-        {"unit": "hertz", "donor": "spectral_standard_deviation"}
+        {"name": "mean", "kind": "result", "accepts": "spectral_mean", "of": "input", "unit": "hertz"},
+        {"name": "standard_deviation", "kind": "result", "accepts": "spectral_standard_deviation", "of": "input", "unit": "hertz"}
       ],
       "result": {"kind": "scalar", "unit": "none", "min": -2}
     },
@@ -123,6 +202,7 @@
       "name": "spectral_centroid",
       "title": "Spectral Centroid",
       "description": "Extract the spectral centroid of a spectrum",
+      "provides": ["spectral_mean"],
       "input": {"format": "spectral", "unit": "any_amplitude_hertz"},
       "arguments": [],
       "result": {"kind": "scalar", "unit": "hertz", "min": 0, "max": 96000}
@@ -135,7 +215,7 @@
       "input": {"format": "no_data", "unit": "any"},
       "argument_type": "float",
       "arguments": [
-        {"unit": "decibels", "min": 0, "donor": "smoothness"}
+        {"name": "smoothness", "kind": "result", "accepts": "smoothness", "unit": "decibels", "min": 0}
       ],
       "result": {"kind": "scalar", "unit": "none"}
     },
@@ -189,10 +269,11 @@
       "title": "Spectral Spread",
       "description": "Extract the spectral spread of a spectrum",
       "reference": {"author": "Norman Casagrande", "year": 2005},
+      "provides": ["spectral_variance"],
       "input": {"format": "spectral", "unit": "any"},
       "argument_type": "float",
       "arguments": [
-        {"unit": "hertz", "donor": "spectral_mean"}
+        {"name": "mean", "kind": "result", "accepts": "spectral_mean", "of": "input", "unit": "hertz"}
       ],
       "result": {"kind": "scalar", "unit": "hertz_squared", "min": 0, "max": 2304000000}
     },
@@ -212,8 +293,8 @@
       "input": {"format": "spectral_magnitudes", "unit": "any"},
       "argument_type": "float",
       "arguments": [
-        {"unit": "hertz", "min": 0, "default": 43.066},
-        {"unit": "percent", "min": 0, "max": 100, "default": 95}
+        {"name": "bin_spacing", "kind": "property", "property": "bin_spacing", "unit": "hertz", "min": 0},
+        {"name": "threshold", "kind": "setting", "unit": "percent", "min": 0, "max": 100, "default": 95}
       ],
       "result": {"kind": "scalar", "unit": "hertz", "min": 0, "max": 96000}
     },
@@ -243,7 +324,7 @@
       "input": {"format": "no_data", "unit": "any"},
       "argument_type": "float",
       "arguments": [
-        {"unit": "none", "min": 0, "max": 1, "donor": "flatness"}
+        {"name": "flatness", "kind": "result", "accepts": "flatness", "unit": "none", "min": 0, "max": 1}
       ],
       "result": {"kind": "scalar", "unit": "decibels", "max": 0}
     },
@@ -255,7 +336,7 @@
       "input": {"format": "no_data", "unit": "any"},
       "argument_type": "float",
       "arguments": [
-        {"unit": "decibels", "donor": "flatness_db"}
+        {"name": "flatness_db", "kind": "result", "accepts": "flatness_db", "unit": "decibels"}
       ],
       "result": {"kind": "scalar", "unit": "none", "min": 0, "max": 1}
     },
@@ -267,8 +348,8 @@
       "input": {"format": "no_data", "unit": "any"},
       "argument_type": "float",
       "arguments": [
-        {"unit": "any", "donor": "highest_value"},
-        {"unit": "any", "donor": "mean"}
+        {"name": "maximum", "kind": "result", "accepts": "highest_value", "unit": "any"},
+        {"name": "mean", "kind": "result", "accepts": "mean", "unit": "any"}
       ],
       "result": {"kind": "scalar", "unit": "none", "min": 1}
     },
@@ -280,8 +361,8 @@
       "input": {"format": "spectral_peaks", "unit": "any_amplitude_hertz"},
       "argument_type": "float",
       "arguments": [
-        {"unit": "hertz", "min": 0, "default": 440, "donor": "failsafe_f0"},
-        {"unit": "none", "min": 0, "max": 1, "default": 0.1}
+        {"name": "fundamental", "kind": "result", "accepts": "fundamental", "of": "source", "unit": "hertz", "min": 0},
+        {"name": "threshold", "kind": "setting", "unit": "none", "min": 0, "max": 1, "default": 0.1}
       ],
       "result": {"kind": "scalar", "unit": "none", "min": 0, "max": 1}
     },
@@ -300,7 +381,7 @@
       "input": {"format": "spectral_peaks", "unit": "any_amplitude_hertz"},
       "argument_type": "float",
       "arguments": [
-        {"unit": "hertz", "min": 0, "default": 440, "donor": "failsafe_f0"}
+        {"name": "fundamental", "kind": "result", "accepts": "fundamental", "of": "source", "unit": "hertz", "min": 0}
       ],
       "result": {"kind": "scalar", "unit": "none", "min": 0, "max": 1}
     },
@@ -336,7 +417,7 @@
       "input": {"format": "arbitrary_series", "unit": "any"},
       "argument_type": "float",
       "arguments": [
-        {"unit": "any"}
+        {"name": "threshold", "kind": "setting", "unit": "any", "default": -1.7976931348623157e+308}
       ],
       "result": {"kind": "scalar", "unit": "any"}
     },
@@ -368,10 +449,11 @@
       "name": "hps",
       "title": "Harmonic Product Spectrum",
       "description": "Extract the harmonic product spectrum of a spectrum",
+      "provides": ["fundamental"],
       "input": {"format": "spectral", "unit": "any"},
       "argument_type": "float",
       "arguments": [
-        {"unit": "none", "min": 2, "max": 16, "default": 3}
+        {"name": "harmonics", "kind": "setting", "unit": "none", "min": 2, "max": 16, "default": 3, "whole": true}
       ],
       "result": {"kind": "scalar", "unit": "hertz", "min": 0, "max": 96000}
     },
@@ -380,10 +462,11 @@
       "title": "Fundamental Frequency",
       "description": "Extract the fundamental frequency of a signal",
       "reference": {"author": "Jamie Bullock"},
+      "provides": ["fundamental"],
       "input": {"format": "audio_samples", "unit": "any"},
       "argument_type": "float",
       "arguments": [
-        {"unit": "hertz", "min": 2.2250738585072014e-308, "default": 44100}
+        {"name": "sample_rate", "kind": "property", "property": "sample_rate", "unit": "hertz", "min": 2.2250738585072014e-308}
       ],
       "result": {"kind": "scalar", "unit": "hertz", "min": 0, "max": 96000}
     },
@@ -392,10 +475,11 @@
       "title": "Fundamental Frequency (failsafe)",
       "description": "Extract the fundamental frequency of a signal (failsafe)",
       "reference": {"author": "Jamie Bullock"},
+      "provides": ["fundamental"],
       "input": {"format": "audio_samples", "unit": "any"},
       "argument_type": "float",
       "arguments": [
-        {"unit": "hertz", "min": 2.2250738585072014e-308, "default": 44100}
+        {"name": "sample_rate", "kind": "property", "property": "sample_rate", "unit": "hertz", "min": 2.2250738585072014e-308}
       ],
       "result": {"kind": "scalar", "unit": "hertz", "min": 0, "max": 96000}
     },
@@ -404,10 +488,10 @@
       "title": "Fundamental Frequency (wavelet method)",
       "description": "Extract the fundamental frequency of a signal (wavelet method)",
       "reference": {"author": "Antoine Schmitt"},
+      "provides": ["fundamental"],
       "input": {"format": "audio_samples", "unit": "any"},
-      "argument_type": "wavelet_f0_state",
       "arguments": [
-        {"unit": "none"}
+        {"name": "state", "kind": "object", "built_by": "wavelet_f0_state_new"}
       ],
       "result": {"kind": "scalar", "unit": "hertz", "min": 0, "max": 96000}
     },
@@ -416,10 +500,11 @@
       "title": "Fundamental Frequency (McLeod Pitch Method)",
       "description": "Extract the fundamental frequency of a signal (McLeod method)",
       "reference": {"author": "Philip McLeod", "year": 2005},
+      "provides": ["fundamental"],
       "input": {"format": "audio_samples", "unit": "any"},
       "argument_type": "float",
       "arguments": [
-        {"unit": "hertz", "min": 2.2250738585072014e-308, "default": 44100}
+        {"name": "sample_rate", "kind": "property", "property": "sample_rate", "unit": "hertz", "min": 2.2250738585072014e-308}
       ],
       "result": {"kind": "scalar", "unit": "hertz", "min": 0, "max": 96000}
     },
@@ -431,7 +516,7 @@
       "input": {"format": "no_data", "unit": "none"},
       "argument_type": "float",
       "arguments": [
-        {"unit": "hertz", "min": 0}
+        {"name": "frequency", "kind": "result", "accepts": "fundamental", "unit": "hertz", "min": 0}
       ],
       "result": {"kind": "scalar", "unit": "midi_cent", "min": 0, "max": 12700}
     },
@@ -442,9 +527,9 @@
       "input": {"format": "audio_samples", "unit": "any"},
       "argument_type": "float",
       "arguments": [
-        {"unit": "none", "default": 2},
-        {"unit": "none"},
-        {"unit": "none"}
+        {"name": "order", "kind": "setting", "unit": "none", "default": 2},
+        {"name": "filter", "kind": "setting", "unit": "none", "default": 0, "values": ["none", "positive_slope", "negative_slope"]},
+        {"name": "normalise", "kind": "setting", "unit": "none", "default": 0, "values": ["off", "on"]}
       ],
       "delta": true,
       "result": {"kind": "scalar", "unit": "unknown"}
@@ -456,9 +541,9 @@
       "input": {"format": "subframes", "unit": "any"},
       "argument_type": "float",
       "arguments": [
-        {"unit": "none", "default": 2},
-        {"unit": "none"},
-        {"unit": "none"}
+        {"name": "order", "kind": "setting", "unit": "none", "default": 2},
+        {"name": "filter", "kind": "setting", "unit": "none", "default": 0, "values": ["none", "positive_slope", "negative_slope"]},
+        {"name": "normalise", "kind": "setting", "unit": "none", "default": 0, "values": ["off", "on"]}
       ],
       "delta": true,
       "result": {"kind": "scalar", "unit": "unknown"}
@@ -470,9 +555,9 @@
       "input": {"format": "arbitrary_series", "unit": "any"},
       "argument_type": "float",
       "arguments": [
-        {"unit": "hertz", "min": 2.2250738585072014e-308, "default": 44100},
-        {"unit": "none", "min": 0, "max": 1, "default": 0.2},
-        {"unit": "none", "min": 0, "max": 1, "default": 0.9}
+        {"name": "sample_rate", "kind": "property", "property": "sample_rate", "unit": "hertz", "min": 2.2250738585072014e-308},
+        {"name": "start", "kind": "setting", "unit": "none", "min": 0, "max": 1, "default": 0.2},
+        {"name": "stop", "kind": "setting", "unit": "none", "min": 0, "max": 1, "default": 0.9}
       ],
       "result": {"kind": "scalar", "unit": "seconds", "min": 0}
     },
@@ -483,8 +568,8 @@
       "input": {"format": "arbitrary_series", "unit": "any"},
       "argument_type": "float",
       "arguments": [
-        {"unit": "hertz", "min": 2.2250738585072014e-308, "default": 44100},
-        {"unit": "none", "min": 0, "max": 1, "default": 0.4}
+        {"name": "sample_rate", "kind": "property", "property": "sample_rate", "unit": "hertz", "min": 2.2250738585072014e-308},
+        {"name": "threshold", "kind": "setting", "unit": "none", "min": 0, "max": 1, "default": 0.4}
       ],
       "result": {"kind": "scalar", "unit": "seconds", "min": 0}
     },
@@ -526,10 +611,8 @@
       "title": "Bark Coefficients",
       "description": "Extract bark coefficients from a spectrum",
       "input": {"format": "spectral_magnitudes", "unit": "any"},
-      "argument_type": "int",
-      "argument_count": 26,
       "arguments": [
-        {"unit": "none", "donor": "init_bark"}
+        {"name": "band_limits", "kind": "object", "built_by": "init_bark"}
       ],
       "result": {"kind": "vector", "format": "bark_coeffs", "unit": "any"}
     },
@@ -540,8 +623,8 @@
       "input": {"format": "spectral_magnitudes", "unit": "any"},
       "argument_type": "float",
       "arguments": [
-        {"unit": "hertz", "min": 2.2250738585072014e-308, "default": 22050},
-        {"unit": "percent", "min": 0, "max": 100, "default": 10}
+        {"name": "bin_spacing", "kind": "property", "property": "bin_spacing", "unit": "hertz", "min": 2.2250738585072014e-308},
+        {"name": "threshold", "kind": "setting", "unit": "percent", "min": 0, "max": 100, "default": 10}
       ],
       "result": {"kind": "vector", "format": "spectral", "unit": "any_amplitude_hertz"}
     },
@@ -552,9 +635,9 @@
       "input": {"format": "audio_samples", "unit": "any"},
       "argument_type": "float",
       "arguments": [
-        {"unit": "hertz", "min": 2.2250738585072014e-308, "default": 43.06640625},
-        {"unit": "none", "min": 0, "max": 3},
-        {"unit": "none", "min": 0, "max": 1}
+        {"name": "bin_spacing", "kind": "property", "property": "bin_spacing", "unit": "hertz", "min": 2.2250738585072014e-308},
+        {"name": "type", "kind": "setting", "unit": "none", "default": 0, "values": ["magnitude", "log", "power", "magnitude_phase"]},
+        {"name": "normalise", "kind": "setting", "unit": "none", "default": 0, "values": ["off", "on"]}
       ],
       "result": {"kind": "vector", "format": "spectral", "unit": "any_amplitude_hertz"}
     },
@@ -572,9 +655,8 @@
       "description": "Extract MFCC from a spectrum",
       "reference": {"author": "Rabiner"},
       "input": {"format": "spectral_magnitudes", "unit": "any"},
-      "argument_type": "filterbank",
       "arguments": [
-        {"unit": "none", "donor": "init_mfcc"}
+        {"name": "filterbank", "kind": "object", "built_by": "init_mfcc"}
       ],
       "result": {"kind": "vector", "format": "mel_coeffs", "unit": "none"}
     },
@@ -583,7 +665,9 @@
       "title": "Discrete Cosine Transform",
       "description": "Extract the DCT of a signal",
       "input": {"format": "audio_samples", "unit": "any"},
-      "arguments": [],
+      "arguments": [
+        {"name": "table", "kind": "object", "built_by": "init_dct", "optional": true}
+      ],
       "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any"}
     },
     {
@@ -593,8 +677,8 @@
       "input": {"format": "spectral", "unit": "any_amplitude_hertz"},
       "argument_type": "float",
       "arguments": [
-        {"unit": "hertz", "min": 0, "default": 440, "donor": "failsafe_f0"},
-        {"unit": "none", "min": 0, "max": 1, "default": 0.1}
+        {"name": "fundamental", "kind": "result", "accepts": "fundamental", "of": "source", "unit": "hertz", "min": 0},
+        {"name": "threshold", "kind": "setting", "unit": "none", "min": 0, "max": 1, "default": 0.1}
       ],
       "result": {"kind": "vector", "format": "spectral", "unit": "any_amplitude_hertz"}
     },
@@ -615,7 +699,7 @@
       "input": {"format": "lpc_coeffs", "unit": "any"},
       "argument_type": "int",
       "arguments": [
-        {"unit": "none", "min": 1}
+        {"name": "order", "kind": "setting", "unit": "none", "min": 1, "default": 12}
       ],
       "result": {"kind": "vector", "format": "lpcc_coeffs", "unit": "none"}
     },
@@ -626,10 +710,10 @@
       "input": {"format": "spectral_magnitudes", "unit": "any"},
       "argument_type": "int",
       "arguments": [
-        {"unit": "none", "min": 0, "max": 124},
-        {"unit": "none", "min": 1, "default": 4},
-        {"unit": "none", "min": 0, "max": 1, "default": 1},
-        {"unit": "bins", "min": 0, "default": 1}
+        {"name": "feature", "kind": "setting", "unit": "none", "default": 0, "values": "features"},
+        {"name": "bands", "kind": "setting", "unit": "none", "min": 1, "default": 4},
+        {"name": "scale", "kind": "setting", "unit": "none", "default": 1, "values": ["octave", "linear"]},
+        {"name": "start", "kind": "setting", "unit": "bins", "min": 0, "default": 1}
       ],
       "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any"}
     },
@@ -638,9 +722,8 @@
       "title": "Mel Spectrogram",
       "description": "Extract log mel energies from a spectrum",
       "input": {"format": "spectral_magnitudes", "unit": "any"},
-      "argument_type": "filterbank",
       "arguments": [
-        {"unit": "none", "donor": "init_mfcc"}
+        {"name": "filterbank", "kind": "object", "built_by": "init_mfcc"}
       ],
       "result": {"kind": "vector", "format": "mel_coeffs", "unit": "none"}
     },
@@ -649,9 +732,8 @@
       "title": "Gammatone Frequency Cepstral Coefficients",
       "description": "Extract GFCC from a spectrum",
       "input": {"format": "spectral_magnitudes", "unit": "any"},
-      "argument_type": "filterbank",
       "arguments": [
-        {"unit": "none", "donor": "init_gfcc"}
+        {"name": "filterbank", "kind": "object", "built_by": "init_gfcc"}
       ],
       "result": {"kind": "vector", "format": "mel_coeffs", "unit": "none"}
     },
@@ -660,9 +742,8 @@
       "title": "Gammatone Spectrogram",
       "description": "Extract log gammatone energies from a spectrum",
       "input": {"format": "spectral_magnitudes", "unit": "any"},
-      "argument_type": "filterbank",
       "arguments": [
-        {"unit": "none", "donor": "init_gfcc"}
+        {"name": "filterbank", "kind": "object", "built_by": "init_gfcc"}
       ],
       "result": {"kind": "vector", "format": "mel_coeffs", "unit": "none"}
     },
@@ -671,10 +752,8 @@
       "title": "Windowed frame",
       "description": "Apply a window function to a frame of data",
       "input": {"format": "arbitrary_series", "unit": "any"},
-      "argument_type": "float",
-      "argument_count": 1024,
       "arguments": [
-        {"unit": "none", "donor": "init_windowed"}
+        {"name": "window", "kind": "object", "built_by": "init_window"}
       ],
       "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any"}
     },
@@ -685,7 +764,7 @@
       "input": {"format": "arbitrary_series", "unit": "any"},
       "argument_type": "float",
       "arguments": [
-        {"unit": "none"}
+        {"name": "gain", "kind": "setting", "unit": "none", "default": 0.5}
       ],
       "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any"}
     },
@@ -696,7 +775,7 @@
       "input": {"format": "arbitrary_series", "unit": "any"},
       "argument_type": "float",
       "arguments": [
-        {"unit": "any"}
+        {"name": "threshold", "kind": "setting", "unit": "any", "default": 0}
       ],
       "result": {"kind": "scalar", "unit": "any"}
     },
@@ -706,9 +785,8 @@
       "description": "Extract mel band spectral entropies from a magnitude/phase spectrum",
       "reference": {"author": "Rincon et al.", "year": 2013},
       "input": {"format": "spectral_magnitude_phase", "unit": "any"},
-      "argument_type": "filterbank",
       "arguments": [
-        {"unit": "none", "donor": "init_mfcc"}
+        {"name": "filterbank", "kind": "object", "built_by": "init_mfcc"}
       ],
       "result": {"kind": "vector", "format": "mel_coeffs", "unit": "none"}
     },
@@ -717,9 +795,8 @@
       "title": "Spectral Subband Centroids",
       "description": "Extract the centroid of each mel band from a spectrum",
       "input": {"format": "spectral", "unit": "any_amplitude_hertz"},
-      "argument_type": "filterbank",
       "arguments": [
-        {"unit": "none", "donor": "init_mfcc"}
+        {"name": "filterbank", "kind": "object", "built_by": "init_mfcc"}
       ],
       "result": {"kind": "vector", "format": "mel_coeffs", "unit": "hertz"}
     },
@@ -730,7 +807,7 @@
       "input": {"format": "arbitrary_series", "unit": "any"},
       "argument_type": "int",
       "arguments": [
-        {"unit": "none", "min": 1}
+        {"name": "window", "kind": "setting", "unit": "none", "min": 1, "default": 5}
       ],
       "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any"}
     },
@@ -741,7 +818,7 @@
       "input": {"format": "arbitrary_series", "unit": "any"},
       "argument_type": "int",
       "arguments": [
-        {"unit": "none", "min": 1}
+        {"name": "window", "kind": "setting", "unit": "none", "min": 1, "default": 5}
       ],
       "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any"}
     },
@@ -752,7 +829,7 @@
       "input": {"format": "arbitrary_series", "unit": "any"},
       "argument_type": "int",
       "arguments": [
-        {"unit": "none", "min": 2}
+        {"name": "window", "kind": "setting", "unit": "none", "min": 2, "default": 5}
       ],
       "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any_squared"}
     },
@@ -763,7 +840,7 @@
       "input": {"format": "arbitrary_series", "unit": "any"},
       "argument_type": "int",
       "arguments": [
-        {"unit": "none", "min": 2}
+        {"name": "window", "kind": "setting", "unit": "none", "min": 2, "default": 5}
       ],
       "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any"}
     },
@@ -774,7 +851,7 @@
       "input": {"format": "arbitrary_series", "unit": "any"},
       "argument_type": "int",
       "arguments": [
-        {"unit": "none", "min": 1}
+        {"name": "window", "kind": "setting", "unit": "none", "min": 1, "default": 5}
       ],
       "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any"}
     },
@@ -785,7 +862,7 @@
       "input": {"format": "arbitrary_series", "unit": "any"},
       "argument_type": "int",
       "arguments": [
-        {"unit": "none", "min": 1}
+        {"name": "window", "kind": "setting", "unit": "none", "min": 1, "default": 5}
       ],
       "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any"}
     },
@@ -796,7 +873,7 @@
       "input": {"format": "arbitrary_series", "unit": "any"},
       "argument_type": "float",
       "arguments": [
-        {"unit": "none", "min": 0, "max": 1}
+        {"name": "weight", "kind": "setting", "unit": "none", "min": 0, "max": 1, "default": 0.1}
       ],
       "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any"}
     },
@@ -807,7 +884,7 @@
       "input": {"format": "arbitrary_series", "unit": "any"},
       "argument_type": "float",
       "arguments": [
-        {"unit": "none", "min": 0, "max": 1}
+        {"name": "weight", "kind": "setting", "unit": "none", "min": 0, "max": 1, "default": 0.1}
       ],
       "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any_squared"}
     },
@@ -826,7 +903,7 @@
       "input": {"format": "arbitrary_series", "unit": "any"},
       "argument_type": "float",
       "arguments": [
-        {"unit": "any", "donor": "median"}
+        {"name": "median", "kind": "result", "accepts": "median", "of": "input", "unit": "any"}
       ],
       "result": {"kind": "scalar", "unit": "any"}
     },
@@ -864,7 +941,7 @@
       "input": {"format": "arbitrary_series", "unit": "any"},
       "argument_type": "int",
       "arguments": [
-        {"unit": "none", "min": 1}
+        {"name": "lag", "kind": "setting", "unit": "none", "min": 1, "default": 1}
       ],
       "result": {"kind": "scalar", "unit": "any_cubed"}
     },
@@ -902,7 +979,7 @@
       "input": {"format": "arbitrary_series", "unit": "any"},
       "argument_type": "int",
       "arguments": [
-        {"unit": "none", "min": 2, "default": 10}
+        {"name": "k_max", "kind": "setting", "unit": "none", "min": 2, "default": 10}
       ],
       "result": {"kind": "scalar", "unit": "none"}
     },
@@ -914,8 +991,8 @@
       "input": {"format": "arbitrary_series", "unit": "any"},
       "argument_type": "int",
       "arguments": [
-        {"unit": "none", "min": 2, "max": 8, "default": 3},
-        {"unit": "none", "min": 1, "default": 1}
+        {"name": "order", "kind": "setting", "unit": "none", "min": 2, "max": 8, "default": 3},
+        {"name": "delay", "kind": "setting", "unit": "none", "min": 1, "default": 1}
       ],
       "result": {"kind": "scalar", "unit": "none", "min": 0, "max": 1}
     },
@@ -927,7 +1004,7 @@
       "input": {"format": "arbitrary_series", "unit": "any"},
       "argument_type": "float",
       "arguments": [
-        {"unit": "any", "donor": "median"}
+        {"name": "threshold", "kind": "result", "accepts": "median", "of": "input", "unit": "any"}
       ],
       "result": {"kind": "scalar", "unit": "none", "min": 0}
     },
@@ -939,8 +1016,8 @@
       "input": {"format": "arbitrary_series", "unit": "any"},
       "argument_type": "float",
       "arguments": [
-        {"unit": "none", "min": 1, "default": 2},
-        {"unit": "any", "min": 0}
+        {"name": "template_length", "kind": "setting", "unit": "none", "min": 1, "default": 2, "whole": true},
+        {"name": "tolerance", "kind": "setting", "unit": "any", "min": 0, "default": 0.2}
       ],
       "result": {"kind": "scalar", "unit": "none", "min": 0}
     },
@@ -952,8 +1029,8 @@
       "input": {"format": "arbitrary_series", "unit": "any"},
       "argument_type": "float",
       "arguments": [
-        {"unit": "none", "min": 1, "default": 2},
-        {"unit": "any", "min": 0}
+        {"name": "template_length", "kind": "setting", "unit": "none", "min": 1, "default": 2, "whole": true},
+        {"name": "tolerance", "kind": "setting", "unit": "any", "min": 0, "default": 0.2}
       ],
       "result": {"kind": "scalar", "unit": "none"}
     },
@@ -982,8 +1059,8 @@
       "input": {"format": "arbitrary_series", "unit": "any"},
       "argument_type": "float",
       "arguments": [
-        {"unit": "hertz", "min": 2.2250738585072014e-308, "default": 44100},
-        {"unit": "none", "min": 0, "max": 1, "default": 0.4}
+        {"name": "sample_rate", "kind": "property", "property": "sample_rate", "unit": "hertz", "min": 2.2250738585072014e-308},
+        {"name": "threshold", "kind": "setting", "unit": "none", "min": 0, "max": 1, "default": 0.4}
       ],
       "result": {"kind": "scalar", "unit": "per_second"}
     },
@@ -1026,7 +1103,7 @@
       "input": {"format": "subframes", "unit": "any"},
       "argument_type": "float",
       "arguments": [
-        {"unit": "none", "min": 0, "max": 1}
+        {"name": "scaling", "kind": "setting", "unit": "none", "default": 0, "values": ["covariance", "coefficient"]}
       ],
       "result": {"kind": "vector", "format": "arbitrary_series", "unit": "unknown"}
     },
@@ -1066,7 +1143,7 @@
       "input": {"format": "subframes", "unit": "any"},
       "argument_type": "float",
       "arguments": [
-        {"unit": "any", "min": 0}
+        {"name": "offset", "kind": "setting", "unit": "any", "min": 0, "default": 1e-06}
       ],
       "delta": true,
       "result": {"kind": "scalar", "unit": "none", "min": 0}
@@ -1079,9 +1156,9 @@
       "input": {"format": "spectral", "unit": "any_amplitude_hertz"},
       "argument_type": "float",
       "arguments": [
-        {"unit": "none", "min": 1, "default": 6},
-        {"unit": "hertz", "min": 0, "default": 200},
-        {"unit": "none", "min": 0, "max": 1, "default": 0.02}
+        {"name": "bands", "kind": "setting", "unit": "none", "min": 1, "default": 6, "whole": true},
+        {"name": "lower_edge", "kind": "setting", "unit": "hertz", "min": 0, "default": 200},
+        {"name": "fraction", "kind": "setting", "unit": "none", "min": 0, "max": 1, "default": 0.02}
       ],
       "result": {"kind": "vector", "format": "arbitrary_series", "unit": "none"}
     },
@@ -1093,9 +1170,9 @@
       "input": {"format": "spectral", "unit": "any_amplitude_hertz"},
       "argument_type": "float",
       "arguments": [
-        {"unit": "hertz", "min": 2.2250738585072014e-308, "default": 440},
-        {"unit": "hertz", "min": 0, "default": 40},
-        {"unit": "hertz", "min": 0, "default": 5000}
+        {"name": "tuning", "kind": "setting", "unit": "hertz", "min": 2.2250738585072014e-308, "default": 440},
+        {"name": "lowest", "kind": "setting", "unit": "hertz", "min": 0, "default": 40},
+        {"name": "highest", "kind": "setting", "unit": "hertz", "min": 0, "default": 5000}
       ],
       "result": {"kind": "vector", "format": "chroma_coeffs", "unit": "none"}
     },
@@ -1105,9 +1182,8 @@
       "description": "Extract the constant-Q spectrum of a magnitude/phase spectrum",
       "reference": {"author": "Judith C. Brown and Miller S. Puckette", "year": 1992},
       "input": {"format": "spectral_magnitude_phase", "unit": "any"},
-      "argument_type": "cqt_kernel",
       "arguments": [
-        {"unit": "none", "donor": "init_cqt"}
+        {"name": "kernel", "kind": "object", "built_by": "init_cqt"}
       ],
       "result": {"kind": "vector", "format": "spectral", "unit": "any_amplitude_hertz"}
     },
@@ -1126,7 +1202,7 @@
       "input": {"format": "channels", "unit": "any"},
       "argument_type": "int",
       "arguments": [
-        {"unit": "none", "min": 1, "default": 2}
+        {"name": "series", "kind": "property", "property": "series", "unit": "none", "min": 1}
       ],
       "result": {"kind": "vector", "format": "square_matrix", "unit": "any_squared"}
     },
@@ -1161,7 +1237,7 @@
       "input": {"format": "subframes", "unit": "any"},
       "argument_type": "int",
       "arguments": [
-        {"unit": "none", "min": 2, "default": 256}
+        {"name": "segment_length", "kind": "setting", "unit": "none", "min": 2, "default": 256}
       ],
       "result": {"kind": "vector", "format": "arbitrary_series", "unit": "none"}
     },
@@ -1172,7 +1248,7 @@
       "input": {"format": "grid", "unit": "any"},
       "argument_type": "int",
       "arguments": [
-        {"unit": "none", "min": 1}
+        {"name": "width", "kind": "property", "property": "width", "unit": "none", "min": 1}
       ],
       "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any"}
     },
@@ -1183,7 +1259,7 @@
       "input": {"format": "grid", "unit": "any"},
       "argument_type": "int",
       "arguments": [
-        {"unit": "none", "min": 1}
+        {"name": "width", "kind": "property", "property": "width", "unit": "none", "min": 1}
       ],
       "result": {"kind": "vector", "format": "central_moment_coeffs", "unit": "any"}
     },
@@ -1211,9 +1287,9 @@
       "input": {"format": "arbitrary_series", "unit": "any"},
       "argument_type": "float",
       "arguments": [
-        {"unit": "any", "donor": "lowest_value"},
-        {"unit": "any", "donor": "highest_value"},
-        {"unit": "none", "min": 1, "max": 2147483647, "default": 256}
+        {"name": "lower", "kind": "result", "accepts": "lowest_value", "of": "input", "unit": "any"},
+        {"name": "upper", "kind": "result", "accepts": "highest_value", "of": "input", "unit": "any"},
+        {"name": "levels", "kind": "setting", "unit": "none", "min": 1, "max": 2147483647, "default": 256, "whole": true}
       ],
       "result": {"kind": "vector", "format": "arbitrary_series", "unit": "none"}
     },
@@ -1224,7 +1300,7 @@
       "input": {"format": "arbitrary_series", "unit": "none"},
       "argument_type": "int",
       "arguments": [
-        {"unit": "none", "min": 1}
+        {"name": "levels", "kind": "property", "property": "levels", "unit": "none", "min": 1}
       ],
       "result": {"kind": "vector", "format": "arbitrary_series", "unit": "none"}
     },
@@ -1236,11 +1312,11 @@
       "input": {"format": "grid", "unit": "none"},
       "argument_type": "int",
       "arguments": [
-        {"unit": "none", "min": 1},
-        {"unit": "none", "min": 1, "max": 46340, "default": 8},
-        {"unit": "none", "default": 1},
-        {"unit": "none"},
-        {"unit": "none", "min": 0, "max": 1}
+        {"name": "width", "kind": "property", "property": "width", "unit": "none", "min": 1},
+        {"name": "levels", "kind": "property", "property": "levels", "unit": "none", "min": 1, "max": 46340},
+        {"name": "column_offset", "kind": "setting", "unit": "none", "default": 1},
+        {"name": "row_offset", "kind": "setting", "unit": "none", "default": 0},
+        {"name": "symmetric", "kind": "setting", "unit": "none", "default": 0, "values": ["off", "on"]}
       ],
       "result": {"kind": "vector", "format": "square_matrix", "unit": "none"}
     },
@@ -1288,7 +1364,7 @@
       "input": {"format": "grid", "unit": "any"},
       "argument_type": "int",
       "arguments": [
-        {"unit": "none", "min": 1}
+        {"name": "width", "kind": "property", "property": "width", "unit": "none", "min": 1}
       ],
       "result": {"kind": "vector", "format": "arbitrary_series", "unit": "none"}
     },
@@ -1297,9 +1373,8 @@
       "title": "Last N Values",
       "description": "Extract the last N values of a stream given one value at a time",
       "input": {"format": "arbitrary_series", "unit": "any"},
-      "argument_type": "last_n_state",
       "arguments": [
-        {"unit": "none"}
+        {"name": "state", "kind": "object", "built_by": "last_n_state_new"}
       ],
       "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any"}
     },
