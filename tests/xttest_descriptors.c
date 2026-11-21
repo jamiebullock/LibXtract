@@ -1360,7 +1360,9 @@ UTEST(descriptors, a_result_scales_with_its_input_by_the_power_its_unit_states)
                 result[i] = 0.0;
 
             argv = conf_argv(d, argf, argi, mel, bark, window, cqt, last_n[pass], wavelet_f0);
-            if (d->argc > 0 && d->argv.type == XTRACT_FLOAT)
+            /* An argc above XTRACT_MAXARGS is the length of one array
+             * argument, and only its first entry is described. */
+            if (d->argc > 0 && d->argc <= XTRACT_MAXARGS && d->argv.type == XTRACT_FLOAT)
             {
                 for (i = 0; i < d->argc && i < XTRACT_MAXARGS; i++)
                 {
