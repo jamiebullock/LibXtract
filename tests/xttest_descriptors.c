@@ -161,9 +161,11 @@ UTEST(descriptors, audited_result_ranges_and_units)
     ASSERT_EQ(fd[XTRACT_LOUDNESS].result.scalar.unit, XTRACT_SONE);
     ASSERT_EQ(fd[XTRACT_SHARPNESS].result.scalar.unit, XTRACT_ACUM);
 
-    /* Cepstral/LPC coefficient vectors are dimensionless. */
+    /* Cepstral coefficients are dimensionless. */
     ASSERT_EQ(fd[XTRACT_LPCC].result.vector.unit, XTRACT_UNIT_NONE);
-    ASSERT_EQ(fd[XTRACT_BARK_COEFFICIENTS].result.vector.unit, XTRACT_UNIT_NONE);
+
+    /* A Bark coefficient is a sum of the magnitudes in a band. */
+    ASSERT_EQ(fd[XTRACT_BARK_COEFFICIENTS].result.vector.unit, XTRACT_UNIT_ANY);
 
     ASSERT_EQ(xtract_free_descriptors(fd), XTRACT_SUCCESS);
 }
@@ -190,6 +192,46 @@ UTEST(descriptors, only_the_decibel_quantities_carry_the_decibel_unit)
             ASSERT_EQ_MSG(fd[f].argv.unit[i] == XTRACT_DECIBELS, takes_decibels, fd[f].algo.name);
         }
     }
+    ASSERT_EQ(xtract_free_descriptors(fd), XTRACT_SUCCESS);
+}
+
+UTEST(descriptors, a_result_whose_unit_an_argument_decides_has_the_unknown_unit)
+{
+    xtract_function_descriptor_t *fd = xtract_make_descriptors();
+
+    ASSERT_TRUE(fd != NULL);
+    /* The normalise argument turns either into a logarithm. */
+    ASSERT_EQ(fd[XTRACT_LNORM].result.scalar.unit, XTRACT_UNIT_UNKNOWN);
+    ASSERT_EQ(fd[XTRACT_FLUX].result.scalar.unit, XTRACT_UNIT_UNKNOWN);
+    /* The scaling argument divides out the units of the two series. */
+    ASSERT_EQ(fd[XTRACT_CROSS_CORRELATION].result.vector.unit, XTRACT_UNIT_UNKNOWN);
+    ASSERT_EQ(xtract_free_descriptors(fd), XTRACT_SUCCESS);
+}
+
+UTEST(descriptors, a_ratio_or_a_count_has_no_unit_and_its_arguments_have_theirs)
+{
+    xtract_function_descriptor_t *fd = xtract_make_descriptors();
+    int i;
+
+    ASSERT_TRUE(fd != NULL);
+    ASSERT_EQ(fd[XTRACT_SKEWNESS].result.scalar.unit, XTRACT_UNIT_NONE);
+    ASSERT_EQ(fd[XTRACT_KURTOSIS].result.scalar.unit, XTRACT_UNIT_NONE);
+    ASSERT_EQ(fd[XTRACT_NONZERO_COUNT].result.scalar.unit, XTRACT_UNIT_NONE);
+    /* Crossings for each sample: the feature takes no sample rate. */
+    ASSERT_EQ(fd[XTRACT_ZCR].result.scalar.unit, XTRACT_UNIT_NONE);
+
+    /* A mean and a standard deviation, or a maximum and a mean. */
+    for (i = 0; i < 2; i++)
+    {
+        ASSERT_EQ(fd[XTRACT_SKEWNESS].argv.unit[i], XTRACT_UNIT_ANY);
+        ASSERT_EQ(fd[XTRACT_KURTOSIS].argv.unit[i], XTRACT_UNIT_ANY);
+        ASSERT_EQ(fd[XTRACT_CREST].argv.unit[i], XTRACT_UNIT_ANY);
+        ASSERT_EQ(fd[XTRACT_SPECTRAL_SKEWNESS].argv.unit[i], XTRACT_HERTZ);
+        ASSERT_EQ(fd[XTRACT_SPECTRAL_KURTOSIS].argv.unit[i], XTRACT_HERTZ);
+    }
+
+    /* A slope of amplitude over frequency, divided by the sum of the amplitudes. */
+    ASSERT_EQ(fd[XTRACT_SPECTRAL_SLOPE].result.scalar.unit, XTRACT_PER_HERTZ);
     ASSERT_EQ(xtract_free_descriptors(fd), XTRACT_SUCCESS);
 }
 
@@ -437,7 +479,7 @@ UTEST(descriptors, appended_features_are_fully_described)
     ASSERT_EQ(fd[XTRACT_TIME_REVERSAL_ASYMMETRY].argv.max[0], XTRACT_UNBOUNDED_MAX);
     ASSERT_EQ(fd[XTRACT_TIME_REVERSAL_ASYMMETRY].data.format, XTRACT_ARBITRARY_SERIES);
     ASSERT_EQ(fd[XTRACT_TIME_REVERSAL_ASYMMETRY].data.unit, XTRACT_UNIT_ANY);
-    ASSERT_EQ(fd[XTRACT_TIME_REVERSAL_ASYMMETRY].result.scalar.unit, XTRACT_UNIT_ANY);
+    ASSERT_EQ(fd[XTRACT_TIME_REVERSAL_ASYMMETRY].result.scalar.unit, XTRACT_UNIT_ANY_CUBED);
     ASSERT_EQ(fd[XTRACT_TIME_REVERSAL_ASYMMETRY].is_delta, XTRACT_FALSE);
 
     ASSERT_EQ(fd[XTRACT_SPECTRAL_ENTROPY].argc, 0);
@@ -568,7 +610,7 @@ UTEST(descriptors, appended_features_are_fully_described)
     CHECK_REL(fd[XTRACT_CROSS_CORRELATION].argv.max[0], 1.0, EPSILON);
     ASSERT_EQ(fd[XTRACT_CROSS_CORRELATION].is_scalar, XTRACT_FALSE);
     ASSERT_EQ(fd[XTRACT_CROSS_CORRELATION].result.vector.format, XTRACT_ARBITRARY_SERIES);
-    ASSERT_EQ(fd[XTRACT_CROSS_CORRELATION].result.vector.unit, XTRACT_UNIT_ANY);
+    ASSERT_EQ(fd[XTRACT_CROSS_CORRELATION].result.vector.unit, XTRACT_UNIT_UNKNOWN);
     ASSERT_EQ(fd[XTRACT_CROSS_CORRELATION_LAG].argc, 0);
     ASSERT_EQ(fd[XTRACT_CROSS_CORRELATION_LAG].is_scalar, XTRACT_TRUE);
     ASSERT_EQ(fd[XTRACT_CROSS_CORRELATION_LAG].result.scalar.unit, XTRACT_UNIT_NONE);
@@ -959,7 +1001,8 @@ enum
     CONF_N = 16,
     CONF_FILTERS = 2,
     CONF_COHERENCE_SEGMENT = 256,
-    CONF_LONGEST = 3 * CONF_COHERENCE_SEGMENT + 1
+    CONF_LONGEST = 3 * CONF_COHERENCE_SEGMENT + 1,
+    CONF_SCALING_N = 64
 };
 
 static int conf_two_half(const xtract_function_descriptor_t *d)
@@ -1218,6 +1261,133 @@ UTEST(descriptors, every_feature_conforms_to_its_descriptor)
 
     xtract_wavelet_f0_state_delete(wavelet_f0);
     xtract_last_n_state_delete(last_n);
+    xtract_context_delete(ctx);
+    xtract_free_cqt(cqt);
+    xtract_free_filterbank(mel);
+    ASSERT_EQ(xtract_free_descriptors(fd), XTRACT_SUCCESS);
+}
+
+/* The power of a scale of the input that a value in the unit grows by, or 0
+ * for a unit that does not follow the input. */
+static int conf_power(xtract_unit_t unit)
+{
+    switch (unit)
+    {
+    case XTRACT_UNIT_ANY:
+        return 1;
+    case XTRACT_UNIT_ANY_SQUARED:
+        return 2;
+    case XTRACT_UNIT_ANY_CUBED:
+        return 3;
+    default:
+        return 0;
+    }
+}
+
+static double conf_scale_to_the(int power, double scale)
+{
+    double factor = 1.0;
+
+    while (power-- > 0)
+        factor *= scale;
+    return factor;
+}
+
+static int conf_scaling_n(const xtract_function_descriptor_t *d)
+{
+    if (d->data.format == XTRACT_NO_DATA)
+        return 0;
+    if (d->id == XTRACT_BARK_COEFFICIENTS)
+        return 2 * CONF_N;
+    return conf_call_n(d) > conf_min_n(d) ? conf_call_n(d) : CONF_SCALING_N;
+}
+
+UTEST(descriptors, a_result_scales_with_its_input_by_the_power_its_unit_states)
+{
+    static const double scale = 4.0;
+    xtract_function_descriptor_t *fd = xtract_make_descriptors();
+    double data[CONF_LONGEST];
+    double plain[CONF_LONGEST];
+    double scaled[CONF_LONGEST];
+    double argf[XTRACT_MAXARGS];
+    int argi[XTRACT_MAXARGS];
+    double window[XTRACT_WINDOW_SIZE];
+    xtract_filterbank *mel = xtract_init_mfcc(CONF_N, 44100.0, XTRACT_EQUAL_GAIN, 100.0, 8000.0, CONF_FILTERS);
+    xtract_cqt_kernel *cqt = xtract_init_cqt(CONF_N, 1000.0, 100.0, 1, 2, 0.01);
+    xtract_context *ctx = xtract_context_new(CONF_LONGEST);
+    /* A state for each of the two calls, which must not see each other's input. */
+    xtract_last_n_state *last_n[2];
+    xtract_wavelet_f0_state *wavelet_f0 = xtract_wavelet_f0_state_new(44100.0);
+    int bark[XTRACT_BARK_BANDS];
+    int f, i, pass, checked = 0;
+    const void *argv;
+
+    ASSERT_TRUE(fd != NULL);
+    ASSERT_TRUE(mel != NULL);
+    ASSERT_TRUE(cqt != NULL);
+    ASSERT_TRUE(ctx != NULL);
+    for (pass = 0; pass < 2; pass++)
+    {
+        last_n[pass] = xtract_last_n_state_new(CONF_N);
+        ASSERT_TRUE(last_n[pass] != NULL);
+    }
+    ASSERT_TRUE(wavelet_f0 != NULL);
+    xtract_init_bark(2 * CONF_N, 44100.0, bark);
+    for (i = 0; i < XTRACT_WINDOW_SIZE; i++)
+        window[i] = 1.0;
+
+    for (f = 0; f < XTRACT_FEATURES; f++)
+    {
+        const xtract_function_descriptor_t *d = &fd[f];
+        const int power = conf_power(d->is_scalar ? d->result.scalar.unit : d->result.vector.unit);
+        const double factor = conf_scale_to_the(power, scale);
+        const int n = conf_scaling_n(d);
+        int nonzero = 0;
+
+        if (power == 0 || d->data.unit != XTRACT_UNIT_ANY)
+            continue;
+
+        for (pass = 0; pass < 2; pass++)
+        {
+            const double input_scale = pass == 0 ? 1.0 : scale;
+            double *result = pass == 0 ? plain : scaled;
+
+            /* A rising series with values on both sides of 0 and no two
+             * steps alike, so that no feature here gives 0 for it. */
+            for (i = 0; i < n; i++)
+                data[i] = input_scale * (0.75 * i + 0.25 * (i % 3) - 3.0);
+            for (i = 0; i < CONF_LONGEST; i++)
+                result[i] = 0.0;
+
+            argv = conf_argv(d, argf, argi, mel, bark, window, cqt, last_n[pass], wavelet_f0);
+            if (d->argv.type == XTRACT_FLOAT)
+            {
+                for (i = 0; i < d->argc && i < XTRACT_MAXARGS; i++)
+                {
+                    if (conf_power(d->argv.unit[i]) > 0)
+                        argf[i] = conf_scale_to_the(conf_power(d->argv.unit[i]), input_scale);
+                }
+            }
+            /* The default weight of 0 gives a variance of 0 for any input. */
+            if (d->id == XTRACT_EWMA_AVERAGE || d->id == XTRACT_EWMA_VARIANCE)
+                argf[0] = 0.5;
+
+            ASSERT_EQ_MSG(conf_call(f, ctx, data, n, argv, result), XTRACT_SUCCESS, d->algo.name);
+        }
+
+        for (i = 0; i < CONF_LONGEST; i++)
+        {
+            nonzero += plain[i] != 0.0;
+            ASSERT_NEAR_MSG(scaled[i], factor * plain[i], 1e-9 * fabs(factor * plain[i]), d->algo.name);
+        }
+        ASSERT_GT_MSG(nonzero, 0, d->algo.name);
+        checked++;
+    }
+    ASSERT_GT(checked, 30);
+
+    xtract_wavelet_f0_state_delete(wavelet_f0);
+    xtract_last_n_state_delete(last_n[1]);
+    xtract_last_n_state_delete(last_n[0]);
     xtract_context_delete(ctx);
     xtract_free_cqt(cqt);
     xtract_free_filterbank(mel);
