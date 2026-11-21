@@ -79,6 +79,16 @@ function(optional out feature json type key default)
     set(${out} "${value}" PARENT_SCOPE)
 endfunction()
 
+# Sets ${out} to the number at the key, which must be a whole number of at
+# least 0, or to the default when the member is absent
+function(optional_count out feature json key default)
+    optional(value "${feature}" "${json}" NUMBER "${key}" "${default}")
+    if(NOT value MATCHES "^[0-9]+$")
+        fail("${feature}" "'${key}' is ${value}, expected a whole number of at least 0")
+    endif()
+    set(${out} "${value}" PARENT_SCOPE)
+endfunction()
+
 # Sets ${out} to a C string literal of the text, which must fit an array of
 # ${size} characters with its terminator
 function(c_string out feature key size text)
@@ -92,6 +102,9 @@ function(c_string out feature key size text)
     string(REPLACE "\\" "\\\\" text "${text}")
     string(REPLACE "\"" "\\\"" text "${text}")
     string(REPLACE "\t" "\\t" text "${text}")
+    # Two question marks and a third character can form a trigraph, which a
+    # C99 compiler replaces inside a string literal
+    string(REPLACE "?" "\\?" text "${text}")
     set(${out} "\"${text}\"" PARENT_SCOPE)
 endfunction()
 
@@ -166,7 +179,7 @@ foreach(i RANGE ${last})
     optional(reference "${name}" "${feature}" OBJECT reference "{}")
     only_keys("${name}" "${reference}" "'reference'" author year)
     optional(author "${name}" "${reference}" STRING author "")
-    optional(year "${name}" "${reference}" NUMBER year 0)
+    optional_count(year "${name}" "${reference}" year 0)
     c_string(author_c "${name}" reference.author ${MAX_AUTHOR_LENGTH} "${author}")
 
     required(input "${name}" "${feature}" OBJECT input)
@@ -181,7 +194,7 @@ foreach(i RANGE ${last})
     if(listed GREATER MAXARGS)
         fail("${name}" "${listed} arguments, and the most is ${MAXARGS}")
     endif()
-    optional(argc "${name}" "${feature}" NUMBER argument_count ${listed})
+    optional_count(argc "${name}" "${feature}" argument_count ${listed})
     if(argc LESS listed)
         fail("${name}" "'argument_count' is ${argc}, fewer than the ${listed} arguments listed")
     endif()

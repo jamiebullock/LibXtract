@@ -76,7 +76,8 @@ with `-DXTRACT_CLANG_FORMAT=<path>` to run the targets with a chosen binary.
   target writes the feature enumeration (`include/xtract/xtract_features.h`)
   and the dispatch and descriptor tables (`src/features.c`) from it. To add
   or change a feature, edit the JSON file, build the target and commit the
-  three files together. `ctest` fails when they disagree.
+  three files together. `ctest` fails when they disagree. A new record goes
+  at the end of the file, so that every other feature keeps its number.
 - Public declarations in `include/xtract/` carry a Doxygen block that states
   the contract: what the caller passes, what comes back, and the rules for
   using it. Leave the implementation out of the block, and match the
