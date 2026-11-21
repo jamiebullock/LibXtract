@@ -135,7 +135,7 @@ UTEST(descriptors, a_variance_is_in_the_square_of_the_unit_it_is_taken_of)
     {
         ASSERT_EQ_MSG(xtract_descriptor(in_hertz[i])->result.scalar.unit, XTRACT_HERTZ_SQUARED, xtract_descriptor(in_hertz[i])->name);
         ASSERT_EQ_MSG(xtract_descriptor(in_hertz[i])->result.scalar.min, 0.0, xtract_descriptor(in_hertz[i])->name);
-        ASSERT_EQ_MSG(xtract_descriptor(in_hertz[i])->result.scalar.max, 48000.0 * 48000.0, xtract_descriptor(in_hertz[i])->name);
+        ASSERT_EQ_MSG(xtract_descriptor(in_hertz[i])->result.scalar.max, XTRACT_UNBOUNDED_MAX, xtract_descriptor(in_hertz[i])->name);
     }
 
     /* A standard deviation is in the unit its variance is the square of. */
@@ -1217,6 +1217,202 @@ UTEST(descriptors, dct_takes_a_table_or_none)
     ASSERT_EQ(d->argv[0].is_optional, XTRACT_TRUE);
     ASSERT_STREQ(d->argv[0].builder->name, "init_dct");
     ASSERT_EQ(xtract_descriptor(XTRACT_WINDOWED)->argv[0].is_optional, XTRACT_FALSE);
+}
+
+/* ===== Data ===== */
+
+UTEST(descriptors, the_data_of_a_feature_accepts_what_vector_features_provide)
+{
+    int f, q, p;
+
+    for (f = 0; f < XTRACT_FEATURES; f++)
+    {
+        const xtract_function_descriptor_t *d = xtract_descriptor(f);
+
+        ASSERT_TRUE_MSG(d->data.frames == 1 || d->data.frames == 2, d->name);
+        ASSERT_EQ_MSG(d->data.accepts == NULL, d->data.accept_count == 0, d->name);
+        if (d->data.format == XTRACT_NO_DATA)
+            ASSERT_EQ_MSG(d->data.accept_count, 0, d->name);
+        for (q = 0; q < d->data.accept_count; q++)
+        {
+            const xtract_quantity_t *quantity = d->data.accepts[q];
+
+            ASSERT_TRUE_MSG(quantity != NULL && quantity->provider_count > 0, d->name);
+            for (p = 0; p < quantity->provider_count; p++)
+            {
+                const xtract_provider_t *provider = &quantity->providers[p];
+                const xtract_function_descriptor_t *feature = xtract_descriptor(provider->feature);
+
+                ASSERT_TRUE_MSG(feature != NULL && feature->is_scalar == XTRACT_FALSE, d->name);
+                ASSERT_TRUE_MSG(provider->setting >= -1 && provider->setting < feature->argc, d->name);
+                if (provider->setting >= 0)
+                {
+                    ASSERT_EQ_MSG(feature->argv[provider->setting].kind, XTRACT_ARGUMENT_SETTING, d->name);
+                    ASSERT_TRUE_MSG(provider->value >= feature->argv[provider->setting].min && provider->value <= feature->argv[provider->setting].max, d->name);
+                }
+            }
+        }
+    }
+}
+
+UTEST(descriptors, a_part_of_a_spectrum_is_a_quantity_of_its_own)
+{
+    const xtract_quantity_t *bins = xtract_descriptor(XTRACT_ROLLOFF)->data.accepts[0];
+    const xtract_quantity_t *magnitude_phase = xtract_descriptor(XTRACT_CQT)->data.accepts[0];
+    const xtract_quantity_t *whole = xtract_descriptor(XTRACT_HPS)->data.accepts[0];
+
+    ASSERT_STREQ(bins->name, "bins");
+    ASSERT_EQ(bins->provider_count, 1);
+    ASSERT_EQ(bins->providers[0].feature, XTRACT_SPECTRUM);
+    ASSERT_EQ(bins->providers[0].part, XTRACT_PART_FIRST_HALF);
+    ASSERT_EQ(bins->providers[0].setting, -1);
+    ASSERT_TRUE(xtract_descriptor(XTRACT_MFCC)->data.accepts[0] == bins);
+
+    ASSERT_STREQ(magnitude_phase->name, "magnitude_phase");
+    ASSERT_EQ(magnitude_phase->providers[0].feature, XTRACT_SPECTRUM);
+    ASSERT_EQ(magnitude_phase->providers[0].part, XTRACT_PART_WHOLE);
+    ASSERT_STREQ(xtract_descriptor(XTRACT_SPECTRUM)->argv[magnitude_phase->providers[0].setting].name, "type");
+    ASSERT_EQ(magnitude_phase->providers[0].value, (double)XTRACT_MAGNITUDE_PHASE_SPECTRUM);
+    ASSERT_TRUE(xtract_descriptor(XTRACT_MMBSES)->data.accepts[0] == magnitude_phase);
+
+    ASSERT_STREQ(whole->name, "spectrum");
+    ASSERT_EQ(whole->provider_count, 1);
+    ASSERT_EQ(whole->providers[0].part, XTRACT_PART_WHOLE);
+}
+
+UTEST(descriptors, coefficients_with_their_frequencies_come_from_four_features)
+{
+    static const int takers[] = {XTRACT_SPECTRAL_MEAN, XTRACT_SPECTRAL_VARIANCE, XTRACT_SPECTRAL_SKEWNESS, XTRACT_SPECTRAL_KURTOSIS,
+                                 XTRACT_SPECTRAL_CENTROID, XTRACT_SPREAD, XTRACT_SPECTRAL_SLOPE};
+    const xtract_quantity_t *quantity = xtract_descriptor(XTRACT_SPECTRAL_MEAN)->data.accepts[0];
+    size_t t;
+
+    ASSERT_STREQ(quantity->name, "coefficients_and_frequencies");
+    ASSERT_EQ(quantity->provider_count, 4);
+    ASSERT_EQ(quantity->providers[0].feature, XTRACT_SPECTRUM);
+    ASSERT_EQ(quantity->providers[1].feature, XTRACT_PEAK_SPECTRUM);
+    ASSERT_EQ(quantity->providers[2].feature, XTRACT_HARMONIC_SPECTRUM);
+    ASSERT_EQ(quantity->providers[3].feature, XTRACT_PACKED);
+    for (t = 0; t < sizeof(takers) / sizeof(takers[0]); t++)
+        ASSERT_TRUE_MSG(xtract_descriptor(takers[t])->data.accepts[0] == quantity, xtract_descriptor(takers[t])->name);
+}
+
+UTEST(descriptors, harmonic_amplitudes_are_the_first_half_of_a_packed_harmonic_spectrum)
+{
+    static const int takers[] = {XTRACT_TRISTIMULUS_1, XTRACT_TRISTIMULUS_2, XTRACT_TRISTIMULUS_3, XTRACT_ODD_EVEN_RATIO};
+    const xtract_quantity_t *harmonics = xtract_descriptor(XTRACT_TRISTIMULUS_1)->data.accepts[0];
+    const xtract_quantity_t *partials = xtract_descriptor(XTRACT_SMOOTHNESS)->data.accepts[0];
+    size_t t;
+
+    ASSERT_STREQ(harmonics->name, "harmonic_amplitudes");
+    ASSERT_EQ(harmonics->providers[0].feature, XTRACT_PACKED);
+    ASSERT_EQ(harmonics->providers[0].part, XTRACT_PART_FIRST_HALF);
+    ASSERT_STREQ(harmonics->providers[0].given->name, "harmonic_spectrum");
+    ASSERT_EQ(harmonics->providers[0].given->providers[0].feature, XTRACT_HARMONIC_SPECTRUM);
+    for (t = 0; t < sizeof(takers) / sizeof(takers[0]); t++)
+        ASSERT_TRUE_MSG(xtract_descriptor(takers[t])->data.accepts[0] == harmonics, xtract_descriptor(takers[t])->name);
+
+    ASSERT_STREQ(partials->name, "partial_amplitudes");
+    ASSERT_EQ(partials->providers[0].feature, XTRACT_PACKED);
+    ASSERT_EQ(partials->providers[0].part, XTRACT_PART_FIRST_HALF);
+    ASSERT_TRUE(partials->providers[0].given == NULL);
+}
+
+UTEST(descriptors, data_that_more_than_one_quantity_can_be_names_the_usual_one_first)
+{
+    const xtract_function_descriptor_t *irregularity = xtract_descriptor(XTRACT_IRREGULARITY_J);
+    const xtract_function_descriptor_t *variances = xtract_descriptor(XTRACT_PRINCIPAL_VARIANCES);
+    const xtract_function_descriptor_t *packed = xtract_descriptor(XTRACT_PACKED);
+    const xtract_quantity_t *autocorrelation = xtract_descriptor(XTRACT_LPC)->data.accepts[0];
+    const xtract_quantity_t *lpc = xtract_descriptor(XTRACT_LPCC)->data.accepts[0];
+
+    ASSERT_EQ(irregularity->data.accept_count, 2);
+    ASSERT_STREQ(irregularity->data.accepts[0]->name, "partial_amplitudes");
+    ASSERT_STREQ(irregularity->data.accepts[1]->name, "bins");
+
+    ASSERT_EQ(variances->data.accept_count, 2);
+    ASSERT_EQ(variances->data.accepts[0]->providers[0].feature, XTRACT_COVARIANCE_MATRIX);
+    ASSERT_EQ(variances->data.accepts[1]->providers[0].feature, XTRACT_CORRELATION_MATRIX);
+
+    ASSERT_EQ(packed->data.accept_count, 2);
+    ASSERT_EQ(packed->data.accepts[0]->providers[0].feature, XTRACT_PEAK_SPECTRUM);
+    ASSERT_EQ(packed->data.accepts[1]->providers[0].feature, XTRACT_HARMONIC_SPECTRUM);
+
+    ASSERT_EQ(autocorrelation->provider_count, 2);
+    ASSERT_EQ(autocorrelation->providers[0].feature, XTRACT_AUTOCORRELATION);
+    ASSERT_EQ(autocorrelation->providers[1].feature, XTRACT_AUTOCORRELATION_FFT);
+
+    ASSERT_EQ(lpc->providers[0].feature, XTRACT_LPC);
+    ASSERT_EQ(lpc->providers[0].part, XTRACT_PART_FROM_ONE_BEFORE_THE_SECOND_HALF);
+}
+
+UTEST(descriptors, five_features_take_two_successive_frames)
+{
+    int f;
+
+    for (f = 0; f < XTRACT_FEATURES; f++)
+    {
+        const xtract_function_descriptor_t *d = xtract_descriptor(f);
+        const int takes_two = f == XTRACT_FLUX || f == XTRACT_DIFFERENCE_VECTOR || f == XTRACT_KULLBACK_LEIBLER_DIVERGENCE ||
+                              f == XTRACT_ITAKURA_SAITO_DIVERGENCE || f == XTRACT_MODIFIED_KULLBACK_LEIBLER;
+
+        ASSERT_EQ_MSG(d->data.frames, takes_two ? 2 : 1, d->name);
+        if (takes_two)
+            ASSERT_STREQ_MSG(d->data.accepts[0]->name, "bins", d->name);
+    }
+}
+
+UTEST(descriptors, only_the_levels_of_quantise_become_a_property_of_its_result)
+{
+    int f, i;
+
+    for (f = 0; f < XTRACT_FEATURES; f++)
+    {
+        const xtract_function_descriptor_t *d = xtract_descriptor(f);
+
+        for (i = 0; i < d->argc; i++)
+            ASSERT_EQ_MSG(d->argv[i].result_property, f == XTRACT_QUANTISE && i == 2 ? XTRACT_PROPERTY_LEVELS : XTRACT_PROPERTY_NONE, d->name);
+    }
+    ASSERT_EQ(xtract_descriptor(XTRACT_HISTOGRAM)->argv[0].data_property, XTRACT_PROPERTY_LEVELS);
+    ASSERT_EQ(xtract_descriptor(XTRACT_HISTOGRAM)->data.accepts[0]->providers[0].feature, XTRACT_QUANTISE);
+    ASSERT_EQ(xtract_descriptor(XTRACT_COOCCURRENCE_MATRIX)->data.accepts[0]->providers[0].feature, XTRACT_QUANTISE);
+}
+
+UTEST(descriptors, the_features_that_model_hearing_or_a_musical_scale_are_tagged_as_sound)
+{
+    static const int sound[] = {XTRACT_BARK_COEFFICIENTS, XTRACT_LOUDNESS, XTRACT_SHARPNESS, XTRACT_MFCC, XTRACT_MEL_SPECTROGRAM,
+                                XTRACT_GFCC, XTRACT_GAMMATONE_SPECTROGRAM, XTRACT_MMBSES, XTRACT_SPECTRAL_SUBBAND_CENTROIDS,
+                                XTRACT_CHROMA, XTRACT_MIDICENT};
+    size_t s;
+    int f;
+
+    for (f = 0; f < XTRACT_FEATURES; f++)
+    {
+        unsigned int expected = 0;
+
+        for (s = 0; s < sizeof(sound) / sizeof(sound[0]); s++)
+        {
+            if (sound[s] == f)
+                expected = XTRACT_TAG_SOUND;
+        }
+        ASSERT_EQ_MSG(xtract_descriptor(f)->tags, expected, xtract_descriptor(f)->name);
+    }
+}
+
+UTEST(descriptors, a_result_in_hertz_has_no_upper_bound)
+{
+    static const int in_hertz[] = {XTRACT_SPECTRAL_MEAN, XTRACT_SPECTRAL_STANDARD_DEVIATION, XTRACT_SPECTRAL_CENTROID, XTRACT_ROLLOFF,
+                                   XTRACT_HPS, XTRACT_F0, XTRACT_FAILSAFE_F0, XTRACT_WAVELET_F0, XTRACT_MCLEOD_F0};
+    size_t i;
+
+    for (i = 0; i < sizeof(in_hertz) / sizeof(in_hertz[0]); i++)
+    {
+        const xtract_function_descriptor_t *d = xtract_descriptor(in_hertz[i]);
+
+        ASSERT_EQ_MSG(d->result.scalar.unit, XTRACT_HERTZ, d->name);
+        ASSERT_EQ_MSG(d->result.scalar.min, 0.0, d->name);
+        ASSERT_EQ_MSG(d->result.scalar.max, XTRACT_UNBOUNDED_MAX, d->name);
+    }
 }
 
 /* ===== Descriptor conformance ===== */

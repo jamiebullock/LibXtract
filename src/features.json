@@ -1,6 +1,12 @@
 {
   "quantities": [
-    {"name": "fundamental", "default": "failsafe_f0"}
+    {"name": "fundamental", "default": "failsafe_f0"},
+    {"name": "bins", "default": "spectrum"},
+    {"name": "magnitude_phase", "default": "spectrum"},
+    {"name": "coefficients_and_frequencies", "default": "spectrum"},
+    {"name": "partial_amplitudes", "default": "packed"},
+    {"name": "harmonic_amplitudes", "default": "packed"},
+    {"name": "lpc_coefficients", "default": "lpc"}
   ],
   "builders": [
     {
@@ -148,20 +154,20 @@
       "name": "spectral_mean",
       "title": "Spectral Mean",
       "description": "Extract the mean of an input spectrum",
-      "input": {"format": "spectral", "unit": "any_amplitude_hertz"},
+      "input": {"format": "spectral", "unit": "any_amplitude_hertz", "accepts": ["coefficients_and_frequencies"]},
       "arguments": [],
-      "result": {"kind": "scalar", "unit": "hertz", "min": 0, "max": 96000}
+      "result": {"kind": "scalar", "unit": "hertz", "min": 0}
     },
     {
       "name": "spectral_variance",
       "title": "Spectral Variance",
       "description": "Extract the variance of an input spectrum",
-      "input": {"format": "spectral", "unit": "any_amplitude_hertz"},
+      "input": {"format": "spectral", "unit": "any_amplitude_hertz", "accepts": ["coefficients_and_frequencies"]},
       "argument_type": "float",
       "arguments": [
         {"name": "mean", "kind": "result", "accepts": "spectral_mean", "of": "input", "unit": "hertz"}
       ],
-      "result": {"kind": "scalar", "unit": "hertz_squared", "min": 0, "max": 2304000000}
+      "result": {"kind": "scalar", "unit": "hertz_squared", "min": 0}
     },
     {
       "name": "spectral_standard_deviation",
@@ -172,13 +178,13 @@
       "arguments": [
         {"name": "variance", "kind": "result", "accepts": "spectral_variance", "unit": "hertz_squared", "min": 0}
       ],
-      "result": {"kind": "scalar", "unit": "hertz", "min": 0, "max": 96000}
+      "result": {"kind": "scalar", "unit": "hertz", "min": 0}
     },
     {
       "name": "spectral_skewness",
       "title": "Spectral Skewness",
       "description": "Extract the skewness of an input spectrum",
-      "input": {"format": "spectral", "unit": "any_amplitude_hertz"},
+      "input": {"format": "spectral", "unit": "any_amplitude_hertz", "accepts": ["coefficients_and_frequencies"]},
       "argument_type": "float",
       "arguments": [
         {"name": "mean", "kind": "result", "accepts": "spectral_mean", "of": "input", "unit": "hertz"},
@@ -190,7 +196,7 @@
       "name": "spectral_kurtosis",
       "title": "Spectral Kurtosis",
       "description": "Extract the kurtosis of an input spectrum",
-      "input": {"format": "spectral", "unit": "any_amplitude_hertz"},
+      "input": {"format": "spectral", "unit": "any_amplitude_hertz", "accepts": ["coefficients_and_frequencies"]},
       "argument_type": "float",
       "arguments": [
         {"name": "mean", "kind": "result", "accepts": "spectral_mean", "of": "input", "unit": "hertz"},
@@ -203,9 +209,9 @@
       "title": "Spectral Centroid",
       "description": "Extract the spectral centroid of a spectrum",
       "provides": ["spectral_mean"],
-      "input": {"format": "spectral", "unit": "any_amplitude_hertz"},
+      "input": {"format": "spectral", "unit": "any_amplitude_hertz", "accepts": ["coefficients_and_frequencies"]},
       "arguments": [],
-      "result": {"kind": "scalar", "unit": "hertz", "min": 0, "max": 96000}
+      "result": {"kind": "scalar", "unit": "hertz", "min": 0}
     },
     {
       "name": "irregularity_k",
@@ -224,7 +230,7 @@
       "title": "Irregularity II",
       "description": "Extract the irregularity (type II) of a spectrum",
       "reference": {"author": "Jensen", "year": 1999},
-      "input": {"format": "spectral_magnitudes", "unit": "any"},
+      "input": {"format": "spectral_magnitudes", "unit": "any", "accepts": ["partial_amplitudes", "bins"]},
       "arguments": [],
       "result": {"kind": "scalar", "unit": "none", "min": 0}
     },
@@ -233,7 +239,7 @@
       "title": "Tristimulus I",
       "description": "Extract the tristimulus (type I) of a spectrum",
       "reference": {"author": "Pollard and Jansson", "year": 1982},
-      "input": {"format": "spectral_harmonics_magnitudes", "unit": "any"},
+      "input": {"format": "spectral_harmonics_magnitudes", "unit": "any", "accepts": ["harmonic_amplitudes"]},
       "arguments": [],
       "result": {"kind": "scalar", "unit": "none", "min": 0, "max": 1}
     },
@@ -242,7 +248,7 @@
       "title": "Tristimulus II",
       "description": "Extract the tristimulus (type II) of a spectrum",
       "reference": {"author": "Pollard and Jansson", "year": 1982},
-      "input": {"format": "spectral_harmonics_magnitudes", "unit": "any"},
+      "input": {"format": "spectral_harmonics_magnitudes", "unit": "any", "accepts": ["harmonic_amplitudes"]},
       "arguments": [],
       "result": {"kind": "scalar", "unit": "none", "min": 0, "max": 1}
     },
@@ -251,7 +257,7 @@
       "title": "Tristimulus III",
       "description": "Extract the tristimulus (type III) of a spectrum",
       "reference": {"author": "Pollard and Jansson", "year": 1982},
-      "input": {"format": "spectral_harmonics_magnitudes", "unit": "any"},
+      "input": {"format": "spectral_harmonics_magnitudes", "unit": "any", "accepts": ["harmonic_amplitudes"]},
       "arguments": [],
       "result": {"kind": "scalar", "unit": "none", "min": 0, "max": 1}
     },
@@ -260,7 +266,7 @@
       "title": "Spectral Smoothness",
       "description": "Extract the spectral smoothness of a spectrum",
       "reference": {"author": "McAdams", "year": 1999},
-      "input": {"format": "spectral_magnitudes", "unit": "any"},
+      "input": {"format": "spectral_magnitudes", "unit": "any", "accepts": ["partial_amplitudes"]},
       "arguments": [],
       "result": {"kind": "scalar", "unit": "decibels", "min": 0}
     },
@@ -270,12 +276,12 @@
       "description": "Extract the spectral spread of a spectrum",
       "reference": {"author": "Norman Casagrande", "year": 2005},
       "provides": ["spectral_variance"],
-      "input": {"format": "spectral", "unit": "any"},
+      "input": {"format": "spectral", "unit": "any", "accepts": ["coefficients_and_frequencies"]},
       "argument_type": "float",
       "arguments": [
         {"name": "mean", "kind": "result", "accepts": "spectral_mean", "of": "input", "unit": "hertz"}
       ],
-      "result": {"kind": "scalar", "unit": "hertz_squared", "min": 0, "max": 2304000000}
+      "result": {"kind": "scalar", "unit": "hertz_squared", "min": 0}
     },
     {
       "name": "zcr",
@@ -290,20 +296,21 @@
       "title": "Spectral Rolloff",
       "description": "Extract the rolloff point of a spectrum",
       "reference": {"author": "Bee Suan Ong", "year": 2005},
-      "input": {"format": "spectral_magnitudes", "unit": "any"},
+      "input": {"format": "spectral_magnitudes", "unit": "any", "accepts": ["bins"]},
       "argument_type": "float",
       "arguments": [
         {"name": "bin_spacing", "kind": "property", "property": "bin_spacing", "unit": "hertz", "min": 0},
         {"name": "threshold", "kind": "setting", "unit": "percent", "min": 0, "max": 100, "default": 95}
       ],
-      "result": {"kind": "scalar", "unit": "hertz", "min": 0, "max": 96000}
+      "result": {"kind": "scalar", "unit": "hertz", "min": 0}
     },
     {
       "name": "loudness",
       "title": "Loudness",
       "description": "Extract the loudness of a signal from its spectrum",
       "reference": {"author": "Moore, Glasberg et al", "year": 2005},
-      "input": {"format": "bark_coeffs", "unit": "any"},
+      "tags": ["sound"],
+      "input": {"format": "bark_coeffs", "unit": "any", "accepts": ["bark_coefficients"]},
       "arguments": [],
       "result": {"kind": "scalar", "unit": "sone", "min": 0}
     },
@@ -312,7 +319,7 @@
       "title": "Spectral Flatness",
       "description": "Extract the spectral flatness of a spectrum",
       "reference": {"author": "Tristan Jehan", "year": 2005},
-      "input": {"format": "spectral_magnitudes", "unit": "any"},
+      "input": {"format": "spectral_magnitudes", "unit": "any", "accepts": ["bins", "subbands"]},
       "arguments": [],
       "result": {"kind": "scalar", "unit": "none", "min": 0, "max": 1}
     },
@@ -358,7 +365,7 @@
       "title": "Noisiness",
       "description": "Extract the noisiness of a peak spectrum",
       "reference": {"author": "Tae Hong Park", "year": 2000},
-      "input": {"format": "spectral_peaks", "unit": "any_amplitude_hertz"},
+      "input": {"format": "spectral_peaks", "unit": "any_amplitude_hertz", "accepts": ["peak_spectrum"]},
       "argument_type": "float",
       "arguments": [
         {"name": "fundamental", "kind": "result", "accepts": "fundamental", "of": "source", "unit": "hertz", "min": 0},
@@ -378,7 +385,7 @@
       "name": "spectral_inharmonicity",
       "title": "Inharmonicity",
       "description": "Extract the inharmonicity of a spectrum",
-      "input": {"format": "spectral_peaks", "unit": "any_amplitude_hertz"},
+      "input": {"format": "spectral_peaks", "unit": "any_amplitude_hertz", "accepts": ["peak_spectrum"]},
       "argument_type": "float",
       "arguments": [
         {"name": "fundamental", "kind": "result", "accepts": "fundamental", "of": "source", "unit": "hertz", "min": 0}
@@ -389,7 +396,7 @@
       "name": "odd_even_ratio",
       "title": "Odd/even Harmonic Ratio",
       "description": "Extract the odd-to-even harmonic ratio of a spectrum",
-      "input": {"format": "spectral_harmonics_magnitudes", "unit": "any"},
+      "input": {"format": "spectral_harmonics_magnitudes", "unit": "any", "accepts": ["harmonic_amplitudes"]},
       "arguments": [],
       "result": {"kind": "scalar", "unit": "none", "min": 0}
     },
@@ -398,7 +405,8 @@
       "title": "Spectral Sharpness",
       "description": "Extract the spectral sharpness of a spectrum",
       "reference": {"author": "von Bismarck", "year": 1974},
-      "input": {"format": "bark_coeffs", "unit": "any"},
+      "tags": ["sound"],
+      "input": {"format": "bark_coeffs", "unit": "any", "accepts": ["bark_coefficients"]},
       "arguments": [],
       "result": {"kind": "scalar", "unit": "acum", "min": 0}
     },
@@ -406,7 +414,7 @@
       "name": "spectral_slope",
       "title": "Spectral Slope",
       "description": "Extract the spectral slope of a spectrum",
-      "input": {"format": "spectral", "unit": "any_amplitude_hertz"},
+      "input": {"format": "spectral", "unit": "any_amplitude_hertz", "accepts": ["coefficients_and_frequencies"]},
       "arguments": [],
       "result": {"kind": "scalar", "unit": "per_hertz"}
     },
@@ -441,7 +449,7 @@
       "name": "nonzero_count",
       "title": "Non-zero count",
       "description": "Extract the number of non-zero elements in the input vector",
-      "input": {"format": "spectral_peaks_magnitudes", "unit": "any"},
+      "input": {"format": "arbitrary_series", "unit": "any"},
       "arguments": [],
       "result": {"kind": "scalar", "unit": "none"}
     },
@@ -450,12 +458,12 @@
       "title": "Harmonic Product Spectrum",
       "description": "Extract the harmonic product spectrum of a spectrum",
       "provides": ["fundamental"],
-      "input": {"format": "spectral", "unit": "any"},
+      "input": {"format": "spectral", "unit": "any", "accepts": ["spectrum"]},
       "argument_type": "float",
       "arguments": [
         {"name": "harmonics", "kind": "setting", "unit": "none", "min": 2, "max": 16, "default": 3, "whole": true}
       ],
-      "result": {"kind": "scalar", "unit": "hertz", "min": 0, "max": 96000}
+      "result": {"kind": "scalar", "unit": "hertz", "min": 0}
     },
     {
       "name": "f0",
@@ -468,7 +476,7 @@
       "arguments": [
         {"name": "sample_rate", "kind": "property", "property": "sample_rate", "unit": "hertz", "min": 2.2250738585072014e-308}
       ],
-      "result": {"kind": "scalar", "unit": "hertz", "min": 0, "max": 96000}
+      "result": {"kind": "scalar", "unit": "hertz", "min": 0}
     },
     {
       "name": "failsafe_f0",
@@ -481,7 +489,7 @@
       "arguments": [
         {"name": "sample_rate", "kind": "property", "property": "sample_rate", "unit": "hertz", "min": 2.2250738585072014e-308}
       ],
-      "result": {"kind": "scalar", "unit": "hertz", "min": 0, "max": 96000}
+      "result": {"kind": "scalar", "unit": "hertz", "min": 0}
     },
     {
       "name": "wavelet_f0",
@@ -493,7 +501,7 @@
       "arguments": [
         {"name": "state", "kind": "object", "built_by": "wavelet_f0_state_new"}
       ],
-      "result": {"kind": "scalar", "unit": "hertz", "min": 0, "max": 96000}
+      "result": {"kind": "scalar", "unit": "hertz", "min": 0}
     },
     {
       "name": "mcleod_f0",
@@ -506,13 +514,14 @@
       "arguments": [
         {"name": "sample_rate", "kind": "property", "property": "sample_rate", "unit": "hertz", "min": 2.2250738585072014e-308}
       ],
-      "result": {"kind": "scalar", "unit": "hertz", "min": 0, "max": 96000}
+      "result": {"kind": "scalar", "unit": "hertz", "min": 0}
     },
     {
       "name": "midicent",
       "title": "Frequency to MIDI Cent conversion",
       "description": "Convert frequency in Hertz to Pitch in MIDI cents",
       "reference": {"author": "Jamie Bullock"},
+      "tags": ["sound"],
       "input": {"format": "no_data", "unit": "none"},
       "argument_type": "float",
       "arguments": [
@@ -524,7 +533,7 @@
       "name": "lnorm",
       "title": "L-norm",
       "description": "Extract the L-norm of a vector",
-      "input": {"format": "audio_samples", "unit": "any"},
+      "input": {"format": "arbitrary_series", "unit": "any", "accepts": ["difference_vector"]},
       "argument_type": "float",
       "arguments": [
         {"name": "order", "kind": "setting", "unit": "none", "default": 2},
@@ -538,7 +547,7 @@
       "name": "flux",
       "title": "Spectral Flux",
       "description": "Extract the spectral flux of a spectrum",
-      "input": {"format": "subframes", "unit": "any"},
+      "input": {"format": "subframes", "unit": "any", "accepts": ["bins"], "frames": 2},
       "argument_type": "float",
       "arguments": [
         {"name": "order", "kind": "setting", "unit": "none", "default": 2},
@@ -577,7 +586,7 @@
       "name": "difference_vector",
       "title": "Difference vector",
       "description": "Extract the difference between two vectors",
-      "input": {"format": "subframes", "unit": "any"},
+      "input": {"format": "subframes", "unit": "any", "accepts": ["bins"], "frames": 2},
       "arguments": [],
       "delta": true,
       "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any"}
@@ -610,7 +619,8 @@
       "name": "bark_coefficients",
       "title": "Bark Coefficients",
       "description": "Extract bark coefficients from a spectrum",
-      "input": {"format": "spectral_magnitudes", "unit": "any"},
+      "tags": ["sound"],
+      "input": {"format": "spectral_magnitudes", "unit": "any", "accepts": ["bins"]},
       "arguments": [
         {"name": "band_limits", "kind": "object", "built_by": "init_bark"}
       ],
@@ -620,7 +630,8 @@
       "name": "peak_spectrum",
       "title": "Peak Spectrum",
       "description": "Extract the spectral peaks from of a spectrum",
-      "input": {"format": "spectral_magnitudes", "unit": "any"},
+      "provides": ["coefficients_and_frequencies"],
+      "input": {"format": "spectral_magnitudes", "unit": "any", "accepts": ["bins"]},
       "argument_type": "float",
       "arguments": [
         {"name": "bin_spacing", "kind": "property", "property": "bin_spacing", "unit": "hertz", "min": 2.2250738585072014e-308},
@@ -632,6 +643,11 @@
       "name": "spectrum",
       "title": "Spectrum",
       "description": "Extract the spectrum of an input vector",
+      "provides": [
+        {"quantity": "bins", "part": "first_half"},
+        {"quantity": "magnitude_phase", "when": {"argument": "type", "value": "magnitude_phase"}},
+        "coefficients_and_frequencies"
+      ],
       "input": {"format": "audio_samples", "unit": "any"},
       "argument_type": "float",
       "arguments": [
@@ -645,6 +661,7 @@
       "name": "autocorrelation_fft",
       "title": "Autocorrelation (FFT method)",
       "description": "Extract the autocorrelation of a signal (fft method)",
+      "provides": ["autocorrelation"],
       "input": {"format": "audio_samples", "unit": "any"},
       "arguments": [],
       "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any_squared"}
@@ -654,7 +671,8 @@
       "title": "Mel-Frequency Cepstral Coefficients",
       "description": "Extract MFCC from a spectrum",
       "reference": {"author": "Rabiner"},
-      "input": {"format": "spectral_magnitudes", "unit": "any"},
+      "tags": ["sound"],
+      "input": {"format": "spectral_magnitudes", "unit": "any", "accepts": ["bins"]},
       "arguments": [
         {"name": "filterbank", "kind": "object", "built_by": "init_mfcc"}
       ],
@@ -674,7 +692,8 @@
       "name": "harmonic_spectrum",
       "title": "Harmonic Spectrum",
       "description": "Extract the harmonics from a spectrum",
-      "input": {"format": "spectral", "unit": "any_amplitude_hertz"},
+      "provides": ["coefficients_and_frequencies"],
+      "input": {"format": "spectral", "unit": "any_amplitude_hertz", "accepts": ["spectrum"]},
       "argument_type": "float",
       "arguments": [
         {"name": "fundamental", "kind": "result", "accepts": "fundamental", "of": "source", "unit": "hertz", "min": 0},
@@ -687,7 +706,10 @@
       "title": "Linear predictive coding coefficients",
       "description": "Extract LPC from autocorrelation coefficients",
       "reference": {"author": "Rabiner and Juang as implemented by Jutta Degener", "year": 1994},
-      "input": {"format": "autocorrelation_coeffs", "unit": "any"},
+      "provides": [
+        {"quantity": "lpc_coefficients", "part": "from_one_before_the_second_half"}
+      ],
+      "input": {"format": "autocorrelation_coeffs", "unit": "any", "accepts": ["autocorrelation"]},
       "arguments": [],
       "result": {"kind": "vector", "format": "lpc_coeffs", "unit": "none"}
     },
@@ -696,7 +718,7 @@
       "title": "Linear predictive coding cepstral coefficients",
       "description": "Extract LPC cepstrum from LPC coefficients",
       "reference": {"author": "Rabiner and Juang", "year": 1993},
-      "input": {"format": "lpc_coeffs", "unit": "any"},
+      "input": {"format": "lpc_coeffs", "unit": "any", "accepts": ["lpc_coefficients"]},
       "argument_type": "int",
       "arguments": [
         {"name": "order", "kind": "setting", "unit": "none", "min": 1, "default": 12}
@@ -707,7 +729,7 @@
       "name": "subbands",
       "title": "Sub band coefficients",
       "description": "Extract subband coefficients from spectral magnitudes",
-      "input": {"format": "spectral_magnitudes", "unit": "any"},
+      "input": {"format": "spectral_magnitudes", "unit": "any", "accepts": ["bins"]},
       "argument_type": "int",
       "arguments": [
         {"name": "feature", "kind": "setting", "unit": "none", "default": 0, "values": {"features": ["mean", "irregularity_j", "smoothness", "zcr", "loudness", "flatness", "rms_amplitude", "sharpness", "highest_value", "sum", "nonzero_count"]}},
@@ -721,7 +743,8 @@
       "name": "mel_spectrogram",
       "title": "Mel Spectrogram",
       "description": "Extract log mel energies from a spectrum",
-      "input": {"format": "spectral_magnitudes", "unit": "any"},
+      "tags": ["sound"],
+      "input": {"format": "spectral_magnitudes", "unit": "any", "accepts": ["bins"]},
       "arguments": [
         {"name": "filterbank", "kind": "object", "built_by": "init_mfcc"}
       ],
@@ -731,7 +754,8 @@
       "name": "gfcc",
       "title": "Gammatone Frequency Cepstral Coefficients",
       "description": "Extract GFCC from a spectrum",
-      "input": {"format": "spectral_magnitudes", "unit": "any"},
+      "tags": ["sound"],
+      "input": {"format": "spectral_magnitudes", "unit": "any", "accepts": ["bins"]},
       "arguments": [
         {"name": "filterbank", "kind": "object", "built_by": "init_gfcc"}
       ],
@@ -741,7 +765,8 @@
       "name": "gammatone_spectrogram",
       "title": "Gammatone Spectrogram",
       "description": "Extract log gammatone energies from a spectrum",
-      "input": {"format": "spectral_magnitudes", "unit": "any"},
+      "tags": ["sound"],
+      "input": {"format": "spectral_magnitudes", "unit": "any", "accepts": ["bins"]},
       "arguments": [
         {"name": "filterbank", "kind": "object", "built_by": "init_gfcc"}
       ],
@@ -772,7 +797,7 @@
       "name": "peak",
       "title": "Peak",
       "description": "Report whether the last value of a series is a peak",
-      "input": {"format": "arbitrary_series", "unit": "any"},
+      "input": {"format": "arbitrary_series", "unit": "any", "accepts": ["last_n"]},
       "argument_type": "float",
       "arguments": [
         {"name": "threshold", "kind": "setting", "unit": "any", "default": 0}
@@ -784,7 +809,8 @@
       "title": "Mel Multi-Band Spectral Entropy Signature",
       "description": "Extract mel band spectral entropies from a magnitude/phase spectrum",
       "reference": {"author": "Rincon et al.", "year": 2013},
-      "input": {"format": "spectral_magnitude_phase", "unit": "any"},
+      "tags": ["sound"],
+      "input": {"format": "spectral_magnitude_phase", "unit": "any", "accepts": ["magnitude_phase"]},
       "arguments": [
         {"name": "filterbank", "kind": "object", "built_by": "init_mfcc"}
       ],
@@ -794,7 +820,8 @@
       "name": "spectral_subband_centroids",
       "title": "Spectral Subband Centroids",
       "description": "Extract the centroid of each mel band from a spectrum",
-      "input": {"format": "spectral", "unit": "any_amplitude_hertz"},
+      "tags": ["sound"],
+      "input": {"format": "spectral", "unit": "any_amplitude_hertz", "accepts": ["spectrum"]},
       "arguments": [
         {"name": "filterbank", "kind": "object", "built_by": "init_mfcc"}
       ],
@@ -949,7 +976,7 @@
       "name": "spectral_entropy",
       "title": "Spectral Entropy",
       "description": "Extract the normalised Shannon entropy of a spectrum",
-      "input": {"format": "spectral_magnitudes", "unit": "any"},
+      "input": {"format": "spectral_magnitudes", "unit": "any", "accepts": ["bins"]},
       "arguments": [],
       "result": {"kind": "scalar", "unit": "none", "min": 0, "max": 1}
     },
@@ -1120,7 +1147,7 @@
       "title": "Kullback-Leibler Divergence",
       "description": "Extract the Kullback-Leibler divergence between two spectral frames",
       "reference": {"author": "Solomon Kullback and Richard Leibler", "year": 1951},
-      "input": {"format": "subframes", "unit": "any"},
+      "input": {"format": "subframes", "unit": "any", "accepts": ["bins"], "frames": 2},
       "arguments": [],
       "delta": true,
       "result": {"kind": "scalar", "unit": "none", "min": 0}
@@ -1130,7 +1157,7 @@
       "title": "Itakura-Saito Divergence",
       "description": "Extract the Itakura-Saito divergence between two spectral frames",
       "reference": {"author": "Fumitada Itakura and Shuzo Saito", "year": 1968},
-      "input": {"format": "subframes", "unit": "any"},
+      "input": {"format": "subframes", "unit": "any", "accepts": ["bins"], "frames": 2},
       "arguments": [],
       "delta": true,
       "result": {"kind": "scalar", "unit": "none", "min": 0}
@@ -1140,7 +1167,7 @@
       "title": "Modified Kullback-Leibler",
       "description": "Extract the modified Kullback-Leibler onset function between two spectral frames",
       "reference": {"author": "Stephen Hainsworth and Malcolm Macleod", "year": 2003},
-      "input": {"format": "subframes", "unit": "any"},
+      "input": {"format": "subframes", "unit": "any", "accepts": ["bins"], "frames": 2},
       "argument_type": "float",
       "arguments": [
         {"name": "offset", "kind": "setting", "unit": "any", "min": 0, "default": 1e-06}
@@ -1153,7 +1180,7 @@
       "title": "Spectral Contrast",
       "description": "Extract the spectral contrast of a spectrum",
       "reference": {"author": "Dan-Ning Jiang, Lie Lu, Hong-Jiang Zhang, Jian-Hua Tao and Lian-Hong Cai", "year": 2002},
-      "input": {"format": "spectral", "unit": "any_amplitude_hertz"},
+      "input": {"format": "spectral", "unit": "any_amplitude_hertz", "accepts": ["spectrum"]},
       "argument_type": "float",
       "arguments": [
         {"name": "bands", "kind": "setting", "unit": "none", "min": 1, "default": 6, "whole": true},
@@ -1167,7 +1194,8 @@
       "title": "Chroma",
       "description": "Extract the chroma of a spectrum",
       "reference": {"author": "Takuya Fujishima", "year": 1999},
-      "input": {"format": "spectral", "unit": "any_amplitude_hertz"},
+      "tags": ["sound"],
+      "input": {"format": "spectral", "unit": "any_amplitude_hertz", "accepts": ["spectrum"]},
       "argument_type": "float",
       "arguments": [
         {"name": "tuning", "kind": "setting", "unit": "hertz", "min": 2.2250738585072014e-308, "default": 440},
@@ -1181,7 +1209,7 @@
       "title": "Constant-Q Transform",
       "description": "Extract the constant-Q spectrum of a magnitude/phase spectrum",
       "reference": {"author": "Judith C. Brown and Miller S. Puckette", "year": 1992},
-      "input": {"format": "spectral_magnitude_phase", "unit": "any"},
+      "input": {"format": "spectral_magnitude_phase", "unit": "any", "accepts": ["magnitude_phase"]},
       "arguments": [
         {"name": "kernel", "kind": "object", "built_by": "init_cqt"}
       ],
@@ -1210,7 +1238,7 @@
       "name": "correlation_matrix",
       "title": "Correlation Matrix",
       "description": "Extract the correlation matrix of a set of series from their covariance matrix",
-      "input": {"format": "square_matrix", "unit": "any"},
+      "input": {"format": "square_matrix", "unit": "any", "accepts": ["covariance_matrix"]},
       "arguments": [],
       "result": {"kind": "vector", "format": "square_matrix", "unit": "none"}
     },
@@ -1218,7 +1246,7 @@
       "name": "average_correlation",
       "title": "Average Correlation",
       "description": "Extract the average correlation of a set of series from their correlation matrix",
-      "input": {"format": "square_matrix", "unit": "any"},
+      "input": {"format": "square_matrix", "unit": "any", "accepts": ["correlation_matrix"]},
       "arguments": [],
       "result": {"kind": "scalar", "unit": "none", "min": -1, "max": 1}
     },
@@ -1226,7 +1254,7 @@
       "name": "principal_variances",
       "title": "Principal Variances",
       "description": "Extract the variances of the principal components of a set of series from their covariance matrix",
-      "input": {"format": "square_matrix", "unit": "any"},
+      "input": {"format": "square_matrix", "unit": "any", "accepts": ["covariance_matrix", "correlation_matrix"]},
       "arguments": [],
       "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any"}
     },
@@ -1267,7 +1295,7 @@
       "name": "normalised_moments",
       "title": "Normalised Moments",
       "description": "Extract the normalised moments of a grid from its central moments",
-      "input": {"format": "central_moment_coeffs", "unit": "any"},
+      "input": {"format": "central_moment_coeffs", "unit": "any", "accepts": ["grid_central_moments"]},
       "arguments": [],
       "result": {"kind": "vector", "format": "normalised_moment_coeffs", "unit": "none"}
     },
@@ -1276,7 +1304,7 @@
       "title": "Hu Moments",
       "description": "Extract the seven Hu moments of a grid from its normalised moments",
       "reference": {"author": "Ming-Kuei Hu", "year": 1962},
-      "input": {"format": "normalised_moment_coeffs", "unit": "any"},
+      "input": {"format": "normalised_moment_coeffs", "unit": "any", "accepts": ["normalised_moments"]},
       "arguments": [],
       "result": {"kind": "vector", "format": "arbitrary_series", "unit": "none"}
     },
@@ -1289,7 +1317,7 @@
       "arguments": [
         {"name": "lower", "kind": "result", "accepts": "lowest_value", "of": "input", "unit": "any"},
         {"name": "upper", "kind": "result", "accepts": "highest_value", "of": "input", "unit": "any"},
-        {"name": "levels", "kind": "setting", "unit": "none", "min": 1, "max": 2147483647, "default": 256, "whole": true}
+        {"name": "levels", "kind": "setting", "unit": "none", "min": 1, "max": 2147483647, "default": 256, "whole": true, "sets": "levels"}
       ],
       "result": {"kind": "vector", "format": "arbitrary_series", "unit": "none"}
     },
@@ -1297,7 +1325,7 @@
       "name": "histogram",
       "title": "Histogram",
       "description": "Extract the fraction of the elements of an input vector at each level",
-      "input": {"format": "arbitrary_series", "unit": "none"},
+      "input": {"format": "arbitrary_series", "unit": "none", "accepts": ["quantise"]},
       "argument_type": "int",
       "arguments": [
         {"name": "levels", "kind": "property", "property": "levels", "unit": "none", "min": 1}
@@ -1309,7 +1337,7 @@
       "title": "Co-occurrence Matrix",
       "description": "Extract the co-occurrence matrix of the levels of a grid at an offset",
       "reference": {"author": "Robert Haralick", "year": 1973},
-      "input": {"format": "grid", "unit": "none"},
+      "input": {"format": "grid", "unit": "none", "accepts": ["quantise"]},
       "argument_type": "int",
       "arguments": [
         {"name": "width", "kind": "property", "property": "width", "unit": "none", "min": 1},
@@ -1325,7 +1353,7 @@
       "title": "Co-occurrence Contrast",
       "description": "Extract the contrast of a co-occurrence matrix",
       "reference": {"author": "Robert Haralick", "year": 1973},
-      "input": {"format": "square_matrix", "unit": "none"},
+      "input": {"format": "square_matrix", "unit": "none", "accepts": ["cooccurrence_matrix"]},
       "arguments": [],
       "result": {"kind": "scalar", "unit": "none", "min": 0}
     },
@@ -1334,7 +1362,7 @@
       "title": "Co-occurrence Correlation",
       "description": "Extract the correlation of a co-occurrence matrix",
       "reference": {"author": "Robert Haralick", "year": 1973},
-      "input": {"format": "square_matrix", "unit": "none"},
+      "input": {"format": "square_matrix", "unit": "none", "accepts": ["cooccurrence_matrix"]},
       "arguments": [],
       "result": {"kind": "scalar", "unit": "none", "min": -1, "max": 1}
     },
@@ -1343,7 +1371,7 @@
       "title": "Angular Second Moment",
       "description": "Extract the angular second moment of a co-occurrence matrix",
       "reference": {"author": "Robert Haralick", "year": 1973},
-      "input": {"format": "square_matrix", "unit": "none"},
+      "input": {"format": "square_matrix", "unit": "none", "accepts": ["cooccurrence_matrix"]},
       "arguments": [],
       "result": {"kind": "scalar", "unit": "none", "min": 0, "max": 1}
     },
@@ -1352,7 +1380,7 @@
       "title": "Inverse Difference Moment",
       "description": "Extract the inverse difference moment of a co-occurrence matrix",
       "reference": {"author": "Robert Haralick", "year": 1973},
-      "input": {"format": "square_matrix", "unit": "none"},
+      "input": {"format": "square_matrix", "unit": "none", "accepts": ["cooccurrence_matrix"]},
       "arguments": [],
       "result": {"kind": "scalar", "unit": "none", "min": 0, "max": 1}
     },
@@ -1382,7 +1410,12 @@
       "name": "packed",
       "title": "Packed Spectrum",
       "description": "Extract the elements of a spectrum that have an amplitude other than 0",
-      "input": {"format": "spectral_peaks", "unit": "any_amplitude_hertz"},
+      "provides": [
+        "coefficients_and_frequencies",
+        {"quantity": "partial_amplitudes", "part": "first_half"},
+        {"quantity": "harmonic_amplitudes", "part": "first_half", "given": "harmonic_spectrum"}
+      ],
+      "input": {"format": "spectral_peaks", "unit": "any_amplitude_hertz", "accepts": ["peak_spectrum", "harmonic_spectrum"]},
       "arguments": [],
       "result": {"kind": "vector", "format": "spectral_peaks", "unit": "any_amplitude_hertz"}
     }
