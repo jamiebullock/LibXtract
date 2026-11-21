@@ -111,6 +111,17 @@ public class test {
         data.delete();
         lastN.delete();
 
+        System.out.println("Reading a descriptor...");
+
+        int feature = xtract.xtract_feature_by_name("spectral_centroid");
+        xtract_function_descriptor_t descriptor = xtract.xtract_descriptor(feature);
+        if (feature != xtract_features_.XTRACT_SPECTRAL_CENTROID.swigValue()
+                || !descriptor.getName().equals("spectral_centroid")) {
+            System.out.println("The spectral centroid is not found by its name");
+            System.exit(1);
+        }
+        System.out.printf("%s: %s%n", descriptor.getTitle(), descriptor.getDescription());
+
         System.out.println("\nFinished!\n");
 
         a.delete();

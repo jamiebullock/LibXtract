@@ -144,4 +144,13 @@ print('last_n after two values: %.1f, %.1f' % (result[N - 2], result[N - 1]))
 
 xtract.xtract_last_n_state_delete(state)
 
+print('Reading a descriptor...')
+
+feature = xtract.xtract_feature_by_name('spectral_centroid')
+descriptor = xtract.xtract_descriptor(feature)
+if feature != xtract.XTRACT_SPECTRAL_CENTROID or descriptor.name != 'spectral_centroid':
+    print('The spectral centroid is not found by its name')
+    sys.exit(1)
+print('%s: %s' % (descriptor.title, descriptor.description))
+
 print('\nFinished!\n')

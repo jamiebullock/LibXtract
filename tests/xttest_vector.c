@@ -3316,20 +3316,18 @@ UTEST(vector, subbands_accepts_only_features_that_reduce_a_plain_vector_to_one_s
     static const int rejected[] = {
         XTRACT_VARIANCE, XTRACT_IRREGULARITY_K, XTRACT_SPECTRAL_CENTROID, XTRACT_SPECTRAL_SLOPE,
         XTRACT_SPECTRUM, XTRACT_DIFFERENCE_VECTOR, XTRACT_SUBBANDS};
-    xtract_function_descriptor_t *fd = xtract_make_descriptors();
     double data[8] = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
     double result[2] = {-1.0, -1.0};
     int argv[4] = {XTRACT_MEAN, 2, XTRACT_LINEAR_SUBBANDS, 0};
     size_t i;
 
-    ASSERT_TRUE(fd != NULL);
     for (i = 0; i < sizeof(allowed) / sizeof(allowed[0]); i++)
     {
         argv[0] = allowed[i];
-        ASSERT_EQ(fd[allowed[i]].argc, 0);
-        ASSERT_EQ(fd[allowed[i]].is_scalar, XTRACT_TRUE);
-        ASSERT_NE(fd[allowed[i]].data.format, XTRACT_SPECTRAL);
-        ASSERT_NE(fd[allowed[i]].data.format, XTRACT_NO_DATA);
+        ASSERT_EQ(xtract_descriptor(allowed[i])->argc, 0);
+        ASSERT_EQ(xtract_descriptor(allowed[i])->is_scalar, XTRACT_TRUE);
+        ASSERT_NE(xtract_descriptor(allowed[i])->data.format, XTRACT_SPECTRAL);
+        ASSERT_NE(xtract_descriptor(allowed[i])->data.format, XTRACT_NO_DATA);
         ASSERT_EQ(xtract_subbands(NULL, data, 8, argv, result), XTRACT_SUCCESS);
     }
     for (i = 0; i < sizeof(rejected) / sizeof(rejected[0]); i++)
@@ -3339,7 +3337,6 @@ UTEST(vector, subbands_accepts_only_features_that_reduce_a_plain_vector_to_one_s
         ASSERT_EQ(xtract_subbands(NULL, data, 8, argv, result), XTRACT_ARGUMENT_ERROR);
         ASSERT_EQ(result[0], -1.0);
     }
-    ASSERT_EQ(xtract_free_descriptors(fd), XTRACT_SUCCESS);
 }
 
 UTEST(vector, spectrum_and_peak_spectrum_reject_a_bin_spacing_that_is_not_finite_and_above_zero)

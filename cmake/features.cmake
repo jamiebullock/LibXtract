@@ -27,9 +27,6 @@ set(FORMATS spectral spectral_magnitudes spectral_peaks spectral_peaks_magnitude
 set(ARGUMENT_TYPES float floatarray int filterbank cqt_kernel last_n_state wavelet_f0_state)
 set(BUILDERS init_mfcc init_bark init_windowed init_gfcc init_cqt)
 set(MAXARGS 5)
-set(MAX_NAME_LENGTH 64)
-set(MAX_AUTHOR_LENGTH 128)
-set(MAX_DESC_LENGTH 256)
 
 function(fail feature message)
     message(FATAL_ERROR "${data_file}: feature '${feature}': ${message}")
@@ -89,19 +86,16 @@ function(optional_count out feature json key default)
     set(${out} "${value}" PARENT_SCOPE)
 endfunction()
 
-# Sets ${out} to a C string literal of the text, which must fit an array of
-# ${size} characters with its terminator
-function(c_string out feature key size text)
-    string(LENGTH "${text}" length)
-    if(NOT length LESS size)
-        fail("${feature}" "'${key}' has ${length} characters, and the most is ${size} less 1")
+# Sets ${out} to a C string literal of the text
+function(c_string out feature key text)
+    if(text STREQUAL "")
+        fail("${feature}" "'${key}' is empty")
     endif()
-    if(NOT text MATCHES "^[\t -~]*$")
+    if(NOT text MATCHES "^[ -~]*$")
         fail("${feature}" "'${key}' has a character that is not printable ASCII")
     endif()
     string(REPLACE "\\" "\\\\" text "${text}")
     string(REPLACE "\"" "\\\"" text "${text}")
-    string(REPLACE "\t" "\\t" text "${text}")
     # Two question marks and a third character can form a trigraph, which a
     # C99 compiler replaces inside a string literal
     string(REPLACE "?" "\\?" text "${text}")
@@ -163,24 +157,29 @@ foreach(i RANGE ${last})
     string(JSON feature GET "${doc}" features ${i})
     string(JSON name GET "${feature}" name)
     only_keys("${name}" "${feature}" "the feature"
-        name title description pretty_description reference input argument_type argument_count arguments delta result)
+        name title description reference input argument_type argument_count arguments delta result)
     string(TOUPPER "XTRACT_${name}" id)
     string(APPEND enumeration "        ${id},\n")
     string(APPEND dispatch "        xtract_${name},\n")
 
     required(title "${name}" "${feature}" STRING title)
     required(description "${name}" "${feature}" STRING description)
-    required(pretty_description "${name}" "${feature}" STRING pretty_description)
-    c_string(name_c "${name}" name ${MAX_NAME_LENGTH} "${name}")
-    c_string(title_c "${name}" title ${MAX_NAME_LENGTH} "${title}")
-    c_string(description_c "${name}" description ${MAX_DESC_LENGTH} "${description}")
-    c_string(pretty_description_c "${name}" pretty_description ${MAX_DESC_LENGTH} "${pretty_description}")
+    c_string(name_c "${name}" name "${name}")
+    c_string(title_c "${name}" title "${title}")
+    c_string(description_c "${name}" description "${description}")
 
     optional(reference "${name}" "${feature}" OBJECT reference "{}")
     only_keys("${name}" "${reference}" "'reference'" author year)
     optional(author "${name}" "${reference}" STRING author "")
     optional_count(year "${name}" "${reference}" year 0)
-    c_string(author_c "${name}" reference.author ${MAX_AUTHOR_LENGTH} "${author}")
+    if(author STREQUAL "")
+        if(NOT reference STREQUAL "{}")
+            fail("${name}" "'reference' has no author")
+        endif()
+        set(author_c NULL)
+    else()
+        c_string(author_c "${name}" reference.author "${author}")
+    endif()
 
     required(input "${name}" "${feature}" OBJECT input)
     only_keys("${name}" "${input}" "'input'" format unit)
@@ -276,7 +275,11 @@ foreach(i RANGE ${last})
     string(APPEND table
         "    [${id}] = {\n"
         "        .id = ${id},\n"
-        "        .algo = {${name_c}, ${title_c}, ${description_c}, ${pretty_description_c}, ${author_c}, ${year}},\n"
+        "        .name = ${name_c},\n"
+        "        .title = ${title_c},\n"
+        "        .description = ${description_c},\n"
+        "        .author = ${author_c},\n"
+        "        .year = ${year},\n"
         "        .data = {${input_format}, ${input_unit}},\n"
         "        .argc = ${argc},\n"
         "        .argv = {${argument_type}, {${minima}}, {${maxima}}, {${defaults}}, {${units}}, {${donors}}},\n"
@@ -302,7 +305,8 @@ string(CONCAT header_text
 string(CONCAT source_text
     "${licence}\n"
     "/* The dispatch table and the descriptor table, ${notice} */\n\n"
-    "#include \"xtract/libxtract.h\"\n"
+    "#include <stddef.h>\n\n"
+    "#include \"xtract/libxtract.h\"\n\n"
     "#include \"xtract_descriptors_private.h\"\n\n"
     "int (*xtract[])(xtract_context *, const double *, const int, const void *, double *) =\n    {\n"
     "${dispatch}"

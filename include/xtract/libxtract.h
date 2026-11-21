@@ -235,20 +235,20 @@ extern "C"
         XTRACT_NORMALISED_MOMENT_COEFFS
     } xtract_vector_t;
 
-    /** \brief Data structure containing useful information about functions provided by LibXtract. */
-    typedef struct _xtract_function_descriptor
+    /** \brief What the library records about one feature, as xtract_descriptor() gives it */
+    typedef struct xtract_function_descriptor_
     {
-        int id;
+        int id; /* the feature, as given in the enumeration xtract_features_ */
 
-        struct
-        {
-            char name[XTRACT_MAX_NAME_LENGTH];
-            char p_name[XTRACT_MAX_NAME_LENGTH]; /* pretty name */
-            char desc[XTRACT_MAX_DESC_LENGTH];
-            char p_desc[XTRACT_MAX_DESC_LENGTH]; /* pretty description */
-            char author[XTRACT_MAX_AUTHOR_LENGTH];
-            int year;
-        } algo;
+        /* the name of the feature's function without the xtract_ prefix, e.g.
+         * "spectral_centroid". A feature keeps its name in every release,
+         * and its number in the enumeration may change, so a stored
+         * reference to a feature is its name */
+        const char *name;
+        const char *title; /* a name to show to a person, e.g. "Spectral Centroid" */
+        const char *description;
+        const char *author; /* the author of the method, or NULL */
+        int year;           /* the year the method was published, or 0 */
 
         struct
         {
@@ -443,11 +443,19 @@ extern "C"
      */
     void xtract_free_cqt(xtract_cqt_kernel *kernel);
 
-    /* \brief A function to build an array of function descriptors */
-    xtract_function_descriptor_t *xtract_make_descriptors(void);
+    /** \brief Get what the library records about a feature
+     *
+     * \param feature: a feature, as given in the enumeration xtract_features_
+     * \return a pointer to the descriptor of the feature, which belongs to the library and never changes, or NULL if feature is not in the enumeration
+     */
+    const xtract_function_descriptor_t *xtract_descriptor(const int feature);
 
-    /* \brief A function to free an array of function descriptors */
-    int xtract_free_descriptors(xtract_function_descriptor_t *fd);
+    /** \brief Find a feature by its name
+     *
+     * \param *name: the name of a feature as its descriptor gives it, e.g. "spectral_centroid"
+     * \return the feature, as given in the enumeration xtract_features_, or -1 if name is NULL or no feature has that name
+     */
+    int xtract_feature_by_name(const char *name);
     /* Free functions */
 
     /** @} */

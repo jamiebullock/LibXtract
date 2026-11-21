@@ -4,30 +4,31 @@
  * SPDX-License-Identifier: Zlib
  */
 
-#include <stdlib.h>
 #include <string.h>
 
 #include "xtract/libxtract.h"
 
 #include "xtract_descriptors_private.h"
 
-xtract_function_descriptor_t *xtract_make_descriptors(void)
+const xtract_function_descriptor_t *xtract_descriptor(const int feature)
 {
-    xtract_function_descriptor_t *fd = (xtract_function_descriptor_t *)malloc(sizeof(xtract_descriptor_table));
-
-    if (fd == NULL)
+    if (feature < 0 || feature >= XTRACT_FEATURES)
         return NULL;
-    memcpy(fd, xtract_descriptor_table, sizeof(xtract_descriptor_table));
 
-    return fd;
+    return &xtract_descriptor_table[feature];
 }
 
-int xtract_free_descriptors(xtract_function_descriptor_t *fd)
+int xtract_feature_by_name(const char *name)
 {
-    if (fd != NULL)
+    int feature;
+
+    if (name == NULL)
+        return -1;
+    for (feature = 0; feature < XTRACT_FEATURES; feature++)
     {
-        free(fd);
+        if (strcmp(name, xtract_descriptor_table[feature].name) == 0)
+            return feature;
     }
 
-    return XTRACT_SUCCESS;
+    return -1;
 }
