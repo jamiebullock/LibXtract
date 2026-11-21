@@ -72,6 +72,11 @@ with `-DXTRACT_CLANG_FORMAT=<path>` to run the targets with a chosen binary.
 - Feature functions share the signature
   `int xtract_foo(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)`
   and return an `XTRACT_` status code.
+- `src/features.json` holds one record for each feature. The `features`
+  target writes the feature enumeration (`include/xtract/xtract_features.h`)
+  and the dispatch and descriptor tables (`src/features.c`) from it. To add
+  or change a feature, edit the JSON file, build the target and commit the
+  three files together. `ctest` fails when they disagree.
 - Public declarations in `include/xtract/` carry a Doxygen block that states
   the contract: what the caller passes, what comes back, and the rules for
   using it. Leave the implementation out of the block, and match the

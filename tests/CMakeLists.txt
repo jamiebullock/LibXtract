@@ -49,6 +49,11 @@ add_test(NAME version_check
         -DSCRIPT=${PROJECT_SOURCE_DIR}/cmake/version.cmake
         -DWORK=${CMAKE_CURRENT_BINARY_DIR}/version_check
         -P ${CMAKE_CURRENT_SOURCE_DIR}/version_check.cmake)
+add_test(NAME features_are_generated
+    COMMAND ${CMAKE_COMMAND}
+        -DCHECK=ON
+        -DWORK=${CMAKE_CURRENT_BINARY_DIR}/features_check
+        -P ${PROJECT_SOURCE_DIR}/cmake/features.cmake)
 
 if(XTRACT_COVERAGE)
     set(XTRACT_LCOV_IGNORE --ignore-errors unused,inconsistent,format,empty,gcov,unsupported)

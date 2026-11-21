@@ -5,6 +5,6 @@ excludePaths:
   - .*/src/c-ringbuf/.*
   - .*/src/dywapitchtrack/.*
   - .*/src/descriptors\.c
-  - .*/src/libxtract\.c
+  - .*/src/features\.c
   - .*/tests/.*
   - /usr/.*

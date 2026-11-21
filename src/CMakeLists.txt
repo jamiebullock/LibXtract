@@ -7,10 +7,10 @@ set(XTRACT_SOURCES
     context.c
     delta.c
     descriptors.c
+    features.c
     grid.c
     helper.c
     init.c
-    libxtract.c
     multivariate.c
     scalar.c
     sort.c
