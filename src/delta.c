@@ -61,10 +61,9 @@ int xtract_lnorm(xtract_context *ctx, const double *data, const int N, const voi
 {
     int n,
         type,
-        normalise,
         k = 0;
 
-    double order;
+    double order, filter, normalise;
 
     if (N < 1 || argv == NULL)
     {
@@ -72,10 +71,18 @@ int xtract_lnorm(xtract_context *ctx, const double *data, const int N, const voi
         return XTRACT_ARGUMENT_ERROR;
     }
 
-    order = *(double *)argv;
-    type = xtract_argv_int(*((double *)argv + 1));
-    normalise = xtract_argv_int(*((double *)argv + 2));
+    order = ((const double *)argv)[0];
+    filter = ((const double *)argv)[1];
+    normalise = ((const double *)argv)[2];
 
+    if (!(filter == XTRACT_NO_LNORM_FILTER || filter == XTRACT_POSITIVE_SLOPE || filter == XTRACT_NEGATIVE_SLOPE) ||
+        !(normalise == 0.0 || normalise == 1.0))
+    {
+        *result = 0.0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
+
+    type = (int)filter;
     order = order > 0 ? order : 2.0;
 
     *result = 0.0;
@@ -127,7 +134,7 @@ int xtract_lnorm(xtract_context *ctx, const double *data, const int N, const voi
         return XTRACT_NO_RESULT;
     }
 
-    if (normalise == 1)
+    if (normalise == 1.0)
     {
         *result = log(1 + *result);
     }

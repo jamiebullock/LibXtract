@@ -298,21 +298,45 @@ UTEST(delta, lnorm_positive_slope_filter_with_nothing_positive_is_no_result)
     ASSERT_EQ(xtract_lnorm(NULL, data, 3, argv, &result), XTRACT_NO_RESULT);
 }
 
-UTEST(delta, lnorm_out_of_range_argv)
+UTEST(delta, lnorm_and_flux_refuse_a_filter_or_a_flag_they_do_not_define)
 {
-    /* type/normalise are decoded from doubles; out-of-range or NaN values must
-     * not invoke undefined double->int conversion (regression for a fuzzer
-     * find). They fall back to the default filter / no normalisation, so the
-     * L2 norm of {1,-2,3,-4} = sqrt(30) is computed regardless. */
+    static const double undefined_filters[] = {-1.0, 0.5, 3.0, 1e308, NAN};
+    static const double undefined_flags[] = {-1.0, 0.5, 2.0, -1e308, NAN};
     double data[] = {1.0, -2.0, 3.0, -4.0};
-    double argv_nan[3] = {2.0, NAN, NAN};
-    double argv_huge[3] = {2.0, 1e308, -1e308};
-    double result = -1.0;
+    double argv[3];
+    double result;
+    size_t i;
 
-    ASSERT_EQ(xtract_lnorm(NULL, data, 4, argv_nan, &result), XTRACT_SUCCESS);
-    CHECK_REL(result, sqrt(30.0), 1e-10);
-    ASSERT_EQ(xtract_lnorm(NULL, data, 4, argv_huge, &result), XTRACT_SUCCESS);
-    CHECK_REL(result, sqrt(30.0), 1e-10);
+    for (i = 0; i < sizeof(undefined_filters) / sizeof(undefined_filters[0]); i++)
+    {
+        argv[0] = 2.0;
+        argv[1] = undefined_filters[i];
+        argv[2] = 0.0;
+        result = -1.0;
+        ASSERT_EQ(xtract_lnorm(NULL, data, 4, argv, &result), XTRACT_ARGUMENT_ERROR);
+        ASSERT_EQ(result, 0.0);
+        result = -1.0;
+        ASSERT_EQ(xtract_flux(xttest_context(), data, 4, argv, &result), XTRACT_ARGUMENT_ERROR);
+        ASSERT_EQ(result, 0.0);
+    }
+    for (i = 0; i < sizeof(undefined_flags) / sizeof(undefined_flags[0]); i++)
+    {
+        argv[0] = 2.0;
+        argv[1] = XTRACT_NO_LNORM_FILTER;
+        argv[2] = undefined_flags[i];
+        result = -1.0;
+        ASSERT_EQ(xtract_lnorm(NULL, data, 4, argv, &result), XTRACT_ARGUMENT_ERROR);
+        ASSERT_EQ(result, 0.0);
+        result = -1.0;
+        ASSERT_EQ(xtract_flux(xttest_context(), data, 4, argv, &result), XTRACT_ARGUMENT_ERROR);
+        ASSERT_EQ(result, 0.0);
+    }
+
+    /* Each filter and each flag they define is taken */
+    argv[0] = 2.0;
+    argv[2] = 1.0;
+    for (argv[1] = XTRACT_NO_LNORM_FILTER; argv[1] <= XTRACT_NEGATIVE_SLOPE; argv[1] += 1.0)
+        ASSERT_EQ(xtract_lnorm(NULL, data, 4, argv, &result), XTRACT_SUCCESS);
 }
 
 UTEST(delta, delta_features_reject_a_short_or_odd_input_and_a_null_argv)
