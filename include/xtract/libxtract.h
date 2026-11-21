@@ -248,10 +248,13 @@ extern "C"
         XTRACT_PROPERTY_LEVELS          /* the number of levels the elements were quantised to */
     } xtract_property_t;
 
-    /** \brief Enumeration of the data a result that a feature takes as an argument is the result of */
+    /** \brief Enumeration of the data a result that a feature takes as an argument is the result of
+     *
+     * When a feature is called to give such a result, the data that result is to be of is the data of each XTRACT_SUBJECT_ANY argument the feature has in turn: the variance that xtract_standard_deviation() takes is the variance of the data the standard deviation is wanted of.
+     */
     typedef enum xtract_subject_
     {
-        XTRACT_SUBJECT_ANY,   /* data of the caller's choice, the same for each such argument of one feature */
+        XTRACT_SUBJECT_ANY,   /* the data the caller wants the feature's own result to be of, the same for each such argument of one feature */
         XTRACT_SUBJECT_INPUT, /* the data the feature itself is given */
         XTRACT_SUBJECT_SOURCE /* the data the feature's input was made from, e.g. the signal behind a spectrum */
     } xtract_subject_t;
@@ -309,7 +312,7 @@ extern "C"
         double default_value;      /**< the value to use when the caller has none of its own */
         xtract_bool_t is_whole;    /**< only whole numbers are values */
         int value_count;           /**< the number of values that have names, or 0 */
-        const char *const *values; /**< the name of each value from min to max, or NULL */
+        const char *const *values; /**< the name of each value from min to max, with NULL for a value in that range that the feature does not take; or NULL when no value has a name */
     } xtract_argument_descriptor_t;
 
     /** \brief What the library records about one feature, as xtract_descriptor() gives it */

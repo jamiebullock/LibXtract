@@ -957,6 +957,12 @@ UTEST(dispatch, slots_map_to_the_expected_function)
 
 /* ===== Arguments ===== */
 
+/* The size of the arrays the tests keep the parameters of a builder in */
+enum
+{
+    MOST_PARAMETERS = 16
+};
+
 UTEST(descriptors, an_argument_is_described_according_to_its_kind)
 {
     int f, i, j;
@@ -1010,7 +1016,7 @@ UTEST(descriptors, an_argument_is_described_according_to_its_kind)
                     ASSERT_EQ_MSG(a->is_whole, XTRACT_TRUE, d->name);
                 if (a->value_count > 0)
                 {
-                    ASSERT_TRUE_MSG(a->values != NULL, d->name);
+                    ASSERT_TRUE_MSG(a->values != NULL && a->values[(int)a->default_value] != NULL, d->name);
                     ASSERT_EQ_MSG(a->min, 0.0, d->name);
                     ASSERT_EQ_MSG(a->max, a->value_count - 1.0, d->name);
                 }
@@ -1061,7 +1067,7 @@ UTEST(descriptors, a_named_value_of_a_setting_is_the_value_of_its_enumerator)
     ASSERT_EQ(feature->value_count, XTRACT_FEATURES);
     ASSERT_EQ(feature->max, XTRACT_FEATURES - 1.0);
     ASSERT_STREQ(feature->values[XTRACT_SUM], "sum");
-    ASSERT_STREQ(feature->values[XTRACT_PACKED], "packed");
+    ASSERT_TRUE(feature->values[XTRACT_PACKED] == NULL);
 
     ASSERT_STREQ(window->argv[1].name, "type");
     ASSERT_EQ(window->argv[1].value_count, 9);
@@ -1074,6 +1080,30 @@ UTEST(descriptors, a_named_value_of_a_setting_is_the_value_of_its_enumerator)
     ASSERT_STREQ(mel->argv[2].name, "style");
     ASSERT_STREQ(mel->argv[2].values[XTRACT_EQUAL_GAIN], "equal_gain");
     ASSERT_STREQ(mel->argv[2].values[XTRACT_EQUAL_AREA], "equal_area");
+}
+
+UTEST(descriptors, subbands_takes_the_features_its_descriptor_names_and_no_other)
+{
+    const xtract_argument_descriptor_t *feature = &xtract_descriptor(XTRACT_SUBBANDS)->argv[0];
+    const double data[8] = {1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0};
+    double result[2];
+    int argv[4] = {0, 2, XTRACT_LINEAR_SUBBANDS, 0};
+    int f, named = 0;
+
+    for (f = 0; f < XTRACT_FEATURES; f++)
+    {
+        const int rv = (argv[0] = f, xtract_subbands(NULL, data, 8, argv, result));
+
+        named += feature->values[f] != NULL;
+        if (feature->values[f] != NULL)
+        {
+            ASSERT_STREQ_MSG(feature->values[f], xtract_descriptor(f)->name, xtract_descriptor(f)->name);
+            ASSERT_NE_MSG(rv, XTRACT_ARGUMENT_ERROR, xtract_descriptor(f)->name);
+        }
+        else
+            ASSERT_EQ_MSG(rv, XTRACT_ARGUMENT_ERROR, xtract_descriptor(f)->name);
+    }
+    ASSERT_EQ(named, 11);
 }
 
 UTEST(descriptors, a_fundamental_comes_from_any_pitch_feature_and_first_from_the_one_that_always_answers)
@@ -1144,7 +1174,7 @@ UTEST(descriptors, a_builder_gives_what_its_function_gives)
 UTEST(descriptors, a_builder_refuses_values_its_function_cannot_take)
 {
     static const int built_for[] = {XTRACT_MFCC, XTRACT_GFCC, XTRACT_BARK_COEFFICIENTS, XTRACT_WINDOWED, XTRACT_DCT, XTRACT_CQT, XTRACT_LAST_N, XTRACT_WAVELET_F0};
-    double parameters[XTRACT_MAXARGS + 1];
+    double parameters[MOST_PARAMETERS];
     size_t b;
     int i;
 
@@ -1152,6 +1182,7 @@ UTEST(descriptors, a_builder_refuses_values_its_function_cannot_take)
     {
         const xtract_builder_descriptor_t *builder = xtract_descriptor(built_for[b])->argv[0].builder;
 
+        ASSERT_TRUE_MSG(builder->argc <= MOST_PARAMETERS, builder->name);
         ASSERT_TRUE_MSG(builder->build(NULL) == NULL, builder->name);
         for (i = 0; i < builder->argc; i++)
             parameters[i] = NAN;
@@ -1276,6 +1307,10 @@ static int conf_call_n(const xtract_function_descriptor_t *d)
     switch (d->id)
     {
     case XTRACT_WINDOWED:
+    /* the standard deviation these take is that of the data, and the
+     * variance it comes from needs two elements */
+    case XTRACT_SKEWNESS:
+    case XTRACT_KURTOSIS:
         return 2;
     case XTRACT_SUBBANDS:
         return 8;
@@ -1302,6 +1337,13 @@ static int conf_null_argv_allowed(const xtract_function_descriptor_t *d)
     return d->argc == 0 || d->argv[0].is_optional;
 }
 
+/* A value in the range of an argument is one the feature takes unless the
+ * values have names and this one has none */
+static int conf_is_taken(const xtract_argument_descriptor_t *argument, double value)
+{
+    return argument->values == NULL || argument->values[(int)(value - argument->min)] != NULL;
+}
+
 static int conf_takes_values(const xtract_function_descriptor_t *d)
 {
     return d->argc > 0 && d->argv[0].kind != XTRACT_ARGUMENT_OBJECT;
@@ -1313,7 +1355,7 @@ static int conf_bounds_checkable(const xtract_function_descriptor_t *d, int i)
      * named values as the first of them */
     if ((d->id == XTRACT_LNORM || d->id == XTRACT_FLUX) && i > 0)
         return 0;
-    return !(d->id == XTRACT_SUBBANDS && i == 0) && !(d->id == XTRACT_COOCCURRENCE_MATRIX && i == 1);
+    return !(d->id == XTRACT_COOCCURRENCE_MATRIX && i == 1);
 }
 
 static void conf_fill_data(const xtract_function_descriptor_t *d, double *data, int n)
@@ -1382,7 +1424,7 @@ static void conf_set(const xtract_function_descriptor_t *d, conf_arguments *a, i
         a->f[i] = v;
 }
 
-static void conf_arguments_make(const xtract_function_descriptor_t *d, xtract_context *ctx, const double *data, int N, conf_arguments *a);
+static void conf_arguments_make(const xtract_function_descriptor_t *d, xtract_context *ctx, const double *data, int N, int of, conf_arguments *a);
 
 static void conf_arguments_free(conf_arguments *a)
 {
@@ -1391,10 +1433,13 @@ static void conf_arguments_free(conf_arguments *a)
 }
 
 /* The result of a feature that another takes as an argument: of the data
- * given, or of data made for the feature when none is given. */
+ * given, or of data made for the feature when none is given. A result of
+ * the data given has that data for each argument of its own that is a
+ * result of the caller's choice of data. */
 static double conf_result_of(int feature, xtract_context *ctx, const double *data, int N, int *failures)
 {
     const xtract_function_descriptor_t *d = xtract_descriptor(feature);
+    const int of = data != NULL;
     double *own = NULL;
     conf_arguments a;
     double result = 0.0;
@@ -1407,7 +1452,7 @@ static double conf_result_of(int feature, xtract_context *ctx, const double *dat
         conf_fill_data(d, own, N);
         data = own;
     }
-    conf_arguments_make(d, ctx, data, N, &a);
+    conf_arguments_make(d, ctx, data, N, of, &a);
     rv = conf_call(feature, ctx, data, N, a.argv, &result);
     *failures += a.failures + (rv == XTRACT_ARGUMENT_ERROR || rv == XTRACT_BAD_STATE);
     conf_arguments_free(&a);
@@ -1417,12 +1462,12 @@ static double conf_result_of(int feature, xtract_context *ctx, const double *dat
 }
 
 static double conf_value(const xtract_function_descriptor_t *d, const xtract_argument_descriptor_t *argument,
-                         xtract_context *ctx, const double *data, int N, int *failures)
+                         xtract_context *ctx, const double *data, int N, int of, int *failures)
 {
     switch (argument->kind)
     {
     case XTRACT_ARGUMENT_RESULT:
-        if (argument->subject == XTRACT_SUBJECT_INPUT)
+        if (argument->subject == XTRACT_SUBJECT_INPUT || (argument->subject == XTRACT_SUBJECT_ANY && of))
             return conf_result_of(argument->accepts->providers[0].feature, ctx, data, N, failures);
         return conf_result_of(argument->accepts->providers[0].feature, ctx, NULL, 0, failures);
     case XTRACT_ARGUMENT_PROPERTY:
@@ -1432,9 +1477,9 @@ static double conf_value(const xtract_function_descriptor_t *d, const xtract_arg
     }
 }
 
-static void conf_arguments_make(const xtract_function_descriptor_t *d, xtract_context *ctx, const double *data, int N, conf_arguments *a)
+static void conf_arguments_make(const xtract_function_descriptor_t *d, xtract_context *ctx, const double *data, int N, int of, conf_arguments *a)
 {
-    double parameters[XTRACT_MAXARGS + 1];
+    double parameters[MOST_PARAMETERS];
     int i;
 
     a->object = NULL;
@@ -1446,15 +1491,21 @@ static void conf_arguments_make(const xtract_function_descriptor_t *d, xtract_co
     if (d->argv[0].kind == XTRACT_ARGUMENT_OBJECT)
     {
         a->builder = d->argv[0].builder;
+        if (a->builder->argc > MOST_PARAMETERS)
+        {
+            a->builder = NULL;
+            a->failures++;
+            return;
+        }
         for (i = 0; i < a->builder->argc; i++)
-            parameters[i] = conf_value(d, &a->builder->argv[i], ctx, data, N, &a->failures);
+            parameters[i] = conf_value(d, &a->builder->argv[i], ctx, data, N, of, &a->failures);
         a->object = a->builder->build(parameters);
         a->failures += a->object == NULL;
         a->argv = a->object;
         return;
     }
     for (i = 0; i < d->argc; i++)
-        conf_set(d, a, i, conf_value(d, &d->argv[i], ctx, data, N, &a->failures));
+        conf_set(d, a, i, conf_value(d, &d->argv[i], ctx, data, N, of, &a->failures));
     a->argv = d->argv[0].type == XTRACT_INT ? (const void *)a->i : (const void *)a->f;
 }
 
@@ -1475,7 +1526,7 @@ UTEST(descriptors, every_feature_conforms_to_its_descriptor)
         const int call_n = conf_call_n(d);
 
         conf_fill_data(d, data, call_n);
-        conf_arguments_make(d, ctx, data, call_n, &a);
+        conf_arguments_make(d, ctx, data, call_n, 0, &a);
         ASSERT_EQ_MSG(a.failures, 0, d->name);
 
         rv = conf_call(f, ctx, data, call_n, a.argv, result);
@@ -1519,14 +1570,16 @@ UTEST(descriptors, every_feature_conforms_to_its_descriptor)
                 conf_set(d, &a, i, argument->min - 1.0);
                 ASSERT_EQ_MSG(conf_call(f, ctx, data, call_n, a.argv, result), XTRACT_ARGUMENT_ERROR, d->name);
                 conf_set(d, &a, i, argument->min);
-                ASSERT_NE_MSG(conf_call(f, ctx, data, call_n, a.argv, result), XTRACT_ARGUMENT_ERROR, d->name);
+                if (conf_is_taken(argument, argument->min))
+                    ASSERT_NE_MSG(conf_call(f, ctx, data, call_n, a.argv, result), XTRACT_ARGUMENT_ERROR, d->name);
             }
             if (argument->max != XTRACT_UNBOUNDED_MAX)
             {
                 conf_set(d, &a, i, argument->max + 1.0);
                 ASSERT_EQ_MSG(conf_call(f, ctx, data, call_n, a.argv, result), XTRACT_ARGUMENT_ERROR, d->name);
                 conf_set(d, &a, i, argument->max);
-                ASSERT_NE_MSG(conf_call(f, ctx, data, call_n, a.argv, result), XTRACT_ARGUMENT_ERROR, d->name);
+                if (conf_is_taken(argument, argument->max))
+                    ASSERT_NE_MSG(conf_call(f, ctx, data, call_n, a.argv, result), XTRACT_ARGUMENT_ERROR, d->name);
             }
             conf_set(d, &a, i, value);
         }
@@ -1610,7 +1663,7 @@ UTEST(descriptors, a_result_scales_with_its_input_by_the_power_its_unit_states)
 
             /* A state is built for each call, so that neither call sees the
              * other's input. */
-            conf_arguments_make(d, ctx, data, n, &a);
+            conf_arguments_make(d, ctx, data, n, 0, &a);
             ASSERT_EQ_MSG(a.failures, 0, d->name);
             /* An argument in the unit of the data scales with the data. One
              * that is a result of the data given already has. */

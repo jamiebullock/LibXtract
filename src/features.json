@@ -710,7 +710,7 @@
       "input": {"format": "spectral_magnitudes", "unit": "any"},
       "argument_type": "int",
       "arguments": [
-        {"name": "feature", "kind": "setting", "unit": "none", "default": 0, "values": "features"},
+        {"name": "feature", "kind": "setting", "unit": "none", "default": 0, "values": {"features": ["mean", "irregularity_j", "smoothness", "zcr", "loudness", "flatness", "rms_amplitude", "sharpness", "highest_value", "sum", "nonzero_count"]}},
         {"name": "bands", "kind": "setting", "unit": "none", "min": 1, "default": 4},
         {"name": "scale", "kind": "setting", "unit": "none", "default": 1, "values": ["octave", "linear"]},
         {"name": "start", "kind": "setting", "unit": "bins", "min": 0, "default": 1}
