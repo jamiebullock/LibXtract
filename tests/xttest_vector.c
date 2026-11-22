@@ -2946,6 +2946,50 @@ UTEST(vector, spectra_from_a_complex_spectrum_refuse_an_odd_or_short_one_and_a_m
     }
 }
 
+UTEST(log, gives_the_logarithm_of_one_plus_lambda_times_each_element)
+{
+    const double data[4] = {0.0, 1.0, 0.5, 100.0};
+    const double lambda = 2.0;
+    double result[4];
+    int n;
+
+    ASSERT_EQ(xtract_log(NULL, data, 4, &lambda, result), XTRACT_SUCCESS);
+    for (n = 0; n < 4; n++)
+        CHECK_REL(result[n], log(1.0 + lambda * data[n]), EPSILON);
+    ASSERT_EQ(result[0], 0.0);
+}
+
+UTEST(log, stays_finite_where_lambda_times_an_element_overflows)
+{
+    const double data[2] = {2.0, 1e300};
+    const double lambda = DBL_MAX;
+    double result[2];
+
+    ASSERT_EQ(xtract_log(NULL, data, 2, &lambda, result), XTRACT_SUCCESS);
+    CHECK_REL(result[0], log(DBL_MAX) + log(2.0), EPSILON);
+    CHECK_REL(result[1], log(DBL_MAX) + log(1e300), EPSILON);
+}
+
+UTEST(log, refuses_a_short_length_a_missing_or_invalid_lambda_and_a_negative_element)
+{
+    const double data[3] = {1.0, 2.0, 3.0};
+    const double negative[3] = {1.0, -0.5, 3.0};
+    const double not_a_number[3] = {1.0, NAN, 3.0};
+    const double lambdas[4] = {0.0, -1.0, INFINITY, NAN};
+    const double lambda = 1.0;
+    double result[3] = {-7.0, -7.0, -7.0};
+    int i;
+
+    ASSERT_EQ(xtract_log(NULL, data, 0, &lambda, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_log(NULL, data, 3, NULL, result), XTRACT_ARGUMENT_ERROR);
+    for (i = 0; i < 4; i++)
+        ASSERT_EQ(xtract_log(NULL, data, 3, &lambdas[i], result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_log(NULL, negative, 3, &lambda, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_log(NULL, not_a_number, 3, &lambda, result), XTRACT_ARGUMENT_ERROR);
+    for (i = 0; i < 3; i++)
+        ASSERT_EQ(result[i], -7.0);
+}
+
 UTEST(spectrum, rejects_any_argv)
 {
     /* An argv is what a call written for a spectrum that took a type

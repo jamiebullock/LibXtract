@@ -194,6 +194,8 @@ int main(void)
         memcpy(log_magnitudes + HALF_BLOCKSIZE, log_magnitudes, HALF_BLOCKSIZE * sizeof(double));
         argd[0] = 1000.0; /* compression factor lambda */
         xtract_log(NULL, spectrum, HALF_BLOCKSIZE, argd, log_magnitudes);
+        if (n == 0)
+            continue; /* the first block has no block before it */
 
         argd[0] = 1.0;                   /* norm order */
         argd[1] = XTRACT_POSITIVE_SLOPE; /* only the bins that rose */

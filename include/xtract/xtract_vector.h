@@ -80,7 +80,7 @@ extern "C"
 
     /** \brief Extract the logarithm of each element of a vector, compressed by a factor: log(1 + lambda * x)
      *
-     * Taken of a magnitude spectrum before the difference of two frames, this gives the logarithmic spectral flux of Boeck, Krebs and Schedl (2012)
+     * Taken of the coefficients of a magnitude spectrum, it gives the logarithmic spectral flux of Boeck, Krebs and Schedl (2012) as the sum of the rises from one frame to the next: xtract_flux() of the two results with order 1 and XTRACT_POSITIVE_SLOPE
      *
      * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles, each at least 0

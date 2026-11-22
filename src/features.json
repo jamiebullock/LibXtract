@@ -796,7 +796,7 @@
     {
       "name": "mmbses",
       "title": "Mel Multi-Band Spectral Entropy Signature",
-      "description": "Extract mel band spectral entropies from a magnitude/phase spectrum",
+      "description": "Extract mel band spectral entropies from a complex spectrum",
       "reference": {"author": "Rincon et al.", "year": 2013},
       "tags": ["sound"],
       "input": {"format": "spectral_complex", "unit": "any", "accepts": ["spectrum"]},
@@ -1193,7 +1193,7 @@
     {
       "name": "cqt",
       "title": "Constant-Q Transform",
-      "description": "Extract the constant-Q spectrum of a magnitude/phase spectrum",
+      "description": "Extract the constant-Q spectrum of a complex spectrum",
       "reference": {"author": "Judith C. Brown and Miller S. Puckette", "year": 1992},
       "input": {"format": "spectral_complex", "unit": "any", "accepts": ["spectrum"]},
       "arguments": [

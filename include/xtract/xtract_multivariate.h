@@ -46,7 +46,7 @@ extern "C"
      */
     int xtract_normalised_cross_correlation(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
-    /** \brief Extract the lag at which two series are most correlated: the lag of the largest correlation coefficient from xtract_cross_correlation(), taking the one nearest zero on a tie and the negative one before the positive
+    /** \brief Extract the lag at which two series are most correlated: the lag of the largest correlation coefficient from xtract_normalised_cross_correlation(), taking the one nearest zero on a tie and the negative one before the positive
      *
      * \param *ctx: a pointer to a context created for at least N elements
      * \param *data: a pointer to the first element in an array of doubles comprising two series of equal length: the first series in the first N/2 elements, the second in the second N/2 elements

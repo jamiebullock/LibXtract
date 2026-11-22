@@ -41,7 +41,7 @@ static void transform_bin(const DSPDoubleSplitComplex *fft, const unsigned int n
 
 int xtract_spectrum(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
-    const double scale = 1.0 / (double)N;
+    double scale;
     double real = 0.0;
     double imag = 0.0;
     unsigned int n = 0;
@@ -57,6 +57,7 @@ int xtract_spectrum(xtract_context *ctx, const double *data, const int N, const 
 
     if (argv != NULL || N < 2 || !xtract_is_poweroftwo((unsigned int)N))
         return XTRACT_ARGUMENT_ERROR;
+    scale = 1.0 / (double)N;
 
     scratch = xtract_scratch_take(ctx, N, (size_t)N);
     if (scratch == NULL)
@@ -210,7 +211,13 @@ int xtract_log(xtract_context *ctx, const double *data, const int N, const void 
     }
 
     for (n = 0; n < N; n++)
-        result[n] = log1p(lambda * data[n]);
+    {
+        const double product = lambda * data[n];
+
+        /* Where the product overflows, the 1 is below the precision of the
+         * result */
+        result[n] = isfinite(product) ? log1p(product) : log(lambda) + log(data[n]);
+    }
 
     return XTRACT_SUCCESS;
 }
@@ -1361,15 +1368,15 @@ int xtract_chroma(xtract_context *ctx, const double *data, const int N, const vo
 int xtract_cqt(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
     const xtract_cqt_kernel *kernel = (const xtract_cqt_kernel *)argv;
-    const int M = N >> 1;
     const double *real = data;
-    const double *imag = data + M;
+    const double *imag;
     int band, e;
 
     if (N < 2 || (N & 1) || kernel == NULL)
         return XTRACT_ARGUMENT_ERROR;
     if (kernel->N != N)
         return XTRACT_BAD_STATE;
+    imag = data + (N >> 1);
 
     for (band = 0; band < kernel->n_bins; band++)
     {
