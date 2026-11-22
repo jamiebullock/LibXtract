@@ -59,7 +59,7 @@ extern "C"
      * \param *result a pointer to the 'packed' results of the feature calculation. This may be passed in as *data to xtract_features_from_subframes() to calculate further features on the subframes, or xtract_difference_vector(), to get the difference between the subframes. A subframe that yields no result has its N / 2 values set to 0 while the other subframe is still computed, and XTRACT_NO_RESULT is returned; any other failure is returned as soon as a subframe reports it
      *
      *
-     * It is important to ensure that any _init_*() functions that are called in preparation for functions that are called on subframes are given the subframe size as 'N', which is half the frame size. i.e. if xtract_features_from_subframes() is called with N=64, a table that the feature takes is made for N=32.
+     * An object that the feature takes is built for a subframe of N / 2 elements: if xtract_features_from_subframes() is called with N=64, a window is made for 32 elements, and a filterbank for the transform of 64 points whose spectrum has 32 elements.
      *
      */
     int xtract_features_from_subframes(xtract_context *ctx, const double *data, const int N, const int feature, const void *argv, double *result);
