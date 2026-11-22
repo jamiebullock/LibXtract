@@ -1351,10 +1351,6 @@ static int conf_takes_values(const xtract_function_descriptor_t *d)
 
 static int conf_bounds_checkable(const xtract_function_descriptor_t *d, int i)
 {
-    /* xtract_lnorm() and xtract_flux() take a filter or a flag outside its
-     * named values as the first of them */
-    if ((d->id == XTRACT_LNORM || d->id == XTRACT_FLUX) && i > 0)
-        return 0;
     return !(d->id == XTRACT_COOCCURRENCE_MATRIX && i == 1);
 }
 
