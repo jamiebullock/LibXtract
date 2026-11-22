@@ -472,12 +472,13 @@ int xtract_spectral_subband_centroids(xtract_context *ctx, const double *data, c
     int n, filter;
     const int M = N >> 1;
     const double *amps = data;
-    const double *freqs = data + M;
+    const double *freqs;
 
     if (N < 2 || (N & 1) || f == NULL)
         return XTRACT_ARGUMENT_ERROR;
     if (N != f->N)
         return XTRACT_BAD_STATE;
+    freqs = data + M;
 
     for (filter = 0; filter < f->n_filters; filter++)
     {

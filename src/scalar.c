@@ -187,7 +187,7 @@ int xtract_spectral_centroid(xtract_context *ctx, const double *data, const int 
 {
     const int n = (N >> 1);
     const double *amps = data;
-    const double *freqs = data + n;
+    const double *freqs;
     double FA = 0.0, A = 0.0;
 #ifndef __APPLE__
     int m;
@@ -198,6 +198,7 @@ int xtract_spectral_centroid(xtract_context *ctx, const double *data, const int 
         *result = 0.0;
         return XTRACT_ARGUMENT_ERROR;
     }
+    freqs = data + n;
 
 #ifdef __APPLE__
     vDSP_dotprD(amps, 1, freqs, 1, &FA, n);
@@ -232,7 +233,7 @@ int xtract_spectral_variance(xtract_context *ctx, const double *data, const int 
     const int m = N >> 1;
     double A = 0.0;
     const double *amps = data;
-    const double *freqs = data + m;
+    const double *freqs;
     double arg0;
     int mm;
     double sum = 0.0;
@@ -242,6 +243,7 @@ int xtract_spectral_variance(xtract_context *ctx, const double *data, const int 
         *result = 0.0;
         return XTRACT_ARGUMENT_ERROR;
     }
+    freqs = data + m;
 
     arg0 = *(double *)argv;
 
@@ -281,7 +283,7 @@ int xtract_spectral_skewness(xtract_context *ctx, const double *data, const int 
 {
     const int m = N >> 1;
     const double *amps = data;
-    const double *freqs = data + m;
+    const double *freqs;
     double arg0, arg1;
     double sum_amps = 0.0;
     int mm;
@@ -292,6 +294,7 @@ int xtract_spectral_skewness(xtract_context *ctx, const double *data, const int 
         *result = 0.0;
         return XTRACT_ARGUMENT_ERROR;
     }
+    freqs = data + m;
 
     arg0 = ((double *)argv)[0];
     arg1 = ((double *)argv)[1];
@@ -327,7 +330,7 @@ int xtract_spectral_kurtosis(xtract_context *ctx, const double *data, const int 
 {
     const int m = N >> 1;
     const double *amps = data;
-    const double *freqs = data + m;
+    const double *freqs;
     double arg0, arg1;
     double sum_amps = 0.0;
     int mm;
@@ -338,6 +341,7 @@ int xtract_spectral_kurtosis(xtract_context *ctx, const double *data, const int 
         *result = 0.0;
         return XTRACT_ARGUMENT_ERROR;
     }
+    freqs = data + m;
 
     arg0 = ((double *)argv)[0];
     arg1 = ((double *)argv)[1];
@@ -1118,7 +1122,7 @@ int xtract_hps(xtract_context *ctx, const double *data, const int N, const void 
      * coefficient i is coefficient r * i. Bin 0 is never a candidate. */
     const int M = N / 2;
     const int first = 1;
-    const double *freqs = data + M;
+    const double *freqs;
     int R, i, count, peak_index, position1_lwr;
     double harmonics, q, score, peak, largest1_lwr, ratio1, below, above, denominator, delta;
 
@@ -1127,6 +1131,7 @@ int xtract_hps(xtract_context *ctx, const double *data, const int N, const void 
         *result = 0;
         return XTRACT_ARGUMENT_ERROR;
     }
+    freqs = data + M;
     harmonics = *(const double *)argv;
 
     /* The comparisons are false for NaN, and a fractional count has no
