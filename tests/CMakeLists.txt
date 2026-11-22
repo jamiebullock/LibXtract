@@ -55,6 +55,11 @@ add_test(NAME driver_names_no_feature
         -DFEATURES=${PROJECT_SOURCE_DIR}/include/xtract/xtract_features.h
         -DDRIVER=${CMAKE_CURRENT_SOURCE_DIR}/xttest_driver.c
         -P ${CMAKE_CURRENT_SOURCE_DIR}/driver_names_no_feature.cmake)
+add_test(NAME fuzz_calls_every_feature
+    COMMAND ${CMAKE_COMMAND}
+        -DFEATURES=${PROJECT_SOURCE_DIR}/include/xtract/xtract_features.h
+        -DFUZZ=${PROJECT_SOURCE_DIR}/fuzz
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/fuzz_calls_every_feature.cmake)
 add_test(NAME features_are_generated
     COMMAND ${CMAKE_COMMAND}
         -DCHECK=ON

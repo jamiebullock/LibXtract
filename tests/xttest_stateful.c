@@ -11,9 +11,12 @@
 
 #include "xttest_util.h"
 #include "xttest_approx.h"
+#include "xttest_driver.h"
 
-#include <math.h>
 #include <float.h>
+#include <math.h>
+#include <stdlib.h>
+#include <string.h>
 
 /*
  * Unit tests for stateful pitch detection (wavelet/dywapitch), the
@@ -76,21 +79,20 @@ UTEST(helper, features_from_subframes_rejects_out_of_range_feature)
     ASSERT_EQ(xtract_features_from_subframes(NULL, data, 4, XTRACT_FEATURES, NULL, result), XTRACT_ARGUMENT_ERROR);
 }
 
-UTEST(helper, features_from_subframes_rejects_an_odd_or_short_input_and_a_feature_that_outgrows_its_input)
+static int subframes_call(xtract_context *ctx, const double *data, int N, int feature, const void *argv, double *result) XTTEST_REALTIME;
+static int subframes_call(xtract_context *ctx, const double *data, int N, int feature, const void *argv, double *result)
 {
-    static const int outgrowing[] = {
-        XTRACT_PEAK_SPECTRUM, XTRACT_LPC, XTRACT_LPCC, XTRACT_MFCC, XTRACT_MEL_SPECTROGRAM,
-        XTRACT_GFCC, XTRACT_GAMMATONE_SPECTROGRAM, XTRACT_BARK_COEFFICIENTS,
-        XTRACT_SUBBANDS, XTRACT_MMBSES, XTRACT_SPECTRAL_SUBBAND_CENTROIDS};
+    return xtract_features_from_subframes(ctx, data, N, feature, argv, result);
+}
+
+UTEST(helper, features_from_subframes_rejects_an_odd_or_short_input)
+{
     double data[] = {1.0, 2.0, 3.0, 4.0};
     double result[4] = {-1.0, -1.0, -1.0, -1.0};
     double threshold = 0.0;
-    size_t i;
 
     ASSERT_EQ(xtract_features_from_subframes(NULL, data, 3, XTRACT_MEAN, NULL, result), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(xtract_features_from_subframes(NULL, data, 0, XTRACT_MEAN, NULL, result), XTRACT_ARGUMENT_ERROR);
-    for (i = 0; i < sizeof(outgrowing) / sizeof(outgrowing[0]); i++)
-        ASSERT_EQ(xtract_features_from_subframes(NULL, data, 4, outgrowing[i], NULL, result), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(result[0], -1.0);
 
     ASSERT_EQ(xtract_features_from_subframes(NULL, data, 4, XTRACT_DCT, NULL, result), XTRACT_SUCCESS);
@@ -100,6 +102,67 @@ UTEST(helper, features_from_subframes_rejects_an_odd_or_short_input_and_a_featur
     ASSERT_EQ(xtract_features_from_subframes(NULL, data, 4, XTRACT_PEAK, &threshold, result), XTRACT_SUCCESS);
     CHECK_REL(result[0], 2.0, EPSILON);
     CHECK_REL(result[2], 4.0, EPSILON);
+}
+
+UTEST(helper, features_from_subframes_takes_every_feature_whose_result_fits_in_a_subframe)
+{
+    static const double untouched = 1234567.25;
+    xtract_context *ctx = xtract_context_new(XTTEST_DRIVER_LIMIT);
+    int feature, i, taken = 0;
+
+    ASSERT_TRUE(ctx != NULL);
+    for (feature = 0; feature < XTRACT_FEATURES; feature++)
+    {
+        const xtract_function_descriptor_t *d = xtract_descriptor(feature);
+        xttest_call call;
+        double *frames, *result;
+        int n;
+
+        ASSERT_TRUE_MSG(xttest_call_reach(&call, feature, ctx, 1.0), d->name);
+        n = call.data.n;
+        if (n < 1)
+        {
+            xttest_call_free(&call);
+            continue;
+        }
+        frames = (double *)malloc(2 * (size_t)n * sizeof(double));
+        result = (double *)malloc((2 * (size_t)n + XTTEST_DRIVER_SLACK) * sizeof(double));
+        ASSERT_TRUE(frames != NULL && result != NULL);
+        memcpy(frames, call.data.values, (size_t)n * sizeof(double));
+        memcpy(frames + n, call.data.values, (size_t)n * sizeof(double));
+        for (i = 0; i < 2 * n + XTTEST_DRIVER_SLACK; i++)
+            result[i] = untouched;
+
+        if (call.result_length > n)
+        {
+            ASSERT_EQ_MSG(subframes_call(ctx, frames, 2 * n, feature, call.argv, result), XTRACT_ARGUMENT_ERROR, d->name);
+            ASSERT_EQ_MSG(result[0], untouched, d->name);
+        }
+        else
+        {
+            /* Each subframe holds the data of the call, so each half of the
+             * result is what the call gives, apart from a feature that
+             * keeps the state of a stream, which the subframes move on */
+            ASSERT_EQ_MSG(subframes_call(ctx, frames, 2 * n, feature, call.argv, result), XTRACT_SUCCESS, d->name);
+            if (d->argc == 0 || d->argv[0].kind != XTRACT_ARGUMENT_OBJECT || !d->argv[0].builder->is_per_stream)
+            {
+                ASSERT_EQ_MSG(xttest_call_run(&call, ctx), XTRACT_SUCCESS, d->name);
+                for (i = 0; i < call.result_length; i++)
+                {
+                    ASSERT_EQ_MSG(result[i], call.result[i], d->name);
+                    ASSERT_EQ_MSG(result[n + i], call.result[i], d->name);
+                }
+            }
+            for (i = 2 * n; i < 2 * n + XTTEST_DRIVER_SLACK; i++)
+                ASSERT_EQ_MSG(result[i], untouched, d->name);
+            taken++;
+        }
+        free(frames);
+        free(result);
+        xttest_call_free(&call);
+    }
+    ASSERT_GT(taken, 100);
+    xtract_context_delete(ctx);
 }
 
 UTEST(helper, features_from_subframes_still_computes_the_second_subframe_when_the_first_has_no_result)
@@ -120,12 +183,6 @@ UTEST(helper, features_from_subframes_still_computes_the_second_subframe_when_th
     CHECK_REL(result[0], 3.0, EPSILON);
     ASSERT_EQ(result[2], 0.0);
     ASSERT_EQ(result[3], 0.0);
-}
-
-static int subframes_call(xtract_context *ctx, const double *data, int N, int feature, const void *argv, double *result) XTTEST_REALTIME;
-static int subframes_call(xtract_context *ctx, const double *data, int N, int feature, const void *argv, double *result)
-{
-    return xtract_features_from_subframes(ctx, data, N, feature, argv, result);
 }
 
 UTEST(helper, features_from_subframes_passes_its_context_to_the_feature)

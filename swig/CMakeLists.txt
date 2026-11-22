@@ -56,8 +56,7 @@ if(python_found)
         OUTPUT_NAME xtract
         LIBRARY_OUTPUT_DIRECTORY $<1:${python_dir}>)
     target_link_libraries(xtract_python PRIVATE xtract::xtract Python::Module)
-    add_custom_command(TARGET xtract_python POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/test.py ${python_dir}/test.py)
+    configure_file(test.py ${python_dir}/test.py COPYONLY)
     add_test(NAME python_bindings
         COMMAND Python::Interpreter ${python_dir}/test.py ${PROJECT_SOURCE_DIR}/include/xtract
         WORKING_DIRECTORY ${python_dir})
@@ -163,8 +162,7 @@ if(node_found)
     elseif(WIN32)
         target_link_libraries(xtract_node PRIVATE ${XTRACT_NODE_LIBRARY})
     endif()
-    add_custom_command(TARGET xtract_node POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/test.js ${node_dir}/test.js)
+    configure_file(test.js ${node_dir}/test.js COPYONLY)
     add_test(NAME node_bindings
         COMMAND ${XTRACT_NODE_EXECUTABLE} ${node_dir}/test.js
         WORKING_DIRECTORY ${node_dir})

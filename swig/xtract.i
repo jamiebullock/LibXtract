@@ -63,9 +63,10 @@
 
 %include "xtract/xtract_scalar.h"
 
-/* xtract_delta.h and xtract_multivariate.h each hold functions with a scalar
- * result and functions with a vector result, so their declarations are
- * repeated here on the side of the %clear that gives each its result type */
+/* xtract_delta.h, xtract_multivariate.h and xtract_grid.h each hold
+ * functions with a scalar result and functions with a vector result, so
+ * their declarations are repeated here on the side of the %clear that gives
+ * each its result type */
 %inline %{
 
     int xtract_flux(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
@@ -78,6 +79,10 @@
     int xtract_cross_correlation_lag(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
     int xtract_pearson_correlation(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
     int xtract_average_correlation(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
+    int xtract_cooccurrence_contrast(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
+    int xtract_cooccurrence_correlation(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
+    int xtract_angular_second_moment(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
+    int xtract_inverse_difference_moment(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
 %}
 
@@ -92,12 +97,17 @@
     int xtract_correlation_matrix(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
     int xtract_principal_variances(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
     int xtract_coherence(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
+    int xtract_grid_moments(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
+    int xtract_grid_central_moments(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
+    int xtract_normalised_moments(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
+    int xtract_hu_moments(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
+    int xtract_cooccurrence_matrix(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
+    int xtract_local_binary_patterns(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
 %}
 
 
 %include "xtract/xtract_vector.h"
-%include "xtract/xtract_grid.h"
 %include "xtract/xtract_stateful.h"
 %include "xtract/xtract_context.h"
 %include "xtract/xtract_helper.h"
