@@ -1528,6 +1528,22 @@ UTEST(scalar, hps_finds_fundamental_of_harmonic_signal)
     CHECK_REL(result, 10.0 * freq_res, 1e-3);
 }
 
+UTEST(scalar, hps_floors_an_empty_bin_beside_a_subnormal_peak)
+{
+    /* DBL_EPSILON times the largest magnitude rounds to 0 here, so the floor
+     * of an empty bin has to be finite without it */
+    double data[16] = {0};
+    const double harmonics = 3.0;
+    double result = -1.0;
+    int i;
+
+    for (i = 0; i < 8; i++)
+        data[8 + i] = i;
+    data[2] = data[4] = data[6] = 0x1p-1023;
+    ASSERT_EQ(xtract_hps(NULL, data, 16, &harmonics, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(result, 2.0);
+}
+
 UTEST(scalar, hps_considers_the_highest_fundamental_whose_harmonics_fit)
 {
     /* With 128 coefficients and three harmonics, bin 42 is the highest
@@ -2816,9 +2832,39 @@ UTEST(vector, mmbses_floors_a_rank_deficient_band_at_epsilon_of_the_largest_dete
     ASSERT_TRUE(mf != NULL);
     /* One bin, (5, 0), in the second band */
     ASSERT_EQ(xtract_mmbses(NULL, data, 6, mf, result), XTRACT_SUCCESS);
+    ASSERT_TRUE(isfinite(result[0]) && isfinite(result[1]));
     CHECK_REL(result[0], gaussian_term + 0.5 * log(0.25), EPSILON);
     CHECK_REL(result[1], floored, EPSILON);
     xtract_free_filterbank(mf);
+}
+
+UTEST(vector, mmbses_counts_coefficients_on_one_line_as_rank_deficient_whatever_the_rounding)
+{
+    /* The coefficients 1 + 1i and 2 + 2i give rho a step below 1 */
+    double data[4] = {1.0, 2.0, 1.0, 2.0};
+    const double gains[2] = {1.0, 1.0};
+    double result[1] = {-1.0};
+    xtract_filterbank *mf = xtract_init_filterbank(4, 1, gains);
+
+    ASSERT_TRUE(mf != NULL);
+    ASSERT_EQ(xtract_mmbses(NULL, data, 4, mf, result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result[0], 0.0);
+    xtract_free_filterbank(mf);
+}
+
+UTEST(vector, mel_spectrogram_floors_an_empty_filter_beside_a_subnormal_energy)
+{
+    const double gains[4] = {1.0, 0.0, 0.0, 1.0};
+    const double data[2] = {0x1p-1023, 0.0};
+    double result[2];
+    xtract_filterbank *f = xtract_init_filterbank(4, 2, gains);
+
+    ASSERT_TRUE(f != NULL);
+    ASSERT_EQ(xtract_mel_spectrogram(NULL, data, 2, f, result), XTRACT_SUCCESS);
+    ASSERT_TRUE(isfinite(result[0]) && isfinite(result[1]));
+    CHECK_REL(result[0], -1023.0 * log(2.0), EPSILON);
+    CHECK_REL(result[1], -1023.0 * log(2.0) + log(DBL_EPSILON), EPSILON);
+    xtract_free_filterbank(f);
 }
 
 UTEST(vector, mmbses_floors_collinear_bins_and_gives_no_result_when_every_band_is_rank_deficient)
@@ -2844,6 +2890,7 @@ UTEST(vector, mmbses_floors_collinear_bins_and_gives_no_result_when_every_band_i
 
         ASSERT_TRUE(two != NULL);
         ASSERT_EQ(xtract_mmbses(NULL, beside, 8, two, result), XTRACT_SUCCESS);
+        ASSERT_TRUE(isfinite(result[0]) && isfinite(result[1]));
         CHECK_REL(result[0], gaussian_term + 0.5 * log(0.25), EPSILON);
         CHECK_REL(result[1], gaussian_term + 0.5 * (log(0.25) + log(DBL_EPSILON)), EPSILON);
         xtract_free_filterbank(two);
@@ -2866,6 +2913,7 @@ UTEST(vector, mmbses_of_a_spectrum_at_any_level_differs_by_twice_the_log_of_the_
         for (i = 0; i < 6; i++)
             scaled[i] = s < 0 ? data[i] / level : data[i] * level;
         ASSERT_EQ(xtract_mmbses(NULL, scaled, 6, mf, scaled_result), XTRACT_SUCCESS);
+        ASSERT_TRUE(isfinite(scaled_result[0]) && isfinite(scaled_result[1]));
         for (i = 0; i < 2; i++)
             CHECK_REL(scaled_result[i], result[i] + 2.0 * s * log(level), EPSILON);
     }

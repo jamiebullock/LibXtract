@@ -319,7 +319,7 @@ int xtract_autocorrelation_fft(xtract_context *ctx, const double *data, const in
 static int log_filterbank_energies(const double *data, const xtract_filterbank *f, double *result)
 {
     const int bins = xtract_filterbank_bins(f);
-    double largest = 0.0, lowest;
+    double largest = 0.0, log_lowest;
     int n, filter;
 
     for (filter = 0; filter < f->n_filters; filter++)
@@ -342,10 +342,16 @@ static int log_filterbank_energies(const double *data, const xtract_filterbank *
         return XTRACT_NO_RESULT;
     }
 
-    /* An energy below DBL_EPSILON of the largest is lost beside it */
-    lowest = DBL_EPSILON * largest;
+    /* An energy below DBL_EPSILON of the largest is lost beside it. The
+     * floor is kept as a log because DBL_EPSILON times a subnormal energy
+     * rounds to 0 */
+    log_lowest = log(largest) + log(DBL_EPSILON);
     for (filter = 0; filter < f->n_filters; filter++)
-        result[filter] = log(result[filter] < lowest ? lowest : result[filter]);
+    {
+        const double logarithm = result[filter] > 0.0 ? log(result[filter]) : log_lowest;
+
+        result[filter] = logarithm > log_lowest ? logarithm : log_lowest;
+    }
 
     return XTRACT_SUCCESS;
 }
@@ -404,11 +410,12 @@ int xtract_gfcc(xtract_context *ctx, const double *data, const int N, const void
     return cepstral_coefficients(ctx, data, N, (const xtract_filterbank *)argv, result);
 }
 
-/* The log of the determinant of a 2x2 covariance, as the sum of the logs of
- * the two variances and of 1 - rho^2, so that the determinant, a fourth
- * power of the coefficients, is never formed. -INFINITY for a covariance of
- * rank below 2, such as that of a single bin */
-static double log_covariance_determinant(const double sxx, const double syy, const double sxy)
+/* The log of the determinant of a 2x2 covariance of count coefficients, as
+ * the sum of the logs of the two variances and of 1 - rho^2, so that the
+ * determinant, a fourth power of the coefficients, is never formed.
+ * -INFINITY for a covariance of rank below 2, such as that of a single bin or
+ * of coefficients on one line through 0 */
+static double log_covariance_determinant(const double sxx, const double syy, const double sxy, const int count)
 {
     double rho, one_minus_rho_squared;
 
@@ -416,7 +423,10 @@ static double log_covariance_determinant(const double sxx, const double syy, con
         return -INFINITY;
     rho = sxy / sqrt(sxx) / sqrt(syy);
     one_minus_rho_squared = (1.0 - rho) * (1.0 + rho);
-    if (!(one_minus_rho_squared > 0.0))
+    /* Each sum of count terms rounds by up to count DBL_EPSILON of itself,
+     * so coefficients on one line can leave 1 - rho^2 a few times that above
+     * 0 */
+    if (!(one_minus_rho_squared > 4.0 * (count + 2) * DBL_EPSILON))
         return -INFINITY;
 
     return log(sxx) + log(syy) + log(one_minus_rho_squared);
@@ -485,7 +495,7 @@ int xtract_mmbses(xtract_context *ctx, const double *data, const int N, const vo
             count++;
         }
 
-        result[filter] = count == 0 ? 0.0 : log_covariance_determinant(sxx / count, syy / count, sxy / count);
+        result[filter] = count == 0 ? 0.0 : log_covariance_determinant(sxx / count, syy / count, sxy / count, count);
         if (count > 0)
         {
             passed++;
