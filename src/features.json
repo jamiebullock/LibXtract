@@ -14,8 +14,8 @@
       "name": "init_mfcc",
       "type": "filterbank",
       "parameters": [
-        {"name": "transform_size", "kind": "property", "property": "transform_size", "type": "int"},
-        {"name": "sample_rate", "kind": "property", "property": "sample_rate", "type": "float", "unit": "hertz"},
+        {"name": "transform_size", "kind": "property", "property": "transform_size", "type": "int", "min": 2},
+        {"name": "sample_rate", "kind": "property", "property": "sample_rate", "type": "float", "unit": "hertz", "min": 2.2250738585072014e-308},
         {"name": "style", "kind": "setting", "type": "int", "values": ["equal_gain", "equal_area"], "default": 0},
         {"name": "freq_min", "kind": "setting", "type": "float", "unit": "hertz", "min": 0, "default": 20},
         {"name": "freq_max", "kind": "setting", "type": "float", "unit": "hertz", "min": 0, "default": 20000},
@@ -26,8 +26,8 @@
       "name": "init_gfcc",
       "type": "filterbank",
       "parameters": [
-        {"name": "transform_size", "kind": "property", "property": "transform_size", "type": "int"},
-        {"name": "sample_rate", "kind": "property", "property": "sample_rate", "type": "float", "unit": "hertz"},
+        {"name": "transform_size", "kind": "property", "property": "transform_size", "type": "int", "min": 2},
+        {"name": "sample_rate", "kind": "property", "property": "sample_rate", "type": "float", "unit": "hertz", "min": 2.2250738585072014e-308},
         {"name": "freq_min", "kind": "setting", "type": "float", "unit": "hertz", "min": 0, "default": 20},
         {"name": "freq_max", "kind": "setting", "type": "float", "unit": "hertz", "min": 0, "default": 20000},
         {"name": "n_filters", "kind": "setting", "type": "int", "min": 2, "default": 13}
@@ -37,15 +37,15 @@
       "name": "init_bark",
       "type": "intarray",
       "parameters": [
-        {"name": "transform_size", "kind": "property", "property": "transform_size", "type": "int"},
-        {"name": "sample_rate", "kind": "property", "property": "sample_rate", "type": "float", "unit": "hertz"}
+        {"name": "transform_size", "kind": "property", "property": "transform_size", "type": "int", "min": 2},
+        {"name": "sample_rate", "kind": "property", "property": "sample_rate", "type": "float", "unit": "hertz", "min": 2.2250738585072014e-308}
       ]
     },
     {
       "name": "init_window",
       "type": "floatarray",
       "parameters": [
-        {"name": "length", "kind": "property", "property": "length", "type": "int"},
+        {"name": "length", "kind": "property", "property": "length", "type": "int", "min": 2},
         {"name": "type", "kind": "setting", "type": "int", "values": ["gauss", "hamming", "hann", "bartlett", "triangular", "bartlett_hann", "blackman", "kaiser", "blackman_harris"], "default": 2}
       ]
     },
@@ -53,15 +53,15 @@
       "name": "init_dct",
       "type": "floatarray",
       "parameters": [
-        {"name": "length", "kind": "property", "property": "length", "type": "int"}
+        {"name": "length", "kind": "property", "property": "length", "type": "int", "min": 1}
       ]
     },
     {
       "name": "init_cqt",
       "type": "cqt_kernel",
       "parameters": [
-        {"name": "transform_size", "kind": "property", "property": "transform_size", "type": "int"},
-        {"name": "sample_rate", "kind": "property", "property": "sample_rate", "type": "float", "unit": "hertz"},
+        {"name": "transform_size", "kind": "property", "property": "transform_size", "type": "int", "min": 2},
+        {"name": "sample_rate", "kind": "property", "property": "sample_rate", "type": "float", "unit": "hertz", "min": 2.2250738585072014e-308},
         {"name": "fmin", "kind": "setting", "type": "float", "unit": "hertz", "min": 2.2250738585072014e-308, "default": 32.7},
         {"name": "bins_per_octave", "kind": "setting", "type": "int", "min": 1, "default": 12},
         {"name": "n_bins", "kind": "setting", "type": "int", "min": 1, "default": 84},
@@ -73,7 +73,7 @@
       "type": "last_n_state",
       "per_stream": true,
       "parameters": [
-        {"name": "capacity", "kind": "property", "property": "length", "type": "int"}
+        {"name": "capacity", "kind": "property", "property": "length", "type": "int", "min": 1}
       ]
     },
     {
@@ -81,7 +81,7 @@
       "type": "wavelet_f0_state",
       "per_stream": true,
       "parameters": [
-        {"name": "sample_rate", "kind": "property", "property": "sample_rate", "type": "float", "unit": "hertz"}
+        {"name": "sample_rate", "kind": "property", "property": "sample_rate", "type": "float", "unit": "hertz", "min": 2.2250738585072014e-308}
       ]
     }
   ],

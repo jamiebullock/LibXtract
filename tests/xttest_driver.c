@@ -347,7 +347,6 @@ static int prepare(xttest_call *call, int feature, const xttest_source *source, 
                    const xtract_provider_t *as)
 {
     const xtract_function_descriptor_t *d = xtract_descriptor(feature);
-    double parameters[XTTEST_DRIVER_PARAMETERS];
     double value;
     int i, ok = 1;
 
@@ -371,9 +370,9 @@ static int prepare(xttest_call *call, int feature, const xttest_source *source, 
         call->builder = d->argv[0].builder;
         ok = call->builder->argc <= XTTEST_DRIVER_PARAMETERS;
         for (i = 0; ok && i < call->builder->argc; i++)
-            ok = value_of(&call->builder->argv[i], &call->data, given_data, source, &parameters[i]);
+            ok = value_of(&call->builder->argv[i], &call->data, given_data, source, &call->parameters[i]);
         if (ok)
-            call->object = build_object(call->builder, parameters);
+            call->object = build_object(call->builder, call->parameters);
         ok = ok && call->object != NULL;
         call->argv = call->object;
     }
