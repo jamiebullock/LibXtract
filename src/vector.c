@@ -1013,7 +1013,7 @@ int xtract_subbands(xtract_context *ctx, const double *data, const int N, const 
     for (n = 0; n < nbands; n++)
     {
         /* Bounds sanity check: a band may end exactly at N */
-        if (lower >= N || lower + bw > N)
+        if (lower >= N || bw > N - lower)
         {
             result[n] = 0.0;
             continue;

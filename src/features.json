@@ -1248,7 +1248,7 @@
       "name": "coherence",
       "title": "Coherence",
       "description": "Extract the magnitude-squared coherence of two series",
-      "input": {"format": "subframes", "unit": "any", "length": "N >= 3 * segment_length && N % 2 == 0 && is_power_of_two(segment_length)"},
+      "input": {"format": "subframes", "unit": "any", "length": "segment_length >= 2 && N >= 3 * segment_length && N % 2 == 0 && is_power_of_two(segment_length)"},
       "argument_type": "int",
       "arguments": [
         {"name": "segment_length", "kind": "setting", "unit": "none", "min": 2, "default": 256}

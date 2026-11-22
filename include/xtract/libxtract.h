@@ -563,7 +563,7 @@ extern "C"
      * \param feature: a feature, as given in the enumeration xtract_features_
      * \param N: the number of elements the feature would be called with
      * \param *argv: a pointer to the arguments the feature would be called with
-     * \return the number of elements the feature writes to *result: 1 for a scalar result, and for a vector result the value of the expression its descriptor states. -1 if xtract_length_is_accepted() gives 0 for the same feature, N and argv, if argv is NULL and the expression reads an argument, or if the value is below 0 or above INT_MAX
+     * \return the number of elements a successful call of the feature writes to *result: 1 for a scalar result, and for a vector result the value of the expression its descriptor states. -1 if xtract_length_is_accepted() gives 0 for the same feature, N and argv, if argv is NULL and the expression reads an argument, or if the value is below 0 or above INT_MAX
      */
     int xtract_result_length(const int feature, const int N, const void *argv);
     /* Free functions */

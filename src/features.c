@@ -2475,7 +2475,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_SUBFRAMES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 3 * segment_length && N % 2 == 0 && is_power_of_two(segment_length)"},
+        .data = {XTRACT_SUBFRAMES, XTRACT_UNIT_ANY, 0, NULL, 1, "segment_length >= 2 && N >= 3 * segment_length && N % 2 == 0 && is_power_of_two(segment_length)"},
         .argc = 1,
         .argv = arguments_coherence,
         .is_scalar = XTRACT_FALSE,
@@ -3011,7 +3011,7 @@ int xtract_length_is_accepted(const int feature, const int N, const void *argv)
     case XTRACT_PRINCIPAL_VARIANCES:
         return (n >= 1LL && xtract_rule_is_square(n)) != 0;
     case XTRACT_COHERENCE:
-        return argv != NULL && (n >= 3LL * (long long)((const int *)argv)[0] && n % 2LL == 0LL && xtract_rule_is_power_of_two((long long)((const int *)argv)[0])) != 0;
+        return argv != NULL && ((long long)((const int *)argv)[0] >= 2LL && n >= 3LL * (long long)((const int *)argv)[0] && n % 2LL == 0LL && xtract_rule_is_power_of_two((long long)((const int *)argv)[0])) != 0;
     case XTRACT_GRID_MOMENTS:
         return argv != NULL && (n >= 1LL && (long long)((const int *)argv)[0] >= 1LL && n % (long long)((const int *)argv)[0] == 0LL) != 0;
     case XTRACT_GRID_CENTRAL_MOMENTS:

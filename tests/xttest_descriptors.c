@@ -1546,6 +1546,7 @@ UTEST(descriptors, the_rule_for_n_accepts_what_the_feature_takes_where_its_argum
     const int four_linear_from_1[4] = {XTRACT_MEAN, 4, XTRACT_LINEAR_SUBBANDS, 1};
     const int octave_from_0[4] = {XTRACT_MEAN, 2, XTRACT_OCTAVE_SUBBANDS, 0};
     const int octave_from_8[4] = {XTRACT_MEAN, 2, XTRACT_OCTAVE_SUBBANDS, 8};
+    const int segment_1 = 1;
     const int segment_3 = 3;
     const int segment_4 = 4;
     xtract_last_n_state *four = xtract_last_n_state_new(4);
@@ -1557,6 +1558,7 @@ UTEST(descriptors, the_rule_for_n_accepts_what_the_feature_takes_where_its_argum
         ASSERT_EQ(xtract_length_is_accepted(XTRACT_SUBBANDS, N, four_linear_from_1), takes(XTRACT_SUBBANDS, N, four_linear_from_1));
         ASSERT_EQ(xtract_length_is_accepted(XTRACT_SUBBANDS, N, octave_from_0), takes(XTRACT_SUBBANDS, N, octave_from_0));
         ASSERT_EQ(xtract_length_is_accepted(XTRACT_SUBBANDS, N, octave_from_8), takes(XTRACT_SUBBANDS, N, octave_from_8));
+        ASSERT_EQ(xtract_length_is_accepted(XTRACT_COHERENCE, N, &segment_1), takes(XTRACT_COHERENCE, N, &segment_1));
         ASSERT_EQ(xtract_length_is_accepted(XTRACT_COHERENCE, N, &segment_3), takes(XTRACT_COHERENCE, N, &segment_3));
         ASSERT_EQ(xtract_length_is_accepted(XTRACT_COHERENCE, N, &segment_4), takes(XTRACT_COHERENCE, N, &segment_4));
         ASSERT_EQ(xtract_length_is_accepted(XTRACT_LAST_N, N, four), takes(XTRACT_LAST_N, N, four));

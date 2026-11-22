@@ -382,8 +382,9 @@ endfunction()
 
 # Sets ${out} to the C form of an expression in N and the arguments of the
 # feature, and ${uses_argv_out} to whether it reads an argument. Every
-# literal is a long long, so the expression is evaluated as long long and
-# cannot overflow for any int. ${argument_accessors} has, for each argument of the feature in order,
+# literal is a long long, so the expression is evaluated as long long; the
+# author keeps every intermediate value in range, as a product of two ints
+# is. ${argument_accessors} has, for each argument of the feature in order,
 # the C expression that reads it from argv
 function(c_expression out uses_argv_out where key expression)
     if(NOT expression MATCHES "^[A-Za-z0-9_ ()<>=!&|+*/%-]+$")
