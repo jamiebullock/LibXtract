@@ -66,8 +66,8 @@ typedef struct xttest_call_
 int xttest_call_prepare(xttest_call *call, int feature, const xttest_source *source);
 
 /* The same from a series of XTTEST_DRIVER_SHORTEST elements at a level of
- * scale, doubled until the call can be made from it. The call is not the one
- * from the shortest series the feature accepts. Returns 0 when no series up
+ * scale, doubled until the call can be made from it, so the series can be
+ * longer than the shortest the feature accepts. Returns 0 when no series up
  * to XTTEST_DRIVER_LIMIT elements will do */
 int xttest_call_reach(xttest_call *call, int feature, xtract_context *ctx, double scale);
 
