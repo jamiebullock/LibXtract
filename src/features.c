@@ -162,8 +162,8 @@ static const char *const values_4[] = {"octave", "linear"};
 static const char *const values_5[] = {"off", "on"};
 
 static const xtract_argument_descriptor_t parameters_init_mfcc[] = {
-    {.name = "transform_size", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_TRANSFORM_SIZE},
-    {.name = "sample_rate", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_SAMPLE_RATE},
+    {.name = "transform_size", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = 2, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_TRANSFORM_SIZE},
+    {.name = "sample_rate", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = 2.2250738585072014e-308, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_SAMPLE_RATE},
     {.name = "style", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = 0, .max = 1, .value_count = 2, .values = values_0, .default_value = 0, .is_whole = XTRACT_TRUE},
     {.name = "freq_min", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = 0, .max = XTRACT_UNBOUNDED_MAX, .default_value = 20},
     {.name = "freq_max", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = 0, .max = XTRACT_UNBOUNDED_MAX, .default_value = 20000},
@@ -172,8 +172,8 @@ static const xtract_argument_descriptor_t parameters_init_mfcc[] = {
 static const xtract_builder_descriptor_t builder_init_mfcc = {"init_mfcc", XTRACT_FILTERBANK, XTRACT_FALSE, 6, parameters_init_mfcc, xtract_build_init_mfcc, xtract_release_init_mfcc};
 
 static const xtract_argument_descriptor_t parameters_init_gfcc[] = {
-    {.name = "transform_size", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_TRANSFORM_SIZE},
-    {.name = "sample_rate", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_SAMPLE_RATE},
+    {.name = "transform_size", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = 2, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_TRANSFORM_SIZE},
+    {.name = "sample_rate", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = 2.2250738585072014e-308, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_SAMPLE_RATE},
     {.name = "freq_min", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = 0, .max = XTRACT_UNBOUNDED_MAX, .default_value = 20},
     {.name = "freq_max", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = 0, .max = XTRACT_UNBOUNDED_MAX, .default_value = 20000},
     {.name = "n_filters", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = 2, .max = XTRACT_UNBOUNDED_MAX, .default_value = 13, .is_whole = XTRACT_TRUE},
@@ -181,25 +181,25 @@ static const xtract_argument_descriptor_t parameters_init_gfcc[] = {
 static const xtract_builder_descriptor_t builder_init_gfcc = {"init_gfcc", XTRACT_FILTERBANK, XTRACT_FALSE, 5, parameters_init_gfcc, xtract_build_init_gfcc, xtract_release_init_gfcc};
 
 static const xtract_argument_descriptor_t parameters_init_bark[] = {
-    {.name = "transform_size", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_TRANSFORM_SIZE},
-    {.name = "sample_rate", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_SAMPLE_RATE},
+    {.name = "transform_size", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = 2, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_TRANSFORM_SIZE},
+    {.name = "sample_rate", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = 2.2250738585072014e-308, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_SAMPLE_RATE},
 };
 static const xtract_builder_descriptor_t builder_init_bark = {"init_bark", XTRACT_INTARRAY, XTRACT_FALSE, 2, parameters_init_bark, xtract_build_init_bark, xtract_release_init_bark};
 
 static const xtract_argument_descriptor_t parameters_init_window[] = {
-    {.name = "length", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_LENGTH},
+    {.name = "length", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = 2, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_LENGTH},
     {.name = "type", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = 0, .max = 8, .value_count = 9, .values = values_1, .default_value = 2, .is_whole = XTRACT_TRUE},
 };
 static const xtract_builder_descriptor_t builder_init_window = {"init_window", XTRACT_FLOATARRAY, XTRACT_FALSE, 2, parameters_init_window, xtract_build_init_window, xtract_release_init_window};
 
 static const xtract_argument_descriptor_t parameters_init_dct[] = {
-    {.name = "length", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_LENGTH},
+    {.name = "length", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = 1, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_LENGTH},
 };
 static const xtract_builder_descriptor_t builder_init_dct = {"init_dct", XTRACT_FLOATARRAY, XTRACT_FALSE, 1, parameters_init_dct, xtract_build_init_dct, xtract_release_init_dct};
 
 static const xtract_argument_descriptor_t parameters_init_cqt[] = {
-    {.name = "transform_size", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_TRANSFORM_SIZE},
-    {.name = "sample_rate", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_SAMPLE_RATE},
+    {.name = "transform_size", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = 2, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_TRANSFORM_SIZE},
+    {.name = "sample_rate", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = 2.2250738585072014e-308, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_SAMPLE_RATE},
     {.name = "fmin", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = 2.2250738585072014e-308, .max = XTRACT_UNBOUNDED_MAX, .default_value = 32.700000000000003},
     {.name = "bins_per_octave", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = 1, .max = XTRACT_UNBOUNDED_MAX, .default_value = 12, .is_whole = XTRACT_TRUE},
     {.name = "n_bins", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = 1, .max = XTRACT_UNBOUNDED_MAX, .default_value = 84, .is_whole = XTRACT_TRUE},
@@ -208,12 +208,12 @@ static const xtract_argument_descriptor_t parameters_init_cqt[] = {
 static const xtract_builder_descriptor_t builder_init_cqt = {"init_cqt", XTRACT_CQT_KERNEL, XTRACT_FALSE, 6, parameters_init_cqt, xtract_build_init_cqt, xtract_release_init_cqt};
 
 static const xtract_argument_descriptor_t parameters_last_n_state_new[] = {
-    {.name = "capacity", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_LENGTH},
+    {.name = "capacity", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = 1, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_LENGTH},
 };
 static const xtract_builder_descriptor_t builder_last_n_state_new = {"last_n_state_new", XTRACT_LAST_N_STATE, XTRACT_TRUE, 1, parameters_last_n_state_new, xtract_build_last_n_state_new, xtract_release_last_n_state_new};
 
 static const xtract_argument_descriptor_t parameters_wavelet_f0_state_new[] = {
-    {.name = "sample_rate", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_SAMPLE_RATE},
+    {.name = "sample_rate", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = 2.2250738585072014e-308, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_SAMPLE_RATE},
 };
 static const xtract_builder_descriptor_t builder_wavelet_f0_state_new = {"wavelet_f0_state_new", XTRACT_WAVELET_F0_STATE, XTRACT_TRUE, 1, parameters_wavelet_f0_state_new, xtract_build_wavelet_f0_state_new, xtract_release_wavelet_f0_state_new};
 

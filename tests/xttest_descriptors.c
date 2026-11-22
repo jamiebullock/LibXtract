@@ -1739,6 +1739,88 @@ UTEST(descriptors, every_feature_conforms_to_its_descriptor)
     xtract_context_delete(ctx);
 }
 
+/* Whether a builder gives no object for its parameters, releasing any that
+ * it gives */
+static int conf_builder_refuses(const xtract_builder_descriptor_t *builder, const double *parameters)
+{
+    void *object = builder->build(parameters);
+
+    builder->release(object);
+    return object == NULL;
+}
+
+UTEST(descriptors, every_builder_refuses_a_parameter_its_descriptor_rules_out)
+{
+    const xtract_builder_descriptor_t *seen[XTRACT_FEATURES];
+    xtract_context *ctx = xtract_context_new(XTTEST_DRIVER_LIMIT);
+    xttest_call call;
+    int f, i, k, count = 0;
+
+    ASSERT_TRUE(ctx != NULL);
+
+    for (f = 0; f < XTRACT_FEATURES; f++)
+    {
+        const xtract_function_descriptor_t *d = xtract_descriptor(f);
+        const xtract_builder_descriptor_t *builder;
+        int is_new = 1;
+
+        if (d->argc == 0 || d->argv[0].kind != XTRACT_ARGUMENT_OBJECT)
+            continue;
+        builder = d->argv[0].builder;
+        for (k = 0; k < count; k++)
+            is_new = is_new && seen[k] != builder;
+        if (!is_new)
+            continue;
+        seen[count++] = builder;
+
+        /* The driver's parameters build an object, and the parameters with
+         * one value changed to a value outside what the descriptor allows
+         * build none */
+        ASSERT_TRUE_MSG(xttest_call_reach(&call, f, ctx, 1.0), builder->name);
+        ASSERT_TRUE_MSG(call.object != NULL, builder->name);
+        ASSERT_TRUE_MSG(builder->build(NULL) == NULL, builder->name);
+        for (i = 0; i < builder->argc; i++)
+        {
+            const xtract_argument_descriptor_t *parameter = &builder->argv[i];
+            const double value = call.parameters[i];
+            double refused[6];
+            int n = 0, r;
+
+            refused[n++] = NAN;
+            refused[n++] = INFINITY;
+            refused[n++] = -INFINITY;
+            if (parameter->min != XTRACT_UNBOUNDED_MIN)
+                refused[n++] = parameter->min - 1.0;
+            if (parameter->min > 0.0)
+                refused[n++] = 0.0;
+            if (parameter->max != XTRACT_UNBOUNDED_MAX)
+                refused[n++] = parameter->max + 1.0;
+            for (r = 0; r < n; r++)
+            {
+                call.parameters[i] = refused[r];
+                ASSERT_TRUE_MSG(conf_builder_refuses(builder, call.parameters), parameter->name);
+            }
+            if (parameter->type == XTRACT_INT)
+            {
+                call.parameters[i] = value + 0.5;
+                ASSERT_TRUE_MSG(conf_builder_refuses(builder, call.parameters), parameter->name);
+            }
+            for (k = 0; parameter->values != NULL && k <= (int)(parameter->max - parameter->min); k++)
+            {
+                if (parameter->values[k] != NULL)
+                    continue;
+                call.parameters[i] = parameter->min + k;
+                ASSERT_TRUE_MSG(conf_builder_refuses(builder, call.parameters), parameter->name);
+            }
+            call.parameters[i] = value;
+        }
+        xttest_call_free(&call);
+    }
+    ASSERT_GT(count, 5);
+
+    xtract_context_delete(ctx);
+}
+
 /* The power of a scale of the input that a value in the unit grows by, or 0
  * for a unit that does not follow the input. */
 static int conf_power(xtract_unit_t unit)

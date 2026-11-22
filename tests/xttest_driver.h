@@ -54,6 +54,7 @@ typedef struct xttest_call_
     double doubles[XTRACT_MAXARGS];
     int ints[XTRACT_MAXARGS];
     const xtract_builder_descriptor_t *builder;
+    double parameters[XTTEST_DRIVER_PARAMETERS];
     void *object;
     const void *argv;
     double *result;
