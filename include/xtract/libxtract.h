@@ -235,7 +235,10 @@ extern "C"
         XTRACT_ARGUMENT_SETTING   /* a value the caller chooses */
     } xtract_argument_kind_t;
 
-    /** \brief Enumeration of the properties of data that an argument can be */
+    /** \brief Enumeration of the properties of data that an argument can be
+     *
+     * The caller knows the properties of its own data. A result has the length its feature writes, and the levels are those a setting of xtract_quantise() gives its result, which the result_property member of that setting states. Its other properties are those of the data the feature was given: the bin spacing of a spectrum is the sample rate of the series divided by its length, which is the transform size.
+     */
     typedef enum xtract_property_
     {
         XTRACT_PROPERTY_NONE,           /* not a property */
@@ -259,16 +262,39 @@ extern "C"
         XTRACT_SUBJECT_SOURCE /* the data the feature's input was made from, e.g. the signal behind a spectrum */
     } xtract_subject_t;
 
-    /** \brief A feature whose result is a quantity */
+    /** \brief Enumeration of the parts of a result that can be a quantity */
+    typedef enum xtract_part_
+    {
+        XTRACT_PART_WHOLE,
+        XTRACT_PART_FIRST_HALF,
+        XTRACT_PART_FROM_ONE_BEFORE_THE_SECOND_HALF /* the element before the second half, then the second half */
+    } xtract_part_t;
+
+    /** \brief Enumeration of tags. Each states something a feature assumes about its data, and a descriptor has the sum of its tags */
+    enum xtract_tags_
+    {
+        XTRACT_TAG_SOUND = 1 /* the feature applies a model of hearing or a musical scale, so its data is sound */
+    };
+
+    struct xtract_quantity_;
+
+    /** \brief A feature whose result is a quantity, and what makes it so */
     typedef struct xtract_provider_
     {
-        int feature; /**< the feature, as given in the enumeration xtract_features_ */
+        int feature;                          /**< the feature, as given in the enumeration xtract_features_ */
+        xtract_part_t part;                   /**< the part of its result that is the quantity */
+        int setting;                          /**< the index of the argument of the feature, a setting, that must have one of the values below, or -1 when any value will do */
+        int value_count;                      /**< the number of values, or 0 */
+        const double *values;                 /**< the values of that setting for which the result is the quantity, the usual one first, or NULL */
+        const struct xtract_quantity_ *given; /**< what the feature must be given as its data, or NULL when any data it accepts will do */
     } xtract_provider_t;
 
-    /** \brief Something an argument accepts, and the features that provide it */
+    /** \brief Something an argument or the data of a feature accepts, and the features that provide it */
     typedef struct xtract_quantity_
     {
-        const char *name;                   /**< the name of a feature, or a name several features provide, e.g. "fundamental" */
+        const char *name;                   /**< the name of a feature, or a name for a part of a result or for what several features provide, e.g. "fundamental" */
+        xtract_bool_t is_scalar;            /**< it is one value; otherwise an array */
+        xtract_vector_t format;             /**< the layout of the array, which for a part of a result or for one type of result differs from the layout its feature states for the whole. XTRACT_ARBITRARY_SERIES for a scalar */
         int provider_count;                 /**< the number of features that provide it, at least 1 */
         const xtract_provider_t *providers; /**< the features whose result is this quantity, the usual one first */
     } xtract_quantity_t;
@@ -290,7 +316,7 @@ extern "C"
 
     /** \brief What the library records about one argument of a feature, or one parameter of a function that builds an object
      *
-     * The fields after max are read according to kind: accepts and subject for XTRACT_ARGUMENT_RESULT, data_property for XTRACT_ARGUMENT_PROPERTY, builder and is_optional for XTRACT_ARGUMENT_OBJECT, and the rest for XTRACT_ARGUMENT_SETTING.
+     * The fields after max are read according to kind: accepts and subject for XTRACT_ARGUMENT_RESULT, data_property for XTRACT_ARGUMENT_PROPERTY, builder and is_optional for XTRACT_ARGUMENT_OBJECT, and result_property and the rest for XTRACT_ARGUMENT_SETTING.
      */
     typedef struct xtract_argument_descriptor_
     {
@@ -305,6 +331,8 @@ extern "C"
         xtract_subject_t subject;         /**< the data that the result is the result of */
 
         xtract_property_t data_property; /**< which property of the data it is */
+
+        xtract_property_t result_property; /**< for a setting, the property of the result that its value is, or XTRACT_PROPERTY_NONE */
 
         const xtract_builder_descriptor_t *builder; /**< the function that builds the object */
         xtract_bool_t is_optional;                  /**< argv may be NULL in place of the object */
@@ -330,10 +358,16 @@ extern "C"
         const char *author; /* the author of the method, or NULL */
         int year;           /* the year the method was published, or 0 */
 
+        unsigned int tags; /**< the sum of its tags, as given in the enumeration xtract_tags_ */
+
+        /** \brief The data the feature is given */
         struct
         {
-            xtract_vector_t format;
-            xtract_unit_t unit;
+            xtract_vector_t format;                  /**< the layout of the array */
+            xtract_unit_t unit;                      /**< the unit of its elements */
+            int accept_count;                        /**< the number of entries of accepts, or 0 when only the caller has such data */
+            const xtract_quantity_t *const *accepts; /**< what the data usually is, the usual one first, or NULL when accept_count is 0. The function takes any array of the layout. When frames is 2, each frame is the quantity */
+            int frames;                              /**< 2 when the data is two frames of equal length one after the other, successive results of one feature with the current one first, and 1 otherwise */
         } data;
 
         int argc;                                 /* the number of arguments */
