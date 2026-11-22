@@ -335,17 +335,13 @@ extern "C"
     /** \brief What the library records about one feature, as xtract_descriptor() gives it */
     typedef struct xtract_function_descriptor_
     {
-        int id; /* the feature, as given in the enumeration xtract_features_ */
+        int id; /**< the feature, as given in the enumeration xtract_features_ */
 
-        /* the name of the feature's function without the xtract_ prefix, e.g.
-         * "spectral_centroid". A feature keeps its name in every release,
-         * and its number in the enumeration may change, so a stored
-         * reference to a feature is its name */
-        const char *name;
-        const char *title; /* a name to show to a person, e.g. "Spectral Centroid" */
-        const char *description;
-        const char *author; /* the author of the method, or NULL */
-        int year;           /* the year the method was published, or 0 */
+        const char *name;        /**< the name of the feature's function without the xtract_ prefix, e.g. "spectral_centroid". A feature keeps its name in every release, and its number in the enumeration may change, so a stored reference to a feature is its name */
+        const char *title;       /**< a name to show to a person, e.g. "Spectral Centroid" */
+        const char *description; /**< what the feature is, in a sentence */
+        const char *author;      /**< the author of the method, or NULL */
+        int year;                /**< the year the method was published, or 0 */
 
         unsigned int tags; /**< the sum of its tags, as given in the enumeration xtract_tags_ */
 
@@ -357,28 +353,31 @@ extern "C"
             int accept_count;                        /**< the number of entries of accepts, or 0 when only the caller has such data */
             const xtract_quantity_t *const *accepts; /**< what the data usually is, the usual one first, or NULL when accept_count is 0. The function takes any array of the layout. When frames is 2, each frame is the quantity */
             int frames;                              /**< 2 when the data is two frames of equal length one after the other, successive results of one feature with the current one first, and 1 otherwise */
+            const char *lengths;                     /**< the numbers of elements N the feature accepts: an expression in N and the names of its arguments that is true for them, as xtract_length_is_accepted() evaluates it */
         } data;
 
-        int argc;                                 /* the number of arguments */
-        const xtract_argument_descriptor_t *argv; /* one record for each argument in order, or NULL when argc is 0 */
+        int argc;                                 /**< the number of arguments */
+        const xtract_argument_descriptor_t *argv; /**< one record for each argument in order, or NULL when argc is 0 */
 
-        xtract_bool_t is_scalar;
-        xtract_bool_t is_delta; /* features in xtract_delta.h can be scalar or vector */
+        xtract_bool_t is_scalar; /**< the result is one value, described by result.scalar; otherwise an array, described by result.vector */
+        xtract_bool_t is_delta;  /**< the feature is declared in xtract_delta.h */
 
-        /* a result range of XTRACT_UNKNOWN_MIN/MAX means the range is
-         * genuinely undetermined, not merely unverified */
+        /** \brief The result. A range of XTRACT_UNKNOWN_MIN or XTRACT_UNKNOWN_MAX is one that is not determined */
         union {
+            /** \brief A scalar result */
             struct
             {
-                double min;
-                double max;
-                xtract_unit_t unit;
+                double min;         /**< the least value, or XTRACT_UNBOUNDED_MIN */
+                double max;         /**< the greatest value, or XTRACT_UNBOUNDED_MAX */
+                xtract_unit_t unit; /**< the unit of the value */
             } scalar;
 
+            /** \brief A vector result */
             struct
             {
-                xtract_vector_t format;
-                xtract_unit_t unit;
+                xtract_vector_t format; /**< the layout of the array */
+                xtract_unit_t unit;     /**< the unit of its elements */
+                const char *length;     /**< the number of elements the feature writes: an expression in N and the names of its arguments, as xtract_result_length() evaluates it */
             } vector;
 
         } result;
@@ -549,6 +548,24 @@ extern "C"
      * \return the feature, as given in the enumeration xtract_features_, or -1 if name is NULL or no feature has that name
      */
     int xtract_feature_by_name(const char *name);
+
+    /** \brief Report whether a feature accepts a number of elements
+     *
+     * \param feature: a feature, as given in the enumeration xtract_features_
+     * \param N: the number of elements
+     * \param *argv: a pointer to the arguments the feature would be called with. NULL is allowed for a feature whose rule for N reads none of them
+     * \return 1 if N meets the rule that the data.lengths member of the feature's descriptor states, and 0 if it does not, if feature is not in the enumeration, or if argv is NULL and the rule reads an argument
+     */
+    int xtract_length_is_accepted(const int feature, const int N, const void *argv);
+
+    /** \brief Get the number of elements a feature writes to its result
+     *
+     * \param feature: a feature, as given in the enumeration xtract_features_
+     * \param N: the number of elements the feature would be called with
+     * \param *argv: a pointer to the arguments the feature would be called with
+     * \return the number of elements a successful call of the feature writes to *result: 1 for a scalar result, and for a vector result the value of the expression its descriptor states. -1 if xtract_length_is_accepted() gives 0 for the same feature, N and argv, if argv is NULL and the expression reads an argument, or if the value is below 0 or above INT_MAX
+     */
+    int xtract_result_length(const int feature, const int N, const void *argv);
     /* Free functions */
 
     /** @} */

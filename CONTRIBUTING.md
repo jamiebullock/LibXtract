@@ -96,6 +96,59 @@ with `-DXTRACT_CLANG_FORMAT=<path>` to run the targets with a chosen binary.
   and `examples/simpletest/dr_wav.h` keeps its upstream style and licence.
   Do not reformat it or add a project header to it.
 
+### The feature data file
+
+`src/features.json` is where the library records what a caller needs to know
+about each feature, and `cmake/features.cmake` refuses a record that does
+not follow these rules. It has three lists.
+
+`features` has one record for each feature, in the order of the
+enumeration:
+
+- `name` is the name of the function without the `xtract_` prefix. `title`
+  and `description` are for a person to read. `reference` gives the `author`
+  and the `year` of the method, and `tags` lists what the feature assumes
+  about its data.
+- `input` gives the `format` and the `unit` of the data, and `length`, the
+  rule for N. `accepts` lists the quantities the data usually is, the usual
+  one first, and is left out when only the caller has such data. `frames` is
+  2 for data that is two successive results of one feature.
+- `arguments` has one record for each argument, and `argument_type` is the
+  type of the elements of argv, `float` or `int`. The `kind` of an argument
+  is `result`, `property`, `object` or `setting`:
+  - a `result` names in `accepts` the quantity it is, and in `of` whether it
+    is that of the `input` or of the `source` the input was made from;
+  - a `property` names which `property` of the data it is;
+  - an `object` names in `built_by` the builder that makes it, and is the
+    only argument of its feature;
+  - a `setting` has a `default`. It can list the names of its `values`, and
+    `sets` names a property of the result that its value becomes.
+- `provides` lists the quantities the result is, other than the one that
+  has the name of the feature. An entry can give the `part` of the result
+  that is the quantity, and the quantity the feature must be `given` as its
+  data.
+- `result` gives the `kind`, `scalar` or `vector`, and the `unit`, with the
+  range of a scalar or the `format` and the `length` of a vector.
+
+`quantities` has a record for each quantity that does not have the name of a
+feature: its `name` and its `default`, the feature that usually provides it.
+
+`builders` has a record for each function that builds an object: its `name`,
+the `type` of the object and its `parameters`, which are properties and
+settings. A builder also needs the pair of functions in `src/builders.c`
+that call it with an array of values and free what it returns.
+
+A `length` is written as a C expression in `N` and the names of the
+arguments, such as `N >= 2 * lag + 1`. It can call `is_power_of_two`,
+`is_square` and `root` on a number, `filter_count` and `filterbank_size` on
+a filterbank, `band_count` and `kernel_size` on a constant-Q kernel, and
+`capacity` on the state of `xtract_last_n()`. It is evaluated as `long
+long`, and every value it computes on the way must be in range for any int
+N and arguments, as a product of two of them is. An
+argument that a rule divides by is tested first: `width >= 1 && N % width ==
+0`. The generator checks the characters and the names of an expression, and
+the compiler checks its syntax when it builds `src/features.c`.
+
 ## Pull requests
 
 - Branch from `develop` and name the branch `<type>/<short-description>`, where

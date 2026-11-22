@@ -17,11 +17,6 @@
 #include <float.h>
 #include <math.h>
 
-struct xtract_last_n_state_
-{
-    ringbuf_t ringbuf;
-};
-
 xtract_last_n_state *xtract_last_n_state_new(size_t N)
 {
     xtract_last_n_state *last_n_state = malloc(sizeof(xtract_last_n_state));
