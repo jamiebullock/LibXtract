@@ -1223,7 +1223,7 @@ UTEST(descriptors, dct_takes_a_table_or_none)
 
 UTEST(descriptors, the_data_of_a_feature_accepts_what_vector_features_provide)
 {
-    int f, q, p;
+    int f, q, p, v;
 
     for (f = 0; f < XTRACT_FEATURES; f++)
     {
@@ -1245,39 +1245,87 @@ UTEST(descriptors, the_data_of_a_feature_accepts_what_vector_features_provide)
 
                 ASSERT_TRUE_MSG(feature != NULL && feature->is_scalar == XTRACT_FALSE, d->name);
                 ASSERT_TRUE_MSG(provider->setting >= -1 && provider->setting < feature->argc, d->name);
-                if (provider->setting >= 0)
+                ASSERT_EQ_MSG(provider->setting >= 0, provider->value_count > 0, d->name);
+                ASSERT_EQ_MSG(provider->values == NULL, provider->value_count == 0, d->name);
+                for (v = 0; v < provider->value_count; v++)
                 {
-                    ASSERT_EQ_MSG(feature->argv[provider->setting].kind, XTRACT_ARGUMENT_SETTING, d->name);
-                    ASSERT_TRUE_MSG(provider->value >= feature->argv[provider->setting].min && provider->value <= feature->argv[provider->setting].max, d->name);
+                    const xtract_argument_descriptor_t *setting = &feature->argv[provider->setting];
+
+                    ASSERT_EQ_MSG(setting->kind, XTRACT_ARGUMENT_SETTING, d->name);
+                    ASSERT_TRUE_MSG(provider->values[v] >= setting->min && provider->values[v] <= setting->max, d->name);
                 }
             }
         }
     }
 }
 
+/* Whether the provider gives its quantity when the setting it names has the value */
+static int provides_for(const xtract_provider_t *provider, double value)
+{
+    int v, found = 0;
+
+    for (v = 0; v < provider->value_count; v++)
+        found += provider->values[v] == value;
+    return found;
+}
+
 UTEST(descriptors, a_part_of_a_spectrum_is_a_quantity_of_its_own)
 {
-    const xtract_quantity_t *bins = xtract_descriptor(XTRACT_ROLLOFF)->data.accepts[0];
-    const xtract_quantity_t *magnitude_phase = xtract_descriptor(XTRACT_CQT)->data.accepts[0];
-    const xtract_quantity_t *whole = xtract_descriptor(XTRACT_HPS)->data.accepts[0];
+    const xtract_quantity_t *bins = xtract_descriptor(XTRACT_PEAK_SPECTRUM)->data.accepts[0];
+    const xtract_quantity_t *magnitudes = xtract_descriptor(XTRACT_ROLLOFF)->data.accepts[0];
+    const xtract_quantity_t *powers = xtract_descriptor(XTRACT_MFCC)->data.accepts[0];
 
     ASSERT_STREQ(bins->name, "bins");
     ASSERT_EQ(bins->provider_count, 1);
     ASSERT_EQ(bins->providers[0].feature, XTRACT_SPECTRUM);
     ASSERT_EQ(bins->providers[0].part, XTRACT_PART_FIRST_HALF);
     ASSERT_EQ(bins->providers[0].setting, -1);
-    ASSERT_TRUE(xtract_descriptor(XTRACT_MFCC)->data.accepts[0] == bins);
+    ASSERT_TRUE(xtract_descriptor(XTRACT_BARK_COEFFICIENTS)->data.accepts[0] == bins);
+
+    /* The first half is magnitudes for two types of spectrum and powers for one */
+    ASSERT_STREQ(magnitudes->name, "magnitude_bins");
+    ASSERT_EQ(magnitudes->providers[0].part, XTRACT_PART_FIRST_HALF);
+    ASSERT_TRUE(magnitudes->providers[0].setting >= 0);
+    ASSERT_STREQ(xtract_descriptor(XTRACT_SPECTRUM)->argv[magnitudes->providers[0].setting].name, "type");
+    ASSERT_EQ(magnitudes->providers[0].value_count, 2);
+    ASSERT_EQ(magnitudes->providers[0].values[0], (double)XTRACT_MAGNITUDE_SPECTRUM);
+    ASSERT_TRUE(provides_for(&magnitudes->providers[0], XTRACT_MAGNITUDE_PHASE_SPECTRUM));
+    ASSERT_TRUE(xtract_descriptor(XTRACT_FLATNESS)->data.accepts[0] == magnitudes);
+
+    ASSERT_STREQ(powers->name, "power_bins");
+    ASSERT_EQ(powers->providers[0].value_count, 1);
+    ASSERT_EQ(powers->providers[0].values[0], (double)XTRACT_POWER_SPECTRUM);
+    ASSERT_TRUE(xtract_descriptor(XTRACT_MFCC)->data.accepts[1] == magnitudes);
+    ASSERT_TRUE(xtract_descriptor(XTRACT_SPECTRAL_ENTROPY)->data.accepts[0] == powers);
+}
+
+UTEST(descriptors, a_spectrum_of_magnitudes_and_phases_is_a_quantity_apart_from_the_other_types)
+{
+    const xtract_quantity_t *magnitude_phase = xtract_descriptor(XTRACT_CQT)->data.accepts[0];
+    const xtract_quantity_t *whole = xtract_descriptor(XTRACT_HPS)->data.accepts[0];
+    const xtract_quantity_t *with_frequencies = xtract_descriptor(XTRACT_SPECTRAL_MEAN)->data.accepts[0];
 
     ASSERT_STREQ(magnitude_phase->name, "magnitude_phase");
     ASSERT_EQ(magnitude_phase->providers[0].feature, XTRACT_SPECTRUM);
     ASSERT_EQ(magnitude_phase->providers[0].part, XTRACT_PART_WHOLE);
+    ASSERT_TRUE(magnitude_phase->providers[0].setting >= 0);
     ASSERT_STREQ(xtract_descriptor(XTRACT_SPECTRUM)->argv[magnitude_phase->providers[0].setting].name, "type");
-    ASSERT_EQ(magnitude_phase->providers[0].value, (double)XTRACT_MAGNITUDE_PHASE_SPECTRUM);
+    ASSERT_EQ(magnitude_phase->providers[0].value_count, 1);
+    ASSERT_EQ(magnitude_phase->providers[0].values[0], (double)XTRACT_MAGNITUDE_PHASE_SPECTRUM);
     ASSERT_TRUE(xtract_descriptor(XTRACT_MMBSES)->data.accepts[0] == magnitude_phase);
 
+    /* The second half is frequencies for the three other types, and the
+     * features that read frequencies there take those alone */
     ASSERT_STREQ(whole->name, "spectrum");
     ASSERT_EQ(whole->provider_count, 1);
     ASSERT_EQ(whole->providers[0].part, XTRACT_PART_WHOLE);
+    ASSERT_EQ(whole->providers[0].value_count, 3);
+    ASSERT_EQ(whole->providers[0].values[0], (double)XTRACT_MAGNITUDE_SPECTRUM);
+    ASSERT_TRUE(provides_for(&whole->providers[0], XTRACT_LOG_SPECTRUM));
+    ASSERT_TRUE(provides_for(&whole->providers[0], XTRACT_POWER_SPECTRUM));
+    ASSERT_FALSE(provides_for(&whole->providers[0], XTRACT_MAGNITUDE_PHASE_SPECTRUM));
+    ASSERT_EQ(with_frequencies->providers[0].feature, XTRACT_SPECTRUM);
+    ASSERT_FALSE(provides_for(&with_frequencies->providers[0], XTRACT_MAGNITUDE_PHASE_SPECTRUM));
 }
 
 UTEST(descriptors, coefficients_with_their_frequencies_come_from_four_features)
@@ -1328,7 +1376,7 @@ UTEST(descriptors, data_that_more_than_one_quantity_can_be_names_the_usual_one_f
 
     ASSERT_EQ(irregularity->data.accept_count, 2);
     ASSERT_STREQ(irregularity->data.accepts[0]->name, "partial_amplitudes");
-    ASSERT_STREQ(irregularity->data.accepts[1]->name, "bins");
+    ASSERT_STREQ(irregularity->data.accepts[1]->name, "magnitude_bins");
 
     ASSERT_EQ(variances->data.accept_count, 2);
     ASSERT_EQ(variances->data.accepts[0]->providers[0].feature, XTRACT_COVARIANCE_MATRIX);
@@ -1358,7 +1406,7 @@ UTEST(descriptors, five_features_take_two_successive_frames)
 
         ASSERT_EQ_MSG(d->data.frames, takes_two ? 2 : 1, d->name);
         if (takes_two)
-            ASSERT_STREQ_MSG(d->data.accepts[0]->name, "bins", d->name);
+            ASSERT_TRUE_MSG(d->data.accepts[0]->providers[0].feature == XTRACT_SPECTRUM && d->data.accepts[0]->providers[0].part == XTRACT_PART_FIRST_HALF, d->name);
     }
 }
 

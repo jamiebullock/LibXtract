@@ -235,7 +235,10 @@ extern "C"
         XTRACT_ARGUMENT_SETTING   /* a value the caller chooses */
     } xtract_argument_kind_t;
 
-    /** \brief Enumeration of the properties of data that an argument can be */
+    /** \brief Enumeration of the properties of data that an argument can be
+     *
+     * The caller knows the properties of its own data. A result has the length its feature writes, and the levels are those a setting of xtract_quantise() gives its result, which the result_property member of that setting states. Its other properties are those of the data the feature was given: the bin spacing of a spectrum is the sample rate of the series divided by its length, which is the transform size.
+     */
     typedef enum xtract_property_
     {
         XTRACT_PROPERTY_NONE,           /* not a property */
@@ -280,8 +283,9 @@ extern "C"
     {
         int feature;                          /**< the feature, as given in the enumeration xtract_features_ */
         xtract_part_t part;                   /**< the part of its result that is the quantity */
-        int setting;                          /**< the index of the argument of the feature that must have the value below, or -1 when any value will do */
-        double value;                         /**< the value of that argument */
+        int setting;                          /**< the index of the argument of the feature, a setting, that must have one of the values below, or -1 when any value will do */
+        int value_count;                      /**< the number of values, or 0 */
+        const double *values;                 /**< the values of that setting for which the result is the quantity, the usual one first, or NULL */
         const struct xtract_quantity_ *given; /**< what the feature must be given as its data, or NULL when any data it accepts will do */
     } xtract_provider_t;
 
@@ -326,7 +330,7 @@ extern "C"
 
         xtract_property_t data_property; /**< which property of the data it is */
 
-        xtract_property_t result_property; /**< for a setting, the property of the result that its value is, or XTRACT_PROPERTY_NONE. Every other property of the result is that of the data */
+        xtract_property_t result_property; /**< for a setting, the property of the result that its value is, or XTRACT_PROPERTY_NONE */
 
         const xtract_builder_descriptor_t *builder; /**< the function that builds the object */
         xtract_bool_t is_optional;                  /**< argv may be NULL in place of the object */
@@ -358,9 +362,9 @@ extern "C"
         {
             xtract_vector_t format;                  /* the layout of the array */
             xtract_unit_t unit;                      /* the unit of its elements */
-            int accept_count;                        /* the number of quantities it accepts, or 0 when only the caller has such data */
-            const xtract_quantity_t *const *accepts; /* what the data usually is, the usual one first, or NULL. The function takes any array of the layout */
-            int frames;                              /* 2 when the data is two successive results of one feature, the current first, and 1 otherwise */
+            int accept_count;                        /* the number of entries of accepts, or 0 when only the caller has such data */
+            const xtract_quantity_t *const *accepts; /* what the data usually is, the usual one first, or NULL when accept_count is 0. The function takes any array of the layout. When frames is 2, each frame is the quantity */
+            int frames;                              /* 2 when the data is two frames of equal length one after the other, successive results of one feature with the current one first, and 1 otherwise */
         } data;
 
         int argc;                                 /* the number of arguments */
