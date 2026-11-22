@@ -31,6 +31,21 @@ if len(sys.argv) > 1:
         sys.exit(1)
     print('The module has all %d functions the headers declare' % len(declared))
 
+# The interface gives a function a result argument unless the result is one
+# value, which the function returns instead
+import inspect
+
+wrong = []
+for feature in range(xtract.XTRACT_FEATURE_COUNT):
+    descriptor = xtract.xtract_descriptor(feature)
+    parameters = inspect.signature(getattr(xtract, 'xtract_' + descriptor.name)).parameters
+    if ('result' in parameters) == bool(descriptor.is_scalar):
+        wrong.append(descriptor.name)
+if wrong:
+    print('These features return their result the wrong way: ' + ', '.join(wrong))
+    sys.exit(1)
+print('Every feature returns a scalar result and takes an array for a vector result')
+
 len = 8
 
 a = xtract.doubleArray(len)
