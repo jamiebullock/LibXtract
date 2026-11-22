@@ -1,14 +1,14 @@
 {
   "quantities": [
     {"name": "fundamental", "default": "failsafe_f0"},
-    {"name": "bins", "default": "spectrum"},
-    {"name": "magnitude_bins", "default": "spectrum"},
-    {"name": "power_bins", "default": "spectrum"},
-    {"name": "magnitude_phase", "default": "spectrum"},
-    {"name": "coefficients_and_frequencies", "default": "spectrum"},
-    {"name": "partial_amplitudes", "default": "packed"},
-    {"name": "harmonic_amplitudes", "default": "packed"},
-    {"name": "lpc_coefficients", "default": "lpc"}
+    {"name": "bins", "default": "spectrum", "format": "spectral_magnitudes"},
+    {"name": "magnitude_bins", "default": "spectrum", "format": "spectral_magnitudes"},
+    {"name": "power_bins", "default": "spectrum", "format": "spectral_magnitudes"},
+    {"name": "magnitude_phase", "default": "spectrum", "format": "spectral_magnitude_phase"},
+    {"name": "coefficients_and_frequencies", "default": "spectrum", "format": "spectral"},
+    {"name": "partial_amplitudes", "default": "packed", "format": "spectral_magnitudes"},
+    {"name": "harmonic_amplitudes", "default": "packed", "format": "spectral_harmonics_magnitudes"},
+    {"name": "lpc_coefficients", "default": "lpc", "format": "lpc_coeffs"}
   ],
   "builders": [
     {

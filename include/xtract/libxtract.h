@@ -293,6 +293,8 @@ extern "C"
     typedef struct xtract_quantity_
     {
         const char *name;                   /**< the name of a feature, or a name for a part of a result or for what several features provide, e.g. "fundamental" */
+        xtract_bool_t is_scalar;            /**< it is one value; otherwise an array */
+        xtract_vector_t format;             /**< the layout of the array, which for a part of a result or for one type of result differs from the layout its feature states for the whole. XTRACT_ARBITRARY_SERIES for a scalar */
         int provider_count;                 /**< the number of features that provide it, at least 1 */
         const xtract_provider_t *providers; /**< the features whose result is this quantity, the usual one first */
     } xtract_quantity_t;
@@ -356,15 +358,16 @@ extern "C"
         const char *author; /* the author of the method, or NULL */
         int year;           /* the year the method was published, or 0 */
 
-        unsigned int tags; /* the sum of its tags, as given in the enumeration xtract_tags_ */
+        unsigned int tags; /**< the sum of its tags, as given in the enumeration xtract_tags_ */
 
+        /** \brief The data the feature is given */
         struct
         {
-            xtract_vector_t format;                  /* the layout of the array */
-            xtract_unit_t unit;                      /* the unit of its elements */
-            int accept_count;                        /* the number of entries of accepts, or 0 when only the caller has such data */
-            const xtract_quantity_t *const *accepts; /* what the data usually is, the usual one first, or NULL when accept_count is 0. The function takes any array of the layout. When frames is 2, each frame is the quantity */
-            int frames;                              /* 2 when the data is two frames of equal length one after the other, successive results of one feature with the current one first, and 1 otherwise */
+            xtract_vector_t format;                  /**< the layout of the array */
+            xtract_unit_t unit;                      /**< the unit of its elements */
+            int accept_count;                        /**< the number of entries of accepts, or 0 when only the caller has such data */
+            const xtract_quantity_t *const *accepts; /**< what the data usually is, the usual one first, or NULL when accept_count is 0. The function takes any array of the layout. When frames is 2, each frame is the quantity */
+            int frames;                              /**< 2 when the data is two frames of equal length one after the other, successive results of one feature with the current one first, and 1 otherwise */
         } data;
 
         int argc;                                 /* the number of arguments */

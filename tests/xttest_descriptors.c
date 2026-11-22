@@ -6,6 +6,7 @@
 
 #include <math.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "xtract/libxtract.h"
 
@@ -1285,7 +1286,7 @@ UTEST(descriptors, a_part_of_a_spectrum_is_a_quantity_of_its_own)
     /* The first half is magnitudes for two types of spectrum and powers for one */
     ASSERT_STREQ(magnitudes->name, "magnitude_bins");
     ASSERT_EQ(magnitudes->providers[0].part, XTRACT_PART_FIRST_HALF);
-    ASSERT_TRUE(magnitudes->providers[0].setting >= 0);
+    ASSERT_TRUE(magnitudes->providers[0].setting >= 0 && magnitudes->providers[0].setting < xtract_descriptor(XTRACT_SPECTRUM)->argc);
     ASSERT_STREQ(xtract_descriptor(XTRACT_SPECTRUM)->argv[magnitudes->providers[0].setting].name, "type");
     ASSERT_EQ(magnitudes->providers[0].value_count, 2);
     ASSERT_EQ(magnitudes->providers[0].values[0], (double)XTRACT_MAGNITUDE_SPECTRUM);
@@ -1308,7 +1309,7 @@ UTEST(descriptors, a_spectrum_of_magnitudes_and_phases_is_a_quantity_apart_from_
     ASSERT_STREQ(magnitude_phase->name, "magnitude_phase");
     ASSERT_EQ(magnitude_phase->providers[0].feature, XTRACT_SPECTRUM);
     ASSERT_EQ(magnitude_phase->providers[0].part, XTRACT_PART_WHOLE);
-    ASSERT_TRUE(magnitude_phase->providers[0].setting >= 0);
+    ASSERT_TRUE(magnitude_phase->providers[0].setting >= 0 && magnitude_phase->providers[0].setting < xtract_descriptor(XTRACT_SPECTRUM)->argc);
     ASSERT_STREQ(xtract_descriptor(XTRACT_SPECTRUM)->argv[magnitude_phase->providers[0].setting].name, "type");
     ASSERT_EQ(magnitude_phase->providers[0].value_count, 1);
     ASSERT_EQ(magnitude_phase->providers[0].values[0], (double)XTRACT_MAGNITUDE_PHASE_SPECTRUM);
@@ -1326,6 +1327,49 @@ UTEST(descriptors, a_spectrum_of_magnitudes_and_phases_is_a_quantity_apart_from_
     ASSERT_FALSE(provides_for(&whole->providers[0], XTRACT_MAGNITUDE_PHASE_SPECTRUM));
     ASSERT_EQ(with_frequencies->providers[0].feature, XTRACT_SPECTRUM);
     ASSERT_FALSE(provides_for(&with_frequencies->providers[0], XTRACT_MAGNITUDE_PHASE_SPECTRUM));
+
+    /* The layout of each is its own: the descriptor of xtract_spectrum()
+     * states the layout of the three types, which is that of its quantity */
+    ASSERT_EQ(magnitude_phase->format, XTRACT_SPECTRAL_MAGNITUDE_PHASE);
+    ASSERT_EQ(whole->format, XTRACT_SPECTRAL);
+    ASSERT_EQ(whole->format, xtract_descriptor(XTRACT_SPECTRUM)->result.vector.format);
+    ASSERT_EQ(with_frequencies->format, XTRACT_SPECTRAL);
+    ASSERT_EQ(xtract_descriptor(XTRACT_ROLLOFF)->data.accepts[0]->format, XTRACT_SPECTRAL_MAGNITUDES);
+}
+
+UTEST(descriptors, a_quantity_is_a_scalar_or_an_array_as_its_providers_give)
+{
+    int f, i, q, p;
+
+    for (f = 0; f < XTRACT_FEATURES; f++)
+    {
+        const xtract_function_descriptor_t *d = xtract_descriptor(f);
+
+        for (i = 0; i < d->argc; i++)
+        {
+            const xtract_quantity_t *quantity = d->argv[i].accepts;
+
+            if (quantity == NULL)
+                continue;
+            ASSERT_EQ_MSG(quantity->is_scalar, XTRACT_TRUE, d->name);
+            for (p = 0; p < quantity->provider_count; p++)
+                ASSERT_EQ_MSG(xtract_descriptor(quantity->providers[p].feature)->is_scalar, XTRACT_TRUE, d->name);
+        }
+        for (q = 0; q < d->data.accept_count; q++)
+        {
+            const xtract_quantity_t *quantity = d->data.accepts[q];
+
+            ASSERT_EQ_MSG(quantity->is_scalar, XTRACT_FALSE, d->name);
+            /* A quantity named after a feature has the layout that feature states for its result */
+            for (p = 0; p < quantity->provider_count; p++)
+            {
+                const xtract_function_descriptor_t *provider = xtract_descriptor(quantity->providers[p].feature);
+
+                if (strcmp(quantity->name, provider->name) == 0)
+                    ASSERT_EQ_MSG(quantity->format, provider->result.vector.format, d->name);
+            }
+        }
+    }
 }
 
 UTEST(descriptors, coefficients_with_their_frequencies_come_from_four_features)
