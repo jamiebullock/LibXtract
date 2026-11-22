@@ -106,7 +106,7 @@ extern "C"
      * \param *data: a pointer to the first element in an array of spectral coefficients, the first half of the array pointed to by *result from xtract_power_spectrum(), so that element k is bin k as the filterbank expects. Rabiner and Juang define the mel cepstrum on the power spectrum; the first half of the *result of xtract_magnitude_spectrum() may be passed instead
      * \param N: the number of coefficients, at least 1 and equal to half the N the filterbank was built for
      * \param *argv: a pointer to an xtract_filterbank from xtract_init_mfcc() or xtract_init_filterbank(), built for the size of the transform that produced the spectrum
-     * \param *result: a pointer to an array of n_filters doubles containing the resultant MFCC
+     * \param *result: a pointer to an array of n_filters doubles containing the resultant MFCC: the DCT of the log of the energy each filter passes. An energy below DBL_EPSILON times the largest energy of the filters counts as that. The array is zeroed with no result when no filter has an energy above 0
      */
     int xtract_mfcc(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
@@ -119,7 +119,7 @@ extern "C"
      * \param *data: a pointer to the first element in an array of spectral coefficients, the first half of the array pointed to by *result from xtract_power_spectrum(), so that element k is bin k as the filterbank expects. Rabiner and Juang define the mel cepstrum on the power spectrum; the first half of the *result of xtract_magnitude_spectrum() may be passed instead
      * \param N: the number of coefficients, at least 1 and equal to half the N the filterbank was built for
      * \param *argv: a pointer to an xtract_filterbank from xtract_init_mfcc() or xtract_init_filterbank(), built for the size of the transform that produced the spectrum
-     * \param *result: a pointer to an array of n_filters doubles containing the resultant log mel energies (one per filter)
+     * \param *result: a pointer to an array of n_filters doubles containing the resultant log mel energies (one per filter). An energy below DBL_EPSILON times the largest energy of the filters counts as that. The array is zeroed with no result when no filter has an energy above 0
      */
     int xtract_mel_spectrogram(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
@@ -133,7 +133,7 @@ extern "C"
      * \param *data: a pointer to the first element in an array of spectral coefficients, the first half of the array pointed to by *result from xtract_power_spectrum(), so that element k is bin k as the filterbank expects. the gammatone filterbank is applied to the power spectrum in the same way; the first half of the *result of xtract_magnitude_spectrum() may be passed instead
      * \param N: the number of coefficients, at least 1 and equal to half the N the filterbank was built for
      * \param *argv: a pointer to an xtract_filterbank from xtract_init_gfcc() or xtract_init_filterbank(), built for the size of the transform that produced the spectrum
-     * \param *result: a pointer to an array of n_filters doubles containing the resultant GFCC
+     * \param *result: a pointer to an array of n_filters doubles containing the resultant GFCC: the DCT of the log of the energy each filter passes. An energy below DBL_EPSILON times the largest energy of the filters counts as that. The array is zeroed with no result when no filter has an energy above 0
      */
     int xtract_gfcc(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
@@ -146,7 +146,7 @@ extern "C"
      * \param *data: a pointer to the first element in an array of spectral coefficients, the first half of the array pointed to by *result from xtract_power_spectrum(), so that element k is bin k as the filterbank expects. the gammatone filterbank is applied to the power spectrum in the same way; the first half of the *result of xtract_magnitude_spectrum() may be passed instead
      * \param N: the number of coefficients, at least 1 and equal to half the N the filterbank was built for
      * \param *argv: a pointer to an xtract_filterbank from xtract_init_gfcc() or xtract_init_filterbank(), built for the size of the transform that produced the spectrum
-     * \param *result: a pointer to an array of n_filters doubles containing the resultant log gammatone energies (one per filter)
+     * \param *result: a pointer to an array of n_filters doubles containing the resultant log gammatone energies (one per filter). An energy below DBL_EPSILON times the largest energy of the filters counts as that. The array is zeroed with no result when no filter has an energy above 0
      */
     int xtract_gammatone_spectrogram(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
@@ -156,7 +156,7 @@ extern "C"
      * \param *data: a complex spectrum, the *result of xtract_spectrum(), so that element k is bin k as the filterbank expects: the first N/2 elements are the real parts of the bins from DC upward and the next N/2 their imaginary parts
      * \param N: the number of array elements to be considered (the whole complex spectrum; N/2 frequency bins are processed), at least 2 and even, and equal to the N the filterbank was built for
      * \param *argv: a pointer to an xtract_filterbank from xtract_init_mfcc() or xtract_init_filterbank(), built for the size of the transform that produced the spectrum
-     * \param *result: a pointer to an array of n_filters elements containing the resultant MEL-MBSES
+     * \param *result: a pointer to an array of n_filters elements containing the resultant MEL-MBSES. A determinant below DBL_EPSILON times the largest determinant of the bands counts as that, as does a band of a single bin or of bins on one line through 0, whose determinant is 0. A band that no bin passes is 0. The array is zeroed with no result when no band that a bin passes has a determinant above 0
      *
      * Each filter band's complex coefficients are modelled as a zero-mean bivariate (real, imaginary) Gaussian and the band's value is that distribution's differential entropy, H = ln(2*pi*e) + (1/2)ln(det of the 2x2 covariance).
      *
