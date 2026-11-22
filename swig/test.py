@@ -53,16 +53,16 @@ print('The variance is %.2f' % variance)
 
 print('Computing spectrum...')
 
-argv = xtract.doubleArray(3)
+argv = xtract.doubleArray(1)
 argv[0] = 44100.0 / len
-argv[1] = float(xtract.XTRACT_MAGNITUDE_SPECTRUM)
-argv[2] = 0.0
 
 ctx = xtract.xtract_context_new(len)
 
+complex_spectrum = xtract.doubleArray(len)
 result = xtract.doubleArray(len)
 
-xtract.xtract_spectrum(ctx, a,len,argv, result)
+xtract.xtract_spectrum(ctx, a, len, None, complex_spectrum)
+xtract.xtract_magnitude_spectrum(ctx, complex_spectrum, len, argv, result)
 xtract.xtract_context_delete(ctx)
 
 

@@ -13,7 +13,8 @@
  * filterbanks, bark limits, and the context are built once at a fixed
  * power-of-two N in LLVMFuzzerInitialize. The features that need no such
  * setup (DCT, autocorrelation, AMDF, ASDF, LPC, LPCC, the moving-window
- * features, quantise, histogram and packed) are called with a fuzzer-chosen
+ * features, quantise, histogram, packed, the four spectra taken from a
+ * complex spectrum and the logarithm) are called with a fuzzer-chosen
  * N from 0 up to it, which includes the lengths each of them rejects. A filterbank
  * feature is called at the one N its filterbank serves or, when a bit of the
  * input is set, at a fuzzer-chosen N, which it rejects unless it is that N.
@@ -22,7 +23,7 @@
  * sanitizer. Features are called by name.
  *
  * What is fuzzed: the input vector (always), a flag that passes a NULL argv,
- * and the plain scalar argv fields (spectrum type, peak/harmonic thresholds,
+ * and the plain scalar argv fields (bin spacing, peak/harmonic thresholds,
  * f0), each folded into a range around its valid one so that both accepted
  * and rejected values are reached. What is held valid: the filterbank/bark
  * pointers (each feature's maths is fuzzed on adversarial input; the init
@@ -86,6 +87,11 @@ enum
     FZ_QUANTISE,
     FZ_HISTOGRAM,
     FZ_PACKED,
+    FZ_MAGNITUDE_SPECTRUM,
+    FZ_POWER_SPECTRUM,
+    FZ_LOG_SPECTRUM,
+    FZ_PHASE_SPECTRUM,
+    FZ_LOG,
     FZ_N_FEATURES
 };
 
@@ -141,6 +147,11 @@ static int input_length(int feature, int n, int any_length)
     case FZ_MOVING_MIN:
     case FZ_EWMA_AVERAGE:
     case FZ_EWMA_VARIANCE:
+    case FZ_MAGNITUDE_SPECTRUM:
+    case FZ_POWER_SPECTRUM:
+    case FZ_LOG_SPECTRUM:
+    case FZ_PHASE_SPECTRUM:
+    case FZ_LOG:
     case FZ_QUANTISE:
     case FZ_HISTOGRAM:
     case FZ_PACKED:
@@ -225,11 +236,8 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     switch (feature)
     {
     case FZ_SPECTRUM:
-    {
-        double a[3] = {fz[0], fold(fz[1], XTRACT_MAGNITUDE_PHASE_SPECTRUM + 2.0), fz[2]};
-        xtract_spectrum(ctx, input, VEC_N, maybe_null(null_argv, a), result);
+        xtract_spectrum(ctx, input, VEC_N, NULL, result);
         break;
-    }
     case FZ_PEAK_SPECTRUM:
     {
         double a[2] = {fz[0], fold(fz[1], 110.0)};
@@ -390,6 +398,22 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     case FZ_PACKED:
         xtract_packed(ctx, input, n, NULL, result);
         break;
+    case FZ_MAGNITUDE_SPECTRUM:
+    case FZ_POWER_SPECTRUM:
+    case FZ_LOG_SPECTRUM:
+    case FZ_PHASE_SPECTRUM:
+    {
+        static const int spectra[4] = {XTRACT_MAGNITUDE_SPECTRUM, XTRACT_POWER_SPECTRUM, XTRACT_LOG_SPECTRUM, XTRACT_PHASE_SPECTRUM};
+        double q = fz[0];
+        xtract[spectra[feature - FZ_MAGNITUDE_SPECTRUM]](ctx, input, n, maybe_null(null_argv, &q), result);
+        break;
+    }
+    case FZ_LOG:
+    {
+        double lambda = fz[0];
+        xtract_log(ctx, input, n, maybe_null(null_argv, &lambda), result);
+        break;
+    }
     default:
         break;
     }

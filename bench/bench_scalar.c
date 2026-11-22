@@ -251,7 +251,7 @@ UBENCH(spectral_kurtosis, N4096)
 UBENCH(lnorm, N512)
 {
     double result;
-    double argv[3] = {2.0, (double)XTRACT_NO_LNORM_FILTER, 0.0};
+    double argv[2] = {2.0, (double)XTRACT_NO_LNORM_FILTER};
     xtract_lnorm(NULL, data_512, 512, argv, &result);
     UBENCH_DO_NOTHING(&result);
 }
@@ -259,7 +259,7 @@ UBENCH(lnorm, N512)
 UBENCH(lnorm, N4096)
 {
     double result;
-    double argv[3] = {2.0, (double)XTRACT_NO_LNORM_FILTER, 0.0};
+    double argv[2] = {2.0, (double)XTRACT_NO_LNORM_FILTER};
     xtract_lnorm(NULL, data_4096, 4096, argv, &result);
     UBENCH_DO_NOTHING(&result);
 }

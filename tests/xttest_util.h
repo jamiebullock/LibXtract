@@ -46,3 +46,10 @@ uint16_t xttest_ftom(double frequency);
 
 /* Return a context shared by the tests, created for XTTEST_LONGEST elements and freed at exit */
 xtract_context *xttest_context(void);
+
+/* Write to result the spectrum of N elements of data that feature gives
+ * from their complex spectrum, with bin spacing q: feature is
+ * XTRACT_MAGNITUDE_SPECTRUM, XTRACT_POWER_SPECTRUM, XTRACT_LOG_SPECTRUM or
+ * XTRACT_PHASE_SPECTRUM, or XTRACT_SPECTRUM for the complex spectrum itself.
+ * Returns what the first call that does not succeed returns */
+int xttest_spectrum(xtract_context *ctx, const double *data, int N, int feature, double q, double *result);

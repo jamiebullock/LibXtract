@@ -130,17 +130,38 @@ static int subframes_call(xtract_context *ctx, const double *data, int N, int fe
 
 UTEST(helper, features_from_subframes_passes_its_context_to_the_feature)
 {
-    /* Each subframe of 8 elements is a cosine on bin 2, so its spectrum is
-     * 0.5 in the third of its 4 coefficients */
+    /* Each subframe of 8 elements is a cosine on bin 2, so its complex
+     * spectrum has a real part of 0.5 in the third of its 4 bins */
     double data[] = {1.0, 0.0, -1.0, 0.0, 1.0, 0.0, -1.0, 0.0, 1.0, 0.0, -1.0, 0.0, 1.0, 0.0, -1.0, 0.0};
     double result[16] = {0};
-    double argv[3] = {1.0, XTRACT_MAGNITUDE_SPECTRUM, 0.0};
     xtract_context *ctx = xtract_context_new(8);
 
-    ASSERT_EQ(subframes_call(NULL, data, 16, XTRACT_SPECTRUM, argv, result), XTRACT_BAD_STATE);
-    ASSERT_EQ(subframes_call(ctx, data, 16, XTRACT_SPECTRUM, argv, result), XTRACT_SUCCESS);
+    ASSERT_EQ(subframes_call(NULL, data, 16, XTRACT_SPECTRUM, NULL, result), XTRACT_BAD_STATE);
+    ASSERT_EQ(subframes_call(ctx, data, 16, XTRACT_SPECTRUM, NULL, result), XTRACT_SUCCESS);
     CHECK_REL(result[2], 0.5, EPSILON);
     CHECK_REL(result[8 + 2], 0.5, EPSILON);
+    xtract_context_delete(ctx);
+}
+
+UTEST(helper, features_from_subframes_takes_the_spectra_of_a_complex_spectrum_and_the_logarithm)
+{
+    /* The complex spectra of two subframes, each a cosine on bin 2, give a
+     * magnitude of 0.5 in the third bin of each, and the logarithm of the
+     * magnitudes follows */
+    double data[] = {1.0, 0.0, -1.0, 0.0, 1.0, 0.0, -1.0, 0.0, 1.0, 0.0, -1.0, 0.0, 1.0, 0.0, -1.0, 0.0};
+    double complex_spectra[16], magnitudes[16], logarithms[16];
+    const double q = 1.0, lambda = 2.0;
+    xtract_context *ctx = xtract_context_new(8);
+
+    ASSERT_EQ(subframes_call(ctx, data, 16, XTRACT_SPECTRUM, NULL, complex_spectra), XTRACT_SUCCESS);
+    ASSERT_EQ(subframes_call(NULL, complex_spectra, 16, XTRACT_MAGNITUDE_SPECTRUM, &q, magnitudes), XTRACT_SUCCESS);
+    CHECK_REL(magnitudes[2], 0.5, EPSILON);
+    CHECK_REL(magnitudes[8 + 2], 0.5, EPSILON);
+    ASSERT_EQ(subframes_call(NULL, complex_spectra, 16, XTRACT_POWER_SPECTRUM, &q, logarithms), XTRACT_SUCCESS);
+    ASSERT_EQ(subframes_call(NULL, complex_spectra, 16, XTRACT_LOG_SPECTRUM, &q, logarithms), XTRACT_SUCCESS);
+    ASSERT_EQ(subframes_call(NULL, complex_spectra, 16, XTRACT_PHASE_SPECTRUM, &q, logarithms), XTRACT_SUCCESS);
+    ASSERT_EQ(subframes_call(NULL, magnitudes, 16, XTRACT_LOG, &lambda, logarithms), XTRACT_SUCCESS);
+    CHECK_REL(logarithms[2], log(2.0), EPSILON);
     xtract_context_delete(ctx);
 }
 

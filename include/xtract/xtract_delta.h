@@ -31,7 +31,7 @@ extern "C"
      * \param *ctx: a pointer to a context created for at least N elements
      * \param *data: a pointer to the first element in an array of doubles comprising two successive spectral frames: the current frame in the first N/2 elements, the previous frame in the second N/2 elements
      * \param N: the total number of elements in the array pointed to by *data (twice the frame size), at least 2 and even
-     * \param *argv: a pointer to an array of three doubles as for xtract_lnorm(): the norm order, the filter type (enumeration xtract_lnorm_filter_types_), and the normalise flag. XTRACT_POSITIVE_SLOPE counts only the bins that rose from the previous frame, which is the half-wave rectified flux used for onset detection, and XTRACT_NEGATIVE_SLOPE only the bins that fell
+     * \param *argv: a pointer to an array of two doubles as for xtract_lnorm(): the norm order and the filter type (enumeration xtract_lnorm_filter_types_). XTRACT_POSITIVE_SLOPE counts only the bins that rose from the previous frame, which is the half-wave rectified flux used for onset detection, and XTRACT_NEGATIVE_SLOPE only the bins that fell
      * \param *result: a pointer to a double representing the spectral flux: the L-p norm of the difference between the two frames
      */
     int xtract_flux(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
@@ -41,8 +41,8 @@ extern "C"
      * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles representing the difference between two subsequent frames of output from a vector-based feature e.g. the *result from xtract_difference_vector()
      * \param N: the length of the array pointed to by *data, at least 1
-     * \param *argv: a pointer to an array of doubles, the first representing the "norm order". The second argument represents the filter type determining what values we consider from the difference vector, one of the values of the enumeration xtract_lnorm_filter_types_ (libxtract.h); the third sets whether we want the result to be normalised in the range 0-1, and is 0 (no normalise) or 1 (normalise)
-     * \param *result: a pointer to a double representing the flux
+     * \param *argv: a pointer to an array of two doubles: the "norm order", and the filter type determining what values we consider from the difference vector, one of the values of the enumeration xtract_lnorm_filter_types_ (libxtract.h)
+     * \param *result: a pointer to a double representing the norm, in the unit of the elements of *data
      *
      */
     int xtract_lnorm(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);

@@ -78,6 +78,10 @@ with `-DXTRACT_CLANG_FORMAT=<path>` to run the targets with a chosen binary.
   or change a feature, edit the JSON file, build the target and commit the
   three files together. `ctest` fails when they disagree. A new record goes
   at the end of the file, so that every other feature keeps its number.
+- A feature gives one kind of result: one layout and one unit, whatever its
+  settings. Where a setting would change either, the result is two
+  features, as the magnitude and power spectra are two features of one
+  complex spectrum.
 - Public declarations in `include/xtract/` carry a Doxygen block that states
   the contract: what the caller passes, what comes back, and the rules for
   using it. Leave the implementation out of the block, and match the

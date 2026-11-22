@@ -87,6 +87,7 @@
 
     int xtract_difference_vector(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
     int xtract_cross_correlation(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
+    int xtract_normalised_cross_correlation(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
     int xtract_covariance_matrix(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
     int xtract_correlation_matrix(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
     int xtract_principal_variances(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);

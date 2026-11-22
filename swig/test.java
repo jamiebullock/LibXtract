@@ -46,15 +46,15 @@ public class test {
 
         System.out.println("Computing spectrum...");
 
-        doubleArray specArgv = new doubleArray(3);
+        doubleArray specArgv = new doubleArray(1);
         specArgv.setitem(0, 44100.0 / len);
-        specArgv.setitem(1, xtract_spectrum_.XTRACT_MAGNITUDE_SPECTRUM.swigValue());
-        specArgv.setitem(2, 0.0);
 
         SWIGTYPE_p_xtract_context_ ctx = xtract.xtract_context_new(len);
 
+        doubleArray complexSpectrum = new doubleArray(len);
         doubleArray result = new doubleArray(len);
-        xtract.xtract_spectrum(ctx, a.cast(), len,
+        xtract.xtract_spectrum(ctx, a.cast(), len, null, complexSpectrum.cast());
+        xtract.xtract_magnitude_spectrum(ctx, complexSpectrum.cast(), len,
                 xtract.doublea_to_voidp(specArgv.cast()), result.cast());
         xtract.xtract_context_delete(ctx);
 
@@ -127,6 +127,7 @@ public class test {
         a.delete();
         argv.delete();
         specArgv.delete();
+        complexSpectrum.delete();
         result.delete();
     }
 }

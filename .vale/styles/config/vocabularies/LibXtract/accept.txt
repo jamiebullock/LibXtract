@@ -23,6 +23,7 @@ Petrosian
 Rabiner
 Rincon
 Saito
+Schedl
 Sondhi
 Suan
 Tae

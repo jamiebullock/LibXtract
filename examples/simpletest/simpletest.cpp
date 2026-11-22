@@ -9,6 +9,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <math.h>
 #include <stdbool.h>
 
@@ -95,23 +96,21 @@ int main(void)
     double flux = 0.0;
     double centroid = 0.0;
     double lowest = 0.0;
+    double complex_spectrum[BLOCKSIZE] = {0};
     double spectrum[BLOCKSIZE] = {0};
     double power_spectrum[BLOCKSIZE] = {0};
     double windowed[BLOCKSIZE] = {0};
     double peaks[BLOCKSIZE] = {0};
     double harmonics[BLOCKSIZE] = {0};
-    double subframes_windowed[BLOCKSIZE] = {0};
-    double subframes_spectrum[BLOCKSIZE] = {0};
-    double difference[HALF_BLOCKSIZE] = {0};
+    double log_magnitudes[BLOCKSIZE] = {0};
     double lastn[MAVG_COUNT] = {0};
     double *window = NULL;
-    double *window_subframe = NULL;
     double mfccs[MFCC_FREQ_BANDS] = {0};
     double argd[4] = {0};
     double prev_note = 0.0;
     int n;
     int rv = XTRACT_SUCCESS;
-    double last_found_peak_time = 0.0;
+    double last_found_peak_time = -1.0;
     xtract_last_n_state *last_n_state = xtract_last_n_state_new(MAVG_COUNT);
 
     unsigned int wavChannels = 0;
@@ -138,7 +137,6 @@ int main(void)
 
     /* create the window functions */
     window = xtract_init_window(BLOCKSIZE, XTRACT_HANN);
-    window_subframe = xtract_init_window(HALF_BLOCKSIZE, XTRACT_HANN);
     xtract_wavelet_f0_state *wavelet_f0_state = xtract_wavelet_f0_state_new(SAMPLERATE);
     xtract_context *ctx = xtract_context_new(BLOCKSIZE);
 
@@ -170,16 +168,13 @@ int main(void)
 
         xtract_windowed(NULL, &data[n], BLOCKSIZE, window, windowed);
 
-        /* get the spectrum */
+        /* get the complex spectrum once, and the magnitude and power spectra
+         * from it; the mel filterbank is defined on the power spectrum */
         argd[0] = SAMPLERATE / (double)BLOCKSIZE;
-        argd[1] = XTRACT_MAGNITUDE_SPECTRUM;
-        argd[2] = 0.f; /* No Normalisation */
 
-        xtract[XTRACT_SPECTRUM](ctx, windowed, BLOCKSIZE, &argd[0], spectrum);
-
-        /* The mel filterbank is defined on the power spectrum */
-        argd[1] = XTRACT_POWER_SPECTRUM;
-        xtract[XTRACT_SPECTRUM](ctx, windowed, BLOCKSIZE, &argd[0], power_spectrum);
+        xtract[XTRACT_SPECTRUM](ctx, windowed, BLOCKSIZE, NULL, complex_spectrum);
+        xtract[XTRACT_MAGNITUDE_SPECTRUM](NULL, complex_spectrum, BLOCKSIZE, &argd[0], spectrum);
+        xtract[XTRACT_POWER_SPECTRUM](NULL, complex_spectrum, BLOCKSIZE, &argd[0], power_spectrum);
 
         xtract[XTRACT_SPECTRAL_CENTROID](NULL, spectrum, BLOCKSIZE, NULL, &centroid);
 
@@ -193,54 +188,16 @@ int main(void)
         /* compute the MFCCs from the power spectrum taken above */
         xtract_mfcc(ctx, power_spectrum, BLOCKSIZE >> 1, mel_filters, mfccs);
 
-        double gated[BLOCKSIZE] = {0};
-        double block_max = 0.0;
+        /* Spectral flux of the log magnitudes (Boeck, Krebs and Schedl 2012):
+         * the log of this block's magnitudes, then the sum of the rises from
+         * the block before, whose log magnitudes are kept in the second half */
+        memcpy(log_magnitudes + HALF_BLOCKSIZE, log_magnitudes, HALF_BLOCKSIZE * sizeof(double));
+        argd[0] = 1000.0; /* compression factor lambda */
+        xtract_log(NULL, spectrum, HALF_BLOCKSIZE, argd, log_magnitudes);
 
-        /* crude noise gate */
-        for (uint16_t k = 0; k < BLOCKSIZE; ++k)
-        {
-            if (fabs(data[n + k]) > block_max)
-            {
-                block_max = fabs(data[n + k]);
-            }
-
-            if (data[n + k] > .1)
-            {
-                gated[k] = data[n + k];
-            }
-        }
-
-        /* normalise */
-        double norm_factor = block_max > 0.0 ? 1.0 / block_max : 0.0;
-
-        for (uint16_t k = 0; k < BLOCKSIZE; ++k)
-        {
-            gated[k] *= norm_factor;
-        }
-
-        /* compute Spectral Flux */
-        argd[0] = SAMPLERATE / HALF_BLOCKSIZE;
-        argd[1] = XTRACT_LOG_SPECTRUM;
-        argd[2] = 1.f; /* Yes Normalisation */
-
-        xtract_features_from_subframes(NULL, gated, BLOCKSIZE, XTRACT_WINDOWED, window_subframe, subframes_windowed);
-        xtract_features_from_subframes(ctx, subframes_windowed, BLOCKSIZE, XTRACT_SPECTRUM, argd, subframes_spectrum);
-
-        argd[0] = 0.5; /* smoothing factor */
-
-        /* smooth the amplitude components of the first and second spectra */
-        xtract_smoothed(NULL, subframes_spectrum, HALF_BLOCKSIZE >> 1, argd, subframes_spectrum);
-        xtract_smoothed(NULL, subframes_spectrum + HALF_BLOCKSIZE, HALF_BLOCKSIZE >> 1, argd, subframes_spectrum + HALF_BLOCKSIZE);
-
-        /* difference between the two spectra */
-        xtract_difference_vector(NULL, subframes_spectrum, BLOCKSIZE, NULL, difference);
-
-        argd[0] = .25;                   /* norm order */
-        argd[1] = XTRACT_POSITIVE_SLOPE; /* positive slope */
-        argd[2] = 1;                     /* normalise */
-
-        /* Right shift HALF_BLOCKSIZE because we only want amplitudes not frequencies */
-        xtract_flux(ctx, difference, HALF_BLOCKSIZE >> 1, argd, &flux);
+        argd[0] = 1.0;                   /* norm order */
+        argd[1] = XTRACT_POSITIVE_SLOPE; /* only the bins that rose */
+        xtract_flux(ctx, log_magnitudes, BLOCKSIZE, argd, &flux);
 
         xtract_last_n(NULL, &flux, MAVG_COUNT, last_n_state, lastn);
 
@@ -252,7 +209,7 @@ int main(void)
         if (peak_found == XTRACT_SUCCESS)
         {
             double peak_time = n / (float)SAMPLERATE;
-            if (peak_time - last_found_peak_time > .05 || peak_time < .05)
+            if (last_found_peak_time < 0.0 || peak_time - last_found_peak_time > .05)
             {
                 printf("Onset at %f seconds\n", n / (float)SAMPLERATE);
                 last_found_peak_time = peak_time;
@@ -263,7 +220,6 @@ int main(void)
     /* clean up */
     xtract_free_filterbank(mel_filters);
     xtract_free_window(window);
-    xtract_free_window(window_subframe);
     xtract_wavelet_f0_state_delete(wavelet_f0_state);
     xtract_last_n_state_delete(last_n_state);
     xtract_context_delete(ctx);

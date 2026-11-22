@@ -139,28 +139,25 @@ int (*xtract[])(xtract_context *, const double *, const int, const void *, doubl
         xtract_local_binary_patterns,
         xtract_last_n,
         xtract_packed,
+        xtract_magnitude_spectrum,
+        xtract_power_spectrum,
+        xtract_log_spectrum,
+        xtract_phase_spectrum,
+        xtract_log,
+        xtract_normalised_cross_correlation,
 };
 
 static const char *const values_0[] = {"equal_gain", "equal_area"};
 static const char *const values_1[] = {"gauss", "hamming", "hann", "bartlett", "triangular", "bartlett_hann", "blackman", "kaiser", "blackman_harris"};
 static const char *const values_2[] = {"none", "positive_slope", "negative_slope"};
-static const char *const values_3[] = {"off", "on"};
-static const char *const values_4[] = {"magnitude", "log", "power", "magnitude_phase"};
-static const char *const values_5[XTRACT_FEATURES] = {
+static const char *const values_3[XTRACT_FEATURES] = {
     [XTRACT_MEAN] = "mean",
-    [XTRACT_IRREGULARITY_J] = "irregularity_j",
-    [XTRACT_SMOOTHNESS] = "smoothness",
-    [XTRACT_ZCR] = "zcr",
-    [XTRACT_LOUDNESS] = "loudness",
-    [XTRACT_FLATNESS] = "flatness",
     [XTRACT_RMS_AMPLITUDE] = "rms_amplitude",
-    [XTRACT_SHARPNESS] = "sharpness",
     [XTRACT_HIGHEST_VALUE] = "highest_value",
     [XTRACT_SUM] = "sum",
-    [XTRACT_NONZERO_COUNT] = "nonzero_count",
 };
-static const char *const values_6[] = {"octave", "linear"};
-static const char *const values_7[] = {"covariance", "coefficient"};
+static const char *const values_4[] = {"octave", "linear"};
+static const char *const values_5[] = {"off", "on"};
 
 static const xtract_argument_descriptor_t parameters_init_mfcc[] = {
     {.name = "transform_size", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_TRANSFORM_SIZE},
@@ -219,192 +216,201 @@ static const xtract_argument_descriptor_t parameters_wavelet_f0_state_new[] = {
 static const xtract_builder_descriptor_t builder_wavelet_f0_state_new = {"wavelet_f0_state_new", XTRACT_WAVELET_F0_STATE, XTRACT_TRUE, 1, parameters_wavelet_f0_state_new, xtract_build_wavelet_f0_state_new, xtract_release_wavelet_f0_state_new};
 
 static const xtract_provider_t providers_harmonic_spectrum[] = {
-    {XTRACT_HARMONIC_SPECTRUM, XTRACT_PART_WHOLE, -1, 0, NULL, NULL},
+    {XTRACT_HARMONIC_SPECTRUM, XTRACT_PART_WHOLE, NULL},
 };
 static const xtract_quantity_t quantity_harmonic_spectrum = {"harmonic_spectrum", XTRACT_FALSE, XTRACT_SPECTRAL, 1, providers_harmonic_spectrum};
 
 static const xtract_provider_t providers_mean[] = {
-    {XTRACT_MEAN, XTRACT_PART_WHOLE, -1, 0, NULL, NULL},
+    {XTRACT_MEAN, XTRACT_PART_WHOLE, NULL},
 };
 static const xtract_quantity_t quantity_mean = {"mean", XTRACT_TRUE, XTRACT_ARBITRARY_SERIES, 1, providers_mean};
 
 static const xtract_provider_t providers_variance[] = {
-    {XTRACT_VARIANCE, XTRACT_PART_WHOLE, -1, 0, NULL, NULL},
+    {XTRACT_VARIANCE, XTRACT_PART_WHOLE, NULL},
 };
 static const xtract_quantity_t quantity_variance = {"variance", XTRACT_TRUE, XTRACT_ARBITRARY_SERIES, 1, providers_variance};
 
 static const xtract_provider_t providers_standard_deviation[] = {
-    {XTRACT_STANDARD_DEVIATION, XTRACT_PART_WHOLE, -1, 0, NULL, NULL},
+    {XTRACT_STANDARD_DEVIATION, XTRACT_PART_WHOLE, NULL},
 };
 static const xtract_quantity_t quantity_standard_deviation = {"standard_deviation", XTRACT_TRUE, XTRACT_ARBITRARY_SERIES, 1, providers_standard_deviation};
 
-static const double when_coefficients_and_frequencies_spectrum[] = {0, 1, 2};
 static const xtract_provider_t providers_coefficients_and_frequencies[] = {
-    {XTRACT_SPECTRUM, XTRACT_PART_WHOLE, 1, 3, when_coefficients_and_frequencies_spectrum, NULL},
-    {XTRACT_PEAK_SPECTRUM, XTRACT_PART_WHOLE, -1, 0, NULL, NULL},
-    {XTRACT_HARMONIC_SPECTRUM, XTRACT_PART_WHOLE, -1, 0, NULL, NULL},
-    {XTRACT_PACKED, XTRACT_PART_WHOLE, -1, 0, NULL, NULL},
+    {XTRACT_MAGNITUDE_SPECTRUM, XTRACT_PART_WHOLE, NULL},
+    {XTRACT_PEAK_SPECTRUM, XTRACT_PART_WHOLE, NULL},
+    {XTRACT_HARMONIC_SPECTRUM, XTRACT_PART_WHOLE, NULL},
+    {XTRACT_PACKED, XTRACT_PART_WHOLE, NULL},
+    {XTRACT_POWER_SPECTRUM, XTRACT_PART_WHOLE, NULL},
+    {XTRACT_LOG_SPECTRUM, XTRACT_PART_WHOLE, NULL},
 };
-static const xtract_quantity_t quantity_coefficients_and_frequencies = {"coefficients_and_frequencies", XTRACT_FALSE, XTRACT_SPECTRAL, 4, providers_coefficients_and_frequencies};
+static const xtract_quantity_t quantity_coefficients_and_frequencies = {"coefficients_and_frequencies", XTRACT_FALSE, XTRACT_SPECTRAL, 6, providers_coefficients_and_frequencies};
 
 static const xtract_provider_t providers_spectral_mean[] = {
-    {XTRACT_SPECTRAL_MEAN, XTRACT_PART_WHOLE, -1, 0, NULL, NULL},
-    {XTRACT_SPECTRAL_CENTROID, XTRACT_PART_WHOLE, -1, 0, NULL, NULL},
+    {XTRACT_SPECTRAL_MEAN, XTRACT_PART_WHOLE, NULL},
+    {XTRACT_SPECTRAL_CENTROID, XTRACT_PART_WHOLE, NULL},
 };
 static const xtract_quantity_t quantity_spectral_mean = {"spectral_mean", XTRACT_TRUE, XTRACT_ARBITRARY_SERIES, 2, providers_spectral_mean};
 
 static const xtract_provider_t providers_spectral_variance[] = {
-    {XTRACT_SPECTRAL_VARIANCE, XTRACT_PART_WHOLE, -1, 0, NULL, NULL},
-    {XTRACT_SPREAD, XTRACT_PART_WHOLE, -1, 0, NULL, NULL},
+    {XTRACT_SPECTRAL_VARIANCE, XTRACT_PART_WHOLE, NULL},
+    {XTRACT_SPREAD, XTRACT_PART_WHOLE, NULL},
 };
 static const xtract_quantity_t quantity_spectral_variance = {"spectral_variance", XTRACT_TRUE, XTRACT_ARBITRARY_SERIES, 2, providers_spectral_variance};
 
 static const xtract_provider_t providers_spectral_standard_deviation[] = {
-    {XTRACT_SPECTRAL_STANDARD_DEVIATION, XTRACT_PART_WHOLE, -1, 0, NULL, NULL},
+    {XTRACT_SPECTRAL_STANDARD_DEVIATION, XTRACT_PART_WHOLE, NULL},
 };
 static const xtract_quantity_t quantity_spectral_standard_deviation = {"spectral_standard_deviation", XTRACT_TRUE, XTRACT_ARBITRARY_SERIES, 1, providers_spectral_standard_deviation};
 
 static const xtract_provider_t providers_smoothness[] = {
-    {XTRACT_SMOOTHNESS, XTRACT_PART_WHOLE, -1, 0, NULL, NULL},
+    {XTRACT_SMOOTHNESS, XTRACT_PART_WHOLE, NULL},
 };
 static const xtract_quantity_t quantity_smoothness = {"smoothness", XTRACT_TRUE, XTRACT_ARBITRARY_SERIES, 1, providers_smoothness};
 
 static const xtract_provider_t providers_partial_amplitudes[] = {
-    {XTRACT_PACKED, XTRACT_PART_FIRST_HALF, -1, 0, NULL, NULL},
+    {XTRACT_PACKED, XTRACT_PART_FIRST_HALF, NULL},
 };
 static const xtract_quantity_t quantity_partial_amplitudes = {"partial_amplitudes", XTRACT_FALSE, XTRACT_SPECTRAL_MAGNITUDES, 1, providers_partial_amplitudes};
 
-static const double when_magnitude_bins_spectrum[] = {0, 3};
 static const xtract_provider_t providers_magnitude_bins[] = {
-    {XTRACT_SPECTRUM, XTRACT_PART_FIRST_HALF, 1, 2, when_magnitude_bins_spectrum, NULL},
+    {XTRACT_MAGNITUDE_SPECTRUM, XTRACT_PART_FIRST_HALF, NULL},
 };
 static const xtract_quantity_t quantity_magnitude_bins = {"magnitude_bins", XTRACT_FALSE, XTRACT_SPECTRAL_MAGNITUDES, 1, providers_magnitude_bins};
 
 static const xtract_provider_t providers_harmonic_amplitudes[] = {
-    {XTRACT_PACKED, XTRACT_PART_FIRST_HALF, -1, 0, NULL, &quantity_harmonic_spectrum},
+    {XTRACT_PACKED, XTRACT_PART_FIRST_HALF, &quantity_harmonic_spectrum},
 };
 static const xtract_quantity_t quantity_harmonic_amplitudes = {"harmonic_amplitudes", XTRACT_FALSE, XTRACT_SPECTRAL_HARMONICS_MAGNITUDES, 1, providers_harmonic_amplitudes};
 
 static const xtract_provider_t providers_bark_coefficients[] = {
-    {XTRACT_BARK_COEFFICIENTS, XTRACT_PART_WHOLE, -1, 0, NULL, NULL},
+    {XTRACT_BARK_COEFFICIENTS, XTRACT_PART_WHOLE, NULL},
 };
 static const xtract_quantity_t quantity_bark_coefficients = {"bark_coefficients", XTRACT_FALSE, XTRACT_BARK_COEFFS, 1, providers_bark_coefficients};
 
 static const xtract_provider_t providers_subbands[] = {
-    {XTRACT_SUBBANDS, XTRACT_PART_WHOLE, -1, 0, NULL, NULL},
+    {XTRACT_SUBBANDS, XTRACT_PART_WHOLE, NULL},
 };
 static const xtract_quantity_t quantity_subbands = {"subbands", XTRACT_FALSE, XTRACT_ARBITRARY_SERIES, 1, providers_subbands};
 
 static const xtract_provider_t providers_flatness[] = {
-    {XTRACT_FLATNESS, XTRACT_PART_WHOLE, -1, 0, NULL, NULL},
+    {XTRACT_FLATNESS, XTRACT_PART_WHOLE, NULL},
 };
 static const xtract_quantity_t quantity_flatness = {"flatness", XTRACT_TRUE, XTRACT_ARBITRARY_SERIES, 1, providers_flatness};
 
 static const xtract_provider_t providers_flatness_db[] = {
-    {XTRACT_FLATNESS_DB, XTRACT_PART_WHOLE, -1, 0, NULL, NULL},
+    {XTRACT_FLATNESS_DB, XTRACT_PART_WHOLE, NULL},
 };
 static const xtract_quantity_t quantity_flatness_db = {"flatness_db", XTRACT_TRUE, XTRACT_ARBITRARY_SERIES, 1, providers_flatness_db};
 
 static const xtract_provider_t providers_highest_value[] = {
-    {XTRACT_HIGHEST_VALUE, XTRACT_PART_WHOLE, -1, 0, NULL, NULL},
+    {XTRACT_HIGHEST_VALUE, XTRACT_PART_WHOLE, NULL},
 };
 static const xtract_quantity_t quantity_highest_value = {"highest_value", XTRACT_TRUE, XTRACT_ARBITRARY_SERIES, 1, providers_highest_value};
 
 static const xtract_provider_t providers_peak_spectrum[] = {
-    {XTRACT_PEAK_SPECTRUM, XTRACT_PART_WHOLE, -1, 0, NULL, NULL},
+    {XTRACT_PEAK_SPECTRUM, XTRACT_PART_WHOLE, NULL},
 };
 static const xtract_quantity_t quantity_peak_spectrum = {"peak_spectrum", XTRACT_FALSE, XTRACT_SPECTRAL, 1, providers_peak_spectrum};
 
 static const xtract_provider_t providers_fundamental[] = {
-    {XTRACT_FAILSAFE_F0, XTRACT_PART_WHOLE, -1, 0, NULL, NULL},
-    {XTRACT_HPS, XTRACT_PART_WHOLE, -1, 0, NULL, NULL},
-    {XTRACT_F0, XTRACT_PART_WHOLE, -1, 0, NULL, NULL},
-    {XTRACT_WAVELET_F0, XTRACT_PART_WHOLE, -1, 0, NULL, NULL},
-    {XTRACT_MCLEOD_F0, XTRACT_PART_WHOLE, -1, 0, NULL, NULL},
+    {XTRACT_FAILSAFE_F0, XTRACT_PART_WHOLE, NULL},
+    {XTRACT_HPS, XTRACT_PART_WHOLE, NULL},
+    {XTRACT_F0, XTRACT_PART_WHOLE, NULL},
+    {XTRACT_WAVELET_F0, XTRACT_PART_WHOLE, NULL},
+    {XTRACT_MCLEOD_F0, XTRACT_PART_WHOLE, NULL},
 };
 static const xtract_quantity_t quantity_fundamental = {"fundamental", XTRACT_TRUE, XTRACT_ARBITRARY_SERIES, 5, providers_fundamental};
 
-static const double when_spectrum_spectrum[] = {0, 1, 2};
-static const xtract_provider_t providers_spectrum[] = {
-    {XTRACT_SPECTRUM, XTRACT_PART_WHOLE, 1, 3, when_spectrum_spectrum, NULL},
+static const xtract_provider_t providers_magnitude_spectrum[] = {
+    {XTRACT_MAGNITUDE_SPECTRUM, XTRACT_PART_WHOLE, NULL},
 };
-static const xtract_quantity_t quantity_spectrum = {"spectrum", XTRACT_FALSE, XTRACT_SPECTRAL, 1, providers_spectrum};
+static const xtract_quantity_t quantity_magnitude_spectrum = {"magnitude_spectrum", XTRACT_FALSE, XTRACT_SPECTRAL, 1, providers_magnitude_spectrum};
 
 static const xtract_provider_t providers_difference_vector[] = {
-    {XTRACT_DIFFERENCE_VECTOR, XTRACT_PART_WHOLE, -1, 0, NULL, NULL},
+    {XTRACT_DIFFERENCE_VECTOR, XTRACT_PART_WHOLE, NULL},
 };
 static const xtract_quantity_t quantity_difference_vector = {"difference_vector", XTRACT_FALSE, XTRACT_ARBITRARY_SERIES, 1, providers_difference_vector};
 
 static const xtract_provider_t providers_bins[] = {
-    {XTRACT_SPECTRUM, XTRACT_PART_FIRST_HALF, -1, 0, NULL, NULL},
+    {XTRACT_MAGNITUDE_SPECTRUM, XTRACT_PART_FIRST_HALF, NULL},
+    {XTRACT_POWER_SPECTRUM, XTRACT_PART_FIRST_HALF, NULL},
+    {XTRACT_LOG_SPECTRUM, XTRACT_PART_FIRST_HALF, NULL},
 };
-static const xtract_quantity_t quantity_bins = {"bins", XTRACT_FALSE, XTRACT_SPECTRAL_MAGNITUDES, 1, providers_bins};
+static const xtract_quantity_t quantity_bins = {"bins", XTRACT_FALSE, XTRACT_SPECTRAL_MAGNITUDES, 3, providers_bins};
 
-static const double when_power_bins_spectrum[] = {2};
+static const xtract_provider_t providers_log[] = {
+    {XTRACT_LOG, XTRACT_PART_WHOLE, NULL},
+};
+static const xtract_quantity_t quantity_log = {"log", XTRACT_FALSE, XTRACT_ARBITRARY_SERIES, 1, providers_log};
+
 static const xtract_provider_t providers_power_bins[] = {
-    {XTRACT_SPECTRUM, XTRACT_PART_FIRST_HALF, 1, 1, when_power_bins_spectrum, NULL},
+    {XTRACT_POWER_SPECTRUM, XTRACT_PART_FIRST_HALF, NULL},
 };
 static const xtract_quantity_t quantity_power_bins = {"power_bins", XTRACT_FALSE, XTRACT_SPECTRAL_MAGNITUDES, 1, providers_power_bins};
 
 static const xtract_provider_t providers_autocorrelation[] = {
-    {XTRACT_AUTOCORRELATION, XTRACT_PART_WHOLE, -1, 0, NULL, NULL},
-    {XTRACT_AUTOCORRELATION_FFT, XTRACT_PART_WHOLE, -1, 0, NULL, NULL},
+    {XTRACT_AUTOCORRELATION, XTRACT_PART_WHOLE, NULL},
+    {XTRACT_AUTOCORRELATION_FFT, XTRACT_PART_WHOLE, NULL},
 };
 static const xtract_quantity_t quantity_autocorrelation = {"autocorrelation", XTRACT_FALSE, XTRACT_ARBITRARY_SERIES, 2, providers_autocorrelation};
 
 static const xtract_provider_t providers_lpc_coefficients[] = {
-    {XTRACT_LPC, XTRACT_PART_FROM_ONE_BEFORE_THE_SECOND_HALF, -1, 0, NULL, NULL},
+    {XTRACT_LPC, XTRACT_PART_FROM_ONE_BEFORE_THE_SECOND_HALF, NULL},
 };
 static const xtract_quantity_t quantity_lpc_coefficients = {"lpc_coefficients", XTRACT_FALSE, XTRACT_LPC_COEFFS, 1, providers_lpc_coefficients};
 
 static const xtract_provider_t providers_last_n[] = {
-    {XTRACT_LAST_N, XTRACT_PART_WHOLE, -1, 0, NULL, NULL},
+    {XTRACT_LAST_N, XTRACT_PART_WHOLE, NULL},
 };
 static const xtract_quantity_t quantity_last_n = {"last_n", XTRACT_FALSE, XTRACT_ARBITRARY_SERIES, 1, providers_last_n};
 
-static const double when_magnitude_phase_spectrum[] = {3};
-static const xtract_provider_t providers_magnitude_phase[] = {
-    {XTRACT_SPECTRUM, XTRACT_PART_WHOLE, 1, 1, when_magnitude_phase_spectrum, NULL},
+static const xtract_provider_t providers_spectrum[] = {
+    {XTRACT_SPECTRUM, XTRACT_PART_WHOLE, NULL},
 };
-static const xtract_quantity_t quantity_magnitude_phase = {"magnitude_phase", XTRACT_FALSE, XTRACT_SPECTRAL_MAGNITUDE_PHASE, 1, providers_magnitude_phase};
+static const xtract_quantity_t quantity_spectrum = {"spectrum", XTRACT_FALSE, XTRACT_SPECTRAL_COMPLEX, 1, providers_spectrum};
+
+static const xtract_provider_t providers_power_spectrum[] = {
+    {XTRACT_POWER_SPECTRUM, XTRACT_PART_WHOLE, NULL},
+};
+static const xtract_quantity_t quantity_power_spectrum = {"power_spectrum", XTRACT_FALSE, XTRACT_SPECTRAL, 1, providers_power_spectrum};
 
 static const xtract_provider_t providers_median[] = {
-    {XTRACT_MEDIAN, XTRACT_PART_WHOLE, -1, 0, NULL, NULL},
+    {XTRACT_MEDIAN, XTRACT_PART_WHOLE, NULL},
 };
 static const xtract_quantity_t quantity_median = {"median", XTRACT_TRUE, XTRACT_ARBITRARY_SERIES, 1, providers_median};
 
 static const xtract_provider_t providers_covariance_matrix[] = {
-    {XTRACT_COVARIANCE_MATRIX, XTRACT_PART_WHOLE, -1, 0, NULL, NULL},
+    {XTRACT_COVARIANCE_MATRIX, XTRACT_PART_WHOLE, NULL},
 };
 static const xtract_quantity_t quantity_covariance_matrix = {"covariance_matrix", XTRACT_FALSE, XTRACT_SQUARE_MATRIX, 1, providers_covariance_matrix};
 
 static const xtract_provider_t providers_correlation_matrix[] = {
-    {XTRACT_CORRELATION_MATRIX, XTRACT_PART_WHOLE, -1, 0, NULL, NULL},
+    {XTRACT_CORRELATION_MATRIX, XTRACT_PART_WHOLE, NULL},
 };
 static const xtract_quantity_t quantity_correlation_matrix = {"correlation_matrix", XTRACT_FALSE, XTRACT_SQUARE_MATRIX, 1, providers_correlation_matrix};
 
 static const xtract_provider_t providers_grid_central_moments[] = {
-    {XTRACT_GRID_CENTRAL_MOMENTS, XTRACT_PART_WHOLE, -1, 0, NULL, NULL},
+    {XTRACT_GRID_CENTRAL_MOMENTS, XTRACT_PART_WHOLE, NULL},
 };
 static const xtract_quantity_t quantity_grid_central_moments = {"grid_central_moments", XTRACT_FALSE, XTRACT_CENTRAL_MOMENT_COEFFS, 1, providers_grid_central_moments};
 
 static const xtract_provider_t providers_normalised_moments[] = {
-    {XTRACT_NORMALISED_MOMENTS, XTRACT_PART_WHOLE, -1, 0, NULL, NULL},
+    {XTRACT_NORMALISED_MOMENTS, XTRACT_PART_WHOLE, NULL},
 };
 static const xtract_quantity_t quantity_normalised_moments = {"normalised_moments", XTRACT_FALSE, XTRACT_NORMALISED_MOMENT_COEFFS, 1, providers_normalised_moments};
 
 static const xtract_provider_t providers_lowest_value[] = {
-    {XTRACT_LOWEST_VALUE, XTRACT_PART_WHOLE, -1, 0, NULL, NULL},
+    {XTRACT_LOWEST_VALUE, XTRACT_PART_WHOLE, NULL},
 };
 static const xtract_quantity_t quantity_lowest_value = {"lowest_value", XTRACT_TRUE, XTRACT_ARBITRARY_SERIES, 1, providers_lowest_value};
 
 static const xtract_provider_t providers_quantise[] = {
-    {XTRACT_QUANTISE, XTRACT_PART_WHOLE, -1, 0, NULL, NULL},
+    {XTRACT_QUANTISE, XTRACT_PART_WHOLE, NULL},
 };
 static const xtract_quantity_t quantity_quantise = {"quantise", XTRACT_FALSE, XTRACT_ARBITRARY_SERIES, 1, providers_quantise};
 
 static const xtract_provider_t providers_cooccurrence_matrix[] = {
-    {XTRACT_COOCCURRENCE_MATRIX, XTRACT_PART_WHOLE, -1, 0, NULL, NULL},
+    {XTRACT_COOCCURRENCE_MATRIX, XTRACT_PART_WHOLE, NULL},
 };
 static const xtract_quantity_t quantity_cooccurrence_matrix = {"cooccurrence_matrix", XTRACT_FALSE, XTRACT_SQUARE_MATRIX, 1, providers_cooccurrence_matrix};
 
@@ -427,14 +433,14 @@ static const xtract_quantity_t *const accepted_spectral_inharmonicity[] = {&quan
 static const xtract_quantity_t *const accepted_odd_even_ratio[] = {&quantity_harmonic_amplitudes};
 static const xtract_quantity_t *const accepted_sharpness[] = {&quantity_bark_coefficients};
 static const xtract_quantity_t *const accepted_spectral_slope[] = {&quantity_coefficients_and_frequencies};
-static const xtract_quantity_t *const accepted_hps[] = {&quantity_spectrum};
+static const xtract_quantity_t *const accepted_hps[] = {&quantity_magnitude_spectrum};
 static const xtract_quantity_t *const accepted_lnorm[] = {&quantity_difference_vector};
-static const xtract_quantity_t *const accepted_flux[] = {&quantity_bins};
+static const xtract_quantity_t *const accepted_flux[] = {&quantity_bins, &quantity_log};
 static const xtract_quantity_t *const accepted_difference_vector[] = {&quantity_bins};
 static const xtract_quantity_t *const accepted_bark_coefficients[] = {&quantity_bins};
 static const xtract_quantity_t *const accepted_peak_spectrum[] = {&quantity_bins};
 static const xtract_quantity_t *const accepted_mfcc[] = {&quantity_power_bins, &quantity_magnitude_bins};
-static const xtract_quantity_t *const accepted_harmonic_spectrum[] = {&quantity_spectrum};
+static const xtract_quantity_t *const accepted_harmonic_spectrum[] = {&quantity_magnitude_spectrum};
 static const xtract_quantity_t *const accepted_lpc[] = {&quantity_autocorrelation};
 static const xtract_quantity_t *const accepted_lpcc[] = {&quantity_lpc_coefficients};
 static const xtract_quantity_t *const accepted_subbands[] = {&quantity_bins};
@@ -442,15 +448,15 @@ static const xtract_quantity_t *const accepted_mel_spectrogram[] = {&quantity_po
 static const xtract_quantity_t *const accepted_gfcc[] = {&quantity_power_bins, &quantity_magnitude_bins};
 static const xtract_quantity_t *const accepted_gammatone_spectrogram[] = {&quantity_power_bins, &quantity_magnitude_bins};
 static const xtract_quantity_t *const accepted_peak[] = {&quantity_last_n};
-static const xtract_quantity_t *const accepted_mmbses[] = {&quantity_magnitude_phase};
-static const xtract_quantity_t *const accepted_spectral_subband_centroids[] = {&quantity_spectrum};
+static const xtract_quantity_t *const accepted_mmbses[] = {&quantity_spectrum};
+static const xtract_quantity_t *const accepted_spectral_subband_centroids[] = {&quantity_magnitude_spectrum, &quantity_power_spectrum};
 static const xtract_quantity_t *const accepted_spectral_entropy[] = {&quantity_power_bins, &quantity_bins};
 static const xtract_quantity_t *const accepted_kullback_leibler_divergence[] = {&quantity_magnitude_bins};
 static const xtract_quantity_t *const accepted_itakura_saito_divergence[] = {&quantity_magnitude_bins};
 static const xtract_quantity_t *const accepted_modified_kullback_leibler[] = {&quantity_magnitude_bins};
-static const xtract_quantity_t *const accepted_spectral_contrast[] = {&quantity_spectrum};
-static const xtract_quantity_t *const accepted_chroma[] = {&quantity_spectrum};
-static const xtract_quantity_t *const accepted_cqt[] = {&quantity_magnitude_phase};
+static const xtract_quantity_t *const accepted_spectral_contrast[] = {&quantity_magnitude_spectrum, &quantity_power_spectrum};
+static const xtract_quantity_t *const accepted_chroma[] = {&quantity_magnitude_spectrum, &quantity_power_spectrum};
+static const xtract_quantity_t *const accepted_cqt[] = {&quantity_spectrum};
 static const xtract_quantity_t *const accepted_correlation_matrix[] = {&quantity_covariance_matrix};
 static const xtract_quantity_t *const accepted_average_correlation[] = {&quantity_correlation_matrix};
 static const xtract_quantity_t *const accepted_principal_variances[] = {&quantity_covariance_matrix, &quantity_correlation_matrix};
@@ -463,6 +469,11 @@ static const xtract_quantity_t *const accepted_cooccurrence_correlation[] = {&qu
 static const xtract_quantity_t *const accepted_angular_second_moment[] = {&quantity_cooccurrence_matrix};
 static const xtract_quantity_t *const accepted_inverse_difference_moment[] = {&quantity_cooccurrence_matrix};
 static const xtract_quantity_t *const accepted_packed[] = {&quantity_peak_spectrum, &quantity_harmonic_spectrum};
+static const xtract_quantity_t *const accepted_magnitude_spectrum[] = {&quantity_spectrum};
+static const xtract_quantity_t *const accepted_power_spectrum[] = {&quantity_spectrum};
+static const xtract_quantity_t *const accepted_log_spectrum[] = {&quantity_spectrum};
+static const xtract_quantity_t *const accepted_phase_spectrum[] = {&quantity_spectrum};
+static const xtract_quantity_t *const accepted_log[] = {&quantity_magnitude_bins};
 
 static const xtract_argument_descriptor_t arguments_variance[] = {
     {.name = "mean", .kind = XTRACT_ARGUMENT_RESULT, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_ANY, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .accepts = &quantity_mean, .subject = XTRACT_SUBJECT_INPUT},
@@ -570,13 +581,11 @@ static const xtract_argument_descriptor_t arguments_midicent[] = {
 static const xtract_argument_descriptor_t arguments_lnorm[] = {
     {.name = "order", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_NONE, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .default_value = 2},
     {.name = "filter", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_NONE, .min = 0, .max = 2, .value_count = 3, .values = values_2, .default_value = 0, .is_whole = XTRACT_TRUE},
-    {.name = "normalise", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_NONE, .min = 0, .max = 1, .value_count = 2, .values = values_3, .default_value = 0, .is_whole = XTRACT_TRUE},
 };
 
 static const xtract_argument_descriptor_t arguments_flux[] = {
     {.name = "order", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_NONE, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .default_value = 2},
     {.name = "filter", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_NONE, .min = 0, .max = 2, .value_count = 3, .values = values_2, .default_value = 0, .is_whole = XTRACT_TRUE},
-    {.name = "normalise", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_NONE, .min = 0, .max = 1, .value_count = 2, .values = values_3, .default_value = 0, .is_whole = XTRACT_TRUE},
 };
 
 static const xtract_argument_descriptor_t arguments_attack_time[] = {
@@ -599,12 +608,6 @@ static const xtract_argument_descriptor_t arguments_peak_spectrum[] = {
     {.name = "threshold", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_PERCENT, .min = 0, .max = 100, .default_value = 10},
 };
 
-static const xtract_argument_descriptor_t arguments_spectrum[] = {
-    {.name = "bin_spacing", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = 2.2250738585072014e-308, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_BIN_SPACING},
-    {.name = "type", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_NONE, .min = 0, .max = 3, .value_count = 4, .values = values_4, .default_value = 0, .is_whole = XTRACT_TRUE},
-    {.name = "normalise", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_NONE, .min = 0, .max = 1, .value_count = 2, .values = values_3, .default_value = 0, .is_whole = XTRACT_TRUE},
-};
-
 static const xtract_argument_descriptor_t arguments_mfcc[] = {
     {.name = "filterbank", .kind = XTRACT_ARGUMENT_OBJECT, .type = XTRACT_FILTERBANK, .unit = XTRACT_UNIT_NONE, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .builder = &builder_init_mfcc},
 };
@@ -623,9 +626,9 @@ static const xtract_argument_descriptor_t arguments_lpcc[] = {
 };
 
 static const xtract_argument_descriptor_t arguments_subbands[] = {
-    {.name = "feature", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = 0, .max = XTRACT_FEATURES - 1, .value_count = XTRACT_FEATURES, .values = values_5, .default_value = 0, .is_whole = XTRACT_TRUE},
+    {.name = "feature", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = 0, .max = XTRACT_FEATURES - 1, .value_count = XTRACT_FEATURES, .values = values_3, .default_value = 0, .is_whole = XTRACT_TRUE},
     {.name = "bands", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = 1, .max = XTRACT_UNBOUNDED_MAX, .default_value = 4, .is_whole = XTRACT_TRUE},
-    {.name = "scale", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = 0, .max = 1, .value_count = 2, .values = values_6, .default_value = 1, .is_whole = XTRACT_TRUE},
+    {.name = "scale", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = 0, .max = 1, .value_count = 2, .values = values_4, .default_value = 1, .is_whole = XTRACT_TRUE},
     {.name = "start", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_INT, .unit = XTRACT_BINS, .min = 0, .max = XTRACT_UNBOUNDED_MAX, .default_value = 1, .is_whole = XTRACT_TRUE},
 };
 
@@ -729,10 +732,6 @@ static const xtract_argument_descriptor_t arguments_decay_rate[] = {
     {.name = "threshold", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_NONE, .min = 0, .max = 1, .default_value = 0.40000000000000002},
 };
 
-static const xtract_argument_descriptor_t arguments_cross_correlation[] = {
-    {.name = "scaling", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_NONE, .min = 0, .max = 1, .value_count = 2, .values = values_7, .default_value = 0, .is_whole = XTRACT_TRUE},
-};
-
 static const xtract_argument_descriptor_t arguments_modified_kullback_leibler[] = {
     {.name = "offset", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_ANY, .min = 0, .max = XTRACT_UNBOUNDED_MAX, .default_value = 9.9999999999999995e-07},
 };
@@ -784,7 +783,7 @@ static const xtract_argument_descriptor_t arguments_cooccurrence_matrix[] = {
     {.name = "levels", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = 1, .max = 46340, .data_property = XTRACT_PROPERTY_LEVELS},
     {.name = "column_offset", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .default_value = 1, .is_whole = XTRACT_TRUE},
     {.name = "row_offset", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .default_value = 0, .is_whole = XTRACT_TRUE},
-    {.name = "symmetric", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = 0, .max = 1, .value_count = 2, .values = values_3, .default_value = 0, .is_whole = XTRACT_TRUE},
+    {.name = "symmetric", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = 0, .max = 1, .value_count = 2, .values = values_5, .default_value = 0, .is_whole = XTRACT_TRUE},
 };
 
 static const xtract_argument_descriptor_t arguments_local_binary_patterns[] = {
@@ -793,6 +792,26 @@ static const xtract_argument_descriptor_t arguments_local_binary_patterns[] = {
 
 static const xtract_argument_descriptor_t arguments_last_n[] = {
     {.name = "state", .kind = XTRACT_ARGUMENT_OBJECT, .type = XTRACT_LAST_N_STATE, .unit = XTRACT_UNIT_NONE, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .builder = &builder_last_n_state_new},
+};
+
+static const xtract_argument_descriptor_t arguments_magnitude_spectrum[] = {
+    {.name = "bin_spacing", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = 2.2250738585072014e-308, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_BIN_SPACING},
+};
+
+static const xtract_argument_descriptor_t arguments_power_spectrum[] = {
+    {.name = "bin_spacing", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = 2.2250738585072014e-308, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_BIN_SPACING},
+};
+
+static const xtract_argument_descriptor_t arguments_log_spectrum[] = {
+    {.name = "bin_spacing", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = 2.2250738585072014e-308, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_BIN_SPACING},
+};
+
+static const xtract_argument_descriptor_t arguments_phase_spectrum[] = {
+    {.name = "bin_spacing", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = 2.2250738585072014e-308, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_BIN_SPACING},
+};
+
+static const xtract_argument_descriptor_t arguments_log[] = {
+    {.name = "lambda", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_NONE, .min = 2.2250738585072014e-308, .max = XTRACT_UNBOUNDED_MAX, .default_value = 1},
 };
 
 const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
@@ -894,7 +913,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_SPECTRAL, XTRACT_ANY_AMPLITUDE_HERTZ, 1, accepted_spectral_mean, 1},
+        .data = {XTRACT_SPECTRAL, XTRACT_UNIT_ANY, 1, accepted_spectral_mean, 1},
         .argc = 0,
         .argv = NULL,
         .is_scalar = XTRACT_TRUE,
@@ -909,7 +928,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_SPECTRAL, XTRACT_ANY_AMPLITUDE_HERTZ, 1, accepted_spectral_variance, 1},
+        .data = {XTRACT_SPECTRAL, XTRACT_UNIT_ANY, 1, accepted_spectral_variance, 1},
         .argc = 1,
         .argv = arguments_spectral_variance,
         .is_scalar = XTRACT_TRUE,
@@ -924,7 +943,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_NO_DATA, XTRACT_ANY_AMPLITUDE_HERTZ, 0, NULL, 1},
+        .data = {XTRACT_NO_DATA, XTRACT_UNIT_ANY, 0, NULL, 1},
         .argc = 1,
         .argv = arguments_spectral_standard_deviation,
         .is_scalar = XTRACT_TRUE,
@@ -939,7 +958,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_SPECTRAL, XTRACT_ANY_AMPLITUDE_HERTZ, 1, accepted_spectral_skewness, 1},
+        .data = {XTRACT_SPECTRAL, XTRACT_UNIT_ANY, 1, accepted_spectral_skewness, 1},
         .argc = 2,
         .argv = arguments_spectral_skewness,
         .is_scalar = XTRACT_TRUE,
@@ -954,7 +973,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_SPECTRAL, XTRACT_ANY_AMPLITUDE_HERTZ, 1, accepted_spectral_kurtosis, 1},
+        .data = {XTRACT_SPECTRAL, XTRACT_UNIT_ANY, 1, accepted_spectral_kurtosis, 1},
         .argc = 2,
         .argv = arguments_spectral_kurtosis,
         .is_scalar = XTRACT_TRUE,
@@ -969,7 +988,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_SPECTRAL, XTRACT_ANY_AMPLITUDE_HERTZ, 1, accepted_spectral_centroid, 1},
+        .data = {XTRACT_SPECTRAL, XTRACT_UNIT_ANY, 1, accepted_spectral_centroid, 1},
         .argc = 0,
         .argv = NULL,
         .is_scalar = XTRACT_TRUE,
@@ -1194,7 +1213,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = "Tae Hong Park",
         .year = 2000,
         .tags = 0,
-        .data = {XTRACT_SPECTRAL_PEAKS, XTRACT_ANY_AMPLITUDE_HERTZ, 1, accepted_noisiness, 1},
+        .data = {XTRACT_SPECTRAL_PEAKS, XTRACT_UNIT_ANY, 1, accepted_noisiness, 1},
         .argc = 2,
         .argv = arguments_noisiness,
         .is_scalar = XTRACT_TRUE,
@@ -1224,7 +1243,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_SPECTRAL_PEAKS, XTRACT_ANY_AMPLITUDE_HERTZ, 1, accepted_spectral_inharmonicity, 1},
+        .data = {XTRACT_SPECTRAL_PEAKS, XTRACT_UNIT_ANY, 1, accepted_spectral_inharmonicity, 1},
         .argc = 1,
         .argv = arguments_spectral_inharmonicity,
         .is_scalar = XTRACT_TRUE,
@@ -1269,7 +1288,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_SPECTRAL, XTRACT_ANY_AMPLITUDE_HERTZ, 1, accepted_spectral_slope, 1},
+        .data = {XTRACT_SPECTRAL, XTRACT_UNIT_ANY, 1, accepted_spectral_slope, 1},
         .argc = 0,
         .argv = NULL,
         .is_scalar = XTRACT_TRUE,
@@ -1435,11 +1454,11 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .tags = 0,
         .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 1, accepted_lnorm, 1},
-        .argc = 3,
+        .argc = 2,
         .argv = arguments_lnorm,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_TRUE,
-        .result = {.scalar = {XTRACT_UNBOUNDED_MIN, XTRACT_UNBOUNDED_MAX, XTRACT_UNIT_UNKNOWN}},
+        .result = {.scalar = {XTRACT_UNBOUNDED_MIN, XTRACT_UNBOUNDED_MAX, XTRACT_UNIT_ANY}},
     },
     [XTRACT_FLUX] = {
         .id = XTRACT_FLUX,
@@ -1449,12 +1468,12 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_SUBFRAMES, XTRACT_UNIT_ANY, 1, accepted_flux, 2},
-        .argc = 3,
+        .data = {XTRACT_SUBFRAMES, XTRACT_UNIT_ANY, 2, accepted_flux, 2},
+        .argc = 2,
         .argv = arguments_flux,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_TRUE,
-        .result = {.scalar = {XTRACT_UNBOUNDED_MIN, XTRACT_UNBOUNDED_MAX, XTRACT_UNIT_UNKNOWN}},
+        .result = {.scalar = {XTRACT_UNBOUNDED_MIN, XTRACT_UNBOUNDED_MAX, XTRACT_UNIT_ANY}},
     },
     [XTRACT_ATTACK_TIME] = {
         .id = XTRACT_ATTACK_TIME,
@@ -1574,22 +1593,22 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .argv = arguments_peak_spectrum,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
-        .result = {.vector = {XTRACT_SPECTRAL, XTRACT_ANY_AMPLITUDE_HERTZ}},
+        .result = {.vector = {XTRACT_SPECTRAL, XTRACT_UNIT_ANY}},
     },
     [XTRACT_SPECTRUM] = {
         .id = XTRACT_SPECTRUM,
         .name = "spectrum",
         .title = "Spectrum",
-        .description = "Extract the spectrum of an input vector",
+        .description = "Extract the complex spectrum of an input vector",
         .author = NULL,
         .year = 0,
         .tags = 0,
         .data = {XTRACT_AUDIO_SAMPLES, XTRACT_UNIT_ANY, 0, NULL, 1},
-        .argc = 3,
-        .argv = arguments_spectrum,
+        .argc = 0,
+        .argv = NULL,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
-        .result = {.vector = {XTRACT_SPECTRAL, XTRACT_ANY_AMPLITUDE_HERTZ}},
+        .result = {.vector = {XTRACT_SPECTRAL_COMPLEX, XTRACT_UNIT_ANY}},
     },
     [XTRACT_AUTOCORRELATION_FFT] = {
         .id = XTRACT_AUTOCORRELATION_FFT,
@@ -1644,12 +1663,12 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_SPECTRAL, XTRACT_ANY_AMPLITUDE_HERTZ, 1, accepted_harmonic_spectrum, 1},
+        .data = {XTRACT_SPECTRAL, XTRACT_UNIT_ANY, 1, accepted_harmonic_spectrum, 1},
         .argc = 2,
         .argv = arguments_harmonic_spectrum,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
-        .result = {.vector = {XTRACT_SPECTRAL, XTRACT_ANY_AMPLITUDE_HERTZ}},
+        .result = {.vector = {XTRACT_SPECTRAL, XTRACT_UNIT_ANY}},
     },
     [XTRACT_LPC] = {
         .id = XTRACT_LPC,
@@ -1794,7 +1813,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = "Rincon et al.",
         .year = 2013,
         .tags = XTRACT_TAG_SOUND,
-        .data = {XTRACT_SPECTRAL_MAGNITUDE_PHASE, XTRACT_UNIT_ANY, 1, accepted_mmbses, 1},
+        .data = {XTRACT_SPECTRAL_COMPLEX, XTRACT_UNIT_ANY, 1, accepted_mmbses, 1},
         .argc = 1,
         .argv = arguments_mmbses,
         .is_scalar = XTRACT_FALSE,
@@ -1809,7 +1828,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = XTRACT_TAG_SOUND,
-        .data = {XTRACT_SPECTRAL, XTRACT_ANY_AMPLITUDE_HERTZ, 1, accepted_spectral_subband_centroids, 1},
+        .data = {XTRACT_SPECTRAL, XTRACT_UNIT_ANY, 2, accepted_spectral_subband_centroids, 1},
         .argc = 1,
         .argv = arguments_spectral_subband_centroids,
         .is_scalar = XTRACT_FALSE,
@@ -2260,11 +2279,11 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .year = 0,
         .tags = 0,
         .data = {XTRACT_SUBFRAMES, XTRACT_UNIT_ANY, 0, NULL, 1},
-        .argc = 1,
-        .argv = arguments_cross_correlation,
+        .argc = 0,
+        .argv = NULL,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
-        .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_UNKNOWN}},
+        .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY_SQUARED}},
     },
     [XTRACT_CROSS_CORRELATION_LAG] = {
         .id = XTRACT_CROSS_CORRELATION_LAG,
@@ -2334,7 +2353,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = "Dan-Ning Jiang, Lie Lu, Hong-Jiang Zhang, Jian-Hua Tao and Lian-Hong Cai",
         .year = 2002,
         .tags = 0,
-        .data = {XTRACT_SPECTRAL, XTRACT_ANY_AMPLITUDE_HERTZ, 1, accepted_spectral_contrast, 1},
+        .data = {XTRACT_SPECTRAL, XTRACT_UNIT_ANY, 2, accepted_spectral_contrast, 1},
         .argc = 3,
         .argv = arguments_spectral_contrast,
         .is_scalar = XTRACT_FALSE,
@@ -2349,7 +2368,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = "Takuya Fujishima",
         .year = 1999,
         .tags = XTRACT_TAG_SOUND,
-        .data = {XTRACT_SPECTRAL, XTRACT_ANY_AMPLITUDE_HERTZ, 1, accepted_chroma, 1},
+        .data = {XTRACT_SPECTRAL, XTRACT_UNIT_ANY, 2, accepted_chroma, 1},
         .argc = 3,
         .argv = arguments_chroma,
         .is_scalar = XTRACT_FALSE,
@@ -2364,12 +2383,12 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = "Judith C. Brown and Miller S. Puckette",
         .year = 1992,
         .tags = 0,
-        .data = {XTRACT_SPECTRAL_MAGNITUDE_PHASE, XTRACT_UNIT_ANY, 1, accepted_cqt, 1},
+        .data = {XTRACT_SPECTRAL_COMPLEX, XTRACT_UNIT_ANY, 1, accepted_cqt, 1},
         .argc = 1,
         .argv = arguments_cqt,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
-        .result = {.vector = {XTRACT_SPECTRAL, XTRACT_ANY_AMPLITUDE_HERTZ}},
+        .result = {.vector = {XTRACT_SPECTRAL, XTRACT_UNIT_ANY}},
     },
     [XTRACT_PEARSON_CORRELATION] = {
         .id = XTRACT_PEARSON_CORRELATION,
@@ -2664,11 +2683,101 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_SPECTRAL_PEAKS, XTRACT_ANY_AMPLITUDE_HERTZ, 2, accepted_packed, 1},
+        .data = {XTRACT_SPECTRAL_PEAKS, XTRACT_UNIT_ANY, 2, accepted_packed, 1},
         .argc = 0,
         .argv = NULL,
         .is_scalar = XTRACT_FALSE,
         .is_delta = XTRACT_FALSE,
-        .result = {.vector = {XTRACT_SPECTRAL_PEAKS, XTRACT_ANY_AMPLITUDE_HERTZ}},
+        .result = {.vector = {XTRACT_SPECTRAL_PEAKS, XTRACT_UNIT_ANY}},
+    },
+    [XTRACT_MAGNITUDE_SPECTRUM] = {
+        .id = XTRACT_MAGNITUDE_SPECTRUM,
+        .name = "magnitude_spectrum",
+        .title = "Magnitude Spectrum",
+        .description = "Extract the magnitude spectrum from a complex spectrum",
+        .author = NULL,
+        .year = 0,
+        .tags = 0,
+        .data = {XTRACT_SPECTRAL_COMPLEX, XTRACT_UNIT_ANY, 1, accepted_magnitude_spectrum, 1},
+        .argc = 1,
+        .argv = arguments_magnitude_spectrum,
+        .is_scalar = XTRACT_FALSE,
+        .is_delta = XTRACT_FALSE,
+        .result = {.vector = {XTRACT_SPECTRAL, XTRACT_UNIT_ANY}},
+    },
+    [XTRACT_POWER_SPECTRUM] = {
+        .id = XTRACT_POWER_SPECTRUM,
+        .name = "power_spectrum",
+        .title = "Power Spectrum",
+        .description = "Extract the power spectrum from a complex spectrum",
+        .author = NULL,
+        .year = 0,
+        .tags = 0,
+        .data = {XTRACT_SPECTRAL_COMPLEX, XTRACT_UNIT_ANY, 1, accepted_power_spectrum, 1},
+        .argc = 1,
+        .argv = arguments_power_spectrum,
+        .is_scalar = XTRACT_FALSE,
+        .is_delta = XTRACT_FALSE,
+        .result = {.vector = {XTRACT_SPECTRAL, XTRACT_UNIT_ANY_SQUARED}},
+    },
+    [XTRACT_LOG_SPECTRUM] = {
+        .id = XTRACT_LOG_SPECTRUM,
+        .name = "log_spectrum",
+        .title = "Log Spectrum",
+        .description = "Extract the log spectrum from a complex spectrum",
+        .author = NULL,
+        .year = 0,
+        .tags = 0,
+        .data = {XTRACT_SPECTRAL_COMPLEX, XTRACT_UNIT_ANY, 1, accepted_log_spectrum, 1},
+        .argc = 1,
+        .argv = arguments_log_spectrum,
+        .is_scalar = XTRACT_FALSE,
+        .is_delta = XTRACT_FALSE,
+        .result = {.vector = {XTRACT_SPECTRAL, XTRACT_UNIT_NONE}},
+    },
+    [XTRACT_PHASE_SPECTRUM] = {
+        .id = XTRACT_PHASE_SPECTRUM,
+        .name = "phase_spectrum",
+        .title = "Phase Spectrum",
+        .description = "Extract the phase spectrum from a complex spectrum",
+        .author = NULL,
+        .year = 0,
+        .tags = 0,
+        .data = {XTRACT_SPECTRAL_COMPLEX, XTRACT_UNIT_ANY, 1, accepted_phase_spectrum, 1},
+        .argc = 1,
+        .argv = arguments_phase_spectrum,
+        .is_scalar = XTRACT_FALSE,
+        .is_delta = XTRACT_FALSE,
+        .result = {.vector = {XTRACT_SPECTRAL, XTRACT_RADIANS}},
+    },
+    [XTRACT_LOG] = {
+        .id = XTRACT_LOG,
+        .name = "log",
+        .title = "Logarithm",
+        .description = "Extract the logarithm of each element of an input vector, compressed by a factor",
+        .author = "Sebastian Boeck, Florian Krebs, Markus Schedl",
+        .year = 2012,
+        .tags = 0,
+        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 1, accepted_log, 1},
+        .argc = 1,
+        .argv = arguments_log,
+        .is_scalar = XTRACT_FALSE,
+        .is_delta = XTRACT_FALSE,
+        .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_NONE}},
+    },
+    [XTRACT_NORMALISED_CROSS_CORRELATION] = {
+        .id = XTRACT_NORMALISED_CROSS_CORRELATION,
+        .name = "normalised_cross_correlation",
+        .title = "Normalised Cross-Correlation",
+        .description = "Extract the correlation coefficient of two series at every lag",
+        .author = NULL,
+        .year = 0,
+        .tags = 0,
+        .data = {XTRACT_SUBFRAMES, XTRACT_UNIT_ANY, 0, NULL, 1},
+        .argc = 0,
+        .argv = NULL,
+        .is_scalar = XTRACT_FALSE,
+        .is_delta = XTRACT_FALSE,
+        .result = {.vector = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_NONE}},
     },
 };

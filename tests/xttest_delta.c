@@ -19,8 +19,8 @@
  *
  * flux forms the difference of the two halves of the input,
  * diff[n] = data[n] - data[M + n] for n in [0, M) with M = N/2, then returns
- * the L-order norm of diff via xtract_lnorm. argv is the lnorm argument triple
- * {order, filter type, normalise}.
+ * the L-order norm of diff via xtract_lnorm. argv is the lnorm argument pair
+ * {order, filter type}.
  */
 
 static const double EPSILON = 1e-10;
@@ -30,7 +30,7 @@ UTEST(delta, flux_l2_default_filter)
     /* diff = {3-1, 5-1, 1-1, 2-1} = {2, 4, 0, 1};
      * sqrt(2^2 + 4^2 + 0 + 1^2) = sqrt(21) */
     double data[] = {3.0, 5.0, 1.0, 2.0, 1.0, 1.0, 1.0, 1.0};
-    double argv[] = {2.0, (double)XTRACT_NO_LNORM_FILTER, 0.0};
+    double argv[] = {2.0, (double)XTRACT_NO_LNORM_FILTER};
     double result = -1.0;
     int rv = xtract_flux(xttest_context(), data, 8, argv, &result);
     ASSERT_EQ(rv, XTRACT_SUCCESS);
@@ -43,7 +43,7 @@ UTEST(delta, flux_positive_slope_filter)
      * sqrt(9 + 16 + 1) = sqrt(26), versus sqrt(9+16+4+1) = sqrt(30)
      * if the negative bin were included. */
     double data[] = {4.0, 5.0, 1.0, 2.0, 1.0, 1.0, 3.0, 1.0};
-    double argv[] = {2.0, (double)XTRACT_POSITIVE_SLOPE, 0.0};
+    double argv[] = {2.0, (double)XTRACT_POSITIVE_SLOPE};
     double result = -1.0;
     int rv = xtract_flux(xttest_context(), data, 8, argv, &result);
     ASSERT_EQ(rv, XTRACT_SUCCESS);
@@ -55,29 +55,18 @@ UTEST(delta, flux_default_filter_takes_absolute_value)
     /* Same diff = {3, 4, -2, 1} as above but with the default filter:
      * sqrt(9 + 16 + 4 + 1) = sqrt(30). */
     double data[] = {4.0, 5.0, 1.0, 2.0, 1.0, 1.0, 3.0, 1.0};
-    double argv[] = {2.0, (double)XTRACT_NO_LNORM_FILTER, 0.0};
+    double argv[] = {2.0, (double)XTRACT_NO_LNORM_FILTER};
     double result = -1.0;
     int rv = xtract_flux(xttest_context(), data, 8, argv, &result);
     ASSERT_EQ(rv, XTRACT_SUCCESS);
     CHECK_REL(result, sqrt(30.0), EPSILON);
 }
 
-UTEST(delta, flux_normalise_applies_log)
-{
-    /* diff = {2, 4, 0, 1}, norm = sqrt(21), normalised = log(1 + sqrt(21)) */
-    double data[] = {3.0, 5.0, 1.0, 2.0, 1.0, 1.0, 1.0, 1.0};
-    double argv[] = {2.0, (double)XTRACT_NO_LNORM_FILTER, 1.0};
-    double result = -1.0;
-    int rv = xtract_flux(xttest_context(), data, 8, argv, &result);
-    ASSERT_EQ(rv, XTRACT_SUCCESS);
-    CHECK_REL(result, log(1.0 + sqrt(21.0)), EPSILON);
-}
-
 UTEST(delta, flux_positive_slope_no_rising_bins_yields_no_result)
 {
     /* diff = {-1, -1, -1, -1}: no positive bins, so k == 0. */
     double data[] = {1.0, 1.0, 1.0, 1.0, 2.0, 2.0, 2.0, 2.0};
-    double argv[] = {2.0, (double)XTRACT_POSITIVE_SLOPE, 0.0};
+    double argv[] = {2.0, (double)XTRACT_POSITIVE_SLOPE};
     double result = -1.0;
     int rv = xtract_flux(xttest_context(), data, 8, argv, &result);
     ASSERT_EQ(rv, XTRACT_NO_RESULT);
@@ -259,7 +248,7 @@ UTEST(delta, lnorm_each_integer_order_and_a_fractional_one)
 {
     /* {3, -4, 2}: L1 = 9, L3 = cbrt(99), L4 = 353^(1/4), L2.5 from pow. */
     double data[] = {3.0, -4.0, 2.0};
-    double argv[3] = {1.0, 0.0, 0.0};
+    double argv[2] = {1.0, 0.0};
     double result = 0.0;
 
     ASSERT_EQ(xtract_lnorm(NULL, data, 3, argv, &result), XTRACT_SUCCESS);
@@ -281,7 +270,7 @@ UTEST(delta, lnorm_each_integer_order_and_a_fractional_one)
 UTEST(delta, lnorm_order_zero_means_two)
 {
     double data[] = {3.0, -4.0, 2.0};
-    double argv[3] = {0.0, 0.0, 0.0};
+    double argv[2] = {0.0, 0.0};
     double result = 0.0;
 
     ASSERT_EQ(xtract_lnorm(NULL, data, 3, argv, &result), XTRACT_SUCCESS);
@@ -292,18 +281,17 @@ UTEST(delta, lnorm_order_zero_means_two)
 UTEST(delta, lnorm_positive_slope_filter_with_nothing_positive_is_no_result)
 {
     double data[] = {0.0, -1.0, -2.0};
-    double argv[3] = {2.0, XTRACT_POSITIVE_SLOPE, 0.0};
+    double argv[2] = {2.0, XTRACT_POSITIVE_SLOPE};
     double result = 1.0;
 
     ASSERT_EQ(xtract_lnorm(NULL, data, 3, argv, &result), XTRACT_NO_RESULT);
 }
 
-UTEST(delta, lnorm_and_flux_refuse_a_filter_or_a_flag_they_do_not_define)
+UTEST(delta, lnorm_and_flux_refuse_a_filter_they_do_not_define)
 {
     static const double undefined_filters[] = {-1.0, 0.5, 3.0, 1e308, NAN};
-    static const double undefined_flags[] = {-1.0, 0.5, 2.0, -1e308, NAN};
     double data[] = {1.0, -2.0, 3.0, -4.0};
-    double argv[3];
+    double argv[2];
     double result;
     size_t i;
 
@@ -311,7 +299,6 @@ UTEST(delta, lnorm_and_flux_refuse_a_filter_or_a_flag_they_do_not_define)
     {
         argv[0] = 2.0;
         argv[1] = undefined_filters[i];
-        argv[2] = 0.0;
         result = -1.0;
         ASSERT_EQ(xtract_lnorm(NULL, data, 4, argv, &result), XTRACT_ARGUMENT_ERROR);
         ASSERT_EQ(result, 0.0);
@@ -319,22 +306,8 @@ UTEST(delta, lnorm_and_flux_refuse_a_filter_or_a_flag_they_do_not_define)
         ASSERT_EQ(xtract_flux(xttest_context(), data, 4, argv, &result), XTRACT_ARGUMENT_ERROR);
         ASSERT_EQ(result, 0.0);
     }
-    for (i = 0; i < sizeof(undefined_flags) / sizeof(undefined_flags[0]); i++)
-    {
-        argv[0] = 2.0;
-        argv[1] = XTRACT_NO_LNORM_FILTER;
-        argv[2] = undefined_flags[i];
-        result = -1.0;
-        ASSERT_EQ(xtract_lnorm(NULL, data, 4, argv, &result), XTRACT_ARGUMENT_ERROR);
-        ASSERT_EQ(result, 0.0);
-        result = -1.0;
-        ASSERT_EQ(xtract_flux(xttest_context(), data, 4, argv, &result), XTRACT_ARGUMENT_ERROR);
-        ASSERT_EQ(result, 0.0);
-    }
-
-    /* Each filter and each flag they define is taken */
+    /* Each filter they define is taken */
     argv[0] = 2.0;
-    argv[2] = 1.0;
     for (argv[1] = XTRACT_NO_LNORM_FILTER; argv[1] <= XTRACT_NEGATIVE_SLOPE; argv[1] += 1.0)
         ASSERT_EQ(xtract_lnorm(NULL, data, 4, argv, &result), XTRACT_SUCCESS);
 }
@@ -342,7 +315,7 @@ UTEST(delta, lnorm_and_flux_refuse_a_filter_or_a_flag_they_do_not_define)
 UTEST(delta, delta_features_reject_a_short_or_odd_input_and_a_null_argv)
 {
     double data[4] = {1.0, 2.0, 3.0, 4.0};
-    double argv[3] = {2.0, 0.0, 0.0};
+    double argv[2] = {2.0, 0.0};
     double result = 1.0;
     double vec[2] = {-1.0, -1.0};
 
@@ -377,7 +350,7 @@ UTEST(delta, delta_features_reject_a_short_or_odd_input_and_a_null_argv)
 UTEST(delta, lnorm_negative_slope_filter_keeps_only_the_falls)
 {
     double data[] = {3.0, -4.0, 0.0, -1.0};
-    double argv[] = {1.0, (double)XTRACT_NEGATIVE_SLOPE, 0.0};
+    double argv[] = {1.0, (double)XTRACT_NEGATIVE_SLOPE};
     double result = -1.0;
     ASSERT_EQ(xtract_lnorm(NULL, data, 4, argv, &result), XTRACT_SUCCESS);
     CHECK_REL(result, 5.0, EPSILON);
@@ -389,7 +362,7 @@ UTEST(delta, lnorm_negative_slope_filter_keeps_only_the_falls)
 UTEST(delta, lnorm_negative_slope_filter_with_nothing_negative_is_no_result)
 {
     double data[] = {1.0, 0.0, 2.0};
-    double argv[] = {2.0, (double)XTRACT_NEGATIVE_SLOPE, 0.0};
+    double argv[] = {2.0, (double)XTRACT_NEGATIVE_SLOPE};
     double result = -1.0;
     ASSERT_EQ(xtract_lnorm(NULL, data, 3, argv, &result), XTRACT_NO_RESULT);
 }
@@ -397,7 +370,7 @@ UTEST(delta, lnorm_negative_slope_filter_with_nothing_negative_is_no_result)
 UTEST(delta, flux_negative_slope_filter_counts_the_bins_that_fell)
 {
     double data[] = {4.0, 5.0, 1.0, 2.0, 1.0, 1.0, 3.0, 1.0};
-    double argv[] = {2.0, (double)XTRACT_NEGATIVE_SLOPE, 0.0};
+    double argv[] = {2.0, (double)XTRACT_NEGATIVE_SLOPE};
     double result = -1.0;
     ASSERT_EQ(xtract_flux(xttest_context(), data, 8, argv, &result), XTRACT_SUCCESS);
     CHECK_REL(result, 2.0, EPSILON);
@@ -406,7 +379,7 @@ UTEST(delta, flux_negative_slope_filter_counts_the_bins_that_fell)
 UTEST(delta, flux_positive_slope_l1_is_the_half_wave_rectified_flux)
 {
     double data[] = {4.0, 5.0, 1.0, 2.0, 1.0, 1.0, 3.0, 1.0};
-    double argv[] = {1.0, (double)XTRACT_POSITIVE_SLOPE, 0.0};
+    double argv[] = {1.0, (double)XTRACT_POSITIVE_SLOPE};
     double result = -1.0;
     ASSERT_EQ(xtract_flux(xttest_context(), data, 8, argv, &result), XTRACT_SUCCESS);
     CHECK_REL(result, 8.0, EPSILON);
@@ -650,7 +623,7 @@ UTEST(modified_kullback_leibler, rejects_bad_arguments)
 UTEST(delta, flux_is_in_a_bad_state_without_a_context_for_its_length)
 {
     const double data[] = {3.0, 5.0, 1.0, 2.0, 1.0, 1.0, 1.0, 1.0};
-    const double argv[] = {2.0, (double)XTRACT_NO_LNORM_FILTER, 0.0};
+    const double argv[] = {2.0, (double)XTRACT_NO_LNORM_FILTER};
     double result = -1.0;
     xtract_context *shorter = xtract_context_new(7);
 
@@ -663,7 +636,7 @@ UTEST(delta, flux_is_in_a_bad_state_without_a_context_for_its_length)
 UTEST(delta, flux_takes_a_context_created_for_exactly_its_length)
 {
     const double data[] = {3.0, 5.0, 1.0, 2.0, 1.0, 1.0, 1.0, 1.0};
-    const double argv[] = {2.0, (double)XTRACT_NO_LNORM_FILTER, 0.0};
+    const double argv[] = {2.0, (double)XTRACT_NO_LNORM_FILTER};
     double result = -1.0;
     xtract_context *exact = xtract_context_new(8);
 

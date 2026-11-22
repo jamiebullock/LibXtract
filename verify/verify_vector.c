@@ -72,15 +72,32 @@ void verify_spectrum(void)
 {
     const int N = nondet_length();
     double *data = nondet_doubles(N);
-    double *argv = nondet_doubles(XTRACT_MAXARGS);
     double *result = nondet_doubles(N);
 
-    stub_any_sqrt = 1;
-    (void)xtract_spectrum(NULL, data, N, nondet_argv(argv), result);
+    (void)xtract_spectrum(NULL, data, N, NULL, result);
     free(data);
-    free(argv);
     free(result);
 }
+
+#define SPECTRUM_FROM_COMPLEX_HARNESS(feature, any_sqrt)                  \
+    void verify_##feature(void)                                           \
+    {                                                                     \
+        const int N = nondet_length();                                    \
+        double *data = nondet_doubles(N);                                 \
+        double *argv = nondet_doubles(XTRACT_MAXARGS);                    \
+        double *result = nondet_doubles(N);                               \
+                                                                          \
+        stub_any_sqrt = any_sqrt;                                         \
+        (void)xtract_##feature(NULL, data, N, nondet_argv(argv), result); \
+        free(data);                                                       \
+        free(argv);                                                       \
+        free(result);                                                     \
+    }
+
+SPECTRUM_FROM_COMPLEX_HARNESS(magnitude_spectrum, 1)
+SPECTRUM_FROM_COMPLEX_HARNESS(power_spectrum, 0)
+SPECTRUM_FROM_COMPLEX_HARNESS(log_spectrum, 0)
+SPECTRUM_FROM_COMPLEX_HARNESS(phase_spectrum, 0)
 
 #define VECTOR_HARNESS(feature, length, argv_length, result_length)       \
     void verify_##feature(void)                                           \
@@ -104,6 +121,7 @@ VECTOR_HARNESS(asdf, nondet_length(), XTRACT_MAXARGS, N)
 VECTOR_HARNESS(peak_spectrum, nondet_length(), XTRACT_MAXARGS, 2 * N)
 VECTOR_HARNESS(harmonic_spectrum, nondet_length(), XTRACT_MAXARGS, N)
 VECTOR_HARNESS(packed, nondet_length(), XTRACT_MAXARGS, N)
+VECTOR_HARNESS(log, nondet_length(), XTRACT_MAXARGS, N)
 VECTOR_HARNESS(lpc, nondet_length(), XTRACT_MAXARGS, 2 * at_least_zero(N - 1))
 VECTOR_HARNESS(windowed, nondet_length(), N, N)
 VECTOR_HARNESS(smoothed, nondet_length(), XTRACT_MAXARGS, N)

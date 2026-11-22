@@ -78,7 +78,7 @@ extern "C"
      * \param *argv a pointer to a double giving the smoothing gain; NULL is an argument error
      * \param *result a pointer to the first element an array containing the smoothed data
      *
-     * \note if passing in a spectrum e.g. *result from xtract_spectrum(), then N for xtract_smoothed() should be N / 2 with respect to the N for xtract_spectrum() so only amplitude components are smoothed, not frequencies!
+     * \note if passing in a spectrum e.g. *result from xtract_magnitude_spectrum(), then N for xtract_smoothed() should be N / 2 with respect to the N for xtract_magnitude_spectrum() so only amplitude components are smoothed, not frequencies!
      *
      */
     int xtract_smoothed(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
