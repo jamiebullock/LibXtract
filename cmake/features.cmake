@@ -30,7 +30,7 @@ set(PROPERTIES length sample_rate transform_size bin_spacing width series levels
 set(SUBJECTS input source)
 set(PARTS whole first_half from_one_before_the_second_half)
 set(TAGS sound)
-set(RULE_FUNCTIONS is_power_of_two is_square root filter_count filterbank_size band_count kernel_size)
+set(RULE_FUNCTIONS is_power_of_two is_square root filter_count filterbank_size band_count kernel_size capacity)
 set(MAXARGS 5)
 foreach(list VALUE_TYPES OBJECT_TYPES PROPERTIES SUBJECTS PARTS TAGS)
     list(JOIN ${list} ", " ${list}_TEXT)
@@ -381,9 +381,9 @@ function(argument_initialiser out where argument shared_type)
 endfunction()
 
 # Sets ${out} to the C form of an expression in N and the arguments of the
-# feature, and ${uses_argv_out} to whether it reads an argument. The
-# expression is evaluated as long long, so that it cannot overflow for any
-# int. ${argument_accessors} has, for each argument of the feature in order,
+# feature, and ${uses_argv_out} to whether it reads an argument. Every
+# literal is a long long, so the expression is evaluated as long long and
+# cannot overflow for any int. ${argument_accessors} has, for each argument of the feature in order,
 # the C expression that reads it from argv
 function(c_expression out uses_argv_out where key expression)
     if(NOT expression MATCHES "^[A-Za-z0-9_ ()<>=!&|+*/%-]+$")
@@ -394,6 +394,7 @@ function(c_expression out uses_argv_out where key expression)
     set(uses_argv OFF)
     foreach(token IN LISTS tokens)
         if(NOT token MATCHES "^[A-Za-z_]")
+            string(REGEX REPLACE "([0-9]+)" "\\1LL" token "${token}")
             string(APPEND text "${token}")
         elseif(token STREQUAL "N")
             string(APPEND text "n")
@@ -732,6 +733,7 @@ foreach(i RANGE ${last})
     endif()
     optional(length_rule "${where}" "${input}" STRING length "${default_rule}")
     c_expression(rule_c rule_uses_argv "${where}" input.length "${length_rule}")
+    set(rule_c "(${rule_c}) != 0")
     if(rule_uses_argv)
         set(rule_c "argv != NULL && ${rule_c}")
     endif()
@@ -758,7 +760,11 @@ foreach(i RANGE ${last})
         format_enumerator(result_format "${where}" result.format "${result_format}")
         required(result_length "${where}" "${result}" STRING length)
         c_expression(length_c length_uses_argv "${where}" result.length "${result_length}")
-        string(APPEND length_cases "    case ${id}:\n        length = ${length_c};\n        break;\n")
+        string(APPEND length_cases "    case ${id}:\n")
+        if(length_uses_argv)
+            string(APPEND length_cases "        if (argv == NULL)\n            return -1;\n")
+        endif()
+        string(APPEND length_cases "        length = ${length_c};\n        break;\n")
         set(is_scalar XTRACT_FALSE)
         set(result_c ".vector = {${result_format}, ${result_unit_${name}}, \"${result_length}\"}")
     endif()

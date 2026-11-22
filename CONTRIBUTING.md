@@ -141,9 +141,11 @@ that call it with an array of values and free what it returns.
 A `length` is written as a C expression in `N` and the names of the
 arguments, such as `N >= 2 * lag + 1`. It can call `is_power_of_two`,
 `is_square` and `root` on a number, `filter_count` and `filterbank_size` on
-a filterbank, and `band_count` and `kernel_size` on a constant-Q kernel. An
+a filterbank, `band_count` and `kernel_size` on a constant-Q kernel, and
+`capacity` on the state of `xtract_last_n()`. An
 argument that a rule divides by is tested first: `width >= 1 && N % width ==
-0`.
+0`. The generator checks the characters and the names of an expression, and
+the compiler checks its syntax when it builds `src/features.c`.
 
 ## Pull requests
 

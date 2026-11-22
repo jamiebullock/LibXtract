@@ -16,7 +16,8 @@
 
 enum
 {
-    DRIVER_SEARCH = 4096
+    DRIVER_SEARCH = 4096,
+    DRIVER_SHARED_OBJECTS = 64
 };
 
 #ifndef M_PI
@@ -29,6 +30,69 @@ static int call_feature(int feature, xtract_context *ctx, const double *data, in
 static int call_feature(int feature, xtract_context *ctx, const double *data, int N, const void *argv, double *result)
 {
     return xtract[feature](ctx, data, N, argv, result);
+}
+
+/* An object that no call changes is built once for each set of parameters
+ * and shared by every call that needs it, because a constant-Q kernel long
+ * enough for the lowest default band costs more than all the features the
+ * driver calls */
+typedef struct shared_object_
+{
+    const xtract_builder_descriptor_t *builder;
+    double parameters[XTTEST_DRIVER_PARAMETERS];
+    void *object;
+} shared_object;
+
+static shared_object shared_objects[DRIVER_SHARED_OBJECTS];
+static int shared_object_count = 0;
+
+static void release_shared_objects(void)
+{
+    int i;
+
+    for (i = 0; i < shared_object_count; i++)
+        shared_objects[i].builder->release(shared_objects[i].object);
+    shared_object_count = 0;
+}
+
+static void *build_object(const xtract_builder_descriptor_t *builder, const double *parameters)
+{
+    const size_t size = (size_t)builder->argc * sizeof(double);
+    void *object;
+    int i;
+
+    if (builder->is_per_stream)
+        return builder->build(parameters);
+    for (i = 0; i < shared_object_count; i++)
+    {
+        if (shared_objects[i].builder == builder && memcmp(shared_objects[i].parameters, parameters, size) == 0)
+            return shared_objects[i].object;
+    }
+    object = builder->build(parameters);
+    if (object == NULL || shared_object_count == DRIVER_SHARED_OBJECTS)
+        return object;
+    if (shared_object_count == 0)
+        atexit(release_shared_objects);
+    shared_objects[shared_object_count].builder = builder;
+    memcpy(shared_objects[shared_object_count].parameters, parameters, size);
+    shared_objects[shared_object_count].object = object;
+    shared_object_count++;
+
+    return object;
+}
+
+/* Whether the call owns its object, which it does unless the object is shared */
+static int owns_object(const xttest_call *call)
+{
+    int i;
+
+    for (i = 0; i < shared_object_count; i++)
+    {
+        if (shared_objects[i].object == call->object)
+            return 0;
+    }
+
+    return 1;
 }
 
 static int is_usable(int rv)
@@ -48,7 +112,7 @@ static void set_value(const xtract_argument_descriptor_t *argument, double *doub
         doubles[i] = value;
 }
 
-/* What a caller has: three harmonics of 440 Hz from part of the way into a
+/* What a caller has: three harmonics of 1760 Hz from part of the way into a
  * period, so that the first element is not 0. It is a series, two series,
  * the rows of a grid or the channels of a recording according to the
  * feature that takes it */
@@ -61,7 +125,7 @@ static int caller_data(xttest_data *data, int n, double scale)
         return 0;
     for (i = 0; i < n + XTTEST_DRIVER_SLACK; i++)
     {
-        const double phase = 0.5 + 2.0 * M_PI * 440.0 * i / DRIVER_SAMPLE_RATE;
+        const double phase = 0.5 + 2.0 * M_PI * 1760.0 * i / DRIVER_SAMPLE_RATE;
 
         data->values[i] = scale * (0.6 * sin(phase) + 0.3 * sin(2.0 * phase) + 0.1 * sin(3.0 * phase));
     }
@@ -242,6 +306,10 @@ static int data_from_the_caller(const xtract_function_descriptor_t *d, const xtt
             }
             argv = d->argv[0].type == XTRACT_INT ? (const void *)ints : (const void *)doubles;
         }
+        /* An object is built for the data, after it, and the length of the
+         * result is checked against the rule then */
+        if (d->argc > 0 && d->argv[0].kind == XTRACT_ARGUMENT_OBJECT)
+            return caller_data(data, n, source->scale);
         if (xtract_length_is_accepted(d->id, n, argv))
             return caller_data(data, n, source->scale);
     }
@@ -305,7 +373,7 @@ static int prepare(xttest_call *call, int feature, const xttest_source *source, 
         for (i = 0; ok && i < call->builder->argc; i++)
             ok = value_of(&call->builder->argv[i], &call->data, given_data, source, &parameters[i]);
         if (ok)
-            call->object = call->builder->build(parameters);
+            call->object = build_object(call->builder, parameters);
         ok = ok && call->object != NULL;
         call->argv = call->object;
     }
@@ -365,7 +433,7 @@ int xttest_call_run(const xttest_call *call, xtract_context *ctx)
 
 void xttest_call_free(xttest_call *call)
 {
-    if (call->builder != NULL && call->object != NULL)
+    if (call->builder != NULL && call->object != NULL && owns_object(call))
         call->builder->release(call->object);
     free(call->data.values);
     free(call->result);

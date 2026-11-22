@@ -718,7 +718,7 @@
       "name": "subbands",
       "title": "Sub band coefficients",
       "description": "Extract subband coefficients from spectral magnitudes",
-      "input": {"format": "spectral_magnitudes", "unit": "any", "accepts": ["bins"]},
+      "input": {"format": "spectral_magnitudes", "unit": "any", "accepts": ["bins"], "length": "bands >= 1 && start >= 0 && start < N && ((scale == XTRACT_LINEAR_SUBBANDS && N - start >= bands) || (scale == XTRACT_OCTAVE_SUBBANDS && start >= 1))"},
       "argument_type": "int",
       "arguments": [
         {"name": "feature", "kind": "setting", "unit": "none", "default": 0, "values": {"features": ["mean", "rms_amplitude", "highest_value", "sum"]}},
@@ -1248,7 +1248,7 @@
       "name": "coherence",
       "title": "Coherence",
       "description": "Extract the magnitude-squared coherence of two series",
-      "input": {"format": "subframes", "unit": "any", "length": "N >= 3 * segment_length && N % 2 == 0"},
+      "input": {"format": "subframes", "unit": "any", "length": "N >= 3 * segment_length && N % 2 == 0 && is_power_of_two(segment_length)"},
       "argument_type": "int",
       "arguments": [
         {"name": "segment_length", "kind": "setting", "unit": "none", "min": 2, "default": 256}
@@ -1386,7 +1386,7 @@
       "name": "last_n",
       "title": "Last N Values",
       "description": "Extract the last N values of a stream given one value at a time",
-      "input": {"format": "arbitrary_series", "unit": "any"},
+      "input": {"format": "arbitrary_series", "unit": "any", "length": "N >= 1 && N == capacity(state)"},
       "arguments": [
         {"name": "state", "kind": "object", "built_by": "last_n_state_new"}
       ],

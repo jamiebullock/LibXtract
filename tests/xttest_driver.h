@@ -17,7 +17,7 @@ enum
 {
     /* Ten periods of the series the driver starts from, so that the
      * features that look for a period find one */
-    XTTEST_DRIVER_SHORTEST = 1024,
+    XTTEST_DRIVER_SHORTEST = 256,
     XTTEST_DRIVER_LIMIT = 65536,
     XTTEST_DRIVER_SLACK = 8,
     /* The most parameters of a builder the driver has room for */
@@ -65,9 +65,10 @@ typedef struct xttest_call_
  * made from a series of that length, in which case nothing is left to free */
 int xttest_call_prepare(xttest_call *call, int feature, const xttest_source *source);
 
-/* The same from the shortest series that the call can be made from, at a
- * level of scale. Returns 0 when no series up to XTTEST_DRIVER_LIMIT
- * elements will do */
+/* The same from a series of XTTEST_DRIVER_SHORTEST elements at a level of
+ * scale, doubled until the call can be made from it. The call is not the one
+ * from the shortest series the feature accepts. Returns 0 when no series up
+ * to XTTEST_DRIVER_LIMIT elements will do */
 int xttest_call_reach(xttest_call *call, int feature, xtract_context *ctx, double scale);
 
 /* Makes the call and returns what the feature returns */

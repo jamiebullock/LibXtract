@@ -1710,7 +1710,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_SPECTRAL_MAGNITUDES, XTRACT_UNIT_ANY, 1, accepted_subbands, 1, "N >= 1"},
+        .data = {XTRACT_SPECTRAL_MAGNITUDES, XTRACT_UNIT_ANY, 1, accepted_subbands, 1, "bands >= 1 && start >= 0 && start < N && ((scale == XTRACT_LINEAR_SUBBANDS && N - start >= bands) || (scale == XTRACT_OCTAVE_SUBBANDS && start >= 1))"},
         .argc = 4,
         .argv = arguments_subbands,
         .is_scalar = XTRACT_FALSE,
@@ -2475,7 +2475,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_SUBFRAMES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 3 * segment_length && N % 2 == 0"},
+        .data = {XTRACT_SUBFRAMES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 3 * segment_length && N % 2 == 0 && is_power_of_two(segment_length)"},
         .argc = 1,
         .argv = arguments_coherence,
         .is_scalar = XTRACT_FALSE,
@@ -2670,7 +2670,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .author = NULL,
         .year = 0,
         .tags = 0,
-        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 1"},
+        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 1 && N == capacity(state)"},
         .argc = 1,
         .argv = arguments_last_n,
         .is_scalar = XTRACT_FALSE,
@@ -2791,267 +2791,267 @@ int xtract_length_is_accepted(const int feature, const int N, const void *argv)
     switch (feature)
     {
     case XTRACT_MEAN:
-        return n >= 1;
+        return (n >= 1LL) != 0;
     case XTRACT_VARIANCE:
-        return n >= 2;
+        return (n >= 2LL) != 0;
     case XTRACT_STANDARD_DEVIATION:
-        return n >= 0;
+        return (n >= 0LL) != 0;
     case XTRACT_AVERAGE_DEVIATION:
-        return n >= 1;
+        return (n >= 1LL) != 0;
     case XTRACT_SKEWNESS:
-        return n >= 1;
+        return (n >= 1LL) != 0;
     case XTRACT_KURTOSIS:
-        return n >= 1;
+        return (n >= 1LL) != 0;
     case XTRACT_SPECTRAL_MEAN:
-        return n >= 2 && n % 2 == 0;
+        return (n >= 2LL && n % 2LL == 0LL) != 0;
     case XTRACT_SPECTRAL_VARIANCE:
-        return n >= 2 && n % 2 == 0;
+        return (n >= 2LL && n % 2LL == 0LL) != 0;
     case XTRACT_SPECTRAL_STANDARD_DEVIATION:
-        return n >= 0;
+        return (n >= 0LL) != 0;
     case XTRACT_SPECTRAL_SKEWNESS:
-        return n >= 2 && n % 2 == 0;
+        return (n >= 2LL && n % 2LL == 0LL) != 0;
     case XTRACT_SPECTRAL_KURTOSIS:
-        return n >= 2 && n % 2 == 0;
+        return (n >= 2LL && n % 2LL == 0LL) != 0;
     case XTRACT_SPECTRAL_CENTROID:
-        return n >= 2 && n % 2 == 0;
+        return (n >= 2LL && n % 2LL == 0LL) != 0;
     case XTRACT_IRREGULARITY_K:
-        return n >= 0;
+        return (n >= 0LL) != 0;
     case XTRACT_IRREGULARITY_J:
-        return n >= 1;
+        return (n >= 1LL) != 0;
     case XTRACT_TRISTIMULUS_1:
-        return n >= 1;
+        return (n >= 1LL) != 0;
     case XTRACT_TRISTIMULUS_2:
-        return n >= 1;
+        return (n >= 1LL) != 0;
     case XTRACT_TRISTIMULUS_3:
-        return n >= 1;
+        return (n >= 1LL) != 0;
     case XTRACT_SMOOTHNESS:
-        return n >= 3;
+        return (n >= 3LL) != 0;
     case XTRACT_SPREAD:
-        return n >= 2 && n % 2 == 0;
+        return (n >= 2LL && n % 2LL == 0LL) != 0;
     case XTRACT_ZCR:
-        return n >= 1;
+        return (n >= 1LL) != 0;
     case XTRACT_ROLLOFF:
-        return n >= 1;
+        return (n >= 1LL) != 0;
     case XTRACT_LOUDNESS:
-        return n >= 1 && n <= XTRACT_BARK_BANDS;
+        return (n >= 1LL && n <= XTRACT_BARK_BANDS) != 0;
     case XTRACT_FLATNESS:
-        return n >= 1;
+        return (n >= 1LL) != 0;
     case XTRACT_FLATNESS_DB:
-        return n >= 0;
+        return (n >= 0LL) != 0;
     case XTRACT_TONALITY:
-        return n >= 0;
+        return (n >= 0LL) != 0;
     case XTRACT_CREST:
-        return n >= 0;
+        return (n >= 0LL) != 0;
     case XTRACT_NOISINESS:
-        return n >= 2 && n % 2 == 0;
+        return (n >= 2LL && n % 2LL == 0LL) != 0;
     case XTRACT_RMS_AMPLITUDE:
-        return n >= 1;
+        return (n >= 1LL) != 0;
     case XTRACT_SPECTRAL_INHARMONICITY:
-        return n >= 2 && n % 2 == 0;
+        return (n >= 2LL && n % 2LL == 0LL) != 0;
     case XTRACT_ODD_EVEN_RATIO:
-        return n >= 1;
+        return (n >= 1LL) != 0;
     case XTRACT_SHARPNESS:
-        return n >= 1 && n <= XTRACT_BARK_BANDS;
+        return (n >= 1LL && n <= XTRACT_BARK_BANDS) != 0;
     case XTRACT_SPECTRAL_SLOPE:
-        return n >= 2 && n % 2 == 0;
+        return (n >= 2LL && n % 2LL == 0LL) != 0;
     case XTRACT_LOWEST_VALUE:
-        return n >= 1;
+        return (n >= 1LL) != 0;
     case XTRACT_HIGHEST_VALUE:
-        return n >= 1;
+        return (n >= 1LL) != 0;
     case XTRACT_SUM:
-        return n >= 1;
+        return (n >= 1LL) != 0;
     case XTRACT_NONZERO_COUNT:
-        return n >= 1;
+        return (n >= 1LL) != 0;
     case XTRACT_HPS:
-        return n >= 4 && n % 2 == 0;
+        return (n >= 4LL && n % 2LL == 0LL) != 0;
     case XTRACT_F0:
-        return n >= 1;
+        return (n >= 1LL) != 0;
     case XTRACT_FAILSAFE_F0:
-        return n >= 1;
+        return (n >= 1LL) != 0;
     case XTRACT_WAVELET_F0:
-        return n >= 1;
+        return (n >= 1LL) != 0;
     case XTRACT_MCLEOD_F0:
-        return n >= 1;
+        return (n >= 1LL) != 0;
     case XTRACT_MIDICENT:
-        return n >= 0;
+        return (n >= 0LL) != 0;
     case XTRACT_LNORM:
-        return n >= 1;
+        return (n >= 1LL) != 0;
     case XTRACT_FLUX:
-        return n >= 2 && n % 2 == 0;
+        return (n >= 2LL && n % 2LL == 0LL) != 0;
     case XTRACT_ATTACK_TIME:
-        return n >= 1;
+        return (n >= 1LL) != 0;
     case XTRACT_DECAY_TIME:
-        return n >= 1;
+        return (n >= 1LL) != 0;
     case XTRACT_DIFFERENCE_VECTOR:
-        return n >= 2 && n % 2 == 0;
+        return (n >= 2LL && n % 2LL == 0LL) != 0;
     case XTRACT_AUTOCORRELATION:
-        return n >= 1;
+        return (n >= 1LL) != 0;
     case XTRACT_AMDF:
-        return n >= 1;
+        return (n >= 1LL) != 0;
     case XTRACT_ASDF:
-        return n >= 1;
+        return (n >= 1LL) != 0;
     case XTRACT_BARK_COEFFICIENTS:
-        return n >= 1;
+        return (n >= 1LL) != 0;
     case XTRACT_PEAK_SPECTRUM:
-        return n >= 1;
+        return (n >= 1LL) != 0;
     case XTRACT_SPECTRUM:
-        return n >= 2 && xtract_rule_is_power_of_two(n);
+        return (n >= 2LL && xtract_rule_is_power_of_two(n)) != 0;
     case XTRACT_AUTOCORRELATION_FFT:
-        return n >= 2 && xtract_rule_is_power_of_two(n);
+        return (n >= 2LL && xtract_rule_is_power_of_two(n)) != 0;
     case XTRACT_MFCC:
-        return argv != NULL && n >= 1 && 2 * n == xtract_rule_filterbank_size(argv);
+        return argv != NULL && (n >= 1LL && 2LL * n == xtract_rule_filterbank_size(argv)) != 0;
     case XTRACT_DCT:
-        return n >= 1;
+        return (n >= 1LL) != 0;
     case XTRACT_HARMONIC_SPECTRUM:
-        return n >= 2 && n % 2 == 0;
+        return (n >= 2LL && n % 2LL == 0LL) != 0;
     case XTRACT_LPC:
-        return n >= 2;
+        return (n >= 2LL) != 0;
     case XTRACT_LPCC:
-        return n >= 2;
+        return (n >= 2LL) != 0;
     case XTRACT_SUBBANDS:
-        return n >= 1;
+        return argv != NULL && ((long long)((const int *)argv)[1] >= 1LL && (long long)((const int *)argv)[3] >= 0LL && (long long)((const int *)argv)[3] < n && (((long long)((const int *)argv)[2] == XTRACT_LINEAR_SUBBANDS && n - (long long)((const int *)argv)[3] >= (long long)((const int *)argv)[1]) || ((long long)((const int *)argv)[2] == XTRACT_OCTAVE_SUBBANDS && (long long)((const int *)argv)[3] >= 1LL))) != 0;
     case XTRACT_MEL_SPECTROGRAM:
-        return argv != NULL && n >= 1 && 2 * n == xtract_rule_filterbank_size(argv);
+        return argv != NULL && (n >= 1LL && 2LL * n == xtract_rule_filterbank_size(argv)) != 0;
     case XTRACT_GFCC:
-        return argv != NULL && n >= 1 && 2 * n == xtract_rule_filterbank_size(argv);
+        return argv != NULL && (n >= 1LL && 2LL * n == xtract_rule_filterbank_size(argv)) != 0;
     case XTRACT_GAMMATONE_SPECTROGRAM:
-        return argv != NULL && n >= 1 && 2 * n == xtract_rule_filterbank_size(argv);
+        return argv != NULL && (n >= 1LL && 2LL * n == xtract_rule_filterbank_size(argv)) != 0;
     case XTRACT_WINDOWED:
-        return n >= 1;
+        return (n >= 1LL) != 0;
     case XTRACT_SMOOTHED:
-        return n >= 1;
+        return (n >= 1LL) != 0;
     case XTRACT_PEAK:
-        return n >= 1;
+        return (n >= 1LL) != 0;
     case XTRACT_MMBSES:
-        return argv != NULL && n >= 2 && n % 2 == 0 && n == xtract_rule_filterbank_size(argv);
+        return argv != NULL && (n >= 2LL && n % 2LL == 0LL && n == xtract_rule_filterbank_size(argv)) != 0;
     case XTRACT_SPECTRAL_SUBBAND_CENTROIDS:
-        return argv != NULL && n >= 2 && n % 2 == 0 && n == xtract_rule_filterbank_size(argv);
+        return argv != NULL && (n >= 2LL && n % 2LL == 0LL && n == xtract_rule_filterbank_size(argv)) != 0;
     case XTRACT_MOVING_SUM:
-        return argv != NULL && n >= (long long)((const int *)argv)[0];
+        return argv != NULL && (n >= (long long)((const int *)argv)[0]) != 0;
     case XTRACT_MOVING_AVERAGE:
-        return argv != NULL && n >= (long long)((const int *)argv)[0];
+        return argv != NULL && (n >= (long long)((const int *)argv)[0]) != 0;
     case XTRACT_MOVING_VARIANCE:
-        return argv != NULL && n >= (long long)((const int *)argv)[0];
+        return argv != NULL && (n >= (long long)((const int *)argv)[0]) != 0;
     case XTRACT_MOVING_STANDARD_DEVIATION:
-        return argv != NULL && n >= (long long)((const int *)argv)[0];
+        return argv != NULL && (n >= (long long)((const int *)argv)[0]) != 0;
     case XTRACT_MOVING_MAX:
-        return argv != NULL && n >= (long long)((const int *)argv)[0];
+        return argv != NULL && (n >= (long long)((const int *)argv)[0]) != 0;
     case XTRACT_MOVING_MIN:
-        return argv != NULL && n >= (long long)((const int *)argv)[0];
+        return argv != NULL && (n >= (long long)((const int *)argv)[0]) != 0;
     case XTRACT_EWMA_AVERAGE:
-        return n >= 1;
+        return (n >= 1LL) != 0;
     case XTRACT_EWMA_VARIANCE:
-        return n >= 1;
+        return (n >= 1LL) != 0;
     case XTRACT_MEDIAN:
-        return n >= 1;
+        return (n >= 1LL) != 0;
     case XTRACT_MEDIAN_ABSOLUTE_DEVIATION:
-        return n >= 1;
+        return (n >= 1LL) != 0;
     case XTRACT_HJORTH_ACTIVITY:
-        return n >= 1;
+        return (n >= 1LL) != 0;
     case XTRACT_HJORTH_MOBILITY:
-        return n >= 2;
+        return (n >= 2LL) != 0;
     case XTRACT_HJORTH_COMPLEXITY:
-        return n >= 3;
+        return (n >= 3LL) != 0;
     case XTRACT_TIME_REVERSAL_ASYMMETRY:
-        return argv != NULL && n >= 2 * (long long)((const int *)argv)[0] + 1;
+        return argv != NULL && (n >= 2LL * (long long)((const int *)argv)[0] + 1LL) != 0;
     case XTRACT_SPECTRAL_ENTROPY:
-        return n >= 2;
+        return (n >= 2LL) != 0;
     case XTRACT_PETROSIAN_FRACTAL_DIMENSION:
-        return n >= 2;
+        return (n >= 2LL) != 0;
     case XTRACT_KATZ_FRACTAL_DIMENSION:
-        return n >= 2;
+        return (n >= 2LL) != 0;
     case XTRACT_HIGUCHI_FRACTAL_DIMENSION:
-        return argv != NULL && n >= 2 * (long long)((const int *)argv)[0];
+        return argv != NULL && (n >= 2LL * (long long)((const int *)argv)[0]) != 0;
     case XTRACT_PERMUTATION_ENTROPY:
-        return argv != NULL && n >= ((long long)((const int *)argv)[0] - 1) * (long long)((const int *)argv)[1] + 1;
+        return argv != NULL && (n >= ((long long)((const int *)argv)[0] - 1LL) * (long long)((const int *)argv)[1] + 1LL) != 0;
     case XTRACT_LEMPEL_ZIV_COMPLEXITY:
-        return n >= 2;
+        return (n >= 2LL) != 0;
     case XTRACT_SAMPLE_ENTROPY:
-        return argv != NULL && n >= (long long)xtract_argv_int(((const double *)argv)[0]) + 2;
+        return argv != NULL && (n >= (long long)xtract_argv_int(((const double *)argv)[0]) + 2LL) != 0;
     case XTRACT_APPROXIMATE_ENTROPY:
-        return argv != NULL && n >= (long long)xtract_argv_int(((const double *)argv)[0]) + 2;
+        return argv != NULL && (n >= (long long)xtract_argv_int(((const double *)argv)[0]) + 2LL) != 0;
     case XTRACT_PERIODICITY:
-        return n >= 1;
+        return (n >= 1LL) != 0;
     case XTRACT_SIGNAL_CONFIDENCE:
-        return n >= 1;
+        return (n >= 1LL) != 0;
     case XTRACT_DECAY_RATE:
-        return n >= 1;
+        return (n >= 1LL) != 0;
     case XTRACT_TEMPORAL_CENTROID:
-        return n >= 2;
+        return (n >= 2LL) != 0;
     case XTRACT_MAX_POSITION:
-        return n >= 2;
+        return (n >= 2LL) != 0;
     case XTRACT_MIN_POSITION:
-        return n >= 2;
+        return (n >= 2LL) != 0;
     case XTRACT_PEAK_ASYMMETRY:
-        return n >= 1;
+        return (n >= 1LL) != 0;
     case XTRACT_CROSS_CORRELATION:
-        return n >= 2 && n % 2 == 0;
+        return (n >= 2LL && n % 2LL == 0LL) != 0;
     case XTRACT_CROSS_CORRELATION_LAG:
-        return n >= 2 && n % 2 == 0;
+        return (n >= 2LL && n % 2LL == 0LL) != 0;
     case XTRACT_KULLBACK_LEIBLER_DIVERGENCE:
-        return n >= 2 && n % 2 == 0;
+        return (n >= 2LL && n % 2LL == 0LL) != 0;
     case XTRACT_ITAKURA_SAITO_DIVERGENCE:
-        return n >= 2 && n % 2 == 0;
+        return (n >= 2LL && n % 2LL == 0LL) != 0;
     case XTRACT_MODIFIED_KULLBACK_LEIBLER:
-        return n >= 2 && n % 2 == 0;
+        return (n >= 2LL && n % 2LL == 0LL) != 0;
     case XTRACT_SPECTRAL_CONTRAST:
-        return n >= 2 && n % 2 == 0;
+        return (n >= 2LL && n % 2LL == 0LL) != 0;
     case XTRACT_CHROMA:
-        return n >= 2 && n % 2 == 0;
+        return (n >= 2LL && n % 2LL == 0LL) != 0;
     case XTRACT_CQT:
-        return argv != NULL && n >= 2 && n % 2 == 0 && n == xtract_rule_kernel_size(argv);
+        return argv != NULL && (n >= 2LL && n % 2LL == 0LL && n == xtract_rule_kernel_size(argv)) != 0;
     case XTRACT_PEARSON_CORRELATION:
-        return n >= 4 && n % 2 == 0;
+        return (n >= 4LL && n % 2LL == 0LL) != 0;
     case XTRACT_COVARIANCE_MATRIX:
-        return argv != NULL && (long long)((const int *)argv)[0] >= 1 && n >= 2 * (long long)((const int *)argv)[0] && n % (long long)((const int *)argv)[0] == 0;
+        return argv != NULL && ((long long)((const int *)argv)[0] >= 1LL && n >= 2LL * (long long)((const int *)argv)[0] && n % (long long)((const int *)argv)[0] == 0LL) != 0;
     case XTRACT_CORRELATION_MATRIX:
-        return n >= 1 && xtract_rule_is_square(n);
+        return (n >= 1LL && xtract_rule_is_square(n)) != 0;
     case XTRACT_AVERAGE_CORRELATION:
-        return n >= 4 && xtract_rule_is_square(n);
+        return (n >= 4LL && xtract_rule_is_square(n)) != 0;
     case XTRACT_PRINCIPAL_VARIANCES:
-        return n >= 1 && xtract_rule_is_square(n);
+        return (n >= 1LL && xtract_rule_is_square(n)) != 0;
     case XTRACT_COHERENCE:
-        return argv != NULL && n >= 3 * (long long)((const int *)argv)[0] && n % 2 == 0;
+        return argv != NULL && (n >= 3LL * (long long)((const int *)argv)[0] && n % 2LL == 0LL && xtract_rule_is_power_of_two((long long)((const int *)argv)[0])) != 0;
     case XTRACT_GRID_MOMENTS:
-        return argv != NULL && n >= 1 && (long long)((const int *)argv)[0] >= 1 && n % (long long)((const int *)argv)[0] == 0;
+        return argv != NULL && (n >= 1LL && (long long)((const int *)argv)[0] >= 1LL && n % (long long)((const int *)argv)[0] == 0LL) != 0;
     case XTRACT_GRID_CENTRAL_MOMENTS:
-        return argv != NULL && n >= 1 && (long long)((const int *)argv)[0] >= 1 && n % (long long)((const int *)argv)[0] == 0;
+        return argv != NULL && (n >= 1LL && (long long)((const int *)argv)[0] >= 1LL && n % (long long)((const int *)argv)[0] == 0LL) != 0;
     case XTRACT_NORMALISED_MOMENTS:
-        return n == 8;
+        return (n == 8LL) != 0;
     case XTRACT_HU_MOMENTS:
-        return n == 7;
+        return (n == 7LL) != 0;
     case XTRACT_QUANTISE:
-        return n >= 1;
+        return (n >= 1LL) != 0;
     case XTRACT_HISTOGRAM:
-        return n >= 1;
+        return (n >= 1LL) != 0;
     case XTRACT_COOCCURRENCE_MATRIX:
-        return argv != NULL && n >= 1 && (long long)((const int *)argv)[0] >= 1 && n % (long long)((const int *)argv)[0] == 0;
+        return argv != NULL && (n >= 1LL && (long long)((const int *)argv)[0] >= 1LL && n % (long long)((const int *)argv)[0] == 0LL) != 0;
     case XTRACT_COOCCURRENCE_CONTRAST:
-        return n >= 1 && xtract_rule_is_square(n);
+        return (n >= 1LL && xtract_rule_is_square(n)) != 0;
     case XTRACT_COOCCURRENCE_CORRELATION:
-        return n >= 1 && xtract_rule_is_square(n);
+        return (n >= 1LL && xtract_rule_is_square(n)) != 0;
     case XTRACT_ANGULAR_SECOND_MOMENT:
-        return n >= 1 && xtract_rule_is_square(n);
+        return (n >= 1LL && xtract_rule_is_square(n)) != 0;
     case XTRACT_INVERSE_DIFFERENCE_MOMENT:
-        return n >= 1 && xtract_rule_is_square(n);
+        return (n >= 1LL && xtract_rule_is_square(n)) != 0;
     case XTRACT_LOCAL_BINARY_PATTERNS:
-        return argv != NULL && n >= 1 && (long long)((const int *)argv)[0] >= 1 && n % (long long)((const int *)argv)[0] == 0;
+        return argv != NULL && (n >= 1LL && (long long)((const int *)argv)[0] >= 1LL && n % (long long)((const int *)argv)[0] == 0LL) != 0;
     case XTRACT_LAST_N:
-        return n >= 1;
+        return argv != NULL && (n >= 1LL && n == xtract_rule_capacity(argv)) != 0;
     case XTRACT_PACKED:
-        return n >= 2 && n % 2 == 0;
+        return (n >= 2LL && n % 2LL == 0LL) != 0;
     case XTRACT_MAGNITUDE_SPECTRUM:
-        return n >= 2 && n % 2 == 0;
+        return (n >= 2LL && n % 2LL == 0LL) != 0;
     case XTRACT_POWER_SPECTRUM:
-        return n >= 2 && n % 2 == 0;
+        return (n >= 2LL && n % 2LL == 0LL) != 0;
     case XTRACT_LOG_SPECTRUM:
-        return n >= 2 && n % 2 == 0;
+        return (n >= 2LL && n % 2LL == 0LL) != 0;
     case XTRACT_PHASE_SPECTRUM:
-        return n >= 2 && n % 2 == 0;
+        return (n >= 2LL && n % 2LL == 0LL) != 0;
     case XTRACT_LOG:
-        return n >= 1;
+        return (n >= 1LL) != 0;
     case XTRACT_NORMALISED_CROSS_CORRELATION:
-        return n >= 2 && n % 2 == 0;
+        return (n >= 2LL && n % 2LL == 0LL) != 0;
     default:
         return 0;
     }
@@ -3067,7 +3067,7 @@ int xtract_result_length(const int feature, const int N, const void *argv)
     switch (feature)
     {
     case XTRACT_DIFFERENCE_VECTOR:
-        length = n / 2;
+        length = n / 2LL;
         break;
     case XTRACT_AUTOCORRELATION:
         length = n;
@@ -3082,7 +3082,7 @@ int xtract_result_length(const int feature, const int N, const void *argv)
         length = XTRACT_BARK_BANDS;
         break;
     case XTRACT_PEAK_SPECTRUM:
-        length = 2 * n;
+        length = 2LL * n;
         break;
     case XTRACT_SPECTRUM:
         length = n;
@@ -3091,6 +3091,8 @@ int xtract_result_length(const int feature, const int N, const void *argv)
         length = n;
         break;
     case XTRACT_MFCC:
+        if (argv == NULL)
+            return -1;
         length = xtract_rule_filter_count(argv);
         break;
     case XTRACT_DCT:
@@ -3100,21 +3102,31 @@ int xtract_result_length(const int feature, const int N, const void *argv)
         length = n;
         break;
     case XTRACT_LPC:
-        length = 2 * (n - 1);
+        length = 2LL * (n - 1LL);
         break;
     case XTRACT_LPCC:
+        if (argv == NULL)
+            return -1;
         length = (long long)((const int *)argv)[0];
         break;
     case XTRACT_SUBBANDS:
+        if (argv == NULL)
+            return -1;
         length = (long long)((const int *)argv)[1];
         break;
     case XTRACT_MEL_SPECTROGRAM:
+        if (argv == NULL)
+            return -1;
         length = xtract_rule_filter_count(argv);
         break;
     case XTRACT_GFCC:
+        if (argv == NULL)
+            return -1;
         length = xtract_rule_filter_count(argv);
         break;
     case XTRACT_GAMMATONE_SPECTROGRAM:
+        if (argv == NULL)
+            return -1;
         length = xtract_rule_filter_count(argv);
         break;
     case XTRACT_WINDOWED:
@@ -3124,28 +3136,44 @@ int xtract_result_length(const int feature, const int N, const void *argv)
         length = n;
         break;
     case XTRACT_MMBSES:
+        if (argv == NULL)
+            return -1;
         length = xtract_rule_filter_count(argv);
         break;
     case XTRACT_SPECTRAL_SUBBAND_CENTROIDS:
+        if (argv == NULL)
+            return -1;
         length = xtract_rule_filter_count(argv);
         break;
     case XTRACT_MOVING_SUM:
-        length = n - (long long)((const int *)argv)[0] + 1;
+        if (argv == NULL)
+            return -1;
+        length = n - (long long)((const int *)argv)[0] + 1LL;
         break;
     case XTRACT_MOVING_AVERAGE:
-        length = n - (long long)((const int *)argv)[0] + 1;
+        if (argv == NULL)
+            return -1;
+        length = n - (long long)((const int *)argv)[0] + 1LL;
         break;
     case XTRACT_MOVING_VARIANCE:
-        length = n - (long long)((const int *)argv)[0] + 1;
+        if (argv == NULL)
+            return -1;
+        length = n - (long long)((const int *)argv)[0] + 1LL;
         break;
     case XTRACT_MOVING_STANDARD_DEVIATION:
-        length = n - (long long)((const int *)argv)[0] + 1;
+        if (argv == NULL)
+            return -1;
+        length = n - (long long)((const int *)argv)[0] + 1LL;
         break;
     case XTRACT_MOVING_MAX:
-        length = n - (long long)((const int *)argv)[0] + 1;
+        if (argv == NULL)
+            return -1;
+        length = n - (long long)((const int *)argv)[0] + 1LL;
         break;
     case XTRACT_MOVING_MIN:
-        length = n - (long long)((const int *)argv)[0] + 1;
+        if (argv == NULL)
+            return -1;
+        length = n - (long long)((const int *)argv)[0] + 1LL;
         break;
     case XTRACT_EWMA_AVERAGE:
         length = n;
@@ -3154,18 +3182,24 @@ int xtract_result_length(const int feature, const int N, const void *argv)
         length = n;
         break;
     case XTRACT_CROSS_CORRELATION:
-        length = n - 1;
+        length = n - 1LL;
         break;
     case XTRACT_SPECTRAL_CONTRAST:
-        length = (long long)xtract_argv_int(((const double *)argv)[0]) + 1;
+        if (argv == NULL)
+            return -1;
+        length = (long long)xtract_argv_int(((const double *)argv)[0]) + 1LL;
         break;
     case XTRACT_CHROMA:
         length = XTRACT_PITCH_CLASSES;
         break;
     case XTRACT_CQT:
-        length = 2 * xtract_rule_band_count(argv);
+        if (argv == NULL)
+            return -1;
+        length = 2LL * xtract_rule_band_count(argv);
         break;
     case XTRACT_COVARIANCE_MATRIX:
+        if (argv == NULL)
+            return -1;
         length = (long long)((const int *)argv)[0] * (long long)((const int *)argv)[0];
         break;
     case XTRACT_CORRELATION_MATRIX:
@@ -3175,31 +3209,37 @@ int xtract_result_length(const int feature, const int N, const void *argv)
         length = xtract_rule_root(n);
         break;
     case XTRACT_COHERENCE:
-        length = (long long)((const int *)argv)[0] / 2;
+        if (argv == NULL)
+            return -1;
+        length = (long long)((const int *)argv)[0] / 2LL;
         break;
     case XTRACT_GRID_MOMENTS:
-        length = 10;
+        length = 10LL;
         break;
     case XTRACT_GRID_CENTRAL_MOMENTS:
-        length = 8;
+        length = 8LL;
         break;
     case XTRACT_NORMALISED_MOMENTS:
-        length = 7;
+        length = 7LL;
         break;
     case XTRACT_HU_MOMENTS:
-        length = 7;
+        length = 7LL;
         break;
     case XTRACT_QUANTISE:
         length = n;
         break;
     case XTRACT_HISTOGRAM:
+        if (argv == NULL)
+            return -1;
         length = (long long)((const int *)argv)[0];
         break;
     case XTRACT_COOCCURRENCE_MATRIX:
+        if (argv == NULL)
+            return -1;
         length = (long long)((const int *)argv)[1] * (long long)((const int *)argv)[1];
         break;
     case XTRACT_LOCAL_BINARY_PATTERNS:
-        length = 10;
+        length = 10LL;
         break;
     case XTRACT_LAST_N:
         length = n;
@@ -3223,7 +3263,7 @@ int xtract_result_length(const int feature, const int N, const void *argv)
         length = n;
         break;
     case XTRACT_NORMALISED_CROSS_CORRELATION:
-        length = n - 1;
+        length = n - 1LL;
         break;
     default:
         length = 1;

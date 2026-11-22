@@ -13,6 +13,7 @@
 #include "xtract_descriptors_private.h"
 #include "xtract_filterbank_private.h"
 #include "xtract_matrix_private.h"
+#include "xtract_stateful_private.h"
 
 const xtract_function_descriptor_t *xtract_descriptor(const int feature)
 {
@@ -70,4 +71,11 @@ long long xtract_rule_band_count(const void *kernel)
 long long xtract_rule_kernel_size(const void *kernel)
 {
     return ((const xtract_cqt_kernel *)kernel)->N;
+}
+
+long long xtract_rule_capacity(const void *state)
+{
+    const ringbuf_t ringbuf = ((const xtract_last_n_state *)state)->ringbuf;
+
+    return ringbuf == NULL ? 0 : (long long)(ringbuf_capacity(ringbuf) / sizeof(double));
 }

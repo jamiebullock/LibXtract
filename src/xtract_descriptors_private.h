@@ -38,5 +38,6 @@ long long xtract_rule_filter_count(const void *filterbank);
 long long xtract_rule_filterbank_size(const void *filterbank);
 long long xtract_rule_band_count(const void *kernel);
 long long xtract_rule_kernel_size(const void *kernel);
+long long xtract_rule_capacity(const void *state);
 
 #endif

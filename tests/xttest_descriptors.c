@@ -10,6 +10,7 @@
 #include <string.h>
 
 #include "xtract/libxtract.h"
+#include "xtract/xtract_stateful.h"
 
 #include "xttest_approx.h"
 #include "xttest_driver.h"
@@ -1526,6 +1527,49 @@ UTEST(descriptors, a_length_is_accepted_when_it_meets_the_rule_the_descriptor_st
     ASSERT_EQ(xtract_length_is_accepted(XTRACT_FEATURES, 8, NULL), 0);
 }
 
+/* Whether the feature takes data of length N with the arguments */
+static int takes(int feature, int N, const void *argv)
+{
+    double data[16] = {1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 1.0, 3.0, 2.0, 4.0, 3.0, 5.0, 4.0, 6.0};
+    double result[16];
+    xtract_context *ctx = xtract_context_new(16);
+    int rv = xtract[feature](ctx, data, N, argv, result);
+
+    xtract_context_delete(ctx);
+    return rv != XTRACT_ARGUMENT_ERROR && rv != XTRACT_BAD_STATE;
+}
+
+UTEST(descriptors, the_rule_for_n_accepts_what_the_feature_takes_where_its_arguments_decide)
+{
+    /* Linear bands need a bin each after the start, octave bands a start of
+     * at least 1 */
+    const int four_linear_from_1[4] = {XTRACT_MEAN, 4, XTRACT_LINEAR_SUBBANDS, 1};
+    const int octave_from_0[4] = {XTRACT_MEAN, 2, XTRACT_OCTAVE_SUBBANDS, 0};
+    const int octave_from_8[4] = {XTRACT_MEAN, 2, XTRACT_OCTAVE_SUBBANDS, 8};
+    const int segment_3 = 3;
+    const int segment_4 = 4;
+    xtract_last_n_state *four = xtract_last_n_state_new(4);
+    int N;
+
+    ASSERT_TRUE(four != NULL);
+    for (N = 1; N <= 16; N++)
+    {
+        ASSERT_EQ(xtract_length_is_accepted(XTRACT_SUBBANDS, N, four_linear_from_1), takes(XTRACT_SUBBANDS, N, four_linear_from_1));
+        ASSERT_EQ(xtract_length_is_accepted(XTRACT_SUBBANDS, N, octave_from_0), takes(XTRACT_SUBBANDS, N, octave_from_0));
+        ASSERT_EQ(xtract_length_is_accepted(XTRACT_SUBBANDS, N, octave_from_8), takes(XTRACT_SUBBANDS, N, octave_from_8));
+        ASSERT_EQ(xtract_length_is_accepted(XTRACT_COHERENCE, N, &segment_3), takes(XTRACT_COHERENCE, N, &segment_3));
+        ASSERT_EQ(xtract_length_is_accepted(XTRACT_COHERENCE, N, &segment_4), takes(XTRACT_COHERENCE, N, &segment_4));
+        ASSERT_EQ(xtract_length_is_accepted(XTRACT_LAST_N, N, four), takes(XTRACT_LAST_N, N, four));
+    }
+    ASSERT_EQ(xtract_length_is_accepted(XTRACT_SUBBANDS, 4, four_linear_from_1), 0);
+    ASSERT_EQ(xtract_length_is_accepted(XTRACT_SUBBANDS, 5, four_linear_from_1), 1);
+    ASSERT_EQ(xtract_length_is_accepted(XTRACT_COHERENCE, 12, &segment_3), 0);
+    ASSERT_EQ(xtract_length_is_accepted(XTRACT_COHERENCE, 12, &segment_4), 1);
+    ASSERT_EQ(xtract_length_is_accepted(XTRACT_LAST_N, 4, four), 1);
+    ASSERT_EQ(xtract_length_is_accepted(XTRACT_LAST_N, 8, four), 0);
+    xtract_last_n_state_delete(four);
+}
+
 UTEST(descriptors, a_result_has_the_length_the_descriptor_states)
 {
     const int window = 5;
@@ -1553,6 +1597,11 @@ UTEST(descriptors, a_result_has_the_length_the_descriptor_states)
     ASSERT_EQ(xtract_result_length(XTRACT_MFCC, 32, filterbank), 13);
     ASSERT_EQ(xtract_result_length(XTRACT_MFCC, 16, filterbank), -1);
     ASSERT_EQ(xtract_result_length(XTRACT_MFCC, 32, NULL), -1);
+
+    /* A result length that reads an argument needs argv, though the rule
+     * for N does not */
+    ASSERT_EQ(xtract_length_is_accepted(XTRACT_LPCC, 2, NULL), 1);
+    ASSERT_EQ(xtract_result_length(XTRACT_LPCC, 2, NULL), -1);
 
     /* A length that an int cannot hold is not given */
     ASSERT_EQ(xtract_length_is_accepted(XTRACT_PEAK_SPECTRUM, INT_MAX, NULL), 1);
