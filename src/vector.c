@@ -41,12 +41,7 @@ static void transform_bin(const DSPDoubleSplitComplex *fft, const unsigned int n
 
 int xtract_spectrum(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
-    int vector = 0;
-    int normalise = 0;
-    double type, norm;
-    double q = 0.0;
-    double max = 0.0;
-    double NxN = XTRACT_SQ((double)N);
+    double scale;
     double real = 0.0;
     double imag = 0.0;
     unsigned int n = 0;
@@ -60,18 +55,9 @@ int xtract_spectrum(xtract_context *ctx, const double *data, const int N, const 
     double half = 0.5;
 #endif
 
-    if (argv == NULL || N < 2 || !xtract_is_poweroftwo((unsigned int)N))
+    if (argv != NULL || N < 2 || !xtract_is_poweroftwo((unsigned int)N))
         return XTRACT_ARGUMENT_ERROR;
-
-    q = *(double *)argv;
-    type = *((double *)argv + 1);
-    norm = *((double *)argv + 2);
-    if (!isfinite(q) || q <= 0.0 ||
-        !(type >= XTRACT_MAGNITUDE_SPECTRUM && type <= XTRACT_MAGNITUDE_PHASE_SPECTRUM) ||
-        (norm != 0.0 && norm != 1.0))
-        return XTRACT_ARGUMENT_ERROR;
-    vector = (int)type;
-    normalise = (int)norm;
+    scale = 1.0 / (double)N;
 
     scratch = xtract_scratch_take(ctx, N, (size_t)N);
     if (scratch == NULL)
@@ -96,69 +82,142 @@ int xtract_spectrum(xtract_context *ctx, const double *data, const int N, const 
     vDSP_vsmulD(fft->imagp, 1, &half, fft->imagp, 1, M);
 #endif
 
-    switch (vector)
+    for (n = 0; n < M; ++n)
     {
-    case XTRACT_POWER_SPECTRUM:
-    case XTRACT_LOG_SPECTRUM:
-        for (n = 0; n < M; ++n)
-        {
-            transform_bin(fft, n, &real, &imag);
-            result[n] = (XTRACT_SQ(real) + XTRACT_SQ(imag)) / NxN;
-            result[M + n] = n * q;
-        }
-        break;
-
-    case XTRACT_MAGNITUDE_PHASE_SPECTRUM:
-        for (n = 0; n < M; ++n)
-        {
-            transform_bin(fft, n, &real, &imag);
-            /* Magnitudes in the first half, phases in the second -- replacing
-             * the bin frequencies, which are a deterministic n * q the caller
-             * can recompute. result[n] reconstructs to real/imag via
-             * magnitude * cos/sin(phase). */
-            result[n] = sqrt(XTRACT_SQ(real) + XTRACT_SQ(imag)) / (double)N;
-            result[M + n] = atan2(imag, real);
-        }
-        break;
-
-    default:
-        /* MAGNITUDE_SPECTRUM */
-        for (n = 0; n < M; ++n)
-        {
-            transform_bin(fft, n, &real, &imag);
-            result[n] = sqrt(XTRACT_SQ(real) + XTRACT_SQ(imag)) / (double)N;
-            result[M + n] = n * q;
-        }
-        break;
-    }
-
-    if (normalise)
-    {
-        for (n = 0; n < M; n++)
-            max = result[n] > max ? result[n] : max;
-
-        /* Scale the magnitude/power coefficients in the first half; the second
-         * half (bin frequencies, or phases for MAGNITUDE_PHASE) is left as-is. */
-        if (max != 0.0)
-        {
-            for (n = 0; n < M; n++)
-                result[n] /= max;
-        }
-    }
-
-    if (vector == XTRACT_LOG_SPECTRUM)
-    {
-        /* DBL_EPSILON is the step from 1 to the next double, so a magnitude
-         * below it is lost beside a magnitude of 1. Its square is the power
-         * that gives 0, and a power of 1 gives 1. */
-        const double lowest = DBL_EPSILON * DBL_EPSILON;
-        const double span = -log(lowest);
-
-        for (n = 0; n < M; n++)
-            result[n] = result[n] > lowest ? 1.0 + log(result[n]) / span : 0.0;
+        transform_bin(fft, n, &real, &imag);
+        result[n] = real * scale;
+        result[M + n] = imag * scale;
     }
 
     xtract_scratch_return(ctx, scratch, (size_t)N);
+
+    return XTRACT_SUCCESS;
+}
+
+/* The checks the four spectra derived from a complex spectrum share: N/2
+ * bins of real parts then imaginary parts, and a bin spacing when the
+ * spectrum has frequencies in its second half */
+static int complex_spectrum_is_valid(const int N, const void *argv, const int needs_spacing)
+{
+    double q;
+
+    if (N < 2 || (N & 1))
+        return 0;
+    if (!needs_spacing)
+        return 1;
+    if (argv == NULL)
+        return 0;
+    q = *(const double *)argv;
+
+    return isfinite(q) && q > 0.0;
+}
+
+int xtract_magnitude_spectrum(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
+{
+    const int M = N >> 1;
+    double q;
+    int n;
+
+    if (!complex_spectrum_is_valid(N, argv, 1))
+        return XTRACT_ARGUMENT_ERROR;
+    q = *(const double *)argv;
+
+    for (n = 0; n < M; n++)
+    {
+        result[n] = sqrt(XTRACT_SQ(data[n]) + XTRACT_SQ(data[M + n]));
+        result[M + n] = n * q;
+    }
+
+    return XTRACT_SUCCESS;
+}
+
+int xtract_power_spectrum(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
+{
+    const int M = N >> 1;
+    double q;
+    int n;
+
+    if (!complex_spectrum_is_valid(N, argv, 1))
+        return XTRACT_ARGUMENT_ERROR;
+    q = *(const double *)argv;
+
+    for (n = 0; n < M; n++)
+    {
+        result[n] = XTRACT_SQ(data[n]) + XTRACT_SQ(data[M + n]);
+        result[M + n] = n * q;
+    }
+
+    return XTRACT_SUCCESS;
+}
+
+int xtract_log_spectrum(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
+{
+    /* DBL_EPSILON is the step from 1 to the next double, so a magnitude
+     * below it is lost beside a magnitude of 1. Its square is the power
+     * that gives 0, and a power of 1 gives 1. */
+    const double lowest = DBL_EPSILON * DBL_EPSILON;
+    const double span = -log(lowest);
+    const int M = N >> 1;
+    double q, power;
+    int n;
+
+    if (!complex_spectrum_is_valid(N, argv, 1))
+        return XTRACT_ARGUMENT_ERROR;
+    q = *(const double *)argv;
+
+    for (n = 0; n < M; n++)
+    {
+        power = XTRACT_SQ(data[n]) + XTRACT_SQ(data[M + n]);
+        result[n] = power > lowest ? 1.0 + log(power) / span : 0.0;
+        result[M + n] = n * q;
+    }
+
+    return XTRACT_SUCCESS;
+}
+
+int xtract_phase_spectrum(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
+{
+    const int M = N >> 1;
+    double q;
+    int n;
+
+    if (!complex_spectrum_is_valid(N, argv, 1))
+        return XTRACT_ARGUMENT_ERROR;
+    q = *(const double *)argv;
+
+    for (n = 0; n < M; n++)
+    {
+        result[n] = atan2(data[M + n], data[n]);
+        result[M + n] = n * q;
+    }
+
+    return XTRACT_SUCCESS;
+}
+
+int xtract_log(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
+{
+    double lambda;
+    int n;
+
+    if (N < 1 || argv == NULL)
+        return XTRACT_ARGUMENT_ERROR;
+    lambda = *(const double *)argv;
+    if (!(isfinite(lambda) && lambda > 0.0))
+        return XTRACT_ARGUMENT_ERROR;
+    for (n = 0; n < N; n++)
+    {
+        if (!(data[n] >= 0.0))
+            return XTRACT_ARGUMENT_ERROR;
+    }
+
+    for (n = 0; n < N; n++)
+    {
+        const double product = lambda * data[n];
+
+        /* Where the product overflows, the 1 is below the precision of the
+         * result */
+        result[n] = isfinite(product) ? log1p(product) : log(lambda) + log(data[n]);
+    }
 
     return XTRACT_SUCCESS;
 }
@@ -357,9 +416,9 @@ static double bivariate_gaussian_entropy(double sxx, double syy, double sxy, con
 
 int xtract_mmbses(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
-    /* data is a magnitude/phase spectrum as produced by xtract_spectrum() with
-     * XTRACT_MAGNITUDE_PHASE_SPECTRUM: the first M = N/2 elements are bin
-     * magnitudes, the next M their phases. Each filter band's complex
+    /* data is a complex spectrum as xtract_spectrum() gives it: the first
+     * M = N/2 elements are the real parts of the bins, the next M their
+     * imaginary parts. Each filter band's complex
      * coefficients are modelled as a zero-mean bivariate (real, imaginary)
      * Gaussian, and the band's coefficient is that distribution's differential
      * entropy
@@ -384,7 +443,7 @@ int xtract_mmbses(xtract_context *ctx, const double *data, const int N, const vo
         double sxx = 0.0, syy = 0.0, sxy = 0.0;
 
         /* Accumulate the zero-mean second moments of the filter-weighted
-         * complex coefficients (real = mag*cos(phase), imaginary = mag*sin(phase)). */
+         * complex coefficients. */
         for (n = 0; n < M; n++)
         {
             double weight = gains[n];
@@ -393,8 +452,8 @@ int xtract_mmbses(xtract_context *ctx, const double *data, const int N, const vo
             if (weight == 0.0)
                 continue;
 
-            re = data[n] * cos(data[M + n]) * weight;
-            im = data[n] * sin(data[M + n]) * weight;
+            re = data[n] * weight;
+            im = data[M + n] * weight;
             sxx += XTRACT_SQ(re);
             syy += XTRACT_SQ(im);
             sxy += re * im;
@@ -905,9 +964,7 @@ int xtract_lpcc(xtract_context *ctx, const double *data, const int N, const void
  * NULL argv and writes one scalar, so the dispatch below cannot overrun the
  * result or dereference the NULL argv */
 static const int subband_features[] = {
-    XTRACT_MEAN, XTRACT_IRREGULARITY_J, XTRACT_SMOOTHNESS, XTRACT_ZCR,
-    XTRACT_LOUDNESS, XTRACT_FLATNESS, XTRACT_RMS_AMPLITUDE, XTRACT_SHARPNESS,
-    XTRACT_HIGHEST_VALUE, XTRACT_SUM, XTRACT_NONZERO_COUNT};
+    XTRACT_MEAN, XTRACT_RMS_AMPLITUDE, XTRACT_HIGHEST_VALUE, XTRACT_SUM};
 
 static int is_subband_feature(const int feature)
 {
@@ -1311,25 +1368,15 @@ int xtract_chroma(xtract_context *ctx, const double *data, const int N, const vo
 int xtract_cqt(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
     const xtract_cqt_kernel *kernel = (const xtract_cqt_kernel *)argv;
-    const int M = N >> 1;
-    double *real, *imag;
-    int n, band, e;
+    const double *real = data;
+    const double *imag;
+    int band, e;
 
     if (N < 2 || (N & 1) || kernel == NULL)
         return XTRACT_ARGUMENT_ERROR;
     if (kernel->N != N)
         return XTRACT_BAD_STATE;
-
-    real = xtract_scratch_take(ctx, N, (size_t)N);
-    if (real == NULL)
-        return XTRACT_BAD_STATE;
-    imag = real + M;
-
-    for (n = 0; n < M; n++)
-    {
-        real[n] = data[n] * cos(data[M + n]);
-        imag[n] = data[n] * sin(data[M + n]);
-    }
+    imag = data + (N >> 1);
 
     for (band = 0; band < kernel->n_bins; band++)
     {
@@ -1346,8 +1393,6 @@ int xtract_cqt(xtract_context *ctx, const double *data, const int N, const void 
         result[band] = sqrt(sum_real * sum_real + sum_imag * sum_imag);
         result[kernel->n_bins + band] = kernel->frequencies[band];
     }
-
-    xtract_scratch_return(ctx, real, (size_t)N);
 
     return XTRACT_SUCCESS;
 }

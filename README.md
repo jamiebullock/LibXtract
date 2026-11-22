@@ -34,7 +34,7 @@ int xtract_feature(xtract_context *ctx, const double *data, const int N, const v
 
 `ctx` is a context made by `xtract_context_new`, or NULL. `data` points to `N` input values, `argv` points to the arguments the feature needs, and the function writes its output to `result` and returns a status code.
 
-A feature that depends on another takes it as an argument. The variance takes the mean, the skewness takes the mean and the standard deviation, and a spectral feature takes a spectrum from `xtract_spectrum`:
+A feature that depends on another takes it as an argument. The variance takes the mean, the skewness takes the mean and the standard deviation, and a spectral feature takes a spectrum from `xtract_magnitude_spectrum`:
 
 ```c
 double mean, variance;

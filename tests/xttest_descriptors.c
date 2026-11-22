@@ -93,23 +93,22 @@ UTEST(descriptors, scalar_vector_classification)
 
 UTEST(descriptors, units_keep_their_values)
 {
-    ASSERT_EQ((int)XTRACT_UNIT_UNKNOWN, 0);
-    ASSERT_EQ((int)XTRACT_UNIT_NONE, 1);
-    ASSERT_EQ((int)XTRACT_UNIT_ANY, 2);
-    ASSERT_EQ((int)XTRACT_UNIT_ANY_SQUARED, 3);
-    ASSERT_EQ((int)XTRACT_UNIT_ANY_CUBED, 4);
-    ASSERT_EQ((int)XTRACT_HERTZ, 5);
-    ASSERT_EQ((int)XTRACT_HERTZ_SQUARED, 6);
-    ASSERT_EQ((int)XTRACT_PER_HERTZ, 7);
-    ASSERT_EQ((int)XTRACT_ANY_AMPLITUDE_HERTZ, 8);
-    ASSERT_EQ((int)XTRACT_SECONDS, 9);
-    ASSERT_EQ((int)XTRACT_PER_SECOND, 10);
-    ASSERT_EQ((int)XTRACT_DECIBELS, 11);
-    ASSERT_EQ((int)XTRACT_PERCENT, 12);
-    ASSERT_EQ((int)XTRACT_BINS, 13);
-    ASSERT_EQ((int)XTRACT_MIDI_CENT, 14);
-    ASSERT_EQ((int)XTRACT_SONE, 15);
-    ASSERT_EQ((int)XTRACT_ACUM, 16);
+    ASSERT_EQ((int)XTRACT_UNIT_NONE, 0);
+    ASSERT_EQ((int)XTRACT_UNIT_ANY, 1);
+    ASSERT_EQ((int)XTRACT_UNIT_ANY_SQUARED, 2);
+    ASSERT_EQ((int)XTRACT_UNIT_ANY_CUBED, 3);
+    ASSERT_EQ((int)XTRACT_HERTZ, 4);
+    ASSERT_EQ((int)XTRACT_HERTZ_SQUARED, 5);
+    ASSERT_EQ((int)XTRACT_PER_HERTZ, 6);
+    ASSERT_EQ((int)XTRACT_SECONDS, 7);
+    ASSERT_EQ((int)XTRACT_PER_SECOND, 8);
+    ASSERT_EQ((int)XTRACT_DECIBELS, 9);
+    ASSERT_EQ((int)XTRACT_PERCENT, 10);
+    ASSERT_EQ((int)XTRACT_BINS, 11);
+    ASSERT_EQ((int)XTRACT_MIDI_CENT, 12);
+    ASSERT_EQ((int)XTRACT_SONE, 13);
+    ASSERT_EQ((int)XTRACT_ACUM, 14);
+    ASSERT_EQ((int)XTRACT_RADIANS, 15);
 }
 
 UTEST(descriptors, a_variance_is_in_the_square_of_the_unit_it_is_taken_of)
@@ -205,13 +204,20 @@ UTEST(descriptors, only_the_decibel_quantities_carry_the_decibel_unit)
     }
 }
 
-UTEST(descriptors, a_result_whose_unit_an_argument_decides_has_the_unknown_unit)
+UTEST(descriptors, a_result_has_one_unit_whatever_the_settings)
 {
-    /* The normalise argument turns either into a logarithm. */
-    ASSERT_EQ(xtract_descriptor(XTRACT_LNORM)->result.scalar.unit, XTRACT_UNIT_UNKNOWN);
-    ASSERT_EQ(xtract_descriptor(XTRACT_FLUX)->result.scalar.unit, XTRACT_UNIT_UNKNOWN);
-    /* The scaling argument divides out the units of the two series. */
-    ASSERT_EQ(xtract_descriptor(XTRACT_CROSS_CORRELATION)->result.vector.unit, XTRACT_UNIT_UNKNOWN);
+    ASSERT_EQ(xtract_descriptor(XTRACT_LNORM)->result.scalar.unit, XTRACT_UNIT_ANY);
+    ASSERT_EQ(xtract_descriptor(XTRACT_FLUX)->result.scalar.unit, XTRACT_UNIT_ANY);
+    /* A product of the two series, in the square of their unit, and a coefficient */
+    ASSERT_EQ(xtract_descriptor(XTRACT_CROSS_CORRELATION)->result.vector.unit, XTRACT_UNIT_ANY_SQUARED);
+    ASSERT_EQ(xtract_descriptor(XTRACT_NORMALISED_CROSS_CORRELATION)->result.vector.unit, XTRACT_UNIT_NONE);
+    /* The unit of a spectrum is that of its coefficients */
+    ASSERT_EQ(xtract_descriptor(XTRACT_SPECTRUM)->result.vector.unit, XTRACT_UNIT_ANY);
+    ASSERT_EQ(xtract_descriptor(XTRACT_MAGNITUDE_SPECTRUM)->result.vector.unit, XTRACT_UNIT_ANY);
+    ASSERT_EQ(xtract_descriptor(XTRACT_POWER_SPECTRUM)->result.vector.unit, XTRACT_UNIT_ANY_SQUARED);
+    ASSERT_EQ(xtract_descriptor(XTRACT_LOG_SPECTRUM)->result.vector.unit, XTRACT_UNIT_NONE);
+    ASSERT_EQ(xtract_descriptor(XTRACT_PHASE_SPECTRUM)->result.vector.unit, XTRACT_RADIANS);
+    ASSERT_EQ(xtract_descriptor(XTRACT_LOG)->result.vector.unit, XTRACT_UNIT_NONE);
 }
 
 UTEST(descriptors, a_ratio_or_a_count_has_no_unit_and_its_arguments_have_theirs)
@@ -289,6 +295,8 @@ UTEST(descriptors, autocorrelation_fft_and_difference_vector_give_a_series)
 
 UTEST(descriptors, argv_ranges_match_the_functions)
 {
+    int i;
+
     CHECK_REL(xtract_descriptor(XTRACT_ROLLOFF)->argv[0].min, 0.0, EPSILON);
     ASSERT_EQ(xtract_descriptor(XTRACT_ROLLOFF)->argv[0].max, XTRACT_UNBOUNDED_MAX);
     ASSERT_EQ(xtract_descriptor(XTRACT_ROLLOFF)->argv[0].unit, XTRACT_HERTZ);
@@ -320,11 +328,16 @@ UTEST(descriptors, argv_ranges_match_the_functions)
     ASSERT_EQ(xtract_descriptor(XTRACT_ODD_EVEN_RATIO)->result.scalar.min, 0.0);
     ASSERT_EQ(xtract_descriptor(XTRACT_ODD_EVEN_RATIO)->result.scalar.max, XTRACT_UNBOUNDED_MAX);
 
-    ASSERT_EQ(xtract_descriptor(XTRACT_SPECTRUM)->argv[0].min, DBL_MIN);
-    ASSERT_EQ(xtract_descriptor(XTRACT_SPECTRUM)->argv[0].max, XTRACT_UNBOUNDED_MAX);
-    CHECK_REL(xtract_descriptor(XTRACT_SPECTRUM)->argv[1].max, (double)XTRACT_MAGNITUDE_PHASE_SPECTRUM, EPSILON);
-    ASSERT_EQ(xtract_descriptor(XTRACT_SPECTRUM)->argc, 3);
-    CHECK_REL(xtract_descriptor(XTRACT_SPECTRUM)->argv[2].max, 1.0, EPSILON);
+    ASSERT_EQ(xtract_descriptor(XTRACT_SPECTRUM)->argc, 0);
+    for (i = 0; i < 4; i++)
+    {
+        const xtract_function_descriptor_t *derived = xtract_descriptor(XTRACT_MAGNITUDE_SPECTRUM + i);
+
+        ASSERT_EQ_MSG(derived->argc, 1, derived->name);
+        ASSERT_EQ_MSG(derived->argv[0].min, DBL_MIN, derived->name);
+        ASSERT_EQ_MSG(derived->argv[0].max, XTRACT_UNBOUNDED_MAX, derived->name);
+        ASSERT_EQ_MSG(derived->argv[0].data_property, XTRACT_PROPERTY_BIN_SPACING, derived->name);
+    }
 
     CHECK_REL(xtract_descriptor(XTRACT_SUBBANDS)->argv[0].max, (double)(XTRACT_FEATURES - 1), EPSILON);
     CHECK_REL(xtract_descriptor(XTRACT_SUBBANDS)->argv[2].max, (double)XTRACT_LINEAR_SUBBANDS, EPSILON);
@@ -338,15 +351,15 @@ UTEST(descriptors, argv_ranges_match_the_functions)
 UTEST(descriptors, harmonic_spectrum_takes_a_spectrum_and_gives_one)
 {
     ASSERT_EQ(xtract_descriptor(XTRACT_HARMONIC_SPECTRUM)->data.format, XTRACT_SPECTRAL);
-    ASSERT_EQ(xtract_descriptor(XTRACT_HARMONIC_SPECTRUM)->data.unit, XTRACT_ANY_AMPLITUDE_HERTZ);
+    ASSERT_EQ(xtract_descriptor(XTRACT_HARMONIC_SPECTRUM)->data.unit, XTRACT_UNIT_ANY);
     ASSERT_EQ(xtract_descriptor(XTRACT_HARMONIC_SPECTRUM)->result.vector.format, XTRACT_SPECTRAL);
-    ASSERT_EQ(xtract_descriptor(XTRACT_HARMONIC_SPECTRUM)->result.vector.unit, XTRACT_ANY_AMPLITUDE_HERTZ);
+    ASSERT_EQ(xtract_descriptor(XTRACT_HARMONIC_SPECTRUM)->result.vector.unit, XTRACT_UNIT_ANY);
 }
 
 UTEST(descriptors, noisiness_takes_a_peak_spectrum_a_fundamental_and_a_threshold)
 {
     ASSERT_EQ(xtract_descriptor(XTRACT_NOISINESS)->data.format, XTRACT_SPECTRAL_PEAKS);
-    ASSERT_EQ(xtract_descriptor(XTRACT_NOISINESS)->data.unit, XTRACT_ANY_AMPLITUDE_HERTZ);
+    ASSERT_EQ(xtract_descriptor(XTRACT_NOISINESS)->data.unit, XTRACT_UNIT_ANY);
     ASSERT_EQ(xtract_descriptor(XTRACT_NOISINESS)->argc, 2);
     ASSERT_EQ(xtract_descriptor(XTRACT_NOISINESS)->argv[0].min, 0.0);
     ASSERT_EQ(xtract_descriptor(XTRACT_NOISINESS)->argv[0].unit, XTRACT_HERTZ);
@@ -370,7 +383,7 @@ UTEST(descriptors, appended_features_are_fully_described)
     ASSERT_EQ(xtract_descriptor(XTRACT_MMBSES)->argc, 1);
     ASSERT_EQ(xtract_descriptor(XTRACT_MMBSES)->argv[0].type, XTRACT_FILTERBANK);
     ASSERT_STREQ(xtract_descriptor(XTRACT_MMBSES)->argv[0].builder->name, "init_mfcc");
-    ASSERT_EQ(xtract_descriptor(XTRACT_MMBSES)->data.format, XTRACT_SPECTRAL_MAGNITUDE_PHASE);
+    ASSERT_EQ(xtract_descriptor(XTRACT_MMBSES)->data.format, XTRACT_SPECTRAL_COMPLEX);
     ASSERT_EQ(xtract_descriptor(XTRACT_MMBSES)->result.vector.format, XTRACT_MEL_COEFFS);
     ASSERT_EQ(xtract_descriptor(XTRACT_MMBSES)->result.vector.unit, XTRACT_UNIT_NONE);
     ASSERT_EQ(xtract_descriptor(XTRACT_MMBSES)->year, 2013);
@@ -379,7 +392,7 @@ UTEST(descriptors, appended_features_are_fully_described)
     ASSERT_EQ(xtract_descriptor(XTRACT_SPECTRAL_SUBBAND_CENTROIDS)->argv[0].type, XTRACT_FILTERBANK);
     ASSERT_STREQ(xtract_descriptor(XTRACT_SPECTRAL_SUBBAND_CENTROIDS)->argv[0].builder->name, "init_mfcc");
     ASSERT_EQ(xtract_descriptor(XTRACT_SPECTRAL_SUBBAND_CENTROIDS)->data.format, XTRACT_SPECTRAL);
-    ASSERT_EQ(xtract_descriptor(XTRACT_SPECTRAL_SUBBAND_CENTROIDS)->data.unit, XTRACT_ANY_AMPLITUDE_HERTZ);
+    ASSERT_EQ(xtract_descriptor(XTRACT_SPECTRAL_SUBBAND_CENTROIDS)->data.unit, XTRACT_UNIT_ANY);
     ASSERT_EQ(xtract_descriptor(XTRACT_SPECTRAL_SUBBAND_CENTROIDS)->result.vector.format, XTRACT_MEL_COEFFS);
     ASSERT_EQ(xtract_descriptor(XTRACT_SPECTRAL_SUBBAND_CENTROIDS)->result.vector.unit, XTRACT_HERTZ);
 
@@ -573,13 +586,12 @@ UTEST(descriptors, appended_features_are_fully_described)
         CHECK_REL(xtract_descriptor(f)->result.scalar.max, 1.0, EPSILON);
     ASSERT_EQ(xtract_descriptor(XTRACT_PEAK_ASYMMETRY)->result.scalar.max, XTRACT_UNBOUNDED_MAX);
 
-    ASSERT_EQ(xtract_descriptor(XTRACT_CROSS_CORRELATION)->argc, 1);
-    ASSERT_EQ(xtract_descriptor(XTRACT_CROSS_CORRELATION)->argv[0].type, XTRACT_FLOAT);
-    CHECK_NEAR(xtract_descriptor(XTRACT_CROSS_CORRELATION)->argv[0].min, 0.0, EPSILON);
-    CHECK_REL(xtract_descriptor(XTRACT_CROSS_CORRELATION)->argv[0].max, 1.0, EPSILON);
+    ASSERT_EQ(xtract_descriptor(XTRACT_CROSS_CORRELATION)->argc, 0);
+    ASSERT_EQ(xtract_descriptor(XTRACT_NORMALISED_CROSS_CORRELATION)->argc, 0);
+    ASSERT_EQ(xtract_descriptor(XTRACT_NORMALISED_CROSS_CORRELATION)->data.format, XTRACT_SUBFRAMES);
     ASSERT_EQ(xtract_descriptor(XTRACT_CROSS_CORRELATION)->is_scalar, XTRACT_FALSE);
     ASSERT_EQ(xtract_descriptor(XTRACT_CROSS_CORRELATION)->result.vector.format, XTRACT_ARBITRARY_SERIES);
-    ASSERT_EQ(xtract_descriptor(XTRACT_CROSS_CORRELATION)->result.vector.unit, XTRACT_UNIT_UNKNOWN);
+    ASSERT_EQ(xtract_descriptor(XTRACT_CROSS_CORRELATION)->result.vector.unit, XTRACT_UNIT_ANY_SQUARED);
     ASSERT_EQ(xtract_descriptor(XTRACT_CROSS_CORRELATION_LAG)->argc, 0);
     ASSERT_EQ(xtract_descriptor(XTRACT_CROSS_CORRELATION_LAG)->is_scalar, XTRACT_TRUE);
     ASSERT_EQ(xtract_descriptor(XTRACT_CROSS_CORRELATION_LAG)->result.scalar.unit, XTRACT_UNIT_NONE);
@@ -805,7 +817,7 @@ UTEST(descriptors, appended_features_are_fully_described)
     CHECK_REL(xtract_descriptor(XTRACT_SPECTRAL_CONTRAST)->argv[2].max, 1.0, EPSILON);
     CHECK_REL(xtract_descriptor(XTRACT_SPECTRAL_CONTRAST)->argv[2].default_value, 0.02, EPSILON);
     ASSERT_EQ(xtract_descriptor(XTRACT_SPECTRAL_CONTRAST)->data.format, XTRACT_SPECTRAL);
-    ASSERT_EQ(xtract_descriptor(XTRACT_SPECTRAL_CONTRAST)->data.unit, XTRACT_ANY_AMPLITUDE_HERTZ);
+    ASSERT_EQ(xtract_descriptor(XTRACT_SPECTRAL_CONTRAST)->data.unit, XTRACT_UNIT_ANY);
     ASSERT_EQ(xtract_descriptor(XTRACT_SPECTRAL_CONTRAST)->is_scalar, XTRACT_FALSE);
     ASSERT_EQ(xtract_descriptor(XTRACT_SPECTRAL_CONTRAST)->is_delta, XTRACT_FALSE);
     ASSERT_EQ(xtract_descriptor(XTRACT_SPECTRAL_CONTRAST)->result.vector.format, XTRACT_ARBITRARY_SERIES);
@@ -825,7 +837,7 @@ UTEST(descriptors, appended_features_are_fully_described)
         ASSERT_EQ(xtract_descriptor(XTRACT_CHROMA)->argv[i].unit, XTRACT_HERTZ);
     }
     ASSERT_EQ(xtract_descriptor(XTRACT_CHROMA)->data.format, XTRACT_SPECTRAL);
-    ASSERT_EQ(xtract_descriptor(XTRACT_CHROMA)->data.unit, XTRACT_ANY_AMPLITUDE_HERTZ);
+    ASSERT_EQ(xtract_descriptor(XTRACT_CHROMA)->data.unit, XTRACT_UNIT_ANY);
     ASSERT_EQ(xtract_descriptor(XTRACT_CHROMA)->is_scalar, XTRACT_FALSE);
     ASSERT_EQ(xtract_descriptor(XTRACT_CHROMA)->is_delta, XTRACT_FALSE);
     ASSERT_EQ(xtract_descriptor(XTRACT_CHROMA)->result.vector.format, XTRACT_CHROMA_COEFFS);
@@ -834,12 +846,12 @@ UTEST(descriptors, appended_features_are_fully_described)
     ASSERT_EQ(xtract_descriptor(XTRACT_CQT)->argc, 1);
     ASSERT_EQ(xtract_descriptor(XTRACT_CQT)->argv[0].type, XTRACT_CQT_KERNEL);
     ASSERT_STREQ(xtract_descriptor(XTRACT_CQT)->argv[0].builder->name, "init_cqt");
-    ASSERT_EQ(xtract_descriptor(XTRACT_CQT)->data.format, XTRACT_SPECTRAL_MAGNITUDE_PHASE);
+    ASSERT_EQ(xtract_descriptor(XTRACT_CQT)->data.format, XTRACT_SPECTRAL_COMPLEX);
     ASSERT_EQ(xtract_descriptor(XTRACT_CQT)->data.unit, XTRACT_UNIT_ANY);
     ASSERT_EQ(xtract_descriptor(XTRACT_CQT)->is_scalar, XTRACT_FALSE);
     ASSERT_EQ(xtract_descriptor(XTRACT_CQT)->is_delta, XTRACT_FALSE);
     ASSERT_EQ(xtract_descriptor(XTRACT_CQT)->result.vector.format, XTRACT_SPECTRAL);
-    ASSERT_EQ(xtract_descriptor(XTRACT_CQT)->result.vector.unit, XTRACT_ANY_AMPLITUDE_HERTZ);
+    ASSERT_EQ(xtract_descriptor(XTRACT_CQT)->result.vector.unit, XTRACT_UNIT_ANY);
     ASSERT_EQ(xtract_descriptor(XTRACT_CQT)->year, 1992);
 
     ASSERT_EQ(xtract_descriptor(XTRACT_WAVELET_F0)->argc, 1);
@@ -864,11 +876,11 @@ UTEST(descriptors, appended_features_are_fully_described)
     ASSERT_STREQ(xtract_descriptor(XTRACT_PACKED)->name, "packed");
     ASSERT_EQ(xtract_descriptor(XTRACT_PACKED)->argc, 0);
     ASSERT_EQ(xtract_descriptor(XTRACT_PACKED)->data.format, XTRACT_SPECTRAL_PEAKS);
-    ASSERT_EQ(xtract_descriptor(XTRACT_PACKED)->data.unit, XTRACT_ANY_AMPLITUDE_HERTZ);
+    ASSERT_EQ(xtract_descriptor(XTRACT_PACKED)->data.unit, XTRACT_UNIT_ANY);
     ASSERT_EQ(xtract_descriptor(XTRACT_PACKED)->is_scalar, XTRACT_FALSE);
     ASSERT_EQ(xtract_descriptor(XTRACT_PACKED)->is_delta, XTRACT_FALSE);
     ASSERT_EQ(xtract_descriptor(XTRACT_PACKED)->result.vector.format, XTRACT_SPECTRAL_PEAKS);
-    ASSERT_EQ(xtract_descriptor(XTRACT_PACKED)->result.vector.unit, XTRACT_ANY_AMPLITUDE_HERTZ);
+    ASSERT_EQ(xtract_descriptor(XTRACT_PACKED)->result.vector.unit, XTRACT_UNIT_ANY);
 }
 
 UTEST(dispatch, every_feature_slot_points_to_a_function)
@@ -1037,19 +1049,11 @@ UTEST(descriptors, an_argument_is_described_according_to_its_kind)
 
 UTEST(descriptors, a_named_value_of_a_setting_is_the_value_of_its_enumerator)
 {
-    const xtract_argument_descriptor_t *type = &xtract_descriptor(XTRACT_SPECTRUM)->argv[1];
     const xtract_argument_descriptor_t *filter = &xtract_descriptor(XTRACT_LNORM)->argv[1];
     const xtract_argument_descriptor_t *scale = &xtract_descriptor(XTRACT_SUBBANDS)->argv[2];
     const xtract_argument_descriptor_t *feature = &xtract_descriptor(XTRACT_SUBBANDS)->argv[0];
-    const xtract_argument_descriptor_t *scaling = &xtract_descriptor(XTRACT_CROSS_CORRELATION)->argv[0];
     const xtract_builder_descriptor_t *window = xtract_descriptor(XTRACT_WINDOWED)->argv[0].builder;
     const xtract_builder_descriptor_t *mel = xtract_descriptor(XTRACT_MFCC)->argv[0].builder;
-
-    ASSERT_EQ(type->value_count, 4);
-    ASSERT_STREQ(type->values[XTRACT_MAGNITUDE_SPECTRUM], "magnitude");
-    ASSERT_STREQ(type->values[XTRACT_LOG_SPECTRUM], "log");
-    ASSERT_STREQ(type->values[XTRACT_POWER_SPECTRUM], "power");
-    ASSERT_STREQ(type->values[XTRACT_MAGNITUDE_PHASE_SPECTRUM], "magnitude_phase");
 
     ASSERT_EQ(filter->value_count, 3);
     ASSERT_STREQ(filter->values[XTRACT_NO_LNORM_FILTER], "none");
@@ -1060,10 +1064,6 @@ UTEST(descriptors, a_named_value_of_a_setting_is_the_value_of_its_enumerator)
     ASSERT_EQ(scale->value_count, 2);
     ASSERT_STREQ(scale->values[XTRACT_OCTAVE_SUBBANDS], "octave");
     ASSERT_STREQ(scale->values[XTRACT_LINEAR_SUBBANDS], "linear");
-
-    ASSERT_EQ(scaling->value_count, 2);
-    ASSERT_STREQ(scaling->values[0], "covariance");
-    ASSERT_STREQ(scaling->values[1], "coefficient");
 
     ASSERT_EQ(feature->value_count, XTRACT_FEATURES);
     ASSERT_EQ(feature->max, XTRACT_FEATURES - 1.0);
@@ -1104,7 +1104,7 @@ UTEST(descriptors, subbands_takes_the_features_its_descriptor_names_and_no_other
         else
             ASSERT_EQ_MSG(rv, XTRACT_ARGUMENT_ERROR, xtract_descriptor(f)->name);
     }
-    ASSERT_EQ(named, 11);
+    ASSERT_EQ(named, 4);
 }
 
 UTEST(descriptors, a_fundamental_comes_from_any_pitch_feature_and_first_from_the_one_that_always_answers)
@@ -1245,29 +1245,9 @@ UTEST(descriptors, the_data_of_a_feature_accepts_what_vector_features_provide)
                 const xtract_function_descriptor_t *feature = xtract_descriptor(provider->feature);
 
                 ASSERT_TRUE_MSG(feature != NULL && feature->is_scalar == XTRACT_FALSE, d->name);
-                ASSERT_TRUE_MSG(provider->setting >= -1 && provider->setting < feature->argc, d->name);
-                ASSERT_EQ_MSG(provider->setting >= 0, provider->value_count > 0, d->name);
-                ASSERT_EQ_MSG(provider->values == NULL, provider->value_count == 0, d->name);
-                for (v = 0; v < provider->value_count; v++)
-                {
-                    const xtract_argument_descriptor_t *setting = &feature->argv[provider->setting];
-
-                    ASSERT_EQ_MSG(setting->kind, XTRACT_ARGUMENT_SETTING, d->name);
-                    ASSERT_TRUE_MSG(provider->values[v] >= setting->min && provider->values[v] <= setting->max, d->name);
-                }
             }
         }
     }
-}
-
-/* Whether the provider gives its quantity when the setting it names has the value */
-static int provides_for(const xtract_provider_t *provider, double value)
-{
-    int v, found = 0;
-
-    for (v = 0; v < provider->value_count; v++)
-        found += provider->values[v] == value;
-    return found;
 }
 
 UTEST(descriptors, a_part_of_a_spectrum_is_a_quantity_of_its_own)
@@ -1275,65 +1255,60 @@ UTEST(descriptors, a_part_of_a_spectrum_is_a_quantity_of_its_own)
     const xtract_quantity_t *bins = xtract_descriptor(XTRACT_PEAK_SPECTRUM)->data.accepts[0];
     const xtract_quantity_t *magnitudes = xtract_descriptor(XTRACT_ROLLOFF)->data.accepts[0];
     const xtract_quantity_t *powers = xtract_descriptor(XTRACT_MFCC)->data.accepts[0];
+    int p;
 
+    /* The first half of any of the three spectra with frequencies */
     ASSERT_STREQ(bins->name, "bins");
-    ASSERT_EQ(bins->provider_count, 1);
-    ASSERT_EQ(bins->providers[0].feature, XTRACT_SPECTRUM);
-    ASSERT_EQ(bins->providers[0].part, XTRACT_PART_FIRST_HALF);
-    ASSERT_EQ(bins->providers[0].setting, -1);
+    ASSERT_EQ(bins->provider_count, 3);
+    ASSERT_EQ(bins->providers[0].feature, XTRACT_MAGNITUDE_SPECTRUM);
+    ASSERT_EQ(bins->providers[1].feature, XTRACT_POWER_SPECTRUM);
+    ASSERT_EQ(bins->providers[2].feature, XTRACT_LOG_SPECTRUM);
+    for (p = 0; p < bins->provider_count; p++)
+        ASSERT_EQ(bins->providers[p].part, XTRACT_PART_FIRST_HALF);
     ASSERT_TRUE(xtract_descriptor(XTRACT_BARK_COEFFICIENTS)->data.accepts[0] == bins);
 
-    /* The first half is magnitudes for two types of spectrum and powers for one */
     ASSERT_STREQ(magnitudes->name, "magnitude_bins");
+    ASSERT_EQ(magnitudes->provider_count, 1);
+    ASSERT_EQ(magnitudes->providers[0].feature, XTRACT_MAGNITUDE_SPECTRUM);
     ASSERT_EQ(magnitudes->providers[0].part, XTRACT_PART_FIRST_HALF);
-    ASSERT_TRUE(magnitudes->providers[0].setting >= 0 && magnitudes->providers[0].setting < xtract_descriptor(XTRACT_SPECTRUM)->argc);
-    ASSERT_STREQ(xtract_descriptor(XTRACT_SPECTRUM)->argv[magnitudes->providers[0].setting].name, "type");
-    ASSERT_EQ(magnitudes->providers[0].value_count, 2);
-    ASSERT_EQ(magnitudes->providers[0].values[0], (double)XTRACT_MAGNITUDE_SPECTRUM);
-    ASSERT_TRUE(provides_for(&magnitudes->providers[0], XTRACT_MAGNITUDE_PHASE_SPECTRUM));
     ASSERT_TRUE(xtract_descriptor(XTRACT_FLATNESS)->data.accepts[0] == magnitudes);
 
     ASSERT_STREQ(powers->name, "power_bins");
-    ASSERT_EQ(powers->providers[0].value_count, 1);
-    ASSERT_EQ(powers->providers[0].values[0], (double)XTRACT_POWER_SPECTRUM);
+    ASSERT_EQ(powers->provider_count, 1);
+    ASSERT_EQ(powers->providers[0].feature, XTRACT_POWER_SPECTRUM);
     ASSERT_TRUE(xtract_descriptor(XTRACT_MFCC)->data.accepts[1] == magnitudes);
     ASSERT_TRUE(xtract_descriptor(XTRACT_SPECTRAL_ENTROPY)->data.accepts[0] == powers);
 }
 
-UTEST(descriptors, a_spectrum_of_magnitudes_and_phases_is_a_quantity_apart_from_the_other_types)
+UTEST(descriptors, each_spectrum_is_the_quantity_of_its_own_name)
 {
-    const xtract_quantity_t *magnitude_phase = xtract_descriptor(XTRACT_CQT)->data.accepts[0];
-    const xtract_quantity_t *whole = xtract_descriptor(XTRACT_HPS)->data.accepts[0];
+    const xtract_quantity_t *complex_spectrum = xtract_descriptor(XTRACT_CQT)->data.accepts[0];
+    const xtract_quantity_t *magnitudes = xtract_descriptor(XTRACT_HPS)->data.accepts[0];
     const xtract_quantity_t *with_frequencies = xtract_descriptor(XTRACT_SPECTRAL_MEAN)->data.accepts[0];
+    int i;
 
-    ASSERT_STREQ(magnitude_phase->name, "magnitude_phase");
-    ASSERT_EQ(magnitude_phase->providers[0].feature, XTRACT_SPECTRUM);
-    ASSERT_EQ(magnitude_phase->providers[0].part, XTRACT_PART_WHOLE);
-    ASSERT_TRUE(magnitude_phase->providers[0].setting >= 0 && magnitude_phase->providers[0].setting < xtract_descriptor(XTRACT_SPECTRUM)->argc);
-    ASSERT_STREQ(xtract_descriptor(XTRACT_SPECTRUM)->argv[magnitude_phase->providers[0].setting].name, "type");
-    ASSERT_EQ(magnitude_phase->providers[0].value_count, 1);
-    ASSERT_EQ(magnitude_phase->providers[0].values[0], (double)XTRACT_MAGNITUDE_PHASE_SPECTRUM);
-    ASSERT_TRUE(xtract_descriptor(XTRACT_MMBSES)->data.accepts[0] == magnitude_phase);
+    /* The complex spectrum is the data of the four spectra and of the two
+     * features that take real and imaginary parts */
+    ASSERT_STREQ(complex_spectrum->name, "spectrum");
+    ASSERT_EQ(complex_spectrum->provider_count, 1);
+    ASSERT_EQ(complex_spectrum->providers[0].feature, XTRACT_SPECTRUM);
+    ASSERT_EQ(complex_spectrum->format, XTRACT_SPECTRAL_COMPLEX);
+    ASSERT_TRUE(xtract_descriptor(XTRACT_MMBSES)->data.accepts[0] == complex_spectrum);
+    for (i = 0; i < 4; i++)
+    {
+        const xtract_function_descriptor_t *derived = xtract_descriptor(XTRACT_MAGNITUDE_SPECTRUM + i);
 
-    /* The second half is frequencies for the three other types, and the
-     * features that read frequencies there take those alone */
-    ASSERT_STREQ(whole->name, "spectrum");
-    ASSERT_EQ(whole->provider_count, 1);
-    ASSERT_EQ(whole->providers[0].part, XTRACT_PART_WHOLE);
-    ASSERT_EQ(whole->providers[0].value_count, 3);
-    ASSERT_EQ(whole->providers[0].values[0], (double)XTRACT_MAGNITUDE_SPECTRUM);
-    ASSERT_TRUE(provides_for(&whole->providers[0], XTRACT_LOG_SPECTRUM));
-    ASSERT_TRUE(provides_for(&whole->providers[0], XTRACT_POWER_SPECTRUM));
-    ASSERT_FALSE(provides_for(&whole->providers[0], XTRACT_MAGNITUDE_PHASE_SPECTRUM));
-    ASSERT_EQ(with_frequencies->providers[0].feature, XTRACT_SPECTRUM);
-    ASSERT_FALSE(provides_for(&with_frequencies->providers[0], XTRACT_MAGNITUDE_PHASE_SPECTRUM));
+        ASSERT_EQ_MSG(derived->data.format, XTRACT_SPECTRAL_COMPLEX, derived->name);
+        ASSERT_TRUE_MSG(derived->data.accepts[0] == complex_spectrum, derived->name);
+        ASSERT_EQ_MSG(derived->result.vector.format, XTRACT_SPECTRAL, derived->name);
+    }
 
-    /* The layout of each is its own: the descriptor of xtract_spectrum()
-     * states the layout of the three types, which is that of its quantity */
-    ASSERT_EQ(magnitude_phase->format, XTRACT_SPECTRAL_MAGNITUDE_PHASE);
-    ASSERT_EQ(whole->format, XTRACT_SPECTRAL);
-    ASSERT_EQ(whole->format, xtract_descriptor(XTRACT_SPECTRUM)->result.vector.format);
+    ASSERT_STREQ(magnitudes->name, "magnitude_spectrum");
+    ASSERT_EQ(magnitudes->format, XTRACT_SPECTRAL);
+    ASSERT_EQ(with_frequencies->providers[0].feature, XTRACT_MAGNITUDE_SPECTRUM);
     ASSERT_EQ(with_frequencies->format, XTRACT_SPECTRAL);
+    for (i = 0; i < with_frequencies->provider_count; i++)
+        ASSERT_NE(with_frequencies->providers[i].feature, XTRACT_PHASE_SPECTRUM);
     ASSERT_EQ(xtract_descriptor(XTRACT_ROLLOFF)->data.accepts[0]->format, XTRACT_SPECTRAL_MAGNITUDES);
 }
 
@@ -1372,7 +1347,7 @@ UTEST(descriptors, a_quantity_is_a_scalar_or_an_array_as_its_providers_give)
     }
 }
 
-UTEST(descriptors, coefficients_with_their_frequencies_come_from_four_features)
+UTEST(descriptors, coefficients_with_their_frequencies_come_from_six_features)
 {
     static const int takers[] = {XTRACT_SPECTRAL_MEAN, XTRACT_SPECTRAL_VARIANCE, XTRACT_SPECTRAL_SKEWNESS, XTRACT_SPECTRAL_KURTOSIS,
                                  XTRACT_SPECTRAL_CENTROID, XTRACT_SPREAD, XTRACT_SPECTRAL_SLOPE};
@@ -1380,11 +1355,13 @@ UTEST(descriptors, coefficients_with_their_frequencies_come_from_four_features)
     size_t t;
 
     ASSERT_STREQ(quantity->name, "coefficients_and_frequencies");
-    ASSERT_EQ(quantity->provider_count, 4);
-    ASSERT_EQ(quantity->providers[0].feature, XTRACT_SPECTRUM);
+    ASSERT_EQ(quantity->provider_count, 6);
+    ASSERT_EQ(quantity->providers[0].feature, XTRACT_MAGNITUDE_SPECTRUM);
     ASSERT_EQ(quantity->providers[1].feature, XTRACT_PEAK_SPECTRUM);
     ASSERT_EQ(quantity->providers[2].feature, XTRACT_HARMONIC_SPECTRUM);
     ASSERT_EQ(quantity->providers[3].feature, XTRACT_PACKED);
+    ASSERT_EQ(quantity->providers[4].feature, XTRACT_POWER_SPECTRUM);
+    ASSERT_EQ(quantity->providers[5].feature, XTRACT_LOG_SPECTRUM);
     for (t = 0; t < sizeof(takers) / sizeof(takers[0]); t++)
         ASSERT_TRUE_MSG(xtract_descriptor(takers[t])->data.accepts[0] == quantity, xtract_descriptor(takers[t])->name);
 }
@@ -1450,7 +1427,7 @@ UTEST(descriptors, five_features_take_two_successive_frames)
 
         ASSERT_EQ_MSG(d->data.frames, takes_two ? 2 : 1, d->name);
         if (takes_two)
-            ASSERT_TRUE_MSG(d->data.accepts[0]->providers[0].feature == XTRACT_SPECTRUM && d->data.accepts[0]->providers[0].part == XTRACT_PART_FIRST_HALF, d->name);
+            ASSERT_TRUE_MSG(d->data.accepts[0]->providers[0].feature == XTRACT_MAGNITUDE_SPECTRUM && d->data.accepts[0]->providers[0].part == XTRACT_PART_FIRST_HALF, d->name);
     }
 }
 
@@ -1526,7 +1503,7 @@ static int conf_two_half(const xtract_function_descriptor_t *d)
     case XTRACT_SPECTRAL:
     case XTRACT_SPECTRAL_PEAKS:
     case XTRACT_SPECTRAL_HARMONICS:
-    case XTRACT_SPECTRAL_MAGNITUDE_PHASE:
+    case XTRACT_SPECTRAL_COMPLEX:
     case XTRACT_SUBFRAMES:
         return 1;
     default:
@@ -1931,6 +1908,11 @@ UTEST(descriptors, a_result_scales_with_its_input_by_the_power_its_unit_states)
         int nonzero = 0;
 
         if (power == 0 || d->data.unit != XTRACT_UNIT_ANY)
+            continue;
+        /* The frequencies in the second half of these layouts do not scale
+         * with the input; the tests of each spectrum check its coefficients */
+        if (!d->is_scalar && (d->result.vector.format == XTRACT_SPECTRAL || d->result.vector.format == XTRACT_SPECTRAL_PEAKS ||
+                              d->result.vector.format == XTRACT_SPECTRAL_HARMONICS))
             continue;
 
         for (pass = 0; pass < 2; pass++)

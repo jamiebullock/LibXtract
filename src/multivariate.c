@@ -72,37 +72,15 @@ int xtract_matrix_rows(const int N)
     return C <= N / C && C * C == N ? C : 0;
 }
 
-int xtract_cross_correlation(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
+/* The sum of products of the two halves of data at each lag, the first
+ * series shifted, multiplied by scale. Each series has its mean taken off
+ * first when the means are given */
+static void lagged_products(const double *data, const int M, const double mean_x, const double mean_y, const double scale,
+                            double *result)
 {
-    const int M = N >> 1;
     const double *x = data;
-    const double *y;
-    double scaling, mean_x = 0.0, mean_y = 0.0, scale;
+    const double *y = data + M;
     int lag, n;
-
-    if (N < 2 || (N & 1) || argv == NULL)
-        return XTRACT_ARGUMENT_ERROR;
-
-    y = data + M;
-    scaling = *(const double *)argv;
-    if (!(scaling == 0.0 || scaling == 1.0))
-        return XTRACT_ARGUMENT_ERROR;
-
-    if (scaling == 1.0)
-    {
-        double spread_x, spread_y;
-
-        mean_and_spread(x, M, &mean_x, &spread_x);
-        mean_and_spread(y, M, &mean_y, &spread_y);
-        if (spread_x == 0.0 || spread_y == 0.0)
-        {
-            memset(result, 0, (N - 1) * sizeof(double));
-            return XTRACT_NO_RESULT;
-        }
-        scale = 1.0 / (sqrt(spread_x) * sqrt(spread_y));
-    }
-    else
-        scale = 1.0 / M;
 
     for (lag = -(M - 1); lag <= M - 1; lag++)
     {
@@ -114,13 +92,42 @@ int xtract_cross_correlation(xtract_context *ctx, const double *data, const int 
             sum += (x[n + lag] - mean_x) * (y[n] - mean_y);
         result[lag + M - 1] = sum * scale;
     }
+}
+
+int xtract_cross_correlation(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
+{
+    const int M = N >> 1;
+
+    if (N < 2 || (N & 1))
+        return XTRACT_ARGUMENT_ERROR;
+
+    lagged_products(data, M, 0.0, 0.0, 1.0 / M, result);
+
+    return XTRACT_SUCCESS;
+}
+
+int xtract_normalised_cross_correlation(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
+{
+    const int M = N >> 1;
+    double mean_x, mean_y, spread_x, spread_y;
+
+    if (N < 2 || (N & 1))
+        return XTRACT_ARGUMENT_ERROR;
+
+    mean_and_spread(data, M, &mean_x, &spread_x);
+    mean_and_spread(data + M, M, &mean_y, &spread_y);
+    if (spread_x == 0.0 || spread_y == 0.0)
+    {
+        memset(result, 0, (N - 1) * sizeof(double));
+        return XTRACT_NO_RESULT;
+    }
+    lagged_products(data, M, mean_x, mean_y, 1.0 / (sqrt(spread_x) * sqrt(spread_y)), result);
 
     return XTRACT_SUCCESS;
 }
 
 int xtract_cross_correlation_lag(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
-    const double coefficient = 1.0;
     double *correlation;
     int M, distance, best, rv;
 
@@ -134,7 +141,7 @@ int xtract_cross_correlation_lag(xtract_context *ctx, const double *data, const 
     if (correlation == NULL)
         return XTRACT_BAD_STATE;
 
-    rv = xtract_cross_correlation(ctx, data, N, &coefficient, correlation);
+    rv = xtract_normalised_cross_correlation(ctx, data, N, NULL, correlation);
     if (rv != XTRACT_SUCCESS)
     {
         *result = 0.0;

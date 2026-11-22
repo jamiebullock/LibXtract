@@ -82,3 +82,21 @@ xtract_context *xttest_context(void)
 
     return shared_context;
 }
+
+int xttest_spectrum(xtract_context *ctx, const double *data, int N, int feature, double q, double *result)
+{
+    double *complex_spectrum;
+    int rv;
+
+    if (feature == XTRACT_SPECTRUM)
+        return xtract_spectrum(ctx, data, N, NULL, result);
+    complex_spectrum = (double *)malloc((N > 0 ? (size_t)N : 1) * sizeof(double));
+    if (complex_spectrum == NULL)
+        return XTRACT_BAD_STATE;
+    rv = xtract_spectrum(ctx, data, N, NULL, complex_spectrum);
+    if (rv == XTRACT_SUCCESS)
+        rv = xtract[feature](ctx, complex_spectrum, N, &q, result);
+    free(complex_spectrum);
+
+    return rv;
+}

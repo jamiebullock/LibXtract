@@ -8,7 +8,7 @@
  *
  * LibXtract is a portable C99 library of feature extraction functions for time series and other numeric data. Each function takes an array of doubles and returns a number or a vector that describes it: a statistic, a measure of spectral shape, a pitch estimate, a measure of complexity. The library has a full set of audio features, and its statistical, complexity and moving-window functions make no assumption about what the numbers represent.
  *
- * A feature that depends on another takes it as an argument. The variance and average deviation take the mean of the input vector, and the skewness and kurtosis take the mean and the standard deviation, in that order, so the mean is computed once and passed to each of them. A feature of the magnitude spectrum, such as the irregularity, takes the magnitude coefficients that xtract_spectrum() writes to the first half of its result.
+ * A feature that depends on another takes it as an argument. The variance and average deviation take the mean of the input vector, and the skewness and kurtosis take the mean and the standard deviation, in that order, so the mean is computed once and passed to each of them. A feature of the magnitude spectrum, such as the irregularity, takes the magnitude coefficients that xtract_magnitude_spectrum() writes to the first half of its result.
  *
  * A value is therefore computed once however many features use it, and features can be combined: the irregularity of a set of Mel Frequency Cepstral Coefficients is a valid call.
  *
@@ -105,15 +105,6 @@ extern "C"
         XTRACT_ARGUMENT_ERROR
     };
 
-    /** \brief Enumeration of spectrum types */
-    enum xtract_spectrum_
-    {
-        XTRACT_MAGNITUDE_SPECTRUM,
-        XTRACT_LOG_SPECTRUM,
-        XTRACT_POWER_SPECTRUM,
-        XTRACT_MAGNITUDE_PHASE_SPECTRUM
-    };
-
     /** \brief Subband scales */
     enum xtract_subband_scales_
     {
@@ -134,12 +125,14 @@ extern "C"
         XTRACT_INTARRAY /* an array of ints that a function of the library fills */
     } xtract_type_t;
 
-    /** \brief Enumeration of units*/
+    /** \brief Enumeration of units
+     *
+     * A feature has one unit for its result. The unit of an array whose first half is coefficients and whose second half is their frequencies, as in the layout XTRACT_SPECTRAL, is the unit of the coefficients.
+     */
     typedef enum unit_
     {
         /* a unit added later goes at the end, so that the values stay stable
          * across releases */
-        XTRACT_UNIT_UNKNOWN,     /* not determined, or decided by an argument */
         XTRACT_UNIT_NONE,        /* dimensionless */
         XTRACT_UNIT_ANY,         /* the unit of the input, whatever that is */
         XTRACT_UNIT_ANY_SQUARED, /* the square of the input's unit */
@@ -147,7 +140,6 @@ extern "C"
         XTRACT_HERTZ,
         XTRACT_HERTZ_SQUARED,
         XTRACT_PER_HERTZ,
-        XTRACT_ANY_AMPLITUDE_HERTZ,
         XTRACT_SECONDS,
         XTRACT_PER_SECOND,
         XTRACT_DECIBELS,
@@ -155,7 +147,8 @@ extern "C"
         XTRACT_BINS,
         XTRACT_MIDI_CENT,
         XTRACT_SONE,
-        XTRACT_ACUM
+        XTRACT_ACUM,
+        XTRACT_RADIANS
     } xtract_unit_t;
 
     /** \brief Boolean */
@@ -209,9 +202,8 @@ extern "C"
         XTRACT_BARK_COEFFS,
         XTRACT_SUBFRAMES,
         XTRACT_NO_DATA,
-        /* N/2 magnitudes and N/2 phases, as xtract_spectrum() gives for
-         * XTRACT_MAGNITUDE_PHASE_SPECTRUM */
-        XTRACT_SPECTRAL_MAGNITUDE_PHASE,
+        /* N/2 real parts and N/2 imaginary parts, as xtract_spectrum() gives */
+        XTRACT_SPECTRAL_COMPLEX,
         /* 12 pitch class values from C to B */
         XTRACT_CHROMA_COEFFS,
         /* Series of equal length, one after another */
@@ -283,9 +275,6 @@ extern "C"
     {
         int feature;                          /**< the feature, as given in the enumeration xtract_features_ */
         xtract_part_t part;                   /**< the part of its result that is the quantity */
-        int setting;                          /**< the index of the argument of the feature, a setting, that must have one of the values below, or -1 when any value will do */
-        int value_count;                      /**< the number of values, or 0 */
-        const double *values;                 /**< the values of that setting for which the result is the quantity, the usual one first, or NULL */
         const struct xtract_quantity_ *given; /**< what the feature must be given as its data, or NULL when any data it accepts will do */
     } xtract_provider_t;
 
@@ -294,7 +283,7 @@ extern "C"
     {
         const char *name;                   /**< the name of a feature, or a name for a part of a result or for what several features provide, e.g. "fundamental" */
         xtract_bool_t is_scalar;            /**< it is one value; otherwise an array */
-        xtract_vector_t format;             /**< the layout of the array, which for a part of a result or for one type of result differs from the layout its feature states for the whole. XTRACT_ARBITRARY_SERIES for a scalar */
+        xtract_vector_t format;             /**< the layout of the array, which for a part of a result differs from the layout its feature states for the whole. XTRACT_ARBITRARY_SERIES for a scalar */
         int provider_count;                 /**< the number of features that provide it, at least 1 */
         const xtract_provider_t *providers; /**< the features whose result is this quantity, the usual one first */
     } xtract_quantity_t;
@@ -376,9 +365,8 @@ extern "C"
         xtract_bool_t is_scalar;
         xtract_bool_t is_delta; /* features in xtract_delta.h can be scalar or vector */
 
-        /* a result range/unit of XTRACT_UNKNOWN_MIN/MAX or XTRACT_UNIT_UNKNOWN
-         * means its range is genuinely undetermined, not merely unverified,
-         * or that an argument of the feature decides its unit */
+        /* a result range of XTRACT_UNKNOWN_MIN/MAX means the range is
+         * genuinely undetermined, not merely unverified */
         union {
             struct
             {

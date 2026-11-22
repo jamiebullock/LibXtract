@@ -29,15 +29,15 @@ console.log('The variance is ' + variance.toFixed(2));
 
 console.log('Computing spectrum...');
 
-const specArgv = new xtract.doubleArray(3);
+const specArgv = new xtract.doubleArray(1);
 specArgv.setitem(0, 44100.0 / len);
-specArgv.setitem(1, xtract.XTRACT_MAGNITUDE_SPECTRUM);
-specArgv.setitem(2, 0.0);
 
 const ctx = xtract.xtract_context_new(len);
 
+const complexSpectrum = new xtract.doubleArray(len);
 const result = new xtract.doubleArray(len);
-xtract.xtract_spectrum(ctx, a.cast(), len, xtract.doublea_to_voidp(specArgv.cast()), result.cast());
+xtract.xtract_spectrum(ctx, a.cast(), len, null, complexSpectrum.cast());
+xtract.xtract_magnitude_spectrum(ctx, complexSpectrum.cast(), len, xtract.doublea_to_voidp(specArgv.cast()), result.cast());
 xtract.xtract_context_delete(ctx);
 
 for (let i = 0; i < len; i++) {

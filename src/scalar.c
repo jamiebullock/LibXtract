@@ -1343,7 +1343,7 @@ int xtract_f0(xtract_context *ctx, const double *data, const int N, const void *
 
 int xtract_failsafe_f0(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
-    double *spectrum, argf[3], *peaks, sr, f0;
+    double *spectrum, *magnitudes, argf[2], sr, f0;
     int rv;
 
     rv = xtract_f0(ctx, data, N, argv, &f0);
@@ -1364,25 +1364,27 @@ int xtract_failsafe_f0(xtract_context *ctx, const double *data, const int N, con
         return XTRACT_ARGUMENT_ERROR;
     }
 
+    /* The complex spectrum, then its magnitudes, then the peaks of those
+     * magnitudes written over the complex spectrum, which they follow */
     spectrum = xtract_scratch_take(ctx, N, 2 * (size_t)N);
     if (spectrum == NULL)
         return XTRACT_BAD_STATE;
     memset(spectrum, 0, 2 * (size_t)N * sizeof(double));
-    peaks = spectrum + N;
+    magnitudes = spectrum + N;
 
     argf[0] = sr / N;
-    argf[1] = XTRACT_MAGNITUDE_SPECTRUM;
-    argf[2] = 0.0;
-    rv = xtract_spectrum(ctx, data, N, argf, spectrum);
+    rv = xtract_spectrum(ctx, data, N, NULL, spectrum);
+    if (rv == XTRACT_SUCCESS)
+        rv = xtract_magnitude_spectrum(ctx, spectrum, N, argf, magnitudes);
     if (rv == XTRACT_SUCCESS)
     {
         argf[1] = 10.0;
-        rv = xtract_peak_spectrum(ctx, spectrum, N >> 1, argf, peaks);
+        rv = xtract_peak_spectrum(ctx, magnitudes, N >> 1, argf, spectrum);
     }
     if (rv == XTRACT_SUCCESS)
     {
         argf[0] = 0.0;
-        rv = xtract_lowest_value(ctx, peaks + (N >> 1), N >> 1, argf, result);
+        rv = xtract_lowest_value(ctx, spectrum + (N >> 1), N >> 1, argf, result);
     }
 
     xtract_scratch_return(ctx, spectrum, 2 * (size_t)N);

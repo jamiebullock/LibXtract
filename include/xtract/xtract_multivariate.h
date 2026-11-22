@@ -24,17 +24,29 @@ extern "C"
      * @{
      */
 
-    /** \brief Extract the cross-correlation of two series at every lag
+    /** \brief Extract the cross-correlation of two series at every lag: the sum of products at each lag divided by the series length, as xtract_autocorrelation() scales its result
      *
      * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles comprising two series of equal length: the first series in the first N/2 elements, the second in the second N/2 elements
      * \param N: the total number of elements in the array pointed to by *data (twice the series length), at least 2 and even
-     * \param *argv: a pointer to a double selecting the scaling: 0 for the sum of products divided by the series length, as xtract_autocorrelation() scales its result, or 1 for the correlation coefficient: each series has its mean removed and the sum at every lag is divided by the product of the Euclidean norms of the two resulting series, so that the value at lag 0 is the Pearson correlation coefficient of the two series and every value lies between -1 and 1
-     * \param *result: a pointer to an array of N - 1 doubles, one per lag from -(N/2 - 1) to N/2 - 1 in order, lag 0 at index N/2 - 1. The value at lag k pairs element n + k of the first series with element n of the second, so a peak at a positive lag means the first series is delayed by that many elements relative to the second. With the coefficient selected the array is zeroed with no result when either series is constant
+     * \param *argv: not used
+     * \param *result: a pointer to an array of N - 1 doubles, one per lag from -(N/2 - 1) to N/2 - 1 in order, lag 0 at index N/2 - 1. The value at lag k pairs element n + k of the first series with element n of the second, so a peak at a positive lag means the first series is delayed by that many elements relative to the second
      */
     int xtract_cross_correlation(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
-    /** \brief Extract the lag at which two series are most correlated: the lag of the largest correlation coefficient from xtract_cross_correlation(), taking the one nearest zero on a tie and the negative one before the positive
+    /** \brief Extract the normalised cross-correlation of two series at every lag: the correlation coefficient at each lag
+     *
+     * Each series has its mean removed, and the sum of products at every lag is divided by the product of the Euclidean norms of the two resulting series, so that the value at lag 0 is the Pearson correlation coefficient of the two series and every value lies between -1 and 1
+     *
+     * \param *ctx: a pointer to a context, or NULL
+     * \param *data: a pointer to the first element in an array of doubles comprising two series of equal length: the first series in the first N/2 elements, the second in the second N/2 elements
+     * \param N: the total number of elements in the array pointed to by *data (twice the series length), at least 2 and even
+     * \param *argv: not used
+     * \param *result: a pointer to an array of N - 1 doubles, one per lag in the order xtract_cross_correlation() gives them, zeroed with no result when either series is constant
+     */
+    int xtract_normalised_cross_correlation(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
+
+    /** \brief Extract the lag at which two series are most correlated: the lag of the largest correlation coefficient from xtract_normalised_cross_correlation(), taking the one nearest zero on a tie and the negative one before the positive
      *
      * \param *ctx: a pointer to a context created for at least N elements
      * \param *data: a pointer to the first element in an array of doubles comprising two series of equal length: the first series in the first N/2 elements, the second in the second N/2 elements
@@ -102,7 +114,7 @@ extern "C"
      * \param *data: a pointer to the first element in an array of doubles comprising two series of equal length: the first series in the first N/2 elements, the second in the second N/2 elements
      * \param N: the total number of elements in the array pointed to by *data (twice the series length), even and at least 3 * L, so that each series holds two segments
      * \param *argv: a pointer to an int: the segment length L, a power of two of at least 2
-     * \param *result: a pointer to an array of L/2 doubles: the coherence at the frequencies k * samplerate / L for k from 0 to L/2 - 1, the frequencies of the coefficients xtract_spectrum() gives for L elements. Each segment has its mean removed, so the value at k = 0 comes from what the window spreads there from k = 1. A frequency at which either series has no power is 0, and when that is so at every frequency there is no result
+     * \param *result: a pointer to an array of L/2 doubles: the coherence at the frequencies k * samplerate / L for k from 0 to L/2 - 1, the frequencies of the coefficients xtract_magnitude_spectrum() gives for the spectrum of L elements. Each segment has its mean removed, so the value at k = 0 comes from what the window spreads there from k = 1. A frequency at which either series has no power is 0, and when that is so at every frequency there is no result
      */
     int xtract_coherence(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 

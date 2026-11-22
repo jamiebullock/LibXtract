@@ -87,7 +87,7 @@ extern "C"
     /** \brief Extract the mean of an input spectrum
      *
      * \param *ctx: a pointer to a context, or NULL
-     * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector, (e.g. the array pointed to by *result from xtract_spectrum(), xtract_peak_spectrum() or xtract_harmonic_spectrum()).
+     * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector, (e.g. the array pointed to by *result from xtract_magnitude_spectrum(), xtract_peak_spectrum() or xtract_harmonic_spectrum()).
      * \param N: the size of the array pointed to by *data, at least 2 and even
      * \param *argv: a pointer to NULL
      * \param *result: the mean of the spectrum pointed to by *data
@@ -97,7 +97,7 @@ extern "C"
     /** \brief Extract the variance of an input spectrum
      *
      * \param *ctx: a pointer to a context, or NULL
-     * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector, (e.g. the array pointed to by *result from xtract_spectrum(), xtract_peak_spectrum() or xtract_harmonic_spectrum()).
+     * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector, (e.g. the array pointed to by *result from xtract_magnitude_spectrum(), xtract_peak_spectrum() or xtract_harmonic_spectrum()).
      * \param N: the size of the array pointed to by *data, at least 2 and even
      * \param *argv: a pointer to a double representing the spectral mean of the input spectrum
      * \param *result: the variance of the spectrum pointed to by *data
@@ -107,7 +107,7 @@ extern "C"
     /** \brief Extract the deviation of an input spectrum
      *
      * \param *ctx: a pointer to a context, or NULL
-     * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector, (e.g. the array pointed to by *result from xtract_spectrum(), xtract_peak_spectrum() or xtract_harmonic_spectrum()).
+     * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector, (e.g. the array pointed to by *result from xtract_magnitude_spectrum(), xtract_peak_spectrum() or xtract_harmonic_spectrum()).
      * \param N: the size of the array pointed to by *data
      * \param *argv: a pointer to a double representing the spectral variance of the input spectrum, at least 0
      * \param *result: the deviation of the spectrum pointed to by *data
@@ -117,7 +117,7 @@ extern "C"
     /** \brief Extract the skewness of an input spectrum
      *
      * \param *ctx: a pointer to a context, or NULL
-     * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector, (e.g. the array pointed to by *result from xtract_spectrum(), xtract_peak_spectrum() or xtract_harmonic_spectrum()).
+     * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector, (e.g. the array pointed to by *result from xtract_magnitude_spectrum(), xtract_peak_spectrum() or xtract_harmonic_spectrum()).
      * \param N: the size of the array pointed to by *data, at least 2 and even
      * \param *argv: a pointer to an array of doubles representing the spectral mean and spectral standard deviation of the input spectrum
      * \param *result: the skewness of the spectrum pointed to by *data
@@ -127,7 +127,7 @@ extern "C"
     /** \brief Extract the kurtosis of an input spectrum
      *
      * \param *ctx: a pointer to a context, or NULL
-     * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector, (e.g. the array pointed to by *result from xtract_spectrum(), xtract_peak_spectrum() or xtract_harmonic_spectrum()).
+     * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector, (e.g. the array pointed to by *result from xtract_magnitude_spectrum(), xtract_peak_spectrum() or xtract_harmonic_spectrum()).
      * \param N: the size of the array pointed to by *data, at least 2 and even
      * \param *argv: a pointer to an array of values representing the spectral mean and spectral standard deviation of the input spectrum
      * \param *result: the kurtosis of the spectrum pointed to by *data
@@ -137,7 +137,7 @@ extern "C"
     /** \brief Extract the centroid of an input vector
      *
      * \param *ctx: a pointer to a context, or NULL
-     * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector, (e.g. the array pointed to by *result from xtract_spectrum(), xtract_peak_spectrum() or xtract_harmonic_spectrum()).
+     * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector, (e.g. the array pointed to by *result from xtract_magnitude_spectrum(), xtract_peak_spectrum() or xtract_harmonic_spectrum()).
      * \param N: the size of the array pointed to by *data, at least 2 and even
      * \param *argv: a pointer to NULL
      * \param *result: the centroid of the values pointed to by *data
@@ -160,7 +160,7 @@ extern "C"
     /** \brief Calculate the Irregularity of an input vector using a method described by Jensen (1999)
      *
      * \param *ctx: a pointer to a context, or NULL
-     * \param *data: a pointer to the first element in an array of doubles representing the amplitudes of the partials of a sound in order of frequency (e.g. the amplitudes at the start of the array pointed to by *result from xtract_packed(), of which xtract_nonzero_count() gives the number), or the magnitude coefficients from the spectrum of an audio vector (e.g. the first half of the array pointed to by *result from xtract_spectrum()). The result of xtract_peak_spectrum() or xtract_harmonic_spectrum(), which has elements of 0 between its peaks, goes through xtract_packed() first
+     * \param *data: a pointer to the first element in an array of doubles representing the amplitudes of the partials of a sound in order of frequency (e.g. the amplitudes at the start of the array pointed to by *result from xtract_packed(), of which xtract_nonzero_count() gives the number), or the magnitude coefficients from the spectrum of an audio vector (e.g. the first half of the array pointed to by *result from xtract_magnitude_spectrum()). The result of xtract_peak_spectrum() or xtract_harmonic_spectrum(), which has elements of 0 between its peaks, goes through xtract_packed() first
      * \param N: the number of elements to be considered, at least 1
      * \param *argv: a pointer to NULL
      * \param *result: the irregularity of N values from the array pointed to by *data, where the partial after the last counts as 0, or 0 with no result when every element is 0
@@ -200,7 +200,7 @@ extern "C"
     /** \brief Extract the smoothness of an input vector using a method described by McAdams (1999): the sum, over every element but the first and the last, of the distance in decibels between the level of the element and the mean level of the element and its two neighbours
      *
      * \param *ctx: a pointer to a context, or NULL
-     * \param *data: a pointer to the first element in an array of doubles representing the amplitudes of the partials of a sound in order of frequency (e.g. the amplitudes at the start of the array pointed to by *result from xtract_packed(), of which xtract_nonzero_count() gives the number), or the magnitude coefficients from the spectrum of an audio vector (e.g. the first half of the array pointed to by *result from xtract_spectrum()). An element that is 0 or less, or that is less than DBL_EPSILON times the largest element, counts as DBL_EPSILON times the largest element, so the result of xtract_peak_spectrum() or xtract_harmonic_spectrum(), which has elements of 0 between its peaks, goes through xtract_packed() first. A partial left out of *data, such as one below the peak threshold of xtract_peak_spectrum(), leaves its two neighbours next to one another
+     * \param *data: a pointer to the first element in an array of doubles representing the amplitudes of the partials of a sound in order of frequency (e.g. the amplitudes at the start of the array pointed to by *result from xtract_packed(), of which xtract_nonzero_count() gives the number), or the magnitude coefficients from the spectrum of an audio vector (e.g. the first half of the array pointed to by *result from xtract_magnitude_spectrum()). An element that is 0 or less, or that is less than DBL_EPSILON times the largest element, counts as DBL_EPSILON times the largest element, so the result of xtract_peak_spectrum() or xtract_harmonic_spectrum(), which has elements of 0 between its peaks, goes through xtract_packed() first. A partial left out of *data, such as one below the peak threshold of xtract_peak_spectrum(), leaves its two neighbours next to one another
      * \param N: the number of elements to be considered, at least 3
      * \param *argv: a pointer to NULL
      * \param *result: the smoothness of N values from the array pointed to by *data in decibels, or 0 with no result when the largest element is 0 or less. It is 0 when the levels lie on a straight line, and the more jagged the levels the higher it is. It grows with N, so two results compare only for the same N
@@ -210,7 +210,7 @@ extern "C"
     /** \brief Extract the spectral spread of an input vector using a method described by Casagrande(2005)
      *
      * \param *ctx: a pointer to a context, or NULL
-     * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector, (e.g. the array pointed to by *result from xtract_spectrum(), xtract_peak_spectrum() or xtract_harmonic_spectrum()).
+     * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector, (e.g. the array pointed to by *result from xtract_magnitude_spectrum(), xtract_peak_spectrum() or xtract_harmonic_spectrum()).
      * \param N: the size of the array pointed to by *data, at least 2 and even
      * \param *argv: a pointer to a double corresponding to the spectral centroid
      * \param *result: the spectral spread of N values from the array pointed to by *data
@@ -232,9 +232,9 @@ extern "C"
     /** \brief Extract the spectral rolloff of an input vector using a method described by Bee Suan Ong (2005)
      *
      * \param *ctx: a pointer to a context, or NULL
-     * \param *data: a pointer to the first element in an array of doubles representing the magnitude coefficients from the spectrum of an audio vector, (e.g. the first half of the array pointed to by *result from xtract_spectrum().
+     * \param *data: a pointer to the first element in an array of doubles representing the magnitude coefficients from the spectrum of an audio vector, (e.g. the first half of the array pointed to by *result from xtract_magnitude_spectrum().
      * \param N: the number of elements to be considered, at least 1
-     * \param *argv: a pointer to an array of two doubles: argv[0] is the bin spacing in Hz, the sample rate divided by the transform length (twice N for the first half of an xtract_spectrum() output), finite and at least 0, and argv[1] is the rolloff threshold as a percentage from 0 to 100 (e.g. 95.0 for the 95th percentile).
+     * \param *argv: a pointer to an array of two doubles: argv[0] is the bin spacing in Hz, the sample rate divided by the transform length (twice N for the first half of an xtract_magnitude_spectrum() output), finite and at least 0, and argv[1] is the rolloff threshold as a percentage from 0 to 100 (e.g. 95.0 for the 95th percentile).
      * \param *result: the spectral rolloff in Hz of N values from the array pointed to by *data, the first of them being bin 0: the frequency of the first bin at which the running sum of the coefficients reaches argv[1] percent of their total.
      */
     int xtract_rolloff(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
@@ -257,7 +257,7 @@ extern "C"
      * \note As noted by Peeters (2003), the SFM should generally be computed on a small number of 'bands', which xtract_bands() provides.
      *
      * \param *ctx: a pointer to a context, or NULL
-     * \param *data: a pointer to the first element in an array of doubles representing the magnitude coefficients from the spectrum of an audio vector, (e.g. the first half of the array pointed to by *result from xtract_spectrum(). Alternatively the magnitudes from a number of 'subbands' can be used by using *result from xtract_bands().
+     * \param *data: a pointer to the first element in an array of doubles representing the magnitude coefficients from the spectrum of an audio vector, (e.g. the first half of the array pointed to by *result from xtract_magnitude_spectrum(). Alternatively the magnitudes from a number of 'subbands' can be used by using *result from xtract_bands().
      * \param N: the number of *data array elements to be considered, at least 1
      * \param *argv: a pointer to NULL
      * \param *result: the flatness of N values from the array pointed to by *data
@@ -296,7 +296,7 @@ extern "C"
      * \param *result: the sum of the peaks that are not harmonics divided by the sum of the peaks, or 0 with no result when the peaks sum to 0
      *
      * The sums are of the coefficients in whatever unit they are given:
-     * the peaks of XTRACT_POWER_SPECTRUM give the energy of the partials
+     * the peaks of a power spectrum from xtract_power_spectrum() give the energy of the partials
      * that are not harmonics as a part of the energy of the partials.
      */
     int xtract_noisiness(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
@@ -342,7 +342,7 @@ extern "C"
      *
      * The ratio is computed in whatever unit the coefficients are given:
      * magnitude coefficients give an amplitude ratio, while coefficients
-     * derived from XTRACT_POWER_SPECTRUM give the odd-to-even harmonic energy
+     * derived from xtract_power_spectrum() give the odd-to-even harmonic energy
      * ratio of Peeters (2004).
      */
     int xtract_odd_even_ratio(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
@@ -365,7 +365,7 @@ extern "C"
     /** \brief Extract the Slope of an input vector using a method described by Peeters(2003)
      *
      * \param *ctx: a pointer to a context, or NULL
-     * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector: N/2 coefficients and then their N/2 frequencies (e.g. the array pointed to by *result from xtract_spectrum(), or from xtract_packed() for the peaks of xtract_peak_spectrum() or the harmonics of xtract_harmonic_spectrum()). An element after the first that is 0 in both halves is passed over, so the elements of 0 that follow the peaks in the result of xtract_packed() do not count. The first element always counts
+     * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector: N/2 coefficients and then their N/2 frequencies (e.g. the array pointed to by *result from xtract_magnitude_spectrum(), or from xtract_packed() for the peaks of xtract_peak_spectrum() or the harmonics of xtract_harmonic_spectrum()). An element after the first that is 0 in both halves is passed over, so the elements of 0 that follow the peaks in the result of xtract_packed() do not count. The first element always counts
      * \param N: the number of elements to be considered, at least 2 and even
      * \param *argv: a pointer to NULL
      * \param *result: the Slope of the N/2 coefficients over their frequencies, or 0 with no result when the coefficients sum to 0 or fewer than two frequencies differ
@@ -408,7 +408,7 @@ extern "C"
     /** \brief Extract the Pitch of an input vector using Harmonic Product Spectrum (HPS) analysis
      *
      * \param *ctx: a pointer to a context, or NULL
-     * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector, as produced by xtract_spectrum(). The first half of the array holds the magnitude of each frequency bin and the second half the bin frequencies, which must rise from zero in equal steps; any other grid is an argument error
+     * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector, as produced by xtract_magnitude_spectrum(). The first half of the array holds the magnitude of each frequency bin and the second half the bin frequencies, which must rise from zero in equal steps; any other grid is an argument error
      * \param N: The length of the vector pointed to by *data, at least 4 and even.
      * \param *argv: a pointer to a double giving the number of harmonics to multiply, from 2 to 16 (any other value is an argument error). More harmonics make the estimate robust to a weak or missing low harmonic at the cost of a smaller range of fundamentals that fit below the Nyquist bin
      * \param *result: the fundamental frequency in Hertz, interpolated between bins, or 0 when the spectrum is silent, or too short for two fundamentals to have all their harmonics in it, and no result is returned
@@ -567,7 +567,7 @@ extern "C"
     /** \brief Extract the spectral entropy of a spectrum: the Shannon entropy of the spectrum normalised to sum to 1, divided by the entropy of a flat spectrum of the same length
      *
      * \param *ctx: a pointer to a context, or NULL
-     * \param *data: a pointer to the first element in an array of doubles representing the coefficients of a spectrum, such as the first half of the array pointed to by *result from xtract_spectrum(); a power spectrum gives the usual definition, and a bin that is not positive counts as empty
+     * \param *data: a pointer to the first element in an array of doubles representing the coefficients of a spectrum, such as the first half of the array pointed to by *result from xtract_power_spectrum(); a power spectrum gives the usual definition, and a bin that is not positive counts as empty
      * \param N: the number of *data array elements to be considered, at least 2
      * \param *argv: not used
      * \param *result: the spectral entropy of N values from the array pointed to by *data, between 0 for a single occupied bin and 1 for a flat spectrum, or 0 with no result if no bin is positive
