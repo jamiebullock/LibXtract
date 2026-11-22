@@ -9,15 +9,17 @@
  *
  * These write an array (not a scalar) into result and, unlike the scalar/delta
  * features, each needs specific setup: a context, a mel/gammatone filterbank,
- * or bark band limits, plus an argv whose shape differs per feature. The
- * filterbanks, bark limits, and the context are built once at a fixed
- * power-of-two N in LLVMFuzzerInitialize. The features that need no such
- * setup (DCT, autocorrelation, AMDF, ASDF, LPC, LPCC, the moving-window
- * features, quantise, histogram, packed, the four spectra taken from a
- * complex spectrum and the logarithm) are called with a fuzzer-chosen
- * N from 0 up to it, which includes the lengths each of them rejects. A filterbank
- * feature is called at the one N its filterbank serves or, when a bit of the
- * input is set, at a fuzzer-chosen N, which it rejects unless it is that N.
+ * bark band limits, a window or the state of a stream, plus an argv whose
+ * shape differs per feature. The filterbanks, bark limits, window, stream
+ * state and the context are built once at a fixed power-of-two N in
+ * LLVMFuzzerInitialize. The features that need no such setup (DCT,
+ * autocorrelation, AMDF, ASDF, LPC, LPCC, the moving-window features,
+ * quantise, histogram, packed, the four spectra taken from a complex
+ * spectrum, the logarithm and smoothing), and windowing, are called with a
+ * fuzzer-chosen N from 0 up to it, which includes the lengths each of them
+ * rejects. A filterbank feature and xtract_last_n() are called at the one N
+ * their object serves or, when a bit of the input is set, at a fuzzer-chosen
+ * N, which they reject unless it is that N.
  * Every other call runs at the fixed N. The input is allocated at exactly
  * the length each call declares, so a read past it is out of bounds to the
  * sanitizer. Features are called by name.
@@ -92,6 +94,9 @@ enum
     FZ_LOG_SPECTRUM,
     FZ_PHASE_SPECTRUM,
     FZ_LOG,
+    FZ_WINDOWED,
+    FZ_SMOOTHED,
+    FZ_LAST_N,
     FZ_N_FEATURES
 };
 
@@ -101,6 +106,8 @@ static xtract_filterbank *mel;
 static xtract_filterbank *gammatone;
 static xtract_cqt_kernel *cqt;
 static int bark_limits[XTRACT_BARK_BANDS];
+static double *window;
+static xtract_last_n_state *last_n;
 static xtract_context *ctx;
 
 int LLVMFuzzerInitialize(int *argc, char ***argv)
@@ -114,8 +121,10 @@ int LLVMFuzzerInitialize(int *argc, char ***argv)
     xtract_init_bark(VEC_N, SR, bark_limits);
     cqt = xtract_init_cqt(VEC_N, SR, 2000.0, 12, 36, 0.01);
 
+    window = xtract_init_window(VEC_N, XTRACT_HANN);
+    last_n = xtract_last_n_state_new(VEC_N);
     ctx = xtract_context_new(VEC_N);
-    if (mel == NULL || gammatone == NULL || cqt == NULL || ctx == NULL)
+    if (mel == NULL || gammatone == NULL || cqt == NULL || window == NULL || last_n == NULL || ctx == NULL)
         abort();
 
     return 0;
@@ -155,7 +164,11 @@ static int input_length(int feature, int n, int any_length)
     case FZ_QUANTISE:
     case FZ_HISTOGRAM:
     case FZ_PACKED:
+    case FZ_WINDOWED:
+    case FZ_SMOOTHED:
         return n;
+    case FZ_LAST_N:
+        return 1;
     default:
         return VEC_N;
     }
@@ -414,6 +427,18 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
         xtract_log(ctx, input, n, maybe_null(null_argv, &lambda), result);
         break;
     }
+    case FZ_WINDOWED:
+        xtract_windowed(ctx, input, n, maybe_null(null_argv, window), result);
+        break;
+    case FZ_SMOOTHED:
+    {
+        double gain = fz[0];
+        xtract_smoothed(ctx, input, n, maybe_null(null_argv, &gain), result);
+        break;
+    }
+    case FZ_LAST_N:
+        xtract_last_n(ctx, input, any_length ? n : VEC_N, maybe_null(null_argv, last_n), result);
+        break;
     default:
         break;
     }
