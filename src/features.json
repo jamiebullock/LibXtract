@@ -92,6 +92,7 @@
       "description": "Extract the mean of an input vector",
       "input": {"format": "arbitrary_series", "unit": "any"},
       "arguments": [],
+      "invariance": {"offset": "follows", "sign": "negated", "order": "unchanged", "reversal": "unchanged"},
       "result": {"kind": "scalar", "unit": "any"}
     },
     {
@@ -103,6 +104,7 @@
       "arguments": [
         {"name": "mean", "kind": "result", "accepts": "mean", "of": "input", "unit": "any"}
       ],
+      "invariance": {"offset": "unchanged", "sign": "unchanged", "order": "unchanged", "reversal": "unchanged"},
       "result": {"kind": "scalar", "unit": "any_squared"}
     },
     {
@@ -125,6 +127,7 @@
       "arguments": [
         {"name": "mean", "kind": "result", "accepts": "mean", "of": "input", "unit": "any"}
       ],
+      "invariance": {"offset": "unchanged", "sign": "unchanged", "order": "unchanged", "reversal": "unchanged"},
       "result": {"kind": "scalar", "unit": "any"}
     },
     {
@@ -137,6 +140,7 @@
         {"name": "mean", "kind": "result", "accepts": "mean", "of": "input", "unit": "any"},
         {"name": "standard_deviation", "kind": "result", "accepts": "standard_deviation", "of": "input", "unit": "any"}
       ],
+      "invariance": {"offset": "unchanged", "sign": "negated", "order": "unchanged", "reversal": "unchanged"},
       "result": {"kind": "scalar", "unit": "none"}
     },
     {
@@ -149,6 +153,7 @@
         {"name": "mean", "kind": "result", "accepts": "mean", "of": "input", "unit": "any"},
         {"name": "standard_deviation", "kind": "result", "accepts": "standard_deviation", "of": "input", "unit": "any"}
       ],
+      "invariance": {"offset": "unchanged", "sign": "unchanged", "order": "unchanged", "reversal": "unchanged"},
       "result": {"kind": "scalar", "unit": "none"}
     },
     {
@@ -157,6 +162,7 @@
       "description": "Extract the mean of an input spectrum",
       "input": {"format": "spectral", "unit": "any", "accepts": ["coefficients_and_frequencies"], "length": "N >= 2 && N % 2 == 0"},
       "arguments": [],
+      "invariance": {"order": "unchanged"},
       "result": {"kind": "scalar", "unit": "hertz", "min": 0}
     },
     {
@@ -168,6 +174,7 @@
       "arguments": [
         {"name": "mean", "kind": "result", "accepts": "spectral_mean", "of": "input", "unit": "hertz"}
       ],
+      "invariance": {"order": "unchanged"},
       "result": {"kind": "scalar", "unit": "hertz_squared", "min": 0}
     },
     {
@@ -191,6 +198,7 @@
         {"name": "mean", "kind": "result", "accepts": "spectral_mean", "of": "input", "unit": "hertz"},
         {"name": "standard_deviation", "kind": "result", "accepts": "spectral_standard_deviation", "of": "input", "unit": "hertz"}
       ],
+      "invariance": {"order": "unchanged"},
       "result": {"kind": "scalar", "unit": "none"}
     },
     {
@@ -203,6 +211,7 @@
         {"name": "mean", "kind": "result", "accepts": "spectral_mean", "of": "input", "unit": "hertz"},
         {"name": "standard_deviation", "kind": "result", "accepts": "spectral_standard_deviation", "of": "input", "unit": "hertz"}
       ],
+      "invariance": {"order": "unchanged"},
       "result": {"kind": "scalar", "unit": "none", "min": -2}
     },
     {
@@ -212,6 +221,7 @@
       "provides": ["spectral_mean"],
       "input": {"format": "spectral", "unit": "any", "accepts": ["coefficients_and_frequencies"], "length": "N >= 2 && N % 2 == 0"},
       "arguments": [],
+      "invariance": {"order": "unchanged"},
       "result": {"kind": "scalar", "unit": "hertz", "min": 0}
     },
     {
@@ -282,6 +292,7 @@
       "arguments": [
         {"name": "mean", "kind": "result", "accepts": "spectral_mean", "of": "input", "unit": "hertz"}
       ],
+      "invariance": {"order": "unchanged"},
       "result": {"kind": "scalar", "unit": "hertz_squared", "min": 0}
     },
     {
@@ -290,6 +301,7 @@
       "description": "Extract the zero crossing rate of a vector",
       "input": {"format": "audio_samples", "unit": "any"},
       "arguments": [],
+      "invariance": {"sign": "unchanged", "reversal": "unchanged"},
       "result": {"kind": "scalar", "unit": "none", "min": 0}
     },
     {
@@ -381,6 +393,7 @@
       "description": "Extract the RMS amplitude of a signal",
       "input": {"format": "audio_samples", "unit": "any"},
       "arguments": [],
+      "invariance": {"sign": "unchanged", "order": "unchanged", "reversal": "unchanged"},
       "result": {"kind": "scalar", "unit": "any"}
     },
     {
@@ -392,6 +405,7 @@
       "arguments": [
         {"name": "fundamental", "kind": "result", "accepts": "fundamental", "of": "source", "unit": "hertz", "min": 0}
       ],
+      "invariance": {"order": "unchanged"},
       "result": {"kind": "scalar", "unit": "none", "min": 0, "max": 1}
     },
     {
@@ -418,6 +432,7 @@
       "description": "Extract the spectral slope of a spectrum",
       "input": {"format": "spectral", "unit": "any", "accepts": ["coefficients_and_frequencies"], "length": "N >= 2 && N % 2 == 0"},
       "arguments": [],
+      "invariance": {"order": "unchanged"},
       "result": {"kind": "scalar", "unit": "per_hertz"}
     },
     {
@@ -429,6 +444,7 @@
       "arguments": [
         {"name": "threshold", "kind": "setting", "unit": "any", "default": -1.7976931348623157e+308}
       ],
+      "invariance": {"offset": "follows", "order": "unchanged", "reversal": "unchanged"},
       "result": {"kind": "scalar", "unit": "any"}
     },
     {
@@ -437,6 +453,7 @@
       "description": "Extract the highest value from an input vector",
       "input": {"format": "arbitrary_series", "unit": "any"},
       "arguments": [],
+      "invariance": {"offset": "follows", "order": "unchanged", "reversal": "unchanged"},
       "result": {"kind": "scalar", "unit": "any"}
     },
     {
@@ -445,6 +462,7 @@
       "description": "Extract the sum of the values in an input vector",
       "input": {"format": "arbitrary_series", "unit": "any"},
       "arguments": [],
+      "invariance": {"sign": "negated", "order": "unchanged", "reversal": "unchanged"},
       "result": {"kind": "scalar", "unit": "any"}
     },
     {
@@ -453,6 +471,7 @@
       "description": "Extract the number of non-zero elements in the input vector",
       "input": {"format": "arbitrary_series", "unit": "any"},
       "arguments": [],
+      "invariance": {"sign": "unchanged", "order": "unchanged", "reversal": "unchanged"},
       "result": {"kind": "scalar", "unit": "none"}
     },
     {
@@ -516,6 +535,7 @@
       "arguments": [
         {"name": "sample_rate", "kind": "property", "property": "sample_rate", "unit": "hertz", "min": 2.2250738585072014e-308}
       ],
+      "invariance": {"sign": "unchanged", "reversal": "unchanged"},
       "result": {"kind": "scalar", "unit": "hertz", "min": 0}
     },
     {
@@ -542,6 +562,7 @@
         {"name": "filter", "kind": "setting", "unit": "none", "default": 0, "values": ["none", "positive_slope", "negative_slope"]}
       ],
       "delta": true,
+      "invariance": {"sign": "unchanged", "order": "unchanged", "reversal": "unchanged"},
       "result": {"kind": "scalar", "unit": "any"}
     },
     {
@@ -555,6 +576,7 @@
         {"name": "filter", "kind": "setting", "unit": "none", "default": 0, "values": ["none", "positive_slope", "negative_slope"]}
       ],
       "delta": true,
+      "invariance": {"offset": "unchanged", "sign": "unchanged", "swap": "unchanged"},
       "result": {"kind": "scalar", "unit": "any"}
     },
     {
@@ -589,6 +611,7 @@
       "input": {"format": "subframes", "unit": "any", "accepts": ["bins"], "frames": 2, "length": "N >= 2 && N % 2 == 0"},
       "arguments": [],
       "delta": true,
+      "invariance": {"offset": "unchanged", "sign": "negated", "swap": "negated"},
       "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any", "length": "N / 2"}
     },
     {
@@ -597,6 +620,7 @@
       "description": "Extract the autocorrelation of a signal",
       "input": {"format": "audio_samples", "unit": "any"},
       "arguments": [],
+      "invariance": {"sign": "unchanged", "reversal": "unchanged"},
       "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any_squared", "length": "N"}
     },
     {
@@ -605,6 +629,7 @@
       "description": "Extract the AMDF of a signal",
       "input": {"format": "audio_samples", "unit": "any"},
       "arguments": [],
+      "invariance": {"offset": "unchanged", "sign": "unchanged", "reversal": "unchanged"},
       "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any", "length": "N"}
     },
     {
@@ -613,6 +638,7 @@
       "description": "Extract the ASDF of a signal",
       "input": {"format": "audio_samples", "unit": "any"},
       "arguments": [],
+      "invariance": {"offset": "unchanged", "sign": "unchanged", "reversal": "unchanged"},
       "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any_squared", "length": "N"}
     },
     {
@@ -645,6 +671,7 @@
       "description": "Extract the complex spectrum of an input vector",
       "input": {"format": "audio_samples", "unit": "any", "length": "N >= 2 && is_power_of_two(N)"},
       "arguments": [],
+      "invariance": {"sign": "negated"},
       "result": {"kind": "vector", "format": "spectral_complex", "unit": "any", "length": "N"}
     },
     {
@@ -654,6 +681,7 @@
       "provides": ["autocorrelation"],
       "input": {"format": "audio_samples", "unit": "any", "length": "N >= 2 && is_power_of_two(N)"},
       "arguments": [],
+      "invariance": {"sign": "unchanged", "reversal": "unchanged"},
       "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any_squared", "length": "N"}
     },
     {
@@ -677,6 +705,7 @@
       "arguments": [
         {"name": "table", "kind": "object", "built_by": "init_dct", "optional": true}
       ],
+      "invariance": {"sign": "negated"},
       "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any", "length": "N"}
     },
     {
@@ -785,6 +814,7 @@
       "arguments": [
         {"name": "gain", "kind": "setting", "unit": "none", "default": 0.5}
       ],
+      "invariance": {"offset": "follows", "sign": "negated"},
       "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any", "length": "N"}
     },
     {
@@ -831,6 +861,7 @@
       "arguments": [
         {"name": "window", "kind": "setting", "unit": "none", "min": 1, "default": 5}
       ],
+      "invariance": {"sign": "negated", "reversal": "reversed"},
       "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any", "length": "N - window + 1"}
     },
     {
@@ -842,6 +873,7 @@
       "arguments": [
         {"name": "window", "kind": "setting", "unit": "none", "min": 1, "default": 5}
       ],
+      "invariance": {"offset": "follows", "sign": "negated", "reversal": "reversed"},
       "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any", "length": "N - window + 1"}
     },
     {
@@ -853,6 +885,7 @@
       "arguments": [
         {"name": "window", "kind": "setting", "unit": "none", "min": 2, "default": 5}
       ],
+      "invariance": {"offset": "unchanged", "sign": "unchanged", "reversal": "reversed"},
       "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any_squared", "length": "N - window + 1"}
     },
     {
@@ -864,6 +897,7 @@
       "arguments": [
         {"name": "window", "kind": "setting", "unit": "none", "min": 2, "default": 5}
       ],
+      "invariance": {"offset": "unchanged", "sign": "unchanged", "reversal": "reversed"},
       "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any", "length": "N - window + 1"}
     },
     {
@@ -875,6 +909,7 @@
       "arguments": [
         {"name": "window", "kind": "setting", "unit": "none", "min": 1, "default": 5}
       ],
+      "invariance": {"offset": "follows", "reversal": "reversed"},
       "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any", "length": "N - window + 1"}
     },
     {
@@ -886,6 +921,7 @@
       "arguments": [
         {"name": "window", "kind": "setting", "unit": "none", "min": 1, "default": 5}
       ],
+      "invariance": {"offset": "follows", "reversal": "reversed"},
       "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any", "length": "N - window + 1"}
     },
     {
@@ -897,6 +933,7 @@
       "arguments": [
         {"name": "weight", "kind": "setting", "unit": "none", "min": 0, "max": 1, "default": 0.1}
       ],
+      "invariance": {"offset": "follows", "sign": "negated"},
       "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any", "length": "N"}
     },
     {
@@ -908,6 +945,7 @@
       "arguments": [
         {"name": "weight", "kind": "setting", "unit": "none", "min": 0, "max": 1, "default": 0.1}
       ],
+      "invariance": {"offset": "unchanged", "sign": "unchanged"},
       "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any_squared", "length": "N"}
     },
     {
@@ -916,6 +954,7 @@
       "description": "Extract the median of an input vector",
       "input": {"format": "arbitrary_series", "unit": "any"},
       "arguments": [],
+      "invariance": {"offset": "follows", "sign": "negated", "order": "unchanged", "reversal": "unchanged"},
       "result": {"kind": "scalar", "unit": "any"}
     },
     {
@@ -927,6 +966,7 @@
       "arguments": [
         {"name": "median", "kind": "result", "accepts": "median", "of": "input", "unit": "any"}
       ],
+      "invariance": {"offset": "unchanged", "sign": "unchanged", "order": "unchanged", "reversal": "unchanged"},
       "result": {"kind": "scalar", "unit": "any"}
     },
     {
@@ -936,6 +976,7 @@
       "reference": {"author": "Bo Hjorth", "year": 1970},
       "input": {"format": "arbitrary_series", "unit": "any"},
       "arguments": [],
+      "invariance": {"offset": "unchanged", "sign": "unchanged", "order": "unchanged", "reversal": "unchanged"},
       "result": {"kind": "scalar", "unit": "any_squared", "min": 0}
     },
     {
@@ -945,6 +986,7 @@
       "reference": {"author": "Bo Hjorth", "year": 1970},
       "input": {"format": "arbitrary_series", "unit": "any", "length": "N >= 2"},
       "arguments": [],
+      "invariance": {"offset": "unchanged", "sign": "unchanged", "reversal": "unchanged"},
       "result": {"kind": "scalar", "unit": "none", "min": 0}
     },
     {
@@ -954,6 +996,7 @@
       "reference": {"author": "Bo Hjorth", "year": 1970},
       "input": {"format": "arbitrary_series", "unit": "any", "length": "N >= 3"},
       "arguments": [],
+      "invariance": {"offset": "unchanged", "sign": "unchanged", "reversal": "unchanged"},
       "result": {"kind": "scalar", "unit": "none", "min": 0}
     },
     {
@@ -965,6 +1008,7 @@
       "arguments": [
         {"name": "lag", "kind": "setting", "unit": "none", "min": 1, "default": 1}
       ],
+      "invariance": {"sign": "negated", "reversal": "negated"},
       "result": {"kind": "scalar", "unit": "any_cubed"}
     },
     {
@@ -982,6 +1026,7 @@
       "reference": {"author": "A. Petrosian", "year": 1995},
       "input": {"format": "arbitrary_series", "unit": "any", "length": "N >= 2"},
       "arguments": [],
+      "invariance": {"offset": "unchanged", "sign": "unchanged", "reversal": "unchanged"},
       "result": {"kind": "scalar", "unit": "none"}
     },
     {
@@ -991,6 +1036,7 @@
       "reference": {"author": "Michael J. Katz", "year": 1988},
       "input": {"format": "arbitrary_series", "unit": "any", "length": "N >= 2"},
       "arguments": [],
+      "invariance": {"offset": "unchanged", "sign": "unchanged"},
       "result": {"kind": "scalar", "unit": "none"}
     },
     {
@@ -1003,6 +1049,7 @@
       "arguments": [
         {"name": "k_max", "kind": "setting", "unit": "none", "min": 2, "default": 10}
       ],
+      "invariance": {"offset": "unchanged", "sign": "unchanged", "reversal": "unchanged"},
       "result": {"kind": "scalar", "unit": "none"}
     },
     {
@@ -1016,6 +1063,7 @@
         {"name": "order", "kind": "setting", "unit": "none", "min": 2, "max": 8, "default": 3},
         {"name": "delay", "kind": "setting", "unit": "none", "min": 1, "default": 1}
       ],
+      "invariance": {"offset": "unchanged", "sign": "unchanged", "reversal": "unchanged"},
       "result": {"kind": "scalar", "unit": "none", "min": 0, "max": 1}
     },
     {
@@ -1028,6 +1076,7 @@
       "arguments": [
         {"name": "threshold", "kind": "result", "accepts": "median", "of": "input", "unit": "any"}
       ],
+      "invariance": {"offset": "unchanged", "sign": "unchanged"},
       "result": {"kind": "scalar", "unit": "none", "min": 0}
     },
     {
@@ -1041,6 +1090,7 @@
         {"name": "template_length", "kind": "setting", "unit": "none", "min": 1, "default": 2, "whole": true},
         {"name": "tolerance", "kind": "setting", "unit": "any", "min": 0, "default": 0.2}
       ],
+      "invariance": {"offset": "unchanged", "sign": "unchanged"},
       "result": {"kind": "scalar", "unit": "none", "min": 0}
     },
     {
@@ -1054,6 +1104,7 @@
         {"name": "template_length", "kind": "setting", "unit": "none", "min": 1, "default": 2, "whole": true},
         {"name": "tolerance", "kind": "setting", "unit": "any", "min": 0, "default": 0.2}
       ],
+      "invariance": {"offset": "unchanged", "sign": "unchanged", "reversal": "unchanged"},
       "result": {"kind": "scalar", "unit": "none"}
     },
     {
@@ -1063,6 +1114,7 @@
       "reference": {"author": "Philip McLeod", "year": 2005},
       "input": {"format": "arbitrary_series", "unit": "any"},
       "arguments": [],
+      "invariance": {"sign": "unchanged", "reversal": "unchanged"},
       "result": {"kind": "scalar", "unit": "none", "min": 0, "max": 1}
     },
     {
@@ -1072,6 +1124,7 @@
       "reference": {"author": "Philip McLeod", "year": 2005},
       "input": {"format": "audio_samples", "unit": "any"},
       "arguments": [],
+      "invariance": {"sign": "unchanged", "reversal": "unchanged"},
       "result": {"kind": "scalar", "unit": "none", "min": 0, "max": 1}
     },
     {
@@ -1124,6 +1177,7 @@
       "description": "Extract the cross-correlation of two series at every lag",
       "input": {"format": "subframes", "unit": "any", "length": "N >= 2 && N % 2 == 0"},
       "arguments": [],
+      "invariance": {"sign": "unchanged", "swap": "reversed"},
       "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any_squared", "length": "N - 1"}
     },
     {
@@ -1132,6 +1186,7 @@
       "description": "Extract the lag at which two series are most correlated",
       "input": {"format": "subframes", "unit": "any", "length": "N >= 2 && N % 2 == 0"},
       "arguments": [],
+      "invariance": {"sign": "unchanged", "swap": "negated"},
       "result": {"kind": "scalar", "unit": "none"}
     },
     {
@@ -1179,6 +1234,7 @@
         {"name": "lower_edge", "kind": "setting", "unit": "hertz", "min": 0, "default": 200},
         {"name": "fraction", "kind": "setting", "unit": "none", "min": 0, "max": 1, "default": 0.02}
       ],
+      "invariance": {"order": "unchanged"},
       "result": {"kind": "vector", "format": "arbitrary_series", "unit": "none", "length": "bands + 1"}
     },
     {
@@ -1194,6 +1250,7 @@
         {"name": "lowest", "kind": "setting", "unit": "hertz", "min": 0, "default": 40},
         {"name": "highest", "kind": "setting", "unit": "hertz", "min": 0, "default": 5000}
       ],
+      "invariance": {"order": "unchanged"},
       "result": {"kind": "vector", "format": "chroma_coeffs", "unit": "none", "length": "XTRACT_PITCH_CLASSES"}
     },
     {
@@ -1213,6 +1270,7 @@
       "description": "Extract the Pearson correlation coefficient of two series",
       "input": {"format": "subframes", "unit": "any", "length": "N >= 4 && N % 2 == 0"},
       "arguments": [],
+      "invariance": {"offset": "unchanged", "sign": "unchanged", "swap": "unchanged"},
       "result": {"kind": "scalar", "unit": "none", "min": -1, "max": 1}
     },
     {
@@ -1259,6 +1317,7 @@
       "arguments": [
         {"name": "segment_length", "kind": "setting", "unit": "none", "min": 2, "default": 256}
       ],
+      "invariance": {"sign": "unchanged", "swap": "unchanged"},
       "result": {"kind": "vector", "format": "arbitrary_series", "unit": "none", "length": "segment_length / 2"}
     },
     {
@@ -1313,6 +1372,7 @@
         {"name": "upper", "kind": "result", "accepts": "highest_value", "of": "input", "unit": "any"},
         {"name": "levels", "kind": "setting", "unit": "none", "min": 1, "max": 2147483647, "default": 256, "whole": true, "sets": "levels"}
       ],
+      "invariance": {"offset": "unchanged", "order": "reordered", "reversal": "reversed"},
       "result": {"kind": "vector", "format": "arbitrary_series", "unit": "none", "length": "N"}
     },
     {
@@ -1324,6 +1384,7 @@
       "arguments": [
         {"name": "levels", "kind": "property", "property": "levels", "unit": "none", "min": 1}
       ],
+      "invariance": {"order": "unchanged", "reversal": "unchanged"},
       "result": {"kind": "vector", "format": "arbitrary_series", "unit": "none", "length": "levels"}
     },
     {
@@ -1482,7 +1543,7 @@
       "arguments": [
         {"name": "lambda", "kind": "setting", "unit": "none", "min": 2.2250738585072014e-308, "default": 1}
       ],
-      "invariance": {"level": "unstated"},
+      "invariance": {"level": "unstated", "order": "reordered", "reversal": "reversed"},
       "result": {"kind": "vector", "format": "arbitrary_series", "unit": "none", "length": "N"}
     },
     {
@@ -1491,6 +1552,7 @@
       "description": "Extract the correlation coefficient of two series at every lag",
       "input": {"format": "subframes", "unit": "any", "length": "N >= 2 && N % 2 == 0"},
       "arguments": [],
+      "invariance": {"sign": "unchanged", "swap": "reversed"},
       "result": {"kind": "vector", "format": "arbitrary_series", "unit": "none", "length": "N - 1"}
     }
   ]

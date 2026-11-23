@@ -20,10 +20,32 @@ typedef enum xttest_level_
     XTTEST_LEVEL_UNSTATED
 } xttest_level;
 
-/* What the properties of a feature in src/features.json say of its result */
+/* What a change of the data a feature is given does to its result */
+typedef enum xttest_effect_
+{
+    XTTEST_UNSTATED,
+    XTTEST_UNCHANGED,
+    /* Moves by the constant added to the data */
+    XTTEST_FOLLOWS,
+    XTTEST_NEGATED,
+    /* Reordered as the data is, element by element */
+    XTTEST_REORDERED,
+    XTTEST_REVERSED
+} xttest_effect;
+
+/* What the properties of a feature in src/features.json say of its result,
+ * with its settings at their defaults: how it follows the level of the
+ * data, and what adding a constant to the data, negating it, reordering it
+ * (the pairs of coefficient and frequency of a spectrum), reversing it, or
+ * swapping the two series of a feature that takes two does to it */
 typedef struct xttest_properties_
 {
     xttest_level level;
+    xttest_effect offset;
+    xttest_effect sign;
+    xttest_effect order;
+    xttest_effect reversal;
+    xttest_effect swap;
 } xttest_properties;
 
 /* Indexed by feature, written from src/features.json by the build target
