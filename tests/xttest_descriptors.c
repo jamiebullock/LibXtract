@@ -2062,6 +2062,8 @@ UTEST(descriptors, a_result_follows_the_level_of_its_input_by_the_law_its_featur
                 const double value = call[j].result[i], at_one = call[0].result[i];
                 double expected, slope, tolerance;
 
+                if (law != XTTEST_LEVEL_UNSTATED)
+                    ASSERT_TRUE_MSG(isfinite(at_one), d->name);
                 if (law == XTTEST_LEVEL_UNIT)
                 {
                     const double factor = pow(levels[j], conf_exponent(d, growth, length, i));
