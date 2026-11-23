@@ -161,14 +161,21 @@ jobs:
           path: build/fuzz/fuzz/crash-*
           if-no-files-found: ignore
 
-  # A run takes up to about 25 minutes
+  # On a pull request only the lines it changes are mutated. A run over every
+  # line takes about 30 minutes
   mutation:
     runs-on: ubuntu-24.04
     timeout-minutes: 45
+    env:
+      BASE_REF: ${{ github.base_ref }}
     steps:
       - uses: actions/checkout@v6
         with:
           persist-credentials: false
+
+      - name: Fetch the base branch
+        if: github.event_name == 'pull_request'
+        run: git fetch --no-tags --depth=1 origin "$BASE_REF:refs/remotes/origin/$BASE_REF"
 
       - name: Install clang-18 and Mull
         run: |
@@ -178,17 +185,18 @@ jobs:
 
       - name: Mutation tests (Mull, ASan + UBSan)
         run: |
-          cmake --preset mutation
+          cmake --preset mutation -DXTRACT_MUTATION_DIFF_REF="${BASE_REF:+origin/$BASE_REF}"
           cmake --build --preset mutation
           cmake --build --preset mutation --target mutation
 
+      # Mull writes no report when a pull request changes no line it mutates
       - name: Upload mutation report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: mutation-report
           path: build/mutation/reports/mutation.json
-          if-no-files-found: error
+          if-no-files-found: ${{ github.event_name == 'pull_request' && 'ignore' || 'error' }}
           retention-days: 7
 
   # The binary that the proofs run on is built on every pull request, which

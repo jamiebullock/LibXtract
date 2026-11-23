@@ -64,10 +64,21 @@ if(NOT APPLE AND NOT MSVC)
 endif()
 
 set(XTRACT_MUTATION_PLUGIN "" CACHE FILEPATH "Mull IR frontend plugin to compile the library with")
+set(XTRACT_MUTATION_DIFF_REF "" CACHE STRING "Git reference: when set, only the lines that differ from it are mutated")
 if(XTRACT_MUTATION_PLUGIN)
     if(NOT CMAKE_C_COMPILER_ID MATCHES "Clang")
         message(FATAL_ERROR "XTRACT_MUTATION_PLUGIN needs a Clang compiler, the C compiler is ${CMAKE_C_COMPILER_ID}")
     endif()
+    set(XTRACT_MULL_CONFIG ${PROJECT_SOURCE_DIR}/mull.yml)
+    if(XTRACT_MUTATION_DIFF_REF)
+        file(READ ${PROJECT_SOURCE_DIR}/mull.yml mull_config)
+        set(XTRACT_MULL_CONFIG ${PROJECT_BINARY_DIR}/mull.yml)
+        file(WRITE ${XTRACT_MULL_CONFIG} "${mull_config}gitDiffRef: ${XTRACT_MUTATION_DIFF_REF}\ngitProjectRoot: ${PROJECT_SOURCE_DIR}\n")
+    endif()
+    set(XTRACT_MULL_CONFIG ${XTRACT_MULL_CONFIG} PARENT_SCOPE)
+    # The plugin picks the mutants as it compiles, so the configuration that
+    # limits them to the lines of a difference is set for the compiler
+    set_target_properties(xtract PROPERTIES C_COMPILER_LAUNCHER "${CMAKE_COMMAND};-E;env;MULL_CONFIG=${XTRACT_MULL_CONFIG}")
     target_compile_options(xtract PRIVATE -fpass-plugin=${XTRACT_MUTATION_PLUGIN} -grecord-command-line)
 endif()
 

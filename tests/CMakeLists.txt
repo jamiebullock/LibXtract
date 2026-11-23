@@ -94,7 +94,7 @@ if(XTRACT_MUTATION_PLUGIN)
     # library reads the environment on every call of a mutated function, so
     # the tests slow down with the number of variables in it
     add_custom_target(mutation
-        COMMAND env -i PATH=$ENV{PATH} ${XTRACT_MULL_RUNNER}
+        COMMAND env -i PATH=$ENV{PATH} MULL_CONFIG=${XTRACT_MULL_CONFIG} ${XTRACT_MULL_RUNNER}
             --reporters IDE --reporters Elements
             --report-dir ${PROJECT_BINARY_DIR}/reports --report-name mutation
             --workers ${XTRACT_MUTATION_WORKERS} --timeout 10000
