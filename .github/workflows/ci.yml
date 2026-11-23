@@ -162,10 +162,10 @@ jobs:
           if-no-files-found: ignore
 
   # On a pull request only the lines it changes are mutated. A run over every
-  # line takes about 30 minutes
+  # line takes 25 to 45 minutes, by the speed of the runner
   mutation:
     runs-on: ubuntu-24.04
-    timeout-minutes: 45
+    timeout-minutes: 75
     env:
       # A pull request is tested at a merge commit whose first parent is the
       # base it was merged onto
