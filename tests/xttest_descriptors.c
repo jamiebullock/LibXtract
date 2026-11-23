@@ -1995,32 +1995,17 @@ static int conf_reach_at(xttest_call *call, int f, xtract_context *ctx, const xt
     return 1;
 }
 
-/* The largest magnitude among the elements of one half of a result, or of
- * the whole when the result holds no frequencies */
-static double conf_largest(const xtract_function_descriptor_t *d, const double *result, int length, int i)
+/* Whether element i of a result is in its second half of frequencies */
+static int conf_is_frequency(const xtract_function_descriptor_t *d, int length, int i)
 {
-    int first = 0, last = length, j;
-    double largest = 0.0;
-
-    if (!d->is_scalar && xttest_has_frequencies(d->result.vector.format))
-    {
-        first = i < length / 2 ? 0 : length / 2;
-        last = i < length / 2 ? length / 2 : length;
-    }
-    for (j = first; j < last; j++)
-    {
-        if (isfinite(result[j]) && fabs(result[j]) > largest)
-            largest = fabs(result[j]);
-    }
-
-    return largest;
+    return !d->is_scalar && xttest_has_frequencies(d->result.vector.format) && i >= length / 2;
 }
 
 /* The power of the level that element i of the result grows by: the power
  * its unit states of the factor the data grows by, and 0 for a frequency */
 static int conf_exponent(const xtract_function_descriptor_t *d, int growth, int length, int i)
 {
-    if (!d->is_scalar && xttest_has_frequencies(d->result.vector.format) && i >= length / 2)
+    if (conf_is_frequency(d, length, i))
         return 0;
 
     return growth * conf_power(d->is_scalar ? d->result.scalar.unit : d->result.vector.unit);
@@ -2042,6 +2027,9 @@ UTEST(descriptors, a_result_follows_the_level_of_its_input_by_the_law_its_featur
     {
         const xtract_function_descriptor_t *d = xtract_descriptor(f);
         const xttest_level law = xttest_property_table[f].level;
+        /* The largest magnitude among the coefficients and among the
+         * frequencies of the result at level 1 */
+        double largest[2] = {0.0, 0.0};
         int growth = 1, length;
 
         for (j = 0; j < CONF_LEVELS; j++)
@@ -2051,6 +2039,11 @@ UTEST(descriptors, a_result_follows_the_level_of_its_input_by_the_law_its_featur
             ASSERT_EQ_MSG(call[j].result_length, call[0].result_length, d->name);
         }
         length = call[0].result_length;
+        for (i = 0; i < length; i++)
+        {
+            if (isfinite(call[0].result[i]))
+                largest[conf_is_frequency(d, length, i)] = fmax(largest[conf_is_frequency(d, length, i)], fabs(call[0].result[i]));
+        }
 
         /* The data of a feature grows by a whole power of the level: 1 for
          * a series, 2 for a covariance, 0 for data that has no unit */
@@ -2078,7 +2071,7 @@ UTEST(descriptors, a_result_follows_the_level_of_its_input_by_the_law_its_featur
                     if (!isfinite(expected) || (expected != 0.0 && fabs(expected) < DBL_MIN))
                         continue;
                     ASSERT_TRUE_MSG(isfinite(value), d->name);
-                    tolerance = 1e-9 * factor * conf_largest(d, call[0].result, length, i);
+                    tolerance = 1e-9 * factor * largest[conf_is_frequency(d, length, i)];
                     ASSERT_NEAR_MSG(value, expected, tolerance, d->name);
                 }
                 else if (law == XTTEST_LEVEL_LOG)
@@ -2087,7 +2080,7 @@ UTEST(descriptors, a_result_follows_the_level_of_its_input_by_the_law_its_featur
                     /* The multiple of the log is the one levels 1 and 4 show */
                     slope = (call[1].result[i] - at_one) / log(levels[1]);
                     expected = at_one + slope * log(levels[j]);
-                    tolerance = 1e-9 * (conf_largest(d, call[0].result, length, i) + fabs(slope) * fabs(log(levels[j])));
+                    tolerance = 1e-9 * (largest[conf_is_frequency(d, length, i)] + fabs(slope) * fabs(log(levels[j])));
                     ASSERT_NEAR_MSG(value, expected, tolerance, d->name);
                 }
             }
