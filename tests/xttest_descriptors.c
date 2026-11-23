@@ -15,6 +15,7 @@
 
 #include "xttest_approx.h"
 #include "xttest_driver.h"
+#include "xttest_properties.h"
 #include "xttest_util.h"
 
 static const double EPSILON = 1e-10;
@@ -1877,16 +1878,18 @@ static double conf_scale_to_the(int power, double scale)
     return factor;
 }
 
-/* How many times larger every element of the second array is than the same
- * element of the first, or 0 when the elements do not share one ratio. */
-static double conf_ratio(const xttest_data *first, const xttest_data *second)
+/* How many times larger every coefficient of the second array of the
+ * layout is than the same coefficient of the first, or 0 when the
+ * coefficients do not share one ratio. */
+static double conf_ratio(xtract_vector_t format, const xttest_data *first, const xttest_data *second)
 {
+    const int count = xttest_has_frequencies(format) ? first->n / 2 : first->n;
     double ratio = 0.0, largest = 0.0;
     int i;
 
     if (first->n != second->n)
         return 0.0;
-    for (i = 0; i < first->n; i++)
+    for (i = 0; i < count; i++)
     {
         if (fabs(first->values[i]) > largest)
         {
@@ -1894,7 +1897,7 @@ static double conf_ratio(const xttest_data *first, const xttest_data *second)
             ratio = second->values[i] / first->values[i];
         }
     }
-    for (i = 0; i < first->n; i++)
+    for (i = 0; i < count; i++)
     {
         if (fabs(second->values[i] - ratio * first->values[i]) > 1e-9 * fabs(ratio * first->values[i]))
             return 0.0;
@@ -1948,7 +1951,7 @@ UTEST(descriptors, a_result_scales_with_its_input_by_the_power_its_unit_states)
          * multiple of its level: 4 for a series, 16 for a covariance */
         for (pass = 0; pass < 2; pass++)
             ASSERT_TRUE_MSG(xttest_call_reach(&call[pass], f, ctx, pass == 0 ? 1.0 : scale), d->name);
-        ratio = call[0].data.n > 0 ? conf_ratio(&call[0].data, &call[1].data) : scale;
+        ratio = call[0].data.n > 0 ? conf_ratio(d->data.format, &call[0].data, &call[1].data) : scale;
         ASSERT_TRUE_MSG(ratio > 1.0, d->name);
 
         conf_scale_settings(d, &call[1], ratio);
@@ -1975,7 +1978,7 @@ UTEST(descriptors, a_result_scales_with_its_input_by_the_power_its_unit_states)
 
 enum
 {
-    CONF_LEVELS = 3
+    CONF_LEVELS = 5
 };
 
 /* A call from the driver's series at a level of scale, with each setting in
@@ -1987,90 +1990,104 @@ static int conf_reach_at(xttest_call *call, int f, xtract_context *ctx, const xt
     if (!xttest_call_reach(call, f, ctx, scale))
         return 0;
     if (at_one != NULL)
-        conf_scale_settings(d, call, at_one->data.n > 0 ? conf_ratio(&at_one->data, &call->data) : scale);
+        conf_scale_settings(d, call, at_one->data.n > 0 ? conf_ratio(d->data.format, &at_one->data, &call->data) : scale);
 
     return 1;
 }
 
-UTEST(descriptors, a_result_follows_the_level_of_its_input_to_the_ends_of_the_double_range)
+/* Whether element i of a result is in its second half of frequencies */
+static int conf_is_frequency(const xtract_function_descriptor_t *d, int length, int i)
+{
+    return !d->is_scalar && xttest_has_frequencies(d->result.vector.format) && i >= length / 2;
+}
+
+/* The power of the level that element i of the result grows by: the power
+ * its unit states of the factor the data grows by, and 0 for a frequency */
+static int conf_exponent(const xtract_function_descriptor_t *d, int growth, int length, int i)
+{
+    if (conf_is_frequency(d, length, i))
+        return 0;
+
+    return growth * conf_power(d->is_scalar ? d->result.scalar.unit : d->result.vector.unit);
+}
+
+UTEST(descriptors, a_result_follows_the_level_of_its_input_by_the_law_its_feature_states)
 {
     /* Powers of two scale every double exactly. A square of the input at
      * these levels, summed over every element the driver gives, is still a
      * normal double */
-    static const double levels[CONF_LEVELS] = {1.0, 4.0, 16.0};
-    static const double extremes[2] = {0x1p-500, 0x1p500};
+    static const double levels[CONF_LEVELS] = {1.0, 4.0, 16.0, 0x1p-500, 0x1p500};
     xtract_context *ctx = xtract_context_new(XTTEST_DRIVER_LIMIT);
-    xttest_call call[CONF_LEVELS], extreme;
-    int f, i, j, e, followed = 0;
+    xttest_call call[CONF_LEVELS];
+    int f, i, j, followed = 0;
 
     ASSERT_TRUE(ctx != NULL);
 
     for (f = 0; f < XTRACT_FEATURES; f++)
     {
         const xtract_function_descriptor_t *d = xtract_descriptor(f);
-        double *power, *slope;
-
-        /* The log spectrum is on a scale where a power of 1 gives 1 and a
-         * power of DBL_EPSILON squared or less gives 0 */
-        if (f == XTRACT_LOG_SPECTRUM)
-            continue;
+        const xttest_level law = xttest_property_table[f].level;
+        /* The largest magnitude among the coefficients and among the
+         * frequencies of the result at level 1 */
+        double largest[2] = {0.0, 0.0};
+        int growth = 1, length;
 
         for (j = 0; j < CONF_LEVELS; j++)
         {
             ASSERT_TRUE_MSG(conf_reach_at(&call[j], f, ctx, j == 0 ? NULL : &call[0], levels[j]), d->name);
             ASSERT_EQ_MSG(xttest_call_run(&call[j], ctx), XTRACT_SUCCESS, d->name);
+            ASSERT_EQ_MSG(call[j].result_length, call[0].result_length, d->name);
         }
-        power = (double *)malloc((size_t)call[0].result_length * sizeof(double));
-        slope = (double *)malloc((size_t)call[0].result_length * sizeof(double));
-        ASSERT_TRUE(power != NULL && slope != NULL);
-
-        /* Each element is a whole power of the level, a multiple of its
-         * log, or neither, as the three ordinary levels show */
-        for (i = 0; i < call[0].result_length; i++)
+        length = call[0].result_length;
+        for (i = 0; i < length; i++)
         {
-            const double r1 = call[0].result[i], r4 = call[1].result[i], r16 = call[2].result[i];
-            const double k = r1 != 0.0 && r4 / r1 > 0.0 ? round(log(r4 / r1) / log(4.0)) : NAN;
-
-            power[i] = NAN;
-            slope[i] = NAN;
-            if (r1 == r4 && r4 == r16)
-                power[i] = 0.0;
-            else if (!isnan(k) && fabs(r4 - r1 * pow(4.0, k)) <= 1e-9 * fabs(r4) && fabs(r16 - r1 * pow(16.0, k)) <= 1e-9 * fabs(r16))
-                power[i] = k;
-            else if (fabs((r16 - r4) - (r4 - r1)) <= 1e-9 * (fabs(r1) + fabs(r4) + fabs(r16)))
-                slope[i] = (r4 - r1) / log(4.0);
+            if (isfinite(call[0].result[i]))
+                largest[conf_is_frequency(d, length, i)] = fmax(largest[conf_is_frequency(d, length, i)], fabs(call[0].result[i]));
         }
 
-        for (e = 0; e < 2; e++)
+        /* The data of a feature grows by a whole power of the level: 1 for
+         * a series, 2 for a covariance, 0 for data that has no unit */
+        if (call[0].data.n > 0)
         {
-            ASSERT_TRUE_MSG(conf_reach_at(&extreme, f, ctx, &call[0], extremes[e]), d->name);
-            ASSERT_EQ_MSG(xttest_call_run(&extreme, ctx), XTRACT_SUCCESS, d->name);
-            ASSERT_EQ_MSG(extreme.result_length, call[0].result_length, d->name);
-            for (i = 0; i < extreme.result_length; i++)
+            const double ratio = conf_ratio(d->data.format, &call[0].data, &call[1].data);
+
+            ASSERT_TRUE_MSG(ratio > 0.0 || law == XTTEST_LEVEL_UNSTATED, d->name);
+            growth = ratio > 0.0 ? (int)lround(log(ratio) / log(levels[1])) : 0;
+        }
+
+        for (j = 1; j < CONF_LEVELS; j++)
+        {
+            for (i = 0; i < length; i++)
             {
-                const double value = extreme.result[i];
-                double expected;
+                const double value = call[j].result[i], at_one = call[0].result[i];
+                double expected, slope, tolerance;
 
-                if (!isnan(power[i]))
+                if (law != XTTEST_LEVEL_UNSTATED)
+                    ASSERT_TRUE_MSG(isfinite(at_one), d->name);
+                if (law == XTTEST_LEVEL_UNIT)
                 {
-                    expected = call[0].result[i] * pow(extremes[e], power[i]);
+                    const double factor = pow(levels[j], conf_exponent(d, growth, length, i));
+
+                    expected = at_one * factor;
                     /* A value the double range cannot hold is the caller's range */
                     if (!isfinite(expected) || (expected != 0.0 && fabs(expected) < DBL_MIN))
                         continue;
-                    ASSERT_NEAR_MSG(value, expected, 1e-9 * fabs(expected), d->name);
+                    ASSERT_TRUE_MSG(isfinite(value), d->name);
+                    tolerance = 1e-9 * factor * largest[conf_is_frequency(d, length, i)];
+                    ASSERT_NEAR_MSG(value, expected, tolerance, d->name);
                 }
-                else if (!isnan(slope[i]))
+                else if (law == XTTEST_LEVEL_LOG)
                 {
-                    expected = call[0].result[i] + slope[i] * log(extremes[e]);
-                    ASSERT_NEAR_MSG(value, expected, 1e-6 * (fabs(expected) + fabs(slope[i])), d->name);
+                    ASSERT_TRUE_MSG(isfinite(value), d->name);
+                    /* The multiple of the log is the one levels 1 and 4 show */
+                    slope = (call[1].result[i] - at_one) / log(levels[1]);
+                    expected = at_one + slope * log(levels[j]);
+                    tolerance = 1e-9 * (largest[conf_is_frequency(d, length, i)] + fabs(slope) * fabs(log(levels[j])));
+                    ASSERT_NEAR_MSG(value, expected, tolerance, d->name);
                 }
-                ASSERT_TRUE_MSG(isfinite(value), d->name);
             }
-            xttest_call_free(&extreme);
         }
-        followed++;
-        free(power);
-        free(slope);
+        followed += law != XTTEST_LEVEL_UNSTATED;
         for (j = 0; j < CONF_LEVELS; j++)
             xttest_call_free(&call[j]);
     }

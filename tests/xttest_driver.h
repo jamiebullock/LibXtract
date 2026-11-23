@@ -66,6 +66,11 @@ typedef struct xttest_call_
  * made from a series of that length, in which case nothing is left to free */
 int xttest_call_prepare(xttest_call *call, int feature, const xttest_source *source);
 
+/* The same with data of the caller's in place of the data the driver would
+ * make: an argument that is a result of the data is a result of that data,
+ * and any other comes from the caller's series as before */
+int xttest_call_prepare_given(xttest_call *call, int feature, const xttest_source *source, const xttest_data *data);
+
 /* The same from a series of XTTEST_DRIVER_SHORTEST elements at a level of
  * scale, doubled until the call can be made from it, so the series can be
  * longer than the shortest the feature accepts. Returns 0 when no series up
@@ -74,6 +79,9 @@ int xttest_call_reach(xttest_call *call, int feature, xtract_context *ctx, doubl
 
 /* Makes the call and returns what the feature returns */
 int xttest_call_run(const xttest_call *call, xtract_context *ctx);
+
+/* An array of the layout holds frequencies in its second half */
+int xttest_has_frequencies(xtract_vector_t format);
 
 void xttest_call_free(xttest_call *call);
 
