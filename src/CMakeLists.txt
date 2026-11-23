@@ -71,14 +71,30 @@ if(XTRACT_MUTATION_PLUGIN)
     endif()
     set(XTRACT_MULL_CONFIG ${PROJECT_SOURCE_DIR}/mull.yml)
     if(XTRACT_MUTATION_DIFF_REF)
+        # Mull skips every mutant, and passes, when it cannot resolve the
+        # reference
+        find_package(Git REQUIRED)
+        execute_process(
+            COMMAND ${GIT_EXECUTABLE} rev-parse --verify --quiet "${XTRACT_MUTATION_DIFF_REF}^{commit}"
+            WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+            RESULT_VARIABLE diff_ref_missing
+            OUTPUT_QUIET ERROR_QUIET)
+        if(diff_ref_missing)
+            message(FATAL_ERROR "XTRACT_MUTATION_DIFF_REF '${XTRACT_MUTATION_DIFF_REF}' is not a commit in ${PROJECT_SOURCE_DIR}")
+        endif()
         file(READ ${PROJECT_SOURCE_DIR}/mull.yml mull_config)
         set(XTRACT_MULL_CONFIG ${PROJECT_BINARY_DIR}/mull.yml)
-        file(WRITE ${XTRACT_MULL_CONFIG} "${mull_config}gitDiffRef: ${XTRACT_MUTATION_DIFF_REF}\ngitProjectRoot: ${PROJECT_SOURCE_DIR}\n")
+        file(CONFIGURE OUTPUT ${XTRACT_MULL_CONFIG}
+            CONTENT "${mull_config}gitDiffRef: ${XTRACT_MUTATION_DIFF_REF}\ngitProjectRoot: ${PROJECT_SOURCE_DIR}\n"
+            @ONLY)
     endif()
     set(XTRACT_MULL_CONFIG ${XTRACT_MULL_CONFIG} PARENT_SCOPE)
     # The plugin picks the mutants as it compiles, so the configuration that
-    # limits them to the lines of a difference is set for the compiler
+    # limits them to the lines of a difference is set for the compiler, and a
+    # change to it compiles the library again
     set_target_properties(xtract PROPERTIES C_COMPILER_LAUNCHER "${CMAKE_COMMAND};-E;env;MULL_CONFIG=${XTRACT_MULL_CONFIG}")
+    get_target_property(xtract_sources xtract SOURCES)
+    set_source_files_properties(${xtract_sources} PROPERTIES OBJECT_DEPENDS ${XTRACT_MULL_CONFIG})
     target_compile_options(xtract PRIVATE -fpass-plugin=${XTRACT_MUTATION_PLUGIN} -grecord-command-line)
 endif()
 

@@ -167,15 +167,14 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     env:
-      BASE_REF: ${{ github.base_ref }}
+      # A pull request is tested at a merge commit whose first parent is the
+      # base it was merged onto
+      DIFF_REF: ${{ github.event_name == 'pull_request' && 'HEAD^1' || '' }}
     steps:
       - uses: actions/checkout@v6
         with:
           persist-credentials: false
-
-      - name: Fetch the base branch
-        if: github.event_name == 'pull_request'
-        run: git fetch --no-tags --depth=1 origin "$BASE_REF:refs/remotes/origin/$BASE_REF"
+          fetch-depth: 2
 
       - name: Install clang-18 and Mull
         run: |
@@ -185,7 +184,7 @@ jobs:
 
       - name: Mutation tests (Mull, ASan + UBSan)
         run: |
-          cmake --preset mutation -DXTRACT_MUTATION_DIFF_REF="${BASE_REF:+origin/$BASE_REF}"
+          cmake --preset mutation -DXTRACT_MUTATION_DIFF_REF="$DIFF_REF"
           cmake --build --preset mutation
           cmake --build --preset mutation --target mutation
 
