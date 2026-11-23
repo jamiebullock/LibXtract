@@ -113,10 +113,10 @@ static void set_value(const xtract_argument_descriptor_t *argument, double *doub
 }
 
 /* What a caller has: three harmonics of 1760 Hz from part of the way into a
- * period, so that the first element is not 0. It is a series, two series,
- * the rows of a grid or the channels of a recording according to the
- * feature that takes it */
-static int caller_data(xttest_data *data, int n, double scale)
+ * period, so that the first element is not 0, its n elements rotated by
+ * rotation. It is a series, two series, the rows of a grid or the channels
+ * of a recording according to the feature that takes it */
+static int caller_data(xttest_data *data, int n, double scale, int rotation)
 {
     int i;
 
@@ -125,7 +125,8 @@ static int caller_data(xttest_data *data, int n, double scale)
         return 0;
     for (i = 0; i < n + XTTEST_DRIVER_SLACK; i++)
     {
-        const double phase = 0.5 + 2.0 * M_PI * 1760.0 * i / DRIVER_SAMPLE_RATE;
+        const int at = i < n ? (i + rotation) % n : i;
+        const double phase = 0.5 + 2.0 * M_PI * 1760.0 * at / DRIVER_SAMPLE_RATE;
 
         data->values[i] = scale * (0.6 * sin(phase) + 0.3 * sin(2.0 * phase) + 0.1 * sin(3.0 * phase));
     }
@@ -278,7 +279,7 @@ static int data_from_the_caller(const xtract_function_descriptor_t *d, const xtt
 
     if (d->data.format == XTRACT_NO_DATA)
     {
-        if (!caller_data(data, 0, source->scale))
+        if (!caller_data(data, 0, source->scale, 0))
             return 0;
         return 1;
     }
@@ -309,9 +310,9 @@ static int data_from_the_caller(const xtract_function_descriptor_t *d, const xtt
         /* An object is built for the data, after it, and the length of the
          * result is checked against the rule then */
         if (d->argc > 0 && d->argv[0].kind == XTRACT_ARGUMENT_OBJECT)
-            return caller_data(data, n, source->scale);
+            return caller_data(data, n, source->scale, source->rotation);
         if (xtract_length_is_accepted(d->id, n, argv))
-            return caller_data(data, n, source->scale);
+            return caller_data(data, n, source->scale, source->rotation);
     }
 
     return 0;
@@ -418,6 +419,7 @@ int xttest_call_reach(xttest_call *call, int feature, xtract_context *ctx, doubl
 
     source.ctx = ctx;
     source.scale = scale;
+    source.rotation = 0;
     /* A feature may need more data than the shortest series has: a
      * constant-Q kernel needs a transform long enough for its lowest band */
     for (source.base = XTTEST_DRIVER_SHORTEST; source.base <= XTTEST_DRIVER_LIMIT; source.base *= 2)

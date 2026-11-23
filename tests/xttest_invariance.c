@@ -64,6 +64,7 @@ UTEST(invariance, a_feature_that_takes_a_peak_spectrum_is_unchanged_by_elements_
     source.ctx = ctx;
     source.base = XTTEST_DRIVER_SHORTEST;
     source.scale = 1.0;
+    source.rotation = 0;
     ASSERT_TRUE(xttest_call_prepare(&peaks, XTRACT_PEAK_SPECTRUM, &source));
     ASSERT_EQ(xttest_call_run(&peaks, ctx), XTRACT_SUCCESS);
     given = peaks.data;
@@ -223,6 +224,7 @@ UTEST(invariance, a_result_changes_with_its_data_as_its_feature_states)
     ASSERT_TRUE(ctx != NULL);
     source.ctx = ctx;
     source.scale = 1.0;
+    source.rotation = 0;
 
     for (f = 0; f < XTRACT_FEATURES; f++)
     {
@@ -269,6 +271,97 @@ UTEST(invariance, a_result_changes_with_its_data_as_its_feature_states)
         }
     }
     ASSERT_GT(checked, 100);
+
+    xtract_context_delete(ctx);
+}
+
+/* The spectra whose coefficients do not change when the series they are
+ * taken of is rotated */
+static int is_rotation_free_spectrum(int feature)
+{
+    return feature == XTRACT_MAGNITUDE_SPECTRUM || feature == XTRACT_POWER_SPECTRUM || feature == XTRACT_LOG_SPECTRUM;
+}
+
+static int is_rotation_free(int feature, const xtract_quantity_t *given);
+
+/* Each argument that is a result, and each parameter of a builder that is,
+ * is a result of the data of the call or of a feature whose result does not
+ * change with the rotation */
+static int arguments_are_rotation_free(const xtract_argument_descriptor_t *argv, int argc)
+{
+    int i;
+
+    for (i = 0; i < argc; i++)
+    {
+        const xtract_argument_descriptor_t *argument = &argv[i];
+
+        if (argument->kind == XTRACT_ARGUMENT_RESULT && argument->subject != XTRACT_SUBJECT_INPUT &&
+            !is_rotation_free(argument->accepts->providers[0].feature, argument->accepts->providers[0].given))
+            return 0;
+        if (argument->kind == XTRACT_ARGUMENT_OBJECT && !arguments_are_rotation_free(argument->builder->argv, argument->builder->argc))
+            return 0;
+    }
+
+    return 1;
+}
+
+/* Whether the result of the feature, called as the driver calls it, comes
+ * only from those spectra of the caller's series: given is the quantity its
+ * data is, or NULL for the quantity its data usually is */
+static int is_rotation_free(int feature, const xtract_quantity_t *given)
+{
+    const xtract_function_descriptor_t *d = xtract_descriptor(feature);
+    const xtract_provider_t *provider = NULL;
+
+    if (is_rotation_free_spectrum(feature))
+        return 1;
+    if (given != NULL)
+        provider = &given->providers[0];
+    else if (d->data.accept_count > 0)
+        provider = &d->data.accepts[0]->providers[0];
+    else if (d->data.format != XTRACT_NO_DATA)
+        return 0;
+    if (provider != NULL && !is_rotation_free(provider->feature, provider->given))
+        return 0;
+
+    return arguments_are_rotation_free(d->argv, d->argc);
+}
+
+UTEST(invariance, a_result_of_a_magnitude_or_power_spectrum_is_unchanged_by_rotating_the_series)
+{
+    xtract_context *ctx = xtract_context_new(XTTEST_DRIVER_LIMIT);
+    xttest_source source, rotated;
+    int f, i, checked = 0;
+
+    ASSERT_TRUE(ctx != NULL);
+    source.ctx = ctx;
+    source.scale = 1.0;
+    source.rotation = 0;
+
+    for (f = 0; f < XTRACT_FEATURES; f++)
+    {
+        const xtract_function_descriptor_t *d = xtract_descriptor(f);
+        xttest_call before, after;
+        double largest = 0.0;
+
+        if (!is_rotation_free(f, NULL))
+            continue;
+        ASSERT_TRUE_MSG(reach_from(&before, f, &source), d->name);
+        rotated = source;
+        rotated.rotation = source.base / 3;
+        ASSERT_TRUE_MSG(xttest_call_prepare(&after, f, &rotated), d->name);
+        ASSERT_EQ_MSG(xttest_call_run(&before, ctx), XTRACT_SUCCESS, d->name);
+        ASSERT_EQ_MSG(xttest_call_run(&after, ctx), XTRACT_SUCCESS, d->name);
+        ASSERT_EQ_MSG(after.result_length, before.result_length, d->name);
+        for (i = 0; i < before.result_length; i++)
+            largest = fmax(largest, fabs(before.result[i]));
+        for (i = 0; i < before.result_length; i++)
+            ASSERT_NEAR_MSG(after.result[i], before.result[i], 1e-9 * largest, d->name);
+        checked++;
+        xttest_call_free(&before);
+        xttest_call_free(&after);
+    }
+    ASSERT_GT(checked, 20);
 
     xtract_context_delete(ctx);
 }
