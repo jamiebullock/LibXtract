@@ -156,7 +156,7 @@ extern "C"
      * \param *data: a complex spectrum, the *result of xtract_spectrum(), so that element k is bin k as the filterbank expects: the first N/2 elements are the real parts of the bins from DC upward and the next N/2 their imaginary parts
      * \param N: the number of array elements to be considered (the whole complex spectrum; N/2 frequency bins are processed), at least 2 and even, and equal to the N the filterbank was built for
      * \param *argv: a pointer to an xtract_filterbank from xtract_init_mfcc() or xtract_init_filterbank(), built for the size of the transform that produced the spectrum
-     * \param *result: a pointer to an array of n_filters elements containing the resultant MEL-MBSES. A determinant below DBL_EPSILON times the largest determinant of the bands counts as that, as does a band of a single bin or of bins on one line through 0, whose determinant is 0. A band that no bin passes is 0. The array is zeroed with no result when no band that a bin passes has a determinant above 0
+     * \param *result: a pointer to an array of n_filters elements containing the resultant MEL-MBSES. A determinant below DBL_EPSILON times the largest determinant of the bands counts as that, as does a band of a single bin or of bins on one line through 0, whose determinant is 0. A band that no bin passes is 0. The array is zeroed with no result when no band has a determinant above 0
      *
      * Each filter band's complex coefficients are modelled as a zero-mean bivariate (real, imaginary) Gaussian and the band's value is that distribution's differential entropy, H = ln(2*pi*e) + (1/2)ln(det of the 2x2 covariance).
      *

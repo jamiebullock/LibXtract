@@ -2801,9 +2801,8 @@ UTEST(vector, gfcc_equals_dct_of_gammatone_spectrogram)
  * with ln(2*pi*e) = ln(2*pi) + 1 (Rincon et al. 2013, Eq. 5).
  */
 
-UTEST(vector, mmbses_all_zero_filter_produces_zero_coefficient)
+UTEST(vector, mmbses_of_a_filterbank_that_passes_no_bin_is_zeroed_with_no_result)
 {
-    /* No bin passes the filter (count == 0), so the band is left at 0. */
     const int N = 4;
     double data[4] = {1.0, 1.0, 0.0, 0.0};
     const double filt[2] = {0.0, 0.0};
@@ -2811,7 +2810,7 @@ UTEST(vector, mmbses_all_zero_filter_produces_zero_coefficient)
     double result[1] = {-1.0};
 
     ASSERT_TRUE(mf != NULL);
-    ASSERT_EQ(xtract_mmbses(NULL, data, N, mf, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_mmbses(NULL, data, N, mf, result), XTRACT_NO_RESULT);
     xtract_free_filterbank(mf);
     CHECK_NEAR(result[0], 0.0, EPSILON);
 }

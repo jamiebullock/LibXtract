@@ -464,7 +464,7 @@ int xtract_mmbses(xtract_context *ctx, const double *data, const int N, const vo
     /* ln(2*pi*e) = ln(2*pi) + 1, avoiding the non-portable M_E. */
     const double gaussian_term = log(2.0 * M_PI) + 1.0;
     double largest = -INFINITY, lowest;
-    int n, filter, passed = 0;
+    int n, filter;
 
     if (N < 2 || (N & 1) || f == NULL)
         return XTRACT_ARGUMENT_ERROR;
@@ -496,14 +496,10 @@ int xtract_mmbses(xtract_context *ctx, const double *data, const int N, const vo
         }
 
         result[filter] = count == 0 ? 0.0 : log_covariance_determinant(sxx / count, syy / count, sxy / count, count);
-        if (count > 0)
-        {
-            passed++;
-            if (result[filter] > largest)
-                largest = result[filter];
-        }
+        if (count > 0 && result[filter] > largest)
+            largest = result[filter];
     }
-    if (passed > 0 && largest == -INFINITY)
+    if (largest == -INFINITY)
     {
         memset(result, 0, (size_t)f->n_filters * sizeof(double));
         return XTRACT_NO_RESULT;
