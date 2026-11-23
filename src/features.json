@@ -1076,7 +1076,7 @@
       "arguments": [
         {"name": "threshold", "kind": "result", "accepts": "median", "of": "input", "unit": "any"}
       ],
-      "invariance": {"offset": "unchanged", "sign": "unchanged"},
+      "invariance": {"offset": "unchanged"},
       "result": {"kind": "scalar", "unit": "none", "min": 0}
     },
     {
