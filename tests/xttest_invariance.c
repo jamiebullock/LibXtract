@@ -11,6 +11,7 @@
 
 #include "xttest_approx.h"
 #include "xttest_driver.h"
+#include "xttest_properties.h"
 
 static int accepts_a_peak_spectrum(const xtract_function_descriptor_t *d)
 {
@@ -109,5 +110,165 @@ UTEST(invariance, a_feature_that_takes_a_peak_spectrum_is_unchanged_by_elements_
 
     free(wider.values);
     xttest_call_free(&peaks);
+    xtract_context_delete(ctx);
+}
+
+typedef enum change_
+{
+    CHANGE_OFFSET,
+    CHANGE_SIGN,
+    CHANGE_ORDER,
+    CHANGE_REVERSAL,
+    CHANGE_SWAP,
+    CHANGES
+} change;
+
+static xttest_effect effect_of(const xttest_properties *properties, change c)
+{
+    switch (c)
+    {
+    case CHANGE_OFFSET:
+        return properties->offset;
+    case CHANGE_SIGN:
+        return properties->sign;
+    case CHANGE_ORDER:
+        return properties->order;
+    case CHANGE_REVERSAL:
+        return properties->reversal;
+    default:
+        return properties->swap;
+    }
+}
+
+/* A stride that visits every one of n elements once */
+static int stride_for(int n)
+{
+    int stride, a, b, r;
+
+    for (stride = 7; stride < n; stride += 2)
+    {
+        for (a = stride, b = n; b != 0; a = b, b = r)
+            r = a % b;
+        if (a == 1)
+            return stride;
+    }
+
+    return 1;
+}
+
+/* The data changed as c changes it. The order of a spectrum is that of its
+ * pairs of coefficient and frequency, and element i of a reordered series
+ * is element i * stride modulo its length of the series before */
+static int changed_data(change c, const xtract_function_descriptor_t *d, const xttest_data *in, xttest_data *out,
+                        double *offset, int *stride)
+{
+    const int n = in->n, half = n / 2;
+    const int pairs = d->data.format == XTRACT_SPECTRAL || d->data.format == XTRACT_SPECTRAL_PEAKS;
+    double largest = 0.0;
+    int i;
+
+    *out = *in;
+    out->values = (double *)calloc((size_t)(n + XTTEST_DRIVER_SLACK), sizeof(double));
+    if (out->values == NULL)
+        return 0;
+    for (i = 0; i < n; i++)
+        largest = fmax(largest, fabs(in->values[i]));
+    *offset = 0.25 * largest;
+    *stride = stride_for(pairs ? half : n);
+    for (i = 0; i < n; i++)
+    {
+        switch (c)
+        {
+        case CHANGE_OFFSET:
+            out->values[i] = in->values[i] + *offset;
+            break;
+        case CHANGE_SIGN:
+            out->values[i] = -in->values[i];
+            break;
+        case CHANGE_ORDER:
+            if (pairs)
+                out->values[i] = i < half ? in->values[(long long)i * *stride % half] : in->values[half + (long long)(i - half) * *stride % half];
+            else
+                out->values[i] = in->values[(long long)i * *stride % n];
+            break;
+        case CHANGE_REVERSAL:
+            out->values[i] = in->values[n - 1 - i];
+            break;
+        default:
+            out->values[i] = in->values[i < half ? half + i : i - half];
+            break;
+        }
+    }
+
+    return 1;
+}
+
+static int reach_from(xttest_call *call, int feature, xttest_source *source)
+{
+    for (source->base = XTTEST_DRIVER_SHORTEST; source->base <= XTTEST_DRIVER_LIMIT; source->base *= 2)
+    {
+        if (xttest_call_prepare(call, feature, source))
+            return 1;
+    }
+
+    return 0;
+}
+
+UTEST(invariance, a_result_changes_with_its_data_as_its_feature_states)
+{
+    xtract_context *ctx = xtract_context_new(XTTEST_DRIVER_LIMIT);
+    xttest_source source;
+    int f, c, i, checked = 0;
+
+    ASSERT_TRUE(ctx != NULL);
+    source.ctx = ctx;
+    source.scale = 1.0;
+
+    for (f = 0; f < XTRACT_FEATURES; f++)
+    {
+        const xtract_function_descriptor_t *d = xtract_descriptor(f);
+
+        for (c = 0; c < CHANGES; c++)
+        {
+            const xttest_effect effect = effect_of(&xttest_property_table[f], (change)c);
+            xttest_call before, after;
+            xttest_data data;
+            double offset, largest = 0.0;
+            int stride, length;
+
+            if (effect == XTTEST_UNSTATED)
+                continue;
+            ASSERT_TRUE_MSG(reach_from(&before, f, &source), d->name);
+            ASSERT_TRUE_MSG(changed_data((change)c, d, &before.data, &data, &offset, &stride), d->name);
+            ASSERT_TRUE_MSG(xttest_call_prepare_given(&after, f, &source, &data), d->name);
+            free(data.values);
+            ASSERT_EQ_MSG(xttest_call_run(&before, ctx), XTRACT_SUCCESS, d->name);
+            ASSERT_EQ_MSG(xttest_call_run(&after, ctx), XTRACT_SUCCESS, d->name);
+            ASSERT_EQ_MSG(after.result_length, before.result_length, d->name);
+
+            length = before.result_length;
+            for (i = 0; i < length; i++)
+                largest = fmax(largest, fabs(before.result[i]));
+            for (i = 0; i < length; i++)
+            {
+                double expected = before.result[i];
+
+                if (effect == XTTEST_FOLLOWS)
+                    expected += offset;
+                else if (effect == XTTEST_NEGATED)
+                    expected = -expected;
+                else if (effect == XTTEST_REORDERED)
+                    expected = before.result[(long long)i * stride % length];
+                else if (effect == XTTEST_REVERSED)
+                    expected = before.result[length - 1 - i];
+                ASSERT_NEAR_MSG(after.result[i], expected, 1e-9 * (largest + offset), d->name);
+            }
+            checked++;
+            xttest_call_free(&before);
+            xttest_call_free(&after);
+        }
+    }
+    ASSERT_GT(checked, 100);
+
     xtract_context_delete(ctx);
 }
