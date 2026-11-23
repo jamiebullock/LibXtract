@@ -25,12 +25,13 @@ enum
 };
 
 /* What a caller has: a context, and a series of at least base elements at
- * a level of scale */
+ * a level of scale, rotated so that it starts rotation elements in */
 typedef struct xttest_source_
 {
     xtract_context *ctx;
     int base;
     double scale;
+    int rotation;
 } xttest_source;
 
 /* An array and what its maker knows about it */
