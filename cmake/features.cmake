@@ -3,9 +3,10 @@
 # SPDX-FileCopyrightText: 2026 Jamie Bullock
 # SPDX-License-Identifier: Zlib
 
-# Writes the feature enumeration (include/xtract/xtract_features.h) and the
-# dispatch and descriptor tables (src/features.c) from src/features.json,
-# after checking every record. The written files are committed. With CHECK
+# Writes the feature enumeration (include/xtract/xtract_features.h), the
+# dispatch and descriptor tables (src/features.c) and the table of the
+# properties the tests check (tests/xttest_properties.c) from
+# src/features.json, after checking every record. The written files are committed. With CHECK
 # set they are written under WORK instead and compared with the committed
 # ones, and a difference is an error.
 
@@ -15,6 +16,7 @@ get_filename_component(root "${CMAKE_CURRENT_LIST_DIR}/.." ABSOLUTE)
 set(data_file "${root}/src/features.json")
 set(header include/xtract/xtract_features.h)
 set(source src/features.c)
+set(property_source tests/xttest_properties.c)
 
 set(UNITS none any any_squared any_cubed hertz hertz_squared per_hertz
           seconds per_second decibels percent bins midi_cent sone acum radians)
@@ -30,9 +32,10 @@ set(PROPERTIES length sample_rate transform_size bin_spacing width series levels
 set(SUBJECTS input source)
 set(PARTS whole first_half from_one_before_the_second_half)
 set(TAGS sound)
+set(LEVELS unit log unstated)
 set(RULE_FUNCTIONS is_power_of_two is_square root filter_count filterbank_size band_count kernel_size capacity)
 set(MAXARGS 5)
-foreach(list VALUE_TYPES OBJECT_TYPES PROPERTIES SUBJECTS PARTS TAGS)
+foreach(list VALUE_TYPES OBJECT_TYPES PROPERTIES SUBJECTS PARTS TAGS LEVELS)
     list(JOIN ${list} ", " ${list}_TEXT)
 endforeach()
 
@@ -586,12 +589,13 @@ set(accepted_text "")
 set(rule_cases "")
 set(length_cases "")
 set(table "")
+set(property_table "")
 foreach(i RANGE ${last})
     string(JSON feature GET "${doc}" features ${i})
     string(JSON name GET "${feature}" name)
     set(where "feature '${name}'")
     only_keys("${where}" "${feature}"
-        name title description reference tags provides input argument_type arguments delta result)
+        name title description reference tags provides input argument_type arguments delta result invariance)
     string(TOUPPER "XTRACT_${name}" id)
     string(APPEND enumeration "        ${id},\n")
     string(APPEND dispatch "        xtract_${name},\n")
@@ -745,6 +749,17 @@ foreach(i RANGE ${last})
         set(is_delta XTRACT_TRUE)
     else()
         set(is_delta XTRACT_FALSE)
+    endif()
+
+    optional(invariance "${where}" "${feature}" OBJECT invariance "{}")
+    only_keys("${where}, 'invariance'" "${invariance}" level)
+    optional(level "${where}" "${invariance}" STRING level unit)
+    if(NOT level IN_LIST LEVELS)
+        fail("${where}" "'invariance.level' is '${level}', which is not one of ${LEVELS_TEXT}")
+    endif()
+    if(NOT invariance STREQUAL "{}")
+        string(TOUPPER "XTTEST_LEVEL_${level}" level_c)
+        string(APPEND property_table "    [${id}] = {.level = ${level_c}},\n")
     endif()
 
     string(JSON result GET "${feature}" result)
@@ -931,6 +946,14 @@ string(CONCAT source_text
     "    default:\n        length = 1;\n        break;\n    }\n\n"
     "    return length >= 0 && length <= INT_MAX ? (int)length : -1;\n}\n")
 
+string(CONCAT property_text
+    "${licence}\n"
+    "/* The properties of each feature that the tests check, ${notice} */\n\n"
+    "#include \"xttest_properties.h\"\n\n"
+    "const xttest_properties xttest_property_table[XTRACT_FEATURES] = {\n"
+    "${property_table}"
+    "};\n")
+
 if(CHECK)
     if(NOT WORK)
         message(FATAL_ERROR "CHECK needs WORK, a directory to write to")
@@ -941,9 +964,10 @@ else()
 endif()
 file(WRITE "${destination}/${header}" "${header_text}")
 file(WRITE "${destination}/${source}" "${source_text}")
+file(WRITE "${destination}/${property_source}" "${property_text}")
 
 if(CHECK)
-    foreach(file ${header} ${source})
+    foreach(file ${header} ${source} ${property_source})
         execute_process(
             COMMAND ${CMAKE_COMMAND} -E compare_files --ignore-eol "${root}/${file}" "${WORK}/${file}"
             RESULT_VARIABLE result

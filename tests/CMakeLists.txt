@@ -11,7 +11,9 @@ add_executable(xttest
     xttest_driver.c
     xttest_grid.c
     xttest_init.c
+    xttest_invariance.c
     xttest_multivariate.c
+    xttest_properties.c
     xttest_scalar.c
     xttest_stateful.c
     xttest_util.c

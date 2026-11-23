@@ -407,6 +407,11 @@ int xttest_call_prepare(xttest_call *call, int feature, const xttest_source *sou
     return prepare(call, feature, source, NULL, NULL);
 }
 
+int xttest_call_prepare_given(xttest_call *call, int feature, const xttest_source *source, const xttest_data *data)
+{
+    return prepare(call, feature, source, data, NULL);
+}
+
 int xttest_call_reach(xttest_call *call, int feature, xtract_context *ctx, double scale)
 {
     xttest_source source;
@@ -428,6 +433,11 @@ int xttest_call_run(const xttest_call *call, xtract_context *ctx)
 {
     return call_feature(call->feature, ctx, call->data.n > 0 ? call->data.values : NULL, call->data.n, call->argv,
                         call->result);
+}
+
+int xttest_has_frequencies(xtract_vector_t format)
+{
+    return format == XTRACT_SPECTRAL || format == XTRACT_SPECTRAL_PEAKS || format == XTRACT_SPECTRAL_HARMONICS;
 }
 
 void xttest_call_free(xttest_call *call)

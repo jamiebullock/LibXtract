@@ -313,6 +313,7 @@
       "tags": ["sound"],
       "input": {"format": "bark_coeffs", "unit": "any", "accepts": ["bark_coefficients"], "length": "N >= 1 && N <= XTRACT_BARK_BANDS"},
       "arguments": [],
+      "invariance": {"level": "unstated"},
       "result": {"kind": "scalar", "unit": "sone", "min": 0}
     },
     {
@@ -665,6 +666,7 @@
       "arguments": [
         {"name": "filterbank", "kind": "object", "built_by": "init_mfcc"}
       ],
+      "invariance": {"level": "log"},
       "result": {"kind": "vector", "format": "mel_coeffs", "unit": "none", "length": "filter_count(filterbank)"}
     },
     {
@@ -737,6 +739,7 @@
       "arguments": [
         {"name": "filterbank", "kind": "object", "built_by": "init_mfcc"}
       ],
+      "invariance": {"level": "log"},
       "result": {"kind": "vector", "format": "mel_coeffs", "unit": "none", "length": "filter_count(filterbank)"}
     },
     {
@@ -748,6 +751,7 @@
       "arguments": [
         {"name": "filterbank", "kind": "object", "built_by": "init_gfcc"}
       ],
+      "invariance": {"level": "log"},
       "result": {"kind": "vector", "format": "mel_coeffs", "unit": "none", "length": "filter_count(filterbank)"}
     },
     {
@@ -759,6 +763,7 @@
       "arguments": [
         {"name": "filterbank", "kind": "object", "built_by": "init_gfcc"}
       ],
+      "invariance": {"level": "log"},
       "result": {"kind": "vector", "format": "mel_coeffs", "unit": "none", "length": "filter_count(filterbank)"}
     },
     {
@@ -803,6 +808,7 @@
       "arguments": [
         {"name": "filterbank", "kind": "object", "built_by": "init_mfcc"}
       ],
+      "invariance": {"level": "log"},
       "result": {"kind": "vector", "format": "mel_coeffs", "unit": "none", "length": "filter_count(filterbank)"}
     },
     {
@@ -1283,6 +1289,7 @@
       "description": "Extract the normalised moments of a grid from its central moments",
       "input": {"format": "central_moment_coeffs", "unit": "any", "accepts": ["grid_central_moments"], "length": "N == 8"},
       "arguments": [],
+      "invariance": {"level": "unstated"},
       "result": {"kind": "vector", "format": "normalised_moment_coeffs", "unit": "none", "length": "7"}
     },
     {
@@ -1292,6 +1299,7 @@
       "reference": {"author": "Ming-Kuei Hu", "year": 1962},
       "input": {"format": "normalised_moment_coeffs", "unit": "none", "accepts": ["normalised_moments"], "length": "N == 7"},
       "arguments": [],
+      "invariance": {"level": "unstated"},
       "result": {"kind": "vector", "format": "arbitrary_series", "unit": "none", "length": "7"}
     },
     {
@@ -1450,6 +1458,7 @@
       "arguments": [
         {"name": "bin_spacing", "kind": "property", "property": "bin_spacing", "unit": "hertz", "min": 2.2250738585072014e-308}
       ],
+      "invariance": {"level": "unstated"},
       "result": {"kind": "vector", "format": "spectral", "unit": "none", "length": "N"}
     },
     {
@@ -1473,6 +1482,7 @@
       "arguments": [
         {"name": "lambda", "kind": "setting", "unit": "none", "min": 2.2250738585072014e-308, "default": 1}
       ],
+      "invariance": {"level": "unstated"},
       "result": {"kind": "vector", "format": "arbitrary_series", "unit": "none", "length": "N"}
     },
     {
