@@ -72,20 +72,24 @@ if(XTRACT_MUTATION_PLUGIN)
     set(XTRACT_MULL_CONFIG ${PROJECT_SOURCE_DIR}/mull.yml)
     if(XTRACT_MUTATION_DIFF_REF)
         # Mull skips every mutant, and passes, when it cannot resolve the
-        # reference
+        # reference. The configuration names the commit, so that configuring
+        # again after the reference has moved compiles the library again
         find_package(Git REQUIRED)
         execute_process(
             COMMAND ${GIT_EXECUTABLE} rev-parse --verify --quiet "${XTRACT_MUTATION_DIFF_REF}^{commit}"
             WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
             RESULT_VARIABLE diff_ref_missing
-            OUTPUT_QUIET ERROR_QUIET)
+            OUTPUT_VARIABLE diff_commit
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+            ERROR_QUIET)
         if(diff_ref_missing)
             message(FATAL_ERROR "XTRACT_MUTATION_DIFF_REF '${XTRACT_MUTATION_DIFF_REF}' is not a commit in ${PROJECT_SOURCE_DIR}")
         endif()
+        set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${PROJECT_SOURCE_DIR}/mull.yml)
         file(READ ${PROJECT_SOURCE_DIR}/mull.yml mull_config)
         set(XTRACT_MULL_CONFIG ${PROJECT_BINARY_DIR}/mull.yml)
         file(CONFIGURE OUTPUT ${XTRACT_MULL_CONFIG}
-            CONTENT "${mull_config}gitDiffRef: ${XTRACT_MUTATION_DIFF_REF}\ngitProjectRoot: ${PROJECT_SOURCE_DIR}\n"
+            CONTENT "${mull_config}gitDiffRef: ${diff_commit}\ngitProjectRoot: ${PROJECT_SOURCE_DIR}\n"
             @ONLY)
     endif()
     set(XTRACT_MULL_CONFIG ${XTRACT_MULL_CONFIG} PARENT_SCOPE)
