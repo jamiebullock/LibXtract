@@ -327,6 +327,13 @@ static int is_rotation_free(int feature, const xtract_quantity_t *given)
     return arguments_are_rotation_free(d->argv, d->argc);
 }
 
+/* Whether element i of a result is in the second half of a layout that
+ * holds frequencies there */
+static int in_second_half(const xtract_function_descriptor_t *d, int length, int i)
+{
+    return !d->is_scalar && xttest_has_frequencies(d->result.vector.format) && i >= length / 2;
+}
+
 UTEST(invariance, a_result_of_a_magnitude_or_power_spectrum_is_unchanged_by_rotating_the_series)
 {
     xtract_context *ctx = xtract_context_new(XTTEST_DRIVER_LIMIT);
@@ -342,7 +349,7 @@ UTEST(invariance, a_result_of_a_magnitude_or_power_spectrum_is_unchanged_by_rota
     {
         const xtract_function_descriptor_t *d = xtract_descriptor(f);
         xttest_call before, after;
-        double largest = 0.0;
+        double largest[2] = {0.0, 0.0};
 
         if (!is_rotation_free(f, NULL))
             continue;
@@ -353,10 +360,12 @@ UTEST(invariance, a_result_of_a_magnitude_or_power_spectrum_is_unchanged_by_rota
         ASSERT_EQ_MSG(xttest_call_run(&before, ctx), XTRACT_SUCCESS, d->name);
         ASSERT_EQ_MSG(xttest_call_run(&after, ctx), XTRACT_SUCCESS, d->name);
         ASSERT_EQ_MSG(after.result_length, before.result_length, d->name);
+        /* The coefficients and the frequencies of a spectral layout each
+         * have a tolerance of their own */
         for (i = 0; i < before.result_length; i++)
-            largest = fmax(largest, fabs(before.result[i]));
+            largest[in_second_half(d, before.result_length, i)] = fmax(largest[in_second_half(d, before.result_length, i)], fabs(before.result[i]));
         for (i = 0; i < before.result_length; i++)
-            ASSERT_NEAR_MSG(after.result[i], before.result[i], 1e-9 * largest, d->name);
+            ASSERT_NEAR_MSG(after.result[i], before.result[i], 1e-9 * largest[in_second_half(d, before.result_length, i)], d->name);
         checked++;
         xttest_call_free(&before);
         xttest_call_free(&after);
