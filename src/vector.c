@@ -316,9 +316,10 @@ int xtract_autocorrelation_fft(xtract_context *ctx, const double *data, const in
 
 /* The log of the sum each filter passes of data, which has an element for
  * each bin the filterbank has a gain for. */
-static void log_filterbank_energies(const double *data, const xtract_filterbank *f, double *result)
+static int log_filterbank_energies(const double *data, const xtract_filterbank *f, double *result)
 {
     const int bins = xtract_filterbank_bins(f);
+    double largest = 0.0, log_lowest;
     int n, filter;
 
     for (filter = 0; filter < f->n_filters; filter++)
@@ -331,12 +332,28 @@ static void log_filterbank_energies(const double *data, const xtract_filterbank 
             if (gains[n] != 0)
                 result[filter] += data[n] * gains[n];
         }
-        if (result[filter] < XTRACT_LOG_LIMIT)
-            result[filter] = XTRACT_LN_LOG_LIMIT;
-        else
-            /* cppcheck-suppress invalidFunctionArg */
-            result[filter] = log(result[filter]);
+        if (result[filter] > largest)
+            largest = result[filter];
     }
+    if (!(largest > 0.0))
+    {
+        for (filter = 0; filter < f->n_filters; filter++)
+            result[filter] = 0.0;
+        return XTRACT_NO_RESULT;
+    }
+
+    /* An energy below DBL_EPSILON of the largest is lost beside it. The
+     * floor is kept as a log because DBL_EPSILON times a subnormal energy
+     * rounds to 0 */
+    log_lowest = log(largest) + log(DBL_EPSILON);
+    for (filter = 0; filter < f->n_filters; filter++)
+    {
+        const double logarithm = result[filter] > 0.0 ? log(result[filter]) : log_lowest;
+
+        result[filter] = logarithm > log_lowest ? logarithm : log_lowest;
+    }
+
+    return XTRACT_SUCCESS;
 }
 
 static int filterbank_spectrogram(const double *data, const int N, const xtract_filterbank *f, double *result)
@@ -346,9 +363,7 @@ static int filterbank_spectrogram(const double *data, const int N, const xtract_
     if (N != xtract_filterbank_bins(f))
         return XTRACT_BAD_STATE;
 
-    log_filterbank_energies(data, f, result);
-
-    return XTRACT_SUCCESS;
+    return log_filterbank_energies(data, f, result);
 }
 
 static int cepstral_coefficients(xtract_context *ctx, const double *data, const int N, const xtract_filterbank *f, double *result)
@@ -365,8 +380,11 @@ static int cepstral_coefficients(xtract_context *ctx, const double *data, const 
     if (temp == NULL)
         return XTRACT_BAD_STATE;
 
-    log_filterbank_energies(data, f, temp);
-    rv = xtract_dct(ctx, temp, f->n_filters, f->dct_table, result);
+    rv = log_filterbank_energies(data, f, temp);
+    if (rv == XTRACT_SUCCESS)
+        rv = xtract_dct(ctx, temp, f->n_filters, f->dct_table, result);
+    else
+        memset(result, 0, (size_t)f->n_filters * sizeof(double));
     xtract_scratch_return(ctx, temp, (size_t)f->n_filters);
 
     return rv;
@@ -392,26 +410,40 @@ int xtract_gfcc(xtract_context *ctx, const double *data, const int N, const void
     return cepstral_coefficients(ctx, data, N, (const xtract_filterbank *)argv, result);
 }
 
-static double bivariate_gaussian_entropy(double sxx, double syy, double sxy, const int count)
+/* The log of the determinant of a 2x2 covariance of count coefficients, as
+ * the sum of the logs of the two variances and of 1 - rho^2, so that the
+ * determinant, a fourth power of the coefficients, is never formed.
+ * -INFINITY for a covariance of rank below 2, such as that of a single bin or
+ * of coefficients on one line through 0 */
+static double log_covariance_determinant(const double sxx, const double syy, const double sxy, const int count)
 {
-    /* ln(2*pi*e) = ln(2*pi) + 1, avoiding the non-portable M_E. */
-    const double gaussian_term = log(2.0 * M_PI) + 1.0;
-    double det;
+    double rho, one_minus_rho_squared;
 
-    if (count == 0)
-        return 0.0;
+    if (!(sxx > 0.0 && syy > 0.0))
+        return -INFINITY;
+    rho = sxy / sqrt(sxx) / sqrt(syy);
+    one_minus_rho_squared = (1.0 - rho) * (1.0 + rho);
+    /* Each sum of count terms rounds by up to count DBL_EPSILON of itself,
+     * so coefficients on one line can leave 1 - rho^2 a few times that above
+     * 0 */
+    if (!(one_minus_rho_squared > 4.0 * (count + 2) * DBL_EPSILON))
+        return -INFINITY;
 
-    sxx /= count;
-    syy /= count;
-    sxy /= count;
-    /* A single passed bin leaves the covariance rank-deficient (determinant 0),
-     * so the entropy floors without a dedicated case. */
-    det = sxx * syy - XTRACT_SQ(sxy);
+    return log(sxx) + log(syy) + log(one_minus_rho_squared);
+}
 
-    if (det < XTRACT_LOG_LIMIT)
-        return gaussian_term + 0.5 * XTRACT_LN_LOG_LIMIT;
+static int filter_passes_a_bin(const xtract_filterbank *f, const int filter, const int M)
+{
+    const double *gains = xtract_filter_gains(f, filter);
+    int n;
 
-    return gaussian_term + 0.5 * log(det);
+    for (n = 0; n < M; n++)
+    {
+        if (gains[n] != 0.0)
+            return 1;
+    }
+
+    return 0;
 }
 
 int xtract_mmbses(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
@@ -429,6 +461,9 @@ int xtract_mmbses(xtract_context *ctx, const double *data, const int N, const vo
      * Camarena-Ibarrola & Chavez). */
     const xtract_filterbank *f = (const xtract_filterbank *)argv;
     const int M = N >> 1;
+    /* ln(2*pi*e) = ln(2*pi) + 1, avoiding the non-portable M_E. */
+    const double gaussian_term = log(2.0 * M_PI) + 1.0;
+    double largest = -INFINITY, lowest;
     int n, filter;
 
     if (N < 2 || (N & 1) || f == NULL)
@@ -460,7 +495,22 @@ int xtract_mmbses(xtract_context *ctx, const double *data, const int N, const vo
             count++;
         }
 
-        result[filter] = bivariate_gaussian_entropy(sxx, syy, sxy, count);
+        result[filter] = count == 0 ? 0.0 : log_covariance_determinant(sxx / count, syy / count, sxy / count, count);
+        if (count > 0 && result[filter] > largest)
+            largest = result[filter];
+    }
+    if (largest == -INFINITY)
+    {
+        memset(result, 0, (size_t)f->n_filters * sizeof(double));
+        return XTRACT_NO_RESULT;
+    }
+
+    /* A determinant below DBL_EPSILON of the largest is lost beside it */
+    lowest = largest + log(DBL_EPSILON);
+    for (filter = 0; filter < f->n_filters; filter++)
+    {
+        if (filter_passes_a_bin(f, filter, M))
+            result[filter] = gaussian_term + 0.5 * (result[filter] < lowest ? lowest : result[filter]);
     }
 
     return XTRACT_SUCCESS;
@@ -1391,7 +1441,7 @@ int xtract_cqt(xtract_context *ctx, const double *data, const int N, const void 
             sum_real += real[j] * kernel->real[e] + imag[j] * kernel->imag[e];
             sum_imag += imag[j] * kernel->real[e] - real[j] * kernel->imag[e];
         }
-        result[band] = sqrt(sum_real * sum_real + sum_imag * sum_imag);
+        result[band] = hypot(sum_real, sum_imag);
         result[kernel->n_bins + band] = kernel->frequencies[band];
     }
 

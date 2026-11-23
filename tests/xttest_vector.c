@@ -1528,6 +1528,22 @@ UTEST(scalar, hps_finds_fundamental_of_harmonic_signal)
     CHECK_REL(result, 10.0 * freq_res, 1e-3);
 }
 
+UTEST(scalar, hps_floors_an_empty_bin_beside_a_subnormal_peak)
+{
+    /* DBL_EPSILON times the largest magnitude rounds to 0 here, so the floor
+     * of an empty bin has to be finite without it */
+    double data[16] = {0};
+    const double harmonics = 3.0;
+    double result = -1.0;
+    int i;
+
+    for (i = 0; i < 8; i++)
+        data[8 + i] = i;
+    data[2] = data[4] = data[6] = 0x1p-1023;
+    ASSERT_EQ(xtract_hps(NULL, data, 16, &harmonics, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(result, 2.0);
+}
+
 UTEST(scalar, hps_considers_the_highest_fundamental_whose_harmonics_fit)
 {
     /* With 128 coefficients and three harmonics, bin 42 is the highest
@@ -2782,13 +2798,11 @@ UTEST(vector, gfcc_equals_dct_of_gammatone_spectrogram)
  * argv is an xtract_filterbank. Per band, the filter-weighted complex
  * coefficients are modelled as a zero-mean bivariate Gaussian and the result is its differential entropy
  *     H = ln(2*pi*e) + (1/2)ln(sigma_xx*sigma_yy - sigma_xy^2),
- * with ln(2*pi*e) = ln(2*pi) + 1 (Rincon et al. 2013, Eq. 5). -96.0
- * (XTRACT_LN_LOG_LIMIT) is the determinant-term floor when it is non-positive.
+ * with ln(2*pi*e) = ln(2*pi) + 1 (Rincon et al. 2013, Eq. 5).
  */
 
-UTEST(vector, mmbses_all_zero_filter_produces_zero_coefficient)
+UTEST(vector, mmbses_of_a_filterbank_that_passes_no_bin_is_zeroed_with_no_result)
 {
-    /* No bin passes the filter (count == 0), so the band is left at 0. */
     const int N = 4;
     double data[4] = {1.0, 1.0, 0.0, 0.0};
     const double filt[2] = {0.0, 0.0};
@@ -2796,43 +2810,113 @@ UTEST(vector, mmbses_all_zero_filter_produces_zero_coefficient)
     double result[1] = {-1.0};
 
     ASSERT_TRUE(mf != NULL);
-    ASSERT_EQ(xtract_mmbses(NULL, data, N, mf, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_mmbses(NULL, data, N, mf, result), XTRACT_NO_RESULT);
     xtract_free_filterbank(mf);
     CHECK_NEAR(result[0], 0.0, EPSILON);
 }
 
-UTEST(vector, mmbses_single_passed_bin_floors_determinant)
+/* Two filters on a 3-bin spectrum: the first passes bins 0 and 1, which
+ * give it a determinant of 0.25 from the coefficients (1, 0) and (0, 1), and
+ * the second passes only bin 2 */
+static const double mmbses_two_filters[6] = {1.0, 1.0, 0.0, 0.0, 0.0, 1.0};
+
+UTEST(vector, mmbses_floors_a_rank_deficient_band_at_epsilon_of_the_largest_determinant)
 {
-    const double LN_LOG_LIMIT = -96.0;
-    /* One passed bin (5, 0) gives a rank-deficient
-     * covariance, so the determinant term floors to -96. */
-    const int N = 4;
-    double data[4] = {5.0, 0.0, 0.0, 0.0};
-    const double filt[2] = {1.0, 0.0};
-    xtract_filterbank *mf = xtract_init_filterbank(N, 1, filt);
-    double result[1] = {-1.0};
+    const double gaussian_term = log(2.0 * M_PI) + 1.0;
+    const double floored = gaussian_term + 0.5 * (log(0.25) + log(DBL_EPSILON));
+    double data[6] = {1.0, 0.0, 5.0, 0.0, 1.0, 0.0};
+    double result[2] = {-1.0, -1.0};
+    xtract_filterbank *mf = xtract_init_filterbank(6, 2, mmbses_two_filters);
 
     ASSERT_TRUE(mf != NULL);
-    ASSERT_EQ(xtract_mmbses(NULL, data, N, mf, result), XTRACT_SUCCESS);
+    /* One bin, (5, 0), in the second band */
+    ASSERT_EQ(xtract_mmbses(NULL, data, 6, mf, result), XTRACT_SUCCESS);
+    ASSERT_TRUE(isfinite(result[0]) && isfinite(result[1]));
+    CHECK_REL(result[0], gaussian_term + 0.5 * log(0.25), EPSILON);
+    CHECK_REL(result[1], floored, EPSILON);
     xtract_free_filterbank(mf);
-    CHECK_REL(result[0], (log(2.0 * M_PI) + 1.0) + 0.5 * LN_LOG_LIMIT, EPSILON);
 }
 
-UTEST(vector, mmbses_two_collinear_bins_floor_determinant)
+UTEST(vector, mmbses_counts_coefficients_on_one_line_as_rank_deficient_whatever_the_rounding)
 {
-    const double LN_LOG_LIMIT = -96.0;
-    /* Two passed bins (1, 0) and (2, 0). All imaginary parts are 0, so
-     * sigma_yy = 0 and the determinant is 0 (floored). */
-    const int N = 4;
-    double data[4] = {1.0, 2.0, 0.0, 0.0};
-    const double filt[2] = {1.0, 1.0};
-    xtract_filterbank *mf = xtract_init_filterbank(N, 1, filt);
+    /* The coefficients 1 + 1i and 2 + 2i give rho a step below 1 */
+    double data[4] = {1.0, 2.0, 1.0, 2.0};
+    const double gains[2] = {1.0, 1.0};
     double result[1] = {-1.0};
+    xtract_filterbank *mf = xtract_init_filterbank(4, 1, gains);
 
     ASSERT_TRUE(mf != NULL);
-    ASSERT_EQ(xtract_mmbses(NULL, data, N, mf, result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_mmbses(NULL, data, 4, mf, result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result[0], 0.0);
     xtract_free_filterbank(mf);
-    CHECK_REL(result[0], (log(2.0 * M_PI) + 1.0) + 0.5 * LN_LOG_LIMIT, EPSILON);
+}
+
+UTEST(vector, mel_spectrogram_floors_an_empty_filter_beside_a_subnormal_energy)
+{
+    const double gains[4] = {1.0, 0.0, 0.0, 1.0};
+    const double data[2] = {0x1p-1023, 0.0};
+    double result[2];
+    xtract_filterbank *f = xtract_init_filterbank(4, 2, gains);
+
+    ASSERT_TRUE(f != NULL);
+    ASSERT_EQ(xtract_mel_spectrogram(NULL, data, 2, f, result), XTRACT_SUCCESS);
+    ASSERT_TRUE(isfinite(result[0]) && isfinite(result[1]));
+    CHECK_REL(result[0], -1023.0 * log(2.0), EPSILON);
+    CHECK_REL(result[1], -1023.0 * log(2.0) + log(DBL_EPSILON), EPSILON);
+    xtract_free_filterbank(f);
+}
+
+UTEST(vector, mmbses_floors_collinear_bins_and_gives_no_result_when_every_band_is_rank_deficient)
+{
+    const double gaussian_term = log(2.0 * M_PI) + 1.0;
+    const double collinear[2] = {1.0, 1.0};
+    double data[4] = {1.0, 2.0, 0.0, 0.0};
+    double result[2] = {-1.0, -1.0};
+    xtract_filterbank *mf = xtract_init_filterbank(4, 1, collinear);
+
+    /* The bins (1, 0) and (2, 0) lie on one line, and with no other band
+     * there is no determinant to floor them against */
+    ASSERT_TRUE(mf != NULL);
+    ASSERT_EQ(xtract_mmbses(NULL, data, 4, mf, result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result[0], 0.0);
+    xtract_free_filterbank(mf);
+
+    /* Beside a band with a determinant of 0.25 they take its floor */
+    {
+        double beside[8] = {1.0, 0.0, 1.0, 2.0, 0.0, 1.0, 0.0, 0.0};
+        const double gains[8] = {1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0};
+        xtract_filterbank *two = xtract_init_filterbank(8, 2, gains);
+
+        ASSERT_TRUE(two != NULL);
+        ASSERT_EQ(xtract_mmbses(NULL, beside, 8, two, result), XTRACT_SUCCESS);
+        ASSERT_TRUE(isfinite(result[0]) && isfinite(result[1]));
+        CHECK_REL(result[0], gaussian_term + 0.5 * log(0.25), EPSILON);
+        CHECK_REL(result[1], gaussian_term + 0.5 * (log(0.25) + log(DBL_EPSILON)), EPSILON);
+        xtract_free_filterbank(two);
+    }
+}
+
+UTEST(vector, mmbses_of_a_spectrum_at_any_level_differs_by_twice_the_log_of_the_level)
+{
+    const double level = ldexp(1.0, 500);
+    double data[6] = {1.0, 0.0, 5.0, 0.0, 1.0, 0.0};
+    double scaled[6];
+    double result[2], scaled_result[2];
+    xtract_filterbank *mf = xtract_init_filterbank(6, 2, mmbses_two_filters);
+    int i, s;
+
+    ASSERT_TRUE(mf != NULL);
+    ASSERT_EQ(xtract_mmbses(NULL, data, 6, mf, result), XTRACT_SUCCESS);
+    for (s = -1; s <= 1; s += 2)
+    {
+        for (i = 0; i < 6; i++)
+            scaled[i] = s < 0 ? data[i] / level : data[i] * level;
+        ASSERT_EQ(xtract_mmbses(NULL, scaled, 6, mf, scaled_result), XTRACT_SUCCESS);
+        ASSERT_TRUE(isfinite(scaled_result[0]) && isfinite(scaled_result[1]));
+        for (i = 0; i < 2; i++)
+            CHECK_REL(scaled_result[i], result[i] + 2.0 * s * log(level), EPSILON);
+    }
+    xtract_free_filterbank(mf);
 }
 
 UTEST(vector, mmbses_two_orthogonal_bins_positive_determinant)
@@ -3179,7 +3263,8 @@ UTEST(vector, filterbank_features_reject_a_short_input_and_a_missing_filterbank)
     ASSERT_EQ(xtract_mel_spectrogram(NULL, data, 2, f, result), XTRACT_SUCCESS);
     CHECK_REL(result[0], log(2.0), EPSILON);
     ASSERT_EQ(xtract_mfcc(xttest_context(), data, 2, f, result), XTRACT_SUCCESS);
-    ASSERT_EQ(xtract_mmbses(NULL, data, 4, f, result), XTRACT_SUCCESS);
+    /* The real parts alone leave the covariance of the band of rank 1 */
+    ASSERT_EQ(xtract_mmbses(NULL, data, 4, f, result), XTRACT_NO_RESULT);
     xtract_free_filterbank(f);
 }
 

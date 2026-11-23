@@ -9,6 +9,7 @@
 
 #include "xttest_approx.h"
 
+#include <float.h>
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
@@ -22,40 +23,39 @@ static const double FB_SR = 22050.0;
 static const double FB_MIN = 100.0;
 static const double FB_MAX = 8000.0;
 
-static const double LOG_FLOOR = -96.0;
-
 /* Reads every gain of a filterbank through xtract_mel_spectrogram(): a
  * spectrum that is 1 at one bin and 0 elsewhere gives the log of each
- * filter's gain at that bin. A gain too small to lift that above the log
- * floor is read from a spectrum that is 2^1000 there, which any gain above 0
- * lifts above the floor, so a gain is read as 0 only when it is 0. */
+ * filter's gain at that bin. A gain below DBL_EPSILON of the largest at that
+ * bin reads as the floor and is taken as 0, and a bin no filter passes gives
+ * no result and a gain of 0 in every filter. */
 static int fb_read(const xtract_filterbank *filterbank, double tables[FB_BANDS][FB_M])
 {
-    const double large = ldexp(1.0, 1000);
     double spectrum[FB_M] = {0};
-    double log_gains[FB_BANDS], log_scaled_gains[FB_BANDS];
+    double log_gains[FB_BANDS], floor_of_bin;
     int n, k, rv;
 
     for (k = 0; k < FB_M; k++)
     {
         spectrum[k] = 1.0;
         rv = xtract_mel_spectrogram(NULL, spectrum, FB_M, filterbank, log_gains);
-        if (rv != XTRACT_SUCCESS)
-            return rv;
-        spectrum[k] = large;
-        rv = xtract_mel_spectrogram(NULL, spectrum, FB_M, filterbank, log_scaled_gains);
-        if (rv != XTRACT_SUCCESS)
-            return rv;
         spectrum[k] = 0.0;
-        for (n = 0; n < FB_BANDS; n++)
+        if (rv == XTRACT_NO_RESULT)
         {
-            if (log_gains[n] != LOG_FLOOR)
-                tables[n][k] = exp(log_gains[n]);
-            else if (log_scaled_gains[n] != LOG_FLOOR)
-                tables[n][k] = ldexp(exp(log_scaled_gains[n]), -1000);
-            else
+            for (n = 0; n < FB_BANDS; n++)
                 tables[n][k] = 0.0;
+            continue;
         }
+        if (rv != XTRACT_SUCCESS)
+            return rv;
+        floor_of_bin = log_gains[0];
+        for (n = 1; n < FB_BANDS; n++)
+        {
+            if (log_gains[n] > floor_of_bin)
+                floor_of_bin = log_gains[n];
+        }
+        floor_of_bin += log(DBL_EPSILON);
+        for (n = 0; n < FB_BANDS; n++)
+            tables[n][k] = log_gains[n] > floor_of_bin ? exp(log_gains[n]) : 0.0;
     }
 
     return XTRACT_SUCCESS;
@@ -340,11 +340,14 @@ UTEST(init, mfcc_and_gfcc_filterbanks_serve_the_bins_of_the_transform_size_they_
 {
     static double spectrum[FB_M + 1];
     double result[FB_BANDS];
+    int k;
     xtract_filterbank *mel = xtract_init_mfcc(FB_N, FB_SR, XTRACT_EQUAL_GAIN, FB_MIN, FB_MAX, FB_BANDS);
     xtract_filterbank *gammatone = xtract_init_gfcc(FB_N, FB_SR, FB_MIN, FB_MAX, FB_BANDS);
 
     ASSERT_TRUE(mel != NULL);
     ASSERT_TRUE(gammatone != NULL);
+    for (k = 0; k <= FB_M; k++)
+        spectrum[k] = 1.0;
     ASSERT_EQ(xtract_mel_spectrogram(NULL, spectrum, FB_M, mel, result), XTRACT_SUCCESS);
     ASSERT_EQ(xtract_mel_spectrogram(NULL, spectrum, FB_M - 1, mel, result), XTRACT_BAD_STATE);
     ASSERT_EQ(xtract_mel_spectrogram(NULL, spectrum, FB_M + 1, mel, result), XTRACT_BAD_STATE);

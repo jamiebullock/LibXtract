@@ -1098,20 +1098,24 @@ int xtract_nonzero_count(xtract_context *ctx, const double *data, const int N, c
     return XTRACT_SUCCESS;
 }
 
-/* Sum of log magnitudes over the first R harmonics of coefficient i, each
- * floored at XTRACT_LOG_LIMIT so that an empty bin lowers a candidate's
- * score by a finite amount. */
-static double hps_score(const double *data, const int i, const int R)
+/* The log of a magnitude, or log_lowest when that is larger, so that an
+ * empty bin counts by a finite amount. The floor is kept as a log because
+ * DBL_EPSILON times a subnormal magnitude rounds to 0 */
+static double log_no_lower_than(const double log_lowest, const double magnitude)
+{
+    const double logarithm = magnitude > 0.0 ? log(magnitude) : log_lowest;
+
+    return logarithm > log_lowest ? logarithm : log_lowest;
+}
+
+/* Sum of log magnitudes over the first R harmonics of coefficient i */
+static double hps_score(const double *data, const int i, const int R, const double log_lowest)
 {
     double score = 0.0;
     int r;
 
     for (r = 1; r <= R; ++r)
-    {
-        const double magnitude = data[r * i];
-
-        score += log(magnitude < XTRACT_LOG_LIMIT ? XTRACT_LOG_LIMIT : magnitude);
-    }
+        score += log_no_lower_than(log_lowest, data[r * i]);
 
     return score;
 }
@@ -1124,7 +1128,7 @@ int xtract_hps(xtract_context *ctx, const double *data, const int N, const void 
     const int first = 1;
     const double *freqs;
     int R, i, count, peak_index, position1_lwr;
-    double harmonics, q, score, peak, largest1_lwr, ratio1, below, above, denominator, delta;
+    double harmonics, q, score, peak, largest, log_lowest, largest1_lwr, ratio1, below, above, denominator, delta;
 
     if (N < 4 || (N & 1) || argv == NULL)
     {
@@ -1145,16 +1149,20 @@ int xtract_hps(xtract_context *ctx, const double *data, const int N, const void 
     R = (int)harmonics;
 
     /* Silence has no product peak, whatever its frequency grid says */
+    largest = 0.0;
     for (i = 0; i < M; ++i)
     {
-        if (data[i] > 0.0)
-            break;
+        if (data[i] > largest)
+            largest = data[i];
     }
-    if (i == M)
+    if (largest == 0.0)
     {
         *result = 0;
         return XTRACT_NO_RESULT;
     }
+    /* A magnitude below DBL_EPSILON of the largest is lost beside it */
+    /* cppcheck-suppress invalidFunctionArg */
+    log_lowest = log(largest) + log(DBL_EPSILON);
 
     q = freqs[1] - freqs[0];
     if (!(q > 0.0))
@@ -1188,10 +1196,10 @@ int xtract_hps(xtract_context *ctx, const double *data, const int N, const void 
     }
 
     peak_index = first;
-    peak = hps_score(data, first, R);
+    peak = hps_score(data, first, R, log_lowest);
     for (i = first + 1; i < count; ++i)
     {
-        score = hps_score(data, i, R);
+        score = hps_score(data, i, R, log_lowest);
         if (score > peak)
         {
             peak = score;
@@ -1235,8 +1243,8 @@ int xtract_hps(xtract_context *ctx, const double *data, const int N, const void 
         above = data[peak_index + 1];
         if (data[peak_index] >= below && data[peak_index] >= above)
         {
-            below = log(below < XTRACT_LOG_LIMIT ? XTRACT_LOG_LIMIT : below);
-            above = log(above < XTRACT_LOG_LIMIT ? XTRACT_LOG_LIMIT : above);
+            below = log_no_lower_than(log_lowest, below);
+            above = log_no_lower_than(log_lowest, above);
             score = log(data[peak_index]);
             denominator = below - 2.0 * score + above;
             if (denominator != 0.0)

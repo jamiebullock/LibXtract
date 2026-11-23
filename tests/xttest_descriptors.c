@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Zlib
  */
 
+#include <float.h>
 #include <limits.h>
 #include <math.h>
 #include <stdlib.h>
@@ -1873,6 +1874,21 @@ static double conf_ratio(const xttest_data *first, const xttest_data *second)
     return ratio;
 }
 
+/* A setting in the unit of the data scales with the data, which is ratio
+ * times the level of the data at the defaults */
+static void conf_scale_settings(const xtract_function_descriptor_t *d, xttest_call *call, double ratio)
+{
+    int i;
+
+    for (i = 0; conf_takes_values(d) && i < d->argc; i++)
+    {
+        const xtract_argument_descriptor_t *argument = &d->argv[i];
+
+        if (argument->kind == XTRACT_ARGUMENT_SETTING && conf_power(argument->unit) > 0)
+            conf_set(d, call, i, argument->default_value * conf_scale_to_the(conf_power(argument->unit), ratio));
+    }
+}
+
 UTEST(descriptors, a_result_scales_with_its_input_by_the_power_its_unit_states)
 {
     static const double scale = 4.0;
@@ -1906,14 +1922,7 @@ UTEST(descriptors, a_result_scales_with_its_input_by_the_power_its_unit_states)
         ratio = call[0].data.n > 0 ? conf_ratio(&call[0].data, &call[1].data) : scale;
         ASSERT_TRUE_MSG(ratio > 1.0, d->name);
 
-        /* A setting in the unit of the data scales with the data */
-        for (i = 0; conf_takes_values(d) && i < d->argc; i++)
-        {
-            const xtract_argument_descriptor_t *argument = &d->argv[i];
-
-            if (argument->kind == XTRACT_ARGUMENT_SETTING && conf_power(argument->unit) > 0)
-                conf_set(d, &call[1], i, argument->default_value * conf_scale_to_the(conf_power(argument->unit), ratio));
-        }
+        conf_scale_settings(d, &call[1], ratio);
         for (pass = 0; pass < 2; pass++)
             ASSERT_EQ_MSG(xttest_call_run(&call[pass], ctx), XTRACT_SUCCESS, d->name);
 
@@ -1931,6 +1940,112 @@ UTEST(descriptors, a_result_scales_with_its_input_by_the_power_its_unit_states)
         xttest_call_free(&call[1]);
     }
     ASSERT_GT(checked, 30);
+
+    xtract_context_delete(ctx);
+}
+
+enum
+{
+    CONF_LEVELS = 3
+};
+
+/* A call from the driver's series at a level of scale, with each setting in
+ * the unit of the data scaled with it */
+static int conf_reach_at(xttest_call *call, int f, xtract_context *ctx, const xttest_call *at_one, double scale)
+{
+    const xtract_function_descriptor_t *d = xtract_descriptor(f);
+
+    if (!xttest_call_reach(call, f, ctx, scale))
+        return 0;
+    if (at_one != NULL)
+        conf_scale_settings(d, call, at_one->data.n > 0 ? conf_ratio(&at_one->data, &call->data) : scale);
+
+    return 1;
+}
+
+UTEST(descriptors, a_result_follows_the_level_of_its_input_to_the_ends_of_the_double_range)
+{
+    /* Powers of two scale every double exactly. A square of the input at
+     * these levels, summed over every element the driver gives, is still a
+     * normal double */
+    static const double levels[CONF_LEVELS] = {1.0, 4.0, 16.0};
+    static const double extremes[2] = {0x1p-500, 0x1p500};
+    xtract_context *ctx = xtract_context_new(XTTEST_DRIVER_LIMIT);
+    xttest_call call[CONF_LEVELS], extreme;
+    int f, i, j, e, followed = 0;
+
+    ASSERT_TRUE(ctx != NULL);
+
+    for (f = 0; f < XTRACT_FEATURES; f++)
+    {
+        const xtract_function_descriptor_t *d = xtract_descriptor(f);
+        double *power, *slope;
+
+        /* The log spectrum is on a scale where a power of 1 gives 1 and a
+         * power of DBL_EPSILON squared or less gives 0 */
+        if (f == XTRACT_LOG_SPECTRUM)
+            continue;
+
+        for (j = 0; j < CONF_LEVELS; j++)
+        {
+            ASSERT_TRUE_MSG(conf_reach_at(&call[j], f, ctx, j == 0 ? NULL : &call[0], levels[j]), d->name);
+            ASSERT_EQ_MSG(xttest_call_run(&call[j], ctx), XTRACT_SUCCESS, d->name);
+        }
+        power = (double *)malloc((size_t)call[0].result_length * sizeof(double));
+        slope = (double *)malloc((size_t)call[0].result_length * sizeof(double));
+        ASSERT_TRUE(power != NULL && slope != NULL);
+
+        /* Each element is a whole power of the level, a multiple of its
+         * log, or neither, as the three ordinary levels show */
+        for (i = 0; i < call[0].result_length; i++)
+        {
+            const double r1 = call[0].result[i], r4 = call[1].result[i], r16 = call[2].result[i];
+            const double k = r1 != 0.0 && r4 / r1 > 0.0 ? round(log(r4 / r1) / log(4.0)) : NAN;
+
+            power[i] = NAN;
+            slope[i] = NAN;
+            if (r1 == r4 && r4 == r16)
+                power[i] = 0.0;
+            else if (!isnan(k) && fabs(r4 - r1 * pow(4.0, k)) <= 1e-9 * fabs(r4) && fabs(r16 - r1 * pow(16.0, k)) <= 1e-9 * fabs(r16))
+                power[i] = k;
+            else if (fabs((r16 - r4) - (r4 - r1)) <= 1e-9 * (fabs(r1) + fabs(r4) + fabs(r16)))
+                slope[i] = (r4 - r1) / log(4.0);
+        }
+
+        for (e = 0; e < 2; e++)
+        {
+            ASSERT_TRUE_MSG(conf_reach_at(&extreme, f, ctx, &call[0], extremes[e]), d->name);
+            ASSERT_EQ_MSG(xttest_call_run(&extreme, ctx), XTRACT_SUCCESS, d->name);
+            ASSERT_EQ_MSG(extreme.result_length, call[0].result_length, d->name);
+            for (i = 0; i < extreme.result_length; i++)
+            {
+                const double value = extreme.result[i];
+                double expected;
+
+                if (!isnan(power[i]))
+                {
+                    expected = call[0].result[i] * pow(extremes[e], power[i]);
+                    /* A value the double range cannot hold is the caller's range */
+                    if (!isfinite(expected) || (expected != 0.0 && fabs(expected) < DBL_MIN))
+                        continue;
+                    ASSERT_NEAR_MSG(value, expected, 1e-9 * fabs(expected), d->name);
+                }
+                else if (!isnan(slope[i]))
+                {
+                    expected = call[0].result[i] + slope[i] * log(extremes[e]);
+                    ASSERT_NEAR_MSG(value, expected, 1e-6 * (fabs(expected) + fabs(slope[i])), d->name);
+                }
+                ASSERT_TRUE_MSG(isfinite(value), d->name);
+            }
+            xttest_call_free(&extreme);
+        }
+        followed++;
+        free(power);
+        free(slope);
+        for (j = 0; j < CONF_LEVELS; j++)
+            xttest_call_free(&call[j]);
+    }
+    ASSERT_GT(followed, 100);
 
     xtract_context_delete(ctx);
 }
