@@ -707,7 +707,7 @@
       "title": "Linear predictive coding cepstral coefficients",
       "description": "Extract LPC cepstrum from LPC coefficients",
       "reference": {"author": "Rabiner and Juang", "year": 1993},
-      "input": {"format": "lpc_coeffs", "unit": "any", "accepts": ["lpc_coefficients"], "length": "N >= 2"},
+      "input": {"format": "lpc_coeffs", "unit": "none", "accepts": ["lpc_coefficients"], "length": "N >= 2"},
       "argument_type": "int",
       "arguments": [
         {"name": "order", "kind": "setting", "unit": "none", "min": 1, "default": 12}
@@ -1232,7 +1232,7 @@
       "name": "average_correlation",
       "title": "Average Correlation",
       "description": "Extract the average correlation of a set of series from their correlation matrix",
-      "input": {"format": "square_matrix", "unit": "any", "accepts": ["correlation_matrix"], "length": "N >= 4 && is_square(N)"},
+      "input": {"format": "square_matrix", "unit": "none", "accepts": ["correlation_matrix"], "length": "N >= 4 && is_square(N)"},
       "arguments": [],
       "result": {"kind": "scalar", "unit": "none", "min": -1, "max": 1}
     },
@@ -1290,7 +1290,7 @@
       "title": "Hu Moments",
       "description": "Extract the seven Hu moments of a grid from its normalised moments",
       "reference": {"author": "Ming-Kuei Hu", "year": 1962},
-      "input": {"format": "normalised_moment_coeffs", "unit": "any", "accepts": ["normalised_moments"], "length": "N == 7"},
+      "input": {"format": "normalised_moment_coeffs", "unit": "none", "accepts": ["normalised_moments"], "length": "N == 7"},
       "arguments": [],
       "result": {"kind": "vector", "format": "arbitrary_series", "unit": "none", "length": "7"}
     },
