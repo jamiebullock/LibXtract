@@ -248,6 +248,35 @@ UTEST(descriptors, a_ratio_or_a_count_has_no_unit_and_its_arguments_have_theirs)
     ASSERT_EQ(xtract_descriptor(XTRACT_SPECTRAL_SLOPE)->result.scalar.unit, XTRACT_PER_HERTZ);
 }
 
+UTEST(descriptors, data_has_no_unit_exactly_when_every_feature_that_gives_it_has_none)
+{
+    int f, q, p, checked = 0;
+
+    for (f = 0; f < XTRACT_FEATURES; f++)
+    {
+        const xtract_function_descriptor_t *d = xtract_descriptor(f);
+        int unitless = 1;
+
+        for (q = 0; q < d->data.accept_count; q++)
+        {
+            const xtract_quantity_t *quantity = d->data.accepts[q];
+
+            for (p = 0; p < quantity->provider_count; p++)
+            {
+                const xtract_function_descriptor_t *provider = xtract_descriptor(quantity->providers[p].feature);
+                const xtract_unit_t unit = provider->is_scalar ? provider->result.scalar.unit : provider->result.vector.unit;
+
+                unitless = unitless && unit == XTRACT_UNIT_NONE;
+            }
+        }
+        if (d->data.accept_count == 0)
+            continue;
+        ASSERT_EQ_MSG(d->data.unit == XTRACT_UNIT_NONE, unitless, d->name);
+        checked++;
+    }
+    ASSERT_GT(checked, 50);
+}
+
 UTEST(descriptors, an_argument_has_the_unit_of_the_value_it_takes)
 {
     /* A mean, a median or a threshold of the data. */
@@ -642,7 +671,7 @@ UTEST(descriptors, appended_features_are_fully_described)
     ASSERT_STREQ(xtract_descriptor(XTRACT_AVERAGE_CORRELATION)->name, "average_correlation");
     ASSERT_EQ(xtract_descriptor(XTRACT_AVERAGE_CORRELATION)->argc, 0);
     ASSERT_EQ(xtract_descriptor(XTRACT_AVERAGE_CORRELATION)->data.format, XTRACT_SQUARE_MATRIX);
-    ASSERT_EQ(xtract_descriptor(XTRACT_AVERAGE_CORRELATION)->data.unit, XTRACT_UNIT_ANY);
+    ASSERT_EQ(xtract_descriptor(XTRACT_AVERAGE_CORRELATION)->data.unit, XTRACT_UNIT_NONE);
     ASSERT_EQ(xtract_descriptor(XTRACT_AVERAGE_CORRELATION)->is_scalar, XTRACT_TRUE);
     ASSERT_EQ(xtract_descriptor(XTRACT_AVERAGE_CORRELATION)->is_delta, XTRACT_FALSE);
     ASSERT_EQ(xtract_descriptor(XTRACT_AVERAGE_CORRELATION)->result.scalar.unit, XTRACT_UNIT_NONE);
@@ -708,7 +737,7 @@ UTEST(descriptors, appended_features_are_fully_described)
     ASSERT_EQ(xtract_descriptor(XTRACT_HU_MOMENTS)->year, 1962);
     ASSERT_EQ(xtract_descriptor(XTRACT_HU_MOMENTS)->argc, 0);
     ASSERT_EQ(xtract_descriptor(XTRACT_HU_MOMENTS)->data.format, XTRACT_NORMALISED_MOMENT_COEFFS);
-    ASSERT_EQ(xtract_descriptor(XTRACT_HU_MOMENTS)->data.unit, XTRACT_UNIT_ANY);
+    ASSERT_EQ(xtract_descriptor(XTRACT_HU_MOMENTS)->data.unit, XTRACT_UNIT_NONE);
     ASSERT_EQ(xtract_descriptor(XTRACT_HU_MOMENTS)->is_scalar, XTRACT_FALSE);
     ASSERT_EQ(xtract_descriptor(XTRACT_HU_MOMENTS)->is_delta, XTRACT_FALSE);
     ASSERT_EQ(xtract_descriptor(XTRACT_HU_MOMENTS)->result.vector.format, XTRACT_ARBITRARY_SERIES);
