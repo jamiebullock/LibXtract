@@ -64,10 +64,41 @@ if(NOT APPLE AND NOT MSVC)
 endif()
 
 set(XTRACT_MUTATION_PLUGIN "" CACHE FILEPATH "Mull IR frontend plugin to compile the library with")
+set(XTRACT_MUTATION_DIFF_REF "" CACHE STRING "Git reference: when set, only the lines that differ from it are mutated")
 if(XTRACT_MUTATION_PLUGIN)
     if(NOT CMAKE_C_COMPILER_ID MATCHES "Clang")
         message(FATAL_ERROR "XTRACT_MUTATION_PLUGIN needs a Clang compiler, the C compiler is ${CMAKE_C_COMPILER_ID}")
     endif()
+    set(XTRACT_MULL_CONFIG ${PROJECT_SOURCE_DIR}/mull.yml)
+    if(XTRACT_MUTATION_DIFF_REF)
+        # Mull skips every mutant, and passes, when it cannot resolve the
+        # reference. The configuration names the commit, so that configuring
+        # again after the reference has moved compiles the library again
+        find_package(Git REQUIRED)
+        execute_process(
+            COMMAND ${GIT_EXECUTABLE} rev-parse --verify --quiet "${XTRACT_MUTATION_DIFF_REF}^{commit}"
+            WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+            RESULT_VARIABLE diff_ref_missing
+            OUTPUT_VARIABLE diff_commit
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+            ERROR_QUIET)
+        if(diff_ref_missing)
+            message(FATAL_ERROR "XTRACT_MUTATION_DIFF_REF '${XTRACT_MUTATION_DIFF_REF}' is not a commit in ${PROJECT_SOURCE_DIR}")
+        endif()
+        set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${PROJECT_SOURCE_DIR}/mull.yml)
+        file(READ ${PROJECT_SOURCE_DIR}/mull.yml mull_config)
+        set(XTRACT_MULL_CONFIG ${PROJECT_BINARY_DIR}/mull.yml)
+        file(CONFIGURE OUTPUT ${XTRACT_MULL_CONFIG}
+            CONTENT "${mull_config}gitDiffRef: ${diff_commit}\ngitProjectRoot: ${PROJECT_SOURCE_DIR}\n"
+            @ONLY)
+    endif()
+    set(XTRACT_MULL_CONFIG ${XTRACT_MULL_CONFIG} PARENT_SCOPE)
+    # The plugin picks the mutants as it compiles, so the configuration that
+    # limits them to the lines of a difference is set for the compiler, and a
+    # change to it compiles the library again
+    set_target_properties(xtract PROPERTIES C_COMPILER_LAUNCHER "${CMAKE_COMMAND};-E;env;MULL_CONFIG=${XTRACT_MULL_CONFIG}")
+    get_target_property(xtract_sources xtract SOURCES)
+    set_source_files_properties(${xtract_sources} PROPERTIES OBJECT_DEPENDS ${XTRACT_MULL_CONFIG})
     target_compile_options(xtract PRIVATE -fpass-plugin=${XTRACT_MUTATION_PLUGIN} -grecord-command-line)
 endif()
 
