@@ -284,6 +284,11 @@ static const xtract_provider_t providers_harmonic_amplitudes[] = {
 };
 static const xtract_quantity_t quantity_harmonic_amplitudes = {"harmonic_amplitudes", XTRACT_FALSE, XTRACT_SPECTRAL_HARMONICS_MAGNITUDES, 1, providers_harmonic_amplitudes};
 
+static const xtract_provider_t providers_power_bins[] = {
+    {XTRACT_POWER_SPECTRUM, XTRACT_PART_FIRST_HALF, NULL},
+};
+static const xtract_quantity_t quantity_power_bins = {"power_bins", XTRACT_FALSE, XTRACT_SPECTRAL_MAGNITUDES, 1, providers_power_bins};
+
 static const xtract_provider_t providers_bark_coefficients[] = {
     {XTRACT_BARK_COEFFICIENTS, XTRACT_PART_WHOLE, NULL},
 };
@@ -344,11 +349,6 @@ static const xtract_provider_t providers_log[] = {
     {XTRACT_LOG, XTRACT_PART_WHOLE, NULL},
 };
 static const xtract_quantity_t quantity_log = {"log", XTRACT_FALSE, XTRACT_ARBITRARY_SERIES, 1, providers_log};
-
-static const xtract_provider_t providers_power_bins[] = {
-    {XTRACT_POWER_SPECTRUM, XTRACT_PART_FIRST_HALF, NULL},
-};
-static const xtract_quantity_t quantity_power_bins = {"power_bins", XTRACT_FALSE, XTRACT_SPECTRAL_MAGNITUDES, 1, providers_power_bins};
 
 static const xtract_provider_t providers_autocorrelation[] = {
     {XTRACT_AUTOCORRELATION, XTRACT_PART_WHOLE, NULL},
@@ -427,7 +427,7 @@ static const xtract_quantity_t *const accepted_tristimulus_2[] = {&quantity_harm
 static const xtract_quantity_t *const accepted_tristimulus_3[] = {&quantity_harmonic_amplitudes};
 static const xtract_quantity_t *const accepted_smoothness[] = {&quantity_partial_amplitudes};
 static const xtract_quantity_t *const accepted_spread[] = {&quantity_coefficients_and_frequencies};
-static const xtract_quantity_t *const accepted_rolloff[] = {&quantity_magnitude_bins};
+static const xtract_quantity_t *const accepted_rolloff[] = {&quantity_power_bins};
 static const xtract_quantity_t *const accepted_loudness[] = {&quantity_bark_coefficients};
 static const xtract_quantity_t *const accepted_flatness[] = {&quantity_magnitude_bins, &quantity_subbands};
 static const xtract_quantity_t *const accepted_noisiness[] = {&quantity_peak_spectrum};
@@ -519,7 +519,7 @@ static const xtract_argument_descriptor_t arguments_spectral_kurtosis[] = {
 
 static const char *const authors_irregularity_k_0[] = {"Krimphoff", "McAdams", "Winsberg"};
 static const xtract_source_t sources_irregularity_k[] = {
-    {XTRACT_SOURCE_ORIGIN, 3, authors_irregularity_k_0, 1994, NULL, NULL, NULL, NULL},
+    {XTRACT_SOURCE_ORIGIN, 3, authors_irregularity_k_0, 1994, "Caracterisation du timbre des sons complexes. II. Analyses acoustiques et quantification psychophysique", "Journal de Physique IV 4(C5)", "equation 4", "doi:10.1051/jp4:19945134"},
 };
 static const xtract_argument_descriptor_t arguments_irregularity_k[] = {
     {.name = "smoothness", .kind = XTRACT_ARGUMENT_RESULT, .type = XTRACT_FLOAT, .unit = XTRACT_DECIBELS, .min = 0, .max = XTRACT_UNBOUNDED_MAX, .accepts = &quantity_smoothness},
@@ -527,60 +527,78 @@ static const xtract_argument_descriptor_t arguments_irregularity_k[] = {
 
 static const char *const authors_irregularity_j_0[] = {"Jensen"};
 static const xtract_source_t sources_irregularity_j[] = {
-    {XTRACT_SOURCE_ORIGIN, 1, authors_irregularity_j_0, 1999, NULL, NULL, NULL, NULL},
+    {XTRACT_SOURCE_ORIGIN, 1, authors_irregularity_j_0, 1999, "Timbre models of musical sounds", "PhD thesis, University of Copenhagen", "equation 7.16", NULL},
 };
 static const char *const authors_tristimulus_1_0[] = {"Pollard", "Jansson"};
+static const char *const authors_tristimulus_1_1[] = {"Peeters"};
 static const xtract_source_t sources_tristimulus_1[] = {
-    {XTRACT_SOURCE_ORIGIN, 2, authors_tristimulus_1_0, 1982, NULL, NULL, NULL, NULL},
+    {XTRACT_SOURCE_ORIGIN, 2, authors_tristimulus_1_0, 1982, "A tristimulus method for the specification of musical timbre", "Acustica 51(3)", "equations 4 to 6", NULL},
+    {XTRACT_SOURCE_FORMULATION, 1, authors_tristimulus_1_1, 2004, "A large set of audio features for sound description (similarity and classification) in the CUIDADO project", "Technical report, IRCAM", "section 7.1.6", NULL},
 };
 static const char *const authors_tristimulus_2_0[] = {"Pollard", "Jansson"};
+static const char *const authors_tristimulus_2_1[] = {"Peeters"};
 static const xtract_source_t sources_tristimulus_2[] = {
-    {XTRACT_SOURCE_ORIGIN, 2, authors_tristimulus_2_0, 1982, NULL, NULL, NULL, NULL},
+    {XTRACT_SOURCE_ORIGIN, 2, authors_tristimulus_2_0, 1982, "A tristimulus method for the specification of musical timbre", "Acustica 51(3)", "equations 4 to 6", NULL},
+    {XTRACT_SOURCE_FORMULATION, 1, authors_tristimulus_2_1, 2004, "A large set of audio features for sound description (similarity and classification) in the CUIDADO project", "Technical report, IRCAM", "section 7.1.6", NULL},
 };
 static const char *const authors_tristimulus_3_0[] = {"Pollard", "Jansson"};
+static const char *const authors_tristimulus_3_1[] = {"Peeters"};
 static const xtract_source_t sources_tristimulus_3[] = {
-    {XTRACT_SOURCE_ORIGIN, 2, authors_tristimulus_3_0, 1982, NULL, NULL, NULL, NULL},
+    {XTRACT_SOURCE_ORIGIN, 2, authors_tristimulus_3_0, 1982, "A tristimulus method for the specification of musical timbre", "Acustica 51(3)", "equations 4 to 6", NULL},
+    {XTRACT_SOURCE_FORMULATION, 1, authors_tristimulus_3_1, 2004, "A large set of audio features for sound description (similarity and classification) in the CUIDADO project", "Technical report, IRCAM", "section 7.1.6", NULL},
 };
-static const char *const authors_smoothness_0[] = {"McAdams"};
+static const char *const authors_smoothness_0[] = {"Krimphoff", "McAdams", "Winsberg"};
+static const char *const authors_smoothness_1[] = {"McAdams"};
 static const xtract_source_t sources_smoothness[] = {
-    {XTRACT_SOURCE_ORIGIN, 1, authors_smoothness_0, 1999, NULL, NULL, NULL, NULL},
+    {XTRACT_SOURCE_ORIGIN, 3, authors_smoothness_0, 1994, "Caracterisation du timbre des sons complexes. II. Analyses acoustiques et quantification psychophysique", "Journal de Physique IV 4(C5)", "equation 4", "doi:10.1051/jp4:19945134"},
+    {XTRACT_SOURCE_FORMULATION, 1, authors_smoothness_1, 1999, "Perspectives on the contribution of timbre to musical structure", "Computer Music Journal 23(3)", "equation 7", "doi:10.1162/014892699559797"},
 };
-static const char *const authors_spread_0[] = {"Casagrande"};
+static const char *const authors_spread_0[] = {"Peeters"};
 static const xtract_source_t sources_spread[] = {
-    {XTRACT_SOURCE_ORIGIN, 1, authors_spread_0, 2005, NULL, NULL, NULL, NULL},
+    {XTRACT_SOURCE_ORIGIN, 1, authors_spread_0, 2004, "A large set of audio features for sound description (similarity and classification) in the CUIDADO project", "Technical report, IRCAM", "section 6.1.2", NULL},
 };
 static const xtract_argument_descriptor_t arguments_spread[] = {
     {.name = "mean", .kind = XTRACT_ARGUMENT_RESULT, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .accepts = &quantity_spectral_mean, .subject = XTRACT_SUBJECT_INPUT},
 };
 
-static const char *const authors_rolloff_0[] = {"Ong"};
+static const char *const authors_rolloff_0[] = {"Scheirer", "Slaney"};
+static const char *const authors_rolloff_1[] = {"Peeters"};
 static const xtract_source_t sources_rolloff[] = {
-    {XTRACT_SOURCE_ORIGIN, 1, authors_rolloff_0, 2005, NULL, NULL, NULL, NULL},
+    {XTRACT_SOURCE_ORIGIN, 2, authors_rolloff_0, 1997, "Construction and evaluation of a robust multifeature speech/music discriminator", "Proceedings of ICASSP 1997, volume 2", "section 2", "doi:10.1109/ICASSP.1997.596192"},
+    {XTRACT_SOURCE_FORMULATION, 1, authors_rolloff_1, 2004, "A large set of audio features for sound description (similarity and classification) in the CUIDADO project", "Technical report, IRCAM", "section 6.1.7", NULL},
 };
 static const xtract_argument_descriptor_t arguments_rolloff[] = {
     {.name = "bin_spacing", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = 0, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_BIN_SPACING},
     {.name = "threshold", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_PERCENT, .min = 0, .max = 100, .default_value = 95},
 };
 
-static const char *const authors_loudness_0[] = {"Moore", "Glasberg"};
+static const char *const authors_loudness_0[] = {"Moore", "Glasberg", "Baer"};
+static const char *const authors_loudness_1[] = {"Peeters"};
 static const xtract_source_t sources_loudness[] = {
-    {XTRACT_SOURCE_ORIGIN, 2, authors_loudness_0, 2005, NULL, NULL, NULL, NULL},
+    {XTRACT_SOURCE_ORIGIN, 3, authors_loudness_0, 1997, "A model for the prediction of thresholds, loudness, and partial loudness", "Journal of the Audio Engineering Society 45(4)", NULL, "https://www.aes.org/e-lib/browse.cfm\?elib=10272"},
+    {XTRACT_SOURCE_FORMULATION, 1, authors_loudness_1, 2004, "A large set of audio features for sound description (similarity and classification) in the CUIDADO project", "Technical report, IRCAM", "section 8.1.1", NULL},
 };
-static const char *const authors_flatness_0[] = {"Jehan"};
+static const char *const authors_flatness_0[] = {"Gray", "Markel"};
+static const char *const authors_flatness_1[] = {"Peeters"};
 static const xtract_source_t sources_flatness[] = {
-    {XTRACT_SOURCE_ORIGIN, 1, authors_flatness_0, 2005, NULL, NULL, NULL, NULL},
+    {XTRACT_SOURCE_ORIGIN, 2, authors_flatness_0, 1974, "A spectral-flatness measure for studying the autocorrelation method of linear prediction of speech analysis", "IEEE Transactions on Acoustics, Speech, and Signal Processing 22(3)", "equation 6", "doi:10.1109/TASSP.1974.1162572"},
+    {XTRACT_SOURCE_FORMULATION, 1, authors_flatness_1, 2004, "A large set of audio features for sound description (similarity and classification) in the CUIDADO project", "Technical report, IRCAM", "section 9.1", NULL},
 };
-static const char *const authors_flatness_db_0[] = {"Peeters"};
+static const char *const authors_flatness_db_0[] = {"Johnston"};
+static const char *const authors_flatness_db_1[] = {"Peeters"};
 static const xtract_source_t sources_flatness_db[] = {
-    {XTRACT_SOURCE_ORIGIN, 1, authors_flatness_db_0, 2003, NULL, NULL, NULL, NULL},
+    {XTRACT_SOURCE_ORIGIN, 1, authors_flatness_db_0, 1988, "Transform coding of audio signals using perceptual noise criteria", "IEEE Journal on Selected Areas in Communications 6(2)", "page 318", "doi:10.1109/49.608"},
+    {XTRACT_SOURCE_FORMULATION, 1, authors_flatness_db_1, 2004, "A large set of audio features for sound description (similarity and classification) in the CUIDADO project", "Technical report, IRCAM", "section 9.1", NULL},
 };
 static const xtract_argument_descriptor_t arguments_flatness_db[] = {
     {.name = "flatness", .kind = XTRACT_ARGUMENT_RESULT, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_NONE, .min = 0, .max = 1, .accepts = &quantity_flatness},
 };
 
 static const char *const authors_tonality_0[] = {"Johnston"};
+static const char *const authors_tonality_1[] = {"Peeters"};
 static const xtract_source_t sources_tonality[] = {
-    {XTRACT_SOURCE_ORIGIN, 1, authors_tonality_0, 1988, NULL, NULL, NULL, NULL},
+    {XTRACT_SOURCE_ORIGIN, 1, authors_tonality_0, 1988, "Transform coding of audio signals using perceptual noise criteria", "IEEE Journal on Selected Areas in Communications 6(2)", "page 318", "doi:10.1109/49.608"},
+    {XTRACT_SOURCE_FORMULATION, 1, authors_tonality_1, 2004, "A large set of audio features for sound description (similarity and classification) in the CUIDADO project", "Technical report, IRCAM", "section 9.1", NULL},
 };
 static const xtract_argument_descriptor_t arguments_tonality[] = {
     {.name = "flatness_db", .kind = XTRACT_ARGUMENT_RESULT, .type = XTRACT_FLOAT, .unit = XTRACT_DECIBELS, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .accepts = &quantity_flatness_db},
@@ -588,29 +606,43 @@ static const xtract_argument_descriptor_t arguments_tonality[] = {
 
 static const char *const authors_crest_0[] = {"Peeters"};
 static const xtract_source_t sources_crest[] = {
-    {XTRACT_SOURCE_ORIGIN, 1, authors_crest_0, 2003, NULL, NULL, NULL, NULL},
+    {XTRACT_SOURCE_ORIGIN, 1, authors_crest_0, 2004, "A large set of audio features for sound description (similarity and classification) in the CUIDADO project", "Technical report, IRCAM", "section 9.1", NULL},
 };
 static const xtract_argument_descriptor_t arguments_crest[] = {
     {.name = "maximum", .kind = XTRACT_ARGUMENT_RESULT, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_ANY, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .accepts = &quantity_highest_value},
     {.name = "mean", .kind = XTRACT_ARGUMENT_RESULT, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_ANY, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .accepts = &quantity_mean},
 };
 
-static const char *const authors_noisiness_0[] = {"Park"};
+static const char *const authors_noisiness_0[] = {"Peeters"};
 static const xtract_source_t sources_noisiness[] = {
-    {XTRACT_SOURCE_ORIGIN, 1, authors_noisiness_0, 2000, NULL, NULL, NULL, NULL},
+    {XTRACT_SOURCE_ORIGIN, 1, authors_noisiness_0, 2004, "A large set of audio features for sound description (similarity and classification) in the CUIDADO project", "Technical report, IRCAM", "section 7.1.2", NULL},
 };
 static const xtract_argument_descriptor_t arguments_noisiness[] = {
     {.name = "fundamental", .kind = XTRACT_ARGUMENT_RESULT, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = 0, .max = XTRACT_UNBOUNDED_MAX, .accepts = &quantity_fundamental, .subject = XTRACT_SUBJECT_SOURCE},
     {.name = "threshold", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_NONE, .min = 0, .max = 1, .default_value = 0.10000000000000001},
 };
 
+static const char *const authors_spectral_inharmonicity_0[] = {"Peeters"};
+static const xtract_source_t sources_spectral_inharmonicity[] = {
+    {XTRACT_SOURCE_ORIGIN, 1, authors_spectral_inharmonicity_0, 2004, "A large set of audio features for sound description (similarity and classification) in the CUIDADO project", "Technical report, IRCAM", "section 7.1.3", NULL},
+};
 static const xtract_argument_descriptor_t arguments_spectral_inharmonicity[] = {
     {.name = "fundamental", .kind = XTRACT_ARGUMENT_RESULT, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = 0, .max = XTRACT_UNBOUNDED_MAX, .accepts = &quantity_fundamental, .subject = XTRACT_SUBJECT_SOURCE},
 };
 
+static const char *const authors_odd_even_ratio_0[] = {"Peeters"};
+static const xtract_source_t sources_odd_even_ratio[] = {
+    {XTRACT_SOURCE_ORIGIN, 1, authors_odd_even_ratio_0, 2004, "A large set of audio features for sound description (similarity and classification) in the CUIDADO project", "Technical report, IRCAM", "section 7.1.5", NULL},
+};
 static const char *const authors_sharpness_0[] = {"von Bismarck"};
+static const char *const authors_sharpness_1[] = {"Peeters"};
 static const xtract_source_t sources_sharpness[] = {
-    {XTRACT_SOURCE_ORIGIN, 1, authors_sharpness_0, 1974, NULL, NULL, NULL, NULL},
+    {XTRACT_SOURCE_ORIGIN, 1, authors_sharpness_0, 1974, "Sharpness as an attribute of the timbre of steady sounds", "Acustica 30(3)", "equation 1", NULL},
+    {XTRACT_SOURCE_FORMULATION, 1, authors_sharpness_1, 2004, "A large set of audio features for sound description (similarity and classification) in the CUIDADO project", "Technical report, IRCAM", "section 8.1.3", NULL},
+};
+static const char *const authors_spectral_slope_0[] = {"Peeters"};
+static const xtract_source_t sources_spectral_slope[] = {
+    {XTRACT_SOURCE_ORIGIN, 1, authors_spectral_slope_0, 2004, "A large set of audio features for sound description (similarity and classification) in the CUIDADO project", "Technical report, IRCAM", "section 6.1.5", NULL},
 };
 static const xtract_argument_descriptor_t arguments_lowest_value[] = {
     {.name = "threshold", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_ANY, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .default_value = -1.7976931348623157e+308},
@@ -1000,7 +1032,7 @@ static const xtract_argument_descriptor_t arguments_phase_spectrum[] = {
 
 static const char *const authors_log_0[] = {"Boeck", "Krebs", "Schedl"};
 static const xtract_source_t sources_log[] = {
-    {XTRACT_SOURCE_ORIGIN, 3, authors_log_0, 2012, NULL, NULL, NULL, NULL},
+    {XTRACT_SOURCE_ORIGIN, 3, authors_log_0, 2012, "Evaluating the online capabilities of onset detection methods", "Proceedings of the 13th International Society for Music Information Retrieval Conference", "equation 1", "doi:10.5281/zenodo.1416036"},
 };
 static const xtract_argument_descriptor_t arguments_log[] = {
     {.name = "lambda", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_NONE, .min = 2.2250738585072014e-308, .max = XTRACT_UNBOUNDED_MAX, .default_value = 1},
@@ -1236,7 +1268,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .name = "tristimulus_1",
         .title = "Tristimulus I",
         .description = "Extract the tristimulus (type I) of a spectrum",
-        .source_count = 1,
+        .source_count = 2,
         .sources = sources_tristimulus_1,
         .validation_level = 0,
         .tags = 0,
@@ -1252,7 +1284,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .name = "tristimulus_2",
         .title = "Tristimulus II",
         .description = "Extract the tristimulus (type II) of a spectrum",
-        .source_count = 1,
+        .source_count = 2,
         .sources = sources_tristimulus_2,
         .validation_level = 0,
         .tags = 0,
@@ -1268,7 +1300,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .name = "tristimulus_3",
         .title = "Tristimulus III",
         .description = "Extract the tristimulus (type III) of a spectrum",
-        .source_count = 1,
+        .source_count = 2,
         .sources = sources_tristimulus_3,
         .validation_level = 0,
         .tags = 0,
@@ -1284,7 +1316,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .name = "smoothness",
         .title = "Spectral Smoothness",
         .description = "Extract the spectral smoothness of a spectrum",
-        .source_count = 1,
+        .source_count = 2,
         .sources = sources_smoothness,
         .validation_level = 0,
         .tags = 0,
@@ -1332,7 +1364,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .name = "rolloff",
         .title = "Spectral Rolloff",
         .description = "Extract the rolloff point of a spectrum",
-        .source_count = 1,
+        .source_count = 2,
         .sources = sources_rolloff,
         .validation_level = 0,
         .tags = 0,
@@ -1348,7 +1380,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .name = "loudness",
         .title = "Loudness",
         .description = "Extract the loudness of a signal from its spectrum",
-        .source_count = 1,
+        .source_count = 2,
         .sources = sources_loudness,
         .validation_level = 0,
         .tags = XTRACT_TAG_SOUND,
@@ -1357,14 +1389,14 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .argv = NULL,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
-        .result = {.scalar = {0, XTRACT_UNBOUNDED_MAX, XTRACT_SONE}},
+        .result = {.scalar = {0, XTRACT_UNBOUNDED_MAX, XTRACT_UNIT_NONE}},
     },
     [XTRACT_FLATNESS] = {
         .id = XTRACT_FLATNESS,
         .name = "flatness",
         .title = "Spectral Flatness",
         .description = "Extract the spectral flatness of a spectrum",
-        .source_count = 1,
+        .source_count = 2,
         .sources = sources_flatness,
         .validation_level = 0,
         .tags = 0,
@@ -1380,7 +1412,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .name = "flatness_db",
         .title = "Log Spectral Flatness",
         .description = "Extract the log spectral flatness of a spectrum",
-        .source_count = 1,
+        .source_count = 2,
         .sources = sources_flatness_db,
         .validation_level = 0,
         .tags = 0,
@@ -1396,7 +1428,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .name = "tonality",
         .title = "Tonality",
         .description = "Extract the tonality of a spectrum",
-        .source_count = 1,
+        .source_count = 2,
         .sources = sources_tonality,
         .validation_level = 0,
         .tags = 0,
@@ -1460,8 +1492,8 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .name = "spectral_inharmonicity",
         .title = "Inharmonicity",
         .description = "Extract the inharmonicity of a spectrum",
-        .source_count = 0,
-        .sources = NULL,
+        .source_count = 1,
+        .sources = sources_spectral_inharmonicity,
         .validation_level = 0,
         .tags = 0,
         .data = {XTRACT_SPECTRAL_PEAKS, XTRACT_UNIT_ANY, 1, accepted_spectral_inharmonicity, 1, "N >= 2 && N % 2 == 0"},
@@ -1476,8 +1508,8 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .name = "odd_even_ratio",
         .title = "Odd/even Harmonic Ratio",
         .description = "Extract the odd-to-even harmonic ratio of a spectrum",
-        .source_count = 0,
-        .sources = NULL,
+        .source_count = 1,
+        .sources = sources_odd_even_ratio,
         .validation_level = 0,
         .tags = 0,
         .data = {XTRACT_SPECTRAL_HARMONICS_MAGNITUDES, XTRACT_UNIT_ANY, 1, accepted_odd_even_ratio, 1, "N >= 1"},
@@ -1492,7 +1524,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .name = "sharpness",
         .title = "Spectral Sharpness",
         .description = "Extract the spectral sharpness of a spectrum",
-        .source_count = 1,
+        .source_count = 2,
         .sources = sources_sharpness,
         .validation_level = 0,
         .tags = XTRACT_TAG_SOUND,
@@ -1501,15 +1533,15 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .argv = NULL,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
-        .result = {.scalar = {0, XTRACT_UNBOUNDED_MAX, XTRACT_ACUM}},
+        .result = {.scalar = {0, XTRACT_UNBOUNDED_MAX, XTRACT_UNIT_NONE}},
     },
     [XTRACT_SPECTRAL_SLOPE] = {
         .id = XTRACT_SPECTRAL_SLOPE,
         .name = "spectral_slope",
         .title = "Spectral Slope",
         .description = "Extract the spectral slope of a spectrum",
-        .source_count = 0,
-        .sources = NULL,
+        .source_count = 1,
+        .sources = sources_spectral_slope,
         .validation_level = 0,
         .tags = 0,
         .data = {XTRACT_SPECTRAL, XTRACT_UNIT_ANY, 1, accepted_spectral_slope, 1, "N >= 2 && N % 2 == 0"},

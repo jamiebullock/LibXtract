@@ -167,7 +167,7 @@ extern "C"
      */
     int xtract_irregularity_j(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
-    /** \brief Calculate the first order Tristimulus of the harmonics of a sound using a method described by Pollard and Jansson (1982)
+    /** \brief Calculate the first tristimulus of the harmonics of a sound: the first harmonic's the share of the sum of the coefficients of all N harmonics. Peeters (2004, section 7.1.6) formulates it on the coefficients; Pollard and Jansson (1982) define the tristimulus on the loudness of groups of partials
      *
      * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles representing the coefficients of the harmonics of a sound in order of harmonic number, the fundamental first (e.g. the first half of the array pointed to by *result from xtract_packed() when it is given the result of xtract_harmonic_spectrum()). The elements of 0 that xtract_packed() leaves after the harmonics do not change the result
@@ -177,7 +177,7 @@ extern "C"
      */
     int xtract_tristimulus_1(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
-    /** \brief Calculate the second order Tristimulus of the harmonics of a sound using a method described by Pollard and Jansson (1982)
+    /** \brief Calculate the second tristimulus of the harmonics of a sound: the second, third and fourth harmonics' the share of the sum of the coefficients of all N harmonics. Peeters (2004, section 7.1.6) formulates it on the coefficients; Pollard and Jansson (1982) define the tristimulus on the loudness of groups of partials
      *
      * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles representing the coefficients of the harmonics of a sound in order of harmonic number, the fundamental first (e.g. the first half of the array pointed to by *result from xtract_packed() when it is given the result of xtract_harmonic_spectrum()). The elements of 0 that xtract_packed() leaves after the harmonics do not change the result
@@ -187,7 +187,7 @@ extern "C"
      */
     int xtract_tristimulus_2(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
-    /** \brief Calculate the third order Tristimulus of the harmonics of a sound using a method described by Pollard and Jansson (1982)
+    /** \brief Calculate the third tristimulus of the harmonics of a sound: the fifth and higher harmonics' the share of the sum of the coefficients of all N harmonics. Peeters (2004, section 7.1.6) formulates it on the coefficients; Pollard and Jansson (1982) define the tristimulus on the loudness of groups of partials
      *
      * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles representing the coefficients of the harmonics of a sound in order of harmonic number, the fundamental first (e.g. the first half of the array pointed to by *result from xtract_packed() when it is given the result of xtract_harmonic_spectrum()). The elements of 0 that xtract_packed() leaves after the harmonics do not change the result
@@ -207,7 +207,7 @@ extern "C"
      */
     int xtract_smoothness(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
-    /** \brief Extract the spectral spread of an input vector using a method described by Casagrande(2005)
+    /** \brief Extract the spectral spread of a spectrum: the variance of its frequencies weighted by its coefficients, which Peeters (2004, section 6.1.2) calls the spread. It is the quantity xtract_spectral_variance() gives
      *
      * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector, (e.g. the array pointed to by *result from xtract_magnitude_spectrum(), xtract_peak_spectrum() or xtract_harmonic_spectrum()).
@@ -229,17 +229,17 @@ extern "C"
      */
     int xtract_zcr(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
-    /** \brief Extract the spectral rolloff of an input vector using a method described by Bee Suan Ong (2005)
+    /** \brief Extract the spectral rolloff of a power spectrum: the frequency below which a given percentage of its energy lies (Scheirer and Slaney 1997), with the rolloff bin counted in the sum (Peeters 2004, section 6.1.7)
      *
      * \param *ctx: a pointer to a context, or NULL
-     * \param *data: a pointer to the first element in an array of doubles representing the magnitude coefficients from the spectrum of an audio vector, (e.g. the first half of the array pointed to by *result from xtract_magnitude_spectrum().
+     * \param *data: a pointer to the first element in an array of doubles representing the power coefficients from the spectrum of an audio vector (e.g. the first half of the array pointed to by *result from xtract_power_spectrum())
      * \param N: the number of elements to be considered, at least 1
-     * \param *argv: a pointer to an array of two doubles: argv[0] is the bin spacing in Hz, the sample rate divided by the transform length (twice N for the first half of an xtract_magnitude_spectrum() output), finite and at least 0, and argv[1] is the rolloff threshold as a percentage from 0 to 100 (e.g. 95.0 for the 95th percentile).
+     * \param *argv: a pointer to an array of two doubles: argv[0] is the bin spacing in Hz, the sample rate divided by the transform length (twice N for the first half of an xtract_power_spectrum() output), finite and at least 0, and argv[1] is the rolloff threshold as a percentage from 0 to 100 (e.g. 95.0 for the 95th percentile).
      * \param *result: the spectral rolloff in Hz of N values from the array pointed to by *data, the first of them being bin 0: the frequency of the first bin at which the running sum of the coefficients reaches argv[1] percent of their total.
      */
     int xtract_rolloff(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
-    /** \brief Extract the 'total loudness' of an input vector using a method described by Moore, Glasberg et al (2005)
+    /** \brief Extract the total loudness of a spectrum from its Bark band energies E(z): the sum over the bands of E(z)^0.23, the simplified form of Peeters (2004, section 8.1.1) of the loudness model of Moore, Glasberg and Baer (1997). The result is on a relative scale; it is not a loudness in sones
      *
      * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles representing a set of BARK_BANDS bark coefficients
@@ -264,30 +264,27 @@ extern "C"
      */
     int xtract_flatness(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
-    /** \brief Extract the LOG spectral flatness measure of an input vector
+    /** \brief Extract the spectral flatness measure in decibels, 10 log10 of the flatness (Johnston 1988; Peeters 2004, section 9.1)
      *
      * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to NULL.
      * \param N: not used - can safely be set to 0.
      * \param *argv: a pointer to a double representing spectral flatness, from 0 to 1
-     * \param *result: the LOG spectral flatness of N values from the array pointed to by *data
-     *
-     *  flatness_db = 10 * log10(flatness)
-     *
+     * \param *result: the spectral flatness in decibels, at most 0
      */
     int xtract_flatness_db(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
-    /** \brief Extract the tonality factor of an input vector using a method described by Peeters 2003
+    /** \brief Extract the tonality coefficient of a spectrum from its flatness in decibels SFM_dB: min(SFM_dB / -60, 1), 1 for a tonal spectrum and 0 for a flat one (Johnston 1988; Peeters 2004, section 9.1)
      *
      * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to NULL.
      * \param N: not used - can safely be set to 0.
-     * \param *argv: a pointer to the LOG spectral flatness measure of an audio vector (e.g. the output from xtract_flatness_db)
-     * \param *result: the tonality factor of N values from the array pointed to by *data
+     * \param *argv: a pointer to the spectral flatness in decibels of a power spectrum (e.g. the output from xtract_flatness_db())
+     * \param *result: the tonality coefficient
      */
     int xtract_tonality(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
-    /** \brief Extract the noisiness of a peak spectrum using a method described by Tae Hong Park (2000): the part of the sum of its peaks that is not in its harmonics. The harmonic number of a peak is the whole number nearest to its frequency divided by the fundamental. A peak is a harmonic when its harmonic number is at least 1 and that quotient is within a threshold of it, and of several such peaks with one harmonic number only the largest is
+    /** \brief Extract the noisiness of a peak spectrum as Peeters (2004, section 7.1.2) defines it: the part of the sum of its peaks that is not in its harmonics. The harmonic number of a peak is the whole number nearest to its frequency divided by the fundamental. A peak is a harmonic when its harmonic number is at least 1 and that quotient is within a threshold of it, and of several such peaks with one harmonic number only the largest is
      *
      * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles representing the peak spectrum of an audio vector (e.g. *result from xtract_peak_spectrum()). It is expected that the first half of the array pointed to by *data will contain amplitudes for each peak considered, and the second half will contain the respective frequencies. A frequency of 0 marks an element that holds no peak. No frequency may be negative or NaN, and the frequency of a peak may not be lower than that of a peak before it
@@ -311,7 +308,7 @@ extern "C"
      */
     int xtract_rms_amplitude(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
-    /** \brief Extract the Inharmonicity of an input vector
+    /** \brief Extract the inharmonicity of a peak spectrum: twice the sum over the peaks of the distance of each from its multiple of the fundamental, weighted by its squared coefficient, divided by the fundamental and the sum of the squared coefficients (Peeters 2004, section 7.1.3)
      *
      * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles representing a magnitude peak spectrum of size N/2, and a frequency spectrum of size N/2 (This is the output format of xtract_peak_spectrum())
@@ -321,7 +318,7 @@ extern "C"
      */
     int xtract_spectral_inharmonicity(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
-    /** \brief Extract the spectral crest of an input vector using a method described by Peeters (2003)
+    /** \brief Extract the spectral crest of a spectrum: its largest coefficient divided by the mean of its coefficients (Peeters 2004, section 9.1)
      *
      * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to NULL
@@ -331,8 +328,7 @@ extern "C"
      */
     int xtract_crest(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
-    /* Odd to even harmonic ratio */
-    /** \brief Extract the Odd to even harmonic ratio of the harmonics of a sound
+    /** \brief Extract the odd to even harmonic ratio of the harmonics of a sound (Peeters 2004, section 7.1.5)
      *
      * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles representing the coefficients of the harmonics of a sound in order of harmonic number, the fundamental first (e.g. the first half of the array pointed to by *result from xtract_packed() when it is given the result of xtract_harmonic_spectrum()). The elements of 0 that xtract_packed() leaves after the harmonics do not change the result
@@ -347,22 +343,17 @@ extern "C"
      */
     int xtract_odd_even_ratio(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
-    /** \brief Extract the Sharpness of an input vector
+    /** \brief Extract the sharpness of a spectrum from its Bark band energies E(z), in the simplified form of Peeters (2004, section 8.1.3) of the sharpness of von Bismarck (1974): 0.11 times the sum over the bands z = 1 to N of z g(z) N'(z), divided by the sum of N'(z), where N'(z) = E(z)^0.23, g(z) = 1 below z = 15 and g(z) = 0.066 exp(0.171 z) from z = 15
      *
      * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles representing Bark band coefficients (e.g. the result of xtract_bark_coefficients())
      * \param N: the number of Bark bands to be considered, from 1 to XTRACT_BARK_BANDS
      * \param *argv: a pointer to NULL
-     * \param *result: the sharpness of the input, in acums
-     *
-     * Perceptual sharpness after von Bismarck (1974), in the formulation given
-     * by Peeters (2004) with band weighting g(z) per Fastl and Zwicker: the
-     * g-weighted centroid of specific loudness normalised by total loudness,
-     * where the specific loudness of Bark band z is N'(z) = E(z)^0.23.
+     * \param *result: the sharpness of the input, on a relative scale: it is not a sharpness in acums
      */
     int xtract_sharpness(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
-    /** \brief Extract the Slope of an input vector using a method described by Peeters(2003)
+    /** \brief Extract the spectral slope of a spectrum: the slope of the least-squares line through its coefficients over their frequencies, divided by the sum of the coefficients (Peeters 2004, section 6.1.5)
      *
      * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector: N/2 coefficients and then their N/2 frequencies (e.g. the array pointed to by *result from xtract_magnitude_spectrum(), or from xtract_packed() for the peaks of xtract_peak_spectrum() or the harmonics of xtract_harmonic_spectrum()). An element after the first that is 0 in both halves is passed over, so the elements of 0 that follow the peaks in the result of xtract_packed() do not count. The first element always counts
