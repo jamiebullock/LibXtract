@@ -930,7 +930,8 @@ UTEST(descriptors, appended_features_are_fully_described)
     ASSERT_EQ(xtract_descriptor(XTRACT_CQT)->is_delta, XTRACT_FALSE);
     ASSERT_EQ(xtract_descriptor(XTRACT_CQT)->result.vector.format, XTRACT_SPECTRAL);
     ASSERT_EQ(xtract_descriptor(XTRACT_CQT)->result.vector.unit, XTRACT_UNIT_ANY);
-    ASSERT_EQ(xtract_descriptor(XTRACT_CQT)->sources[0].year, 1992);
+    ASSERT_EQ(xtract_descriptor(XTRACT_CQT)->sources[0].year, 1991);
+    ASSERT_EQ(xtract_descriptor(XTRACT_CQT)->sources[1].year, 1992);
 
     ASSERT_EQ(xtract_descriptor(XTRACT_WAVELET_F0)->argc, 1);
     ASSERT_EQ(xtract_descriptor(XTRACT_WAVELET_F0)->argv[0].type, XTRACT_WAVELET_F0_STATE);

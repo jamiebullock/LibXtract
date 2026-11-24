@@ -902,9 +902,11 @@ static const xtract_argument_descriptor_t arguments_chroma[] = {
     {.name = "highest", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = 0, .max = XTRACT_UNBOUNDED_MAX, .default_value = 5000},
 };
 
-static const char *const authors_cqt_0[] = {"Brown", "Puckette"};
+static const char *const authors_cqt_0[] = {"Brown"};
+static const char *const authors_cqt_1[] = {"Brown", "Puckette"};
 static const xtract_source_t sources_cqt[] = {
-    {XTRACT_SOURCE_ORIGIN, 2, authors_cqt_0, 1992, NULL, NULL, NULL, NULL},
+    {XTRACT_SOURCE_ORIGIN, 1, authors_cqt_0, 1991, "Calculation of a constant Q spectral transform", "Journal of the Acoustical Society of America 89(1)", NULL, "doi:10.1121/1.400476"},
+    {XTRACT_SOURCE_FORMULATION, 2, authors_cqt_1, 1992, "An efficient algorithm for the calculation of a constant Q transform", "Journal of the Acoustical Society of America 92(5)", NULL, "doi:10.1121/1.404385"},
 };
 static const xtract_argument_descriptor_t arguments_cqt[] = {
     {.name = "kernel", .kind = XTRACT_ARGUMENT_OBJECT, .type = XTRACT_CQT_KERNEL, .unit = XTRACT_UNIT_NONE, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .builder = &builder_init_cqt},
@@ -2674,7 +2676,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .name = "cqt",
         .title = "Constant-Q Transform",
         .description = "Extract the constant-Q spectrum of a complex spectrum",
-        .source_count = 1,
+        .source_count = 2,
         .sources = sources_cqt,
         .validation_level = 0,
         .tags = 0,
