@@ -252,15 +252,15 @@ extern "C"
      */
     int xtract_loudness(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
-    /** \brief Extract the spectral flatness measure of an input vector, where the flatness measure (SFM) is defined as the ratio of the geometric mean to the arithmetic mean of a magnitude spectrum.
+    /** \brief Extract the spectral flatness measure of a power spectrum: the ratio of the geometric mean of its coefficients to their arithmetic mean (Gray and Markel 1974, equation 6; Peeters 2004, section 9.1)
      *
-     * \note As noted by Peeters (2003), the SFM should generally be computed on a small number of 'bands', which xtract_bands() provides.
+     * \note Peeters (2004) computes the measure over a small number of frequency bands. The power coefficients of one band give the flatness of that band.
      *
      * \param *ctx: a pointer to a context, or NULL
-     * \param *data: a pointer to the first element in an array of doubles representing the magnitude coefficients from the spectrum of an audio vector, (e.g. the first half of the array pointed to by *result from xtract_magnitude_spectrum(). Alternatively the magnitudes from a number of 'subbands' can be used by using *result from xtract_bands().
+     * \param *data: a pointer to the first element in an array of doubles representing the power coefficients from the spectrum of an audio vector (e.g. the first half of the array pointed to by *result from xtract_power_spectrum())
      * \param N: the number of *data array elements to be considered, at least 1
      * \param *argv: a pointer to NULL
-     * \param *result: the flatness of N values from the array pointed to by *data
+     * \param *result: the flatness of N values from the array pointed to by *data, from 0 to 1: 0 when an element is 0 or below, and 0 with no result when no element is above 0
      */
     int xtract_flatness(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 

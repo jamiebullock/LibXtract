@@ -2341,15 +2341,12 @@ UTEST(scalar, hps_second_loop_should_not_read_frequency_data_as_amplitudes)
     CHECK_REL(result, 5.0 * freq_res, 1e-3);
 }
 
-UTEST(scalar, flatness_of_sparse_constant_data_should_be_1)
+UTEST(scalar, flatness_of_sparse_constant_data_is_0)
 {
-    /* [0, 0, 5, 5]: 2 non-zero out of 4.
-     * Correct: geo_mean = (5*5)^(1/2) = 5, arith_mean = 10/2 = 5
-     * flatness = 1.0 */
-    double result = 0.0;
+    double result = -1.0;
     double data[] = {0.0, 0.0, 5.0, 5.0};
-    xtract_flatness(NULL, data, 4, NULL, &result);
-    CHECK_REL(result, 1.0, 1e-6);
+    ASSERT_EQ(xtract_flatness(NULL, data, 4, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(result, 0.0);
 }
 
 UTEST(vector, peak_spectrum_measures_a_peak_of_coefficients_near_the_largest_double)

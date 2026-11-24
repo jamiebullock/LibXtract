@@ -1351,13 +1351,13 @@ UTEST(descriptors, a_part_of_a_spectrum_is_a_quantity_of_its_own)
     ASSERT_EQ(magnitudes->provider_count, 1);
     ASSERT_EQ(magnitudes->providers[0].feature, XTRACT_MAGNITUDE_SPECTRUM);
     ASSERT_EQ(magnitudes->providers[0].part, XTRACT_PART_FIRST_HALF);
-    ASSERT_TRUE(xtract_descriptor(XTRACT_FLATNESS)->data.accepts[0] == magnitudes);
 
     ASSERT_STREQ(powers->name, "power_bins");
     ASSERT_EQ(powers->provider_count, 1);
     ASSERT_EQ(powers->providers[0].feature, XTRACT_POWER_SPECTRUM);
     ASSERT_TRUE(xtract_descriptor(XTRACT_MFCC)->data.accepts[1] == magnitudes);
     ASSERT_TRUE(xtract_descriptor(XTRACT_SPECTRAL_ENTROPY)->data.accepts[0] == powers);
+    ASSERT_TRUE(xtract_descriptor(XTRACT_FLATNESS)->data.accepts[0] == powers);
 }
 
 UTEST(descriptors, each_spectrum_is_the_quantity_of_its_own_name)

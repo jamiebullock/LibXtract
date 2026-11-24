@@ -2929,13 +2929,22 @@ UTEST(scalar, flatness_stability_constant)
     CHECK_REL(result, 1.0, 1e-10);
 }
 
-UTEST(scalar, flatness_stability_single_nonzero)
+UTEST(scalar, flatness_of_a_spectrum_with_an_empty_bin_is_0)
 {
-    double result = 0.0;
-    double data[] = {1.0, 0.0, 0.0, 0.0};
-    int rv = xtract_flatness(NULL, data, 4, NULL, &result);
-    ASSERT_EQ(rv, XTRACT_SUCCESS);
-    CHECK_REL(result, 1.0, 1e-10);
+    /* The geometric mean of coefficients one of which is 0 is 0 */
+    double result = -1.0;
+    double single[] = {1.0, 0.0, 0.0, 0.0};
+    double one_empty[] = {1.0, 0.0, 1.0, 1.0};
+    double one_negative[] = {1.0, -1.0, 1.0, 1.0};
+
+    ASSERT_EQ(xtract_flatness(NULL, single, 4, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(result, 0.0);
+    result = -1.0;
+    ASSERT_EQ(xtract_flatness(NULL, one_empty, 4, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(result, 0.0);
+    result = -1.0;
+    ASSERT_EQ(xtract_flatness(NULL, one_negative, 4, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(result, 0.0);
 }
 
 UTEST(scalar, flatness_stability_large_n)
