@@ -223,9 +223,10 @@ UTEST(descriptors, audited_result_ranges_and_units)
     CHECK_REL(xtract_descriptor(XTRACT_FLATNESS_DB)->result.scalar.max, 0.0, EPSILON);
     ASSERT_EQ(xtract_descriptor(XTRACT_FLATNESS_DB)->result.scalar.unit, XTRACT_DECIBELS);
 
-    /* Loudness is in sones, sharpness in acums. */
-    ASSERT_EQ(xtract_descriptor(XTRACT_LOUDNESS)->result.scalar.unit, XTRACT_SONE);
-    ASSERT_EQ(xtract_descriptor(XTRACT_SHARPNESS)->result.scalar.unit, XTRACT_ACUM);
+    /* Loudness and sharpness in the simplified forms of Peeters (2004) are
+     * not calibrated to sones or acums. */
+    ASSERT_EQ(xtract_descriptor(XTRACT_LOUDNESS)->result.scalar.unit, XTRACT_UNIT_NONE);
+    ASSERT_EQ(xtract_descriptor(XTRACT_SHARPNESS)->result.scalar.unit, XTRACT_UNIT_NONE);
 
     /* Cepstral coefficients are dimensionless. */
     ASSERT_EQ(xtract_descriptor(XTRACT_LPCC)->result.vector.unit, XTRACT_UNIT_NONE);
@@ -1332,7 +1333,7 @@ UTEST(descriptors, the_data_of_a_feature_accepts_what_vector_features_provide)
 UTEST(descriptors, a_part_of_a_spectrum_is_a_quantity_of_its_own)
 {
     const xtract_quantity_t *bins = xtract_descriptor(XTRACT_PEAK_SPECTRUM)->data.accepts[0];
-    const xtract_quantity_t *magnitudes = xtract_descriptor(XTRACT_ROLLOFF)->data.accepts[0];
+    const xtract_quantity_t *magnitudes = xtract_descriptor(XTRACT_LOG)->data.accepts[0];
     const xtract_quantity_t *powers = xtract_descriptor(XTRACT_MFCC)->data.accepts[0];
     int p;
 
