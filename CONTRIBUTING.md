@@ -106,9 +106,18 @@ not follow these rules. It has three lists.
 enumeration:
 
 - `name` is the name of the function without the `xtract_` prefix. `title`
-  and `description` are for a person to read. `reference` gives the `author`
-  and the `year` of the method, and `tags` lists what the feature assumes
-  about its data.
+  and `description` are for a person to read, and `tags` lists what the
+  feature assumes about its data.
+- `sources` lists the published works that define the feature, the work
+  that introduced the measure first with the `role` `origin`, then any work
+  whose formulation the feature computes with the role `formulation`. Each
+  gives the family names of its `authors` and the `year`, and may give the
+  `title`, the `venue`, the `locator` of the definition in the work
+  (`equation 7`) and a `permalink` (`doi:`, `hdl:` or `https://`). A feature the
+  library defines itself has no `sources`.
+- `validation_level` states how far the results have been checked against
+  values computed independently of the library, from 0 (not checked) to 3
+  (certified by a machine-checked proof).
 - `input` gives the `format` and the `unit` of the data, and `length`, the
   rule for N. `accepts` lists the quantities the data usually is, the usual
   one first, and is left out when only the caller has such data. `frames` is

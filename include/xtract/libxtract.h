@@ -268,6 +268,26 @@ extern "C"
         XTRACT_TAG_SOUND = 1 /* the feature applies a model of hearing or a musical scale, so its data is sound */
     };
 
+    /** \brief Enumeration of the roles a published source has for a feature */
+    typedef enum xtract_source_role_
+    {
+        XTRACT_SOURCE_ORIGIN,     /* the work that introduced the measure */
+        XTRACT_SOURCE_FORMULATION /* the work whose formulation the feature computes, where it differs from the origin */
+    } xtract_source_role_t;
+
+    /** \brief A published work that defines a feature */
+    typedef struct xtract_source_
+    {
+        xtract_source_role_t role;  /**< what the work is to the feature */
+        int author_count;           /**< the number of entries of authors, at least 1 */
+        const char *const *authors; /**< the family names of the authors, in the order the work gives them */
+        int year;                   /**< the year of publication, or 0 where it is not yet recorded */
+        const char *title;          /**< the title of the work, or NULL where it is not yet recorded */
+        const char *venue;          /**< the journal, proceedings, book or report it appeared in, e.g. "PhD thesis, University of Copenhagen", or NULL where it is not yet recorded */
+        const char *locator;        /**< where in the work the definition is, e.g. "equation 7" or "section 6.1.7", or NULL */
+        const char *permalink;      /**< a persistent identifier with its scheme, e.g. "doi:10.1121/1.426277", "hdl:1721.1/33941" or an https URL, or NULL where the work has none */
+    } xtract_source_t;
+
     struct xtract_quantity_;
 
     /** \brief A feature whose result is a quantity, and what makes it so */
@@ -337,11 +357,12 @@ extern "C"
     {
         int id; /**< the feature, as given in the enumeration xtract_features_ */
 
-        const char *name;        /**< the name of the feature's function without the xtract_ prefix, e.g. "spectral_centroid". A feature keeps its name in every release, and its number in the enumeration may change, so a stored reference to a feature is its name */
-        const char *title;       /**< a name to show to a person, e.g. "Spectral Centroid" */
-        const char *description; /**< what the feature is, in a sentence */
-        const char *author;      /**< the author of the method, or NULL */
-        int year;                /**< the year the method was published, or 0 */
+        const char *name;               /**< the name of the feature's function without the xtract_ prefix, e.g. "spectral_centroid". A feature keeps its name in every release, and its number in the enumeration may change, so a stored reference to a feature is its name */
+        const char *title;              /**< a name to show to a person, e.g. "Spectral Centroid" */
+        const char *description;        /**< what the feature is, in a sentence */
+        int source_count;               /**< the number of entries of sources, or 0 for a feature the library defines itself */
+        const xtract_source_t *sources; /**< the published works that define the feature, its origin first, or NULL when source_count is 0 */
+        int validation_level;           /**< how far the results have been checked against values computed independently of the library: 3 certified by a machine-checked proof, 2 derived from the definition or from certified published data, 1 compared with an independent implementation, 0 not checked. The level holds for the inputs the checks use, on every platform the library is tested on */
 
         unsigned int tags; /**< the sum of its tags, as given in the enumeration xtract_tags_ */
 
