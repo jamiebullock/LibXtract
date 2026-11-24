@@ -62,12 +62,56 @@ UTEST(descriptors, a_feature_has_a_name_a_title_and_a_description)
         ASSERT_TRUE(d->name != NULL && d->name[0] != 0);
         ASSERT_TRUE_MSG(d->title != NULL && d->title[0] != 0, d->name);
         ASSERT_TRUE_MSG(d->description != NULL && d->description[0] != 0, d->name);
-        ASSERT_TRUE_MSG(d->author == NULL || d->author[0] != 0, d->name);
     }
     ASSERT_STREQ(xtract_descriptor(XTRACT_SPECTRAL_CENTROID)->name, "spectral_centroid");
     ASSERT_STREQ(xtract_descriptor(XTRACT_SPECTRAL_CENTROID)->title, "Spectral Centroid");
-    ASSERT_TRUE(xtract_descriptor(XTRACT_MEAN)->author == NULL);
-    ASSERT_STREQ(xtract_descriptor(XTRACT_HU_MOMENTS)->author, "Ming-Kuei Hu");
+}
+
+static int is_absent_or_text(const char *text)
+{
+    return text == NULL || text[0] != 0;
+}
+
+UTEST(descriptors, a_source_names_its_authors_and_only_the_first_source_is_an_origin)
+{
+    int f, s, a;
+    for (f = 0; f < XTRACT_FEATURES; f++)
+    {
+        const xtract_function_descriptor_t *d = xtract_descriptor(f);
+        ASSERT_TRUE_MSG(d->source_count >= 0, d->name);
+        ASSERT_TRUE_MSG((d->source_count == 0) == (d->sources == NULL), d->name);
+        for (s = 0; s < d->source_count; s++)
+        {
+            const xtract_source_t *source = &d->sources[s];
+            ASSERT_TRUE_MSG(source->role == XTRACT_SOURCE_FORMULATION || (source->role == XTRACT_SOURCE_ORIGIN && s == 0), d->name);
+            ASSERT_TRUE_MSG(source->author_count >= 1 && source->authors != NULL, d->name);
+            for (a = 0; a < source->author_count; a++)
+                ASSERT_TRUE_MSG(source->authors[a] != NULL && source->authors[a][0] != 0, d->name);
+            ASSERT_TRUE_MSG(source->year >= 0, d->name);
+            ASSERT_TRUE_MSG(is_absent_or_text(source->title) && is_absent_or_text(source->venue), d->name);
+            ASSERT_TRUE_MSG(is_absent_or_text(source->locator) && is_absent_or_text(source->permalink), d->name);
+        }
+    }
+}
+
+UTEST(descriptors, a_feature_the_library_defines_has_no_source)
+{
+    const xtract_function_descriptor_t *mean = xtract_descriptor(XTRACT_MEAN);
+    const xtract_function_descriptor_t *hu = xtract_descriptor(XTRACT_HU_MOMENTS);
+
+    ASSERT_EQ(mean->source_count, 0);
+    ASSERT_TRUE(mean->sources == NULL);
+    ASSERT_EQ(hu->source_count, 1);
+    ASSERT_EQ(hu->sources[0].role, XTRACT_SOURCE_ORIGIN);
+    ASSERT_STREQ(hu->sources[0].authors[0], "Hu");
+    ASSERT_EQ(hu->sources[0].year, 1962);
+}
+
+UTEST(descriptors, no_feature_claims_a_validation_level_before_the_suite_holds_reference_values)
+{
+    int f;
+    for (f = 0; f < XTRACT_FEATURES; f++)
+        ASSERT_EQ_MSG(xtract_descriptor(f)->validation_level, 0, xtract_descriptor(f)->name);
 }
 
 UTEST(descriptors, scalar_vector_classification)
@@ -420,7 +464,7 @@ UTEST(descriptors, appended_features_are_fully_described)
     ASSERT_EQ(xtract_descriptor(XTRACT_MMBSES)->data.format, XTRACT_SPECTRAL_COMPLEX);
     ASSERT_EQ(xtract_descriptor(XTRACT_MMBSES)->result.vector.format, XTRACT_MEL_COEFFS);
     ASSERT_EQ(xtract_descriptor(XTRACT_MMBSES)->result.vector.unit, XTRACT_UNIT_NONE);
-    ASSERT_EQ(xtract_descriptor(XTRACT_MMBSES)->year, 2013);
+    ASSERT_EQ(xtract_descriptor(XTRACT_MMBSES)->sources[0].year, 2013);
 
     ASSERT_EQ(xtract_descriptor(XTRACT_SPECTRAL_SUBBAND_CENTROIDS)->argc, 1);
     ASSERT_EQ(xtract_descriptor(XTRACT_SPECTRAL_SUBBAND_CENTROIDS)->argv[0].type, XTRACT_FILTERBANK);
@@ -484,7 +528,7 @@ UTEST(descriptors, appended_features_are_fully_described)
         ASSERT_EQ_MSG(xtract_descriptor(f)->data.format, XTRACT_ARBITRARY_SERIES, xtract_descriptor(f)->name);
         ASSERT_EQ_MSG(xtract_descriptor(f)->data.unit, XTRACT_UNIT_ANY, xtract_descriptor(f)->name);
         ASSERT_EQ_MSG(xtract_descriptor(f)->is_delta, XTRACT_FALSE, xtract_descriptor(f)->name);
-        ASSERT_EQ_MSG(xtract_descriptor(f)->year, 1970, xtract_descriptor(f)->name);
+        ASSERT_EQ_MSG(xtract_descriptor(f)->sources[0].year, 1970, xtract_descriptor(f)->name);
         CHECK_NEAR(xtract_descriptor(f)->result.scalar.min, 0.0, EPSILON);
     }
     ASSERT_EQ(xtract_descriptor(XTRACT_HJORTH_ACTIVITY)->result.scalar.unit, XTRACT_UNIT_ANY_SQUARED);
@@ -514,7 +558,7 @@ UTEST(descriptors, appended_features_are_fully_described)
         ASSERT_EQ_MSG(xtract_descriptor(f)->data.unit, XTRACT_UNIT_ANY, xtract_descriptor(f)->name);
         ASSERT_EQ_MSG(xtract_descriptor(f)->result.scalar.unit, XTRACT_UNIT_NONE, xtract_descriptor(f)->name);
         ASSERT_EQ_MSG(xtract_descriptor(f)->is_delta, XTRACT_FALSE, xtract_descriptor(f)->name);
-        ASSERT_TRUE_MSG(xtract_descriptor(f)->year != 0, xtract_descriptor(f)->name);
+        ASSERT_TRUE_MSG(xtract_descriptor(f)->sources[0].year != 0, xtract_descriptor(f)->name);
     }
     ASSERT_EQ(xtract_descriptor(XTRACT_PETROSIAN_FRACTAL_DIMENSION)->argc, 0);
     ASSERT_EQ(xtract_descriptor(XTRACT_KATZ_FRACTAL_DIMENSION)->argc, 0);
@@ -735,7 +779,7 @@ UTEST(descriptors, appended_features_are_fully_described)
     ASSERT_EQ(xtract_descriptor(XTRACT_NORMALISED_MOMENTS)->result.vector.unit, XTRACT_UNIT_NONE);
 
     ASSERT_STREQ(xtract_descriptor(XTRACT_HU_MOMENTS)->name, "hu_moments");
-    ASSERT_EQ(xtract_descriptor(XTRACT_HU_MOMENTS)->year, 1962);
+    ASSERT_EQ(xtract_descriptor(XTRACT_HU_MOMENTS)->sources[0].year, 1962);
     ASSERT_EQ(xtract_descriptor(XTRACT_HU_MOMENTS)->argc, 0);
     ASSERT_EQ(xtract_descriptor(XTRACT_HU_MOMENTS)->data.format, XTRACT_NORMALISED_MOMENT_COEFFS);
     ASSERT_EQ(xtract_descriptor(XTRACT_HU_MOMENTS)->data.unit, XTRACT_UNIT_NONE);
@@ -771,7 +815,7 @@ UTEST(descriptors, appended_features_are_fully_described)
     ASSERT_EQ(xtract_descriptor(XTRACT_HISTOGRAM)->result.vector.unit, XTRACT_UNIT_NONE);
 
     ASSERT_STREQ(xtract_descriptor(XTRACT_COOCCURRENCE_MATRIX)->name, "cooccurrence_matrix");
-    ASSERT_EQ(xtract_descriptor(XTRACT_COOCCURRENCE_MATRIX)->year, 1973);
+    ASSERT_EQ(xtract_descriptor(XTRACT_COOCCURRENCE_MATRIX)->sources[0].year, 1973);
     ASSERT_EQ(xtract_descriptor(XTRACT_COOCCURRENCE_MATRIX)->argc, 5);
     ASSERT_EQ(xtract_descriptor(XTRACT_COOCCURRENCE_MATRIX)->argv[0].type, XTRACT_INT);
     CHECK_REL(xtract_descriptor(XTRACT_COOCCURRENCE_MATRIX)->argv[0].min, 1.0, EPSILON);
@@ -794,7 +838,7 @@ UTEST(descriptors, appended_features_are_fully_described)
     ASSERT_STREQ(xtract_descriptor(XTRACT_INVERSE_DIFFERENCE_MOMENT)->name, "inverse_difference_moment");
     for (f = XTRACT_COOCCURRENCE_CONTRAST; f <= XTRACT_INVERSE_DIFFERENCE_MOMENT; f++)
     {
-        ASSERT_EQ_MSG(xtract_descriptor(f)->year, 1973, xtract_descriptor(f)->name);
+        ASSERT_EQ_MSG(xtract_descriptor(f)->sources[0].year, 1973, xtract_descriptor(f)->name);
         ASSERT_EQ_MSG(xtract_descriptor(f)->argc, 0, xtract_descriptor(f)->name);
         ASSERT_EQ_MSG(xtract_descriptor(f)->data.format, XTRACT_SQUARE_MATRIX, xtract_descriptor(f)->name);
         ASSERT_EQ_MSG(xtract_descriptor(f)->data.unit, XTRACT_UNIT_NONE, xtract_descriptor(f)->name);
@@ -812,7 +856,7 @@ UTEST(descriptors, appended_features_are_fully_described)
     CHECK_REL(xtract_descriptor(XTRACT_INVERSE_DIFFERENCE_MOMENT)->result.scalar.max, 1.0, EPSILON);
 
     ASSERT_STREQ(xtract_descriptor(XTRACT_LOCAL_BINARY_PATTERNS)->name, "local_binary_patterns");
-    ASSERT_EQ(xtract_descriptor(XTRACT_LOCAL_BINARY_PATTERNS)->year, 2002);
+    ASSERT_EQ(xtract_descriptor(XTRACT_LOCAL_BINARY_PATTERNS)->sources[0].year, 2002);
     ASSERT_EQ(xtract_descriptor(XTRACT_LOCAL_BINARY_PATTERNS)->argc, 1);
     ASSERT_EQ(xtract_descriptor(XTRACT_LOCAL_BINARY_PATTERNS)->argv[0].type, XTRACT_INT);
     CHECK_REL(xtract_descriptor(XTRACT_LOCAL_BINARY_PATTERNS)->argv[0].min, 1.0, EPSILON);
@@ -886,7 +930,7 @@ UTEST(descriptors, appended_features_are_fully_described)
     ASSERT_EQ(xtract_descriptor(XTRACT_CQT)->is_delta, XTRACT_FALSE);
     ASSERT_EQ(xtract_descriptor(XTRACT_CQT)->result.vector.format, XTRACT_SPECTRAL);
     ASSERT_EQ(xtract_descriptor(XTRACT_CQT)->result.vector.unit, XTRACT_UNIT_ANY);
-    ASSERT_EQ(xtract_descriptor(XTRACT_CQT)->year, 1992);
+    ASSERT_EQ(xtract_descriptor(XTRACT_CQT)->sources[0].year, 1992);
 
     ASSERT_EQ(xtract_descriptor(XTRACT_WAVELET_F0)->argc, 1);
     ASSERT_EQ(xtract_descriptor(XTRACT_WAVELET_F0)->argv[0].type, XTRACT_WAVELET_F0_STATE);
