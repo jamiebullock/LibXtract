@@ -636,9 +636,9 @@ static const xtract_argument_descriptor_t arguments_wavelet_f0[] = {
     {.name = "state", .kind = XTRACT_ARGUMENT_OBJECT, .type = XTRACT_WAVELET_F0_STATE, .unit = XTRACT_UNIT_NONE, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .builder = &builder_wavelet_f0_state_new},
 };
 
-static const char *const authors_mcleod_f0_0[] = {"McLeod"};
+static const char *const authors_mcleod_f0_0[] = {"McLeod", "Wyvill"};
 static const xtract_source_t sources_mcleod_f0[] = {
-    {XTRACT_SOURCE_ORIGIN, 1, authors_mcleod_f0_0, 2005, NULL, NULL, NULL, NULL},
+    {XTRACT_SOURCE_ORIGIN, 2, authors_mcleod_f0_0, 2005, NULL, NULL, NULL, NULL},
 };
 static const xtract_argument_descriptor_t arguments_mcleod_f0[] = {
     {.name = "sample_rate", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = 2.2250738585072014e-308, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_SAMPLE_RATE},
@@ -853,13 +853,13 @@ static const xtract_argument_descriptor_t arguments_approximate_entropy[] = {
     {.name = "tolerance", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_ANY, .min = 0, .max = XTRACT_UNBOUNDED_MAX, .default_value = 0.20000000000000001},
 };
 
-static const char *const authors_periodicity_0[] = {"McLeod"};
+static const char *const authors_periodicity_0[] = {"McLeod", "Wyvill"};
 static const xtract_source_t sources_periodicity[] = {
-    {XTRACT_SOURCE_ORIGIN, 1, authors_periodicity_0, 2005, NULL, NULL, NULL, NULL},
+    {XTRACT_SOURCE_ORIGIN, 2, authors_periodicity_0, 2005, NULL, NULL, NULL, NULL},
 };
-static const char *const authors_signal_confidence_0[] = {"McLeod"};
+static const char *const authors_signal_confidence_0[] = {"McLeod", "Wyvill"};
 static const xtract_source_t sources_signal_confidence[] = {
-    {XTRACT_SOURCE_ORIGIN, 1, authors_signal_confidence_0, 2005, NULL, NULL, NULL, NULL},
+    {XTRACT_SOURCE_ORIGIN, 2, authors_signal_confidence_0, 2005, NULL, NULL, NULL, NULL},
 };
 static const xtract_argument_descriptor_t arguments_decay_rate[] = {
     {.name = "sample_rate", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = 2.2250738585072014e-308, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_SAMPLE_RATE},
@@ -940,9 +940,9 @@ static const xtract_argument_descriptor_t arguments_histogram[] = {
     {.name = "levels", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = 1, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_LEVELS},
 };
 
-static const char *const authors_cooccurrence_matrix_0[] = {"Haralick"};
+static const char *const authors_cooccurrence_matrix_0[] = {"Haralick", "Shanmugam", "Dinstein"};
 static const xtract_source_t sources_cooccurrence_matrix[] = {
-    {XTRACT_SOURCE_ORIGIN, 1, authors_cooccurrence_matrix_0, 1973, NULL, NULL, NULL, NULL},
+    {XTRACT_SOURCE_ORIGIN, 3, authors_cooccurrence_matrix_0, 1973, NULL, NULL, NULL, NULL},
 };
 static const xtract_argument_descriptor_t arguments_cooccurrence_matrix[] = {
     {.name = "width", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = 1, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_WIDTH},
@@ -952,25 +952,25 @@ static const xtract_argument_descriptor_t arguments_cooccurrence_matrix[] = {
     {.name = "symmetric", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = 0, .max = 1, .value_count = 2, .values = values_5, .default_value = 0, .is_whole = XTRACT_TRUE},
 };
 
-static const char *const authors_cooccurrence_contrast_0[] = {"Haralick"};
+static const char *const authors_cooccurrence_contrast_0[] = {"Haralick", "Shanmugam", "Dinstein"};
 static const xtract_source_t sources_cooccurrence_contrast[] = {
-    {XTRACT_SOURCE_ORIGIN, 1, authors_cooccurrence_contrast_0, 1973, NULL, NULL, NULL, NULL},
+    {XTRACT_SOURCE_ORIGIN, 3, authors_cooccurrence_contrast_0, 1973, NULL, NULL, NULL, NULL},
 };
-static const char *const authors_cooccurrence_correlation_0[] = {"Haralick"};
+static const char *const authors_cooccurrence_correlation_0[] = {"Haralick", "Shanmugam", "Dinstein"};
 static const xtract_source_t sources_cooccurrence_correlation[] = {
-    {XTRACT_SOURCE_ORIGIN, 1, authors_cooccurrence_correlation_0, 1973, NULL, NULL, NULL, NULL},
+    {XTRACT_SOURCE_ORIGIN, 3, authors_cooccurrence_correlation_0, 1973, NULL, NULL, NULL, NULL},
 };
-static const char *const authors_angular_second_moment_0[] = {"Haralick"};
+static const char *const authors_angular_second_moment_0[] = {"Haralick", "Shanmugam", "Dinstein"};
 static const xtract_source_t sources_angular_second_moment[] = {
-    {XTRACT_SOURCE_ORIGIN, 1, authors_angular_second_moment_0, 1973, NULL, NULL, NULL, NULL},
+    {XTRACT_SOURCE_ORIGIN, 3, authors_angular_second_moment_0, 1973, NULL, NULL, NULL, NULL},
 };
-static const char *const authors_inverse_difference_moment_0[] = {"Haralick"};
+static const char *const authors_inverse_difference_moment_0[] = {"Haralick", "Shanmugam", "Dinstein"};
 static const xtract_source_t sources_inverse_difference_moment[] = {
-    {XTRACT_SOURCE_ORIGIN, 1, authors_inverse_difference_moment_0, 1973, NULL, NULL, NULL, NULL},
+    {XTRACT_SOURCE_ORIGIN, 3, authors_inverse_difference_moment_0, 1973, NULL, NULL, NULL, NULL},
 };
-static const char *const authors_local_binary_patterns_0[] = {"Ojala"};
+static const char *const authors_local_binary_patterns_0[] = {"Ojala", "Pietikainen", "Maenpaa"};
 static const xtract_source_t sources_local_binary_patterns[] = {
-    {XTRACT_SOURCE_ORIGIN, 1, authors_local_binary_patterns_0, 2002, NULL, NULL, NULL, NULL},
+    {XTRACT_SOURCE_ORIGIN, 3, authors_local_binary_patterns_0, 2002, NULL, NULL, NULL, NULL},
 };
 static const xtract_argument_descriptor_t arguments_local_binary_patterns[] = {
     {.name = "width", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = 1, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_WIDTH},

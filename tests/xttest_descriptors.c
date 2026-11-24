@@ -72,7 +72,7 @@ static int is_absent_or_text(const char *text)
     return text == NULL || text[0] != 0;
 }
 
-UTEST(descriptors, a_source_names_its_authors_and_only_the_first_source_is_an_origin)
+UTEST(descriptors, a_source_names_its_authors_and_the_first_source_is_the_origin)
 {
     int f, s, a;
     for (f = 0; f < XTRACT_FEATURES; f++)
@@ -83,7 +83,7 @@ UTEST(descriptors, a_source_names_its_authors_and_only_the_first_source_is_an_or
         for (s = 0; s < d->source_count; s++)
         {
             const xtract_source_t *source = &d->sources[s];
-            ASSERT_TRUE_MSG(source->role == XTRACT_SOURCE_FORMULATION || (source->role == XTRACT_SOURCE_ORIGIN && s == 0), d->name);
+            ASSERT_EQ_MSG(source->role, s == 0 ? XTRACT_SOURCE_ORIGIN : XTRACT_SOURCE_FORMULATION, d->name);
             ASSERT_TRUE_MSG(source->author_count >= 1 && source->authors != NULL, d->name);
             for (a = 0; a < source->author_count; a++)
                 ASSERT_TRUE_MSG(source->authors[a] != NULL && source->authors[a][0] != 0, d->name);
