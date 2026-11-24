@@ -242,7 +242,7 @@ extern "C"
     /** \brief Extract the total loudness of a spectrum from its Bark band energies E(z): the sum over the bands of E(z)^0.23, the simplified form of Peeters (2004, section 8.1.1) of the loudness model of Moore, Glasberg and Baer (1997). The result is on a relative scale; it is not a loudness in sones
      *
      * \param *ctx: a pointer to a context, or NULL
-     * \param *data: a pointer to the first element in an array of doubles representing a set of BARK_BANDS bark coefficients
+     * \param *data: a pointer to the first element in an array of doubles representing the energies of the Bark bands of a spectrum (e.g. *result from xtract_bark_coefficients() given the first half of the array pointed to by *result from xtract_power_spectrum(); given magnitudes, xtract_bark_coefficients() gives sums of magnitudes, which are not energies)
      * \param N: the number of coefficients to be considered, from 1 to XTRACT_BARK_BANDS
      * \param *argv: a pointer to NULL
      * \param *result: the total loudness of N values from the array pointed to by *data; a coefficient of 0 or below contributes nothing
@@ -270,7 +270,7 @@ extern "C"
      * \param *data: a pointer to NULL.
      * \param N: not used - can safely be set to 0.
      * \param *argv: a pointer to a double representing spectral flatness, from 0 to 1
-     * \param *result: the spectral flatness in decibels, at most 0
+     * \param *result: the spectral flatness in decibels, at most 0. A flatness of 0 gives 10 log10(2e-42), about -416.99, in place of minus infinity
      */
     int xtract_flatness_db(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
@@ -346,7 +346,7 @@ extern "C"
     /** \brief Extract the sharpness of a spectrum from its Bark band energies E(z), in the simplified form of Peeters (2004, section 8.1.3) of the sharpness of von Bismarck (1974): 0.11 times the sum over the bands z = 1 to N of z g(z) N'(z), divided by the sum of N'(z), where N'(z) = E(z)^0.23, g(z) = 1 below z = 15 and g(z) = 0.066 exp(0.171 z) from z = 15
      *
      * \param *ctx: a pointer to a context, or NULL
-     * \param *data: a pointer to the first element in an array of doubles representing Bark band coefficients (e.g. the result of xtract_bark_coefficients())
+     * \param *data: a pointer to the first element in an array of doubles representing the energies of the Bark bands of a spectrum (e.g. *result from xtract_bark_coefficients() given the first half of the array pointed to by *result from xtract_power_spectrum(); given magnitudes, xtract_bark_coefficients() gives sums of magnitudes, which are not energies)
      * \param N: the number of Bark bands to be considered, from 1 to XTRACT_BARK_BANDS
      * \param *argv: a pointer to NULL
      * \param *result: the sharpness of the input, on a relative scale: it is not a sharpness in acums
