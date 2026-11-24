@@ -287,14 +287,10 @@ extern "C"
     /** \brief Extract the noisiness of a peak spectrum as Peeters (2004, section 7.1.2) defines it: the part of the sum of its peaks that is not in its harmonics. The harmonic number of a peak is the whole number nearest to its frequency divided by the fundamental. A peak is a harmonic when its harmonic number is at least 1 and that quotient is within a threshold of it, and of several such peaks with one harmonic number only the largest is
      *
      * \param *ctx: a pointer to a context, or NULL
-     * \param *data: a pointer to the first element in an array of doubles representing the peak spectrum of an audio vector (e.g. *result from xtract_peak_spectrum()). It is expected that the first half of the array pointed to by *data will contain amplitudes for each peak considered, and the second half will contain the respective frequencies. A frequency of 0 marks an element that holds no peak. No frequency may be negative or NaN, and the frequency of a peak may not be lower than that of a peak before it
+     * \param *data: a pointer to the first element in an array of doubles representing the peak spectrum of the power spectrum of an audio vector (e.g. *result from xtract_peak_spectrum() given the first half of the array pointed to by *result from xtract_power_spectrum()). It is expected that the first half of the array pointed to by *data will contain amplitudes for each peak considered, and the second half will contain the respective frequencies. A frequency of 0 marks an element that holds no peak. No frequency may be negative or NaN, and the frequency of a peak may not be lower than that of a peak before it
      * \param N: the size of the array pointed to by *data, at least 2 and even
      * \param *argv: a pointer to an array containing the fundamental (f0) of the spectrum, finite and at least 0 (0 gives no result), and a threshold (t) where 0<=t<=1.0, and t determines the distance from the nearest harmonic number within which a peak can be considered harmonic
-     * \param *result: the sum of the peaks that are not harmonics divided by the sum of the peaks, or 0 with no result when the peaks sum to 0
-     *
-     * The sums are of the coefficients in whatever unit they are given:
-     * the peaks of a power spectrum from xtract_power_spectrum() give the energy of the partials
-     * that are not harmonics as a part of the energy of the partials.
+     * \param *result: the energy of the peaks that are not harmonics divided by the energy of all the peaks, or 0 with no result when the peaks sum to 0
      */
     int xtract_noisiness(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
@@ -331,15 +327,10 @@ extern "C"
     /** \brief Extract the odd to even harmonic ratio of the harmonics of a sound (Peeters 2004, section 7.1.5)
      *
      * \param *ctx: a pointer to a context, or NULL
-     * \param *data: a pointer to the first element in an array of doubles representing the coefficients of the harmonics of a sound in order of harmonic number, the fundamental first (e.g. the first half of the array pointed to by *result from xtract_packed() when it is given the result of xtract_harmonic_spectrum()). The elements of 0 that xtract_packed() leaves after the harmonics do not change the result
+     * \param *data: a pointer to the first element in an array of doubles representing the powers of the harmonics of a sound in order of harmonic number, the fundamental first (e.g. the first half of the array pointed to by *result from xtract_packed() when it is given the result of xtract_harmonic_spectrum() of the result of xtract_power_spectrum()). The elements of 0 that xtract_packed() leaves after the harmonics do not change the result
      * \param N: the number of elements to be considered, at least 1
      * \param *argv: a pointer to NULL
-     * \param *result: the sum of the coefficients of the odd harmonics divided by the sum of those of the even harmonics, or 0 with no result when either sum is 0
-     *
-     * The ratio is computed in whatever unit the coefficients are given:
-     * magnitude coefficients give an amplitude ratio, while coefficients
-     * derived from xtract_power_spectrum() give the odd-to-even harmonic energy
-     * ratio of Peeters (2004).
+     * \param *result: the energy of the odd harmonics divided by the energy of the even harmonics, or 0 with no result when either is 0
      */
     int xtract_odd_even_ratio(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 

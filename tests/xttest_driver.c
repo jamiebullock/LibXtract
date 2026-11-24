@@ -188,6 +188,11 @@ static int provide(const xtract_provider_t *provider, const xttest_source *sourc
         first = call.result_length / 2 - 1;
         count = call.result_length / 2 + 1;
     }
+    else if (provider->part == XTRACT_PART_FIRST_HALF_FROM_ONE)
+    {
+        first = 1;
+        count = call.result_length / 2 - 1;
+    }
     if (first < 0 || count < 1)
     {
         xttest_call_free(&call);

@@ -7,7 +7,13 @@
     {"name": "coefficients_and_frequencies", "default": "magnitude_spectrum", "format": "spectral"},
     {"name": "partial_amplitudes", "default": "packed", "format": "spectral_magnitudes"},
     {"name": "harmonic_amplitudes", "default": "packed", "format": "spectral_harmonics_magnitudes"},
-    {"name": "lpc_coefficients", "default": "lpc", "format": "lpc_coeffs"}
+    {"name": "lpc_coefficients", "default": "lpc", "format": "lpc_coeffs"},
+    {"name": "magnitude_bins_from_one", "default": "magnitude_spectrum", "format": "spectral_magnitudes"},
+    {"name": "log_bins_from_one", "default": "log", "format": "arbitrary_series"},
+    {"name": "power_peaks", "default": "peak_spectrum", "format": "spectral"},
+    {"name": "power_harmonics", "default": "harmonic_spectrum", "format": "spectral"},
+    {"name": "harmonic_powers", "default": "packed", "format": "spectral_harmonics_magnitudes"},
+    {"name": "bark_energies", "default": "bark_coefficients", "format": "bark_coeffs"}
   ],
   "builders": [
     {
@@ -345,7 +351,7 @@
       "sources": [{"role": "origin", "authors": ["Moore", "Glasberg", "Baer"], "year": 1997, "title": "A model for the prediction of thresholds, loudness, and partial loudness", "venue": "Journal of the Audio Engineering Society 45(4)", "permalink": "https://www.aes.org/e-lib/browse.cfm?elib=10272"}, {"role": "formulation", "authors": ["Peeters"], "year": 2004, "title": "A large set of audio features for sound description (similarity and classification) in the CUIDADO project", "venue": "Technical report, IRCAM", "locator": "section 8.1.1"}],
       "validation_level": 0,
       "tags": ["sound"],
-      "input": {"format": "bark_coeffs", "unit": "any", "accepts": ["bark_coefficients"], "length": "N >= 1 && N <= XTRACT_BARK_BANDS"},
+      "input": {"format": "bark_coeffs", "unit": "any", "accepts": ["bark_energies"], "length": "N >= 1 && N <= XTRACT_BARK_BANDS"},
       "arguments": [],
       "invariance": {"level": "unstated"},
       "result": {"kind": "scalar", "unit": "none", "min": 0}
@@ -406,7 +412,7 @@
       "description": "Extract the noisiness of a peak spectrum",
       "sources": [{"role": "origin", "authors": ["Peeters"], "year": 2004, "title": "A large set of audio features for sound description (similarity and classification) in the CUIDADO project", "venue": "Technical report, IRCAM", "locator": "section 7.1.2"}],
       "validation_level": 0,
-      "input": {"format": "spectral_peaks", "unit": "any", "accepts": ["peak_spectrum"], "length": "N >= 2 && N % 2 == 0"},
+      "input": {"format": "spectral_peaks", "unit": "any", "accepts": ["power_peaks"], "length": "N >= 2 && N % 2 == 0"},
       "argument_type": "float",
       "arguments": [
         {"name": "fundamental", "kind": "result", "accepts": "fundamental", "of": "source", "unit": "hertz", "min": 0},
@@ -444,7 +450,7 @@
       "description": "Extract the odd-to-even harmonic ratio of a spectrum",
       "sources": [{"role": "origin", "authors": ["Peeters"], "year": 2004, "title": "A large set of audio features for sound description (similarity and classification) in the CUIDADO project", "venue": "Technical report, IRCAM", "locator": "section 7.1.5"}],
       "validation_level": 0,
-      "input": {"format": "spectral_harmonics_magnitudes", "unit": "any", "accepts": ["harmonic_amplitudes"]},
+      "input": {"format": "spectral_harmonics_magnitudes", "unit": "any", "accepts": ["harmonic_powers"]},
       "arguments": [],
       "result": {"kind": "scalar", "unit": "none", "min": 0}
     },
@@ -455,7 +461,7 @@
       "sources": [{"role": "origin", "authors": ["von Bismarck"], "year": 1974, "title": "Sharpness as an attribute of the timbre of steady sounds", "venue": "Acustica 30(3)", "locator": "equation 1"}, {"role": "formulation", "authors": ["Peeters"], "year": 2004, "title": "A large set of audio features for sound description (similarity and classification) in the CUIDADO project", "venue": "Technical report, IRCAM", "locator": "section 8.1.3"}],
       "validation_level": 0,
       "tags": ["sound"],
-      "input": {"format": "bark_coeffs", "unit": "any", "accepts": ["bark_coefficients"], "length": "N >= 1 && N <= XTRACT_BARK_BANDS"},
+      "input": {"format": "bark_coeffs", "unit": "any", "accepts": ["bark_energies"], "length": "N >= 1 && N <= XTRACT_BARK_BANDS"},
       "arguments": [],
       "result": {"kind": "scalar", "unit": "none", "min": 0}
     },
@@ -613,7 +619,7 @@
       "title": "Spectral Flux",
       "description": "Extract the spectral flux of a spectrum",
       "validation_level": 0,
-      "input": {"format": "subframes", "unit": "any", "accepts": ["bins", "log"], "frames": 2, "length": "N >= 2 && N % 2 == 0"},
+      "input": {"format": "subframes", "unit": "any", "accepts": ["magnitude_bins_from_one", "log_bins_from_one"], "frames": 2, "length": "N >= 2 && N % 2 == 0"},
       "argument_type": "float",
       "arguments": [
         {"name": "order", "kind": "setting", "unit": "none", "default": 2},
@@ -697,6 +703,7 @@
       "description": "Extract bark coefficients from a spectrum",
       "validation_level": 0,
       "tags": ["sound"],
+      "provides": [{"quantity": "bark_energies", "given": "power_bins"}],
       "input": {"format": "spectral_magnitudes", "unit": "any", "accepts": ["bins"]},
       "arguments": [
         {"name": "band_limits", "kind": "object", "built_by": "init_bark"}
@@ -708,7 +715,7 @@
       "title": "Peak Spectrum",
       "description": "Extract the spectral peaks from of a spectrum",
       "validation_level": 0,
-      "provides": ["coefficients_and_frequencies"],
+      "provides": ["coefficients_and_frequencies", {"quantity": "power_peaks", "given": "power_bins"}],
       "input": {"format": "spectral_magnitudes", "unit": "any", "accepts": ["bins"]},
       "argument_type": "float",
       "arguments": [
@@ -769,7 +776,7 @@
       "title": "Harmonic Spectrum",
       "description": "Extract the harmonics from a spectrum",
       "validation_level": 0,
-      "provides": ["coefficients_and_frequencies"],
+      "provides": ["coefficients_and_frequencies", {"quantity": "power_harmonics", "given": "power_spectrum"}],
       "input": {"format": "spectral", "unit": "any", "accepts": ["magnitude_spectrum"], "length": "N >= 2 && N % 2 == 0"},
       "argument_type": "float",
       "arguments": [
@@ -1593,7 +1600,8 @@
       "provides": [
         "coefficients_and_frequencies",
         {"quantity": "partial_amplitudes", "part": "first_half"},
-        {"quantity": "harmonic_amplitudes", "part": "first_half", "given": "harmonic_spectrum"}
+        {"quantity": "harmonic_amplitudes", "part": "first_half", "given": "harmonic_spectrum"},
+        {"quantity": "harmonic_powers", "part": "first_half", "given": "power_harmonics"}
       ],
       "input": {"format": "spectral_peaks", "unit": "any", "accepts": ["peak_spectrum", "harmonic_spectrum"], "length": "N >= 2 && N % 2 == 0"},
       "arguments": [],
@@ -1607,7 +1615,8 @@
       "provides": [
         "coefficients_and_frequencies",
         {"quantity": "bins", "part": "first_half"},
-        {"quantity": "magnitude_bins", "part": "first_half"}
+        {"quantity": "magnitude_bins", "part": "first_half"},
+        {"quantity": "magnitude_bins_from_one", "part": "first_half_from_one"}
       ],
       "input": {"format": "spectral_complex", "unit": "any", "accepts": ["spectrum"], "length": "N >= 2 && N % 2 == 0"},
       "argument_type": "float",
@@ -1668,7 +1677,8 @@
       "description": "Extract the logarithm of each element of an input vector, compressed by a factor",
       "sources": [{"role": "origin", "authors": ["Boeck", "Krebs", "Schedl"], "year": 2012, "title": "Evaluating the online capabilities of onset detection methods", "venue": "Proceedings of the 13th International Society for Music Information Retrieval Conference", "locator": "equation 1", "permalink": "doi:10.5281/zenodo.1416036"}],
       "validation_level": 0,
-      "input": {"format": "arbitrary_series", "unit": "any", "accepts": ["magnitude_bins"]},
+      "provides": [{"quantity": "log_bins_from_one", "given": "magnitude_bins_from_one"}],
+      "input": {"format": "arbitrary_series", "unit": "any", "accepts": ["magnitude_bins_from_one"]},
       "argument_type": "float",
       "arguments": [
         {"name": "lambda", "kind": "setting", "unit": "none", "min": 2.2250738585072014e-308, "default": 1}

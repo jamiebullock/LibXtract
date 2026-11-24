@@ -259,7 +259,8 @@ extern "C"
     {
         XTRACT_PART_WHOLE,
         XTRACT_PART_FIRST_HALF,
-        XTRACT_PART_FROM_ONE_BEFORE_THE_SECOND_HALF /* the element before the second half, then the second half */
+        XTRACT_PART_FROM_ONE_BEFORE_THE_SECOND_HALF, /* the element before the second half, then the second half */
+        XTRACT_PART_FIRST_HALF_FROM_ONE              /* the first half without its first element */
     } xtract_part_t;
 
     /** \brief Enumeration of tags. Each states something a feature assumes about its data, and a descriptor has the sum of its tags */

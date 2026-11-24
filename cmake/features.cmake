@@ -30,7 +30,7 @@ set(VALUE_TYPES float int)
 set(OBJECT_TYPES floatarray intarray filterbank cqt_kernel last_n_state wavelet_f0_state)
 set(PROPERTIES length sample_rate transform_size bin_spacing width series levels)
 set(SUBJECTS input source)
-set(PARTS whole first_half from_one_before_the_second_half)
+set(PARTS whole first_half from_one_before_the_second_half first_half_from_one)
 set(TAGS sound)
 set(LEVELS unit log unstated)
 # The properties of a result under a change of its data, the effects each
