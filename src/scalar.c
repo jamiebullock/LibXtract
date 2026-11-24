@@ -854,6 +854,8 @@ int xtract_spectral_inharmonicity(xtract_context *ctx, const double *data, const
         if (amps[n])
         {
             h = xtract_argv_int(floor(freqs[n] / fund + 0.5));
+            if (h == 0)
+                continue;
             num += fabs(freqs[n] - h * fund) * XTRACT_SQ(amps[n]);
             den += XTRACT_SQ(amps[n]);
         }

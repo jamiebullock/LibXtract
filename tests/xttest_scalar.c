@@ -3184,6 +3184,20 @@ UTEST(scalar, spectral_inharmonicity_detuned)
     CHECK_REL(result, 0.05, EPSILON);
 }
 
+UTEST(scalar, spectral_inharmonicity_leaves_out_a_peak_below_half_the_fundamental)
+{
+    double fund = 200.0;
+    double result = -1.0;
+    double below_and_on[] = {1.0, 1.0, 40.0, 200.0};
+    double below_only[] = {1.0, 0.0, 40.0, 0.0};
+
+    ASSERT_EQ(xtract_spectral_inharmonicity(NULL, below_and_on, 4, &fund, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(result, 0.0);
+    result = -1.0;
+    ASSERT_EQ(xtract_spectral_inharmonicity(NULL, below_only, 4, &fund, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
+}
+
 UTEST(scalar, spectral_inharmonicity_zero_fundamental)
 {
     double result = -1.0;
