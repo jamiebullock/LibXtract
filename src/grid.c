@@ -443,8 +443,8 @@ int xtract_inverse_difference_moment(xtract_context *ctx, const double *data, co
  * from the centre, the two elements beside the centre on the way to the
  * corner, and the corner: it lies 1 / sqrt(2) along both axes, so the
  * corner has weight 1/2 and each side 1 / sqrt(2) - 1/2. A difference from
- * the centre overflows only towards one sign; halving them all then keeps
- * the sign of their weighted sum */
+ * the centre overflows only towards one sign; quartering them all keeps the
+ * sum of the two sides finite and the sign of the weighted sum */
 static int diagonal_at_or_above(const double centre, const double side, const double other_side, const double corner)
 {
     const double side_weight = 0.70710678118654752440 - 0.5;
@@ -454,8 +454,8 @@ static int diagonal_at_or_above(const double centre, const double side, const do
      * them, as mirroring the grid does, gives the same rounding */
     if (!isfinite(sides) || !isfinite(d3))
     {
-        sides = (ldexp(side, -1) - ldexp(centre, -1)) + (ldexp(other_side, -1) - ldexp(centre, -1));
-        d3 = ldexp(corner, -1) - ldexp(centre, -1);
+        sides = (ldexp(side, -2) - ldexp(centre, -2)) + (ldexp(other_side, -2) - ldexp(centre, -2));
+        d3 = ldexp(corner, -2) - ldexp(centre, -2);
     }
 
     return side_weight * sides + 0.5 * d3 >= 0.0;

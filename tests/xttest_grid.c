@@ -984,6 +984,17 @@ UTEST(local_binary_patterns, a_diagonal_adds_both_sides_when_a_difference_overfl
     expect_one_class(grid, 1, utest_result);
 }
 
+UTEST(local_binary_patterns, a_diagonal_keeps_its_sign_when_both_sides_overflow)
+{
+    /* Each side of every diagonal differs from the centre by more than the
+     * largest double, and so would their halves added together; the
+     * diagonals are still below the centre and the sides above it */
+    const double c = -0.01 * DBL_MAX;
+    const double grid[] = {-DBL_MAX, DBL_MAX, -DBL_MAX, DBL_MAX, c, DBL_MAX, -DBL_MAX, DBL_MAX, -DBL_MAX};
+
+    expect_one_class(grid, 9, utest_result);
+}
+
 UTEST(local_binary_patterns, neighbours_in_more_than_one_run_are_class_9)
 {
     /* The four corners are higher than the centre and the four sides lower */
