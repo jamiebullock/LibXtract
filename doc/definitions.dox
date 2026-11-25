@@ -529,8 +529,12 @@ Validation level 0, not checked.
 
 xtract_mfcc()
 
+\f[ c_i = \sum_{m=1}^{M} \ln \max\left(E_m, \epsilon \max_j E_j\right) \cos\left(\frac{\pi i (m - \tfrac{1}{2})}{M}\right) \text{ when } \max_j E_j > 0, \text{ and } c_i = 0 \text{ otherwise}, \quad i = 0, \dots, M-1, \quad E_m = \sum_k H_m(k) P_k, \quad \epsilon = 2^{-52} \f]
+
 Sources:
-- Origin: Rabiner
+- Origin: Davis and Mermelstein (1980). "Comparison of parametric representations for monosyllabic word recognition in continuously spoken sentences". IEEE Transactions on Acoustics, Speech, and Signal Processing 28(4), equation 1 and figure 1. <a href="https://doi.org/10.1109/TASSP.1980.1163420">doi:10.1109/TASSP.1980.1163420</a>
+- Formulation: Rabiner and Juang (1993). "Fundamentals of speech recognition". PTR Prentice Hall, section 4.5.6, equation 4.90
+- Formulation: Young, Evermann, Gales, Hain, Kershaw, Liu, Moore, Odell, Ollason, Povey, Valtchev and Woodland (2009). "The HTK book, for HTK version 3.4". Cambridge University Engineering Department, section 5.4, equation 5.13
 
 Validation level 0, not checked.
 

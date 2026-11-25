@@ -132,10 +132,20 @@ static xtract_filterbank *cepstral_filterbank_alloc(const int N, const int n_fil
     return filterbank;
 }
 
+static double mel_of_hertz(const double hz)
+{
+    return 1127 * log(1 + hz / 700);
+}
+
+static double hertz_of_mel(const double mel)
+{
+    return 700 * (exp(mel / 1127) - 1);
+}
+
 xtract_filterbank *xtract_init_mfcc(const int N, const double sr, const int style, const double freq_min, const double freq_max, const int n_filters)
 {
     xtract_filterbank *filterbank;
-    double mel_min, mel_max, mel_step, mel_peak, first_height, lower, peak;
+    double mel_min, mel_step, first_base, lower, peak, upper;
     double shape[4];
     int n;
 
@@ -147,30 +157,20 @@ xtract_filterbank *xtract_init_mfcc(const int N, const double sr, const int styl
     if (filterbank == NULL)
         return NULL;
 
-    /* The peaks are equally spaced on the mel scale from freq_min, with
-     * freq_max one step beyond the last filter's peak. Each filter is the
-     * triangle through the peak below its own, its own and the peak above
-     * on the linear frequency scale (Rabiner and Juang 1993, section 4.5.6),
-     * the first rising from 0 Hz. */
-    mel_min = 1127 * log(1 + freq_min / 700);
-    mel_max = 1127 * log(1 + freq_max / 700);
-    mel_step = (mel_max - mel_min) / n_filters;
-    first_height = 2 / (700 * (exp((mel_min + mel_step) / 1127) - 1));
-    mel_peak = mel_min;
-    lower = 0.0;
-    peak = freq_min;
+    mel_min = mel_of_hertz(freq_min);
+    mel_step = (mel_of_hertz(freq_max) - mel_min) / (n_filters + 1);
+    first_base = hertz_of_mel(mel_min + 2 * mel_step) - freq_min;
+    lower = freq_min;
+    peak = hertz_of_mel(mel_min + mel_step);
     for (n = 0; n < n_filters; n++)
     {
-        double upper;
-
-        mel_peak += mel_step;
-        upper = 700 * (exp(mel_peak / 1127) - 1);
+        upper = n == n_filters - 1 ? freq_max : hertz_of_mel(mel_min + (n + 2) * mel_step);
         shape[0] = lower;
         shape[1] = peak;
         shape[2] = upper;
         /* Equal area: a triangle's height is inverse to its base, scaled so
          * that the first filter keeps a gain of 1. */
-        shape[3] = style == XTRACT_EQUAL_GAIN ? 1.0 : 2 / (upper - lower) * (1 / first_height);
+        shape[3] = style == XTRACT_EQUAL_GAIN ? 1.0 : first_base / (upper - lower);
         sample_filter(xtract_filter_gains(filterbank, n), N, sr, triangle_response, shape);
         lower = peak;
         peak = upper;

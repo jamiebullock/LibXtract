@@ -456,13 +456,13 @@ extern "C"
 
     /** \brief Build a mel filterbank
      *
-     * The filterbank has n_filters triangular filters whose peaks are equally spaced on the mel scale from freq_min, each filter spanning the peaks either side of its own and the first rising from 0 Hz (Rabiner and Juang 1993, section 4.5.6). Each filter has a gain for each of the N / 2 bins of an N-point transform from DC upward, bin k being at frequency k * sr / N.
+     * The filterbank has n_filters triangular filters on n_filters + 2 points equally spaced on the mel scale 1127 ln(1 + f / 700) from freq_min to freq_max: filter n rises from point n to its peak at point n + 1 and falls to point n + 2 (Rabiner and Juang 1993, section 4.5.6; the HTK Book, section 5.4). Each filter has a gain for each of the N / 2 bins of an N-point transform from DC upward, bin k being at frequency k * sr / N.
      *
      * \param N: the size of the transform the filters will be applied to, at least 2 and even
      * \param sr: the sample rate in Hz, finite and above 0
      * \param style: XTRACT_EQUAL_GAIN or XTRACT_EQUAL_AREA, as given in the enumeration xtract_mfcc_types_
-     * \param freq_min: the peak frequency of the first filter in Hz, finite and at least 0
-     * \param freq_max: the frequency in Hz the peaks step towards, reached one step beyond the last filter, finite and above freq_min
+     * \param freq_min: the frequency in Hz at which the first filter starts to rise, finite and at least 0
+     * \param freq_max: the frequency in Hz at which the last filter falls to 0, finite and above freq_min
      * \param n_filters: the number of filters, at least 2
      * \return a pointer to the filterbank, or NULL if an argument is out of range or allocation fails
      */

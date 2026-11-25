@@ -100,23 +100,20 @@ extern "C"
      */
     int xtract_autocorrelation_fft(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
-    /** \brief Extract Mel Frequency Cepstral Coefficients based on a method described by Rabiner
+    /** \brief Extract the mel frequency cepstral coefficients of a power spectrum (Davis and Mermelstein 1980): the cosine transform of the natural log of the energy each filter of a mel filterbank passes
      *
      * \param *ctx: a pointer to a context created for at least the larger of N and the filterbank's n_filters elements
-     * \param *data: a pointer to the first element in an array of spectral coefficients, the first half of the array pointed to by *result from xtract_power_spectrum(), so that element k is bin k as the filterbank expects. Rabiner and Juang define the mel cepstrum on the power spectrum; the first half of the *result of xtract_magnitude_spectrum() may be passed instead
+     * \param *data: a pointer to the first element in an array of spectral coefficients, the first half of the array pointed to by *result from xtract_power_spectrum(), so that element k is bin k as the filterbank expects. Davis and Mermelstein, and Rabiner and Juang, define the mel cepstrum on the power spectrum
      * \param N: the number of coefficients, at least 1 and equal to half the N the filterbank was built for
      * \param *argv: a pointer to an xtract_filterbank from xtract_init_mfcc() or xtract_init_filterbank(), built for the size of the transform that produced the spectrum
-     * \param *result: a pointer to an array of n_filters doubles containing the resultant MFCC: the DCT of the log of the energy each filter passes. An energy below DBL_EPSILON times the largest energy of the filters counts as that. The array is zeroed with no result when no filter has an energy above 0
+     * \param *result: a pointer to an array of n_filters doubles containing the coefficients c[0] to c[n_filters - 1]: c[i] is the sum over the filters m from 1 of the log energy of filter m times cos(pi i (m - 1/2) / n_filters), with no scale factor. c[0] is the sum of the log energies; Davis and Mermelstein's coefficients are c[1] onward. An energy below DBL_EPSILON times the largest energy of the filters counts as that. The array is zeroed with no result when no filter has an energy above 0
      */
     int xtract_mfcc(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
-    /** \brief Extract a Mel spectrogram (log-scaled mel-filtered energies)
-     *
-     * This computes the intermediate step of MFCC extraction: the mel filter bank
-     * is applied to the magnitude spectrum and the result is log-scaled.
+    /** \brief Extract the natural log of the energy each filter of a mel filterbank passes, the step of xtract_mfcc() before the cosine transform
      *
      * \param *ctx: a pointer to a context, or NULL
-     * \param *data: a pointer to the first element in an array of spectral coefficients, the first half of the array pointed to by *result from xtract_power_spectrum(), so that element k is bin k as the filterbank expects. Rabiner and Juang define the mel cepstrum on the power spectrum; the first half of the *result of xtract_magnitude_spectrum() may be passed instead
+     * \param *data: a pointer to the first element in an array of spectral coefficients, the first half of the array pointed to by *result from xtract_power_spectrum(), so that element k is bin k as the filterbank expects. Davis and Mermelstein, and Rabiner and Juang, define the mel cepstrum on the power spectrum
      * \param N: the number of coefficients, at least 1 and equal to half the N the filterbank was built for
      * \param *argv: a pointer to an xtract_filterbank from xtract_init_mfcc() or xtract_init_filterbank(), built for the size of the transform that produced the spectrum
      * \param *result: a pointer to an array of n_filters doubles containing the resultant log mel energies (one per filter). An energy below DBL_EPSILON times the largest energy of the filters counts as that. The array is zeroed with no result when no filter has an energy above 0
