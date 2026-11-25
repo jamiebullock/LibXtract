@@ -303,15 +303,36 @@ UTEST(vector, lpcc_rejects_non_positive_cepstrum_length)
 UTEST(vector, lpcc_computes_cepstral_recursion_for_int_argv)
 {
     /* data[0] is unused (the recursion starts at data[1]):
-     * c[1] = a[1] = 0.5
-     * c[2] = a[2] + (1 * c[1] * a[1]) / 2 = 0.25 + 0.125 = 0.375 */
+     * c[1] = -a[1] = -0.5
+     * c[2] = -a[2] - (1 * c[1] * a[1]) / 2 = -0.25 + 0.125 = -0.125 */
     double lpc[3] = {0.0, 0.5, 0.25};
     double result[2] = {0};
     int cep_length = 2;
 
     ASSERT_EQ(xtract_lpcc(NULL, lpc, 3, &cep_length, result), XTRACT_SUCCESS);
-    CHECK_REL(result[0], 0.5, EPSILON);
-    CHECK_REL(result[1], 0.375, EPSILON);
+    CHECK_REL(result[0], -0.5, EPSILON);
+    CHECK_REL(result[1], -0.125, EPSILON);
+}
+
+UTEST(vector, lpcc_of_lpc_is_the_cepstrum_of_the_all_pole_model)
+{
+    /* The autocorrelation of x[n] = 1.2 x[n-1] - 0.5 x[n-2] + e[n], scaled
+     * to r[0] = 1, has the model 1 / (1 - 1.2 z^-1 + 0.5 z^-2), whose
+     * cepstrum begins 1.2, 0.22, -0.024 */
+    double autocorr[3] = {1.0, 0.8, 0.46};
+    double lpc_result[4];
+    double lpc[3];
+    double result[3];
+    int cep_length = 3;
+
+    ASSERT_EQ(xtract_lpc(NULL, autocorr, 3, NULL, lpc_result), XTRACT_SUCCESS);
+    lpc[0] = 1.0;
+    lpc[1] = lpc_result[2];
+    lpc[2] = lpc_result[3];
+    ASSERT_EQ(xtract_lpcc(NULL, lpc, 3, &cep_length, result), XTRACT_SUCCESS);
+    CHECK_REL(result[0], 1.2, 1e-12);
+    CHECK_REL(result[1], 0.22, 1e-12);
+    CHECK_REL(result[2], -0.024, 1e-12);
 }
 
 UTEST(vector, lpcc_rejects_a_null_argv)
@@ -336,7 +357,7 @@ UTEST(vector, lpcc_cepstrum_order_macro_rounds_three_halves_p)
 UTEST(vector, lpcc_extrapolates_past_the_lpc_order_by_the_rabiner_juang_recursion)
 {
     /* Three LPC coefficients and a six-term cepstrum. The first three terms
-     * follow c[n] = a[n] + (1/n) sum_{k=1}^{n-1} k c[k] a[n-k]; the rest
+     * follow c[n] = -a[n] - (1/n) sum_{k=1}^{n-1} k c[k] a[n-k]; the rest
      * have no a[n] and sum only over the last p terms. Both are recomputed
      * here from the coefficients. */
     const int p = 3, q = 6;
@@ -352,7 +373,7 @@ UTEST(vector, lpcc_extrapolates_past_the_lpc_order_by_the_rabiner_juang_recursio
 
         for (k = (n <= p) ? 1 : n - p; k < n; k++)
             sum += k * expected[k - 1] * lpc[n - k];
-        expected[n - 1] = (n <= p ? lpc[n] : 0.0) + sum / n;
+        expected[n - 1] = -(n <= p ? lpc[n] : 0.0) - sum / n;
     }
 
     ASSERT_EQ(xtract_lpcc(NULL, lpc, p + 1, &cep_length, result), XTRACT_SUCCESS);
@@ -367,8 +388,8 @@ UTEST(vector, lpcc_shorter_than_the_order_stops_at_the_requested_length)
     int cep_length = 2;
 
     ASSERT_EQ(xtract_lpcc(NULL, lpc, 4, &cep_length, result), XTRACT_SUCCESS);
-    CHECK_REL(result[0], 0.5, 1e-12);
-    CHECK_REL(result[1], -0.25 + 0.5 * 0.5 / 2.0, 1e-12);
+    CHECK_REL(result[0], -0.5, 1e-12);
+    CHECK_REL(result[1], 0.25 + 0.5 * 0.5 / 2.0, 1e-12);
     ASSERT_EQ(result[2], -1.0);
 }
 
@@ -1813,6 +1834,43 @@ UTEST(vector, lpc_rejects_fewer_than_two_autocorrelation_values)
     CHECK_REL(result[0], -0.5, EPSILON);
 }
 
+UTEST(vector, lpc_has_no_result_for_a_singular_autocorrelation)
+{
+    /* A constant series is predicted exactly after one coefficient: the
+     * prediction error is 0 and the second coefficient is undefined */
+    double singular[3] = {1.0, 1.0, 1.0};
+    double silent[3] = {0.0, 0.0, 0.0};
+    double result[4] = {-1.0, -1.0, -1.0, -1.0};
+    int n;
+
+    ASSERT_EQ(xtract_lpc(NULL, singular, 3, NULL, result), XTRACT_NO_RESULT);
+    for (n = 0; n < 4; n++)
+        ASSERT_EQ(result[n], 0.0);
+    ASSERT_EQ(xtract_lpc(NULL, silent, 3, NULL, result), XTRACT_NO_RESULT);
+}
+
+UTEST(vector, lpc_has_no_result_when_the_prediction_error_turns_negative)
+{
+    /* No series has this autocorrelation: the fourth reflection coefficient
+     * is about 1.39, so the prediction error after it is negative */
+    double autocorr[6] = {1.0, 0.9, 0.7, 0.55, 0.4, 0.3};
+    double result[10];
+
+    ASSERT_EQ(xtract_lpc(NULL, autocorr, 6, NULL, result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result[0], 0.0);
+}
+
+UTEST(vector, lpc_with_an_exact_last_coefficient_succeeds)
+{
+    /* The prediction error reaches 0 only after the last coefficient */
+    double data[2] = {1.0, 1.0};
+    double result[2];
+
+    ASSERT_EQ(xtract_lpc(NULL, data, 2, NULL, result), XTRACT_SUCCESS);
+    CHECK_REL(result[0], -1.0, 1e-12);
+    CHECK_REL(result[1], -1.0, 1e-12);
+}
+
 UTEST(vector, lpc_of_simple_autocorrelation_sequence)
 {
     /* For a first-order AR process with coefficient a = 0.5:
@@ -1894,7 +1952,7 @@ UTEST(vector, lpc_5th_order_matches_a_textbook_levinson_durbin_recursion)
      * indices from the fourth order on, which is why a fifth-order case
      * is needed. */
     const int p = 5;
-    double autocorr[6] = {1.0, 0.9, 0.7, 0.55, 0.4, 0.3};
+    double autocorr[6] = {1.0, 0.7, 0.3, -0.1, -0.3, -0.35};
     double a[6] = {0};
     double ref[5];
     double energy = autocorr[0];
