@@ -448,16 +448,17 @@ int xtract_inverse_difference_moment(xtract_context *ctx, const double *data, co
 static int diagonal_at_or_above(const double centre, const double side, const double other_side, const double corner)
 {
     const double side_weight = 0.70710678118654752440 - 0.5;
-    double d1 = side - centre, d2 = other_side - centre, d3 = corner - centre;
+    double sides = (side - centre) + (other_side - centre), d3 = corner - centre;
 
-    if (!isfinite(d1) || !isfinite(d2) || !isfinite(d3))
+    /* The two sides are added before they are weighted, so that swapping
+     * them, as mirroring the grid does, gives the same rounding */
+    if (!isfinite(sides) || !isfinite(d3))
     {
-        d1 = 0.5 * side - 0.5 * centre;
-        d2 = 0.5 * other_side - 0.5 * centre;
+        sides = (0.5 * side - 0.5 * centre) + (0.5 * other_side - 0.5 * centre);
         d3 = 0.5 * corner - 0.5 * centre;
     }
 
-    return side_weight * d1 + side_weight * d2 + 0.5 * d3 >= 0.0;
+    return side_weight * sides + 0.5 * d3 >= 0.0;
 }
 
 /* The class of the element at the centre of the three rows given: the number

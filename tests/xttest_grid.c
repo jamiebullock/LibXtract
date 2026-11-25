@@ -960,6 +960,18 @@ UTEST(local_binary_patterns, a_diagonal_keeps_its_sign_when_a_difference_overflo
     expect_one_class(grid, 9, utest_result);
 }
 
+UTEST(local_binary_patterns, a_diagonal_whose_sides_cancel_keeps_its_class_under_mirroring)
+{
+    /* Towards the upper left corner the two sides differ from the centre
+     * by +5 and -5 and the corner by 0, so the interpolated value equals
+     * the centre exactly in the grid and in its transpose */
+    const double grid[] = {0.0, -5.0, -10.0, 5.0, 0.0, -10.0, -10.0, -10.0, -10.0};
+    const double transposed[] = {0.0, 5.0, -10.0, -5.0, 0.0, -10.0, -10.0, -10.0, -10.0};
+
+    expect_one_class(grid, 2, utest_result);
+    expect_one_class(transposed, 2, utest_result);
+}
+
 UTEST(local_binary_patterns, neighbours_in_more_than_one_run_are_class_9)
 {
     /* The four corners are higher than the centre and the four sides lower */
