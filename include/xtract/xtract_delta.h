@@ -26,10 +26,10 @@ extern "C"
 
 #include "xtract_types.h"
 
-    /** \brief Extract flux
+    /** \brief Extract the spectral flux of two successive frames: the L-p norm of their difference. With order 1 and XTRACT_POSITIVE_SLOPE it is the spectral flux of Boeck, Krebs and Schedl (2012, equation 3), and of the results of xtract_log() their logarithmic spectral flux (equation 7)
      *
      * \param *ctx: a pointer to a context created for at least N elements
-     * \param *data: a pointer to the first element in an array of doubles comprising two successive spectral frames: the current frame in the first N/2 elements, the previous frame in the second N/2 elements
+     * \param *data: a pointer to the first element in an array of doubles comprising two successive spectral frames: the current frame in the first N/2 elements, the previous frame in the second N/2 elements. Boeck, Krebs and Schedl sum over the bins from bin 1, so each frame is the magnitudes of a spectrum from bin 1 (e.g. the first half of the array pointed to by *result from xtract_magnitude_spectrum() without its first element), or the result of xtract_log() of them
      * \param N: the total number of elements in the array pointed to by *data (twice the frame size), at least 2 and even
      * \param *argv: a pointer to an array of two doubles as for xtract_lnorm(): the norm order and the filter type (enumeration xtract_lnorm_filter_types_). XTRACT_POSITIVE_SLOPE counts only the bins that rose from the previous frame, which is the half-wave rectified flux used for onset detection, and XTRACT_NEGATIVE_SLOPE only the bins that fell
      * \param *result: a pointer to a double representing the spectral flux: the L-p norm of the difference between the two frames

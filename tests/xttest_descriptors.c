@@ -1333,7 +1333,7 @@ UTEST(descriptors, the_data_of_a_feature_accepts_what_vector_features_provide)
 UTEST(descriptors, a_part_of_a_spectrum_is_a_quantity_of_its_own)
 {
     const xtract_quantity_t *bins = xtract_descriptor(XTRACT_PEAK_SPECTRUM)->data.accepts[0];
-    const xtract_quantity_t *magnitudes = xtract_descriptor(XTRACT_LOG)->data.accepts[0];
+    const xtract_quantity_t *magnitudes = xtract_descriptor(XTRACT_MFCC)->data.accepts[1];
     const xtract_quantity_t *powers = xtract_descriptor(XTRACT_MFCC)->data.accepts[0];
     int p;
 
@@ -1448,7 +1448,7 @@ UTEST(descriptors, coefficients_with_their_frequencies_come_from_six_features)
 
 UTEST(descriptors, harmonic_amplitudes_are_the_first_half_of_a_packed_harmonic_spectrum)
 {
-    static const int takers[] = {XTRACT_TRISTIMULUS_1, XTRACT_TRISTIMULUS_2, XTRACT_TRISTIMULUS_3, XTRACT_ODD_EVEN_RATIO};
+    static const int takers[] = {XTRACT_TRISTIMULUS_1, XTRACT_TRISTIMULUS_2, XTRACT_TRISTIMULUS_3};
     const xtract_quantity_t *harmonics = xtract_descriptor(XTRACT_TRISTIMULUS_1)->data.accepts[0];
     const xtract_quantity_t *partials = xtract_descriptor(XTRACT_SMOOTHNESS)->data.accepts[0];
     size_t t;
@@ -1465,6 +1465,46 @@ UTEST(descriptors, harmonic_amplitudes_are_the_first_half_of_a_packed_harmonic_s
     ASSERT_EQ(partials->providers[0].feature, XTRACT_PACKED);
     ASSERT_EQ(partials->providers[0].part, XTRACT_PART_FIRST_HALF);
     ASSERT_TRUE(partials->providers[0].given == NULL);
+}
+
+UTEST(descriptors, the_energy_features_are_given_quantities_of_a_power_spectrum)
+{
+    const xtract_quantity_t *harmonic_powers = xtract_descriptor(XTRACT_ODD_EVEN_RATIO)->data.accepts[0];
+    const xtract_quantity_t *power_peaks = xtract_descriptor(XTRACT_NOISINESS)->data.accepts[0];
+    const xtract_quantity_t *bark_energies = xtract_descriptor(XTRACT_LOUDNESS)->data.accepts[0];
+    const xtract_quantity_t *power_harmonics;
+
+    ASSERT_STREQ(harmonic_powers->name, "harmonic_powers");
+    ASSERT_EQ(harmonic_powers->providers[0].feature, XTRACT_PACKED);
+    ASSERT_EQ(harmonic_powers->providers[0].part, XTRACT_PART_FIRST_HALF);
+    power_harmonics = harmonic_powers->providers[0].given;
+    ASSERT_STREQ(power_harmonics->name, "power_harmonics");
+    ASSERT_EQ(power_harmonics->providers[0].feature, XTRACT_HARMONIC_SPECTRUM);
+    ASSERT_EQ(power_harmonics->providers[0].given->providers[0].feature, XTRACT_POWER_SPECTRUM);
+
+    ASSERT_STREQ(power_peaks->name, "power_peaks");
+    ASSERT_EQ(power_peaks->providers[0].feature, XTRACT_PEAK_SPECTRUM);
+    ASSERT_STREQ(power_peaks->providers[0].given->name, "power_bins");
+
+    ASSERT_STREQ(bark_energies->name, "bark_energies");
+    ASSERT_EQ(bark_energies->providers[0].feature, XTRACT_BARK_COEFFICIENTS);
+    ASSERT_STREQ(bark_energies->providers[0].given->name, "power_bins");
+    ASSERT_TRUE(xtract_descriptor(XTRACT_SHARPNESS)->data.accepts[0] == bark_energies);
+    ASSERT_STREQ(xtract_descriptor(XTRACT_ROLLOFF)->data.accepts[0]->name, "power_bins");
+}
+
+UTEST(descriptors, the_spectral_flux_of_boeck_takes_the_bins_from_bin_1)
+{
+    const xtract_quantity_t *magnitudes = xtract_descriptor(XTRACT_LOG)->data.accepts[0];
+    const xtract_quantity_t *logs = xtract_descriptor(XTRACT_FLUX)->data.accepts[1];
+
+    ASSERT_STREQ(magnitudes->name, "magnitude_bins_from_one");
+    ASSERT_EQ(magnitudes->providers[0].feature, XTRACT_MAGNITUDE_SPECTRUM);
+    ASSERT_EQ(magnitudes->providers[0].part, XTRACT_PART_FIRST_HALF_FROM_ONE);
+    ASSERT_TRUE(xtract_descriptor(XTRACT_FLUX)->data.accepts[0] == magnitudes);
+    ASSERT_STREQ(logs->name, "log_bins_from_one");
+    ASSERT_EQ(logs->providers[0].feature, XTRACT_LOG);
+    ASSERT_TRUE(logs->providers[0].given == magnitudes);
 }
 
 UTEST(descriptors, data_that_more_than_one_quantity_can_be_names_the_usual_one_first)
@@ -1507,7 +1547,9 @@ UTEST(descriptors, five_features_take_two_successive_frames)
 
         ASSERT_EQ_MSG(d->data.frames, takes_two ? 2 : 1, d->name);
         if (takes_two)
-            ASSERT_TRUE_MSG(d->data.accepts[0]->providers[0].feature == XTRACT_MAGNITUDE_SPECTRUM && d->data.accepts[0]->providers[0].part == XTRACT_PART_FIRST_HALF, d->name);
+            ASSERT_TRUE_MSG(d->data.accepts[0]->providers[0].feature == XTRACT_MAGNITUDE_SPECTRUM &&
+                                d->data.accepts[0]->providers[0].part == (f == XTRACT_FLUX ? XTRACT_PART_FIRST_HALF_FROM_ONE : XTRACT_PART_FIRST_HALF),
+                            d->name);
     }
 }
 

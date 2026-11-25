@@ -80,10 +80,10 @@ extern "C"
 
     /** \brief Extract the natural logarithm of each element of a vector, compressed by a factor: ln(1 + lambda * x) (Boeck, Krebs and Schedl 2012, equation 1)
      *
-     * Taken of the coefficients of a magnitude spectrum, it gives the logarithmic spectral flux of Boeck, Krebs and Schedl (2012) as the sum of the rises from one frame to the next: xtract_flux() of the two results with order 1 and XTRACT_POSITIVE_SLOPE
+     * Taken of the magnitudes of a spectrum from bin 1, it gives the logarithmic spectral flux of Boeck, Krebs and Schedl (2012, equation 7) as the sum of the rises from one frame to the next: xtract_flux() of the two results with order 1 and XTRACT_POSITIVE_SLOPE
      *
      * \param *ctx: a pointer to a context, or NULL
-     * \param *data: a pointer to the first element in an array of doubles, each at least 0
+     * \param *data: a pointer to the first element in an array of doubles, each at least 0 (e.g. the first half of the array pointed to by *result from xtract_magnitude_spectrum() without its first element)
      * \param N: the number of elements to be considered, at least 1
      * \param *argv: a pointer to a double representing the compression factor lambda, finite and above 0
      * \param *result: a pointer to an array of N doubles: ln(1 + lambda * x) of each element x of *data
