@@ -161,15 +161,13 @@ jobs:
           path: build/fuzz/fuzz/crash-*
           if-no-files-found: ignore
 
-  # On a pull request only the lines it changes are mutated. A run over every
-  # line takes 25 to 45 minutes, by the speed of the runner
+  # On a pull request only the lines it changes are mutated. A pull request
+  # that changes most of the library takes as long as a run over every line on
+  # this runner: 25 to 45 minutes
   mutation:
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-24.04
     timeout-minutes: 75
-    env:
-      # A pull request is tested at a merge commit whose first parent is the
-      # base it was merged onto
-      DIFF_REF: ${{ github.event_name == 'pull_request' && 'HEAD^1' || '' }}
     steps:
       - uses: actions/checkout@v6
         with:
@@ -182,9 +180,11 @@ jobs:
           echo "983ea9c84ecab621414d5442a66c1a1ce4127491b79d42fd5e2fd6fe01d02699  mull.deb" | sha256sum -c -
           sudo apt-get update && sudo apt-get install -y clang-18 ./mull.deb
 
+      # A pull request is tested at a merge commit whose first parent is the
+      # base it was merged onto
       - name: Mutation tests (Mull, ASan + UBSan)
         run: |
-          cmake --preset mutation -DXTRACT_MUTATION_DIFF_REF="$DIFF_REF"
+          cmake --preset mutation -DXTRACT_MUTATION_DIFF_REF=HEAD^1
           cmake --build --preset mutation
           cmake --build --preset mutation --target mutation
 
@@ -195,7 +195,35 @@ jobs:
         with:
           name: mutation-report
           path: build/mutation/reports/mutation.json
-          if-no-files-found: ${{ github.event_name == 'pull_request' && 'ignore' || 'error' }}
+          if-no-files-found: ignore
+          retention-days: 7
+
+  # Every line is mutated, on a self-hosted runner with clang-18 and Mull
+  # 0.34.1 installed. Only pushes and manual runs reach it, both of which need
+  # write access to the repository: a pull request from a fork runs any code it
+  # contains on the machine that takes the job
+  mutation-full:
+    if: github.event_name != 'pull_request'
+    runs-on: [self-hosted, linux, x64, mutation]
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Mutation tests (Mull, ASan + UBSan)
+        run: |
+          cmake --preset mutation -DXTRACT_MUTATION_WORKERS=14
+          cmake --build --preset mutation -j 20
+          cmake --build --preset mutation --target mutation
+
+      - name: Upload mutation report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mutation-report
+          path: build/mutation/reports/mutation.json
+          if-no-files-found: error
           retention-days: 7
 
   # The binary that the proofs run on is built on every pull request, which
