@@ -468,8 +468,8 @@ static const xtract_quantity_t *const accepted_peak[] = {&quantity_last_n};
 static const xtract_quantity_t *const accepted_mmbses[] = {&quantity_spectrum};
 static const xtract_quantity_t *const accepted_spectral_subband_centroids[] = {&quantity_magnitude_spectrum, &quantity_power_spectrum};
 static const xtract_quantity_t *const accepted_spectral_entropy[] = {&quantity_power_bins, &quantity_bins};
-static const xtract_quantity_t *const accepted_kullback_leibler_divergence[] = {&quantity_magnitude_bins};
-static const xtract_quantity_t *const accepted_itakura_saito_divergence[] = {&quantity_magnitude_bins};
+static const xtract_quantity_t *const accepted_kullback_leibler_divergence[] = {&quantity_bins};
+static const xtract_quantity_t *const accepted_itakura_saito_divergence[] = {&quantity_power_bins};
 static const xtract_quantity_t *const accepted_modified_kullback_leibler[] = {&quantity_magnitude_bins};
 static const xtract_quantity_t *const accepted_spectral_contrast[] = {&quantity_magnitude_spectrum, &quantity_power_spectrum};
 static const xtract_quantity_t *const accepted_chroma[] = {&quantity_magnitude_spectrum, &quantity_power_spectrum};
@@ -685,7 +685,7 @@ static const xtract_argument_descriptor_t arguments_wavelet_f0[] = {
 
 static const char *const authors_mcleod_f0_0[] = {"McLeod", "Wyvill"};
 static const xtract_source_t sources_mcleod_f0[] = {
-    {XTRACT_SOURCE_ORIGIN, 2, authors_mcleod_f0_0, 2005, NULL, NULL, NULL, NULL},
+    {XTRACT_SOURCE_ORIGIN, 2, authors_mcleod_f0_0, 2005, "A smarter way to find pitch", "Proceedings of the International Computer Music Conference, Barcelona", "sections 5 and 6", NULL},
 };
 static const xtract_argument_descriptor_t arguments_mcleod_f0[] = {
     {.name = "sample_rate", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = 2.2250738585072014e-308, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_SAMPLE_RATE},
@@ -835,15 +835,15 @@ static const xtract_argument_descriptor_t arguments_median_absolute_deviation[] 
 
 static const char *const authors_hjorth_activity_0[] = {"Hjorth"};
 static const xtract_source_t sources_hjorth_activity[] = {
-    {XTRACT_SOURCE_ORIGIN, 1, authors_hjorth_activity_0, 1970, NULL, NULL, NULL, NULL},
+    {XTRACT_SOURCE_ORIGIN, 1, authors_hjorth_activity_0, 1970, "EEG analysis based on time domain properties", "Electroencephalography and Clinical Neurophysiology 29(3)", "table I", "doi:10.1016/0013-4694(70)90143-4"},
 };
 static const char *const authors_hjorth_mobility_0[] = {"Hjorth"};
 static const xtract_source_t sources_hjorth_mobility[] = {
-    {XTRACT_SOURCE_ORIGIN, 1, authors_hjorth_mobility_0, 1970, NULL, NULL, NULL, NULL},
+    {XTRACT_SOURCE_ORIGIN, 1, authors_hjorth_mobility_0, 1970, "EEG analysis based on time domain properties", "Electroencephalography and Clinical Neurophysiology 29(3)", "table I and p. 308", "doi:10.1016/0013-4694(70)90143-4"},
 };
 static const char *const authors_hjorth_complexity_0[] = {"Hjorth"};
 static const xtract_source_t sources_hjorth_complexity[] = {
-    {XTRACT_SOURCE_ORIGIN, 1, authors_hjorth_complexity_0, 1970, NULL, NULL, NULL, NULL},
+    {XTRACT_SOURCE_ORIGIN, 1, authors_hjorth_complexity_0, 1970, "EEG analysis based on time domain properties", "Electroencephalography and Clinical Neurophysiology 29(3)", "table I and p. 308", "doi:10.1016/0013-4694(70)90143-4"},
 };
 static const xtract_argument_descriptor_t arguments_time_reversal_asymmetry[] = {
     {.name = "lag", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = 1, .max = XTRACT_UNBOUNDED_MAX, .default_value = 1, .is_whole = XTRACT_TRUE},
@@ -851,7 +851,7 @@ static const xtract_argument_descriptor_t arguments_time_reversal_asymmetry[] = 
 
 static const char *const authors_petrosian_fractal_dimension_0[] = {"Petrosian"};
 static const xtract_source_t sources_petrosian_fractal_dimension[] = {
-    {XTRACT_SOURCE_ORIGIN, 1, authors_petrosian_fractal_dimension_0, 1995, NULL, NULL, NULL, NULL},
+    {XTRACT_SOURCE_ORIGIN, 1, authors_petrosian_fractal_dimension_0, 1995, "Kolmogorov complexity of finite sequences and recognition of different preictal EEG patterns", "Proceedings of the Eighth IEEE Symposium on Computer-Based Medical Systems", "p. 214, binary sequence (c)", "doi:10.1109/CBMS.1995.465426"},
 };
 static const char *const authors_katz_fractal_dimension_0[] = {"Katz"};
 static const xtract_source_t sources_katz_fractal_dimension[] = {
@@ -859,15 +859,17 @@ static const xtract_source_t sources_katz_fractal_dimension[] = {
 };
 static const char *const authors_higuchi_fractal_dimension_0[] = {"Higuchi"};
 static const xtract_source_t sources_higuchi_fractal_dimension[] = {
-    {XTRACT_SOURCE_ORIGIN, 1, authors_higuchi_fractal_dimension_0, 1988, NULL, NULL, NULL, NULL},
+    {XTRACT_SOURCE_ORIGIN, 1, authors_higuchi_fractal_dimension_0, 1988, "Approach to an irregular time series on the basis of the fractal theory", "Physica D 31(2)", "section 2", "doi:10.1016/0167-2789(88)90081-4"},
 };
 static const xtract_argument_descriptor_t arguments_higuchi_fractal_dimension[] = {
     {.name = "k_max", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = 2, .max = XTRACT_UNBOUNDED_MAX, .default_value = 10, .is_whole = XTRACT_TRUE},
 };
 
 static const char *const authors_permutation_entropy_0[] = {"Bandt", "Pompe"};
+static const char *const authors_permutation_entropy_1[] = {"Cao", "Tung", "Gao", "Protopopescu", "Hively"};
 static const xtract_source_t sources_permutation_entropy[] = {
-    {XTRACT_SOURCE_ORIGIN, 2, authors_permutation_entropy_0, 2002, NULL, NULL, NULL, NULL},
+    {XTRACT_SOURCE_ORIGIN, 2, authors_permutation_entropy_0, 2002, "Permutation entropy: a natural complexity measure for time series", "Physical Review Letters 88(17)", "section II, and section III for the normalisation", "doi:10.1103/PhysRevLett.88.174102"},
+    {XTRACT_SOURCE_FORMULATION, 5, authors_permutation_entropy_1, 2004, "Detecting dynamical changes in time series using the permutation entropy", "Physical Review E 70(4)", "section II, the delay and the order of equal values", "doi:10.1103/PhysRevE.70.046217"},
 };
 static const xtract_argument_descriptor_t arguments_permutation_entropy[] = {
     {.name = "order", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = 2, .max = 8, .default_value = 3, .is_whole = XTRACT_TRUE},
@@ -875,16 +877,18 @@ static const xtract_argument_descriptor_t arguments_permutation_entropy[] = {
 };
 
 static const char *const authors_lempel_ziv_complexity_0[] = {"Lempel", "Ziv"};
+static const char *const authors_lempel_ziv_complexity_1[] = {"Kaspar", "Schuster"};
 static const xtract_source_t sources_lempel_ziv_complexity[] = {
-    {XTRACT_SOURCE_ORIGIN, 2, authors_lempel_ziv_complexity_0, 1976, NULL, NULL, NULL, NULL},
+    {XTRACT_SOURCE_ORIGIN, 2, authors_lempel_ziv_complexity_0, 1976, "On the complexity of finite sequences", "IEEE Transactions on Information Theory 22(1)", "section III", "doi:10.1109/TIT.1976.1055501"},
+    {XTRACT_SOURCE_FORMULATION, 2, authors_lempel_ziv_complexity_1, 1987, "Easily calculable measure for the complexity of spatiotemporal patterns", "Physical Review A 36(2)", "figure 1 and equation 1", "doi:10.1103/PhysRevA.36.842"},
 };
 static const xtract_argument_descriptor_t arguments_lempel_ziv_complexity[] = {
-    {.name = "threshold", .kind = XTRACT_ARGUMENT_RESULT, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_ANY, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .accepts = &quantity_median, .subject = XTRACT_SUBJECT_INPUT},
+    {.name = "threshold", .kind = XTRACT_ARGUMENT_RESULT, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_ANY, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .accepts = &quantity_mean, .subject = XTRACT_SUBJECT_INPUT},
 };
 
 static const char *const authors_sample_entropy_0[] = {"Richman", "Moorman"};
 static const xtract_source_t sources_sample_entropy[] = {
-    {XTRACT_SOURCE_ORIGIN, 2, authors_sample_entropy_0, 2000, NULL, NULL, NULL, NULL},
+    {XTRACT_SOURCE_ORIGIN, 2, authors_sample_entropy_0, 2000, "Physiological time-series analysis using approximate entropy and sample entropy", "American Journal of Physiology - Heart and Circulatory Physiology 278(6)", "p. H2042", "doi:10.1152/ajpheart.2000.278.6.H2039"},
 };
 static const xtract_argument_descriptor_t arguments_sample_entropy[] = {
     {.name = "template_length", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_NONE, .min = 1, .max = XTRACT_UNBOUNDED_MAX, .default_value = 2, .is_whole = XTRACT_TRUE},
@@ -892,8 +896,10 @@ static const xtract_argument_descriptor_t arguments_sample_entropy[] = {
 };
 
 static const char *const authors_approximate_entropy_0[] = {"Pincus"};
+static const char *const authors_approximate_entropy_1[] = {"Richman", "Moorman"};
 static const xtract_source_t sources_approximate_entropy[] = {
-    {XTRACT_SOURCE_ORIGIN, 1, authors_approximate_entropy_0, 1991, NULL, NULL, NULL, NULL},
+    {XTRACT_SOURCE_ORIGIN, 1, authors_approximate_entropy_0, 1991, "Approximate entropy as a measure of system complexity", "Proceedings of the National Academy of Sciences of the USA 88(6)", "equations 1, 2, 6 and 10", "doi:10.1073/pnas.88.6.2297"},
+    {XTRACT_SOURCE_FORMULATION, 2, authors_approximate_entropy_1, 2000, "Physiological time-series analysis using approximate entropy and sample entropy", "American Journal of Physiology - Heart and Circulatory Physiology 278(6)", "p. H2040", "doi:10.1152/ajpheart.2000.278.6.H2039"},
 };
 static const xtract_argument_descriptor_t arguments_approximate_entropy[] = {
     {.name = "template_length", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_NONE, .min = 1, .max = XTRACT_UNBOUNDED_MAX, .default_value = 2, .is_whole = XTRACT_TRUE},
@@ -902,11 +908,11 @@ static const xtract_argument_descriptor_t arguments_approximate_entropy[] = {
 
 static const char *const authors_periodicity_0[] = {"McLeod", "Wyvill"};
 static const xtract_source_t sources_periodicity[] = {
-    {XTRACT_SOURCE_ORIGIN, 2, authors_periodicity_0, 2005, NULL, NULL, NULL, NULL},
+    {XTRACT_SOURCE_ORIGIN, 2, authors_periodicity_0, 2005, "A smarter way to find pitch", "Proceedings of the International Computer Music Conference, Barcelona", "section 5", NULL},
 };
 static const char *const authors_signal_confidence_0[] = {"McLeod", "Wyvill"};
 static const xtract_source_t sources_signal_confidence[] = {
-    {XTRACT_SOURCE_ORIGIN, 2, authors_signal_confidence_0, 2005, NULL, NULL, NULL, NULL},
+    {XTRACT_SOURCE_ORIGIN, 2, authors_signal_confidence_0, 2005, "A smarter way to find pitch", "Proceedings of the International Computer Music Conference, Barcelona", "section 7", NULL},
 };
 static const xtract_argument_descriptor_t arguments_decay_rate[] = {
     {.name = "sample_rate", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = 2.2250738585072014e-308, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_SAMPLE_RATE},
@@ -915,15 +921,19 @@ static const xtract_argument_descriptor_t arguments_decay_rate[] = {
 
 static const char *const authors_kullback_leibler_divergence_0[] = {"Kullback", "Leibler"};
 static const xtract_source_t sources_kullback_leibler_divergence[] = {
-    {XTRACT_SOURCE_ORIGIN, 2, authors_kullback_leibler_divergence_0, 1951, NULL, NULL, NULL, NULL},
+    {XTRACT_SOURCE_ORIGIN, 2, authors_kullback_leibler_divergence_0, 1951, "On information and sufficiency", "The Annals of Mathematical Statistics 22(1)", "equation 2.4", "doi:10.1214/aoms/1177729694"},
 };
 static const char *const authors_itakura_saito_divergence_0[] = {"Itakura", "Saito"};
+static const char *const authors_itakura_saito_divergence_1[] = {"Fevotte", "Bertin", "Durrieu"};
 static const xtract_source_t sources_itakura_saito_divergence[] = {
-    {XTRACT_SOURCE_ORIGIN, 2, authors_itakura_saito_divergence_0, 1968, NULL, NULL, NULL, NULL},
+    {XTRACT_SOURCE_ORIGIN, 2, authors_itakura_saito_divergence_0, 1968, "Analysis synthesis telephony based on the maximum likelihood method", "Proceedings of the 6th International Congress on Acoustics, Tokyo", NULL, NULL},
+    {XTRACT_SOURCE_FORMULATION, 3, authors_itakura_saito_divergence_1, 2009, "Nonnegative matrix factorization with the Itakura-Saito divergence: with application to music analysis", "Neural Computation 21(3)", "equations 1.3 and 1.6, theorem 1", "doi:10.1162/neco.2008.04-08-771"},
 };
 static const char *const authors_modified_kullback_leibler_0[] = {"Hainsworth", "Macleod"};
+static const char *const authors_modified_kullback_leibler_1[] = {"Brossier"};
 static const xtract_source_t sources_modified_kullback_leibler[] = {
-    {XTRACT_SOURCE_ORIGIN, 2, authors_modified_kullback_leibler_0, 2003, NULL, NULL, NULL, NULL},
+    {XTRACT_SOURCE_ORIGIN, 2, authors_modified_kullback_leibler_0, 2003, "Onset detection in musical audio signals", "Proceedings of the International Computer Music Conference, Singapore", "equations 4 and 5", NULL},
+    {XTRACT_SOURCE_FORMULATION, 1, authors_modified_kullback_leibler_1, 2006, "Automatic annotation of musical audio for interactive applications", "PhD thesis, Queen Mary, University of London", "equation 2.9", "https://aubio.org/phd/"},
 };
 static const xtract_argument_descriptor_t arguments_modified_kullback_leibler[] = {
     {.name = "offset", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_ANY, .min = 0, .max = XTRACT_UNBOUNDED_MAX, .default_value = 9.9999999999999995e-07},
@@ -2332,7 +2342,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .argv = NULL,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
-        .result = {.scalar = {0, XTRACT_UNBOUNDED_MAX, XTRACT_UNIT_NONE}},
+        .result = {.scalar = {0, XTRACT_UNBOUNDED_MAX, XTRACT_RADIANS}},
     },
     [XTRACT_HJORTH_COMPLEXITY] = {
         .id = XTRACT_HJORTH_COMPLEXITY,
@@ -2435,7 +2445,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .name = "permutation_entropy",
         .title = "Permutation Entropy",
         .description = "Extract the normalised permutation entropy of an input vector",
-        .source_count = 1,
+        .source_count = 2,
         .sources = sources_permutation_entropy,
         .validation_level = 0,
         .tags = 0,
@@ -2451,7 +2461,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .name = "lempel_ziv_complexity",
         .title = "Lempel-Ziv Complexity",
         .description = "Extract the normalised Lempel-Ziv complexity of an input vector",
-        .source_count = 1,
+        .source_count = 2,
         .sources = sources_lempel_ziv_complexity,
         .validation_level = 0,
         .tags = 0,
@@ -2483,7 +2493,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .name = "approximate_entropy",
         .title = "Approximate Entropy",
         .description = "Extract the approximate entropy of an input vector",
-        .source_count = 1,
+        .source_count = 2,
         .sources = sources_approximate_entropy,
         .validation_level = 0,
         .tags = 0,
@@ -2659,7 +2669,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .name = "itakura_saito_divergence",
         .title = "Itakura-Saito Divergence",
         .description = "Extract the Itakura-Saito divergence between two spectral frames",
-        .source_count = 1,
+        .source_count = 2,
         .sources = sources_itakura_saito_divergence,
         .validation_level = 0,
         .tags = 0,
@@ -2675,7 +2685,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .name = "modified_kullback_leibler",
         .title = "Modified Kullback-Leibler",
         .description = "Extract the modified Kullback-Leibler onset function between two spectral frames",
-        .source_count = 1,
+        .source_count = 2,
         .sources = sources_modified_kullback_leibler,
         .validation_level = 0,
         .tags = 0,

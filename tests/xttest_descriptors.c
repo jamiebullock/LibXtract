@@ -533,7 +533,7 @@ UTEST(descriptors, appended_features_are_fully_described)
         CHECK_NEAR(xtract_descriptor(f)->result.scalar.min, 0.0, EPSILON);
     }
     ASSERT_EQ(xtract_descriptor(XTRACT_HJORTH_ACTIVITY)->result.scalar.unit, XTRACT_UNIT_ANY_SQUARED);
-    ASSERT_EQ(xtract_descriptor(XTRACT_HJORTH_MOBILITY)->result.scalar.unit, XTRACT_UNIT_NONE);
+    ASSERT_EQ(xtract_descriptor(XTRACT_HJORTH_MOBILITY)->result.scalar.unit, XTRACT_RADIANS);
     ASSERT_EQ(xtract_descriptor(XTRACT_HJORTH_COMPLEXITY)->result.scalar.unit, XTRACT_UNIT_NONE);
 
     ASSERT_EQ(xtract_descriptor(XTRACT_TIME_REVERSAL_ASYMMETRY)->argc, 1);
@@ -585,7 +585,7 @@ UTEST(descriptors, appended_features_are_fully_described)
 
     ASSERT_EQ(xtract_descriptor(XTRACT_LEMPEL_ZIV_COMPLEXITY)->argc, 1);
     ASSERT_EQ(xtract_descriptor(XTRACT_LEMPEL_ZIV_COMPLEXITY)->argv[0].type, XTRACT_FLOAT);
-    ASSERT_EQ(xtract_descriptor(XTRACT_LEMPEL_ZIV_COMPLEXITY)->argv[0].accepts->providers[0].feature, XTRACT_MEDIAN);
+    ASSERT_EQ(xtract_descriptor(XTRACT_LEMPEL_ZIV_COMPLEXITY)->argv[0].accepts->providers[0].feature, XTRACT_MEAN);
     ASSERT_EQ(xtract_descriptor(XTRACT_LEMPEL_ZIV_COMPLEXITY)->data.format, XTRACT_ARBITRARY_SERIES);
     ASSERT_EQ(xtract_descriptor(XTRACT_LEMPEL_ZIV_COMPLEXITY)->data.unit, XTRACT_UNIT_ANY);
     ASSERT_EQ(xtract_descriptor(XTRACT_LEMPEL_ZIV_COMPLEXITY)->result.scalar.unit, XTRACT_UNIT_NONE);
@@ -1547,7 +1547,8 @@ UTEST(descriptors, five_features_take_two_successive_frames)
 
         ASSERT_EQ_MSG(d->data.frames, takes_two ? 2 : 1, d->name);
         if (takes_two)
-            ASSERT_TRUE_MSG(d->data.accepts[0]->providers[0].feature == XTRACT_MAGNITUDE_SPECTRUM &&
+            ASSERT_TRUE_MSG(d->data.accepts[0]->providers[0].feature ==
+                                    (f == XTRACT_ITAKURA_SAITO_DIVERGENCE ? XTRACT_POWER_SPECTRUM : XTRACT_MAGNITUDE_SPECTRUM) &&
                                 d->data.accepts[0]->providers[0].part == (f == XTRACT_FLUX ? XTRACT_PART_FIRST_HALF_FROM_ONE : XTRACT_PART_FIRST_HALF),
                             d->name);
     }

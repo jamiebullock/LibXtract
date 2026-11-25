@@ -4349,7 +4349,7 @@ static double lempel_ziv_phrases(double normalised, int n)
     return normalised * n * log(2.0) / log((double)n);
 }
 
-UTEST(scalar, lempel_ziv_complexity_of_the_kaspar_schuster_example_has_6_phrases)
+UTEST(scalar, lempel_ziv_complexity_of_the_lempel_ziv_example_has_6_phrases)
 {
     double data[16] = {0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 1.0};
     double threshold = 0.5;
@@ -4357,6 +4357,16 @@ UTEST(scalar, lempel_ziv_complexity_of_the_kaspar_schuster_example_has_6_phrases
 
     ASSERT_EQ(xtract_lempel_ziv_complexity(NULL, data, 16, &threshold, &result), XTRACT_SUCCESS);
     CHECK_REL(lempel_ziv_phrases(result, 16), 6.0, EPSILON);
+}
+
+UTEST(scalar, lempel_ziv_complexity_of_the_kaspar_schuster_example_has_3_phrases)
+{
+    double data[4] = {0.0, 0.0, 1.0, 0.0};
+    double threshold = 0.5;
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_lempel_ziv_complexity(NULL, data, 4, &threshold, &result), XTRACT_SUCCESS);
+    CHECK_REL(lempel_ziv_phrases(result, 4), 3.0, EPSILON);
 }
 
 UTEST(scalar, lempel_ziv_complexity_of_a_constant_series_has_2_phrases)

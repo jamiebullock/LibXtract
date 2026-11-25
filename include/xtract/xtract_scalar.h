@@ -443,7 +443,9 @@ extern "C"
      *
      * Uses the Normalised Square Difference Function (NSDF) with parabolic
      * interpolation for sub-sample accuracy. Based on McLeod and Wyvill (2005)
-     * "A Smarter Way to Find Pitch".
+     * "A Smarter Way to Find Pitch": the period is the first key maximum of
+     * the NSDF at least 0.8 times the highest key maximum, and there is no
+     * pitch when the highest key maximum is below 0.01.
      *
      * \param *ctx: a pointer to a context created for at least N elements
      * \param *data: a pointer to the first element in an array of doubles representing an audio vector
@@ -516,7 +518,7 @@ extern "C"
      */
     int xtract_hjorth_activity(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
-    /** \brief Extract the Hjorth mobility of an input vector: the square root of the ratio of the activity of its first difference to its own activity
+    /** \brief Extract the Hjorth mobility of an input vector: the square root of the ratio of the activity of its first difference to its own activity, in radians per sample. The first difference takes the place of Hjorth's derivative, so a sinusoid of w radians per sample has a mobility of 2 sin(w / 2)
      *
      * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles
@@ -556,7 +558,7 @@ extern "C"
      */
     int xtract_spectral_entropy(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
-    /** \brief Extract the Petrosian fractal dimension of an input vector, from the number of sign changes in its first difference
+    /** \brief Extract the Petrosian fractal dimension of an input vector, from the number of sign changes in its first difference, where a difference of 0 counts as positive (Petrosian's binary sequence (c))
      *
      * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles
@@ -576,7 +578,7 @@ extern "C"
      */
     int xtract_katz_fractal_dimension(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
-    /** \brief Extract the Higuchi fractal dimension of an input vector: the slope of the log of its curve length against the log of the scale, over scales 1 to k_max
+    /** \brief Extract the Higuchi fractal dimension of an input vector: the least-squares slope of the log of its mean curve length against the log of the reciprocal of the scale, over every scale from 1 to k_max
      *
      * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles
@@ -592,17 +594,17 @@ extern "C"
      * \param *data: a pointer to the first element in an array of doubles
      * \param N: the number of elements to be considered, at least (order - 1) * delay + 1
      * \param *argv: a pointer to an array of two ints: the order, the number of elements in a pattern, from 2 to 8; and the delay, the distance between consecutive elements of a pattern, at least 1
-     * \param *result: the permutation entropy of N values from the array pointed to by *data, between 0 when every window has the same pattern and 1 when every pattern is equally frequent; equal values within a window take the order of their positions
+     * \param *result: the permutation entropy of N values from the array pointed to by *data, between 0 when every window has the same pattern and 1 when all order-factorial patterns are equally frequent; equal values within a window take the order of their positions
      */
     int xtract_permutation_entropy(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
-    /** \brief Extract the Lempel-Ziv complexity of an input vector: the number of distinct phrases in its exhaustive parse once each element is reduced to whether it exceeds a threshold, normalised by N over log2 N so that a random series scores about 1
+    /** \brief Extract the Lempel-Ziv complexity of an input vector: the number of distinct phrases in its exhaustive parse once each element is reduced to whether it exceeds a threshold, normalised by N over log2 N so that a long random series in which 0 and 1 are equally likely scores about 1
      *
      * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles
      * \param N: the number of elements to be considered, at least 2
-     * \param *argv: a pointer to a double holding the threshold, typically the median of the input vector; an element counts as 1 when it is greater than the threshold and 0 otherwise
-     * \param *result: the normalised Lempel-Ziv complexity of N values from the array pointed to by *data
+     * \param *argv: a pointer to a double holding the threshold, typically the mean of the input vector, the threshold Kaspar and Schuster use; an element counts as 1 when it is greater than the threshold and 0 otherwise. The median makes 0 and 1 equally frequent, which the normalisation assumes
+     * \param *result: the normalised Lempel-Ziv complexity of N values from the array pointed to by *data; below 1 for a long series in which 0 and 1 are not equally frequent, above 1 for some short series, and 2 log2(N) / N for a series that is all 0 or all 1
      */
     int xtract_lempel_ziv_complexity(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
@@ -611,8 +613,8 @@ extern "C"
      * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles
      * \param N: the number of elements to be considered, at least the template length plus 2
-     * \param *argv: a pointer to an array of two doubles: the template length, a whole number at least 1; and the tolerance in the units of the input, at least 0, typically 0.2 times the standard deviation of the input vector
-     * \param *result: the sample entropy of N values from the array pointed to by *data, in nats, or 0 with no result if no pair of templates matches at either length
+     * \param *argv: a pointer to an array of two doubles: the template length, a whole number at least 1; and the tolerance in the units of the input, at least 0. Richman and Moorman use 0.2 times the standard deviation of the input vector
+     * \param *result: the sample entropy of N values from the array pointed to by *data, in nats, or 0 with no result if no pair of templates matches at the template length, or none at the template length plus 1
      */
     int xtract_sample_entropy(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
@@ -621,8 +623,8 @@ extern "C"
      * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles
      * \param N: the number of elements to be considered, at least the template length plus 2
-     * \param *argv: a pointer to an array of two doubles: the template length, a whole number at least 1; and the tolerance in the units of the input, at least 0, typically 0.2 times the standard deviation of the input vector
-     * \param *result: the approximate entropy of N values from the array pointed to by *data, in nats
+     * \param *argv: a pointer to an array of two doubles: the template length, a whole number at least 1; and the tolerance in the units of the input, at least 0. Pincus uses 0.1 to 0.2 times the standard deviation of the input vector
+     * \param *result: the approximate entropy of N values from the array pointed to by *data, in nats; it can be negative for a short series
      */
     int xtract_approximate_entropy(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
