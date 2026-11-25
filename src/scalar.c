@@ -940,7 +940,7 @@ int xtract_sharpness(xtract_context *ctx, const double *data, const int N, const
     }
 
     /* Sharpness is the g-weighted centroid of specific loudness,
-     * normalised by the total loudness, in acums */
+     * normalised by the total loudness */
     *result = 0.11 * temp / total_loudness;
 
     return XTRACT_SUCCESS;

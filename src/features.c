@@ -700,6 +700,12 @@ static const xtract_argument_descriptor_t arguments_lnorm[] = {
     {.name = "filter", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_NONE, .min = 0, .max = 2, .value_count = 3, .values = values_2, .default_value = 0, .is_whole = XTRACT_TRUE},
 };
 
+static const char *const authors_flux_0[] = {"Scheirer", "Slaney"};
+static const char *const authors_flux_1[] = {"Boeck", "Krebs", "Schedl"};
+static const xtract_source_t sources_flux[] = {
+    {XTRACT_SOURCE_ORIGIN, 2, authors_flux_0, 1997, "Construction and evaluation of a robust multifeature speech/music discriminator", "Proceedings of ICASSP 1997, volume 2", "section 2, spectral flux", "doi:10.1109/ICASSP.1997.596192"},
+    {XTRACT_SOURCE_FORMULATION, 3, authors_flux_1, 2012, "Evaluating the online capabilities of onset detection methods", "Proceedings of the 13th International Society for Music Information Retrieval Conference", "equation 3", "doi:10.5281/zenodo.1416036"},
+};
 static const xtract_argument_descriptor_t arguments_flux[] = {
     {.name = "order", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_NONE, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .default_value = 2},
     {.name = "filter", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_NONE, .min = 0, .max = 2, .value_count = 3, .values = values_2, .default_value = 0, .is_whole = XTRACT_TRUE},
@@ -1757,8 +1763,8 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .name = "flux",
         .title = "Spectral Flux",
         .description = "Extract the spectral flux of a spectrum",
-        .source_count = 0,
-        .sources = NULL,
+        .source_count = 2,
+        .sources = sources_flux,
         .validation_level = 0,
         .tags = 0,
         .data = {XTRACT_SUBFRAMES, XTRACT_UNIT_ANY, 2, accepted_flux, 2, "N >= 2 && N % 2 == 0"},
