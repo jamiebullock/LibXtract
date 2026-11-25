@@ -1487,18 +1487,27 @@ static int wavelet_distances(const int *maxima, const int n_maxima, const int *m
  * spacing of it, more than a quarter of the periods of that length the
  * level holds; on a tie, one close to twice the mode so far replaces it.
  * Returned as the mean of the distances within spacing of it, or 0 when no
- * distance qualifies. */
-static double wavelet_mode(const int *distances, const int count, const int width, const int spacing)
+ * distance qualifies. Every distance is between 1 and width - 1, and
+ * at_most[d] counts the distances of d or less, so the number within
+ * spacing of a distance is the difference of two of its elements. */
+static double wavelet_mode(const int *distances, const int count, const int width, const int spacing, int *at_most)
 {
-    int j, k, support, best_support = 1;
+    int j, k, d, support, best_support = 1;
     double mode = 0.0, sum = 0.0;
     int near = 0;
 
+    memset(at_most, 0, (size_t)width * sizeof(int));
+    for (k = 0; k < count; k++)
+        at_most[distances[k]]++;
+    for (d = 1; d < width; d++)
+        at_most[d] += at_most[d - 1];
+
     for (j = 0; j < count; j++)
     {
-        support = 0;
-        for (k = 0; k < count; k++)
-            support += abs(distances[k] - distances[j]) <= spacing;
+        const int highest = distances[j] + spacing < width ? distances[j] + spacing : width - 1;
+        const int below = distances[j] - spacing - 1;
+
+        support = at_most[highest] - (below > 0 ? at_most[below] : 0);
         if (support >= best_support && support > (width / distances[j]) / 4.0)
         {
             if (support == best_support)
@@ -1532,7 +1541,7 @@ int xtract_wavelet_f0(xtract_context *ctx, const double *data, const int N, cons
 {
     double sample_rate, mean, highest, lowest, upper, lower, mode, previous_mode = 0.0;
     double *approximation;
-    int *maxima, *minima, *distances;
+    int *maxima, *minima, *distances, *at_most;
     int n, level, width, spacing, n_maxima, n_minima, count;
     int previous_has_extrema = 0, rv = XTRACT_NO_RESULT;
     const int half = N / 2;
@@ -1547,7 +1556,7 @@ int xtract_wavelet_f0(xtract_context *ctx, const double *data, const int N, cons
     approximation = xtract_scratch_take(ctx, N, (size_t)half);
     if (approximation == NULL)
         return XTRACT_BAD_STATE;
-    maxima = xtract_scratch_take_ints(ctx, N, 5 * (size_t)half);
+    maxima = xtract_scratch_take_ints(ctx, N, 6 * (size_t)half);
     if (maxima == NULL)
     {
         xtract_scratch_return(ctx, approximation, (size_t)half);
@@ -1555,6 +1564,7 @@ int xtract_wavelet_f0(xtract_context *ctx, const double *data, const int N, cons
     }
     minima = maxima + half;
     distances = minima + half;
+    at_most = distances + 3 * half;
     *result = 0.0;
 
     mean = 0.0;
@@ -1591,7 +1601,7 @@ int xtract_wavelet_f0(xtract_context *ctx, const double *data, const int N, cons
         }
 
         count = wavelet_distances(maxima, n_maxima, minima, n_minima, distances);
-        mode = wavelet_mode(distances, count, width, spacing);
+        mode = wavelet_mode(distances, count, width, spacing, at_most);
         if (previous_has_extrema && previous_mode != 0.0 && fabs(previous_mode - 2.0 * mode) <= spacing)
         {
             *result = sample_rate / previous_mode / (double)(1 << (level - 1));
@@ -1602,7 +1612,7 @@ int xtract_wavelet_f0(xtract_context *ctx, const double *data, const int N, cons
         previous_has_extrema = 1;
     }
 
-    xtract_scratch_return_ints(ctx, maxima, 5 * (size_t)half);
+    xtract_scratch_return_ints(ctx, maxima, 6 * (size_t)half);
     xtract_scratch_return(ctx, approximation, (size_t)half);
 
     return rv;

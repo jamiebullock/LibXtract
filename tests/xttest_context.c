@@ -153,7 +153,8 @@ UTEST(context, two_ints_take_one_double)
 UTEST(context, wavelet_f0_holds_no_scratch_after_a_caller_left_room_for_only_part_of_it)
 {
     /* With 16 of the 24 doubles held, the 4 doubles of the first level of
-     * approximation fit and the 20 ints of extrema and distances do not */
+     * approximation fit and the 24 ints of extrema, distances and their
+     * counts do not */
     double data[8] = {0};
     double sample_rate = 44100.0;
     double result = -1.0;
