@@ -1039,7 +1039,7 @@ static const xtract_source_t sources_inverse_difference_moment[] = {
 };
 static const char *const authors_local_binary_patterns_0[] = {"Ojala", "Pietikainen", "Maenpaa"};
 static const xtract_source_t sources_local_binary_patterns[] = {
-    {XTRACT_SOURCE_ORIGIN, 3, authors_local_binary_patterns_0, 2002, NULL, NULL, NULL, NULL},
+    {XTRACT_SOURCE_ORIGIN, 3, authors_local_binary_patterns_0, 2002, "Multiresolution gray-scale and rotation invariant texture classification with local binary patterns", "IEEE Transactions on Pattern Analysis and Machine Intelligence 24(7)", "equations 6, 9 and 10, P = 8, R = 1", "doi:10.1109/TPAMI.2002.1017623"},
 };
 static const xtract_argument_descriptor_t arguments_local_binary_patterns[] = {
     {.name = "width", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = 1, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_WIDTH},

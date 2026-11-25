@@ -438,6 +438,28 @@ int xtract_inverse_difference_moment(xtract_context *ctx, const double *data, co
     return XTRACT_SUCCESS;
 }
 
+/* Whether the value at distance 1 from the centre towards a corner is at or
+ * above the centre. The value is interpolated linearly in both directions
+ * from the centre, the two elements beside the centre on the way to the
+ * corner, and the corner: it lies 1 / sqrt(2) along both axes, so the
+ * corner has weight 1/2 and each side 1 / sqrt(2) - 1/2. A difference from
+ * the centre overflows only towards one sign; halving them all then keeps
+ * the sign of their weighted sum */
+static int diagonal_at_or_above(const double centre, const double side, const double other_side, const double corner)
+{
+    const double side_weight = 0.70710678118654752440 - 0.5;
+    double d1 = side - centre, d2 = other_side - centre, d3 = corner - centre;
+
+    if (!isfinite(d1) || !isfinite(d2) || !isfinite(d3))
+    {
+        d1 = 0.5 * side - 0.5 * centre;
+        d2 = 0.5 * other_side - 0.5 * centre;
+        d3 = 0.5 * corner - 0.5 * centre;
+    }
+
+    return side_weight * d1 + side_weight * d2 + 0.5 * d3 >= 0.0;
+}
+
 /* The class of the element at the centre of the three rows given: the number
  * of its neighbours at or above it when they form one unbroken run around
  * it, and the last class otherwise. A run has at most two places where a
@@ -445,14 +467,21 @@ int xtract_inverse_difference_moment(xtract_context *ctx, const double *data, co
 static int pattern_class(const double *above, const double *row, const double *below)
 {
     const double centre = row[0];
-    const double around[NEIGHBOURS] = {above[-1], above[0], above[1], row[1],
-                                       below[1], below[0], below[-1], row[-1]};
+    const int around[NEIGHBOURS] = {
+        diagonal_at_or_above(centre, row[-1], above[0], above[-1]),
+        above[0] >= centre,
+        diagonal_at_or_above(centre, above[0], row[1], above[1]),
+        row[1] >= centre,
+        diagonal_at_or_above(centre, row[1], below[0], below[1]),
+        below[0] >= centre,
+        diagonal_at_or_above(centre, below[0], row[-1], below[-1]),
+        row[-1] >= centre};
     int k, at_or_above = 0, changes = 0;
 
     for (k = 0; k < NEIGHBOURS; k++)
     {
-        const int here = around[k] >= centre;
-        const int next = around[(k + 1) % NEIGHBOURS] >= centre;
+        const int here = around[k];
+        const int next = around[(k + 1) % NEIGHBOURS];
 
         at_or_above += here;
         changes += here != next;
