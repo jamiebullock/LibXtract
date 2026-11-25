@@ -363,7 +363,7 @@ extern "C"
         const char *description;        /**< what the feature is, in a sentence */
         int source_count;               /**< the number of entries of sources, or 0 for a feature the library defines itself */
         const xtract_source_t *sources; /**< the published works that define the feature, its origin first, or NULL when source_count is 0 */
-        int validation_level;           /**< how far the results have been checked against values computed independently of the library: 3 certified by a machine-checked proof, 2 derived from the definition or from certified published data, 1 compared with an independent implementation, 0 not checked. The level holds for the inputs the checks use, on every platform the library is tested on */
+        int validation_level;           /**< how far the results have been checked against values computed independently of the library: 3 certified by a machine-checked proof, 2 derived from the definition or from certified published data, 1 compared with an independent implementation, 0 not checked. The level holds for the inputs the checks use, on every platform the library is tested on. The page \ref definitions lists each feature's definition, sources and level */
 
         unsigned int tags; /**< the sum of its tags, as given in the enumeration xtract_tags_ */
 

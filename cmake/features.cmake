@@ -5,7 +5,8 @@
 
 # Writes the feature enumeration (include/xtract/xtract_features.h), the
 # dispatch and descriptor tables (src/features.c) and the table of the
-# properties the tests check (tests/xttest_properties.c) from
+# properties the tests check (tests/xttest_properties.c) and the page of
+# feature definitions in the documentation (doc/definitions.dox) from
 # src/features.json, after checking every record. The written files are committed. With CHECK
 # set they are written under WORK instead and compared with the committed
 # ones, and a difference is an error.
@@ -17,6 +18,8 @@ set(data_file "${root}/src/features.json")
 set(header include/xtract/xtract_features.h)
 set(source src/features.c)
 set(property_source tests/xttest_properties.c)
+set(page doc/definitions.dox)
+set(LEVEL_NAMES "not checked" "compared" "derived" "certified")
 
 set(UNITS none any any_squared any_cubed hertz hertz_squared per_hertz
           seconds per_second decibels percent bins midi_cent sone acum radians)
@@ -124,6 +127,26 @@ endfunction()
 function(check_name where key text)
     if(NOT text MATCHES "^[a-z][a-z0-9_]*$")
         fail("${where}" "'${key}' is '${text}', which is not lower case letters, digits and underscores")
+    endif()
+endfunction()
+
+# Sets ${out} to the text with the characters Doxygen reads as commands,
+# markup or links escaped
+function(doc_text out text)
+    foreach(character "\\" "@" "&" "<" ">" "#" "%" "*" "_" "$")
+        string(REPLACE "${character}" "\\${character}" text "${text}")
+    endforeach()
+    set(${out} "${text}" PARENT_SCOPE)
+endfunction()
+
+# Sets ${out} to the URL a permalink resolves to
+function(permalink_url out permalink)
+    if(permalink MATCHES "^doi:(.*)$")
+        set(${out} "https://doi.org/${CMAKE_MATCH_1}" PARENT_SCOPE)
+    elseif(permalink MATCHES "^hdl:(.*)$")
+        set(${out} "https://hdl.handle.net/${CMAKE_MATCH_1}" PARENT_SCOPE)
+    else()
+        set(${out} "${permalink}" PARENT_SCOPE)
     endif()
 endfunction()
 
@@ -603,12 +626,13 @@ set(rule_cases "")
 set(length_cases "")
 set(table "")
 set(property_table "")
+set(page_text "")
 foreach(i RANGE ${last})
     string(JSON feature GET "${doc}" features ${i})
     string(JSON name GET "${feature}" name)
     set(where "feature '${name}'")
     only_keys("${where}" "${feature}"
-        name title description sources validation_level tags provides input argument_type arguments delta result invariance)
+        name title description definition sources validation_level tags provides input argument_type arguments delta result invariance)
     string(TOUPPER "XTRACT_${name}" id)
     string(APPEND enumeration "        ${id},\n")
     string(APPEND dispatch "        xtract_${name},\n")
@@ -618,9 +642,26 @@ foreach(i RANGE ${last})
     c_string(title_c "${where}" title "${title}")
     c_string(description_c "${where}" description "${description}")
 
+    optional(definition "${where}" "${feature}" STRING definition "")
+    doc_text(title_doc "${title}")
+    string(APPEND page_text "\\section definition_${name} ${title_doc}\n\nxtract_${name}()\n\n")
+    if(NOT definition STREQUAL "")
+        if(NOT definition MATCHES "^[ -~]*$")
+            fail("${where}" "'definition' has a character that is not printable ASCII")
+        endif()
+        foreach(ending "*/" "\\f]" "\\f$" "\\f)" "\\f}")
+            string(FIND "${definition}" "${ending}" found)
+            if(NOT found EQUAL -1)
+                fail("${where}" "'definition' has ${ending}, which ends the documentation page or its formula")
+            endif()
+        endforeach()
+        string(APPEND page_text "\\f[ ${definition} \\f]\n\n")
+    endif()
+
     optional(sources "${where}" "${feature}" ARRAY sources "[]")
     string(JSON source_count LENGTH "${sources}")
     set(sources_c NULL)
+    set(source_lines "")
     if(source_count GREATER 0)
         set(source_rows "")
         math(EXPR last_source "${source_count} - 1")
@@ -645,11 +686,19 @@ foreach(i RANGE ${last})
                 fail("${source_where}" "'authors' is empty")
             endif()
             set(author_literals "")
+            set(author_names "")
             math(EXPR last_author "${author_count} - 1")
             foreach(a RANGE ${last_author})
                 string(JSON author GET "${authors}" ${a})
                 c_string(author_literal "${source_where}" authors "${author}")
                 list(APPEND author_literals "${author_literal}")
+                if(a EQUAL 0)
+                    set(author_names "${author}")
+                elseif(a EQUAL last_author)
+                    string(APPEND author_names " and ${author}")
+                else()
+                    string(APPEND author_names ", ${author}")
+                endif()
             endforeach()
             list(JOIN author_literals ", " author_literals)
             string(APPEND argument_text "static const char *const authors_${name}_${s}[] = {${author_literals}};\n")
@@ -667,6 +716,42 @@ foreach(i RANGE ${last})
             endif()
             string(APPEND source_rows
                 "    {${role_c}, ${author_count}, authors_${name}_${s}, ${source_year}, ${source_title_c}, ${source_venue_c}, ${source_locator_c}, ${source_permalink_c}},\n")
+            if(s EQUAL 0)
+                set(source_line "Origin: ")
+            else()
+                set(source_line "Formulation: ")
+            endif()
+            doc_text(author_names "${author_names}")
+            string(APPEND source_line "${author_names}")
+            if(NOT source_year EQUAL 0)
+                string(APPEND source_line " (${source_year})")
+            endif()
+            if(NOT source_title STREQUAL "")
+                doc_text(field_doc "${source_title}")
+                string(APPEND source_line ". \"${field_doc}\"")
+            endif()
+            set(place "")
+            foreach(field venue locator)
+                if(NOT source_${field} STREQUAL "")
+                    doc_text(field_doc "${source_${field}}")
+                    list(APPEND place "${field_doc}")
+                endif()
+            endforeach()
+            if(NOT place STREQUAL "")
+                list(JOIN place ", " place)
+                string(APPEND source_line ". ${place}")
+            endif()
+            if(NOT source_permalink STREQUAL "")
+                permalink_url(url "${source_permalink}")
+                foreach(character "%" " " "\"" "<" ">")
+                    string(HEX "${character}" code)
+                    string(TOUPPER "${code}" code)
+                    string(REPLACE "${character}" "%${code}" url "${url}")
+                endforeach()
+                doc_text(permalink_doc "${source_permalink}")
+                string(APPEND source_line ". <a href=\"${url}\">${permalink_doc}</a>")
+            endif()
+            string(APPEND source_lines "- ${source_line}\n")
         endforeach()
         string(APPEND argument_text "static const xtract_source_t sources_${name}[] = {\n${source_rows}};\n")
         set(sources_c "sources_${name}")
@@ -675,6 +760,13 @@ foreach(i RANGE ${last})
     if(NOT validation_level MATCHES "^[0-3]$")
         fail("${where}" "'validation_level' is ${validation_level}, expected 0, 1, 2 or 3")
     endif()
+    if(source_count GREATER 0)
+        string(APPEND page_text "Sources:\n${source_lines}\n")
+    else()
+        string(APPEND page_text "No published source is listed.\n\n")
+    endif()
+    list(GET LEVEL_NAMES ${validation_level} level_name)
+    string(APPEND page_text "Validation level ${validation_level}, ${level_name}.\n\n")
 
     optional(tags "${where}" "${feature}" ARRAY tags "[]")
     string(JSON tag_count LENGTH "${tags}")
@@ -1030,6 +1122,23 @@ string(CONCAT property_text
     "${property_table}"
     "};\n")
 
+string(CONCAT page_file_text
+    "${licence}\n"
+    "/* The page of feature definitions, ${notice} */\n\n"
+    "/** \\page definitions Feature definitions\n\n"
+    "\\tableofcontents\n\n"
+    "Each feature's definition, the published sources it follows and its validation level. "
+    "The first source is the origin, the work that introduced the feature; any other is a formulation, "
+    "a later work whose form of the definition the library computes.\n\n"
+    "The validation level states how far the feature's results have been checked against values computed "
+    "independently of the library, on the inputs the checks use and on every platform the library is tested on:\n\n"
+    "- 3, certified: by a machine-checked proof\n"
+    "- 2, derived: from the definition, or from certified published data\n"
+    "- 1, compared: with an independent implementation\n"
+    "- 0, not checked\n\n"
+    "${page_text}"
+    "*/\n")
+
 if(CHECK)
     if(NOT WORK)
         message(FATAL_ERROR "CHECK needs WORK, a directory to write to")
@@ -1041,9 +1150,10 @@ endif()
 file(WRITE "${destination}/${header}" "${header_text}")
 file(WRITE "${destination}/${source}" "${source_text}")
 file(WRITE "${destination}/${property_source}" "${property_text}")
+file(WRITE "${destination}/${page}" "${page_file_text}")
 
 if(CHECK)
-    foreach(file ${header} ${source} ${property_source})
+    foreach(file ${header} ${source} ${property_source} ${page})
         execute_process(
             COMMAND ${CMAKE_COMMAND} -E compare_files --ignore-eol "${root}/${file}" "${WORK}/${file}"
             RESULT_VARIABLE result
