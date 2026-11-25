@@ -310,7 +310,7 @@ extern "C"
      * \param *data: a pointer to the first element in an array of doubles representing a magnitude peak spectrum of size N/2, and a frequency spectrum of size N/2 (This is the output format of xtract_peak_spectrum())
      * \param N: the number of elements to be considered, at least 2 and even
      * \param *argv: a pointer to a double representing the fundamental frequency of the input vector, finite and at least 0; 0 gives no result
-     * \param *result: the inharmonicity of N values from the array pointed to by *data
+     * \param *result: the inharmonicity of N values from the array pointed to by *data. A peak whose frequency is from minus half the fundamental to below half the fundamental, and so has harmonic number 0, is left out. 0 with no result when no other peak has a coefficient other than 0
      */
     int xtract_spectral_inharmonicity(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
