@@ -2145,17 +2145,10 @@ int xtract_katz_fractal_dimension(xtract_context *ctx, const double *data, const
         return XTRACT_NO_RESULT;
     }
     log_ratio = log10(diameter / mean_step);
-    if (!(log_ratio > 0.0))
-    {
-        *result = 0.0;
-        return XTRACT_NO_RESULT;
-    }
 
     /* The greatest distance is at most the path length, so the exact value is
        at least 1; rounding can put a series that only rises just below it */
-    *result = log10((double)(N - 1)) / log_ratio;
-    if (*result < 1.0)
-        *result = 1.0;
+    *result = fmax(log10((double)(N - 1)) / log_ratio, 1.0);
 
     return XTRACT_SUCCESS;
 }
