@@ -54,7 +54,7 @@ extern "C"
      */
     int xtract_normalised_moments(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
-    /** \brief Extract the seven Hu moments of a grid from its normalised moments: values that do not change when the grid is moved, turned a quarter or mirrored, and that would not change if it were made larger or smaller or turned by any angle continuously; on a grid of elements those change them a little
+    /** \brief Extract the seven Hu moments of a grid from its normalised moments: values that do not change when the grid is moved or turned a quarter, and would not change if it were made larger or smaller or turned by any angle continuously, which on a grid of elements change them a little. Mirroring the grid leaves the first six unchanged and changes the sign of the seventh
      *
      * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of 7 doubles: the normalised moments of a grid as xtract_normalised_moments() gives them
