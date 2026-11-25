@@ -972,6 +972,18 @@ UTEST(local_binary_patterns, a_diagonal_whose_sides_cancel_keeps_its_class_under
     expect_one_class(transposed, 2, utest_result);
 }
 
+UTEST(local_binary_patterns, a_diagonal_adds_both_sides_when_a_difference_overflows)
+{
+    /* Towards both left corners one side is the largest double, whose
+     * difference from the centre overflows, and the other side and the
+     * corner the lowest; the interpolated values are below the centre, so
+     * only the left neighbour is at or above it */
+    const double c = -0.3 * DBL_MAX;
+    const double grid[] = {-DBL_MAX, -DBL_MAX, -DBL_MAX, DBL_MAX, c, -DBL_MAX, -DBL_MAX, -DBL_MAX, -DBL_MAX};
+
+    expect_one_class(grid, 1, utest_result);
+}
+
 UTEST(local_binary_patterns, neighbours_in_more_than_one_run_are_class_9)
 {
     /* The four corners are higher than the centre and the four sides lower */

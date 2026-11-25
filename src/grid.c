@@ -454,8 +454,8 @@ static int diagonal_at_or_above(const double centre, const double side, const do
      * them, as mirroring the grid does, gives the same rounding */
     if (!isfinite(sides) || !isfinite(d3))
     {
-        sides = (0.5 * side - 0.5 * centre) + (0.5 * other_side - 0.5 * centre);
-        d3 = 0.5 * corner - 0.5 * centre;
+        sides = (ldexp(side, -1) - ldexp(centre, -1)) + (ldexp(other_side, -1) - ldexp(centre, -1));
+        d3 = ldexp(corner, -1) - ldexp(centre, -1);
     }
 
     return side_weight * sides + 0.5 * d3 >= 0.0;
