@@ -748,13 +748,17 @@ static const xtract_argument_descriptor_t arguments_harmonic_spectrum[] = {
     {.name = "threshold", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_NONE, .min = 0, .max = 1, .default_value = 0.10000000000000001},
 };
 
-static const char *const authors_lpc_0[] = {"Rabiner", "Juang"};
+static const char *const authors_lpc_0[] = {"Atal", "Hanauer"};
+static const char *const authors_lpc_1[] = {"Makhoul"};
 static const xtract_source_t sources_lpc[] = {
-    {XTRACT_SOURCE_ORIGIN, 2, authors_lpc_0, 1994, NULL, NULL, NULL, NULL},
+    {XTRACT_SOURCE_ORIGIN, 2, authors_lpc_0, 1971, "Speech analysis and synthesis by linear prediction of the speech wave", "Journal of the Acoustical Society of America 50(2B)", "appendix E, equations E8 to E10, with the opposite sign", "doi:10.1121/1.1912679"},
+    {XTRACT_SOURCE_FORMULATION, 1, authors_lpc_1, 1975, "Linear prediction: a tutorial review", "Proceedings of the IEEE 63(4)", "equations 12 and 38a to 38e", "doi:10.1109/PROC.1975.9792"},
 };
-static const char *const authors_lpcc_0[] = {"Rabiner", "Juang"};
+static const char *const authors_lpcc_0[] = {"Atal"};
+static const char *const authors_lpcc_1[] = {"Rabiner", "Juang"};
 static const xtract_source_t sources_lpcc[] = {
-    {XTRACT_SOURCE_ORIGIN, 2, authors_lpcc_0, 1993, NULL, NULL, NULL, NULL},
+    {XTRACT_SOURCE_ORIGIN, 1, authors_lpcc_0, 1974, "Effectiveness of linear prediction characteristics of the speech wave for automatic speaker identification and verification", "Journal of the Acoustical Society of America 55(6)", "equation 15, in the opposite sign", "doi:10.1121/1.1914702"},
+    {XTRACT_SOURCE_FORMULATION, 2, authors_lpcc_1, 1993, "Fundamentals of speech recognition", "PTR Prentice Hall", "equation 4.19, p. 163, and equation 3.83c, p. 115", NULL},
 };
 static const xtract_argument_descriptor_t arguments_lpcc[] = {
     {.name = "order", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = 1, .max = XTRACT_UNBOUNDED_MAX, .default_value = 12, .is_whole = XTRACT_TRUE},
@@ -1987,7 +1991,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .name = "lpc",
         .title = "Linear predictive coding coefficients",
         .description = "Extract LPC from autocorrelation coefficients",
-        .source_count = 1,
+        .source_count = 2,
         .sources = sources_lpc,
         .validation_level = 0,
         .tags = 0,
@@ -2003,7 +2007,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .name = "lpcc",
         .title = "Linear predictive coding cepstral coefficients",
         .description = "Extract LPC cepstrum from LPC coefficients",
-        .source_count = 1,
+        .source_count = 2,
         .sources = sources_lpcc,
         .validation_level = 0,
         .tags = 0,

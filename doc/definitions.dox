@@ -554,8 +554,11 @@ Validation level 0, not checked.
 
 xtract_lpc()
 
+\f[ E_0 = r_0, \quad k_i = -\frac{r_i + \sum_{j=1}^{i-1} a_j^{(i-1)} r_{i-j}}{E_{i-1}}, \quad a_i^{(i)} = k_i, \quad a_j^{(i)} = a_j^{(i-1)} + k_i a_{i-j}^{(i-1)}, \quad E_i = (1 - k_i^2) E_{i-1}, \quad i = 1, \dots, p, \quad A(z) = 1 + \sum_{j=1}^{p} a_j^{(p)} z^{-j} \f]
+
 Sources:
-- Origin: Rabiner and Juang (1994)
+- Origin: Atal and Hanauer (1971). "Speech analysis and synthesis by linear prediction of the speech wave". Journal of the Acoustical Society of America 50(2B), appendix E, equations E8 to E10, with the opposite sign. <a href="https://doi.org/10.1121/1.1912679">doi:10.1121/1.1912679</a>
+- Formulation: Makhoul (1975). "Linear prediction: a tutorial review". Proceedings of the IEEE 63(4), equations 12 and 38a to 38e. <a href="https://doi.org/10.1109/PROC.1975.9792">doi:10.1109/PROC.1975.9792</a>
 
 Validation level 0, not checked.
 
@@ -563,8 +566,11 @@ Validation level 0, not checked.
 
 xtract_lpcc()
 
+\f[ c_n = -a_n - \frac{1}{n} \sum_{k=\max(1, n-p)}^{n-1} k \, c_k \, a_{n-k}, \quad n = 1, \dots, Q, \quad a_n = 0 \text{ for } n > p \f]
+
 Sources:
-- Origin: Rabiner and Juang (1993)
+- Origin: Atal (1974). "Effectiveness of linear prediction characteristics of the speech wave for automatic speaker identification and verification". Journal of the Acoustical Society of America 55(6), equation 15, in the opposite sign. <a href="https://doi.org/10.1121/1.1914702">doi:10.1121/1.1914702</a>
+- Formulation: Rabiner and Juang (1993). "Fundamentals of speech recognition". PTR Prentice Hall, equation 4.19, p. 163, and equation 3.83c, p. 115
 
 Validation level 0, not checked.
 

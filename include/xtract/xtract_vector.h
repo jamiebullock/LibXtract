@@ -255,29 +255,25 @@ extern "C"
      */
     int xtract_packed(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
-    /** \brief Extract Linear Predictive Coding Coefficients
-     *
-     * Based on algorithm in Rabiner and Juang as implemented by Jutta Degener in Dr. Dobb's Journal December, 1994.
-     *
-     * Returns N-1 reflection (PARCOR) coefficients and N-1 LPC coefficients via *result
+    /** \brief Extract the linear prediction coefficients of an autocorrelation by the Levinson-Durbin recursion: the coefficients a[1] to a[p] of the inverse filter A(z) = 1 + a[1] z^-1 + ... + a[p] z^-p, so that each value is predicted as minus the sum of a[k] times the value k steps before
      *
      * \param *ctx: a pointer to a context, or NULL
-     * \param *data: N autocorrelation values e.g the data pointed to by *result from xtract_autocorrelation()
-     * \param N: the number of autocorrelation values to be considered, at least 2
+     * \param *data: N autocorrelation values from lag 0, e.g. the data pointed to by *result from xtract_autocorrelation()
+     * \param N: the number of autocorrelation values to be considered, at least 2; the order p is N - 1
      * \param *argv: a pointer to NULL
-     * \param *result: a pointer to an array containing N-1 reflection coefficients and N-1 LPC coefficients.
+     * \param *result: the p reflection coefficients followed by the p prediction coefficients a[1] to a[p]; the prediction error is not returned. All are 0 with no result when the prediction error is 0 or below before the last coefficient, as for a series that fewer coefficients predict exactly or a sequence that is not the autocorrelation of any series
      *
      * An array of size 2 * (N - 1) must be allocated, and *result must point to its first element.
      */
     int xtract_lpc(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
-    /** \brief Extract Linear Predictive Coding Cepstral Coefficients
+    /** \brief Extract the cepstrum of an all-pole model 1 / A(z) from the coefficients of A(z) = 1 + a[1] z^-1 + ... + a[p] z^-p, as xtract_lpc() gives them
      *
      * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to an array of N doubles: a gain term followed by the p LPC coefficients a[1] to a[p], e.g. one element followed by the second half of the array pointed to by *result from xtract_lpc(). The gain term is not read
      * \param N: the size of the array pointed to by *data, one more than the number of LPC coefficients p, at least 2
      * \param *argv: a pointer to an int representing the order (Q) of the result vector. Must be greater than 0. According to Rabiner and Juang the recommended ratio is Q ~ (3/2)p where p is the number of LPC coefficients and Q > p; XTRACT_LPCC_CEPSTRUM_ORDER(p) computes this value.
-     * \param *result: a pointer to an array containing the resultant LPCC.
+     * \param *result: a pointer to an array containing the cepstral coefficients c[1] to c[Q]; c[0], the log of the gain, is not computed.
      *
      * An array of size Q must be allocated, and *result must point to its first element.
      *

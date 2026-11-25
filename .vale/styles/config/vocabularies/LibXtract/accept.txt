@@ -1,4 +1,5 @@
 Allman
+Atal
 Baer
 Bertin
 Bitwuzla
@@ -13,6 +14,7 @@ Fastl
 Fevotte
 Glasberg
 Hainsworth
+Hanauer
 Higuchi
 Hu
 Hjorth
@@ -23,6 +25,7 @@ Jutta
 Kaspar
 Krimphoff
 Maenpaa
+Makhoul
 Markel
 Nyquist
 Ojala

@@ -938,16 +938,18 @@ int xtract_lpc(xtract_context *ctx, const double *data, const int N, const void 
     ref = result;
     lpc = result + L;
 
-    if (error == 0.0)
-    {
-        memset(result, 0, M * sizeof(double));
-        return XTRACT_NO_RESULT;
-    }
-
     memset(result, 0, M * sizeof(double));
 
     for (i = 0; i < L; i++)
     {
+        /* A prediction error of 0 means the autocorrelation is singular: the
+         * coefficients from here on are undefined */
+        if (!(error > 0.0))
+        {
+            memset(result, 0, M * sizeof(double));
+            return XTRACT_NO_RESULT;
+        }
+
         /* Sum up this iteration's reflection coefficient. */
         r = -data[i + 1];
         for (j = 0; j < i; j++)
@@ -973,8 +975,6 @@ int xtract_lpc(xtract_context *ctx, const double *data, const int N, const void 
 
 int xtract_lpcc(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
-    /* Based on an algorithm by Rabiner and Juang */
-
     int n, k;
     double sum;
     int order; /* LPC order p (data[0] is the gain term) */
@@ -995,17 +995,17 @@ int xtract_lpcc(xtract_context *ctx, const double *data, const int N, const void
         sum = 0.0;
         for (k = 1; k < n; k++)
             sum += k * result[k - 1] * data[n - k];
-        result[n - 1] = data[n] + sum / n;
+        result[n - 1] = -data[n] - sum / n;
     }
 
     /* Beyond the LPC order there is no a[n] term and the sum runs over the
-     * last p cepstral terms, k = n - p to n - 1 (Rabiner and Juang 1993). */
+     * last p cepstral terms, k = n - p to n - 1 */
     for (n = order + 1; n <= cep_length; n++)
     {
         sum = 0.0;
         for (k = n - order; k < n; k++)
             sum += k * result[k - 1] * data[n - k];
-        result[n - 1] = sum / n;
+        result[n - 1] = -sum / n;
     }
 
     return XTRACT_SUCCESS;
