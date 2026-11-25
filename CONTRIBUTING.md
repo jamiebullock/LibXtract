@@ -108,6 +108,10 @@ enumeration:
 - `name` is the name of the function without the `xtract_` prefix. `title`
   and `description` are for a person to read, and `tags` lists what the
   feature assumes about its data.
+- `definition` is the mathematical definition the feature computes, in
+  LaTeX, the body of a displayed formula. The documentation page of feature
+  definitions (`doc/definitions.dox`) shows it with the sources and the
+  validation level.
 - `sources` lists the published works that define the feature, the work
   that introduced the measure first with the `role` `origin`, then any work
   whose formulation the feature computes with the role `formulation`. Each
