@@ -1557,14 +1557,13 @@ int xtract_wavelet_f0(xtract_context *ctx, const double *data, const int N, cons
     distances = minima + half;
     *result = 0.0;
 
-    mean = highest = lowest = 0.0;
+    mean = 0.0;
+    highest = lowest = data[0];
     for (n = 0; n < N; n++)
     {
         mean += data[n];
-        if (n == 0 || data[n] > highest)
-            highest = data[n];
-        if (n == 0 || data[n] < lowest)
-            lowest = data[n];
+        highest = fmax(highest, data[n]);
+        lowest = fmin(lowest, data[n]);
     }
     mean /= N;
     upper = WAVELET_F0_THRESHOLD * (highest - mean) + mean;
@@ -1583,9 +1582,7 @@ int xtract_wavelet_f0(xtract_context *ctx, const double *data, const int N, cons
 
         /* No two extrema of a level are further apart than its width, so a
          * larger spacing has the same effect */
-        spacing = (int)XTRACT_MIN(floor(sample_rate / WAVELET_F0_HIGHEST / (double)(1 << level)), (double)width);
-        if (spacing < 1)
-            spacing = 1;
+        spacing = (int)fmin(fmax(floor(sample_rate / WAVELET_F0_HIGHEST / (double)(1 << level)), 1.0), (double)width);
         wavelet_extrema(approximation, width, mean, upper, lower, spacing, maxima, &n_maxima, minima, &n_minima);
         if (n_maxima < 2 || n_minima < 2)
         {
