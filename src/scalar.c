@@ -612,7 +612,7 @@ int xtract_loudness(xtract_context *ctx, const double *data, const int N, const 
 
 int xtract_flatness(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
-    int n, count;
+    int n, count, has_empty = 0;
     double log_sum, den;
 
     log_sum = 0.0;
@@ -637,12 +637,20 @@ int xtract_flatness(xtract_context *ctx, const double *data, const int N, const 
             den += data[n];
             count++;
         }
+        else if (data[n] <= 0.0)
+            has_empty = 1;
     }
 
     if (!count)
     {
         *result = 0.0;
         return XTRACT_NO_RESULT;
+    }
+
+    if (has_empty)
+    {
+        *result = 0.0;
+        return XTRACT_SUCCESS;
     }
 
     *result = exp(log_sum / (double)count) / (den / (double)count);

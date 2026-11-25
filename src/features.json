@@ -356,7 +356,7 @@
       "description": "Extract the spectral flatness of a spectrum",
       "sources": [{"role": "origin", "authors": ["Gray", "Markel"], "year": 1974, "title": "A spectral-flatness measure for studying the autocorrelation method of linear prediction of speech analysis", "venue": "IEEE Transactions on Acoustics, Speech, and Signal Processing 22(3)", "locator": "equation 6", "permalink": "doi:10.1109/TASSP.1974.1162572"}, {"role": "formulation", "authors": ["Peeters"], "year": 2004, "title": "A large set of audio features for sound description (similarity and classification) in the CUIDADO project", "venue": "Technical report, IRCAM", "locator": "section 9.1"}],
       "validation_level": 0,
-      "input": {"format": "spectral_magnitudes", "unit": "any", "accepts": ["magnitude_bins", "subbands"]},
+      "input": {"format": "spectral_magnitudes", "unit": "any", "accepts": ["power_bins"]},
       "arguments": [],
       "result": {"kind": "scalar", "unit": "none", "min": 0, "max": 1}
     },

@@ -294,11 +294,6 @@ static const xtract_provider_t providers_bark_coefficients[] = {
 };
 static const xtract_quantity_t quantity_bark_coefficients = {"bark_coefficients", XTRACT_FALSE, XTRACT_BARK_COEFFS, 1, providers_bark_coefficients};
 
-static const xtract_provider_t providers_subbands[] = {
-    {XTRACT_SUBBANDS, XTRACT_PART_WHOLE, NULL},
-};
-static const xtract_quantity_t quantity_subbands = {"subbands", XTRACT_FALSE, XTRACT_ARBITRARY_SERIES, 1, providers_subbands};
-
 static const xtract_provider_t providers_flatness[] = {
     {XTRACT_FLATNESS, XTRACT_PART_WHOLE, NULL},
 };
@@ -429,7 +424,7 @@ static const xtract_quantity_t *const accepted_smoothness[] = {&quantity_partial
 static const xtract_quantity_t *const accepted_spread[] = {&quantity_coefficients_and_frequencies};
 static const xtract_quantity_t *const accepted_rolloff[] = {&quantity_power_bins};
 static const xtract_quantity_t *const accepted_loudness[] = {&quantity_bark_coefficients};
-static const xtract_quantity_t *const accepted_flatness[] = {&quantity_magnitude_bins, &quantity_subbands};
+static const xtract_quantity_t *const accepted_flatness[] = {&quantity_power_bins};
 static const xtract_quantity_t *const accepted_noisiness[] = {&quantity_peak_spectrum};
 static const xtract_quantity_t *const accepted_spectral_inharmonicity[] = {&quantity_peak_spectrum};
 static const xtract_quantity_t *const accepted_odd_even_ratio[] = {&quantity_harmonic_amplitudes};
@@ -1400,7 +1395,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .sources = sources_flatness,
         .validation_level = 0,
         .tags = 0,
-        .data = {XTRACT_SPECTRAL_MAGNITUDES, XTRACT_UNIT_ANY, 2, accepted_flatness, 1, "N >= 1"},
+        .data = {XTRACT_SPECTRAL_MAGNITUDES, XTRACT_UNIT_ANY, 1, accepted_flatness, 1, "N >= 1"},
         .argc = 0,
         .argv = NULL,
         .is_scalar = XTRACT_TRUE,
