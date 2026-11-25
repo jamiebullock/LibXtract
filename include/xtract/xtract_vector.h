@@ -397,7 +397,7 @@ extern "C"
      * \param *argv: a pointer to an array of three finite doubles: the frequency of A4 in Hz, above 0; the lowest bin frequency included, at least 0, with 0 including every bin above 0 Hz; and the highest bin frequency included, with 0 including every bin above the lowest, and otherwise greater than the lowest. The 440 Hz, 0 and 0 the descriptor gives as defaults are applied only when passed
      * \param *result: a pointer to an array of XTRACT_PITCH_CLASSES doubles, the first for C and the last for B, each from the bins whose frequency rounds to that pitch class in any octave, scaled to a maximum of 1. The array is zeroed with no result when no included bin has a positive coefficient; bins at or below 0 Hz are never included
      *
-     * \note For pitch classes from constant-Q bands, which resolve the semitones of the low octaves that the bins of xtract_spectrum() merge, pass the *result of xtract_cqt() with N twice its number of bands
+     * \note For pitch classes from constant-Q bands, which resolve the semitones of the low octaves that the bins of xtract_spectrum() merge, pass the *result of xtract_cqt() with N twice its number of bands, its band magnitudes squared and its band frequencies kept
      */
     int xtract_chroma(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
