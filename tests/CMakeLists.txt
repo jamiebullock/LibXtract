@@ -75,7 +75,7 @@ if(XTRACT_COVERAGE)
         COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure
         COMMAND lcov --capture --directory src
             --output-file coverage.info ${XTRACT_LCOV_IGNORE}
-        COMMAND lcov --remove coverage.info */ooura/* */c-ringbuf/* */dywapitchtrack/*
+        COMMAND lcov --remove coverage.info */ooura/* */c-ringbuf/*
             --output-file coverage.info ${XTRACT_LCOV_IGNORE}
         COMMAND lcov --list coverage.info ${XTRACT_LCOV_IGNORE}
         COMMAND genhtml --quiet coverage.info --output-directory coverage-html ${XTRACT_LCOV_IGNORE}

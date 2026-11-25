@@ -12,13 +12,12 @@ Each function named `verify_*` in `verify_scalar.c`, `verify_vector.c`, `verify_
 - for the features that take scratch, a context that either gives it, as an allocation of exactly the size asked for, or refuses;
 - for the filterbank features, a filterbank of up to `VERIFY_MAX_FILTERS` filters, built for a transform of any even size from 2 to twice the proof's bound, whose gains and cosine table are allocated at exactly their sizes, the cosine table possibly NULL.
 
-Three functions have no proof, each because the formula outgrows both solvers before N reaches 8:
+Two functions have no proof, each because the formula outgrows both solvers before N reaches 8:
 
 - `xtract_subbands` reduces each band by calling through the `xtract[]` table, so its proof is the union of a proof for every permitted feature, once per band. Restricting the call site to the twelve permitted features with `goto-instrument --restrict-function-pointer` and bounding the band count to two was not enough.
 - `xtract_features_from_subframes` dispatches through the same table with nearly every feature permitted.
-- `xtract_wavelet_f0` runs the bundled dywapitchtrack pitch tracker, whose loop counts do not follow N.
 
-The unit tests, built with the address and undefined behaviour sanitizers, remain the evidence for those three, and the fuzz jobs cover the two that are feature functions. `xtract_features_from_subframes` has no fuzz harness.
+The unit tests, built with the address and undefined behaviour sanitizers, remain the evidence for those two, and the fuzz job covers `xtract_subbands`. `xtract_features_from_subframes` has no fuzz harness.
 
 CBMC then checks every array bound, pointer dereference, integer division, signed overflow and loop bound on every path. `malloc` may return NULL. NaN and infinity are valid inputs, so floating-point results are not checked. A passing proof means the function returns a status code for every such input without reading or writing outside its buffers.
 

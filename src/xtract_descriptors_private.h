@@ -25,8 +25,6 @@ void *xtract_build_init_cqt(const double *parameters);
 void xtract_release_init_cqt(void *object);
 void *xtract_build_last_n_state_new(const double *parameters);
 void xtract_release_last_n_state_new(void *object);
-void *xtract_build_wavelet_f0_state_new(const double *parameters);
-void xtract_release_wavelet_f0_state_new(void *object);
 
 /* The functions an expression for a length can call, as the generated
  * xtract_length_is_accepted() and xtract_result_length() do. The root of a

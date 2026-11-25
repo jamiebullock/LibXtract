@@ -212,11 +212,6 @@ static const xtract_argument_descriptor_t parameters_last_n_state_new[] = {
 };
 static const xtract_builder_descriptor_t builder_last_n_state_new = {"last_n_state_new", XTRACT_LAST_N_STATE, XTRACT_TRUE, 1, parameters_last_n_state_new, xtract_build_last_n_state_new, xtract_release_last_n_state_new};
 
-static const xtract_argument_descriptor_t parameters_wavelet_f0_state_new[] = {
-    {.name = "sample_rate", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = 2.2250738585072014e-308, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_SAMPLE_RATE},
-};
-static const xtract_builder_descriptor_t builder_wavelet_f0_state_new = {"wavelet_f0_state_new", XTRACT_WAVELET_F0_STATE, XTRACT_TRUE, 1, parameters_wavelet_f0_state_new, xtract_build_wavelet_f0_state_new, xtract_release_wavelet_f0_state_new};
-
 static const xtract_provider_t providers_power_bins[] = {
     {XTRACT_POWER_SPECTRUM, XTRACT_PART_FIRST_HALF, NULL},
 };
@@ -675,12 +670,12 @@ static const xtract_argument_descriptor_t arguments_failsafe_f0[] = {
     {.name = "sample_rate", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = 2.2250738585072014e-308, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_SAMPLE_RATE},
 };
 
-static const char *const authors_wavelet_f0_0[] = {"Schmitt"};
+static const char *const authors_wavelet_f0_0[] = {"Larson", "Maddox"};
 static const xtract_source_t sources_wavelet_f0[] = {
-    {XTRACT_SOURCE_ORIGIN, 1, authors_wavelet_f0_0, 0, NULL, NULL, NULL, NULL},
+    {XTRACT_SOURCE_ORIGIN, 2, authors_wavelet_f0_0, 2005, "Real-time time-domain pitch tracking using wavelets", "Report, NSF Research Experiences for Undergraduates, Department of Physics, University of Illinois at Urbana-Champaign", "section II, equations 2 and 3, table I and appendix A", NULL},
 };
 static const xtract_argument_descriptor_t arguments_wavelet_f0[] = {
-    {.name = "state", .kind = XTRACT_ARGUMENT_OBJECT, .type = XTRACT_WAVELET_F0_STATE, .unit = XTRACT_UNIT_NONE, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .builder = &builder_wavelet_f0_state_new},
+    {.name = "sample_rate", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = 2.2250738585072014e-308, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_SAMPLE_RATE},
 };
 
 static const char *const authors_mcleod_f0_0[] = {"McLeod", "Wyvill"};

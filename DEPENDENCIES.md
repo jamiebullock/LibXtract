@@ -23,21 +23,6 @@ and keep their upstream licence and style. None of them is covered by
 - Platforms: Linux and Windows. On macOS the file is compiled and Accelerate
   does the transforms
 
-### dywapitchtrack
-
-- Location: `src/dywapitchtrack/`
-- Source: Antoine Schmitt, Dynamic Wavelet Algorithm Pitch Tracking library.
-  The files do not give an address
-- Version: none recorded in the files
-- Revision: none recorded. The copy differs from the one first vendored in
-  four ways: the sample buffer parameters are `const`, `abs` is `fabs`, one
-  product is cast to `double`, and `dywapitch_computepitch` works in two
-  buffers that its caller passes and does not allocate
-- Licence: MIT
-- Copyright: Copyright (c) 2010 Antoine Schmitt
-- Used for: `xtract_wavelet_f0`
-- Platforms: all
-
 ### c-ringbuf
 
 - Location: `src/c-ringbuf/`
@@ -97,11 +82,6 @@ and keep their upstream licence and style. None of them is covered by
 
 ## Obligations
 
-- **dywapitchtrack (MIT).** The copyright and permission notice at the top of
-  `src/dywapitchtrack/dywapitchtrack.c` must be included in all copies or
-  substantial portions, which includes binary distributions of any build
-  that links it. It is the only vendored component whose notice follows
-  binaries.
 - **Ooura FFT.** The source file carries no licence header. The package's
   `readme.txt` says: "You may use, copy, modify this code for any purpose and
   without fee. You may distribute this ORIGINAL package." The package's web

@@ -9,7 +9,6 @@ reviews:
   path_filters:
     - '!src/ooura/**'
     - '!src/c-ringbuf/**'
-    - '!src/dywapitchtrack/**'
   path_instructions:
     - path: 'src/**/*.c'
       instructions: |

@@ -399,8 +399,10 @@ Validation level 0, not checked.
 
 xtract_wavelet_f0()
 
+\f[ f_0 = \frac{f_s}{2^{l-1} \bar{d}_{l-1}}, \quad l = \text{the first level from 2 at which } |\bar{d}_{l-1} - 2 \bar{d}_l| \le \delta_l, \quad a_l(n) = \frac{a_{l-1}(2n) + a_{l-1}(2n+1)}{2}, \; a_0 = x, \quad \delta_l = \max\left(\left\lfloor \frac{f_s}{3000 \cdot 2^l} \right\rfloor, 1\right), \quad \bar{d}_l = \text{the mean of the distances between extrema of } a_l \text{ within } \delta_l \text{ of their mode}, \; l = 1, \dots, 5 \f]
+
 Sources:
-- Origin: Schmitt
+- Origin: Larson and Maddox (2005). "Real-time time-domain pitch tracking using wavelets". Report, NSF Research Experiences for Undergraduates, Department of Physics, University of Illinois at Urbana-Champaign, section II, equations 2 and 3, table I and appendix A
 
 Validation level 0, not checked.
 

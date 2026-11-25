@@ -152,26 +152,24 @@ UTEST(context, two_ints_take_one_double)
 
 UTEST(context, wavelet_f0_holds_no_scratch_after_a_caller_left_room_for_only_part_of_it)
 {
-    /* With 16 of the 24 doubles held, the copy of the frame fits and the
-     * ints do not */
+    /* With 16 of the 24 doubles held, the 4 doubles of the first level of
+     * approximation fit and the 20 ints of extrema and distances do not */
     double data[8] = {0};
+    double sample_rate = 44100.0;
     double result = -1.0;
     xtract_context *ctx = xtract_context_new(8);
-    xtract_wavelet_f0_state *state = xtract_wavelet_f0_state_new(44100.0);
     double *held, *rest;
 
-    ASSERT_TRUE(state != NULL);
     held = xtract_scratch_take(ctx, 8, 16);
     ASSERT_TRUE(held != NULL);
 
-    ASSERT_EQ(xtract_wavelet_f0(ctx, data, 8, state, &result), XTRACT_BAD_STATE);
+    ASSERT_EQ(xtract_wavelet_f0(ctx, data, 8, &sample_rate, &result), XTRACT_BAD_STATE);
     ASSERT_EQ(result, -1.0);
     rest = xtract_scratch_take(ctx, 8, 8);
     ASSERT_TRUE(rest != NULL);
 
     xtract_scratch_return(ctx, rest, 8);
     xtract_scratch_return(ctx, held, 16);
-    xtract_wavelet_f0_state_delete(state);
     xtract_context_delete(ctx);
 }
 

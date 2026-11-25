@@ -112,7 +112,7 @@ static void set_value(const xtract_argument_descriptor_t *argument, double *doub
         doubles[i] = value;
 }
 
-/* What a caller has: three harmonics of 1760 Hz from part of the way into a
+/* What a caller has: three harmonics of 880 Hz from part of the way into a
  * period, so that the first element is not 0, its n elements rotated by
  * rotation. It is a series, two series, the rows of a grid or the channels
  * of a recording according to the feature that takes it */
@@ -126,7 +126,7 @@ static int caller_data(xttest_data *data, int n, double scale, int rotation)
     for (i = 0; i < n + XTTEST_DRIVER_SLACK; i++)
     {
         const int at = i < n ? (i + rotation) % n : i;
-        const double phase = 0.5 + 2.0 * M_PI * 1760.0 * at / DRIVER_SAMPLE_RATE;
+        const double phase = 0.5 + 2.0 * M_PI * 880.0 * at / DRIVER_SAMPLE_RATE;
 
         data->values[i] = scale * (0.6 * sin(phase) + 0.3 * sin(2.0 * phase) + 0.1 * sin(3.0 * phase));
     }

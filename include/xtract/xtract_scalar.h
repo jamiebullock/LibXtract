@@ -425,17 +425,13 @@ extern "C"
      */
     int xtract_failsafe_f0(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
-    /** \brief Extract the fundamental frequency of an input vector using wavelet-based method
+    /** \brief Extract the fundamental frequency of an input vector by the time-domain wavelet method of Larson and Maddox (2005): the distance between the extrema of successive Haar approximations of the signal, taken at the first level whose distance is half that of the level before
      *
      * \param *ctx: a pointer to a context created for at least N elements
      * \param *data: a pointer to the first element in an array of doubles representing an audio vector
      * \param N: the number of elements to be considered, at least 1
-     * \param *argv: a pointer to the xtract_wavelet_f0_state of the stream the frame belongs to, as allocated by xtract_wavelet_f0_state_new()
-     * \param *result: the pitch of N values from the array pointed to by *data
-     *
-     * This function uses the time-domain wavelet-based method described in Larson and Maddox (2005) and
-     * implemented in the dywapitchtrack library
-     *
+     * \param *argv: a pointer to a double representing the audio sample rate, finite and above 0
+     * \param *result: the pitch in Hz of N values from the array pointed to by *data, or 0 with no result when no two successive levels agree. The method uses Larson and Maddox's constants: five levels, extrema at least three quarters of the way from the mean to the highest or lowest value, distances spanning up to three extrema, and extrema at least the sample rate over 3000 Hz apart at the signal's own rate, halving at each level. Each frame is analysed on its own. At 44100 Hz it finds a sine up to about 1800 Hz; a tone with strong harmonics can give no result or a pitch below its fundamental
      */
     int xtract_wavelet_f0(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 

@@ -84,6 +84,7 @@ SCALAR_HARNESS(nonzero_count, nondet_length())
 SCALAR_HARNESS(hps, nondet_small_length())
 SCALAR_HARNESS(f0, nondet_length())
 SCALAR_HARNESS(mcleod_f0, nondet_small_length())
+SCALAR_HARNESS(wavelet_f0, nondet_small_length())
 SCALAR_HARNESS(midicent, nondet_length())
 SCALAR_HARNESS(peak, nondet_length())
 

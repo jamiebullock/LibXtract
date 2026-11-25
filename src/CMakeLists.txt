@@ -21,7 +21,6 @@ set(XTRACT_SOURCES
 
 set(XTRACT_THIRD_PARTY_SOURCES
     c-ringbuf/ringbuf.c
-    dywapitchtrack/dywapitchtrack.c
     ooura/fftsg.c)
 
 add_library(xtract ${XTRACT_SOURCES} ${XTRACT_THIRD_PARTY_SOURCES})

@@ -77,25 +77,3 @@ int xtract_last_n(xtract_context *ctx, const double *data, const int N, const vo
 
     return XTRACT_SUCCESS;
 }
-
-xtract_wavelet_f0_state *xtract_wavelet_f0_state_new(double sample_rate)
-{
-    xtract_wavelet_f0_state *wavelet_f0_state;
-
-    if (!isfinite(sample_rate) || sample_rate <= 0.0)
-        return NULL;
-
-    wavelet_f0_state = malloc(sizeof(xtract_wavelet_f0_state));
-    if (wavelet_f0_state == NULL)
-        return NULL;
-
-    dywapitch_inittracking(&wavelet_f0_state->tracker);
-    wavelet_f0_state->sample_rate = sample_rate;
-
-    return wavelet_f0_state;
-}
-
-void xtract_wavelet_f0_state_delete(xtract_wavelet_f0_state *wavelet_f0_state)
-{
-    free(wavelet_f0_state);
-}

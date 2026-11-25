@@ -30,7 +30,7 @@ set(FORMATS spectral spectral_magnitudes spectral_peaks spectral_peaks_magnitude
             spectral_complex chroma_coeffs channels square_matrix grid central_moment_coeffs
             normalised_moment_coeffs)
 set(VALUE_TYPES float int)
-set(OBJECT_TYPES floatarray intarray filterbank cqt_kernel last_n_state wavelet_f0_state)
+set(OBJECT_TYPES floatarray intarray filterbank cqt_kernel last_n_state)
 set(PROPERTIES length sample_rate transform_size bin_spacing width series levels)
 set(SUBJECTS input source)
 set(PARTS whole first_half from_one_before_the_second_half first_half_from_one)

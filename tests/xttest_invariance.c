@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Zlib
  */
 
+#include <float.h>
 #include <math.h>
 #include <stdlib.h>
 
@@ -349,7 +350,7 @@ UTEST(invariance, a_result_of_a_magnitude_or_power_spectrum_is_unchanged_by_rota
     {
         const xtract_function_descriptor_t *d = xtract_descriptor(f);
         xttest_call before, after;
-        double largest[2] = {0.0, 0.0};
+        double largest[2];
 
         if (!is_rotation_free(f, NULL))
             continue;
@@ -361,7 +362,10 @@ UTEST(invariance, a_result_of_a_magnitude_or_power_spectrum_is_unchanged_by_rota
         ASSERT_EQ_MSG(xttest_call_run(&after, ctx), XTRACT_SUCCESS, d->name);
         ASSERT_EQ_MSG(after.result_length, before.result_length, d->name);
         /* The coefficients and the frequencies of a spectral layout each
-         * have a tolerance of their own */
+         * have a tolerance of their own. A divergence of two equal frames is
+         * 0 up to rounding, so the tolerance is at least a few multiples of
+         * the rounding of 1 */
+        largest[0] = largest[1] = 16.0 * DBL_EPSILON / 1e-9;
         for (i = 0; i < before.result_length; i++)
             largest[in_second_half(d, before.result_length, i)] = fmax(largest[in_second_half(d, before.result_length, i)], fabs(before.result[i]));
         for (i = 0; i < before.result_length; i++)

@@ -137,16 +137,3 @@ void xtract_release_last_n_state_new(void *object)
 {
     xtract_last_n_state_delete((xtract_last_n_state *)object);
 }
-
-void *xtract_build_wavelet_f0_state_new(const double *parameters)
-{
-    if (parameters == NULL)
-        return NULL;
-
-    return xtract_wavelet_f0_state_new(parameters[0]);
-}
-
-void xtract_release_wavelet_f0_state_new(void *object)
-{
-    xtract_wavelet_f0_state_delete((xtract_wavelet_f0_state *)object);
-}

@@ -81,14 +81,6 @@
       "parameters": [
         {"name": "capacity", "kind": "property", "property": "length", "type": "int", "min": 1}
       ]
-    },
-    {
-      "name": "wavelet_f0_state_new",
-      "type": "wavelet_f0_state",
-      "per_stream": true,
-      "parameters": [
-        {"name": "sample_rate", "kind": "property", "property": "sample_rate", "type": "float", "unit": "hertz", "min": 2.2250738585072014e-308}
-      ]
     }
   ],
   "features": [
@@ -580,12 +572,14 @@
       "name": "wavelet_f0",
       "title": "Fundamental Frequency (wavelet method)",
       "description": "Extract the fundamental frequency of a signal (wavelet method)",
-      "sources": [{"role": "origin", "authors": ["Schmitt"], "year": 0}],
+      "definition": "f_0 = \\frac{f_s}{2^{l-1} \\bar{d}_{l-1}}, \\quad l = \\text{the first level from 2 at which } |\\bar{d}_{l-1} - 2 \\bar{d}_l| \\le \\delta_l, \\quad a_l(n) = \\frac{a_{l-1}(2n) + a_{l-1}(2n+1)}{2}, \\; a_0 = x, \\quad \\delta_l = \\max\\left(\\left\\lfloor \\frac{f_s}{3000 \\cdot 2^l} \\right\\rfloor, 1\\right), \\quad \\bar{d}_l = \\text{the mean of the distances between extrema of } a_l \\text{ within } \\delta_l \\text{ of their mode}, \\; l = 1, \\dots, 5",
+      "sources": [{"role": "origin", "authors": ["Larson", "Maddox"], "year": 2005, "title": "Real-time time-domain pitch tracking using wavelets", "venue": "Report, NSF Research Experiences for Undergraduates, Department of Physics, University of Illinois at Urbana-Champaign", "locator": "section II, equations 2 and 3, table I and appendix A"}],
       "validation_level": 0,
       "provides": ["fundamental"],
       "input": {"format": "audio_samples", "unit": "any"},
+      "argument_type": "float",
       "arguments": [
-        {"name": "state", "kind": "object", "built_by": "wavelet_f0_state_new"}
+        {"name": "sample_rate", "kind": "property", "property": "sample_rate", "unit": "hertz", "min": 2.2250738585072014e-308}
       ],
       "result": {"kind": "scalar", "unit": "hertz", "min": 0}
     },

@@ -121,7 +121,6 @@ extern "C"
         XTRACT_FILTERBANK,
         XTRACT_CQT_KERNEL,
         XTRACT_LAST_N_STATE,
-        XTRACT_WAVELET_F0_STATE,
         XTRACT_INTARRAY /* an array of ints that a function of the library fills */
     } xtract_type_t;
 

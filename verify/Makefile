@@ -52,7 +52,7 @@ VERIFY_MAX_N ?= 32
 # reachable. covariance_matrix is here for its loops: one over the elements
 # of a series inside two over the series, whose unwindings multiply.
 VERIFY_SMALL_N ?= 8
-SMALL_PROOFS = verify_hps verify_mcleod_f0 verify_sharpness \
+SMALL_PROOFS = verify_hps verify_mcleod_f0 verify_wavelet_f0 verify_sharpness \
 	verify_tristimulus_1 verify_tristimulus_2 verify_tristimulus_3 \
 	verify_mel_spectrogram verify_mfcc verify_gammatone_spectrogram verify_gfcc \
 	verify_mmbses verify_spectral_subband_centroids \
@@ -74,10 +74,10 @@ PROOF_DIR = .proofs
 SORT_SRC := ../src/sort.c
 CONTEXT_SRC := ../src/context.c
 LIB_SRC := $(filter-out ../src/ooura/fftsg.c $(SORT_SRC) $(CONTEXT_SRC), \
-	$(wildcard ../src/*.c ../src/ooura/*.c ../src/c-ringbuf/*.c ../src/dywapitchtrack/*.c))
+	$(wildcard ../src/*.c ../src/ooura/*.c ../src/c-ringbuf/*.c))
 HARNESS_SRC := $(wildcard verify_*.c) context_stub.c fft_stub.c math_stub.c sort_stub.c
 HEADERS := verify.h $(wildcard ../include/xtract/*.h ../src/*.h ../src/ooura/*.h \
-	../src/c-ringbuf/*.h ../src/dywapitchtrack/*.h)
+	../src/c-ringbuf/*.h)
 
 # goto-cc reports a call to a function that nothing declares as a warning,
 # which -Wall prints and -Werror makes an error.

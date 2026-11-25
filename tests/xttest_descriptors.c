@@ -936,10 +936,9 @@ UTEST(descriptors, appended_features_are_fully_described)
     ASSERT_EQ(xtract_descriptor(XTRACT_CQT)->sources[1].year, 1992);
 
     ASSERT_EQ(xtract_descriptor(XTRACT_WAVELET_F0)->argc, 1);
-    ASSERT_EQ(xtract_descriptor(XTRACT_WAVELET_F0)->argv[0].type, XTRACT_WAVELET_F0_STATE);
-    ASSERT_EQ(xtract_descriptor(XTRACT_WAVELET_F0)->argv[0].min, XTRACT_UNBOUNDED_MIN);
-    ASSERT_EQ(xtract_descriptor(XTRACT_WAVELET_F0)->argv[0].max, XTRACT_UNBOUNDED_MAX);
-    ASSERT_EQ(xtract_descriptor(XTRACT_WAVELET_F0)->argv[0].unit, XTRACT_UNIT_NONE);
+    ASSERT_EQ(xtract_descriptor(XTRACT_WAVELET_F0)->argv[0].type, XTRACT_FLOAT);
+    ASSERT_EQ(xtract_descriptor(XTRACT_WAVELET_F0)->argv[0].kind, XTRACT_ARGUMENT_PROPERTY);
+    ASSERT_EQ(xtract_descriptor(XTRACT_WAVELET_F0)->argv[0].unit, XTRACT_HERTZ);
 
     ASSERT_STREQ(xtract_descriptor(XTRACT_LAST_N)->name, "last_n");
     ASSERT_EQ(xtract_descriptor(XTRACT_LAST_N)->argc, 1);
@@ -1255,7 +1254,7 @@ UTEST(descriptors, a_builder_gives_what_its_function_gives)
 
 UTEST(descriptors, a_builder_refuses_values_its_function_cannot_take)
 {
-    static const int built_for[] = {XTRACT_MFCC, XTRACT_GFCC, XTRACT_BARK_COEFFICIENTS, XTRACT_WINDOWED, XTRACT_DCT, XTRACT_CQT, XTRACT_LAST_N, XTRACT_WAVELET_F0};
+    static const int built_for[] = {XTRACT_MFCC, XTRACT_GFCC, XTRACT_BARK_COEFFICIENTS, XTRACT_WINDOWED, XTRACT_DCT, XTRACT_CQT, XTRACT_LAST_N};
     double parameters[MOST_PARAMETERS];
     size_t b;
     int i;
@@ -1286,7 +1285,7 @@ UTEST(descriptors, a_state_belongs_to_one_stream_and_any_other_object_is_shared)
         const xtract_function_descriptor_t *d = xtract_descriptor(f);
 
         if (d->argc == 1 && d->argv[0].kind == XTRACT_ARGUMENT_OBJECT)
-            ASSERT_EQ_MSG(d->argv[0].builder->is_per_stream == XTRACT_TRUE, f == XTRACT_LAST_N || f == XTRACT_WAVELET_F0, d->name);
+            ASSERT_EQ_MSG(d->argv[0].builder->is_per_stream == XTRACT_TRUE, f == XTRACT_LAST_N, d->name);
     }
 }
 
