@@ -372,8 +372,10 @@ Validation level 0, not checked.
 
 xtract_mcleod_f0()
 
+\f[ f_0 = \frac{f_s}{\tau^* + \delta}, \quad \delta = \frac{n_{\tau^*-1} - n_{\tau^*+1}}{2 (n_{\tau^*-1} - 2 n_{\tau^*} + n_{\tau^*+1})}, \quad \tau^* = \text{the first key maximum with } h(\tau^*) \ge 0.8 \max_{\text{key}} h, \quad h(\tau) = \min\left(n_\tau - \frac{(n_{\tau-1} - n_{\tau+1})^2}{8 (n_{\tau-1} - 2 n_\tau + n_{\tau+1})}, 1\right), \quad n_\tau = \frac{2 \sum_{j=0}^{N-1-\tau} x_j x_{j+\tau}}{\sum_{j=0}^{N-1-\tau} (x_j^2 + x_{j+\tau}^2)}, \quad \text{key maxima taken over } 1 \le \tau \le \min(\lfloor N/2 \rfloor, N-2) \f]
+
 Sources:
-- Origin: McLeod and Wyvill (2005)
+- Origin: McLeod and Wyvill (2005). "A smarter way to find pitch". Proceedings of the International Computer Music Conference, Barcelona, sections 5 and 6
 
 Validation level 0, not checked.
 
@@ -681,8 +683,10 @@ Validation level 0, not checked.
 
 xtract_hjorth_activity()
 
+\f[ A = \frac{1}{N} \sum_{n=0}^{N-1} (x_n - \bar{x})^2 \f]
+
 Sources:
-- Origin: Hjorth (1970)
+- Origin: Hjorth (1970). "EEG analysis based on time domain properties". Electroencephalography and Clinical Neurophysiology 29(3), table I. <a href="https://doi.org/10.1016/0013-4694(70)90143-4">doi:10.1016/0013-4694(70)90143-4</a>
 
 Validation level 0, not checked.
 
@@ -690,8 +694,10 @@ Validation level 0, not checked.
 
 xtract_hjorth_mobility()
 
+\f[ M = \sqrt{\frac{\operatorname{var}(\Delta x)}{\operatorname{var}(x)}}, \quad \Delta x_n = x_{n+1} - x_n, \quad \operatorname{var}(y) = \frac{1}{K} \sum_{k=0}^{K-1} (y_k - \bar{y})^2 \text{ over the } K \text{ elements of } y \f]
+
 Sources:
-- Origin: Hjorth (1970)
+- Origin: Hjorth (1970). "EEG analysis based on time domain properties". Electroencephalography and Clinical Neurophysiology 29(3), table I and p. 308. <a href="https://doi.org/10.1016/0013-4694(70)90143-4">doi:10.1016/0013-4694(70)90143-4</a>
 
 Validation level 0, not checked.
 
@@ -699,8 +705,10 @@ Validation level 0, not checked.
 
 xtract_hjorth_complexity()
 
+\f[ C = \frac{M(\Delta x)}{M(x)}, \quad M(y) = \sqrt{\frac{\operatorname{var}(\Delta y)}{\operatorname{var}(y)}}, \quad \Delta y_n = y_{n+1} - y_n \f]
+
 Sources:
-- Origin: Hjorth (1970)
+- Origin: Hjorth (1970). "EEG analysis based on time domain properties". Electroencephalography and Clinical Neurophysiology 29(3), table I and p. 308. <a href="https://doi.org/10.1016/0013-4694(70)90143-4">doi:10.1016/0013-4694(70)90143-4</a>
 
 Validation level 0, not checked.
 
@@ -724,8 +732,10 @@ Validation level 0, not checked.
 
 xtract_petrosian_fractal_dimension()
 
+\f[ D = \frac{\log N}{\log N + \log \frac{N}{N + 0.4 N_\delta}}, \quad N_\delta = \#\{1 \le n \le N-2 : b_n \ne b_{n-1}\}, \quad b_n = [x_{n+1} - x_n < 0] \f]
+
 Sources:
-- Origin: Petrosian (1995)
+- Origin: Petrosian (1995). "Kolmogorov complexity of finite sequences and recognition of different preictal EEG patterns". Proceedings of the Eighth IEEE Symposium on Computer-Based Medical Systems, p. 214, binary sequence (c). <a href="https://doi.org/10.1109/CBMS.1995.465426">doi:10.1109/CBMS.1995.465426</a>
 
 Validation level 0, not checked.
 
@@ -744,8 +754,10 @@ Validation level 0, not checked.
 
 xtract_higuchi_fractal_dimension()
 
+\f[ L_m(k) = \frac{N-1}{\lfloor (N-m)/k \rfloor k^2} \sum_{i=1}^{\lfloor (N-m)/k \rfloor} |x_{m+ik} - x_{m+(i-1)k}|, \quad \langle L(k) \rangle = \frac{1}{k} \sum_{m=1}^{k} L_m(k), \quad D = \text{the least-squares slope of } \ln \langle L(k) \rangle \text{ against } \ln \tfrac{1}{k}, \; k = 1, \dots, k_{\max} \f]
+
 Sources:
-- Origin: Higuchi (1988)
+- Origin: Higuchi (1988). "Approach to an irregular time series on the basis of the fractal theory". Physica D 31(2), section 2. <a href="https://doi.org/10.1016/0167-2789(88)90081-4">doi:10.1016/0167-2789(88)90081-4</a>
 
 Validation level 0, not checked.
 
@@ -753,8 +765,11 @@ Validation level 0, not checked.
 
 xtract_permutation_entropy()
 
+\f[ H = -\frac{1}{\ln m!} \sum_{\pi} p(\pi) \ln p(\pi), \quad p(\pi) = \frac{\#\{t : (x_t, x_{t+\tau}, \dots, x_{t+(m-1)\tau}) \text{ has ordinal pattern } \pi\}}{N - (m-1)\tau}, \text{ equal values ordered by position} \f]
+
 Sources:
-- Origin: Bandt and Pompe (2002)
+- Origin: Bandt and Pompe (2002). "Permutation entropy: a natural complexity measure for time series". Physical Review Letters 88(17), section II, and section III for the normalisation. <a href="https://doi.org/10.1103/PhysRevLett.88.174102">doi:10.1103/PhysRevLett.88.174102</a>
+- Formulation: Cao, Tung, Gao, Protopopescu and Hively (2004). "Detecting dynamical changes in time series using the permutation entropy". Physical Review E 70(4), section II, the delay and the order of equal values. <a href="https://doi.org/10.1103/PhysRevE.70.046217">doi:10.1103/PhysRevE.70.046217</a>
 
 Validation level 0, not checked.
 
@@ -762,8 +777,11 @@ Validation level 0, not checked.
 
 xtract_lempel_ziv_complexity()
 
+\f[ C = c(s) \frac{\log_2 N}{N}, \quad s_n = [x_n > \theta], \quad c(s) = \text{the number of components of the exhaustive history of } s_0 \cdots s_{N-1} \f]
+
 Sources:
-- Origin: Lempel and Ziv (1976)
+- Origin: Lempel and Ziv (1976). "On the complexity of finite sequences". IEEE Transactions on Information Theory 22(1), section III. <a href="https://doi.org/10.1109/TIT.1976.1055501">doi:10.1109/TIT.1976.1055501</a>
+- Formulation: Kaspar and Schuster (1987). "Easily calculable measure for the complexity of spatiotemporal patterns". Physical Review A 36(2), figure 1 and equation 1. <a href="https://doi.org/10.1103/PhysRevA.36.842">doi:10.1103/PhysRevA.36.842</a>
 
 Validation level 0, not checked.
 
@@ -771,8 +789,10 @@ Validation level 0, not checked.
 
 xtract_sample_entropy()
 
+\f[ \mathrm{SampEn} = -\ln \frac{A}{B}, \quad B = \#\{i < j \le N-m : d_m(i,j) \le r\}, \quad A = \#\{i < j \le N-m : d_{m+1}(i,j) \le r\}, \quad d_L(i,j) = \max_{0 \le k < L} |x_{i+k} - x_{j+k}| \f]
+
 Sources:
-- Origin: Richman and Moorman (2000)
+- Origin: Richman and Moorman (2000). "Physiological time-series analysis using approximate entropy and sample entropy". American Journal of Physiology - Heart and Circulatory Physiology 278(6), p. H2042. <a href="https://doi.org/10.1152/ajpheart.2000.278.6.H2039">doi:10.1152/ajpheart.2000.278.6.H2039</a>
 
 Validation level 0, not checked.
 
@@ -780,8 +800,11 @@ Validation level 0, not checked.
 
 xtract_approximate_entropy()
 
+\f[ \mathrm{ApEn} = \Phi^m - \Phi^{m+1}, \quad \Phi^L = \frac{1}{N-L+1} \sum_{i=1}^{N-L+1} \ln \frac{\#\{1 \le j \le N-L+1 : d_L(i,j) \le r\}}{N-L+1}, \quad d_L(i,j) = \max_{0 \le k < L} |x_{i+k} - x_{j+k}| \f]
+
 Sources:
-- Origin: Pincus (1991)
+- Origin: Pincus (1991). "Approximate entropy as a measure of system complexity". Proceedings of the National Academy of Sciences of the USA 88(6), equations 1, 2, 6 and 10. <a href="https://doi.org/10.1073/pnas.88.6.2297">doi:10.1073/pnas.88.6.2297</a>
+- Formulation: Richman and Moorman (2000). "Physiological time-series analysis using approximate entropy and sample entropy". American Journal of Physiology - Heart and Circulatory Physiology 278(6), p. H2040. <a href="https://doi.org/10.1152/ajpheart.2000.278.6.H2039">doi:10.1152/ajpheart.2000.278.6.H2039</a>
 
 Validation level 0, not checked.
 
@@ -789,8 +812,10 @@ Validation level 0, not checked.
 
 xtract_periodicity()
 
+\f[ P = \max_{\tau \text{ a key maximum}} h(\tau), \quad h(\tau) = \min\left(n_\tau - \frac{(n_{\tau-1} - n_{\tau+1})^2}{8 (n_{\tau-1} - 2 n_\tau + n_{\tau+1})}, 1\right), \quad n_\tau = \frac{2 \sum_{j=0}^{N-1-\tau} x_j x_{j+\tau}}{\sum_{j=0}^{N-1-\tau} (x_j^2 + x_{j+\tau}^2)}, \quad \text{key maxima taken over } 1 \le \tau \le \min(\lfloor N/2 \rfloor, N-2) \f]
+
 Sources:
-- Origin: McLeod and Wyvill (2005)
+- Origin: McLeod and Wyvill (2005). "A smarter way to find pitch". Proceedings of the International Computer Music Conference, Barcelona, section 5
 
 Validation level 0, not checked.
 
@@ -798,8 +823,10 @@ Validation level 0, not checked.
 
 xtract_signal_confidence()
 
+\f[ c = h(\tau^*), \quad \tau^* \text{ the key maximum that the McLeod pitch method takes as the period}, \quad h(\tau) = \min\left(n_\tau - \frac{(n_{\tau-1} - n_{\tau+1})^2}{8 (n_{\tau-1} - 2 n_\tau + n_{\tau+1})}, 1\right), \quad \text{key maxima taken over } 1 \le \tau \le \min(\lfloor N/2 \rfloor, N-2) \f]
+
 Sources:
-- Origin: McLeod and Wyvill (2005)
+- Origin: McLeod and Wyvill (2005). "A smarter way to find pitch". Proceedings of the International Computer Music Conference, Barcelona, section 7
 
 Validation level 0, not checked.
 
@@ -863,8 +890,10 @@ Validation level 0, not checked.
 
 xtract_kullback_leibler_divergence()
 
+\f[ D = \sum_{k : p_k > 0} p_k \ln \frac{p_k}{q_k}, \quad p_k = \frac{X_n(k)}{\sum_j X_n(j)}, \quad q_k = \frac{X_{n-1}(k)}{\sum_j X_{n-1}(j)} \f]
+
 Sources:
-- Origin: Kullback and Leibler (1951)
+- Origin: Kullback and Leibler (1951). "On information and sufficiency". The Annals of Mathematical Statistics 22(1), equation 2.4. <a href="https://doi.org/10.1214/aoms/1177729694">doi:10.1214/aoms/1177729694</a>
 
 Validation level 0, not checked.
 
@@ -872,8 +901,11 @@ Validation level 0, not checked.
 
 xtract_itakura_saito_divergence()
 
+\f[ D = \sum_k \left( \frac{P_n(k)}{P_{n-1}(k)} - \ln \frac{P_n(k)}{P_{n-1}(k)} - 1 \right) \f]
+
 Sources:
-- Origin: Itakura and Saito (1968)
+- Origin: Itakura and Saito (1968). "Analysis synthesis telephony based on the maximum likelihood method". Proceedings of the 6th International Congress on Acoustics, Tokyo
+- Formulation: Fevotte, Bertin and Durrieu (2009). "Nonnegative matrix factorization with the Itakura-Saito divergence: with application to music analysis". Neural Computation 21(3), equations 1.3 and 1.6, theorem 1. <a href="https://doi.org/10.1162/neco.2008.04-08-771">doi:10.1162/neco.2008.04-08-771</a>
 
 Validation level 0, not checked.
 
@@ -881,8 +913,11 @@ Validation level 0, not checked.
 
 xtract_modified_kullback_leibler()
 
+\f[ D = \sum_{k : X_n(k) > 0} \ln \left( 1 + \frac{X_n(k)}{X_{n-1}(k) + \epsilon} \right) \f]
+
 Sources:
-- Origin: Hainsworth and Macleod (2003)
+- Origin: Hainsworth and Macleod (2003). "Onset detection in musical audio signals". Proceedings of the International Computer Music Conference, Singapore, equations 4 and 5
+- Formulation: Brossier (2006). "Automatic annotation of musical audio for interactive applications". PhD thesis, Queen Mary, University of London, equation 2.9. <a href="https://aubio.org/phd/">https://aubio.org/phd/</a>
 
 Validation level 0, not checked.
 

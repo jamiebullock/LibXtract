@@ -79,10 +79,10 @@ extern "C"
      * */
     int xtract_difference_vector(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
-    /** \brief Extract the Kullback-Leibler divergence of the current spectral frame from the previous one, each frame scaled to sum to 1
+    /** \brief Extract the Kullback-Leibler divergence of the current spectral frame from the previous one, each frame scaled to sum to 1: the directed divergence of the current distribution from the previous one
      *
      * \param *ctx: a pointer to a context, or NULL
-     * \param *data: a pointer to the first element in an array of doubles comprising two successive frames of non-negative coefficients, e.g. magnitude spectra: the current frame in the first N/2 elements, the previous frame in the second N/2 elements
+     * \param *data: a pointer to the first element in an array of doubles comprising two successive frames of non-negative coefficients, e.g. spectra: the current frame in the first N/2 elements, the previous frame in the second N/2 elements
      * \param N: the total number of elements in the array pointed to by *data (twice the frame size), at least 2 and even
      * \param *argv: not used
      * \param *result: the divergence in nats, at least 0 and 0 for frames that differ only by a gain. Elements that are not positive count as 0. The result is 0 with no result when the current frame has no positive element, or has a positive element where the previous frame has none
@@ -92,19 +92,19 @@ extern "C"
     /** \brief Extract the Itakura-Saito divergence of the current spectral frame from the previous one
      *
      * \param *ctx: a pointer to a context, or NULL
-     * \param *data: a pointer to the first element in an array of doubles comprising two successive frames of positive coefficients: the current frame in the first N/2 elements, the previous frame in the second N/2 elements. Itakura and Saito define the divergence on power spectra; the elements are used as given
+     * \param *data: a pointer to the first element in an array of doubles comprising two successive frames of positive coefficients of power spectra, on which the divergence is defined: the current frame in the first N/2 elements, the previous frame in the second N/2 elements
      * \param N: the total number of elements in the array pointed to by *data (twice the frame size), at least 2 and even
      * \param *argv: not used
-     * \param *result: the divergence, at least 0, 0 for identical frames and unchanged when both frames are scaled by the same gain, or 0 with no result when either frame has an element that is not positive
+     * \param *result: the divergence, summed over the elements, at least 0, 0 for identical frames and unchanged when both frames are scaled by the same gain, or 0 with no result when either frame has an element that is not positive
      */
     int xtract_itakura_saito_divergence(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
-    /** \brief Extract the modified Kullback-Leibler onset function of Hainsworth and Macleod: the sum over the frame of the logarithm of 1 plus the ratio of each element to its value in the previous frame, so that an element rising from near silence dominates, an element falling by a large factor adds almost nothing and a gain common to both frames leaves the result almost unchanged
+    /** \brief Extract the modified Kullback-Leibler onset function in Brossier's form of Hainsworth and Macleod's measure: the sum over the frame of the logarithm of 1 plus the ratio of each element to its value in the previous frame, so that an element rising from near silence dominates, an element falling by a large factor adds almost nothing and a gain common to both frames leaves the result almost unchanged while the value in argv is small next to the elements of the previous frame
      *
      * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles comprising two successive frames of non-negative coefficients, e.g. magnitude spectra: the current frame in the first N/2 elements, the previous frame in the second N/2 elements
      * \param N: the total number of elements in the array pointed to by *data (twice the frame size), at least 2 and even
-     * \param *argv: a pointer to a double, the value added to every element of the previous frame before the ratio is taken, finite and at least 0; it bounds the contribution of an element that rises from 0
+     * \param *argv: a pointer to a double, the value added to every element of the previous frame before the ratio is taken, finite and at least 0; it bounds the contribution of an element that rises from 0. Brossier uses 1e-6; a suitable value depends on the level of the signal
      * \param *result: the onset function, at least 0 and 0 when the current frame has no positive element; an unchanged positive element adds the logarithm of 2 when the value in argv is 0, and less when it is positive. Elements that are not positive count as 0. The result is 0 with no result when the value in argv is 0 and an element rises from 0
      */
     int xtract_modified_kullback_leibler(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
