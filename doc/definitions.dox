@@ -733,8 +733,10 @@ Validation level 0, not checked.
 
 xtract_katz_fractal_dimension()
 
+\f[ D = \frac{\log (N-1)}{\log (d / a)}, \quad L = \sum_{n=1}^{N-1} |x_n - x_{n-1}|, \quad a = \frac{L}{N-1}, \quad d = \max_{n} |x_n - x_0| \f]
+
 Sources:
-- Origin: Katz (1988)
+- Origin: Katz (1988). "Fractals and the analysis of waveforms". Computers in Biology and Medicine 18(3), equations 2 to 5. <a href="https://doi.org/10.1016/0010-4825(88)90041-8">doi:10.1016/0010-4825(88)90041-8</a>
 
 Validation level 0, not checked.
 
