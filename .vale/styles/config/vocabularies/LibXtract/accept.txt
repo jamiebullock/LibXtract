@@ -1,12 +1,16 @@
 Allman
 Baer
+Bertin
 Bitwuzla
 Brossier
+Cao
 Chavez
 Degener
 Dinstein
 Dobb's
+Durrieu
 Fastl
+Fevotte
 Glasberg
 Hainsworth
 Higuchi
