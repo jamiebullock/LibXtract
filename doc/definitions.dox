@@ -153,7 +153,7 @@ Validation level 0, not checked.
 
 xtract_tristimulus_2()
 
-\f[ T_2 = \frac{a_2 + a_3 + a_4}{\sum_{h=1}^{N} a_h} \f]
+\f[ T_2 = \frac{\sum_{h=2}^{\min(4, N)} a_h}{\sum_{h=1}^{N} a_h} \f]
 
 Sources:
 - Origin: Pollard and Jansson (1982). "A tristimulus method for the specification of musical timbre". Acustica 51(3), equations 4 to 6
@@ -427,7 +427,7 @@ Validation level 0, not checked.
 
 xtract_lnorm()
 
-\f[ \|x\|_p = \left(\sum_{k \in K} |x_k|^p\right)^{1/p}, \quad K = \text{every } k \text{, the } k \text{ with } x_k > 0 \text{, or the } k \text{ with } x_k < 0 \text{, as the filter selects} \f]
+\f[ \|x\|_p = \left(\sum_{k \in K} |x_k|^p\right)^{1/p}, \quad K = \text{every } k \text{, the } k \text{ with } x_k > 0 \text{, or the } k \text{ with } x_k < 0 \text{, as the filter selects}, \quad p = \text{the order given when it is above 0, else } 2 \f]
 
 No published source is listed.
 
@@ -437,7 +437,7 @@ Validation level 0, not checked.
 
 xtract_flux()
 
-\f[ \left(\sum_{k \in K} |X_n(k) - X_{n-1}(k)|^p\right)^{1/p}, \quad K = \text{every } k \text{, the rising } k \text{, or the falling } k \text{, as the filter selects} \f]
+\f[ \left(\sum_{k \in K} |X_n(k) - X_{n-1}(k)|^p\right)^{1/p}, \quad K = \text{every } k \text{, the rising } k \text{, or the falling } k \text{, as the filter selects}, \quad p = \text{the order given when it is above 0, else } 2 \f]
 
 Sources:
 - Origin: Scheirer and Slaney (1997). "Construction and evaluation of a robust multifeature speech/music discriminator". Proceedings of ICASSP 1997, volume 2, section 2, spectral flux. <a href="https://doi.org/10.1109/ICASSP.1997.596192">doi:10.1109/ICASSP.1997.596192</a>
