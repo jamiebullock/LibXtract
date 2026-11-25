@@ -198,10 +198,6 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
 
-  # Every line is mutated, on a self-hosted runner with clang-18 and Mull
-  # 0.34.1 installed. Only pushes and manual runs reach it, both of which need
-  # write access to the repository: a pull request from a fork runs any code it
-  # contains on the machine that takes the job
   mutation-full:
     if: github.event_name != 'pull_request'
     runs-on: [self-hosted, linux, x64, mutation]
