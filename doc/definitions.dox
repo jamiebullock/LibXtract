@@ -973,8 +973,10 @@ Validation level 0, not checked.
 
 xtract_spectral_contrast()
 
+\f[ SC_j = \ln \frac{\frac{1}{a_j} \sum_{i=1}^{a_j} x_{j,(|B_j|-i+1)}}{\frac{1}{a_j} \sum_{i=1}^{a_j} x_{j,(i)}}, \quad a_j = \max(1, \lfloor \alpha |B_j| + \tfrac{1}{2} \rfloor), \quad B_0 = \{k : f_k < e\}, \; B_j = \{k : 2^{j-1} e \le f_k < 2^j e\}, \; B_K = \{k : f_k \ge 2^{K-1} e\}, \quad x_{j,(i)} \text{ the coefficients of } B_j \text{ in ascending order}, \; j = 0, \dots, K \f]
+
 Sources:
-- Origin: Jiang, Lu, Zhang, Tao and Cai (2002)
+- Origin: Jiang, Lu, Zhang, Tao and Cai (2002). "Music type classification by spectral contrast feature". Proceedings of the IEEE International Conference on Multimedia and Expo 2002, equations 1 to 3. <a href="https://doi.org/10.1109/ICME.2002.1035731">doi:10.1109/ICME.2002.1035731</a>
 
 Validation level 0, not checked.
 
@@ -982,8 +984,10 @@ Validation level 0, not checked.
 
 xtract_chroma()
 
+\f[ C_p = \frac{c_p}{\max_q c_q}, \quad c_p = \sum_{k : m_k = p} P_k, \quad m_k = \left(\left\lfloor 12 \log_2 \frac{f_k}{f_{A4}} + \tfrac{1}{2} \right\rfloor - 3\right) \bmod 12, \text{ over the bins with } f_k > 0 \text{ in the range given}, \; p = 0, \dots, 11 \f]
+
 Sources:
-- Origin: Fujishima (1999)
+- Origin: Fujishima (1999). "Realtime chord recognition of musical sound: a system using Common Lisp Music". Proceedings of the International Computer Music Conference 1999, section 2.2
 
 Validation level 0, not checked.
 
@@ -1098,8 +1102,10 @@ Validation level 0, not checked.
 
 xtract_cooccurrence_matrix()
 
+\f[ P_{ij} = \frac{\#\{(y,x) : g_{y,x} = i, \, g_{y+\Delta r, x+\Delta c} = j\} + s \, \#\{(y,x) : g_{y,x} = j, \, g_{y+\Delta r, x+\Delta c} = i\}}{(1 + s)(W - |\Delta c|)(H - |\Delta r|)}, \quad s \in \{0, 1\}, \; i, j = 0, \dots, L-1 \f]
+
 Sources:
-- Origin: Haralick, Shanmugam and Dinstein (1973)
+- Origin: Haralick, Shanmugam and Dinstein (1973). "Textural features for image classification". IEEE Transactions on Systems, Man, and Cybernetics SMC-3(6), equation 1 and figure 3. <a href="https://doi.org/10.1109/TSMC.1973.4309314">doi:10.1109/TSMC.1973.4309314</a>
 
 Validation level 0, not checked.
 

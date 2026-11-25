@@ -826,6 +826,7 @@ UTEST(descriptors, appended_features_are_fully_described)
     ASSERT_EQ(xtract_descriptor(XTRACT_COOCCURRENCE_MATRIX)->argv[3].max, XTRACT_UNBOUNDED_MAX);
     ASSERT_EQ(xtract_descriptor(XTRACT_COOCCURRENCE_MATRIX)->argv[4].min, 0.0);
     CHECK_REL(xtract_descriptor(XTRACT_COOCCURRENCE_MATRIX)->argv[4].max, 1.0, EPSILON);
+    CHECK_REL(xtract_descriptor(XTRACT_COOCCURRENCE_MATRIX)->argv[4].default_value, 1.0, EPSILON);
     for (i = 0; i < 5; i++)
         ASSERT_EQ(xtract_descriptor(XTRACT_COOCCURRENCE_MATRIX)->data.format, XTRACT_GRID);
     ASSERT_EQ(xtract_descriptor(XTRACT_COOCCURRENCE_MATRIX)->data.unit, XTRACT_UNIT_NONE);
@@ -888,7 +889,7 @@ UTEST(descriptors, appended_features_are_fully_described)
     ASSERT_EQ(xtract_descriptor(XTRACT_SPECTRAL_CONTRAST)->argc, 3);
     ASSERT_EQ(xtract_descriptor(XTRACT_SPECTRAL_CONTRAST)->argv[0].type, XTRACT_FLOAT);
     CHECK_REL(xtract_descriptor(XTRACT_SPECTRAL_CONTRAST)->argv[0].min, 1.0, EPSILON);
-    CHECK_REL(xtract_descriptor(XTRACT_SPECTRAL_CONTRAST)->argv[0].default_value, 6.0, EPSILON);
+    CHECK_REL(xtract_descriptor(XTRACT_SPECTRAL_CONTRAST)->argv[0].default_value, 5.0, EPSILON);
     CHECK_NEAR(xtract_descriptor(XTRACT_SPECTRAL_CONTRAST)->argv[1].min, 0.0, EPSILON);
     CHECK_REL(xtract_descriptor(XTRACT_SPECTRAL_CONTRAST)->argv[1].default_value, 200.0, EPSILON);
     ASSERT_EQ(xtract_descriptor(XTRACT_SPECTRAL_CONTRAST)->argv[1].unit, XTRACT_HERTZ);
@@ -905,8 +906,8 @@ UTEST(descriptors, appended_features_are_fully_described)
     ASSERT_EQ(xtract_descriptor(XTRACT_CHROMA)->argc, 3);
     ASSERT_EQ(xtract_descriptor(XTRACT_CHROMA)->argv[0].type, XTRACT_FLOAT);
     CHECK_REL(xtract_descriptor(XTRACT_CHROMA)->argv[0].default_value, 440.0, EPSILON);
-    CHECK_REL(xtract_descriptor(XTRACT_CHROMA)->argv[1].default_value, 40.0, EPSILON);
-    CHECK_REL(xtract_descriptor(XTRACT_CHROMA)->argv[2].default_value, 5000.0, EPSILON);
+    CHECK_NEAR(xtract_descriptor(XTRACT_CHROMA)->argv[1].default_value, 0.0, EPSILON);
+    CHECK_NEAR(xtract_descriptor(XTRACT_CHROMA)->argv[2].default_value, 0.0, EPSILON);
     ASSERT_EQ(xtract_descriptor(XTRACT_CHROMA)->argv[0].min, DBL_MIN);
     ASSERT_EQ(xtract_descriptor(XTRACT_CHROMA)->argv[1].min, 0.0);
     ASSERT_EQ(xtract_descriptor(XTRACT_CHROMA)->argv[2].min, 0.0);
