@@ -566,13 +566,13 @@ extern "C"
      */
     int xtract_petrosian_fractal_dimension(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
-    /** \brief Extract the Katz fractal dimension of an input vector, from the length of its path and its greatest distance from the first element
+    /** \brief Extract the Katz fractal dimension of an input vector, from the length of its path and its greatest distance from the first element, both measured on the values alone: the path length is the sum of the absolute differences of successive elements, and the distance of an element from the first is the absolute difference of their values. Katz measures both in the plane of sample index and value
      *
      * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles
      * \param N: the number of elements to be considered, at least 2
      * \param *argv: not used
-     * \param *result: the Katz fractal dimension of N values from the array pointed to by *data, or 0 with no result if the values are all equal or the greatest distance from the first element equals the mean step
+     * \param *result: the Katz fractal dimension of N values from the array pointed to by *data, 1 for a series that only rises or only falls and above 1 otherwise, with no upper bound; or 0 with no result if the greatest distance from the first element is not greater than the mean step, as for a series whose values are all equal or that alternates about its first element
      */
     int xtract_katz_fractal_dimension(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 

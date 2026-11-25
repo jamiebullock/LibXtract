@@ -4034,10 +4034,11 @@ UTEST(scalar, katz_fractal_dimension_of_a_line_is_1)
     CHECK_REL(result, 1.0, EPSILON);
 }
 
-UTEST(scalar, katz_fractal_dimension_has_no_result_for_a_constant_or_a_unit_oscillation)
+UTEST(scalar, katz_fractal_dimension_has_no_result_when_no_element_is_further_from_the_first_than_the_mean_step)
 {
     double constant[4] = {2.0, 2.0, 2.0, 2.0};
     double oscillation[5] = {0.0, 1.0, 0.0, 1.0, 0.0};
+    double alternation[5] = {0.0, 1.0, -1.0, 1.0, -1.0};
     double result = -1.0;
 
     ASSERT_EQ(xtract_katz_fractal_dimension(NULL, constant, 4, NULL, &result), XTRACT_NO_RESULT);
@@ -4045,6 +4046,18 @@ UTEST(scalar, katz_fractal_dimension_has_no_result_for_a_constant_or_a_unit_osci
     result = -1.0;
     ASSERT_EQ(xtract_katz_fractal_dimension(NULL, oscillation, 5, NULL, &result), XTRACT_NO_RESULT);
     ASSERT_EQ(result, 0.0);
+    result = -1.0;
+    ASSERT_EQ(xtract_katz_fractal_dimension(NULL, alternation, 5, NULL, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
+}
+
+UTEST(scalar, katz_fractal_dimension_of_a_series_that_only_rises_is_1)
+{
+    double data[10] = {0.002, 0.028, 0.094, 0.433, 0.445, 0.652, 0.722, 0.762, 0.789, 0.836};
+    double result = -1.0;
+
+    ASSERT_EQ(xtract_katz_fractal_dimension(NULL, data, 10, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(result, 1.0);
 }
 
 UTEST(scalar, katz_fractal_dimension_rejects_fewer_than_two_values_and_sets_the_result_to_zero)

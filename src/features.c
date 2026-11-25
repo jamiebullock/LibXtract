@@ -855,7 +855,7 @@ static const xtract_source_t sources_petrosian_fractal_dimension[] = {
 };
 static const char *const authors_katz_fractal_dimension_0[] = {"Katz"};
 static const xtract_source_t sources_katz_fractal_dimension[] = {
-    {XTRACT_SOURCE_ORIGIN, 1, authors_katz_fractal_dimension_0, 1988, NULL, NULL, NULL, NULL},
+    {XTRACT_SOURCE_ORIGIN, 1, authors_katz_fractal_dimension_0, 1988, "Fractals and the analysis of waveforms", "Computers in Biology and Medicine 18(3)", "equations 2 to 5", "doi:10.1016/0010-4825(88)90041-8"},
 };
 static const char *const authors_higuchi_fractal_dimension_0[] = {"Higuchi"};
 static const xtract_source_t sources_higuchi_fractal_dimension[] = {
@@ -2412,7 +2412,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .argv = NULL,
         .is_scalar = XTRACT_TRUE,
         .is_delta = XTRACT_FALSE,
-        .result = {.scalar = {XTRACT_UNBOUNDED_MIN, XTRACT_UNBOUNDED_MAX, XTRACT_UNIT_NONE}},
+        .result = {.scalar = {1, XTRACT_UNBOUNDED_MAX, XTRACT_UNIT_NONE}},
     },
     [XTRACT_HIGUCHI_FRACTAL_DIMENSION] = {
         .id = XTRACT_HIGUCHI_FRACTAL_DIMENSION,

@@ -1124,12 +1124,13 @@
       "name": "katz_fractal_dimension",
       "title": "Katz Fractal Dimension",
       "description": "Extract the Katz fractal dimension of an input vector",
-      "sources": [{"role": "origin", "authors": ["Katz"], "year": 1988}],
+      "definition": "D = \\frac{\\log (N-1)}{\\log (d / a)}, \\quad L = \\sum_{n=1}^{N-1} |x_n - x_{n-1}|, \\quad a = \\frac{L}{N-1}, \\quad d = \\max_{n} |x_n - x_0|",
+      "sources": [{"role": "origin", "authors": ["Katz"], "year": 1988, "title": "Fractals and the analysis of waveforms", "venue": "Computers in Biology and Medicine 18(3)", "locator": "equations 2 to 5", "permalink": "doi:10.1016/0010-4825(88)90041-8"}],
       "validation_level": 0,
       "input": {"format": "arbitrary_series", "unit": "any", "length": "N >= 2"},
       "arguments": [],
       "invariance": {"offset": "unchanged", "sign": "unchanged"},
-      "result": {"kind": "scalar", "unit": "none"}
+      "result": {"kind": "scalar", "unit": "none", "min": 1}
     },
     {
       "name": "higuchi_fractal_dimension",
