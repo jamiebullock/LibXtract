@@ -384,7 +384,7 @@ extern "C"
      * \param *ctx: a pointer to a context created for at least N elements
      * \param *data: a pointer to the first element in an array of doubles containing N/2 magnitude/power coefficients followed by N/2 bin frequencies in Hz, e.g. the *result from xtract_magnitude_spectrum()
      * \param N: the size of the array pointed to by *data, at least 2 and even
-     * \param *argv: a pointer to an array of three doubles: the number of octave bands, cast to an integer, at least 1; the lower edge of the first octave band in Hz, finite and at least 0; and the fraction of a band's bins averaged at each end, from 0 to 1, at least one bin being averaged whatever the fraction
+     * \param *argv: a pointer to an array of three doubles: the number of octave bands, cast to an integer, at least 1; the lower edge of the first octave band in Hz, finite and at least 0; and the fraction of a band's bins averaged at each end, from 0 to 1, at least one bin being averaged whatever the fraction. Five octave bands from 200 Hz with a fraction of 0.02, the descriptor's defaults, give the six bands of Jiang et al. (2002) at a sample rate of 16 kHz; their valleys, the logs of the means of the smallest coefficients, are not returned
      * \param *result: a pointer to an array of argv[0] + 1 doubles: the contrast of the bins below the first edge, then of each octave band from that edge, the last band running to the highest bin frequency. A coefficient that is NaN is left out of its band. The array is zeroed with no result when a band contains no bin or the mean of its smallest coefficients is not positive
      */
     int xtract_spectral_contrast(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
@@ -392,9 +392,9 @@ extern "C"
     /** \brief Extract the chroma of a spectrum: the coefficients of the bins nearest each of the twelve pitch classes summed and scaled so that the largest class is 1
      *
      * \param *ctx: a pointer to a context, or NULL
-     * \param *data: a pointer to the first element in an array of doubles containing N/2 magnitude/power coefficients followed by N/2 bin frequencies in Hz, e.g. the *result from xtract_magnitude_spectrum(). The coefficients are summed as given, so a power spectrum gives the energy in each class
+     * \param *data: a pointer to the first element in an array of doubles containing N/2 power coefficients followed by N/2 bin frequencies in Hz, e.g. the *result from xtract_power_spectrum(), as Fujishima (1999) sums the energy in each class
      * \param N: the size of the array pointed to by *data, at least 2 and even
-     * \param *argv: a pointer to an array of three finite doubles: the frequency of A4 in Hz, above 0; the lowest bin frequency included, at least 0, with 0 including every bin above 0 Hz; and the highest bin frequency included, with 0 including every bin above the lowest, and otherwise greater than the lowest. The 440 Hz, 40 Hz and 5000 Hz the descriptor gives as defaults are applied only when passed
+     * \param *argv: a pointer to an array of three finite doubles: the frequency of A4 in Hz, above 0; the lowest bin frequency included, at least 0, with 0 including every bin above 0 Hz; and the highest bin frequency included, with 0 including every bin above the lowest, and otherwise greater than the lowest. The 440 Hz, 0 and 0 the descriptor gives as defaults are applied only when passed
      * \param *result: a pointer to an array of XTRACT_PITCH_CLASSES doubles, the first for C and the last for B, each from the bins whose frequency rounds to that pitch class in any octave, scaled to a maximum of 1. The array is zeroed with no result when no included bin has a positive coefficient; bins at or below 0 Hz are never included
      *
      * \note For pitch classes from constant-Q bands, which resolve the semitones of the low octaves that the bins of xtract_spectrum() merge, pass the *result of xtract_cqt() with N twice its number of bands

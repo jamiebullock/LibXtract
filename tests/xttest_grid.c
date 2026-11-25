@@ -504,6 +504,22 @@ UTEST(cooccurrence_matrix, symmetric_counts_every_pair_in_both_orders)
     }
 }
 
+UTEST(cooccurrence_matrix, symmetric_reproduces_haralicks_horizontal_example)
+{
+    /* Haralick, Shanmugam and Dinstein (1973), figure 3: the 4 x 4 image of
+     * grey tones 0 to 3 and its horizontal matrix at distance 1, whose
+     * counts sum to 24 */
+    const double image[16] = {0, 0, 1, 1, 0, 0, 1, 1, 0, 2, 2, 2, 2, 2, 3, 3};
+    const double counts[16] = {4, 2, 1, 0, 2, 4, 0, 0, 1, 0, 6, 1, 0, 0, 1, 2};
+    int argv[] = {4, 4, 1, 0, 1};
+    double result[16];
+    int n;
+
+    ASSERT_EQ(xtract_cooccurrence_matrix(NULL, image, 16, argv, result), XTRACT_SUCCESS);
+    for (n = 0; n < 16; n++)
+        CHECK_NEAR(result[n], counts[n] / 24.0, 1e-15);
+}
+
 UTEST(cooccurrence_matrix, each_element_with_the_one_below)
 {
     /* The pairs are (0, 2), (1, 1) and (1, 0) */

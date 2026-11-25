@@ -1374,12 +1374,13 @@
       "name": "spectral_contrast",
       "title": "Spectral Contrast",
       "description": "Extract the spectral contrast of a spectrum",
-      "sources": [{"role": "origin", "authors": ["Jiang", "Lu", "Zhang", "Tao", "Cai"], "year": 2002}],
+      "definition": "SC_j = \\ln \\frac{\\frac{1}{a_j} \\sum_{i=1}^{a_j} x_{j,(|B_j|-i+1)}}{\\frac{1}{a_j} \\sum_{i=1}^{a_j} x_{j,(i)}}, \\quad a_j = \\max(1, \\lfloor \\alpha |B_j| + \\tfrac{1}{2} \\rfloor), \\quad B_0 = \\{k : f_k < e\\}, \\; B_j = \\{k : 2^{j-1} e \\le f_k < 2^j e\\}, \\; B_K = \\{k : f_k \\ge 2^{K-1} e\\}, \\quad x_{j,(i)} \\text{ the coefficients of } B_j \\text{ in ascending order}, \\; j = 0, \\dots, K",
+      "sources": [{"role": "origin", "authors": ["Jiang", "Lu", "Zhang", "Tao", "Cai"], "year": 2002, "title": "Music type classification by spectral contrast feature", "venue": "Proceedings of the IEEE International Conference on Multimedia and Expo 2002", "locator": "equations 1 to 3", "permalink": "doi:10.1109/ICME.2002.1035731"}],
       "validation_level": 0,
-      "input": {"format": "spectral", "unit": "any", "accepts": ["magnitude_spectrum", "power_spectrum"], "length": "N >= 2 && N % 2 == 0"},
+      "input": {"format": "spectral", "unit": "any", "accepts": ["magnitude_spectrum"], "length": "N >= 2 && N % 2 == 0"},
       "argument_type": "float",
       "arguments": [
-        {"name": "bands", "kind": "setting", "unit": "none", "min": 1, "default": 6, "whole": true},
+        {"name": "bands", "kind": "setting", "unit": "none", "min": 1, "default": 5, "whole": true},
         {"name": "lower_edge", "kind": "setting", "unit": "hertz", "min": 0, "default": 200},
         {"name": "fraction", "kind": "setting", "unit": "none", "min": 0, "max": 1, "default": 0.02}
       ],
@@ -1390,15 +1391,16 @@
       "name": "chroma",
       "title": "Chroma",
       "description": "Extract the chroma of a spectrum",
-      "sources": [{"role": "origin", "authors": ["Fujishima"], "year": 1999}],
+      "definition": "C_p = \\frac{c_p}{\\max_q c_q}, \\quad c_p = \\sum_{k : m_k = p} P_k, \\quad m_k = \\left(\\left\\lfloor 12 \\log_2 \\frac{f_k}{f_{A4}} + \\tfrac{1}{2} \\right\\rfloor - 3\\right) \\bmod 12, \\text{ over the bins with } f_k > 0 \\text{ in the range given}, \\; p = 0, \\dots, 11",
+      "sources": [{"role": "origin", "authors": ["Fujishima"], "year": 1999, "title": "Realtime chord recognition of musical sound: a system using Common Lisp Music", "venue": "Proceedings of the International Computer Music Conference 1999", "locator": "section 2.2"}],
       "validation_level": 0,
       "tags": ["sound"],
-      "input": {"format": "spectral", "unit": "any", "accepts": ["magnitude_spectrum", "power_spectrum"], "length": "N >= 2 && N % 2 == 0"},
+      "input": {"format": "spectral", "unit": "any", "accepts": ["power_spectrum"], "length": "N >= 2 && N % 2 == 0"},
       "argument_type": "float",
       "arguments": [
         {"name": "tuning", "kind": "setting", "unit": "hertz", "min": 2.2250738585072014e-308, "default": 440},
-        {"name": "lowest", "kind": "setting", "unit": "hertz", "min": 0, "default": 40},
-        {"name": "highest", "kind": "setting", "unit": "hertz", "min": 0, "default": 5000}
+        {"name": "lowest", "kind": "setting", "unit": "hertz", "min": 0, "default": 0},
+        {"name": "highest", "kind": "setting", "unit": "hertz", "min": 0, "default": 0}
       ],
       "invariance": {"order": "unchanged"},
       "result": {"kind": "vector", "format": "chroma_coeffs", "unit": "none", "length": "XTRACT_PITCH_CLASSES"}
@@ -1554,7 +1556,8 @@
       "name": "cooccurrence_matrix",
       "title": "Co-occurrence Matrix",
       "description": "Extract the co-occurrence matrix of the levels of a grid at an offset",
-      "sources": [{"role": "origin", "authors": ["Haralick", "Shanmugam", "Dinstein"], "year": 1973}],
+      "definition": "P_{ij} = \\frac{\\#\\{(y,x) : g_{y,x} = i, \\, g_{y+\\Delta r, x+\\Delta c} = j\\} + s \\, \\#\\{(y,x) : g_{y,x} = j, \\, g_{y+\\Delta r, x+\\Delta c} = i\\}}{(1 + s)(W - |\\Delta c|)(H - |\\Delta r|)}, \\quad s \\in \\{0, 1\\}, \\; i, j = 0, \\dots, L-1",
+      "sources": [{"role": "origin", "authors": ["Haralick", "Shanmugam", "Dinstein"], "year": 1973, "title": "Textural features for image classification", "venue": "IEEE Transactions on Systems, Man, and Cybernetics SMC-3(6)", "locator": "equation 1 and figure 3", "permalink": "doi:10.1109/TSMC.1973.4309314"}],
       "validation_level": 0,
       "input": {"format": "grid", "unit": "none", "accepts": ["quantise"], "length": "N >= 1 && width >= 1 && N % width == 0"},
       "argument_type": "int",
@@ -1563,7 +1566,7 @@
         {"name": "levels", "kind": "property", "property": "levels", "unit": "none", "min": 1, "max": 46340},
         {"name": "column_offset", "kind": "setting", "unit": "none", "default": 1},
         {"name": "row_offset", "kind": "setting", "unit": "none", "default": 0},
-        {"name": "symmetric", "kind": "setting", "unit": "none", "default": 0, "values": ["off", "on"]}
+        {"name": "symmetric", "kind": "setting", "unit": "none", "default": 1, "values": ["off", "on"]}
       ],
       "result": {"kind": "vector", "format": "square_matrix", "unit": "none", "length": "levels * levels"}
     },

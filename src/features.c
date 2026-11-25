@@ -471,8 +471,8 @@ static const xtract_quantity_t *const accepted_spectral_entropy[] = {&quantity_p
 static const xtract_quantity_t *const accepted_kullback_leibler_divergence[] = {&quantity_bins};
 static const xtract_quantity_t *const accepted_itakura_saito_divergence[] = {&quantity_power_bins};
 static const xtract_quantity_t *const accepted_modified_kullback_leibler[] = {&quantity_magnitude_bins};
-static const xtract_quantity_t *const accepted_spectral_contrast[] = {&quantity_magnitude_spectrum, &quantity_power_spectrum};
-static const xtract_quantity_t *const accepted_chroma[] = {&quantity_magnitude_spectrum, &quantity_power_spectrum};
+static const xtract_quantity_t *const accepted_spectral_contrast[] = {&quantity_magnitude_spectrum};
+static const xtract_quantity_t *const accepted_chroma[] = {&quantity_power_spectrum};
 static const xtract_quantity_t *const accepted_cqt[] = {&quantity_spectrum};
 static const xtract_quantity_t *const accepted_correlation_matrix[] = {&quantity_covariance_matrix};
 static const xtract_quantity_t *const accepted_average_correlation[] = {&quantity_correlation_matrix};
@@ -951,22 +951,22 @@ static const xtract_argument_descriptor_t arguments_modified_kullback_leibler[] 
 
 static const char *const authors_spectral_contrast_0[] = {"Jiang", "Lu", "Zhang", "Tao", "Cai"};
 static const xtract_source_t sources_spectral_contrast[] = {
-    {XTRACT_SOURCE_ORIGIN, 5, authors_spectral_contrast_0, 2002, NULL, NULL, NULL, NULL},
+    {XTRACT_SOURCE_ORIGIN, 5, authors_spectral_contrast_0, 2002, "Music type classification by spectral contrast feature", "Proceedings of the IEEE International Conference on Multimedia and Expo 2002", "equations 1 to 3", "doi:10.1109/ICME.2002.1035731"},
 };
 static const xtract_argument_descriptor_t arguments_spectral_contrast[] = {
-    {.name = "bands", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_NONE, .min = 1, .max = XTRACT_UNBOUNDED_MAX, .default_value = 6, .is_whole = XTRACT_TRUE},
+    {.name = "bands", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_NONE, .min = 1, .max = XTRACT_UNBOUNDED_MAX, .default_value = 5, .is_whole = XTRACT_TRUE},
     {.name = "lower_edge", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = 0, .max = XTRACT_UNBOUNDED_MAX, .default_value = 200},
     {.name = "fraction", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_NONE, .min = 0, .max = 1, .default_value = 0.02},
 };
 
 static const char *const authors_chroma_0[] = {"Fujishima"};
 static const xtract_source_t sources_chroma[] = {
-    {XTRACT_SOURCE_ORIGIN, 1, authors_chroma_0, 1999, NULL, NULL, NULL, NULL},
+    {XTRACT_SOURCE_ORIGIN, 1, authors_chroma_0, 1999, "Realtime chord recognition of musical sound: a system using Common Lisp Music", "Proceedings of the International Computer Music Conference 1999", "section 2.2", NULL},
 };
 static const xtract_argument_descriptor_t arguments_chroma[] = {
     {.name = "tuning", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = 2.2250738585072014e-308, .max = XTRACT_UNBOUNDED_MAX, .default_value = 440},
-    {.name = "lowest", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = 0, .max = XTRACT_UNBOUNDED_MAX, .default_value = 40},
-    {.name = "highest", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = 0, .max = XTRACT_UNBOUNDED_MAX, .default_value = 5000},
+    {.name = "lowest", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = 0, .max = XTRACT_UNBOUNDED_MAX, .default_value = 0},
+    {.name = "highest", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = 0, .max = XTRACT_UNBOUNDED_MAX, .default_value = 0},
 };
 
 static const char *const authors_cqt_0[] = {"Brown"};
@@ -1011,14 +1011,14 @@ static const xtract_argument_descriptor_t arguments_histogram[] = {
 
 static const char *const authors_cooccurrence_matrix_0[] = {"Haralick", "Shanmugam", "Dinstein"};
 static const xtract_source_t sources_cooccurrence_matrix[] = {
-    {XTRACT_SOURCE_ORIGIN, 3, authors_cooccurrence_matrix_0, 1973, NULL, NULL, NULL, NULL},
+    {XTRACT_SOURCE_ORIGIN, 3, authors_cooccurrence_matrix_0, 1973, "Textural features for image classification", "IEEE Transactions on Systems, Man, and Cybernetics SMC-3(6)", "equation 1 and figure 3", "doi:10.1109/TSMC.1973.4309314"},
 };
 static const xtract_argument_descriptor_t arguments_cooccurrence_matrix[] = {
     {.name = "width", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = 1, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_WIDTH},
     {.name = "levels", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = 1, .max = 46340, .data_property = XTRACT_PROPERTY_LEVELS},
     {.name = "column_offset", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .default_value = 1, .is_whole = XTRACT_TRUE},
     {.name = "row_offset", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .default_value = 0, .is_whole = XTRACT_TRUE},
-    {.name = "symmetric", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = 0, .max = 1, .value_count = 2, .values = values_5, .default_value = 0, .is_whole = XTRACT_TRUE},
+    {.name = "symmetric", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = 0, .max = 1, .value_count = 2, .values = values_5, .default_value = 1, .is_whole = XTRACT_TRUE},
 };
 
 static const char *const authors_cooccurrence_contrast_0[] = {"Haralick", "Shanmugam", "Dinstein"};
@@ -2715,7 +2715,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .sources = sources_spectral_contrast,
         .validation_level = 0,
         .tags = 0,
-        .data = {XTRACT_SPECTRAL, XTRACT_UNIT_ANY, 2, accepted_spectral_contrast, 1, "N >= 2 && N % 2 == 0"},
+        .data = {XTRACT_SPECTRAL, XTRACT_UNIT_ANY, 1, accepted_spectral_contrast, 1, "N >= 2 && N % 2 == 0"},
         .argc = 3,
         .argv = arguments_spectral_contrast,
         .is_scalar = XTRACT_FALSE,
@@ -2731,7 +2731,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .sources = sources_chroma,
         .validation_level = 0,
         .tags = XTRACT_TAG_SOUND,
-        .data = {XTRACT_SPECTRAL, XTRACT_UNIT_ANY, 2, accepted_chroma, 1, "N >= 2 && N % 2 == 0"},
+        .data = {XTRACT_SPECTRAL, XTRACT_UNIT_ANY, 1, accepted_chroma, 1, "N >= 2 && N % 2 == 0"},
         .argc = 3,
         .argv = arguments_chroma,
         .is_scalar = XTRACT_FALSE,

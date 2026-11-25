@@ -12,9 +12,11 @@ Dobb's
 Durrieu
 Fastl
 Fevotte
+Fujishima
 Glasberg
 Hainsworth
 Hanauer
+Haralick
 Higuchi
 Hu
 Hjorth
@@ -24,9 +26,12 @@ Juang
 Jutta
 Kaspar
 Krimphoff
+Larson
+Maddox
 Maenpaa
 Makhoul
 Markel
+Mermelstein
 Nyquist
 Ojala
 Ong
