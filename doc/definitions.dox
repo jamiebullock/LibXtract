@@ -372,7 +372,7 @@ Validation level 0, not checked.
 
 xtract_mcleod_f0()
 
-\f[ f_0 = \frac{f_s}{\tau^*}, \quad n(\tau) = \frac{2 \sum_{j=0}^{N-1-\tau} x_j x_{j+\tau}}{\sum_{j=0}^{N-1-\tau} (x_j^2 + x_{j+\tau}^2)}, \quad \tau^* = \text{the first key maximum of } n \text{ with } n(\tau^*) \ge 0.8 \max_{\text{key}} n, \text{ interpolated by a parabola} \f]
+\f[ f_0 = \frac{f_s}{\tau^* + \delta}, \quad \delta = \frac{n_{\tau^*-1} - n_{\tau^*+1}}{2 (n_{\tau^*-1} - 2 n_{\tau^*} + n_{\tau^*+1})}, \quad \tau^* = \text{the first key maximum with } h(\tau^*) \ge 0.8 \max_{\text{key}} h, \quad h(\tau) = \min\left(n_\tau - \frac{(n_{\tau-1} - n_{\tau+1})^2}{8 (n_{\tau-1} - 2 n_\tau + n_{\tau+1})}, 1\right), \quad n_\tau = \frac{2 \sum_{j=0}^{N-1-\tau} x_j x_{j+\tau}}{\sum_{j=0}^{N-1-\tau} (x_j^2 + x_{j+\tau}^2)} \f]
 
 Sources:
 - Origin: McLeod and Wyvill (2005). "A smarter way to find pitch". Proceedings of the International Computer Music Conference, Barcelona, sections 5 and 6
@@ -812,7 +812,7 @@ Validation level 0, not checked.
 
 xtract_periodicity()
 
-\f[ P = \max_{\tau \text{ a key maximum}} n(\tau), \quad n(\tau) = \frac{2 \sum_{j=0}^{N-1-\tau} x_j x_{j+\tau}}{\sum_{j=0}^{N-1-\tau} (x_j^2 + x_{j+\tau}^2)} \f]
+\f[ P = \max_{\tau \text{ a key maximum}} h(\tau), \quad h(\tau) = \min\left(n_\tau - \frac{(n_{\tau-1} - n_{\tau+1})^2}{8 (n_{\tau-1} - 2 n_\tau + n_{\tau+1})}, 1\right), \quad n_\tau = \frac{2 \sum_{j=0}^{N-1-\tau} x_j x_{j+\tau}}{\sum_{j=0}^{N-1-\tau} (x_j^2 + x_{j+\tau}^2)} \f]
 
 Sources:
 - Origin: McLeod and Wyvill (2005). "A smarter way to find pitch". Proceedings of the International Computer Music Conference, Barcelona, section 5
@@ -823,7 +823,7 @@ Validation level 0, not checked.
 
 xtract_signal_confidence()
 
-\f[ c = n(\tau^*), \quad \tau^* \text{ the key maximum that the McLeod pitch method takes as the period} \f]
+\f[ c = h(\tau^*), \quad \tau^* \text{ the key maximum that the McLeod pitch method takes as the period}, \quad h(\tau) = \min\left(n_\tau - \frac{(n_{\tau-1} - n_{\tau+1})^2}{8 (n_{\tau-1} - 2 n_\tau + n_{\tau+1})}, 1\right) \f]
 
 Sources:
 - Origin: McLeod and Wyvill (2005). "A smarter way to find pitch". Proceedings of the International Computer Music Conference, Barcelona, section 7

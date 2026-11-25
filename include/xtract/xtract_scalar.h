@@ -518,7 +518,7 @@ extern "C"
      */
     int xtract_hjorth_activity(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
-    /** \brief Extract the Hjorth mobility of an input vector: the square root of the ratio of the activity of its first difference to its own activity, in radians per sample. The first difference takes the place of Hjorth's derivative, so a sinusoid of w radians per sample has a mobility of 2 sin(w / 2)
+    /** \brief Extract the Hjorth mobility of an input vector: the square root of the ratio of the activity of its first difference to its own activity, in radians per sample. The first difference takes the place of Hjorth's derivative, so the mobility of a sinusoid of w radians per sample approaches 2 sin(w / 2) as N grows
      *
      * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles
@@ -603,7 +603,7 @@ extern "C"
      * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles
      * \param N: the number of elements to be considered, at least 2
-     * \param *argv: a pointer to a double holding the threshold, typically the mean of the input vector, the threshold Kaspar and Schuster use; an element counts as 1 when it is greater than the threshold and 0 otherwise. The median makes 0 and 1 equally frequent, which the normalisation assumes
+     * \param *argv: a pointer to a double holding the threshold, typically the mean of the input vector, the threshold Kaspar and Schuster use; an element counts as 1 when it is greater than the threshold and 0 otherwise. The median makes 0 and 1 about equally frequent, which the normalisation assumes, unless many elements equal it
      * \param *result: the normalised Lempel-Ziv complexity of N values from the array pointed to by *data; below 1 for a long series in which 0 and 1 are not equally frequent, above 1 for some short series, and 2 log2(N) / N for a series that is all 0 or all 1
      */
     int xtract_lempel_ziv_complexity(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);

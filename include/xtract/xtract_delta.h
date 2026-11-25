@@ -99,7 +99,7 @@ extern "C"
      */
     int xtract_itakura_saito_divergence(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
-    /** \brief Extract the modified Kullback-Leibler onset function in Brossier's form of Hainsworth and Macleod's measure: the sum over the frame of the logarithm of 1 plus the ratio of each element to its value in the previous frame, so that an element rising from near silence dominates, an element falling by a large factor adds almost nothing and a gain common to both frames leaves the result almost unchanged
+    /** \brief Extract the modified Kullback-Leibler onset function in Brossier's form of Hainsworth and Macleod's measure: the sum over the frame of the logarithm of 1 plus the ratio of each element to its value in the previous frame, so that an element rising from near silence dominates, an element falling by a large factor adds almost nothing and a gain common to both frames leaves the result almost unchanged while the value in argv is small next to the elements of the previous frame
      *
      * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles comprising two successive frames of non-negative coefficients, e.g. magnitude spectra: the current frame in the first N/2 elements, the previous frame in the second N/2 elements
