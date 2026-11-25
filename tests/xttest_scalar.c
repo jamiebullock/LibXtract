@@ -3204,10 +3204,10 @@ UTEST(scalar, spectral_inharmonicity_leaves_out_a_peak_below_half_the_fundamenta
 
 UTEST(scalar, spectral_inharmonicity_leaves_out_peaks_from_minus_half_to_below_half_the_fundamental)
 {
-    /* With a fundamental of 200 Hz a peak at 200 Hz adds nothing to the
-     * numerator, so the result is (2 / 200) times the distance of the other
-     * peak from its multiple when that peak counts, and 0 when it is left out.
-     * A peak at half the fundamental is harmonic 1, 100 Hz from 200 Hz */
+    /* Both peaks have coefficient 1 and the one at 200 Hz is on its multiple,
+     * so the result is 2 d / (200 * 2) for the distance d of the other peak
+     * from its multiple when that peak counts, and 0 when it is left out.
+     * A peak at half the fundamental is harmonic 1, d = 100 Hz */
     double fund = 200.0;
     double result = -1.0;
     double at_half[] = {1.0, 1.0, 100.0, 200.0};
