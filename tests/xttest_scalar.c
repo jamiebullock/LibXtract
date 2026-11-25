@@ -3202,6 +3202,26 @@ UTEST(scalar, spectral_inharmonicity_leaves_out_a_peak_below_half_the_fundamenta
     ASSERT_EQ(result, 0.0);
 }
 
+UTEST(scalar, spectral_inharmonicity_leaves_out_peaks_from_minus_half_to_below_half_the_fundamental)
+{
+    /* With a fundamental of 200 Hz a peak at 200 Hz adds nothing to the
+     * numerator, so the result is (2 / 200) times the distance of the other
+     * peak from its multiple when that peak counts, and 0 when it is left out.
+     * A peak at half the fundamental is harmonic 1, 100 Hz from 200 Hz */
+    double fund = 200.0;
+    double result = -1.0;
+    double at_half[] = {1.0, 1.0, 100.0, 200.0};
+    double at_minus_half[] = {1.0, 1.0, -100.0, 200.0};
+    double inside[] = {1.0, 1.0, -50.0, 200.0};
+
+    ASSERT_EQ(xtract_spectral_inharmonicity(NULL, at_half, 4, &fund, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 0.5, EPSILON);
+    ASSERT_EQ(xtract_spectral_inharmonicity(NULL, at_minus_half, 4, &fund, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(result, 0.0);
+    ASSERT_EQ(xtract_spectral_inharmonicity(NULL, inside, 4, &fund, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(result, 0.0);
+}
+
 UTEST(scalar, spectral_inharmonicity_zero_fundamental)
 {
     double result = -1.0;
