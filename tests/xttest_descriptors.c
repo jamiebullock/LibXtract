@@ -465,7 +465,7 @@ UTEST(descriptors, appended_features_are_fully_described)
     ASSERT_EQ(xtract_descriptor(XTRACT_MMBSES)->data.format, XTRACT_SPECTRAL_COMPLEX);
     ASSERT_EQ(xtract_descriptor(XTRACT_MMBSES)->result.vector.format, XTRACT_MEL_COEFFS);
     ASSERT_EQ(xtract_descriptor(XTRACT_MMBSES)->result.vector.unit, XTRACT_UNIT_NONE);
-    ASSERT_EQ(xtract_descriptor(XTRACT_MMBSES)->sources[0].year, 2013);
+    ASSERT_EQ(xtract_descriptor(XTRACT_MMBSES)->sources[0].year, 2006);
 
     ASSERT_EQ(xtract_descriptor(XTRACT_SPECTRAL_SUBBAND_CENTROIDS)->argc, 1);
     ASSERT_EQ(xtract_descriptor(XTRACT_SPECTRAL_SUBBAND_CENTROIDS)->argv[0].type, XTRACT_FILTERBANK);

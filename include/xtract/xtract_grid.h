@@ -44,7 +44,7 @@ extern "C"
      */
     int xtract_grid_central_moments(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
-    /** \brief Extract the normalised moments of a grid from its central moments: the central moments in a form that does not change when the grid is made larger or smaller
+    /** \brief Extract the normalised moments of a grid from its central moments: the central moments in a form that would not change if the grid were made larger or smaller continuously. On a grid of elements the change is small but not 0: doubling a grid by repeating each element changes nu20 and nu02 by 1 / (16 mu00)
      *
      * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of 8 doubles: the central moments of a grid as xtract_grid_central_moments() gives them
@@ -54,13 +54,13 @@ extern "C"
      */
     int xtract_normalised_moments(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
-    /** \brief Extract the seven Hu moments of a grid from its normalised moments: values that do not change when the grid is moved, made larger or smaller, or rotated
+    /** \brief Extract the seven Hu moments of a grid from its normalised moments: values that do not change when the grid is moved, turned a quarter or mirrored, and that would not change if it were made larger or smaller or turned by any angle continuously; on a grid of elements those change them a little
      *
      * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of 7 doubles: the normalised moments of a grid as xtract_normalised_moments() gives them
      * \param N: the number of elements in the array pointed to by *data, which must be 7
      * \param *argv: a pointer to NULL
-     * \param *result: a pointer to an array of 7 doubles: the moments in the order of Hu (1962). The first six are the same for a grid and its mirror image, and the seventh changes sign
+     * \param *result: a pointer to an array of 7 doubles: the moments in the order of Hu (1962). The first six are the same for a grid and its mirror image, and the seventh changes sign. Rows are counted downward, so the seventh has the opposite sign to Hu's frame, in which y increases upward
      */
     int xtract_hu_moments(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
