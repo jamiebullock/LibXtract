@@ -119,6 +119,8 @@ Validation level 0, not checked.
 
 xtract_irregularity_k()
 
+\f[ \mathrm{IRR} = \log_{10} S, \quad S = \sum_{n=1}^{N-2} \left| L_n - \frac{L_{n-1} + L_n + L_{n+1}}{3} \right| \text{ the smoothness given in argv} \f]
+
 Sources:
 - Origin: Krimphoff, McAdams and Winsberg (1994). "Caracterisation du timbre des sons complexes. II. Analyses acoustiques et quantification psychophysique". Journal de Physique IV 4(C5), equation 4. <a href="https://doi.org/10.1051/jp4:19945134">doi:10.1051/jp4:19945134</a>
 
@@ -128,6 +130,8 @@ Validation level 0, not checked.
 
 xtract_irregularity_j()
 
+\f[ \mathrm{IRR} = \frac{\sum_{n=0}^{N-1} (a_n - a_{n+1})^2}{\sum_{n=0}^{N-1} a_n^2}, \quad a_N = 0 \f]
+
 Sources:
 - Origin: Jensen (1999). "Timbre models of musical sounds". PhD thesis, University of Copenhagen, equation 7.16
 
@@ -136,6 +140,8 @@ Validation level 0, not checked.
 \section definition_tristimulus_1 Tristimulus I
 
 xtract_tristimulus_1()
+
+\f[ T_1 = \frac{a_1}{\sum_{h=1}^{N} a_h} \f]
 
 Sources:
 - Origin: Pollard and Jansson (1982). "A tristimulus method for the specification of musical timbre". Acustica 51(3), equations 4 to 6
@@ -147,6 +153,8 @@ Validation level 0, not checked.
 
 xtract_tristimulus_2()
 
+\f[ T_2 = \frac{a_2 + a_3 + a_4}{\sum_{h=1}^{N} a_h} \f]
+
 Sources:
 - Origin: Pollard and Jansson (1982). "A tristimulus method for the specification of musical timbre". Acustica 51(3), equations 4 to 6
 - Formulation: Peeters (2004). "A large set of audio features for sound description (similarity and classification) in the CUIDADO project". Technical report, IRCAM, section 7.1.6
@@ -156,6 +164,8 @@ Validation level 0, not checked.
 \section definition_tristimulus_3 Tristimulus III
 
 xtract_tristimulus_3()
+
+\f[ T_3 = \frac{\sum_{h=5}^{N} a_h}{\sum_{h=1}^{N} a_h} \f]
 
 Sources:
 - Origin: Pollard and Jansson (1982). "A tristimulus method for the specification of musical timbre". Acustica 51(3), equations 4 to 6
@@ -167,6 +177,8 @@ Validation level 0, not checked.
 
 xtract_smoothness()
 
+\f[ S = \sum_{n=1}^{N-2} \left| L_n - \frac{L_{n-1} + L_n + L_{n+1}}{3} \right|, \quad L_n = \max\left(20 \log_{10} a_n, \; 20 \log_{10}(\epsilon \max_k a_k)\right), \quad \epsilon = 2^{-52} \f]
+
 Sources:
 - Origin: Krimphoff, McAdams and Winsberg (1994). "Caracterisation du timbre des sons complexes. II. Analyses acoustiques et quantification psychophysique". Journal de Physique IV 4(C5), equation 4. <a href="https://doi.org/10.1051/jp4:19945134">doi:10.1051/jp4:19945134</a>
 - Formulation: McAdams (1999). "Perspectives on the contribution of timbre to musical structure". Computer Music Journal 23(3), equation 7. <a href="https://doi.org/10.1162/014892699559797">doi:10.1162/014892699559797</a>
@@ -176,6 +188,8 @@ Validation level 0, not checked.
 \section definition_spread Spectral Spread
 
 xtract_spread()
+
+\f[ \sigma^2 = \frac{\sum_k (f_k - \mu)^2 a_k}{\sum_k a_k}, \quad \mu \text{ the spectral mean given in argv} \f]
 
 Sources:
 - Origin: Peeters (2004). "A large set of audio features for sound description (similarity and classification) in the CUIDADO project". Technical report, IRCAM, section 6.1.2
@@ -194,6 +208,8 @@ Validation level 0, not checked.
 
 xtract_rolloff()
 
+\f[ f_r = \Delta f \, k^*, \quad k^* = \min\left\{k : \sum_{j=0}^{k} P_j \ge \frac{p}{100} \sum_{j=0}^{N-1} P_j\right\} \f]
+
 Sources:
 - Origin: Scheirer and Slaney (1997). "Construction and evaluation of a robust multifeature speech/music discriminator". Proceedings of ICASSP 1997, volume 2, section 2. <a href="https://doi.org/10.1109/ICASSP.1997.596192">doi:10.1109/ICASSP.1997.596192</a>
 - Formulation: Peeters (2004). "A large set of audio features for sound description (similarity and classification) in the CUIDADO project". Technical report, IRCAM, section 6.1.7
@@ -203,6 +219,8 @@ Validation level 0, not checked.
 \section definition_loudness Loudness
 
 xtract_loudness()
+
+\f[ N' = \sum_{z : E_z > 0} E_z^{0.23} \f]
 
 Sources:
 - Origin: Moore, Glasberg and Baer (1997). "A model for the prediction of thresholds, loudness, and partial loudness". Journal of the Audio Engineering Society 45(4). <a href="https://www.aes.org/e-lib/browse.cfm?elib=10272">https://www.aes.org/e-lib/browse.cfm?elib=10272</a>
@@ -214,6 +232,8 @@ Validation level 0, not checked.
 
 xtract_flatness()
 
+\f[ \mathrm{SFM} = \frac{\left(\prod_{k=0}^{N-1} P_k\right)^{1/N}}{\frac{1}{N} \sum_{k=0}^{N-1} P_k}, \quad 0 \text{ when some } P_k \le 0 \f]
+
 Sources:
 - Origin: Gray and Markel (1974). "A spectral-flatness measure for studying the autocorrelation method of linear prediction of speech analysis". IEEE Transactions on Acoustics, Speech, and Signal Processing 22(3), equation 6. <a href="https://doi.org/10.1109/TASSP.1974.1162572">doi:10.1109/TASSP.1974.1162572</a>
 - Formulation: Peeters (2004). "A large set of audio features for sound description (similarity and classification) in the CUIDADO project". Technical report, IRCAM, section 9.1
@@ -223,6 +243,8 @@ Validation level 0, not checked.
 \section definition_flatness_db Log Spectral Flatness
 
 xtract_flatness_db()
+
+\f[ \mathrm{SFM}_{\mathrm{dB}} = 10 \log_{10} \mathrm{SFM}, \text{ with } \mathrm{SFM} = 0 \text{ taken as } 2 \times 10^{-42} \f]
 
 Sources:
 - Origin: Johnston (1988). "Transform coding of audio signals using perceptual noise criteria". IEEE Journal on Selected Areas in Communications 6(2), page 318. <a href="https://doi.org/10.1109/49.608">doi:10.1109/49.608</a>
@@ -234,6 +256,8 @@ Validation level 0, not checked.
 
 xtract_tonality()
 
+\f[ \alpha = \min\left(\frac{\mathrm{SFM}_{\mathrm{dB}}}{-60}, 1\right) \f]
+
 Sources:
 - Origin: Johnston (1988). "Transform coding of audio signals using perceptual noise criteria". IEEE Journal on Selected Areas in Communications 6(2), page 318. <a href="https://doi.org/10.1109/49.608">doi:10.1109/49.608</a>
 - Formulation: Peeters (2004). "A large set of audio features for sound description (similarity and classification) in the CUIDADO project". Technical report, IRCAM, section 9.1
@@ -244,6 +268,8 @@ Validation level 0, not checked.
 
 xtract_crest()
 
+\f[ C = \frac{\max_k x_k}{\frac{1}{N} \sum_{k=0}^{N-1} x_k} \f]
+
 Sources:
 - Origin: Peeters (2004). "A large set of audio features for sound description (similarity and classification) in the CUIDADO project". Technical report, IRCAM, section 9.1
 
@@ -252,6 +278,8 @@ Validation level 0, not checked.
 \section definition_noisiness Noisiness
 
 xtract_noisiness()
+
+\f[ \frac{\sum_{k \notin H} P_k}{\sum_k P_k} \text{ over the peaks with } f_k \ne 0, \quad H = \text{for each } h \ge 1 \text{, the largest peak } k \text{ with } \mathrm{round}(f_k / f_0) = h \text{ and } |f_k / f_0 - h| \le t \f]
 
 Sources:
 - Origin: Peeters (2004). "A large set of audio features for sound description (similarity and classification) in the CUIDADO project". Technical report, IRCAM, section 7.1.2
@@ -270,6 +298,8 @@ Validation level 0, not checked.
 
 xtract_spectral_inharmonicity()
 
+\f[ \frac{2}{f_0} \frac{\sum_k |f_k - h_k f_0| \, a_k^2}{\sum_k a_k^2}, \quad h_k = \mathrm{round}(f_k / f_0), \text{ over the peaks with } a_k \ne 0 \text{ and } h_k \ne 0 \f]
+
 Sources:
 - Origin: Peeters (2004). "A large set of audio features for sound description (similarity and classification) in the CUIDADO project". Technical report, IRCAM, section 7.1.3
 
@@ -278,6 +308,8 @@ Validation level 0, not checked.
 \section definition_odd_even_ratio Odd/even Harmonic Ratio
 
 xtract_odd_even_ratio()
+
+\f[ \frac{\sum_{h \text{ odd}} E_h}{\sum_{h \text{ even}} E_h}, \quad h = 1, \dots, N \f]
 
 Sources:
 - Origin: Peeters (2004). "A large set of audio features for sound description (similarity and classification) in the CUIDADO project". Technical report, IRCAM, section 7.1.5
@@ -288,6 +320,8 @@ Validation level 0, not checked.
 
 xtract_sharpness()
 
+\f[ S = 0.11 \frac{\sum_{z=1}^{N} z \, g(z) \, E_z^{0.23}}{\sum_{z=1}^{N} E_z^{0.23}}, \quad g(z) = \begin{cases} 1 & z < 15 \\ 0.066 \, e^{0.171 z} & z \ge 15 \end{cases} \f]
+
 Sources:
 - Origin: von Bismarck (1974). "Sharpness as an attribute of the timbre of steady sounds". Acustica 30(3), equation 1
 - Formulation: Peeters (2004). "A large set of audio features for sound description (similarity and classification) in the CUIDADO project". Technical report, IRCAM, section 8.1.3
@@ -297,6 +331,8 @@ Validation level 0, not checked.
 \section definition_spectral_slope Spectral Slope
 
 xtract_spectral_slope()
+
+\f[ \frac{1}{\sum_k a_k} \frac{\sum_k (f_k - \bar{f})(a_k - \bar{a})}{\sum_k (f_k - \bar{f})^2}, \text{ over } k = 0 \text{ and the } k \text{ with } f_k \ne 0 \text{ or } a_k \ne 0 \f]
 
 Sources:
 - Origin: Peeters (2004). "A large set of audio features for sound description (similarity and classification) in the CUIDADO project". Technical report, IRCAM, section 6.1.5
@@ -391,6 +427,8 @@ Validation level 0, not checked.
 
 xtract_lnorm()
 
+\f[ \|x\|_p = \left(\sum_{k \in K} |x_k|^p\right)^{1/p}, \quad K = \text{every } k \text{, the } k \text{ with } x_k > 0 \text{, or the } k \text{ with } x_k < 0 \text{, as the filter selects} \f]
+
 No published source is listed.
 
 Validation level 0, not checked.
@@ -399,7 +437,11 @@ Validation level 0, not checked.
 
 xtract_flux()
 
-No published source is listed.
+\f[ \left(\sum_{k \in K} |X_n(k) - X_{n-1}(k)|^p\right)^{1/p}, \quad K = \text{every } k \text{, the rising } k \text{, or the falling } k \text{, as the filter selects} \f]
+
+Sources:
+- Origin: Scheirer and Slaney (1997). "Construction and evaluation of a robust multifeature speech/music discriminator". Proceedings of ICASSP 1997, volume 2, section 2, spectral flux. <a href="https://doi.org/10.1109/ICASSP.1997.596192">doi:10.1109/ICASSP.1997.596192</a>
+- Formulation: Boeck, Krebs and Schedl (2012). "Evaluating the online capabilities of onset detection methods". Proceedings of the 13th International Society for Music Information Retrieval Conference, equation 3. <a href="https://doi.org/10.5281/zenodo.1416036">doi:10.5281/zenodo.1416036</a>
 
 Validation level 0, not checked.
 
@@ -1151,6 +1193,8 @@ Validation level 0, not checked.
 \section definition_log Logarithm
 
 xtract_log()
+
+\f[ y_k = \ln(1 + \lambda x_k) \f]
 
 Sources:
 - Origin: Boeck, Krebs and Schedl (2012). "Evaluating the online capabilities of onset detection methods". Proceedings of the 13th International Society for Music Information Retrieval Conference, equation 1. <a href="https://doi.org/10.5281/zenodo.1416036">doi:10.5281/zenodo.1416036</a>

@@ -123,9 +123,11 @@ enumeration:
   values computed independently of the library, from 0 (not checked) to 3
   (certified by a machine-checked proof).
 - `input` gives the `format` and the `unit` of the data, and `length`, the
-  rule for N. `accepts` lists the quantities the data usually is, the usual
-  one first, and is left out when only the caller has such data. `frames` is
-  2 for data that is two successive results of one feature.
+  rule for N. `accepts` lists the quantities the feature's definition is
+  stated for, the one its sources use first, and is left out when only the
+  caller has such data. The function takes any array of the layout, and the
+  validation level holds for these quantities only. `frames` is 2 for data
+  that is two successive results of one feature.
 - `arguments` has one record for each argument, and `argument_type` is the
   type of the elements of argv, `float` or `int`. The `kind` of an argument
   is `result`, `property`, `object` or `setting`:

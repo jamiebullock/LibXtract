@@ -373,7 +373,7 @@ extern "C"
             xtract_vector_t format;                  /**< the layout of the array */
             xtract_unit_t unit;                      /**< the unit of its elements */
             int accept_count;                        /**< the number of entries of accepts, or 0 when only the caller has such data */
-            const xtract_quantity_t *const *accepts; /**< what the data usually is, the usual one first, or NULL when accept_count is 0. The function takes any array of the layout. When frames is 2, each frame is the quantity */
+            const xtract_quantity_t *const *accepts; /**< the quantities the feature's definition is stated for, the one its sources use first, or NULL when accept_count is 0. The function takes any array of the layout, and the validation level holds for these quantities only. When frames is 2, each frame is the quantity */
             int frames;                              /**< 2 when the data is two frames of equal length one after the other, successive results of one feature with the current one first, and 1 otherwise */
             const char *lengths;                     /**< the numbers of elements N the feature accepts: an expression in N and the names of its arguments that is true for them, as xtract_length_is_accepted() evaluates it */
         } data;
