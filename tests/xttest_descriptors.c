@@ -1334,7 +1334,7 @@ UTEST(descriptors, the_data_of_a_feature_accepts_what_vector_features_provide)
 UTEST(descriptors, a_part_of_a_spectrum_is_a_quantity_of_its_own)
 {
     const xtract_quantity_t *bins = xtract_descriptor(XTRACT_PEAK_SPECTRUM)->data.accepts[0];
-    const xtract_quantity_t *magnitudes = xtract_descriptor(XTRACT_MFCC)->data.accepts[1];
+    const xtract_quantity_t *magnitudes = xtract_descriptor(XTRACT_MODIFIED_KULLBACK_LEIBLER)->data.accepts[0];
     const xtract_quantity_t *powers = xtract_descriptor(XTRACT_MFCC)->data.accepts[0];
     int p;
 
@@ -1356,7 +1356,8 @@ UTEST(descriptors, a_part_of_a_spectrum_is_a_quantity_of_its_own)
     ASSERT_STREQ(powers->name, "power_bins");
     ASSERT_EQ(powers->provider_count, 1);
     ASSERT_EQ(powers->providers[0].feature, XTRACT_POWER_SPECTRUM);
-    ASSERT_TRUE(xtract_descriptor(XTRACT_MFCC)->data.accepts[1] == magnitudes);
+    ASSERT_TRUE(xtract_descriptor(XTRACT_MFCC)->data.accepts[0] == powers);
+    ASSERT_EQ(xtract_descriptor(XTRACT_MFCC)->data.accept_count, 1);
     ASSERT_TRUE(xtract_descriptor(XTRACT_SPECTRAL_ENTROPY)->data.accepts[0] == powers);
     ASSERT_TRUE(xtract_descriptor(XTRACT_FLATNESS)->data.accepts[0] == powers);
 }

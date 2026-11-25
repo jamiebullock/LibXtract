@@ -771,10 +771,11 @@
       "name": "mfcc",
       "title": "Mel-Frequency Cepstral Coefficients",
       "description": "Extract MFCC from a spectrum",
-      "sources": [{"role": "origin", "authors": ["Rabiner"], "year": 0}],
+      "definition": "c_i = \\sum_{m=1}^{M} \\ln \\max\\left(E_m, \\epsilon \\max_j E_j\\right) \\cos\\left(\\frac{\\pi i (m - \\tfrac{1}{2})}{M}\\right), \\quad i = 0, \\dots, M-1, \\quad E_m = \\sum_k H_m(k) P_k, \\quad \\epsilon = 2^{-52}",
+      "sources": [{"role": "origin", "authors": ["Davis", "Mermelstein"], "year": 1980, "title": "Comparison of parametric representations for monosyllabic word recognition in continuously spoken sentences", "venue": "IEEE Transactions on Acoustics, Speech, and Signal Processing 28(4)", "locator": "equation 1 and figure 1", "permalink": "doi:10.1109/TASSP.1980.1163420"}, {"role": "formulation", "authors": ["Rabiner", "Juang"], "year": 1993, "title": "Fundamentals of speech recognition", "venue": "PTR Prentice Hall", "locator": "section 4.5.6, equation 4.90"}, {"role": "formulation", "authors": ["Young", "Evermann", "Gales", "Hain", "Kershaw", "Liu", "Moore", "Odell", "Ollason", "Povey", "Valtchev", "Woodland"], "year": 2009, "title": "The HTK book, for HTK version 3.4", "venue": "Cambridge University Engineering Department", "locator": "section 5.4, equation 5.13"}],
       "validation_level": 0,
       "tags": ["sound"],
-      "input": {"format": "spectral_magnitudes", "unit": "any", "accepts": ["power_bins", "magnitude_bins"], "length": "N >= 1 && 2 * N == filterbank_size(filterbank)"},
+      "input": {"format": "spectral_magnitudes", "unit": "any", "accepts": ["power_bins"], "length": "N >= 1 && 2 * N == filterbank_size(filterbank)"},
       "arguments": [
         {"name": "filterbank", "kind": "object", "built_by": "init_mfcc"}
       ],
@@ -856,7 +857,7 @@
       "description": "Extract log mel energies from a spectrum",
       "validation_level": 0,
       "tags": ["sound"],
-      "input": {"format": "spectral_magnitudes", "unit": "any", "accepts": ["power_bins", "magnitude_bins"], "length": "N >= 1 && 2 * N == filterbank_size(filterbank)"},
+      "input": {"format": "spectral_magnitudes", "unit": "any", "accepts": ["power_bins"], "length": "N >= 1 && 2 * N == filterbank_size(filterbank)"},
       "arguments": [
         {"name": "filterbank", "kind": "object", "built_by": "init_mfcc"}
       ],

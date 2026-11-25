@@ -456,12 +456,12 @@ static const xtract_quantity_t *const accepted_flux[] = {&quantity_magnitude_bin
 static const xtract_quantity_t *const accepted_difference_vector[] = {&quantity_bins};
 static const xtract_quantity_t *const accepted_bark_coefficients[] = {&quantity_bins};
 static const xtract_quantity_t *const accepted_peak_spectrum[] = {&quantity_bins};
-static const xtract_quantity_t *const accepted_mfcc[] = {&quantity_power_bins, &quantity_magnitude_bins};
+static const xtract_quantity_t *const accepted_mfcc[] = {&quantity_power_bins};
 static const xtract_quantity_t *const accepted_harmonic_spectrum[] = {&quantity_magnitude_spectrum};
 static const xtract_quantity_t *const accepted_lpc[] = {&quantity_autocorrelation};
 static const xtract_quantity_t *const accepted_lpcc[] = {&quantity_lpc_coefficients};
 static const xtract_quantity_t *const accepted_subbands[] = {&quantity_bins};
-static const xtract_quantity_t *const accepted_mel_spectrogram[] = {&quantity_power_bins, &quantity_magnitude_bins};
+static const xtract_quantity_t *const accepted_mel_spectrogram[] = {&quantity_power_bins};
 static const xtract_quantity_t *const accepted_gfcc[] = {&quantity_power_bins, &quantity_magnitude_bins};
 static const xtract_quantity_t *const accepted_gammatone_spectrogram[] = {&quantity_power_bins, &quantity_magnitude_bins};
 static const xtract_quantity_t *const accepted_peak[] = {&quantity_last_n};
@@ -731,9 +731,13 @@ static const xtract_argument_descriptor_t arguments_peak_spectrum[] = {
     {.name = "threshold", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_PERCENT, .min = 0, .max = 100, .default_value = 10},
 };
 
-static const char *const authors_mfcc_0[] = {"Rabiner"};
+static const char *const authors_mfcc_0[] = {"Davis", "Mermelstein"};
+static const char *const authors_mfcc_1[] = {"Rabiner", "Juang"};
+static const char *const authors_mfcc_2[] = {"Young", "Evermann", "Gales", "Hain", "Kershaw", "Liu", "Moore", "Odell", "Ollason", "Povey", "Valtchev", "Woodland"};
 static const xtract_source_t sources_mfcc[] = {
-    {XTRACT_SOURCE_ORIGIN, 1, authors_mfcc_0, 0, NULL, NULL, NULL, NULL},
+    {XTRACT_SOURCE_ORIGIN, 2, authors_mfcc_0, 1980, "Comparison of parametric representations for monosyllabic word recognition in continuously spoken sentences", "IEEE Transactions on Acoustics, Speech, and Signal Processing 28(4)", "equation 1 and figure 1", "doi:10.1109/TASSP.1980.1163420"},
+    {XTRACT_SOURCE_FORMULATION, 2, authors_mfcc_1, 1993, "Fundamentals of speech recognition", "PTR Prentice Hall", "section 4.5.6, equation 4.90", NULL},
+    {XTRACT_SOURCE_FORMULATION, 12, authors_mfcc_2, 2009, "The HTK book, for HTK version 3.4", "Cambridge University Engineering Department", "section 5.4, equation 5.13", NULL},
 };
 static const xtract_argument_descriptor_t arguments_mfcc[] = {
     {.name = "filterbank", .kind = XTRACT_ARGUMENT_OBJECT, .type = XTRACT_FILTERBANK, .unit = XTRACT_UNIT_NONE, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .builder = &builder_init_mfcc},
@@ -1943,11 +1947,11 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .name = "mfcc",
         .title = "Mel-Frequency Cepstral Coefficients",
         .description = "Extract MFCC from a spectrum",
-        .source_count = 1,
+        .source_count = 3,
         .sources = sources_mfcc,
         .validation_level = 0,
         .tags = XTRACT_TAG_SOUND,
-        .data = {XTRACT_SPECTRAL_MAGNITUDES, XTRACT_UNIT_ANY, 2, accepted_mfcc, 1, "N >= 1 && 2 * N == filterbank_size(filterbank)"},
+        .data = {XTRACT_SPECTRAL_MAGNITUDES, XTRACT_UNIT_ANY, 1, accepted_mfcc, 1, "N >= 1 && 2 * N == filterbank_size(filterbank)"},
         .argc = 1,
         .argv = arguments_mfcc,
         .is_scalar = XTRACT_FALSE,
@@ -2043,7 +2047,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .sources = NULL,
         .validation_level = 0,
         .tags = XTRACT_TAG_SOUND,
-        .data = {XTRACT_SPECTRAL_MAGNITUDES, XTRACT_UNIT_ANY, 2, accepted_mel_spectrogram, 1, "N >= 1 && 2 * N == filterbank_size(filterbank)"},
+        .data = {XTRACT_SPECTRAL_MAGNITUDES, XTRACT_UNIT_ANY, 1, accepted_mel_spectrogram, 1, "N >= 1 && 2 * N == filterbank_size(filterbank)"},
         .argc = 1,
         .argv = arguments_mel_spectrogram,
         .is_scalar = XTRACT_FALSE,

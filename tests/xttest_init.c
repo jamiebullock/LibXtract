@@ -80,17 +80,17 @@ static double hz_of_mel(double mel)
     return 700.0 * (exp(mel / 1127.0) - 1.0);
 }
 
-/* The FB_BANDS + 2 mel-spaced peak frequencies the filterbank is built on:
- * peak 0 is FB_MIN, the rest step up the mel scale in equal increments of
- * (mel(FB_MAX) - mel(FB_MIN)) / FB_BANDS. Filter n peaks at peak n and its
- * triangle spans peaks n - 1 and n + 1, with 0 Hz below the first. */
-static void mel_peaks(double *hz)
+/* The FB_BANDS + 2 points the filterbank is built on, equally spaced on the
+ * mel scale from FB_MIN to FB_MAX. Filter n rises from point n, peaks at
+ * point n + 1 and falls to point n + 2. */
+static void mel_points(double *hz)
 {
-    const double step = (mel_of(FB_MAX) - mel_of(FB_MIN)) / FB_BANDS;
+    const double step = (mel_of(FB_MAX) - mel_of(FB_MIN)) / (FB_BANDS + 1);
     int n;
 
     for (n = 0; n < FB_BANDS + 2; n++)
-        hz[n] = n == 0 ? FB_MIN : hz_of_mel(mel_of(FB_MIN) + n * step);
+        hz[n] = n == 0 ? FB_MIN : n == FB_BANDS + 1 ? FB_MAX
+                                                    : hz_of_mel(mel_of(FB_MIN) + n * step);
 }
 
 /* The unit triangle through lower, centre and upper, evaluated at a frequency in Hz. */
@@ -105,25 +105,23 @@ static double triangle(double lower, double centre, double upper, double hz)
 
 UTEST(init, mfcc_gains_sample_each_triangle_at_the_bin_frequencies)
 {
-    /* Rabiner and Juang's filterbank is a set of unit-height triangles on
-     * the linear frequency scale; filter n has that triangle's value at
-     * every bin frequency k * sr / N. */
+    /* The filterbank is a set of unit-height triangles on the linear
+     * frequency scale; filter n has that triangle's value at every bin
+     * frequency k * sr / N. */
     xtract_filterbank *filterbank = xtract_init_mfcc(FB_N, FB_SR, XTRACT_EQUAL_GAIN, FB_MIN, FB_MAX, FB_BANDS);
     static double tables[FB_BANDS][FB_M];
     double hz[FB_BANDS + 2];
     int n, k;
 
-    mel_peaks(hz);
+    mel_points(hz);
     ASSERT_TRUE(filterbank != NULL);
     ASSERT_EQ(fb_read(filterbank, tables), XTRACT_SUCCESS);
     xtract_free_filterbank(filterbank);
 
     for (n = 0; n < FB_BANDS; n++)
     {
-        const double lower = n == 0 ? 0.0 : hz[n - 1];
-
         for (k = 0; k < FB_M; k++)
-            CHECK_NEAR(tables[n][k], triangle(lower, hz[n], hz[n + 1], (double)k / FB_N * FB_SR), 1e-12);
+            CHECK_NEAR(tables[n][k], triangle(hz[n], hz[n + 1], hz[n + 2], (double)k / FB_N * FB_SR), 1e-12);
     }
 }
 
@@ -134,14 +132,14 @@ UTEST(init, mfcc_peaks_fall_between_the_bins_that_bracket_each_centre)
     double hz[FB_BANDS + 2];
     int n, k;
 
-    mel_peaks(hz);
+    mel_points(hz);
     ASSERT_TRUE(filterbank != NULL);
     ASSERT_EQ(fb_read(filterbank, tables), XTRACT_SUCCESS);
     xtract_free_filterbank(filterbank);
 
     for (n = 0; n < FB_BANDS; n++)
     {
-        const int below = (int)floor(hz[n] / FB_SR * FB_N);
+        const int below = (int)floor(hz[n + 1] / FB_SR * FB_N);
         int argmax = 0;
 
         for (k = 1; k < FB_M; k++)
@@ -157,29 +155,26 @@ UTEST(init, mfcc_peaks_fall_between_the_bins_that_bracket_each_centre)
 UTEST(init, mfcc_equal_area_gives_every_filter_the_same_area)
 {
     /* Under XTRACT_EQUAL_AREA filter n is the unit triangle scaled by the
-     * ratio of the first filter's base to its own, peak n - 1 to peak
-     * n + 1 in Hz with the first base starting at 0 Hz, so base times
-     * height is the same for every filter and the first keeps a gain of 1. */
+     * ratio of the first filter's base to its own, point n to point n + 2
+     * in Hz, so base times height is the same for every filter and the
+     * first keeps a gain of 1. */
     xtract_filterbank *filterbank = xtract_init_mfcc(FB_N, FB_SR, XTRACT_EQUAL_AREA, FB_MIN, FB_MAX, FB_BANDS);
     static double tables[FB_BANDS][FB_M];
     double hz[FB_BANDS + 2];
     int n, k;
 
-    mel_peaks(hz);
+    mel_points(hz);
     ASSERT_TRUE(filterbank != NULL);
     ASSERT_EQ(fb_read(filterbank, tables), XTRACT_SUCCESS);
     xtract_free_filterbank(filterbank);
 
     for (n = 0; n < FB_BANDS; n++)
     {
-        const double lower = n == 0 ? 0.0 : hz[n - 1];
-        const double height = hz[1] / (hz[n + 1] - lower);
+        const double height = (hz[2] - hz[0]) / (hz[n + 2] - hz[n]);
 
-        CHECK_REL(height * (hz[n + 1] - lower), hz[1], 1e-12);
         for (k = 0; k < FB_M; k++)
-            CHECK_NEAR(tables[n][k], height * triangle(lower, hz[n], hz[n + 1], (double)k / FB_N * FB_SR), 1e-12);
+            CHECK_NEAR(tables[n][k], height * triangle(hz[n], hz[n + 1], hz[n + 2], (double)k / FB_N * FB_SR), 1e-12);
     }
-    CHECK_REL(tables[0][3], triangle(0.0, hz[0], hz[1], 3.0 / FB_N * FB_SR), 1e-12);
 }
 
 UTEST(init, mfcc_needs_at_least_two_filters)
