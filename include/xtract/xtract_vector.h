@@ -83,7 +83,7 @@ extern "C"
      * Taken of the magnitudes of a spectrum from bin 1, it gives the logarithmic spectral flux of Boeck, Krebs and Schedl (2012, equation 7) as the sum of the rises from one frame to the next: xtract_flux() of the two results with order 1 and XTRACT_POSITIVE_SLOPE
      *
      * \param *ctx: a pointer to a context, or NULL
-     * \param *data: a pointer to the first element in an array of doubles, each at least 0 (e.g. elements 1 to N/2 - 1 of the first half of the array pointed to by *result from xtract_magnitude_spectrum())
+     * \param *data: a pointer to the first element in an array of doubles, each at least 0 (e.g. the first half of the array pointed to by *result from xtract_magnitude_spectrum() without its first element)
      * \param N: the number of elements to be considered, at least 1
      * \param *argv: a pointer to a double representing the compression factor lambda, finite and above 0
      * \param *result: a pointer to an array of N doubles: ln(1 + lambda * x) of each element x of *data
