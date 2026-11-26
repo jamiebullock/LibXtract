@@ -108,17 +108,18 @@ enumeration:
 - `name` is the name of the function without the `xtract_` prefix. `title`
   and `description` are for a person to read, and `tags` lists what the
   feature assumes about its data.
-- `definition` is the mathematical definition the feature computes, in
-  LaTeX, the body of a displayed formula. The documentation page of feature
-  definitions (`doc/definitions.dox`) shows it with the sources and the
-  validation level.
+- `definition`, which every feature has, is the mathematical definition the
+  feature computes, in LaTeX, the body of a displayed formula. The
+  documentation page of feature definitions (`doc/definitions.dox`) shows it
+  with the sources and the validation level.
 - `sources` lists the published works that define the feature, the work
   that introduced the measure first with the `role` `origin`, then any work
   whose formulation the feature computes with the role `formulation`. Each
   gives the family names of its `authors` and the `year`, and may give the
   `title`, the `venue`, the `locator` of the definition in the work
   (`equation 7`) and a `permalink` (`doi:`, `hdl:` or `https://`). A feature the
-  library defines itself has no `sources`.
+  library defines itself has no `sources`, and its definition is the
+  reference.
 - `validation_level` states how far the results have been checked against
   values computed independently of the library, from 0 (not checked) to 3
   (certified by a machine-checked proof).
