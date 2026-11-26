@@ -56,6 +56,11 @@ def decimal(fraction):
     return Decimal(fraction.numerator) / Decimal(fraction.denominator)
 
 
+def write(path, text):
+    with open(path, "w", encoding="ascii", newline="\n") as file:
+        file.write(text)
+
+
 def certified(text, label):
     match = re.search(rf"\s{re.escape(label)}:\s+({NUMBER})\s", text)
     if match is None:
@@ -99,7 +104,7 @@ def main():
             if re.fullmatch(NUMBER, value) is None:
                 sys.exit(f"{name}.dat: '{value}' is not a decimal number")
         series = f"nist_{name.lower()}"
-        (reference / "series" / f"{series}.txt").write_text("\n".join(values) + "\n", encoding="ascii", newline="\n")
+        write(reference / "series" / f"{series}.txt", "\n".join(values) + "\n")
 
         mean = certified(text, "ybar")
         deviation = certified(text, "s")
@@ -152,7 +157,7 @@ def main():
         },
         "records": records,
     }
-    (reference / "values" / "nist.json").write_text(json.dumps(document, indent=2) + "\n", encoding="ascii", newline="\n")
+    write(reference / "values" / "nist.json", json.dumps(document, indent=2) + "\n")
 
 
 if __name__ == "__main__":

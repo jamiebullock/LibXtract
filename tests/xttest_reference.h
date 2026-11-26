@@ -17,9 +17,10 @@ typedef struct xttest_reference_record_
     const char *series;
     const double *data;
     int n;
-    /* The value of each argument in the order of the feature's descriptor,
-     * or NULL for a feature that has none */
-    const double *arguments;
+    /* What the feature is given as argv: the value of each argument in the
+     * order of the feature's descriptor, as doubles or as ints, or NULL for
+     * a feature that has none */
+    const void *arguments;
     const double *expected;
     int expected_count;
     /* The most an element of the result may differ from its expected value,

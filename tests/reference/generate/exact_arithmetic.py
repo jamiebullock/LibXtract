@@ -34,6 +34,11 @@ ROUNDING = Fraction(1, 2**53)
 getcontext().prec = 60
 
 
+def write(path, text):
+    with open(path, "w", encoding="ascii", newline="\n") as file:
+        file.write(text)
+
+
 def tolerance(roundings, reason):
     """A relative tolerance of a number of roundings, rounded up to three
     significant digits, and its reason."""
@@ -46,7 +51,7 @@ def main():
     reference = pathlib.Path(__file__).resolve().parent.parent
     records = []
     for series, values in SERIES.items():
-        (reference / "series" / f"{series}.txt").write_text("\n".join(values) + "\n", encoding="ascii", newline="\n")
+        write(reference / "series" / f"{series}.txt", "\n".join(values) + "\n")
         doubles = [Fraction(float(value)) for value in values]
         n = len(doubles)
         # The bound on the sum holds for terms of one sign
@@ -105,9 +110,7 @@ def main():
         },
         "records": records,
     }
-    (reference / "values" / "exact_arithmetic.json").write_text(
-        json.dumps(document, indent=2) + "\n", encoding="ascii", newline="\n"
-    )
+    write(reference / "values" / "exact_arithmetic.json", json.dumps(document, indent=2) + "\n")
 
 
 if __name__ == "__main__":

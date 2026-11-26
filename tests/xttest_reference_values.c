@@ -15,7 +15,7 @@
 #include "xttest_reference.h"
 
 static const double series_offset_1e7_integers[3] = {
-    10000001, 10000003, 10000002};
+    10000001.0, 10000003.0, 10000002.0};
 
 static const double series_offset_1_tenths[1001] = {
     1.2, 1.1, 1.3, 1.1, 1.3, 1.1, 1.3, 1.1,
