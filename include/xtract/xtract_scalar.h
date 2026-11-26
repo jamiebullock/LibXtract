@@ -359,8 +359,8 @@ extern "C"
      * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles
      * \param N: the number of elements to be considered, at least 1
-     * \param *argv: a pointer to a double representing the lower limit for the search. All values in the array pointed to by *data that are below or equal to this threshold will be ignored.
-     * \param *result: a pointer to a value representing the lowest component in *data that falls above the threshold; 0 with no result when every value is at or below it
+     * \param *argv: a pointer to a double representing the lower limit for the search. All values in the array pointed to by *data that are below or equal to this threshold, and every NaN, will be ignored, so a threshold of -DBL_MAX also leaves out -DBL_MAX and -infinity.
+     * \param *result: a pointer to a value representing the lowest component in *data that falls above the threshold, which may be DBL_MAX or infinity; 0 with no result when every value is at or below it
      *
      */
     int xtract_lowest_value(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);

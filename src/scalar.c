@@ -1013,7 +1013,9 @@ int xtract_spectral_slope(xtract_context *ctx, const double *data, const int N, 
 
 int xtract_lowest_value(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
-    int n = N;
+    int n = 0;
+    double threshold;
+    double lowest;
 
     if (N < 1 || argv == NULL)
     {
@@ -1021,19 +1023,25 @@ int xtract_lowest_value(xtract_context *ctx, const double *data, const int N, co
         return XTRACT_ARGUMENT_ERROR;
     }
 
-    *result = DBL_MAX;
+    threshold = *(double *)argv;
 
-    while (n--)
-    {
-        if (data[n] > *(double *)argv)
-            *result = XTRACT_MIN(*result, data[n]);
-    }
+    while (n < N && !(data[n] > threshold))
+        n++;
 
-    if (*result == DBL_MAX)
+    if (n == N)
     {
         *result = 0.0;
         return XTRACT_NO_RESULT;
     }
+
+    lowest = data[n];
+    for (n++; n < N; n++)
+    {
+        if (data[n] > threshold && data[n] < lowest)
+            lowest = data[n];
+    }
+
+    *result = lowest;
 
     return XTRACT_SUCCESS;
 }
