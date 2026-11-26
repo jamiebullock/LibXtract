@@ -119,6 +119,35 @@ jobs:
           cmake --build build/package --config Release
           ctest --test-dir build/package --build-config Release --output-on-failure
 
+  # The build downloads the NIST Statistical Reference Datasets, which the
+  # repository does not hold, so the job fails when NIST's server cannot be
+  # reached. It is not a required check.
+  nist:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.x'
+
+      - name: Configure
+        run: cmake --preset default -DXTRACT_NIST_TESTS=ON -DXTRACT_BUILD_EXAMPLES=OFF -DXTRACT_BUILD_BENCH=OFF -DXTRACT_BUILD_PYTHON=OFF -DXTRACT_BUILD_JAVA=OFF -DXTRACT_BUILD_NODE=OFF
+
+      - name: Build
+        run: cmake --build --preset default --target xttest
+
+      - name: Test
+        run: ctest --preset default -R "^xttest$"
+
   realtime:
     runs-on: ubuntu-latest
     timeout-minutes: 15

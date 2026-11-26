@@ -13,6 +13,8 @@ reviews:
     - '!doc/definitions.dox'
     - '!include/xtract/xtract_features.h'
     - '!tests/xttest_properties.c'
+    - '!tests/xttest_reference_values.c'
+    - '!tests/reference/series/**'
   path_instructions:
     - path: 'src/**/*.c'
       instructions: |

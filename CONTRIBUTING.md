@@ -165,6 +165,44 @@ argument that a rule divides by is tested first: `width >= 1 && N % width ==
 0`. The generator checks the characters and the names of an expression, and
 the compiler checks its syntax when it builds `src/features.c`.
 
+### Reference values
+
+`tests/reference/values` has one file for each source of values computed
+independently of the library, and the test suite checks the library against
+every record in them. `cmake/reference.cmake` writes the committed table
+`tests/xttest_reference_values.c` from them and refuses a record that does
+not follow these rules. After changing a file, build the `reference` target
+and commit the result.
+
+- `source` gives the `name` of the source, its `version`, its `url` when it
+  has one, the `licence` of the values, `how` they were obtained, and the
+  validation `level` they support: 1 for an independent implementation, 2
+  for a value derived from the definition or certified published data, 3 for
+  a value certified by a machine-checked proof.
+- A record is one call of a `feature`. `data` names a series in
+  `tests/reference/series`, a file of one number to a line, and is left out
+  for a feature that takes no data. `arguments` gives a value for each
+  argument by its name in `src/features.json`. `expected` lists every
+  element of the result.
+- `tolerance` gives the most an element may differ from its expected value,
+  `relative` to the largest magnitude among the expected values, and the
+  `reason` it is that large. `call` says where the expected values come
+  from: the call of a tool as it was run, or the equation of a work.
+
+A feature's `validation_level` in `src/features.json` is the highest level
+among the sources that have a record of it, and the tests fail when the two
+differ. The script that wrote a file of values is in
+`tests/reference/generate`. It is run by hand, and the build and the tests
+read only what it wrote.
+
+The repository has no copy of the
+[NIST Statistical Reference Datasets](https://www.itl.nist.gov/div898/strd/).
+Configuring with `-DXTRACT_NIST_TESTS=ON` downloads the nine datasets for
+univariate summary statistics from NIST into the build directory, and the
+tests then also check the mean, the variance and the standard deviation
+against their certified values. It needs Python 3 and a network connection.
+CI does this in the `nist` job.
+
 ## Pull requests
 
 - Branch from `develop` and name the branch `<type>/<short-description>`, where

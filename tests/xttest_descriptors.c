@@ -107,13 +107,6 @@ UTEST(descriptors, a_feature_the_library_defines_has_no_source)
     ASSERT_EQ(hu->sources[0].year, 1962);
 }
 
-UTEST(descriptors, no_feature_claims_a_validation_level_before_the_suite_holds_reference_values)
-{
-    int f;
-    for (f = 0; f < XTRACT_FEATURES; f++)
-        ASSERT_EQ_MSG(xtract_descriptor(f)->validation_level, 0, xtract_descriptor(f)->name);
-}
-
 UTEST(descriptors, scalar_vector_classification)
 {
     /* mean reduces to a single value; spectrum produces a vector. */

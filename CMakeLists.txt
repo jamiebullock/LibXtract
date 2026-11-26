@@ -15,6 +15,7 @@ option(XTRACT_BUILD_BENCH "Build the benchmarks" OFF)
 option(XTRACT_BUILD_FUZZ "Build the libFuzzer harnesses, which need clang" OFF)
 option(XTRACT_COVERAGE "Instrument the build for gcov and add a coverage report target" OFF)
 option(XTRACT_REALTIME_SANITIZER "Build with RealtimeSanitizer, which needs clang 20 or later" OFF)
+option(XTRACT_NIST_TESTS "Download the NIST Statistical Reference Datasets when configuring and test against them, which needs Python 3" OFF)
 set(XTRACT_BUILD_PYTHON AUTO CACHE STRING "Build the Python bindings: ON, OFF or AUTO")
 set(XTRACT_BUILD_JAVA AUTO CACHE STRING "Build the Java bindings: ON, OFF or AUTO")
 set(XTRACT_BUILD_NODE AUTO CACHE STRING "Build the Node.js bindings: ON, OFF or AUTO")
@@ -95,6 +96,9 @@ if(PROJECT_IS_TOP_LEVEL)
         VERBATIM)
     add_custom_target(features
         COMMAND ${CMAKE_COMMAND} -P ${PROJECT_SOURCE_DIR}/cmake/features.cmake
+        VERBATIM)
+    add_custom_target(reference
+        COMMAND ${CMAKE_COMMAND} -P ${PROJECT_SOURCE_DIR}/cmake/reference.cmake
         VERBATIM)
     add_custom_target(version-check
         COMMAND ${CMAKE_COMMAND} -P ${PROJECT_SOURCE_DIR}/cmake/version.cmake

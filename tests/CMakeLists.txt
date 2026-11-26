@@ -3,6 +3,50 @@
 # SPDX-FileCopyrightText: 2026 Jamie Bullock
 # SPDX-License-Identifier: Zlib
 
+# The NIST datasets are read from NIST and kept in the build directory: the
+# repository has no copy of them. The tests are then built with a table of
+# reference values that has the NIST values as well as the committed ones
+set(reference_values xttest_reference_values.c)
+if(XTRACT_NIST_TESTS)
+    find_package(Python3 REQUIRED COMPONENTS Interpreter)
+    set(nist ${CMAKE_CURRENT_BINARY_DIR}/nist)
+    foreach(dataset Lew Lottery Mavro Michelso NumAcc1 NumAcc2 NumAcc3 NumAcc4 PiDigits)
+        set(file ${nist}/published/${dataset}.dat)
+        set(attempt 0)
+        while(NOT EXISTS ${file})
+            file(DOWNLOAD https://www.itl.nist.gov/div898/strd/univ/data/${dataset}.dat ${file}.part
+                STATUS status TIMEOUT 60)
+            list(GET status 0 code)
+            if(code EQUAL 0)
+                file(RENAME ${file}.part ${file})
+            else()
+                file(REMOVE ${file}.part)
+                math(EXPR attempt "${attempt} + 1")
+                if(attempt EQUAL 5)
+                    message(FATAL_ERROR "XTRACT_NIST_TESTS: ${dataset}.dat could not be downloaded from NIST: ${status}")
+                endif()
+                execute_process(COMMAND ${CMAKE_COMMAND} -E sleep 10)
+            endif()
+        endwhile()
+    endforeach()
+    set(reference_values ${nist}/xttest_reference_values.c)
+    execute_process(
+        COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/reference/generate/nist.py
+            ${nist}/published ${nist}/reference
+        COMMAND_ERROR_IS_FATAL ANY)
+    execute_process(
+        COMMAND ${CMAKE_COMMAND} -DEXTRA=${nist}/reference -DOUTPUT=${reference_values}
+            -P ${PROJECT_SOURCE_DIR}/cmake/reference.cmake
+        COMMAND_ERROR_IS_FATAL ANY)
+    file(GLOB committed reference/values/*.json reference/series/*.txt)
+    set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
+        ${committed}
+        reference/generate/nist.py
+        ${PROJECT_SOURCE_DIR}/cmake/reference.cmake
+        ${PROJECT_SOURCE_DIR}/cmake/json.cmake
+        ${PROJECT_SOURCE_DIR}/src/features.json)
+endif()
+
 add_executable(xttest
     xttest_main.c
     xttest_context.c
@@ -14,11 +58,14 @@ add_executable(xttest
     xttest_invariance.c
     xttest_multivariate.c
     xttest_properties.c
+    xttest_reference.c
+    ${reference_values}
     xttest_scalar.c
     xttest_stateful.c
     xttest_util.c
     xttest_vector.c
     xttest_window.c)
+target_include_directories(xttest PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(xttest PRIVATE xtract::xtract)
 set_target_properties(xttest PROPERTIES
     C_STANDARD 99
@@ -67,6 +114,11 @@ add_test(NAME features_are_generated
         -DCHECK=ON
         -DWORK=${CMAKE_CURRENT_BINARY_DIR}/features_check
         -P ${PROJECT_SOURCE_DIR}/cmake/features.cmake)
+add_test(NAME reference_values_are_generated
+    COMMAND ${CMAKE_COMMAND}
+        -DCHECK=ON
+        -DWORK=${CMAKE_CURRENT_BINARY_DIR}/reference_check
+        -P ${PROJECT_SOURCE_DIR}/cmake/reference.cmake)
 
 if(XTRACT_COVERAGE)
     set(XTRACT_LCOV_IGNORE --ignore-errors unused,inconsistent,format,empty,gcov,unsupported)

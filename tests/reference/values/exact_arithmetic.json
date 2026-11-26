@@ -1,0 +1,175 @@
+{
+  "source": {
+    "name": "Exact rational arithmetic on the stored doubles",
+    "version": "Python 3.15.2, fractions and decimal",
+    "licence": "Zlib, as the library",
+    "how": "each feature's definition evaluated on the doubles nearest the stored values, by tests/reference/generate/exact_arithmetic.py",
+    "level": 2
+  },
+  "records": [
+    {
+      "feature": "mean",
+      "data": "offset_1e7_integers",
+      "expected": [
+        10000002.0
+      ],
+      "tolerance": {
+        "relative": 5.56e-16,
+        "reason": "5 roundings, each within 2^-53 relatively: the N - 1 additions of values of one sign, in any order; the division, or a reciprocal and a multiplication; and the expected value"
+      },
+      "call": "the sum of the doubles over N, as a fraction"
+    },
+    {
+      "feature": "variance",
+      "data": "offset_1e7_integers",
+      "arguments": {
+        "mean": 10000002.0
+      },
+      "expected": [
+        1.0
+      ],
+      "tolerance": {
+        "relative": 7.78e-16,
+        "reason": "7 roundings, each within 2^-53 relatively: the difference from the mean, which its square counts twice, and the square, in every term; the N - 1 additions of terms of one sign, in any order; the division; and the expected value"
+      },
+      "call": "the sum of the squared differences of the doubles from the mean given, over N - 1, as a fraction"
+    },
+    {
+      "feature": "standard_deviation",
+      "arguments": {
+        "variance": 1.0
+      },
+      "expected": [
+        1.0
+      ],
+      "tolerance": {
+        "relative": 2.23e-16,
+        "reason": "2 roundings, each within 2^-53 relatively: the square root, which is correctly rounded, and the expected value"
+      },
+      "call": "the square root of the variance of offset_1e7_integers to 60 digits"
+    },
+    {
+      "feature": "mean",
+      "data": "offset_1_tenths",
+      "expected": [
+        1.2
+      ],
+      "tolerance": {
+        "relative": 1.12e-13,
+        "reason": "1003 roundings, each within 2^-53 relatively: the N - 1 additions of values of one sign, in any order; the division, or a reciprocal and a multiplication; and the expected value"
+      },
+      "call": "the sum of the doubles over N, as a fraction"
+    },
+    {
+      "feature": "variance",
+      "data": "offset_1_tenths",
+      "arguments": {
+        "mean": 1.2
+      },
+      "expected": [
+        0.009999999999999995
+      ],
+      "tolerance": {
+        "relative": 1.12e-13,
+        "reason": "1005 roundings, each within 2^-53 relatively: the difference from the mean, which its square counts twice, and the square, in every term; the N - 1 additions of terms of one sign, in any order; the division; and the expected value"
+      },
+      "call": "the sum of the squared differences of the doubles from the mean given, over N - 1, as a fraction"
+    },
+    {
+      "feature": "standard_deviation",
+      "arguments": {
+        "variance": 0.009999999999999995
+      },
+      "expected": [
+        0.09999999999999998
+      ],
+      "tolerance": {
+        "relative": 2.23e-16,
+        "reason": "2 roundings, each within 2^-53 relatively: the square root, which is correctly rounded, and the expected value"
+      },
+      "call": "the square root of the variance of offset_1_tenths to 60 digits"
+    },
+    {
+      "feature": "mean",
+      "data": "offset_1e6_tenths",
+      "expected": [
+        1000000.2
+      ],
+      "tolerance": {
+        "relative": 1.12e-13,
+        "reason": "1003 roundings, each within 2^-53 relatively: the N - 1 additions of values of one sign, in any order; the division, or a reciprocal and a multiplication; and the expected value"
+      },
+      "call": "the sum of the doubles over N, as a fraction"
+    },
+    {
+      "feature": "variance",
+      "data": "offset_1e6_tenths",
+      "arguments": {
+        "mean": 1000000.2
+      },
+      "expected": [
+        0.01000000000698492
+      ],
+      "tolerance": {
+        "relative": 1.12e-13,
+        "reason": "1005 roundings, each within 2^-53 relatively: the difference from the mean, which its square counts twice, and the square, in every term; the N - 1 additions of terms of one sign, in any order; the division; and the expected value"
+      },
+      "call": "the sum of the squared differences of the doubles from the mean given, over N - 1, as a fraction"
+    },
+    {
+      "feature": "standard_deviation",
+      "arguments": {
+        "variance": 0.01000000000698492
+      },
+      "expected": [
+        0.1000000000349246
+      ],
+      "tolerance": {
+        "relative": 2.23e-16,
+        "reason": "2 roundings, each within 2^-53 relatively: the square root, which is correctly rounded, and the expected value"
+      },
+      "call": "the square root of the variance of offset_1e6_tenths to 60 digits"
+    },
+    {
+      "feature": "mean",
+      "data": "offset_1e7_tenths",
+      "expected": [
+        10000000.2
+      ],
+      "tolerance": {
+        "relative": 1.12e-13,
+        "reason": "1003 roundings, each within 2^-53 relatively: the N - 1 additions of values of one sign, in any order; the division, or a reciprocal and a multiplication; and the expected value"
+      },
+      "call": "the sum of the doubles over N, as a fraction"
+    },
+    {
+      "feature": "variance",
+      "data": "offset_1e7_tenths",
+      "arguments": {
+        "mean": 10000000.2
+      },
+      "expected": [
+        0.01000000011175871
+      ],
+      "tolerance": {
+        "relative": 1.12e-13,
+        "reason": "1005 roundings, each within 2^-53 relatively: the difference from the mean, which its square counts twice, and the square, in every term; the N - 1 additions of terms of one sign, in any order; the division; and the expected value"
+      },
+      "call": "the sum of the squared differences of the doubles from the mean given, over N - 1, as a fraction"
+    },
+    {
+      "feature": "standard_deviation",
+      "arguments": {
+        "variance": 0.01000000011175871
+      },
+      "expected": [
+        0.10000000055879354
+      ],
+      "tolerance": {
+        "relative": 2.23e-16,
+        "reason": "2 roundings, each within 2^-53 relatively: the square root, which is correctly rounded, and the expected value"
+      },
+      "call": "the square root of the variance of offset_1e7_tenths to 60 digits"
+    }
+  ]
+}
