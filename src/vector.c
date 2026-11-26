@@ -1109,36 +1109,26 @@ int xtract_moving_sum(xtract_context *ctx, const double *data, const int N, cons
 {
     const int window = moving_window(N, argv, 1);
     int n;
-    double sum = 0.0;
 
     if (window == 0)
         return XTRACT_ARGUMENT_ERROR;
 
-    for (n = 0; n < window; n++)
-        sum += data[n];
-    result[0] = sum;
-
-    for (n = window; n < N; n++)
-    {
-        sum += data[n] - data[n - window];
-        result[n - window + 1] = sum;
-    }
+    for (n = 0; n <= N - window; n++)
+        xtract_sum(ctx, data + n, window, NULL, result + n);
 
     return XTRACT_SUCCESS;
 }
 
 int xtract_moving_average(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
-    const int rv = xtract_moving_sum(ctx, data, N, argv, result);
-    int window, n;
+    const int window = moving_window(N, argv, 1);
+    int n;
 
-    if (rv != XTRACT_SUCCESS)
-        return rv;
-
-    window = *(const int *)argv;
+    if (window == 0)
+        return XTRACT_ARGUMENT_ERROR;
 
     for (n = 0; n <= N - window; n++)
-        result[n] /= window;
+        xtract_mean(ctx, data + n, window, NULL, result + n);
 
     return XTRACT_SUCCESS;
 }
@@ -1147,29 +1137,15 @@ int xtract_moving_variance(xtract_context *ctx, const double *data, const int N,
 {
     const int window = moving_window(N, argv, 2);
     int n;
-    double mean = 0.0;
-    double m2 = 0.0;
-    double delta, entering, leaving, next_mean;
+    double mean;
 
     if (window == 0)
         return XTRACT_ARGUMENT_ERROR;
 
-    for (n = 0; n < window; n++)
+    for (n = 0; n <= N - window; n++)
     {
-        delta = data[n] - mean;
-        mean += delta / (n + 1);
-        m2 += delta * (data[n] - mean);
-    }
-    result[0] = XTRACT_MAX(m2, 0.0) / (window - 1);
-
-    for (n = window; n < N; n++)
-    {
-        entering = data[n];
-        leaving = data[n - window];
-        next_mean = mean + (entering - leaving) / window;
-        m2 += (entering - leaving) * (entering - next_mean + leaving - mean);
-        mean = next_mean;
-        result[n - window + 1] = XTRACT_MAX(m2, 0.0) / (window - 1);
+        xtract_mean(ctx, data + n, window, NULL, &mean);
+        xtract_variance(ctx, data + n, window, &mean, result + n);
     }
 
     return XTRACT_SUCCESS;
