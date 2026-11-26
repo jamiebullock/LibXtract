@@ -30,6 +30,34 @@ static const double EPSILON = 1e-10;
 
 /* ===== xtract_f0: sine wave ===== */
 
+UTEST(f0, of_a_short_series_follows_the_definition)
+{
+    /* Largest magnitude 3: clipped at 2.4, centre clipped at 0.9. The
+     * difference function over samples 0 to 4 first falls below its value
+     * at lag 1 at lag 3, where it is a thirteenth of it: 1000 / (3 + 1/13) */
+    double data[10] = {3.0, 1.0, -2.0, 2.5, 0.5, -2.0, 2.0, 1.0, -1.5, 2.2};
+    double samplerate = 1000.0;
+    double result = 0.0;
+
+    ASSERT_EQ(xtract_f0(xttest_context(), data, 10, &samplerate, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 325.0, 1e-12);
+}
+
+UTEST(f0, finds_the_pitch_of_a_series_below_zero)
+{
+    double table[512];
+    double samplerate = 44100.0;
+    double frequency = 344.53125;
+    double result = 0.0;
+    int n;
+
+    xttest_gen_sine(table, 512, samplerate, frequency, 1.0);
+    for (n = 0; n < 512; n++)
+        table[n] -= 2.0;
+    ASSERT_EQ(xtract_f0(xttest_context(), table, 512, &samplerate, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xttest_ftom(result), xttest_ftom(frequency));
+}
+
 UTEST(f0, sine_512_44100_86hz_no_result)
 {
     /* period of exactly 512 samples: 1 cycle in the block */
@@ -522,7 +550,7 @@ UTEST(f0, saw_512_44100_86hz_no_result)
     ASSERT_EQ(result, 0.0);
 }
 
-UTEST(f0, saw_512_44100_172hz_quarter_tone)
+UTEST(f0, saw_512_44100_172hz_no_result)
 {
     /* period of exactly 256 samples: 2 cycles in the block */
     uint32_t blocksize = 512;
@@ -531,17 +559,13 @@ UTEST(f0, saw_512_44100_172hz_quarter_tone)
     double amplitude = 1.0;
     double frequency = 172.265625;
     double table[512];
-    uint16_t actual, expected, min, max;
+    int rv;
 
     xttest_gen_sawtooth(table, blocksize, samplerate, frequency, amplitude);
-    xtract_f0(xttest_context(), table, blocksize, &samplerate, &result);
+    rv = xtract_f0(xttest_context(), table, blocksize, &samplerate, &result);
 
-    actual = xttest_ftom(result);
-    expected = xttest_ftom(frequency);
-    min = expected - 50;
-    max = expected + 50;
-    ASSERT_GT(actual, min);
-    ASSERT_LT(actual, max);
+    ASSERT_EQ(rv, XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
 }
 
 UTEST(f0, saw_512_44100_344hz_quarter_tone)
@@ -587,7 +611,7 @@ UTEST(f0, saw_512_44100_344hz_amp001_quarter_tone)
     ASSERT_LT(actual, max);
 }
 
-UTEST(f0, saw_1024_44100_86hz_quarter_tone)
+UTEST(f0, saw_1024_44100_86hz_no_result)
 {
     /* period of exactly 512 samples: 2 cycles in the block */
     uint32_t blocksize = 1024;
@@ -596,17 +620,13 @@ UTEST(f0, saw_1024_44100_86hz_quarter_tone)
     double amplitude = 1.0;
     double frequency = 86.1328125;
     double table[1024];
-    uint16_t actual, expected, min, max;
+    int rv;
 
     xttest_gen_sawtooth(table, blocksize, samplerate, frequency, amplitude);
-    xtract_f0(xttest_context(), table, blocksize, &samplerate, &result);
+    rv = xtract_f0(xttest_context(), table, blocksize, &samplerate, &result);
 
-    actual = xttest_ftom(result);
-    expected = xttest_ftom(frequency);
-    min = expected - 50;
-    max = expected + 50;
-    ASSERT_GT(actual, min);
-    ASSERT_LT(actual, max);
+    ASSERT_EQ(rv, XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
 }
 
 UTEST(f0, saw_1024_44100_140hz_nearest_cent)
@@ -958,26 +978,22 @@ UTEST(f0, saw_1024_11025_344hz_noise40_returns_result)
     ASSERT_GT(xttest_ftom(result), 0);
 }
 
-UTEST(f0, saw_2048_44100_43hz_quarter_tone)
+UTEST(f0, saw_2048_44100_43hz_no_result)
 {
     /* period of exactly 256 samples: 2 cycles in the block */
     uint32_t blocksize = 2048;
     double samplerate = 44100;
     double result = -1.0;
-    double frequency = 43.06640625;
     double amplitude = 1.0;
+    double frequency = 43.06640625;
     double table[2048];
-    uint16_t actual, expected, min, max;
+    int rv;
 
     xttest_gen_sawtooth(table, blocksize, samplerate, frequency, amplitude);
-    xtract_f0(xttest_context(), table, blocksize, &samplerate, &result);
+    rv = xtract_f0(xttest_context(), table, blocksize, &samplerate, &result);
 
-    actual = xttest_ftom(result);
-    expected = xttest_ftom(frequency);
-    min = expected - 50;
-    max = expected + 50;
-    ASSERT_GT(actual, min);
-    ASSERT_LT(actual, max);
+    ASSERT_EQ(rv, XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
 }
 
 UTEST(f0, saw_2048_44100_86hz_nearest_cent)

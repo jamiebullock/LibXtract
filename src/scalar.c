@@ -1349,11 +1349,10 @@ int xtract_f0(xtract_context *ctx, const double *data, const int N, const void *
     err_tau_1 = 0;
     array_max = 0;
 
-    /* Find the array max */
     for (n = 0; n < N; n++)
     {
-        if (input[n] > array_max)
-            array_max = input[n];
+        if (fabs(input[n]) > array_max)
+            array_max = fabs(input[n]);
     }
 
     threshold_peak *= array_max;
@@ -1380,14 +1379,12 @@ int xtract_f0(xtract_context *ctx, const double *data, const int N, const void *
             input[n] = 0;
     }
 
-    /* Estimate fundamental freq */
-    for (n = 1; n < M; n++)
+    for (n = 0; n < M; n++)
         err_tau_1 = err_tau_1 + fabs(input[n] - input[n + 1]);
-    /* FIX: this doesn't pose too much load if it returns 'early', but if it can't find f0, load can be significant for larger block sizes M^2 iterations! */
     for (tau = 2; tau < M; tau++)
     {
         err_tau_x = 0;
-        for (n = 1; n < M; n++)
+        for (n = 0; n < M; n++)
         {
             err_tau_x = err_tau_x + fabs(input[n] - input[n + tau]);
         }
@@ -1399,7 +1396,7 @@ int xtract_f0(xtract_context *ctx, const double *data, const int N, const void *
             return XTRACT_SUCCESS;
         }
     }
-    *result = -0;
+    *result = 0.0;
     xtract_scratch_return(ctx, input, (size_t)N);
     return XTRACT_NO_RESULT;
 }
