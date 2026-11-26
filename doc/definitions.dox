@@ -1153,8 +1153,10 @@ Validation level 0, not checked.
 
 xtract_local_binary_patterns()
 
+\f[ h_c = \frac{\#\{(y, x) : 1 \le y \le H-2, \, 1 \le x \le W-2, \, \mathrm{LBP}(y, x) = c\}}{(W-2)(H-2)}, \quad \mathrm{LBP} = \begin{cases} \sum_{p=0}^{7} s(g_p - g_c) & U \le 2 \\ 9 & \text{otherwise} \end{cases}, \quad U = \sum_{p=0}^{7} |s(g_p - g_c) - s(g_{(p+1) \bmod 8} - g_c)|, \quad s(t) = [t \ge 0], \quad g_p \text{ at } (-\sin\tfrac{\pi p}{4}, \cos\tfrac{\pi p}{4}) \text{ bilinearly interpolated} \f]
+
 Sources:
-- Origin: Ojala, Pietikainen and Maenpaa (2002)
+- Origin: Ojala, Pietikainen and Maenpaa (2002). "Multiresolution gray-scale and rotation invariant texture classification with local binary patterns". IEEE Transactions on Pattern Analysis and Machine Intelligence 24(7), equations 6, 9 and 10, P = 8, R = 1. <a href="https://doi.org/10.1109/TPAMI.2002.1017623">doi:10.1109/TPAMI.2002.1017623</a>
 
 Validation level 0, not checked.
 

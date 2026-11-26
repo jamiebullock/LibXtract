@@ -938,6 +938,63 @@ UTEST(local_binary_patterns, a_run_that_passes_the_first_neighbour_is_still_one_
     expect_one_class(grid, 3, utest_result);
 }
 
+UTEST(local_binary_patterns, a_diagonal_neighbour_is_interpolated_on_the_unit_circle)
+{
+    /* The corner is above the centre, but the value 1 from the centre
+     * towards it, 1/2 of the corner and 1/sqrt(2) - 1/2 of each side with
+     * the rest from the centre, is below: every neighbour is below */
+    const double grid[] = {0.0, 0.0, 6.0, 0.0, 5.0, 0.0, 0.0, 0.0, 0.0};
+
+    expect_one_class(grid, 0, utest_result);
+}
+
+UTEST(local_binary_patterns, a_diagonal_keeps_its_sign_when_a_difference_overflows)
+{
+    /* Above the centre is the largest double, so its difference from the
+     * centre overflows; the interpolated values towards both upper corners
+     * are still below the centre, which leaves two separate neighbours at
+     * or above it */
+    const double c = -0.2 * DBL_MAX;
+    const double grid[] = {-DBL_MAX, DBL_MAX, -DBL_MAX, -DBL_MAX, c, c, -DBL_MAX, -DBL_MAX, -DBL_MAX};
+
+    expect_one_class(grid, 9, utest_result);
+}
+
+UTEST(local_binary_patterns, a_diagonal_whose_sides_cancel_keeps_its_class_under_mirroring)
+{
+    /* Towards the upper left corner the two sides differ from the centre
+     * by +5 and -5 and the corner by 0, so the interpolated value equals
+     * the centre exactly in the grid and in its transpose */
+    const double grid[] = {0.0, -5.0, -10.0, 5.0, 0.0, -10.0, -10.0, -10.0, -10.0};
+    const double transposed[] = {0.0, 5.0, -10.0, -5.0, 0.0, -10.0, -10.0, -10.0, -10.0};
+
+    expect_one_class(grid, 2, utest_result);
+    expect_one_class(transposed, 2, utest_result);
+}
+
+UTEST(local_binary_patterns, a_diagonal_adds_both_sides_when_a_difference_overflows)
+{
+    /* Towards both left corners one side is the largest double, whose
+     * difference from the centre overflows, and the other side and the
+     * corner the lowest; the interpolated values are below the centre, so
+     * only the left neighbour is at or above it */
+    const double c = -0.3 * DBL_MAX;
+    const double grid[] = {-DBL_MAX, -DBL_MAX, -DBL_MAX, DBL_MAX, c, -DBL_MAX, -DBL_MAX, -DBL_MAX, -DBL_MAX};
+
+    expect_one_class(grid, 1, utest_result);
+}
+
+UTEST(local_binary_patterns, a_diagonal_keeps_its_sign_when_both_sides_overflow)
+{
+    /* Each side of every diagonal differs from the centre by more than the
+     * largest double, and so would their halves added together; the
+     * diagonals are still below the centre and the sides above it */
+    const double c = -0.01 * DBL_MAX;
+    const double grid[] = {-DBL_MAX, DBL_MAX, -DBL_MAX, DBL_MAX, c, DBL_MAX, -DBL_MAX, DBL_MAX, -DBL_MAX};
+
+    expect_one_class(grid, 9, utest_result);
+}
+
 UTEST(local_binary_patterns, neighbours_in_more_than_one_run_are_class_9)
 {
     /* The four corners are higher than the centre and the four sides lower */
