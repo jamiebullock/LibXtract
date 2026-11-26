@@ -469,7 +469,7 @@ extern "C"
 
     /** \brief Build a gammatone filterbank
      *
-     * The filterbank has n_filters gammatone filters whose centre frequencies are equally spaced on the ERB-rate scale of Glasberg and Moore (1990) from freq_min to freq_max. Each filter has a gain for each of the N / 2 bins of an N-point transform from DC upward, bin k being at frequency k * sr / N: the power response of a fourth-order gammatone filter whose bandwidth parameter is 1.019 times the equivalent rectangular bandwidth (ERB) at its centre frequency (Patterson et al. 1992), so that the filter passes one ERB of a power spectrum.
+     * The filterbank has n_filters gammatone filters whose centre frequencies are equally spaced on the ERB-rate scale of Glasberg and Moore (1990) from freq_min to freq_max. Each filter has a gain for each of the N / 2 bins of an N-point transform from DC upward, bin k being at frequency k * sr / N: the power response of a fourth-order gammatone filter whose bandwidth parameter is 1.019 times the equivalent rectangular bandwidth (ERB) at its centre frequency (Patterson et al. 1992), so that the continuous response has an equivalent rectangular bandwidth of one ERB. The gains sampled at the bins need not add up to that bandwidth: a filter centred near 0 Hz has half its response at negative frequencies, and bins wide beside the ERB sample the response coarsely.
      *
      * \param N: the size of the transform the filters will be applied to, at least 2 and even
      * \param sr: the sample rate in Hz, finite and above 0
