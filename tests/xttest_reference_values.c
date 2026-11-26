@@ -401,49 +401,49 @@ static const double series_offset_1e7_tenths[1001] = {
     10000000.3, 10000000.1, 10000000.3, 10000000.1, 10000000.3, 10000000.1, 10000000.3, 10000000.1,
     10000000.3};
 
-static const double expected_exact_arithmetic_0[] = {10000002.0};
-static const double arguments_exact_arithmetic_1[] = {10000002.0};
-static const double expected_exact_arithmetic_1[] = {1.0};
-static const double arguments_exact_arithmetic_2[] = {1.0};
-static const double expected_exact_arithmetic_2[] = {1.0};
-static const double expected_exact_arithmetic_3[] = {1.2};
-static const double arguments_exact_arithmetic_4[] = {1.2};
-static const double expected_exact_arithmetic_4[] = {0.009999999999999995};
-static const double arguments_exact_arithmetic_5[] = {0.009999999999999995};
-static const double expected_exact_arithmetic_5[] = {0.099999999999999978};
-static const double expected_exact_arithmetic_6[] = {1000000.2};
-static const double arguments_exact_arithmetic_7[] = {1000000.2};
-static const double expected_exact_arithmetic_7[] = {0.01000000000698492};
-static const double arguments_exact_arithmetic_8[] = {0.01000000000698492};
-static const double expected_exact_arithmetic_8[] = {0.1000000000349246};
-static const double expected_exact_arithmetic_9[] = {10000000.199999999};
-static const double arguments_exact_arithmetic_10[] = {10000000.199999999};
-static const double expected_exact_arithmetic_10[] = {0.01000000011175871};
-static const double arguments_exact_arithmetic_11[] = {0.01000000011175871};
-static const double expected_exact_arithmetic_11[] = {0.10000000055879354};
+static const double expected_lean_statistics_0[] = {10000002.0};
+static const double arguments_lean_statistics_1[] = {10000002.0};
+static const double expected_lean_statistics_1[] = {1.0};
+static const double arguments_lean_statistics_2[] = {1.0};
+static const double expected_lean_statistics_2[] = {1.0};
+static const double expected_lean_statistics_3[] = {1.2};
+static const double arguments_lean_statistics_4[] = {1.2};
+static const double expected_lean_statistics_4[] = {0.009999999999999995};
+static const double arguments_lean_statistics_5[] = {0.009999999999999995};
+static const double expected_lean_statistics_5[] = {0.099999999999999978};
+static const double expected_lean_statistics_6[] = {1000000.2};
+static const double arguments_lean_statistics_7[] = {1000000.2};
+static const double expected_lean_statistics_7[] = {0.01000000000698492};
+static const double arguments_lean_statistics_8[] = {0.01000000000698492};
+static const double expected_lean_statistics_8[] = {0.1000000000349246};
+static const double expected_lean_statistics_9[] = {10000000.199999999};
+static const double arguments_lean_statistics_10[] = {10000000.199999999};
+static const double expected_lean_statistics_10[] = {0.01000000011175871};
+static const double arguments_lean_statistics_11[] = {0.01000000011175871};
+static const double expected_lean_statistics_11[] = {0.10000000055879354};
 
-static const xttest_reference_record records_exact_arithmetic[] = {
-    {.feature = XTRACT_MEAN, .series = "offset_1e7_integers", .data = series_offset_1e7_integers, .n = 3, .arguments = NULL, .expected = expected_exact_arithmetic_0, .expected_count = 1, .tolerance = 5.5599999999999996e-16},
-    {.feature = XTRACT_VARIANCE, .series = "offset_1e7_integers", .data = series_offset_1e7_integers, .n = 3, .arguments = arguments_exact_arithmetic_1, .expected = expected_exact_arithmetic_1, .expected_count = 1, .tolerance = 7.7800000000000002e-16},
-    {.feature = XTRACT_STANDARD_DEVIATION, .series = NULL, .data = NULL, .n = 0, .arguments = arguments_exact_arithmetic_2, .expected = expected_exact_arithmetic_2, .expected_count = 1, .tolerance = 2.2300000000000002e-16},
-    {.feature = XTRACT_MEAN, .series = "offset_1_tenths", .data = series_offset_1_tenths, .n = 1001, .arguments = NULL, .expected = expected_exact_arithmetic_3, .expected_count = 1, .tolerance = 1.12e-13},
-    {.feature = XTRACT_VARIANCE, .series = "offset_1_tenths", .data = series_offset_1_tenths, .n = 1001, .arguments = arguments_exact_arithmetic_4, .expected = expected_exact_arithmetic_4, .expected_count = 1, .tolerance = 1.12e-13},
-    {.feature = XTRACT_STANDARD_DEVIATION, .series = NULL, .data = NULL, .n = 0, .arguments = arguments_exact_arithmetic_5, .expected = expected_exact_arithmetic_5, .expected_count = 1, .tolerance = 2.2300000000000002e-16},
-    {.feature = XTRACT_MEAN, .series = "offset_1e6_tenths", .data = series_offset_1e6_tenths, .n = 1001, .arguments = NULL, .expected = expected_exact_arithmetic_6, .expected_count = 1, .tolerance = 1.12e-13},
-    {.feature = XTRACT_VARIANCE, .series = "offset_1e6_tenths", .data = series_offset_1e6_tenths, .n = 1001, .arguments = arguments_exact_arithmetic_7, .expected = expected_exact_arithmetic_7, .expected_count = 1, .tolerance = 1.12e-13},
-    {.feature = XTRACT_STANDARD_DEVIATION, .series = NULL, .data = NULL, .n = 0, .arguments = arguments_exact_arithmetic_8, .expected = expected_exact_arithmetic_8, .expected_count = 1, .tolerance = 2.2300000000000002e-16},
-    {.feature = XTRACT_MEAN, .series = "offset_1e7_tenths", .data = series_offset_1e7_tenths, .n = 1001, .arguments = NULL, .expected = expected_exact_arithmetic_9, .expected_count = 1, .tolerance = 1.12e-13},
-    {.feature = XTRACT_VARIANCE, .series = "offset_1e7_tenths", .data = series_offset_1e7_tenths, .n = 1001, .arguments = arguments_exact_arithmetic_10, .expected = expected_exact_arithmetic_10, .expected_count = 1, .tolerance = 1.12e-13},
-    {.feature = XTRACT_STANDARD_DEVIATION, .series = NULL, .data = NULL, .n = 0, .arguments = arguments_exact_arithmetic_11, .expected = expected_exact_arithmetic_11, .expected_count = 1, .tolerance = 2.2300000000000002e-16},
+static const xttest_reference_record records_lean_statistics[] = {
+    {.feature = XTRACT_MEAN, .series = "offset_1e7_integers", .data = series_offset_1e7_integers, .n = 3, .arguments = NULL, .expected = expected_lean_statistics_0, .expected_count = 1, .tolerance = 4.4500000000000003e-16},
+    {.feature = XTRACT_VARIANCE, .series = "offset_1e7_integers", .data = series_offset_1e7_integers, .n = 3, .arguments = arguments_lean_statistics_1, .expected = expected_lean_statistics_1, .expected_count = 1, .tolerance = 6.6699999999999999e-16},
+    {.feature = XTRACT_STANDARD_DEVIATION, .series = NULL, .data = NULL, .n = 0, .arguments = arguments_lean_statistics_2, .expected = expected_lean_statistics_2, .expected_count = 1, .tolerance = 1.12e-16},
+    {.feature = XTRACT_MEAN, .series = "offset_1_tenths", .data = series_offset_1_tenths, .n = 1001, .arguments = NULL, .expected = expected_lean_statistics_3, .expected_count = 1, .tolerance = 1.12e-13},
+    {.feature = XTRACT_VARIANCE, .series = "offset_1_tenths", .data = series_offset_1_tenths, .n = 1001, .arguments = arguments_lean_statistics_4, .expected = expected_lean_statistics_4, .expected_count = 1, .tolerance = 1.12e-13},
+    {.feature = XTRACT_STANDARD_DEVIATION, .series = NULL, .data = NULL, .n = 0, .arguments = arguments_lean_statistics_5, .expected = expected_lean_statistics_5, .expected_count = 1, .tolerance = 2.2300000000000002e-16},
+    {.feature = XTRACT_MEAN, .series = "offset_1e6_tenths", .data = series_offset_1e6_tenths, .n = 1001, .arguments = NULL, .expected = expected_lean_statistics_6, .expected_count = 1, .tolerance = 1.12e-13},
+    {.feature = XTRACT_VARIANCE, .series = "offset_1e6_tenths", .data = series_offset_1e6_tenths, .n = 1001, .arguments = arguments_lean_statistics_7, .expected = expected_lean_statistics_7, .expected_count = 1, .tolerance = 1.12e-13},
+    {.feature = XTRACT_STANDARD_DEVIATION, .series = NULL, .data = NULL, .n = 0, .arguments = arguments_lean_statistics_8, .expected = expected_lean_statistics_8, .expected_count = 1, .tolerance = 2.2300000000000002e-16},
+    {.feature = XTRACT_MEAN, .series = "offset_1e7_tenths", .data = series_offset_1e7_tenths, .n = 1001, .arguments = NULL, .expected = expected_lean_statistics_9, .expected_count = 1, .tolerance = 1.12e-13},
+    {.feature = XTRACT_VARIANCE, .series = "offset_1e7_tenths", .data = series_offset_1e7_tenths, .n = 1001, .arguments = arguments_lean_statistics_10, .expected = expected_lean_statistics_10, .expected_count = 1, .tolerance = 1.12e-13},
+    {.feature = XTRACT_STANDARD_DEVIATION, .series = NULL, .data = NULL, .n = 0, .arguments = arguments_lean_statistics_11, .expected = expected_lean_statistics_11, .expected_count = 1, .tolerance = 2.2300000000000002e-16},
 };
 
-static const xttest_reference_source source_exact_arithmetic = {.id = "exact_arithmetic", .name = "Exact rational arithmetic on the stored doubles", .level = 2, .record_count = 12, .records = records_exact_arithmetic};
+static const xttest_reference_source source_lean_statistics = {.id = "lean_statistics", .name = "Theorems about the definitions of the statistics, checked by Lean", .level = 3, .record_count = 12, .records = records_lean_statistics};
 
-const xttest_reference_source *const xttest_reference_sources[] = {&source_exact_arithmetic};
+const xttest_reference_source *const xttest_reference_sources[] = {&source_lean_statistics};
 
 const int xttest_reference_source_count = 1;
 
-UTEST(reference, results_agree_with_exact_arithmetic)
+UTEST(reference, results_agree_with_lean_statistics)
 {
-    xttest_reference_check(&source_exact_arithmetic, utest_result);
+    xttest_reference_check(&source_lean_statistics, utest_result);
 }

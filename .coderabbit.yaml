@@ -15,6 +15,7 @@ reviews:
     - '!tests/xttest_properties.c'
     - '!tests/xttest_reference_values.c'
     - '!tests/reference/series/**'
+    - '!spec/XtractSpec/Records/**'
   path_instructions:
     - path: 'src/**/*.c'
       instructions: |

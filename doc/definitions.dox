@@ -27,7 +27,7 @@ xtract_mean()
 
 Defined by the library: this definition is the reference.
 
-Validation level 2, derived.
+Validation level 3, certified.
 
 \section definition_variance Variance
 
@@ -37,7 +37,7 @@ xtract_variance()
 
 Defined by the library: this definition is the reference.
 
-Validation level 2, derived.
+Validation level 3, certified.
 
 \section definition_standard_deviation Standard Deviation
 
@@ -47,7 +47,7 @@ xtract_standard_deviation()
 
 Defined by the library: this definition is the reference.
 
-Validation level 2, derived.
+Validation level 3, certified.
 
 \section definition_average_deviation Average Deviation
 
