@@ -674,6 +674,12 @@ static const xtract_argument_descriptor_t arguments_lowest_value[] = {
     {.name = "threshold", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_ANY, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .default_value = -1.7976931348623157e+308},
 };
 
+static const char *const authors_hps_0[] = {"Schroeder"};
+static const char *const authors_hps_1[] = {"de la Cuadra", "Master", "Sapp"};
+static const xtract_source_t sources_hps[] = {
+    {XTRACT_SOURCE_ORIGIN, 1, authors_hps_0, 1968, "Period histogram and product spectrum: new methods for fundamental-frequency measurement", "Journal of the Acoustical Society of America 43(4)", "equation 1", "doi:10.1121/1.1910902"},
+    {XTRACT_SOURCE_FORMULATION, 3, authors_hps_1, 2001, "Efficient pitch detection techniques for interactive music", "Proceedings of the International Computer Music Conference 2001", "section 2.1, equations 1 and 2 and the octave rule", NULL},
+};
 static const xtract_argument_descriptor_t arguments_hps[] = {
     {.name = "harmonics", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_NONE, .min = 2, .max = 16, .default_value = 3, .is_whole = XTRACT_TRUE},
 };
@@ -796,10 +802,20 @@ static const xtract_argument_descriptor_t arguments_mel_spectrogram[] = {
     {.name = "filterbank", .kind = XTRACT_ARGUMENT_OBJECT, .type = XTRACT_FILTERBANK, .unit = XTRACT_UNIT_NONE, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .builder = &builder_init_mfcc},
 };
 
+static const char *const authors_gfcc_0[] = {"Valero", "Alias"};
+static const xtract_source_t sources_gfcc[] = {
+    {XTRACT_SOURCE_ORIGIN, 2, authors_gfcc_0, 2012, "Gammatone cepstral coefficients: biologically inspired features for non-speech audio classification", "IEEE Transactions on Multimedia 14(6)", "equations 3 to 5", "doi:10.1109/TMM.2012.2199972"},
+};
 static const xtract_argument_descriptor_t arguments_gfcc[] = {
     {.name = "filterbank", .kind = XTRACT_ARGUMENT_OBJECT, .type = XTRACT_FILTERBANK, .unit = XTRACT_UNIT_NONE, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .builder = &builder_init_gfcc},
 };
 
+static const char *const authors_gammatone_spectrogram_0[] = {"Patterson", "Robinson", "Holdsworth", "McKeown", "Zhang", "Allerhand"};
+static const char *const authors_gammatone_spectrogram_1[] = {"Glasberg", "Moore"};
+static const xtract_source_t sources_gammatone_spectrogram[] = {
+    {XTRACT_SOURCE_ORIGIN, 6, authors_gammatone_spectrogram_0, 1992, "Complex sounds and auditory images", "Auditory Physiology and Perception, Proceedings of the 9th International Symposium on Hearing, Pergamon", "equations 1 and 2", "doi:10.1016/B978-0-08-041847-6.50054-X"},
+    {XTRACT_SOURCE_FORMULATION, 2, authors_gammatone_spectrogram_1, 1990, "Derivation of auditory filter shapes from notched-noise data", "Hearing Research 47(1-2)", "equations 3 and 4", "doi:10.1016/0378-5955(90)90170-T"},
+};
 static const xtract_argument_descriptor_t arguments_gammatone_spectrogram[] = {
     {.name = "filterbank", .kind = XTRACT_ARGUMENT_OBJECT, .type = XTRACT_FILTERBANK, .unit = XTRACT_UNIT_NONE, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .builder = &builder_init_gfcc},
 };
@@ -893,6 +909,10 @@ static const xtract_source_t sources_hjorth_mobility[] = {
 static const char *const authors_hjorth_complexity_0[] = {"Hjorth"};
 static const xtract_source_t sources_hjorth_complexity[] = {
     {XTRACT_SOURCE_ORIGIN, 1, authors_hjorth_complexity_0, 1970, "EEG analysis based on time domain properties", "Electroencephalography and Clinical Neurophysiology 29(3)", "table I and p. 308", "doi:10.1016/0013-4694(70)90143-4"},
+};
+static const char *const authors_time_reversal_asymmetry_0[] = {"Ramsey", "Rothman"};
+static const xtract_source_t sources_time_reversal_asymmetry[] = {
+    {XTRACT_SOURCE_ORIGIN, 2, authors_time_reversal_asymmetry_0, 1996, "Time irreversibility and business cycle asymmetry", "Journal of Money, Credit and Banking 28(1)", "equation 5, and equations 8 and 9 for the estimator", "doi:10.2307/2077963"},
 };
 static const xtract_argument_descriptor_t arguments_time_reversal_asymmetry[] = {
     {.name = "lag", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = 1, .max = XTRACT_UNBOUNDED_MAX, .default_value = 1, .is_whole = XTRACT_TRUE},
@@ -1030,18 +1050,40 @@ static const xtract_argument_descriptor_t arguments_cqt[] = {
     {.name = "kernel", .kind = XTRACT_ARGUMENT_OBJECT, .type = XTRACT_CQT_KERNEL, .unit = XTRACT_UNIT_NONE, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .builder = &builder_init_cqt},
 };
 
+static const char *const authors_pearson_correlation_0[] = {"Pearson"};
+static const xtract_source_t sources_pearson_correlation[] = {
+    {XTRACT_SOURCE_ORIGIN, 1, authors_pearson_correlation_0, 1896, "Mathematical contributions to the theory of evolution. III. Regression, heredity, and panmixia", "Philosophical Transactions of the Royal Society of London, Series A 187", "page 265", "doi:10.1098/rsta.1896.0007"},
+};
 static const xtract_argument_descriptor_t arguments_covariance_matrix[] = {
     {.name = "series", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = 1, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_SERIES},
 };
 
+static const char *const authors_principal_variances_0[] = {"Pearson"};
+static const xtract_source_t sources_principal_variances[] = {
+    {XTRACT_SOURCE_ORIGIN, 1, authors_principal_variances_0, 1901, "On lines and planes of closest fit to systems of points in space", "The London, Edinburgh, and Dublin Philosophical Magazine and Journal of Science 2(11)", "equation x, page 562", "doi:10.1080/14786440109462720"},
+};
+static const char *const authors_coherence_0[] = {"Welch"};
+static const char *const authors_coherence_1[] = {"Carter", "Knapp", "Nuttall"};
+static const xtract_source_t sources_coherence[] = {
+    {XTRACT_SOURCE_ORIGIN, 1, authors_coherence_0, 1967, "The use of fast Fourier transform for the estimation of power spectra: a method based on time averaging over short, modified periodograms", "IEEE Transactions on Audio and Electroacoustics 15(2)", "page 70, and page 73 for cross spectra", "doi:10.1109/TAU.1967.1161901"},
+    {XTRACT_SOURCE_FORMULATION, 3, authors_coherence_1, 1973, "Estimation of the magnitude-squared coherence function via overlapped fast Fourier transform processing", "IEEE Transactions on Audio and Electroacoustics 21(4)", "equations 11 and 12", "doi:10.1109/TAU.1973.1162496"},
+};
 static const xtract_argument_descriptor_t arguments_coherence[] = {
     {.name = "segment_length", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = 2, .max = XTRACT_UNBOUNDED_MAX, .default_value = 256, .is_whole = XTRACT_TRUE},
 };
 
+static const char *const authors_grid_moments_0[] = {"Hu"};
+static const xtract_source_t sources_grid_moments[] = {
+    {XTRACT_SOURCE_ORIGIN, 1, authors_grid_moments_0, 1962, "Visual pattern recognition by moment invariants", "IRE Transactions on Information Theory 8(2)", "equation 1", "doi:10.1109/TIT.1962.1057692"},
+};
 static const xtract_argument_descriptor_t arguments_grid_moments[] = {
     {.name = "width", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = 1, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_WIDTH},
 };
 
+static const char *const authors_grid_central_moments_0[] = {"Hu"};
+static const xtract_source_t sources_grid_central_moments[] = {
+    {XTRACT_SOURCE_ORIGIN, 1, authors_grid_central_moments_0, 1962, "Visual pattern recognition by moment invariants", "IRE Transactions on Information Theory 8(2)", "equations 8 and 9", "doi:10.1109/TIT.1962.1057692"},
+};
 static const xtract_argument_descriptor_t arguments_grid_central_moments[] = {
     {.name = "width", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = 1, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_WIDTH},
 };
@@ -1710,8 +1752,8 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .name = "hps",
         .title = "Harmonic Product Spectrum",
         .description = "Extract the harmonic product spectrum of a spectrum",
-        .source_count = 0,
-        .sources = NULL,
+        .source_count = 2,
+        .sources = sources_hps,
         .validation_level = 0,
         .tags = 0,
         .data = {XTRACT_SPECTRAL, XTRACT_UNIT_ANY, 1, accepted_hps, 1, "N >= 4 && N % 2 == 0"},
@@ -2110,8 +2152,8 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .name = "gfcc",
         .title = "Gammatone Frequency Cepstral Coefficients",
         .description = "Extract GFCC from a spectrum",
-        .source_count = 0,
-        .sources = NULL,
+        .source_count = 1,
+        .sources = sources_gfcc,
         .validation_level = 0,
         .tags = XTRACT_TAG_SOUND,
         .data = {XTRACT_SPECTRAL_MAGNITUDES, XTRACT_UNIT_ANY, 1, accepted_gfcc, 1, "N >= 1 && 2 * N == filterbank_size(filterbank)"},
@@ -2126,8 +2168,8 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .name = "gammatone_spectrogram",
         .title = "Gammatone Spectrogram",
         .description = "Extract log gammatone energies from a spectrum",
-        .source_count = 0,
-        .sources = NULL,
+        .source_count = 2,
+        .sources = sources_gammatone_spectrogram,
         .validation_level = 0,
         .tags = XTRACT_TAG_SOUND,
         .data = {XTRACT_SPECTRAL_MAGNITUDES, XTRACT_UNIT_ANY, 1, accepted_gammatone_spectrogram, 1, "N >= 1 && 2 * N == filterbank_size(filterbank)"},
@@ -2430,8 +2472,8 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .name = "time_reversal_asymmetry",
         .title = "Time Reversal Asymmetry",
         .description = "Extract the time reversal asymmetry statistic of an input vector",
-        .source_count = 0,
-        .sources = NULL,
+        .source_count = 1,
+        .sources = sources_time_reversal_asymmetry,
         .validation_level = 0,
         .tags = 0,
         .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= lag + 1"},
@@ -2814,8 +2856,8 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .name = "pearson_correlation",
         .title = "Pearson Correlation",
         .description = "Extract the Pearson correlation coefficient of two series",
-        .source_count = 0,
-        .sources = NULL,
+        .source_count = 1,
+        .sources = sources_pearson_correlation,
         .validation_level = 0,
         .tags = 0,
         .data = {XTRACT_SUBFRAMES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 4 && N % 2 == 0"},
@@ -2878,8 +2920,8 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .name = "principal_variances",
         .title = "Principal Variances",
         .description = "Extract the variances of the principal components of a set of series from their covariance matrix",
-        .source_count = 0,
-        .sources = NULL,
+        .source_count = 1,
+        .sources = sources_principal_variances,
         .validation_level = 0,
         .tags = 0,
         .data = {XTRACT_SQUARE_MATRIX, XTRACT_UNIT_ANY, 2, accepted_principal_variances, 1, "N >= 1 && is_square(N)"},
@@ -2894,8 +2936,8 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .name = "coherence",
         .title = "Coherence",
         .description = "Extract the magnitude-squared coherence of two series",
-        .source_count = 0,
-        .sources = NULL,
+        .source_count = 2,
+        .sources = sources_coherence,
         .validation_level = 0,
         .tags = 0,
         .data = {XTRACT_SUBFRAMES, XTRACT_UNIT_ANY, 0, NULL, 1, "segment_length >= 2 && N >= 3 * segment_length && N % 2 == 0 && is_power_of_two(segment_length)"},
@@ -2910,8 +2952,8 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .name = "grid_moments",
         .title = "Grid Moments",
         .description = "Extract the moments of a grid up to the third order",
-        .source_count = 0,
-        .sources = NULL,
+        .source_count = 1,
+        .sources = sources_grid_moments,
         .validation_level = 0,
         .tags = 0,
         .data = {XTRACT_GRID, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 1 && width >= 1 && N % width == 0"},
@@ -2926,8 +2968,8 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .name = "grid_central_moments",
         .title = "Grid Central Moments",
         .description = "Extract the central moments of a grid up to the third order",
-        .source_count = 0,
-        .sources = NULL,
+        .source_count = 1,
+        .sources = sources_grid_central_moments,
         .validation_level = 0,
         .tags = 0,
         .data = {XTRACT_GRID, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 1 && width >= 1 && N % width == 0"},

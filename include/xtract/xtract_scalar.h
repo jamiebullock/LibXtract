@@ -415,10 +415,7 @@ extern "C"
      * \param *data: a pointer to the first element in an array of doubles representing an audio vector
      * \param N: the number of elements to be considered, at least 1. When xtract_f0() finds no result the fallback takes the spectrum of the N values, which needs N to be a power of two of at least 2
      * \param *argv: a pointer to a double representing the audio sample rate, finite and above 0
-     * \param *result: the pitch of N values from the array pointed to by *data
-     *
-     * This function wraps xtract_f0, but provides the frequency of the lowest partial in the peak spectrum if f0 can't be found.
-     *
+     * \param *result: the result of xtract_f0() when it has one. Otherwise the frequency of the lowest peak of the magnitude spectrum of the N values, as xtract_peak_spectrum() finds it with a threshold of 10 percent of the largest magnitude from bin 1, or 0 with no result when there is no such peak
      */
     int xtract_failsafe_f0(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 

@@ -122,9 +122,12 @@ extern "C"
 
     /** \brief Extract Gammatone Frequency Cepstral Coefficients
      *
-     * GFCCs are cepstral coefficients computed through a gammatone filter
-     * bank. They are more robust to noise than MFCCs, which use a mel filter
-     * bank.
+     * The coefficients are the gammatone cepstral coefficients of Valero and
+     * Alias (2012): the scheme of xtract_mfcc() with gammatone filters, the
+     * DCT-II with no scale factor of the log of each filter's energy, the
+     * first coefficient included. The coefficients of Shao, Srinivasan and
+     * Wang (2007), which share the name, take a cube root in place of the
+     * log.
      *
      * \param *ctx: a pointer to a context created for at least the larger of N and the filterbank's n_filters elements
      * \param *data: a pointer to the first element in an array of spectral coefficients, the first half of the array pointed to by *result from xtract_power_spectrum(), so that element k is bin k as the filterbank expects
