@@ -64,30 +64,31 @@ int xtract_features_from_subframes(xtract_context *ctx, const double *data, cons
     return rv2 != XTRACT_SUCCESS ? rv2 : rv;
 }
 
-/*
- * Implements y[n] = k * x[n] + (1-k) * y[n-1]
- */
 int xtract_smoothed(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
     double gain;
     double oneminusgain;
+    double current, next;
     int i;
 
     if (N < 1 || argv == NULL)
         return XTRACT_ARGUMENT_ERROR;
 
     gain = *(double *)argv;
+    if (!(gain >= 0.0 && gain <= 1.0))
+        return XTRACT_ARGUMENT_ERROR;
     oneminusgain = 1.0 - gain;
 
-    /* reverse filtering first; the final element seeds the recursion */
-    result[N - 1] = data[N - 1];
+    next = data[N - 1];
+    result[N - 1] = next;
 
     for (i = N - 2; i >= 0; i--)
     {
-        result[i] = gain * data[i] + oneminusgain * data[i + 1];
+        current = data[i];
+        result[i] = gain * current + oneminusgain * next;
+        next = current;
     }
 
-    /* then forward filtering */
     for (i = 1; i < N; i++)
     {
         result[i] = gain * result[i] + oneminusgain * result[i - 1];

@@ -787,7 +787,7 @@ static const xtract_argument_descriptor_t arguments_windowed[] = {
 };
 
 static const xtract_argument_descriptor_t arguments_smoothed[] = {
-    {.name = "gain", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_NONE, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .default_value = 0.5},
+    {.name = "gain", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_NONE, .min = 0, .max = 1, .default_value = 0.5},
 };
 
 static const xtract_argument_descriptor_t arguments_peak[] = {
