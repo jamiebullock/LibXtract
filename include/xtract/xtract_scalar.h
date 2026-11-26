@@ -87,7 +87,7 @@ extern "C"
     /** \brief Extract the spectral mean of an input spectrum: its amplitude-weighted mean frequency, as xtract_spectral_centroid() gives it
      *
      * \param *ctx: a pointer to a context, or NULL
-     * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector, (e.g. the array pointed to by *result from xtract_magnitude_spectrum(), xtract_peak_spectrum() or xtract_harmonic_spectrum()), with amplitudes at least 0.
+     * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector: N/2 amplitudes, each at least 0, followed by their N/2 frequencies, as the array pointed to by *result from xtract_magnitude_spectrum(), xtract_peak_spectrum() or xtract_harmonic_spectrum() holds them
      * \param N: the size of the array pointed to by *data, at least 2 and even
      * \param *argv: a pointer to NULL
      * \param *result: the spectral mean of the spectrum pointed to by *data, or 0 with no result when the amplitudes sum to 0
@@ -97,7 +97,7 @@ extern "C"
     /** \brief Extract the variance of an input spectrum
      *
      * \param *ctx: a pointer to a context, or NULL
-     * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector, (e.g. the array pointed to by *result from xtract_magnitude_spectrum(), xtract_peak_spectrum() or xtract_harmonic_spectrum()), with amplitudes at least 0.
+     * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector: N/2 amplitudes, each at least 0, followed by their N/2 frequencies, as the array pointed to by *result from xtract_magnitude_spectrum(), xtract_peak_spectrum() or xtract_harmonic_spectrum() holds them
      * \param N: the size of the array pointed to by *data, at least 2 and even
      * \param *argv: a pointer to a double representing the spectral mean of the input spectrum
      * \param *result: the variance of the spectrum pointed to by *data: the amplitude-weighted mean of the squared deviations of the frequencies from the spectral mean given, or 0 with no result when the amplitudes sum to 0
@@ -117,7 +117,7 @@ extern "C"
     /** \brief Extract the skewness of an input spectrum
      *
      * \param *ctx: a pointer to a context, or NULL
-     * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector, (e.g. the array pointed to by *result from xtract_magnitude_spectrum(), xtract_peak_spectrum() or xtract_harmonic_spectrum()), with amplitudes at least 0.
+     * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector: N/2 amplitudes, each at least 0, followed by their N/2 frequencies, as the array pointed to by *result from xtract_magnitude_spectrum(), xtract_peak_spectrum() or xtract_harmonic_spectrum() holds them
      * \param N: the size of the array pointed to by *data, at least 2 and even
      * \param *argv: a pointer to an array of doubles representing the spectral mean and spectral standard deviation of the input spectrum, the standard deviation at least 0
      * \param *result: the skewness of the spectrum pointed to by *data: the amplitude-weighted mean of the cubed deviations of the frequencies from the spectral mean given, divided by the cube of the spectral standard deviation given, or 0 with no result when the standard deviation is 0 or the amplitudes sum to 0
@@ -127,7 +127,7 @@ extern "C"
     /** \brief Extract the kurtosis of an input spectrum
      *
      * \param *ctx: a pointer to a context, or NULL
-     * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector, (e.g. the array pointed to by *result from xtract_magnitude_spectrum(), xtract_peak_spectrum() or xtract_harmonic_spectrum()), with amplitudes at least 0.
+     * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector: N/2 amplitudes, each at least 0, followed by their N/2 frequencies, as the array pointed to by *result from xtract_magnitude_spectrum(), xtract_peak_spectrum() or xtract_harmonic_spectrum() holds them
      * \param N: the size of the array pointed to by *data, at least 2 and even
      * \param *argv: a pointer to an array of values representing the spectral mean and spectral standard deviation of the input spectrum, the standard deviation at least 0
      * \param *result: the excess kurtosis of the spectrum pointed to by *data: the amplitude-weighted mean of the fourth powers of the deviations of the frequencies from the spectral mean given, divided by the fourth power of the spectral standard deviation given, less 3, which makes the value for a normal distribution 0; or 0 with no result when the standard deviation is 0 or the amplitudes sum to 0
@@ -137,7 +137,7 @@ extern "C"
     /** \brief Extract the spectral centroid of an input spectrum: its amplitude-weighted mean frequency
      *
      * \param *ctx: a pointer to a context, or NULL
-     * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector, (e.g. the array pointed to by *result from xtract_magnitude_spectrum(), xtract_peak_spectrum() or xtract_harmonic_spectrum()), with amplitudes at least 0.
+     * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector: N/2 amplitudes, each at least 0, followed by their N/2 frequencies, as the array pointed to by *result from xtract_magnitude_spectrum(), xtract_peak_spectrum() or xtract_harmonic_spectrum() holds them
      * \param N: the size of the array pointed to by *data, at least 2 and even
      * \param *argv: a pointer to NULL
      * \param *result: the centroid of the spectrum pointed to by *data, or 0 with no result when the amplitudes sum to 0
@@ -210,7 +210,7 @@ extern "C"
     /** \brief Extract the spectral spread of a spectrum: the variance of its frequencies weighted by its coefficients, which Peeters (2004, section 6.1.2) calls the spread. It is the quantity xtract_spectral_variance() gives
      *
      * \param *ctx: a pointer to a context, or NULL
-     * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector, (e.g. the array pointed to by *result from xtract_magnitude_spectrum(), xtract_peak_spectrum() or xtract_harmonic_spectrum()), with amplitudes at least 0.
+     * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector: N/2 amplitudes, each at least 0, followed by their N/2 frequencies, as the array pointed to by *result from xtract_magnitude_spectrum(), xtract_peak_spectrum() or xtract_harmonic_spectrum() holds them
      * \param N: the size of the array pointed to by *data, at least 2 and even
      * \param *argv: a pointer to a double corresponding to the spectral centroid
      * \param *result: the spectral spread of N values from the array pointed to by *data
