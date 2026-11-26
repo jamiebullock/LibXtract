@@ -24,6 +24,8 @@ The library has more than 100 features:
 
 The [API reference](https://www.jamiebullock.com/LibXtract/) lists every function with its arguments.
 
+The mean, variance and standard deviation are tested against values computed in exact arithmetic, and CI tests them on Linux, macOS and Windows against the certified values of the [NIST Statistical Reference Datasets](https://www.itl.nist.gov/div898/strd/). [CONTRIBUTING.md](CONTRIBUTING.md#reference-values) describes the reference values and how a feature's validation level follows from them.
+
 ## Using the library
 
 The feature functions share one signature:
@@ -100,6 +102,8 @@ The default preset also has targets that run a tool, each built with `cmake --bu
 | `version-check` | Check that `VERSION` is the newest release in `CHANGELOG.md` or a later version |
 | `bench` | The benchmarks |
 | `doc` | The API reference (needs Doxygen) |
+
+Configuring with `-DXTRACT_NIST_TESTS=ON` downloads the NIST Statistical Reference Datasets into the build directory and adds the tests against their certified values (needs Python 3 and a network connection).
 
 The CBMC proofs of the feature functions have their own GNU make build, `make -C verify`, which CI builds on every pull request and runs on every push to main and develop. See [verify/README.md](verify/README.md).
 
