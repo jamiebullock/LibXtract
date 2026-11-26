@@ -397,18 +397,15 @@ extern "C"
      */
     int xtract_hps(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
-    /** \brief Extract the fundamental frequency of an input vector
+    /** \brief Extract the fundamental frequency of an input vector from its average magnitude difference function, after peak and centre clipping
+     *
+     * The series is clipped at 0.8 of its largest magnitude, then centre clipped: a value within 0.3 of the largest magnitude of 0 becomes 0, and any other moves that far towards 0. The difference function at a lag sums the magnitude of the difference between each of the first N / 2 values and the value that lag later. The period is the first lag from 2 to N / 2 - 1 at which the function falls below its value at lag 1, plus the ratio of the two values.
      *
      * \param *ctx: a pointer to a context created for at least N elements
      * \param *data: a pointer to the first element in an array of doubles representing an audio vector
      * \param N: the number of elements to be considered, at least 1
      * \param *argv: a pointer to a double representing the audio sample rate, finite and above 0
-     * \param *result: the pitch of N values from the array pointed to by *data
-     *
-     * This algorithm is based on the AMDF, with peak and centre clipping. It would benefit from further improvements to improve noise robustness and overall efficiency
-     *
-     * It is based on suggestion by Robert Bristow-Johnson in a discussion on the comp.dsp mailing list, subject "Reference implementation of pitch detection"
-     *
+     * \param *result: the sample rate divided by the period, or 0 with no result when no lag qualifies, as for a silent series, a series shorter than 6, or a period of N / 2 or more
      */
     int xtract_f0(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
