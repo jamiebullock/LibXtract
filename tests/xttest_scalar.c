@@ -1357,6 +1357,37 @@ UTEST(scalar, midicent_c4)
     CHECK_NEAR(result, 6000.0, 1.0); /* 1 midicent absolute */
 }
 
+UTEST(scalar, midicent_rounds_to_the_nearest_cent_either_side_of_a_half_cent)
+{
+    /* 6900 + 1200 log2(f / 440) to 40 digits: 12000.50005000028 and
+     * 1000.499949995927 */
+    double result = 0.0;
+    double freq = 8374.43661432;
+    ASSERT_EQ(xtract_midicent(NULL, NULL, 0, &freq, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(result, 12001.0);
+    freq = 14.5718250271;
+    ASSERT_EQ(xtract_midicent(NULL, NULL, 0, &freq, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(result, 1000.0);
+}
+
+UTEST(scalar, midicent_of_a_pitch_just_below_0_cents_is_positive_zero)
+{
+    /* 0.42 cents below 8.1757989156 Hz, MIDI note 0 */
+    double result = 1.0;
+    double freq = 8.1738107;
+    ASSERT_EQ(xtract_midicent(NULL, NULL, 0, &freq, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(result, 0.0);
+    ASSERT_FALSE(signbit(result));
+}
+
+UTEST(scalar, midicent_of_g9_is_the_highest_pitch_12700)
+{
+    double result = 0.0;
+    double freq = 12543.853951415975;
+    ASSERT_EQ(xtract_midicent(NULL, NULL, 0, &freq, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(result, 12700.0);
+}
+
 UTEST(scalar, midicent_zero_frequency_has_no_result)
 {
     double result = 999.0;

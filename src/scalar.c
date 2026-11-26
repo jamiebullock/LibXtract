@@ -1972,17 +1972,16 @@ int xtract_midicent(xtract_context *ctx, const double *data, const int N, const 
         return XTRACT_NO_RESULT;
     }
 
-    note = 69 + log(f0 / 440.f) * 17.31234;
-    note *= 100;
-    note = round(note);
+    note = round(6900.0 + 1200.0 * log(f0 / 440.0) / log(2.0));
 
-    if (note > 12700 || note < 0)
+    if (!(note >= 0.0 && note <= 12700.0))
     {
         *result = 0.0;
         return XTRACT_NO_RESULT;
     }
 
-    *result = note;
+    /* A pitch just below 0 cents rounds to -0 */
+    *result = fabs(note);
 
     return XTRACT_SUCCESS;
 }
