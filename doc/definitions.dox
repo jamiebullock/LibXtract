@@ -375,13 +375,19 @@ Validation level 0, not checked.
 
 xtract_hps()
 
-No published source is listed.
+\f[ f = q\,(k^* + \delta), \quad \hat k = \arg\max_{1 \le k \le \lfloor (M-1)/R \rfloor} \sum_{r=1}^{R} \ln\max(a_{rk}, \epsilon\,a_{\max}) \text{ (the first on a tie)}, \quad k^* = j \text{ if } 0.4\hat k < j < 0.6\hat k \text{ and } a_j > 0.1\,a_{\hat k}, \text{ else } \hat k, \quad j \text{ the largest peak below } \hat k \text{ (the first of equal peaks)}, \text{ a peak being the last bin of a run of equal } a_k \text{ above the bins either side of the run}, \quad \delta \text{ the vertex offset of the parabola through } L_{k^*-1}, L_{k^*}, L_{k^*+1} \text{ limited to } \pm\tfrac{1}{2}, \quad L_k = \ln\max(a_k, \epsilon\,a_{\max}), \quad q \text{ the bin spacing}, \; R \text{ the harmonics given in argv}, \; \epsilon = 2^{-52}; \text{ no result when } a_{\max} = 0, \; \lfloor (M-1)/R \rfloor < 2 \text{ or } a_{\hat k} = 0 \f]
+
+Sources:
+- Origin: Schroeder (1968). "Period histogram and product spectrum: new methods for fundamental-frequency measurement". Journal of the Acoustical Society of America 43(4), equation 1. <a href="https://doi.org/10.1121/1.1910902">doi:10.1121/1.1910902</a>
+- Formulation: de la Cuadra, Master and Sapp (2001). "Efficient pitch detection techniques for interactive music". Proceedings of the International Computer Music Conference 2001, section 2.1, equations 1 and 2 and the octave rule
 
 Validation level 0, not checked.
 
 \section definition_f0 Fundamental Frequency
 
 xtract_f0()
+
+\f[ f_0 = \frac{f_s}{\tau + D(\tau)/D(1)}, \quad \tau = \min\{k : 2 \le k \le M-1,\ D(k) < D(1)\}, \quad D(k) = \sum_{n=0}^{M-1} |z_n - z_{n+k}|, \quad M = \lfloor N/2 \rfloor, \quad z_n = \operatorname{sgn}(y_n)\max(|y_n| - 0.3c, 0), \quad y_n = \min(\max(x_n, -0.8c), 0.8c), \quad c = \max_n |x_n|, \quad f_s \text{ the sample rate given in argv}; \text{ no result when no such } \tau \text{ exists} \f]
 
 No published source is listed.
 
@@ -390,6 +396,8 @@ Validation level 0, not checked.
 \section definition_failsafe_f0 Fundamental Frequency (failsafe)
 
 xtract_failsafe_f0()
+
+\f[ f = f_0 \text{ of xtract\_f0 when it has a result; otherwise } f = \min_{k \in K} \frac{f_s}{N}\left(k + \frac{1}{2}\,\frac{a_{k-1} - a_{k+1}}{a_{k-1} - 2a_k + a_{k+1}}\right), \quad K = \{k : 1 \le k \le N/2 - 2,\ a_k > a_{k-1},\ a_k > a_{k+1},\ a_k \ge 0.1\max_{j \ge 1} a_j\}, \quad a_k \text{ the magnitude of bin } k; \text{ no result when } K \text{ is empty} \f]
 
 No published source is listed.
 
@@ -600,7 +608,10 @@ Validation level 0, not checked.
 
 xtract_gfcc()
 
-No published source is listed.
+\f[ c_i = \sum_{m=1}^{F} L_m \cos\left(\frac{\pi i (m - \tfrac{1}{2})}{F}\right), \quad i = 0, \dots, F-1, \quad L_m \text{ the log energies of xtract\_gammatone\_spectrogram}; \text{ no result when it has none} \f]
+
+Sources:
+- Origin: Valero and Alias (2012). "Gammatone cepstral coefficients: biologically inspired features for non-speech audio classification". IEEE Transactions on Multimedia 14(6), equations 3 to 5. <a href="https://doi.org/10.1109/TMM.2012.2199972">doi:10.1109/TMM.2012.2199972</a>
 
 Validation level 0, not checked.
 
@@ -608,7 +619,11 @@ Validation level 0, not checked.
 
 xtract_gammatone_spectrogram()
 
-No published source is listed.
+\f[ L_m = \ln \max\left(E_m, \epsilon \max_j E_j\right), \quad E_m = \sum_{k=0}^{N-1} H_m(k) P_k, \quad H_m(k) = \left(1 + \left(\frac{k f_s / T - c_m}{1.019 \, B(c_m)}\right)^2\right)^{-4}, \quad B(f) = 24.7\left(\frac{4.37 f}{1000} + 1\right), \quad c_m \text{ equally spaced on } \ln\left(1 + \frac{4.37 f}{1000}\right) \text{ from } f_{\min} \text{ to } f_{\max}, \quad \epsilon = 2^{-52}; \text{ no result when } \max_j E_j = 0 \f]
+
+Sources:
+- Origin: Patterson, Robinson, Holdsworth, McKeown, Zhang and Allerhand (1992). "Complex sounds and auditory images". Auditory Physiology and Perception, Proceedings of the 9th International Symposium on Hearing, Pergamon, equations 1 and 2. <a href="https://doi.org/10.1016/B978-0-08-041847-6.50054-X">doi:10.1016/B978-0-08-041847-6.50054-X</a>
+- Formulation: Glasberg and Moore (1990). "Derivation of auditory filter shapes from notched-noise data". Hearing Research 47(1-2), equations 3 and 4. <a href="https://doi.org/10.1016/0378-5955(90)90170-T">doi:10.1016/0378-5955(90)90170-T</a>
 
 Validation level 0, not checked.
 
@@ -623,6 +638,8 @@ Validation level 0, not checked.
 \section definition_smoothed Smoothed frame
 
 xtract_smoothed()
+
+\f[ u_{N-1} = x_{N-1}, \quad u_n = g x_n + (1-g) x_{n+1} \; (0 \le n \le N-2), \quad y_0 = u_0, \quad y_n = g u_n + (1-g) y_{n-1} \; (1 \le n \le N-1), \quad 0 \le g \le 1 \text{ the gain given in argv} \f]
 
 No published source is listed.
 
@@ -773,7 +790,10 @@ Validation level 0, not checked.
 
 xtract_time_reversal_asymmetry()
 
-No published source is listed.
+\f[ T(k) = \frac{1}{N - k} \sum_{t=k}^{N-1} \left(x_t^2 x_{t-k} - x_t x_{t-k}^2\right), \quad 1 \le k \le N-1 \text{ the lag given in argv} \f]
+
+Sources:
+- Origin: Ramsey and Rothman (1996). "Time irreversibility and business cycle asymmetry". Journal of Money, Credit and Banking 28(1), equation 5, and equations 8 and 9 for the estimator. <a href="https://doi.org/10.2307/2077963">doi:10.2307/2077963</a>
 
 Validation level 0, not checked.
 
@@ -931,6 +951,8 @@ Validation level 0, not checked.
 
 xtract_cross_correlation()
 
+\f[ r_k = \frac{1}{M} \sum_{n=\max(0,-k)}^{\min(M-1,\,M-1-k)} x_{n+k} \, y_n, \quad k = -(M-1), \dots, M-1, \quad M = N/2, \; x_n = d_n, \; y_n = d_{M+n} \f]
+
 No published source is listed.
 
 Validation level 0, not checked.
@@ -938,6 +960,8 @@ Validation level 0, not checked.
 \section definition_cross_correlation_lag Cross-correlation Lag
 
 xtract_cross_correlation_lag()
+
+\f[ \hat{k} = \arg\max_{k} \rho_k, \quad \rho_k \text{ the normalised cross-correlation}, \text{ the least } |k| \text{ on a tie and the negative of } \pm k; \text{ no result when } \rho \text{ has none} \f]
 
 No published source is listed.
 
@@ -1016,13 +1040,18 @@ Validation level 0, not checked.
 
 xtract_pearson_correlation()
 
-No published source is listed.
+\f[ r = \frac{\sum_{n=0}^{M-1} (x_n - \bar{x})(y_n - \bar{y})}{\sqrt{\sum_{n=0}^{M-1} (x_n - \bar{x})^2} \sqrt{\sum_{n=0}^{M-1} (y_n - \bar{y})^2}} \text{ limited to } [-1, 1], \quad M = N/2, \; x_n = d_n, \; y_n = d_{M+n}; \text{ no result when either series is constant} \f]
+
+Sources:
+- Origin: Pearson (1896). "Mathematical contributions to the theory of evolution. III. Regression, heredity, and panmixia". Philosophical Transactions of the Royal Society of London, Series A 187, page 265. <a href="https://doi.org/10.1098/rsta.1896.0007">doi:10.1098/rsta.1896.0007</a>
 
 Validation level 0, not checked.
 
 \section definition_covariance_matrix Covariance Matrix
 
 xtract_covariance_matrix()
+
+\f[ S_{ij} = \frac{1}{M-1} \sum_{n=0}^{M-1} (x^{(i)}_n - \bar{x}^{(i)})(x^{(j)}_n - \bar{x}^{(j)}), \quad i, j = 0, \dots, C-1, \quad M = N/C, \quad x^{(i)}_n = d_{iM+n}, \quad C \text{ the number of series given in argv} \f]
 
 No published source is listed.
 
@@ -1032,6 +1061,8 @@ Validation level 0, not checked.
 
 xtract_correlation_matrix()
 
+\f[ R_{ij} = \frac{S_{ij}}{\sqrt{S_{ii}} \sqrt{S_{jj}}} \text{ limited to } [-1, 1] \text{ for } i \ne j, \; R_{ii} = 1, \quad C = \sqrt{N}; \text{ no result when some } S_{ii} \le 0 \f]
+
 No published source is listed.
 
 Validation level 0, not checked.
@@ -1039,6 +1070,8 @@ Validation level 0, not checked.
 \section definition_average_correlation Average Correlation
 
 xtract_average_correlation()
+
+\f[ \bar{r} = \frac{1}{C(C-1)} \sum_{i=0}^{C-1} \sum_{j \ne i} R_{ij}, \quad C = \sqrt{N} \ge 2 \f]
 
 No published source is listed.
 
@@ -1048,7 +1081,10 @@ Validation level 0, not checked.
 
 xtract_principal_variances()
 
-No published source is listed.
+\f[ \lambda_0 \ge \lambda_1 \ge \dots \ge \lambda_{C-1}, \quad \det(S - \lambda I) = 0, \quad S_{ij} = S_{ji} = d_{iC+j} \text{ for } i \le j, \quad C = \sqrt{N} \f]
+
+Sources:
+- Origin: Pearson (1901). "On lines and planes of closest fit to systems of points in space". The London, Edinburgh, and Dublin Philosophical Magazine and Journal of Science 2(11), equation x, page 562. <a href="https://doi.org/10.1080/14786440109462720">doi:10.1080/14786440109462720</a>
 
 Validation level 0, not checked.
 
@@ -1056,7 +1092,11 @@ Validation level 0, not checked.
 
 xtract_coherence()
 
-No published source is listed.
+\f[ \gamma^2_k = \min\left(1, \frac{|\sum_s X_s(k) Y_s(k)^*|^2}{\sum_s |X_s(k)|^2 \sum_s |Y_s(k)|^2}\right), \text{ or } 0 \text{ when either sum of squares is } 0, \quad X_s(k) = \sum_{n=0}^{L-1} w_n (x_{sL/2+n} - \bar{x}_s) e^{-2\pi i k n/L}, \quad w_n = \tfrac{1}{2} - \tfrac{1}{2}\cos\tfrac{2\pi n}{L}, \quad s = 0, \dots, \lfloor 2(M-L)/L \rfloor, \quad k = 0, \dots, L/2-1, \quad M = N/2, \; x_n = d_n, \; y_n = d_{M+n}, \quad Y_s \text{ the same of } y, \quad L \text{ the segment length given in argv}; \text{ no result when every } \gamma^2_k \text{ is 0 for that reason} \f]
+
+Sources:
+- Origin: Welch (1967). "The use of fast Fourier transform for the estimation of power spectra: a method based on time averaging over short, modified periodograms". IEEE Transactions on Audio and Electroacoustics 15(2), page 70, and page 73 for cross spectra. <a href="https://doi.org/10.1109/TAU.1967.1161901">doi:10.1109/TAU.1967.1161901</a>
+- Formulation: Carter, Knapp and Nuttall (1973). "Estimation of the magnitude-squared coherence function via overlapped fast Fourier transform processing". IEEE Transactions on Audio and Electroacoustics 21(4), equations 11 and 12. <a href="https://doi.org/10.1109/TAU.1973.1162496">doi:10.1109/TAU.1973.1162496</a>
 
 Validation level 0, not checked.
 
@@ -1064,7 +1104,10 @@ Validation level 0, not checked.
 
 xtract_grid_moments()
 
-No published source is listed.
+\f[ m_{pq} = \sum_{y=0}^{H-1} \sum_{x=0}^{W-1} x^p y^q \, g_{yW+x}, \quad (p, q) \in \{(0,0), (1,0), (0,1), (2,0), (1,1), (0,2), (3,0), (2,1), (1,2), (0,3)\}, \quad W \text{ the width given in argv}, \; H = N/W \f]
+
+Sources:
+- Origin: Hu (1962). "Visual pattern recognition by moment invariants". IRE Transactions on Information Theory 8(2), equation 1. <a href="https://doi.org/10.1109/TIT.1962.1057692">doi:10.1109/TIT.1962.1057692</a>
 
 Validation level 0, not checked.
 
@@ -1072,7 +1115,10 @@ Validation level 0, not checked.
 
 xtract_grid_central_moments()
 
-No published source is listed.
+\f[ \mu_{pq} = \sum_{y=0}^{H-1} \sum_{x=0}^{W-1} (x - \bar{x})^p (y - \bar{y})^q \, g_{yW+x}, \quad \bar{x} = m_{10}/m_{00}, \; \bar{y} = m_{01}/m_{00}, \quad (p, q) \in \{(0,0), (2,0), (1,1), (0,2), (3,0), (2,1), (1,2), (0,3)\}; \text{ no result when } m_{00} = 0 \f]
+
+Sources:
+- Origin: Hu (1962). "Visual pattern recognition by moment invariants". IRE Transactions on Information Theory 8(2), equations 8 and 9. <a href="https://doi.org/10.1109/TIT.1962.1057692">doi:10.1109/TIT.1962.1057692</a>
 
 Validation level 0, not checked.
 
@@ -1242,6 +1288,8 @@ Validation level 0, not checked.
 \section definition_normalised_cross_correlation Normalised Cross-Correlation
 
 xtract_normalised_cross_correlation()
+
+\f[ \rho_k = \frac{\sum_{n=\max(0,-k)}^{\min(M-1,\,M-1-k)} (x_{n+k} - \bar{x})(y_n - \bar{y})}{\sqrt{\sum_{n=0}^{M-1} (x_n - \bar{x})^2} \sqrt{\sum_{n=0}^{M-1} (y_n - \bar{y})^2}} \text{ limited to } [-1, 1], \quad k = -(M-1), \dots, M-1, \quad M = N/2, \; x_n = d_n, \; y_n = d_{M+n}; \text{ no result when either series is constant} \f]
 
 No published source is listed.
 

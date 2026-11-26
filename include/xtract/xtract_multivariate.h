@@ -102,13 +102,13 @@ extern "C"
      * \param *data: a pointer to the first element in an array of doubles comprising the C * C values of a symmetric matrix: a covariance matrix as xtract_covariance_matrix() gives it, or a correlation matrix as xtract_correlation_matrix() gives it for the principal components of the standardised series. The diagonal and the values above it, at index i * C + j with j greater than i, are read
      * \param N: the number of elements in the array pointed to by *data, a perfect square of at least 1
      * \param *argv: not used
-     * \param *result: a pointer to an array of C doubles: the eigenvalues of the matrix in descending order. Their sum is the sum of the diagonal of the matrix, so the first divided by xtract_sum() of the array is the share of the total variance that the first principal component explains
+     * \param *result: a pointer to an array of C doubles: the eigenvalues of the matrix in descending order. Their sum is the sum of the diagonal of the matrix to within rounding, so the first divided by xtract_sum() of the array is the share of the total variance that the first principal component explains
      */
     int xtract_principal_variances(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief Extract the magnitude-squared coherence of two series: how far each frequency of one is a linear function of the same frequency of the other, from 0 to 1
      *
-     * The estimate averages over segments of L elements that overlap by half, L being the length given in argv. Each segment has its mean removed and is weighted by a Hann window. Elements after the last whole segment are not used
+     * The estimate averages over segments of L elements that overlap by half, L being the length given in argv. Each segment has its mean removed and is weighted by a Hann window. Elements after the last whole segment are not used. The estimate is biased upward, most where the true coherence is 0, and less with more segments (Carter, Knapp and Nuttall 1973)
      *
      * \param *ctx: a pointer to a context created for at least N elements
      * \param *data: a pointer to the first element in an array of doubles comprising two series of equal length: the first series in the first N/2 elements, the second in the second N/2 elements
