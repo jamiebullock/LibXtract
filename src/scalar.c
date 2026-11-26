@@ -2228,6 +2228,7 @@ int xtract_time_reversal_asymmetry(xtract_context *ctx, const double *data, cons
 {
     int lag, t;
     double sum = 0.0;
+    double difference;
 
     if (argv == NULL)
     {
@@ -2242,8 +2243,14 @@ int xtract_time_reversal_asymmetry(xtract_context *ctx, const double *data, cons
         return XTRACT_ARGUMENT_ERROR;
     }
 
+    /* Equal values add nothing, and their product could overflow. For any
+     * other pair the product overflows only when the term does */
     for (t = lag; t < N; t++)
-        sum += (data[t] - data[t - lag]) * data[t] * data[t - lag];
+    {
+        difference = data[t] - data[t - lag];
+        if (difference != 0.0)
+            sum += data[t] * data[t - lag] * difference;
+    }
 
     *result = sum / (N - lag);
 

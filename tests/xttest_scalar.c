@@ -4017,6 +4017,17 @@ UTEST(scalar, time_reversal_asymmetry_of_equal_large_values_is_zero)
     ASSERT_EQ(result, 0.0);
 }
 
+UTEST(scalar, time_reversal_asymmetry_of_a_large_and_a_small_value)
+{
+    /* 1e200^2 * 1e-200 - 1e200 * 1e-200^2 */
+    double data[2] = {1e-200, 1e200};
+    double result = -1.0;
+    int lag = 1;
+
+    ASSERT_EQ(xtract_time_reversal_asymmetry(NULL, data, 2, &lag, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 1e200, 1e-14);
+}
+
 UTEST(scalar, time_reversal_asymmetry_rejects_a_missing_or_unusable_lag_and_sets_the_result_to_zero)
 {
     double data[5] = {1.0, 2.0, 3.0, 4.0, 5.0};
