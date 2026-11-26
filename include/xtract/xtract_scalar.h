@@ -405,7 +405,7 @@ extern "C"
      * \param *data: a pointer to the first element in an array of doubles representing an audio vector
      * \param N: the number of elements to be considered, at least 1
      * \param *argv: a pointer to a double representing the audio sample rate, finite and above 0
-     * \param *result: the sample rate divided by the period, or 0 with no result when no lag qualifies, as for a silent series, a series shorter than 6, or a period of N / 2 or more
+     * \param *result: the sample rate divided by the period, or 0 with no result when no lag qualifies, as for a silent series or a series shorter than 6. Lags of N / 2 and above are not scanned
      */
     int xtract_f0(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
