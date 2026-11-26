@@ -1187,6 +1187,39 @@ UTEST(scalar, kurtosis_of_peaked_data)
     CHECK_REL(result, -0.92, 0.01);
 }
 
+UTEST(scalar, skewness_and_kurtosis_of_a_zero_deviation_have_no_result)
+{
+    double data[] = {2.0, 2.0, 2.0};
+    double argv[] = {2.0, 0.0};
+    double result = 1.0;
+
+    ASSERT_EQ(xtract_skewness(NULL, data, 3, argv, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
+    result = 1.0;
+    ASSERT_EQ(xtract_kurtosis(NULL, data, 3, argv, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
+}
+
+UTEST(scalar, skewness_and_kurtosis_reject_a_negative_or_nan_deviation)
+{
+    double data[] = {1.0, 1.0, 1.0, 1.0, 10.0};
+    double negative[] = {2.8, -sqrt(16.2)};
+    double nan[] = {2.8, NAN};
+    double result = 1.0;
+
+    ASSERT_EQ(xtract_skewness(NULL, data, 5, negative, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    result = 1.0;
+    ASSERT_EQ(xtract_skewness(NULL, data, 5, nan, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    result = 1.0;
+    ASSERT_EQ(xtract_kurtosis(NULL, data, 5, negative, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    result = 1.0;
+    ASSERT_EQ(xtract_kurtosis(NULL, data, 5, nan, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+}
+
 /* ===== Simple Scalar Features ===== */
 
 UTEST(scalar, rms_of_3_neg3)

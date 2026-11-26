@@ -69,7 +69,7 @@ extern "C"
      * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles
      * \param N: the number of elements to be considered, at least 1
-     * \param *argv: a pointer to an array of doubles representing the mean and standard deviation of the input vector
+     * \param *argv: a pointer to an array of doubles representing the mean and standard deviation of the input vector, the standard deviation at least 0
      * \param *result: the skewness of N values from the array pointed to by *data
      */
     int xtract_skewness(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
@@ -79,7 +79,7 @@ extern "C"
      * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles
      * \param N: the number of elements to be considered, at least 1
-     * \param *argv: a pointer to an array of values representing the mean and standard deviation of the input vector
+     * \param *argv: a pointer to an array of values representing the mean and standard deviation of the input vector, the standard deviation at least 0
      * \param *result: the kurtosis of N values from the array pointed to by *data
      */
     int xtract_kurtosis(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
@@ -119,7 +119,7 @@ extern "C"
      * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector, (e.g. the array pointed to by *result from xtract_magnitude_spectrum(), xtract_peak_spectrum() or xtract_harmonic_spectrum()).
      * \param N: the size of the array pointed to by *data, at least 2 and even
-     * \param *argv: a pointer to an array of doubles representing the spectral mean and spectral standard deviation of the input spectrum
+     * \param *argv: a pointer to an array of doubles representing the spectral mean and spectral standard deviation of the input spectrum, the standard deviation at least 0
      * \param *result: the skewness of the spectrum pointed to by *data
      */
     int xtract_spectral_skewness(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
@@ -129,7 +129,7 @@ extern "C"
      * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector, (e.g. the array pointed to by *result from xtract_magnitude_spectrum(), xtract_peak_spectrum() or xtract_harmonic_spectrum()).
      * \param N: the size of the array pointed to by *data, at least 2 and even
-     * \param *argv: a pointer to an array of values representing the spectral mean and spectral standard deviation of the input spectrum
+     * \param *argv: a pointer to an array of values representing the spectral mean and spectral standard deviation of the input spectrum, the standard deviation at least 0
      * \param *result: the kurtosis of the spectrum pointed to by *data
      */
     int xtract_spectral_kurtosis(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
