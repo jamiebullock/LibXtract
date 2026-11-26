@@ -9,6 +9,10 @@ reviews:
   path_filters:
     - '!src/ooura/**'
     - '!src/c-ringbuf/**'
+    - '!src/features.c'
+    - '!doc/definitions.dox'
+    - '!include/xtract/xtract_features.h'
+    - '!tests/xttest_properties.c'
   path_instructions:
     - path: 'src/**/*.c'
       instructions: |
