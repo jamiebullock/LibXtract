@@ -1174,7 +1174,7 @@ int xtract_hps(xtract_context *ctx, const double *data, const int N, const void 
     const int M = N / 2;
     const int first = 1;
     const double *freqs;
-    int R, i, count, peak_index, lower_peak;
+    int R, i, count, peak_index, lower_peak, run_start;
     double harmonics, q, score, peak, largest, log_lowest, below, above, denominator, delta;
 
     if (N < 4 || (N & 1) || argv == NULL)
@@ -1266,12 +1266,16 @@ int xtract_hps(xtract_context *ctx, const double *data, const int N, const void 
      * and above a tenth of its magnitude, is the fundamental of which the
      * chosen coefficient is the second harmonic (de la Cuadra, Master and
      * Sapp 2001, section 2.1). A peak is the last coefficient of a run of
-     * equal values above both neighbours, and the first of equal peaks is
-     * kept. 0 when there is no peak below */
+     * equal values above the coefficients either side of the run, a run
+     * from DC having none below it, and the first of equal peaks is kept.
+     * 0 when there is no peak below */
     lower_peak = 0;
+    run_start = first;
     for (i = first; i < peak_index; ++i)
     {
-        if (data[i] >= data[i - 1] && data[i] > data[i + 1] && (lower_peak == 0 || data[i] > data[lower_peak]))
+        if (data[i] != data[i - 1])
+            run_start = i;
+        if (data[run_start - 1] < data[i] && data[i] > data[i + 1] && (lower_peak == 0 || data[i] > data[lower_peak]))
             lower_peak = i;
     }
 

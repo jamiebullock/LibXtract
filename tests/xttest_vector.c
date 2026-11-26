@@ -1626,6 +1626,7 @@ UTEST(scalar, hps_octave_rule_limits)
         {{9, -1, -1}, {0.9, 0.0, 0.0}, 95.0},    /* equal bins at 90 and 100 Hz */
         {{10, 11, 12}, {1e-3, 0.9, 0.9}, 200.0}, /* equal bins at 110 and 120 Hz */
     };
+    double ramp[11] = {0.30, 0.29, 0.28, 0.27, 0.26, 0.25, 0.24, 0.23, 0.22, 0.20, 0.20};
     double data[128];
     double harmonics = 3.0;
     double result = 0.0;
@@ -1639,6 +1640,20 @@ UTEST(scalar, hps_octave_rule_limits)
         ASSERT_EQ(xtract_hps(NULL, data, 128, &harmonics, &result), XTRACT_SUCCESS);
         CHECK_REL(result, cases[c].expected, 1e-12);
     }
+
+    /* A falling slope with two equal bins at 90 and 100 Hz has no peak */
+    hps_octave_spectrum(data, 128);
+    for (e = 0; e < 11; e++)
+        data[e] = ramp[e];
+    ASSERT_EQ(xtract_hps(NULL, data, 128, &harmonics, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 200.0, 1e-12);
+
+    /* Equal bins from DC to 100 Hz have nothing below them */
+    hps_octave_spectrum(data, 128);
+    for (e = 0; e <= 10; e++)
+        data[e] = 0.5;
+    ASSERT_EQ(xtract_hps(NULL, data, 128, &harmonics, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 200.0, 1e-12);
 }
 
 UTEST(scalar, hps_floors_an_empty_bin_beside_a_subnormal_peak)
