@@ -39,7 +39,7 @@ void hamming(double *window, const int N)
     const double M = N - 1;
 
     for (n = 0; n < N; n++)
-        window[n] = 0.53836 - (0.46164 * cos(2.0 * M_PI * (double)n / M));
+        window[n] = 0.54 - 0.46 * cos(2.0 * M_PI * (double)n / M);
 }
 
 void hann(double *window, const int N)
@@ -72,20 +72,10 @@ void triangular(double *window, const int N)
 void bartlett_hann(double *window, const int N)
 {
     int n;
-    const double M = N - 1,
-                 a0 = 0.62,
-                 a1 = 0.5,
-                 a2 = 0.38;
-    double term1 = 0.0,
-           term2 = 0.0;
+    const double M = N - 1;
 
     for (n = 0; n < N; n++)
-    {
-        term1 = a1 * fabs(n / M - 0.5);
-        term2 = a2 * cos(2.0 * M_PI * (double)n / M);
-
-        window[n] = a0 - term1 - term2;
-    }
+        window[n] = 0.62 - 0.48 * fabs(n / M - 0.5) - 0.38 * cos(2.0 * M_PI * (double)n / M);
 }
 
 void blackman(double *window, const int N)
