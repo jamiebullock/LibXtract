@@ -499,11 +499,23 @@ static const xtract_argument_descriptor_t arguments_average_deviation[] = {
     {.name = "mean", .kind = XTRACT_ARGUMENT_RESULT, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_ANY, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .accepts = &quantity_mean, .subject = XTRACT_SUBJECT_INPUT},
 };
 
+static const char *const authors_skewness_0[] = {"Pearson"};
+static const char *const authors_skewness_1[] = {"Joanes", "Gill"};
+static const xtract_source_t sources_skewness[] = {
+    {XTRACT_SOURCE_ORIGIN, 1, authors_skewness_0, 1895, "Contributions to the mathematical theory of evolution. II. Skew variation in homogeneous material", "Philosophical Transactions of the Royal Society of London, Series A 186", "page 348, beta 1", "doi:10.1098/rsta.1895.0010"},
+    {XTRACT_SOURCE_FORMULATION, 2, authors_skewness_1, 1998, "Comparing measures of sample skewness and kurtosis", "Journal of the Royal Statistical Society: Series D (The Statistician) 47(1)", "section 2, page 184, b1", "doi:10.1111/1467-9884.00122"},
+};
 static const xtract_argument_descriptor_t arguments_skewness[] = {
     {.name = "mean", .kind = XTRACT_ARGUMENT_RESULT, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_ANY, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .accepts = &quantity_mean, .subject = XTRACT_SUBJECT_INPUT},
     {.name = "standard_deviation", .kind = XTRACT_ARGUMENT_RESULT, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_ANY, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .accepts = &quantity_standard_deviation, .subject = XTRACT_SUBJECT_INPUT},
 };
 
+static const char *const authors_kurtosis_0[] = {"Pearson"};
+static const char *const authors_kurtosis_1[] = {"Joanes", "Gill"};
+static const xtract_source_t sources_kurtosis[] = {
+    {XTRACT_SOURCE_ORIGIN, 1, authors_kurtosis_0, 1905, "Das Fehlergesetz und seine Verallgemeinerungen durch Fechner und Pearson. A rejoinder", "Biometrika 4(1-2)", "pages 173 and 174, beta 2", "doi:10.1093/biomet/4.1-2.169"},
+    {XTRACT_SOURCE_FORMULATION, 2, authors_kurtosis_1, 1998, "Comparing measures of sample skewness and kurtosis", "Journal of the Royal Statistical Society: Series D (The Statistician) 47(1)", "section 2, page 185, b2", "doi:10.1111/1467-9884.00122"},
+};
 static const xtract_argument_descriptor_t arguments_kurtosis[] = {
     {.name = "mean", .kind = XTRACT_ARGUMENT_RESULT, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_ANY, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .accepts = &quantity_mean, .subject = XTRACT_SUBJECT_INPUT},
     {.name = "standard_deviation", .kind = XTRACT_ARGUMENT_RESULT, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_ANY, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .accepts = &quantity_standard_deviation, .subject = XTRACT_SUBJECT_INPUT},
@@ -571,6 +583,10 @@ static const xtract_argument_descriptor_t arguments_spread[] = {
     {.name = "mean", .kind = XTRACT_ARGUMENT_RESULT, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .accepts = &quantity_spectral_mean, .subject = XTRACT_SUBJECT_INPUT},
 };
 
+static const char *const authors_zcr_0[] = {"Gouyon", "Pachet", "Delerue"};
+static const xtract_source_t sources_zcr[] = {
+    {XTRACT_SOURCE_ORIGIN, 3, authors_zcr_0, 2000, "On the use of zero-crossing rate for an application of classification of percussive sounds", "Proceedings of the COST G-6 Conference on Digital Audio Effects (DAFX-00)", "section 2.2.1", "https://dafx.de/paper-archive/details/PMPmCG4vt7Eeuvn0803ULA"},
+};
 static const char *const authors_rolloff_0[] = {"Scheirer", "Slaney"};
 static const char *const authors_rolloff_1[] = {"Peeters"};
 static const xtract_source_t sources_rolloff[] = {
@@ -706,6 +722,12 @@ static const xtract_argument_descriptor_t arguments_flux[] = {
     {.name = "filter", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_NONE, .min = 0, .max = 2, .value_count = 3, .values = values_2, .default_value = 0, .is_whole = XTRACT_TRUE},
 };
 
+static const char *const authors_attack_time_0[] = {"Krimphoff", "McAdams", "Winsberg"};
+static const char *const authors_attack_time_1[] = {"Peeters"};
+static const xtract_source_t sources_attack_time[] = {
+    {XTRACT_SOURCE_ORIGIN, 3, authors_attack_time_0, 1994, "Caracterisation du timbre des sons complexes. II. Analyses acoustiques et quantification psychophysique", "Journal de Physique IV 4(C5)", "section 3.2, equation 3", "doi:10.1051/jp4:19945134"},
+    {XTRACT_SOURCE_FORMULATION, 1, authors_attack_time_1, 2004, "A large set of audio features for sound description (similarity and classification) in the CUIDADO project", "Technical report, IRCAM", "section 3.1.2.1", NULL},
+};
 static const xtract_argument_descriptor_t arguments_attack_time[] = {
     {.name = "sample_rate", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = 2.2250738585072014e-308, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_SAMPLE_RATE},
     {.name = "start", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_NONE, .min = 0, .max = 1, .default_value = 0.20000000000000001},
@@ -790,6 +812,12 @@ static const xtract_argument_descriptor_t arguments_smoothed[] = {
     {.name = "gain", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_NONE, .min = 0, .max = 1, .default_value = 0.5},
 };
 
+static const char *const authors_peak_0[] = {"Dixon"};
+static const char *const authors_peak_1[] = {"Boeck", "Krebs", "Schedl"};
+static const xtract_source_t sources_peak[] = {
+    {XTRACT_SOURCE_ORIGIN, 1, authors_peak_0, 2006, "Onset detection revisited", "Proceedings of the 9th International Conference on Digital Audio Effects (DAFx-06)", "section 2.6, the first two conditions", "https://www.dafx.de/paper-archive/2006/papers/p_133.pdf"},
+    {XTRACT_SOURCE_FORMULATION, 3, authors_peak_1, 2012, "Evaluating the online capabilities of onset detection methods", "Proceedings of the 13th International Society for Music Information Retrieval Conference", "section 2.3.4, conditions 1 and 2 with w2 = w4 = 0", "doi:10.5281/zenodo.1416036"},
+};
 static const xtract_argument_descriptor_t arguments_peak[] = {
     {.name = "threshold", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_ANY, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .default_value = 0},
 };
@@ -832,10 +860,20 @@ static const xtract_argument_descriptor_t arguments_moving_min[] = {
     {.name = "window", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = 1, .max = XTRACT_UNBOUNDED_MAX, .default_value = 5, .is_whole = XTRACT_TRUE},
 };
 
+static const char *const authors_ewma_average_0[] = {"Roberts"};
+static const char *const authors_ewma_average_1[] = {"Finch"};
+static const xtract_source_t sources_ewma_average[] = {
+    {XTRACT_SOURCE_ORIGIN, 1, authors_ewma_average_0, 1959, "Control chart tests based on geometric moving averages", "Technometrics 1(3)", "equation 1, page 240", "doi:10.1080/00401706.1959.10489860"},
+    {XTRACT_SOURCE_FORMULATION, 1, authors_ewma_average_1, 2009, "Incremental calculation of weighted mean and variance", "Technical note, University of Cambridge Computing Service", "section 9, equations 122 and 128", "https://fanf2.user.srcf.net/hermes/doc/antiforgery/stats.pdf"},
+};
 static const xtract_argument_descriptor_t arguments_ewma_average[] = {
     {.name = "weight", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_NONE, .min = 0, .max = 1, .default_value = 0.10000000000000001},
 };
 
+static const char *const authors_ewma_variance_0[] = {"Finch"};
+static const xtract_source_t sources_ewma_variance[] = {
+    {XTRACT_SOURCE_ORIGIN, 1, authors_ewma_variance_0, 2009, "Incremental calculation of weighted mean and variance", "Technical note, University of Cambridge Computing Service", "section 9, equation 143", "https://fanf2.user.srcf.net/hermes/doc/antiforgery/stats.pdf"},
+};
 static const xtract_argument_descriptor_t arguments_ewma_variance[] = {
     {.name = "weight", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_NONE, .min = 0, .max = 1, .default_value = 0.10000000000000001},
 };
@@ -925,11 +963,23 @@ static const char *const authors_signal_confidence_0[] = {"McLeod", "Wyvill"};
 static const xtract_source_t sources_signal_confidence[] = {
     {XTRACT_SOURCE_ORIGIN, 2, authors_signal_confidence_0, 2005, "A smarter way to find pitch", "Proceedings of the International Computer Music Conference, Barcelona", "section 7", NULL},
 };
+static const char *const authors_decay_rate_0[] = {"Peeters"};
+static const char *const authors_decay_rate_1[] = {"Peeters", "Giordano", "Susini", "Misdariis", "McAdams"};
+static const xtract_source_t sources_decay_rate[] = {
+    {XTRACT_SOURCE_ORIGIN, 1, authors_decay_rate_0, 2004, "A large set of audio features for sound description (similarity and classification) in the CUIDADO project", "Technical report, IRCAM", "section 3.1.3.1", NULL},
+    {XTRACT_SOURCE_FORMULATION, 5, authors_decay_rate_1, 2011, "The Timbre Toolbox: extracting audio descriptors from musical signals", "Journal of the Acoustical Society of America 130(5)", "equation 5", "doi:10.1121/1.3642604"},
+};
 static const xtract_argument_descriptor_t arguments_decay_rate[] = {
     {.name = "sample_rate", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = 2.2250738585072014e-308, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_SAMPLE_RATE},
     {.name = "threshold", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_NONE, .min = 0, .max = 1, .default_value = 0.40000000000000002},
 };
 
+static const char *const authors_temporal_centroid_0[] = {"Peeters", "McAdams", "Herrera"};
+static const char *const authors_temporal_centroid_1[] = {"Peeters"};
+static const xtract_source_t sources_temporal_centroid[] = {
+    {XTRACT_SOURCE_ORIGIN, 3, authors_temporal_centroid_0, 2000, "Instrument sound description in the context of MPEG-7", "Proceedings of the International Computer Music Conference 2000", "page 3, table", "https://hal.science/hal-01161319"},
+    {XTRACT_SOURCE_FORMULATION, 1, authors_temporal_centroid_1, 2004, "A large set of audio features for sound description (similarity and classification) in the CUIDADO project", "Technical report, IRCAM", "section 3.2.1", NULL},
+};
 static const char *const authors_kullback_leibler_divergence_0[] = {"Kullback", "Leibler"};
 static const xtract_source_t sources_kullback_leibler_divergence[] = {
     {XTRACT_SOURCE_ORIGIN, 2, authors_kullback_leibler_divergence_0, 1951, "On information and sufficiency", "The Annals of Mathematical Statistics 22(1)", "equation 2.4", "doi:10.1214/aoms/1177729694"},
@@ -1148,8 +1198,8 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .name = "skewness",
         .title = "Skewness",
         .description = "Extract the skewness of an input vector",
-        .source_count = 0,
-        .sources = NULL,
+        .source_count = 2,
+        .sources = sources_skewness,
         .validation_level = 0,
         .tags = 0,
         .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 1"},
@@ -1164,8 +1214,8 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .name = "kurtosis",
         .title = "Kurtosis",
         .description = "Extract the kurtosis of an input vector",
-        .source_count = 0,
-        .sources = NULL,
+        .source_count = 2,
+        .sources = sources_kurtosis,
         .validation_level = 0,
         .tags = 0,
         .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 1"},
@@ -1388,8 +1438,8 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .name = "zcr",
         .title = "Zero Crossing Rate",
         .description = "Extract the zero crossing rate of a vector",
-        .source_count = 0,
-        .sources = NULL,
+        .source_count = 1,
+        .sources = sources_zcr,
         .validation_level = 0,
         .tags = 0,
         .data = {XTRACT_AUDIO_SAMPLES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 1"},
@@ -1788,8 +1838,8 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .name = "attack_time",
         .title = "Attack Time",
         .description = "Extract the attack time of an envelope",
-        .source_count = 0,
-        .sources = NULL,
+        .source_count = 2,
+        .sources = sources_attack_time,
         .validation_level = 0,
         .tags = 0,
         .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 1"},
@@ -2124,8 +2174,8 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .name = "peak",
         .title = "Peak",
         .description = "Report whether the last value of a series is a peak",
-        .source_count = 0,
-        .sources = NULL,
+        .source_count = 2,
+        .sources = sources_peak,
         .validation_level = 0,
         .tags = 0,
         .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 1, accepted_peak, 1, "N >= 1"},
@@ -2268,8 +2318,8 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .name = "ewma_average",
         .title = "Exponentially Weighted Moving Average",
         .description = "Extract the exponentially weighted moving average of a series",
-        .source_count = 0,
-        .sources = NULL,
+        .source_count = 2,
+        .sources = sources_ewma_average,
         .validation_level = 0,
         .tags = 0,
         .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 1"},
@@ -2284,8 +2334,8 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .name = "ewma_variance",
         .title = "Exponentially Weighted Moving Variance",
         .description = "Extract the exponentially weighted moving variance of a series",
-        .source_count = 0,
-        .sources = NULL,
+        .source_count = 1,
+        .sources = sources_ewma_variance,
         .validation_level = 0,
         .tags = 0,
         .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 1"},
@@ -2556,8 +2606,8 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .name = "decay_rate",
         .title = "Decay Rate",
         .description = "Extract the exponential decay rate of an envelope",
-        .source_count = 0,
-        .sources = NULL,
+        .source_count = 2,
+        .sources = sources_decay_rate,
         .validation_level = 0,
         .tags = 0,
         .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 1"},
@@ -2572,8 +2622,8 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .name = "temporal_centroid",
         .title = "Temporal Centroid",
         .description = "Extract the temporal centroid of an envelope",
-        .source_count = 0,
-        .sources = NULL,
+        .source_count = 2,
+        .sources = sources_temporal_centroid,
         .validation_level = 0,
         .tags = 0,
         .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 2"},

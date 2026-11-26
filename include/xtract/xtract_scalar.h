@@ -40,17 +40,17 @@ extern "C"
      * \param *data: a pointer to the first element in an array of doubles
      * \param N: the number of elements to be considered, at least 2
      * \param *argv: a pointer to a double representing the mean of the input vector
-     * \param *result: the variance of N values from the array pointed to by *data
+     * \param *result: the sample variance of N values from the array pointed to by *data: the sum of their squared deviations from the mean given, divided by N - 1
      */
     int xtract_variance(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
-    /** \brief Extract the deviation of an input vector
+    /** \brief Extract the standard deviation of an input vector from its variance
      *
      * \param *ctx: a pointer to a context, or NULL
-     * \param *data: a pointer to the first element in an array of doubles
-     * \param N: the number of elements to be considered
+     * \param *data: not used
+     * \param N: not used
      * \param *argv: a pointer to a double representing the variance of the input vector, at least 0
-     * \param *result: the deviation of N values from the array pointed to by *data
+     * \param *result: the square root of the variance given: the sample standard deviation when the variance is that of xtract_variance()
      */
     int xtract_standard_deviation(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
@@ -60,7 +60,7 @@ extern "C"
      * \param *data: a pointer to the first element in an array of doubles
      * \param N: the number of elements to be considered, at least 1
      * \param *argv: a pointer to a double representing the mean of the input vector
-     * \param *result: the  average deviation of N values from the array pointed to by *data
+     * \param *result: the average deviation of N values from the array pointed to by *data: the sum of their absolute deviations from the mean given, divided by N
      */
     int xtract_average_deviation(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
@@ -70,7 +70,7 @@ extern "C"
      * \param *data: a pointer to the first element in an array of doubles
      * \param N: the number of elements to be considered, at least 1
      * \param *argv: a pointer to an array of doubles representing the mean and standard deviation of the input vector, the standard deviation at least 0
-     * \param *result: the skewness of N values from the array pointed to by *data
+     * \param *result: the skewness of N values from the array pointed to by *data: the mean of the cubes of their deviations from the mean given, each divided by the standard deviation given. With the sample standard deviation, as xtract_standard_deviation() gives it from xtract_variance(), this is b1 of Joanes and Gill (1998); with the standard deviation that divides by N it is g1. 0 with no result when the standard deviation is 0
      */
     int xtract_skewness(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
@@ -80,7 +80,7 @@ extern "C"
      * \param *data: a pointer to the first element in an array of doubles
      * \param N: the number of elements to be considered, at least 1
      * \param *argv: a pointer to an array of values representing the mean and standard deviation of the input vector, the standard deviation at least 0
-     * \param *result: the kurtosis of N values from the array pointed to by *data
+     * \param *result: the excess kurtosis of N values from the array pointed to by *data: the mean of the fourth powers of their deviations from the mean given, each divided by the standard deviation given, less 3, which makes the population value of a normal distribution 0; the value of a sample is not 0 in general. With the sample standard deviation, as xtract_standard_deviation() gives it from xtract_variance(), this is b2 of Joanes and Gill (1998); with the standard deviation that divides by N it is g2. 0 with no result when the standard deviation is 0
      */
     int xtract_kurtosis(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
@@ -294,7 +294,7 @@ extern "C"
      */
     int xtract_noisiness(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
-    /** \brief Extract the RMS amplitude of an input vector using a method described by Tae Hong Park (2000)
+    /** \brief Extract the RMS amplitude of an input vector: the square root of the mean of the squares of its elements
      *
      * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles
@@ -476,7 +476,7 @@ extern "C"
      * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to an array containing a time series as provided by *result from xtract_last_n(), where the Nth value is the 'current' value
      * \param N: the number of elements in the time series, at least 1
-     * \param *argv: a pointer to a double representing the threshold: the current value is a peak if it is the maximum of the series and exceeds the average of the N values by at least the threshold
+     * \param *argv: a pointer to a double representing the threshold: the current value is a peak if no value of the series is above it and it exceeds the average of the N values, itself included, by at least the threshold. An earlier value equal to it does not stop it being a peak, so a constant series is a peak when the threshold is below 0, and at a threshold of 0 when its mean does not round above its value. The series must not hold NaN
      * \param *result: a pointer to a copy of the current value if it is a peak, or 0 with no result if it is not
      */
     int xtract_peak(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
@@ -497,7 +497,7 @@ extern "C"
      * \param *data: a pointer to the first element in an array of doubles
      * \param N: the number of elements to be considered, at least 1
      * \param *argv: a pointer to a double representing the median of the input vector
-     * \param *result: the median of the absolute deviations of N values from the array pointed to by *data from the given median. A NaN deviation orders after every number
+     * \param *result: the median of the absolute deviations of N values from the array pointed to by *data from the given median, without a scale factor. A NaN deviation orders after every number
      */
     int xtract_median_absolute_deviation(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
@@ -643,7 +643,7 @@ extern "C"
      */
     int xtract_signal_confidence(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
-    /** \brief Extract the decay rate of an envelope: the least-squares slope of the natural log of its elements against time, over the elements from its maximum onwards that exceed the threshold fraction of the maximum
+    /** \brief Extract the decay rate of an envelope: the least-squares slope of the natural log of its elements against time, over the elements from its maximum onwards that exceed the threshold fraction of the maximum. The slope is -alpha for an envelope decaying as exp(-alpha t), the model of Peeters (2004), and an energy envelope decays twice as fast as its amplitude envelope
      *
      * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles representing an amplitude envelope or any segment with a single peak
@@ -653,7 +653,7 @@ extern "C"
      */
     int xtract_decay_rate(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
-    /** \brief Extract the temporal centroid of an envelope: the position of its centre of gravity, with each element weighting its own position, as a fraction of the length
+    /** \brief Extract the temporal centroid of an envelope: the position of its centre of gravity, with each element weighting its own position, as a fraction of the length: the centroid in seconds of Peeters (2004) divided by the duration, (N - 1) divided by the sample rate
      *
      * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles representing an amplitude envelope or any non-negative series

@@ -8,6 +8,7 @@ Cao
 Chavez
 Cuadra
 Degener
+Delerue
 Dinstein
 Dobb's
 Durrieu
@@ -15,14 +16,17 @@ Fastl
 Fevotte
 Fujishima
 Glasberg
+Gouyon
 Hainsworth
 Hanauer
 Haralick
+Herrera
 Higuchi
 Hu
 Hjorth
 Itakura
 Jansson
+Joanes
 Juang
 Jutta
 Kaspar
@@ -37,6 +41,7 @@ Nyquist
 Ojala
 Ong
 Ooura
+Pachet
 Peeters
 Petrosian
 Pietikainen

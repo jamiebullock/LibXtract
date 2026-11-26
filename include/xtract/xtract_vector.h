@@ -359,7 +359,7 @@ extern "C"
      * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles
      * \param N: the number of elements in the array pointed to by *data, at least 1
-     * \param *argv: a pointer to a double holding the smoothing factor, the weight given to each new element, between 0 and 1 inclusive
+     * \param *argv: a pointer to a double holding the smoothing factor, the weight given to each new element, between 0 and 1 inclusive; 0 keeps every average at the first element when every element differs from it by a finite amount
      * \param *result: a pointer to an array of N doubles, one average per element of *data, the first equal to the first element
      */
     int xtract_ewma_average(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
@@ -370,7 +370,7 @@ extern "C"
      * \param *data: a pointer to the first element in an array of doubles
      * \param N: the number of elements in the array pointed to by *data, at least 1
      * \param *argv: a pointer to a double holding the smoothing factor, the weight given to each new element, between 0 and 1 inclusive
-     * \param *result: a pointer to an array of N doubles, one variance per element of *data, the first being 0
+     * \param *result: a pointer to an array of N doubles, one variance per element of *data, the first being 0: the variance about the average with the exponential weights, which sum to 1, and no correction for bias
      */
     int xtract_ewma_variance(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
@@ -411,8 +411,8 @@ extern "C"
      * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles
      * \param N: the number of elements to be considered, at least 1
-     * \param *argv: a pointer to an array of three doubles: the lower bound and the upper bound, each finite and the upper not below the lower, as xtract_lowest_value() and xtract_highest_value() give them for the whole range of a vector; and the number of levels, a whole number from 1 to 2147483647
-     * \param *result: a pointer to an array of N doubles: for each element the whole number of its level, from 0 to one less than the number of levels. The range between the bounds is divided into that many steps of equal width, and an element takes the number of the step it falls in. An element at or below the lower bound is at level 0 and one at or above the upper bound is at the highest level. An element that is NaN gives NaN
+     * \param *argv: a pointer to an array of three doubles: the lower bound and the upper bound, each finite and the upper not below the lower, such as the smallest and largest elements of the vector, which is where the descriptor of this feature takes them from xtract_lowest_value() and xtract_highest_value(); and the number of levels, a whole number from 1 to 2147483647
+     * \param *result: a pointer to an array of N doubles: for each element the whole number of its level, from 0 to one less than the number of levels. The range between the bounds is divided into that many steps of equal width, and an element takes the number of the step it falls in, to within rounding at the edge of a step. An element at or below the lower bound is at level 0, and any other element at or above the upper bound is at the highest level, so an element equal to both of two equal bounds is at level 0. An element that is NaN gives NaN
      */
     int xtract_quantise(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
@@ -422,7 +422,7 @@ extern "C"
      * \param *data: a pointer to the first element in an array of doubles, each a whole number from 0 to one less than the number of levels, as xtract_quantise() gives them
      * \param N: the number of elements to be considered, at least 1
      * \param *argv: a pointer to an int, the number of levels, at least 1
-     * \param *result: a pointer to an array of doubles, one per level: the number of elements at that level divided by N, so that the array sums to 1. It is not written when an element is not a whole number or is outside the levels, which is an argument error
+     * \param *result: a pointer to an array of doubles, one per level: the number of elements at that level divided by N, so that the array sums to 1 within rounding. It is not written when an element is not a whole number or is outside the levels, which is an argument error
      */
     int xtract_histogram(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
     /** @} */

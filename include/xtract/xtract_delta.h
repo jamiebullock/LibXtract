@@ -48,7 +48,7 @@ extern "C"
     int xtract_lnorm(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
     /*xtract_frame_tracker *xf */
 
-    /** \brief Extract the attack time of an envelope: the time from the first element that reaches the start fraction of the maximum to the first element from there that reaches the stop fraction
+    /** \brief Extract the attack time of an envelope: the time from the first element that reaches the start fraction of the maximum to the first element from there that reaches the stop fraction. It is the interval whose log10 is the log-attack time of Krimphoff, McAdams and Winsberg (1994) and Peeters (2004); the fractions apply to the values passed, an amplitude or an energy envelope
      *
      * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles representing an amplitude envelope or any segment with a single peak
@@ -58,7 +58,7 @@ extern "C"
      */
     int xtract_attack_time(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
-    /** \brief Extract the decay time of an envelope: the time from its maximum to the first later element at or below the threshold fraction of the maximum, or to the last element when none is
+    /** \brief Extract the decay time of an envelope: the time from its maximum to the first element from the maximum on that is at or below the threshold fraction of the maximum, or to the last element when none is
      *
      * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles representing an amplitude envelope or any segment with a single peak

@@ -23,6 +23,8 @@ The validation level states how far the feature's results have been checked agai
 
 xtract_mean()
 
+\f[ \bar{x} = \frac{1}{N} \sum_{n=0}^{N-1} x_n \f]
+
 No published source is listed.
 
 Validation level 0, not checked.
@@ -30,6 +32,8 @@ Validation level 0, not checked.
 \section definition_variance Variance
 
 xtract_variance()
+
+\f[ s^2 = \frac{1}{N-1} \sum_{n=0}^{N-1} (x_n - m)^2, \quad m \text{ the mean given in argv} \f]
 
 No published source is listed.
 
@@ -39,6 +43,8 @@ Validation level 0, not checked.
 
 xtract_standard_deviation()
 
+\f[ s = \sqrt{v}, \quad v \ge 0 \text{ the variance given in argv} \f]
+
 No published source is listed.
 
 Validation level 0, not checked.
@@ -46,6 +52,8 @@ Validation level 0, not checked.
 \section definition_average_deviation Average Deviation
 
 xtract_average_deviation()
+
+\f[ \frac{1}{N} \sum_{n=0}^{N-1} |x_n - m|, \quad m \text{ the mean given in argv} \f]
 
 No published source is listed.
 
@@ -55,7 +63,11 @@ Validation level 0, not checked.
 
 xtract_skewness()
 
-No published source is listed.
+\f[ \mathrm{Skew} = \frac{1}{N} \sum_{n=0}^{N-1} \left(\frac{x_n - m}{s}\right)^3, \quad m, s \text{ the mean and standard deviation given in argv}, \; s \ge 0; \text{ no result when } s = 0. \text{ It is } b_1 \text{ when } s \text{ divides by } N - 1, \text{ and } g_1 \text{ when } s \text{ divides by } N \f]
+
+Sources:
+- Origin: Pearson (1895). "Contributions to the mathematical theory of evolution. II. Skew variation in homogeneous material". Philosophical Transactions of the Royal Society of London, Series A 186, page 348, beta 1. <a href="https://doi.org/10.1098/rsta.1895.0010">doi:10.1098/rsta.1895.0010</a>
+- Formulation: Joanes and Gill (1998). "Comparing measures of sample skewness and kurtosis". Journal of the Royal Statistical Society: Series D (The Statistician) 47(1), section 2, page 184, b1. <a href="https://doi.org/10.1111/1467-9884.00122">doi:10.1111/1467-9884.00122</a>
 
 Validation level 0, not checked.
 
@@ -63,7 +75,11 @@ Validation level 0, not checked.
 
 xtract_kurtosis()
 
-No published source is listed.
+\f[ \mathrm{Kurt} = \frac{1}{N} \sum_{n=0}^{N-1} \left(\frac{x_n - m}{s}\right)^4 - 3, \quad m, s \text{ the mean and standard deviation given in argv}, \; s \ge 0; \text{ no result when } s = 0. \text{ It is } b_2 \text{ when } s \text{ divides by } N - 1, \text{ and } g_2 \text{ when } s \text{ divides by } N \f]
+
+Sources:
+- Origin: Pearson (1905). "Das Fehlergesetz und seine Verallgemeinerungen durch Fechner und Pearson. A rejoinder". Biometrika 4(1-2), pages 173 and 174, beta 2. <a href="https://doi.org/10.1093/biomet/4.1-2.169">doi:10.1093/biomet/4.1-2.169</a>
+- Formulation: Joanes and Gill (1998). "Comparing measures of sample skewness and kurtosis". Journal of the Royal Statistical Society: Series D (The Statistician) 47(1), section 2, page 185, b2. <a href="https://doi.org/10.1111/1467-9884.00122">doi:10.1111/1467-9884.00122</a>
 
 Validation level 0, not checked.
 
@@ -200,7 +216,10 @@ Validation level 0, not checked.
 
 xtract_zcr()
 
-No published source is listed.
+\f[ \frac{1}{N} \left|\{k \ge 1 : \operatorname{sgn} x_{n_k} \ne \operatorname{sgn} x_{n_{k-1}}\}\right|, \quad n_0 < n_1 < \dots \text{ the indices of the } x_n \text{ that are neither 0 nor NaN} \f]
+
+Sources:
+- Origin: Gouyon, Pachet and Delerue (2000). "On the use of zero-crossing rate for an application of classification of percussive sounds". Proceedings of the COST G-6 Conference on Digital Audio Effects (DAFX-00), section 2.2.1. <a href="https://dafx.de/paper-archive/details/PMPmCG4vt7Eeuvn0803ULA">https://dafx.de/paper-archive/details/PMPmCG4vt7Eeuvn0803ULA</a>
 
 Validation level 0, not checked.
 
@@ -290,6 +309,8 @@ Validation level 0, not checked.
 
 xtract_rms_amplitude()
 
+\f[ \sqrt{\frac{1}{N} \sum_{n=0}^{N-1} x_n^2} \f]
+
 No published source is listed.
 
 Validation level 0, not checked.
@@ -343,6 +364,8 @@ Validation level 0, not checked.
 
 xtract_lowest_value()
 
+\f[ \min \{x_n : x_n > t\}, \quad t \text{ the threshold given in argv}, \text{ a NaN never above it}; \text{ no result when no } x_n > t \f]
+
 No published source is listed.
 
 Validation level 0, not checked.
@@ -350,6 +373,8 @@ Validation level 0, not checked.
 \section definition_highest_value Highest Value
 
 xtract_highest_value()
+
+\f[ \max_{0 \le n < N} x_n \f]
 
 No published source is listed.
 
@@ -359,6 +384,8 @@ Validation level 0, not checked.
 
 xtract_sum()
 
+\f[ \sum_{n=0}^{N-1} x_n \f]
+
 No published source is listed.
 
 Validation level 0, not checked.
@@ -366,6 +393,8 @@ Validation level 0, not checked.
 \section definition_nonzero_count Non-zero count
 
 xtract_nonzero_count()
+
+\f[ \left|\{n : x_n \ne 0\}\right|, \quad \text{a NaN counts} \f]
 
 No published source is listed.
 
@@ -421,6 +450,8 @@ Validation level 0, not checked.
 
 xtract_midicent()
 
+\f[ m = \mathrm{round}\left(6900 + 1200 \log_2 \frac{f}{440}\right), \text{ halves away from 0}, \quad f \text{ the frequency given in argv}; \text{ no result when } f = 0 \text{ or } m \notin [0, 12700] \f]
+
 No published source is listed.
 
 Validation level 0, not checked.
@@ -451,13 +482,19 @@ Validation level 0, not checked.
 
 xtract_attack_time()
 
-No published source is listed.
+\f[ T_a = \frac{n_2 - n_1}{f_s}, \quad n_1 = \min\{n : x_n \ge s\,x_{\max}\}, \quad n_2 = \min\{n \ge n_1 : x_n \ge e\,x_{\max}\}, \quad x_{\max} = \max_n x_n, \quad f_s, s, e \text{ the sample rate and fractions given in argv}; \text{ no result when } x_{\max} \le 0 \f]
+
+Sources:
+- Origin: Krimphoff, McAdams and Winsberg (1994). "Caracterisation du timbre des sons complexes. II. Analyses acoustiques et quantification psychophysique". Journal de Physique IV 4(C5), section 3.2, equation 3. <a href="https://doi.org/10.1051/jp4:19945134">doi:10.1051/jp4:19945134</a>
+- Formulation: Peeters (2004). "A large set of audio features for sound description (similarity and classification) in the CUIDADO project". Technical report, IRCAM, section 3.1.2.1
 
 Validation level 0, not checked.
 
 \section definition_decay_time Decay Time
 
 xtract_decay_time()
+
+\f[ T_d = \frac{m - p}{f_s}, \quad p = \min\{n : x_n = x_{\max}\}, \quad m = \min\left(\{n \ge p : x_n \le c\,x_{\max}\} \cup \{N-1\}\right), \quad f_s, c \text{ the sample rate and fraction given in argv}; \text{ no result when } x_{\max} \le 0 \f]
 
 No published source is listed.
 
@@ -632,7 +669,11 @@ Validation level 0, not checked.
 
 xtract_peak()
 
-No published source is listed.
+\f[ y = x_{N-1} \text{ if } x_{N-1} = \max_{0 \le n < N} x_n \text{ and } x_{N-1} \ge \frac{1}{N} \sum_{n=0}^{N-1} x_n + \delta, \quad \delta \text{ the threshold given in argv}; \text{ otherwise no result} \f]
+
+Sources:
+- Origin: Dixon (2006). "Onset detection revisited". Proceedings of the 9th International Conference on Digital Audio Effects (DAFx-06), section 2.6, the first two conditions. <a href="https://www.dafx.de/paper-archive/2006/papers/p_133.pdf">https://www.dafx.de/paper-archive/2006/papers/p\_133.pdf</a>
+- Formulation: Boeck, Krebs and Schedl (2012). "Evaluating the online capabilities of onset detection methods". Proceedings of the 13th International Society for Music Information Retrieval Conference, section 2.3.4, conditions 1 and 2 with w2 = w4 = 0. <a href="https://doi.org/10.5281/zenodo.1416036">doi:10.5281/zenodo.1416036</a>
 
 Validation level 0, not checked.
 
@@ -660,6 +701,8 @@ Validation level 0, not checked.
 
 xtract_moving_sum()
 
+\f[ y_m = \sum_{n=m}^{m+w-1} x_n, \quad m = 0, \ldots, N-w, \quad 1 \le w \le N \text{ the window given in argv} \f]
+
 No published source is listed.
 
 Validation level 0, not checked.
@@ -667,6 +710,8 @@ Validation level 0, not checked.
 \section definition_moving_average Moving Average
 
 xtract_moving_average()
+
+\f[ y_m = \frac{1}{w} \sum_{n=m}^{m+w-1} x_n, \quad m = 0, \ldots, N-w, \quad 1 \le w \le N \text{ the window given in argv} \f]
 
 No published source is listed.
 
@@ -676,6 +721,8 @@ Validation level 0, not checked.
 
 xtract_moving_variance()
 
+\f[ y_m = \frac{1}{w-1} \sum_{n=m}^{m+w-1} (x_n - \bar{x}_m)^2, \quad \bar{x}_m = \frac{1}{w} \sum_{n=m}^{m+w-1} x_n, \quad m = 0, \ldots, N-w, \quad 2 \le w \le N \text{ the window given in argv} \f]
+
 No published source is listed.
 
 Validation level 0, not checked.
@@ -683,6 +730,8 @@ Validation level 0, not checked.
 \section definition_moving_standard_deviation Moving Standard Deviation
 
 xtract_moving_standard_deviation()
+
+\f[ y_m = \sqrt{\frac{1}{w-1} \sum_{n=m}^{m+w-1} (x_n - \bar{x}_m)^2}, \quad \bar{x}_m = \frac{1}{w} \sum_{n=m}^{m+w-1} x_n, \quad m = 0, \ldots, N-w, \quad 2 \le w \le N \text{ the window given in argv} \f]
 
 No published source is listed.
 
@@ -692,6 +741,8 @@ Validation level 0, not checked.
 
 xtract_moving_max()
 
+\f[ y_m = \max_{m \le n \le m+w-1} x_n, \quad m = 0, \ldots, N-w, \quad 1 \le w \le N \text{ the window given in argv} \f]
+
 No published source is listed.
 
 Validation level 0, not checked.
@@ -699,6 +750,8 @@ Validation level 0, not checked.
 \section definition_moving_min Moving Minimum
 
 xtract_moving_min()
+
+\f[ y_m = \min_{m \le n \le m+w-1} x_n, \quad m = 0, \ldots, N-w, \quad 1 \le w \le N \text{ the window given in argv} \f]
 
 No published source is listed.
 
@@ -708,7 +761,11 @@ Validation level 0, not checked.
 
 xtract_ewma_average()
 
-No published source is listed.
+\f[ y_0 = x_0, \quad y_n = y_{n-1} + \alpha (x_n - y_{n-1}), \quad n = 1, \ldots, N-1, \quad 0 \le \alpha \le 1 \text{ the factor given in argv} \f]
+
+Sources:
+- Origin: Roberts (1959). "Control chart tests based on geometric moving averages". Technometrics 1(3), equation 1, page 240. <a href="https://doi.org/10.1080/00401706.1959.10489860">doi:10.1080/00401706.1959.10489860</a>
+- Formulation: Finch (2009). "Incremental calculation of weighted mean and variance". Technical note, University of Cambridge Computing Service, section 9, equations 122 and 128. <a href="https://fanf2.user.srcf.net/hermes/doc/antiforgery/stats.pdf">https://fanf2.user.srcf.net/hermes/doc/antiforgery/stats.pdf</a>
 
 Validation level 0, not checked.
 
@@ -716,13 +773,18 @@ Validation level 0, not checked.
 
 xtract_ewma_variance()
 
-No published source is listed.
+\f[ \mu_0 = x_0, \; s_0 = 0, \quad \mu_n = \mu_{n-1} + \alpha (x_n - \mu_{n-1}), \quad s_n = (1-\alpha)\left(s_{n-1} + \alpha (x_n - \mu_{n-1})^2\right), \quad n = 1, \ldots, N-1, \quad 0 \le \alpha \le 1 \text{ the factor given in argv} \f]
+
+Sources:
+- Origin: Finch (2009). "Incremental calculation of weighted mean and variance". Technical note, University of Cambridge Computing Service, section 9, equation 143. <a href="https://fanf2.user.srcf.net/hermes/doc/antiforgery/stats.pdf">https://fanf2.user.srcf.net/hermes/doc/antiforgery/stats.pdf</a>
 
 Validation level 0, not checked.
 
 \section definition_median Median
 
 xtract_median()
+
+\f[ \mathrm{med}(x) = x_{((N+1)/2)} \text{ for odd } N, \quad \frac{1}{2}\left(x_{(N/2)} + x_{(N/2+1)}\right) \text{ for even } N, \quad x_{(k)} \text{ the } k\text{th smallest value, a NaN ordered after every number} \f]
 
 No published source is listed.
 
@@ -731,6 +793,8 @@ Validation level 0, not checked.
 \section definition_median_absolute_deviation Median Absolute Deviation
 
 xtract_median_absolute_deviation()
+
+\f[ \mathrm{MAD} = \mathrm{med}_n |x_n - c|, \quad c \text{ the median given in argv}, \quad \mathrm{med} \text{ the median of xtract\_median, without a scale factor} \f]
 
 No published source is listed.
 
@@ -891,7 +955,11 @@ Validation level 0, not checked.
 
 xtract_decay_rate()
 
-No published source is listed.
+\f[ D = \frac{\sum_{n \in S} (t_n - \bar t)(\ln x_n - \overline{\ln x})}{\sum_{n \in S} (t_n - \bar t)^2}, \quad t_n = \frac{n}{f_s}, \quad S = \{n \ge p : x_n > c\,x_{\max}\}, \quad p = \min\{n : x_n = x_{\max}\}, \quad \bar t, \overline{\ln x} \text{ the means over } S; \text{ no result when } x_{\max} \le 0 \text{ or } |S| < 2 \f]
+
+Sources:
+- Origin: Peeters (2004). "A large set of audio features for sound description (similarity and classification) in the CUIDADO project". Technical report, IRCAM, section 3.1.3.1
+- Formulation: Peeters, Giordano, Susini, Misdariis and McAdams (2011). "The Timbre Toolbox: extracting audio descriptors from musical signals". Journal of the Acoustical Society of America 130(5), equation 5. <a href="https://doi.org/10.1121/1.3642604">doi:10.1121/1.3642604</a>
 
 Validation level 0, not checked.
 
@@ -899,13 +967,19 @@ Validation level 0, not checked.
 
 xtract_temporal_centroid()
 
-No published source is listed.
+\f[ TC = \frac{\sum_{n=0}^{N-1} n\,x_n}{(N-1)\sum_{n=0}^{N-1} x_n}; \text{ no result when } \sum_{n=0}^{N-1} x_n \le 0 \f]
+
+Sources:
+- Origin: Peeters, McAdams and Herrera (2000). "Instrument sound description in the context of MPEG-7". Proceedings of the International Computer Music Conference 2000, page 3, table. <a href="https://hal.science/hal-01161319">https://hal.science/hal-01161319</a>
+- Formulation: Peeters (2004). "A large set of audio features for sound description (similarity and classification) in the CUIDADO project". Technical report, IRCAM, section 3.2.1
 
 Validation level 0, not checked.
 
 \section definition_max_position Maximum Position
 
 xtract_max_position()
+
+\f[ P_{\max} = \frac{\min\{n : x_n = \max_{0 \le m < N} x_m\}}{N-1} \f]
 
 No published source is listed.
 
@@ -915,6 +989,8 @@ Validation level 0, not checked.
 
 xtract_min_position()
 
+\f[ P_{\min} = \frac{\min\{n : x_n = \min_{0 \le m < N} x_m\}}{N-1} \f]
+
 No published source is listed.
 
 Validation level 0, not checked.
@@ -922,6 +998,8 @@ Validation level 0, not checked.
 \section definition_peak_asymmetry Peak Asymmetry
 
 xtract_peak_asymmetry()
+
+\f[ A = \frac{\sum_{n=p}^{N-1} x_n^2}{\sum_{n=0}^{p} x_n^2}, \quad p = \min\{n : x_n = \max_{0 \le m < N} x_m\}; \text{ no result when } \sum_{n=0}^{p} x_n^2 = 0 \f]
 
 No published source is listed.
 
@@ -1102,6 +1180,8 @@ Validation level 0, not checked.
 
 xtract_quantise()
 
+\f[ q_n = 0 \text{ if } x_n \le a, \quad \text{otherwise } L-1 \text{ if } x_n \ge b, \quad \text{otherwise } \min\left(\left\lfloor L \frac{x_n - a}{b - a} \right\rfloor, L-1\right), \quad \text{NaN for a NaN } x_n, \quad a, b, L \text{ the bounds and the number of levels given in argv} \f]
+
 No published source is listed.
 
 Validation level 0, not checked.
@@ -1109,6 +1189,8 @@ Validation level 0, not checked.
 \section definition_histogram Histogram
 
 xtract_histogram()
+
+\f[ h_k = \frac{1}{N} \left|\{n : x_n = k\}\right|, \quad k = 0, \dots, L-1, \quad L \text{ the number of levels given in argv}; \text{ an argument error when some } x_n \text{ is not a whole number in } [0, L) \f]
 
 No published source is listed.
 
@@ -1183,6 +1265,8 @@ Validation level 0, not checked.
 \section definition_last_n Last N Values
 
 xtract_last_n()
+
+\f[ y_k = v_{t-N+1+k}, \quad k = 0, \ldots, N-1, \quad v_t \text{ the value given at call } t \text{ (from 0)}, \quad v_j = 0 \text{ for } j < 0 \f]
 
 No published source is listed.
 
