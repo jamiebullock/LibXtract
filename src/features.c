@@ -2656,7 +2656,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .sources = NULL,
         .validation_level = 0,
         .tags = 0,
-        .data = {XTRACT_SUBFRAMES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 2 && N % 2 == 0"},
+        .data = {XTRACT_SUBFRAMES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 4 && N % 2 == 0"},
         .argc = 0,
         .argv = NULL,
         .is_scalar = XTRACT_TRUE,
@@ -3168,7 +3168,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .sources = NULL,
         .validation_level = 0,
         .tags = 0,
-        .data = {XTRACT_SUBFRAMES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 2 && N % 2 == 0"},
+        .data = {XTRACT_SUBFRAMES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 4 && N % 2 == 0"},
         .argc = 0,
         .argv = NULL,
         .is_scalar = XTRACT_FALSE,
@@ -3380,7 +3380,7 @@ int xtract_length_is_accepted(const int feature, const int N, const void *argv)
     case XTRACT_CROSS_CORRELATION:
         return (n >= 2LL && n % 2LL == 0LL) != 0;
     case XTRACT_CROSS_CORRELATION_LAG:
-        return (n >= 2LL && n % 2LL == 0LL) != 0;
+        return (n >= 4LL && n % 2LL == 0LL) != 0;
     case XTRACT_KULLBACK_LEIBLER_DIVERGENCE:
         return (n >= 2LL && n % 2LL == 0LL) != 0;
     case XTRACT_ITAKURA_SAITO_DIVERGENCE:
@@ -3444,7 +3444,7 @@ int xtract_length_is_accepted(const int feature, const int N, const void *argv)
     case XTRACT_LOG:
         return (n >= 1LL) != 0;
     case XTRACT_NORMALISED_CROSS_CORRELATION:
-        return (n >= 2LL && n % 2LL == 0LL) != 0;
+        return (n >= 4LL && n % 2LL == 0LL) != 0;
     default:
         return 0;
     }
