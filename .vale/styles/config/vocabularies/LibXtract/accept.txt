@@ -60,6 +60,7 @@ Wyvill
 acums
 analyzer
 anticorrelates
+bicovariances?
 [Cc]epstral
 cepstrum
 denormals?

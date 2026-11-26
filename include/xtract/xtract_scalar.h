@@ -534,11 +534,13 @@ extern "C"
      */
     int xtract_hjorth_complexity(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
-    /** \brief Extract the time reversal asymmetry statistic of an input vector: the mean over every position of the product of the value one lag ahead with the difference between the squares of the values two lags ahead and at the position
+    /** \brief Extract the time reversal asymmetry statistic of an input vector: the sample bicovariance of Ramsey and Rothman (1996), the mean over every pair of values a lag apart of the square of the later value times the earlier, less the later value times the square of the earlier
+     *
+     * Ramsey and Rothman state the statistic for a series of mean 0. The series is used as given, so an offset changes the result.
      *
      * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles
-     * \param N: the number of elements to be considered, at least twice the lag plus 1
+     * \param N: the number of elements to be considered, at least the lag plus 1
      * \param *argv: a pointer to an int holding the lag, at least 1
      * \param *result: the statistic of N values from the array pointed to by *data; 0 for a series that reads the same in both directions, and the negative of the statistic of the series reversed
      */

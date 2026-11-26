@@ -2229,8 +2229,9 @@ int xtract_hjorth_complexity(xtract_context *ctx, const double *data, const int 
 
 int xtract_time_reversal_asymmetry(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
-    int lag, n, count;
+    int lag, t;
     double sum = 0.0;
+    double difference;
 
     if (argv == NULL)
     {
@@ -2239,17 +2240,22 @@ int xtract_time_reversal_asymmetry(xtract_context *ctx, const double *data, cons
     }
 
     lag = *(const int *)argv;
-    if (lag < 1 || lag > (N - 1) / 2)
+    if (lag < 1 || lag > N - 1)
     {
         *result = 0.0;
         return XTRACT_ARGUMENT_ERROR;
     }
 
-    count = N - 2 * lag;
-    for (n = 0; n < count; n++)
-        sum += data[n + lag] * (XTRACT_SQ(data[n + 2 * lag]) - XTRACT_SQ(data[n]));
+    /* Equal values add nothing, and their product could overflow. For any
+     * other pair the product overflows only when the term does */
+    for (t = lag; t < N; t++)
+    {
+        difference = data[t] - data[t - lag];
+        if (difference != 0.0)
+            sum += data[t] * data[t - lag] * difference;
+    }
 
-    *result = sum / count;
+    *result = sum / (N - lag);
 
     return XTRACT_SUCCESS;
 }
