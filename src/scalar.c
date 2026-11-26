@@ -534,8 +534,9 @@ int xtract_spread(xtract_context *ctx, const double *data, const int N, const vo
 
 int xtract_zcr(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
-    int n = N;
+    int n = 0;
     int count = 0;
+    int negative;
 
     if (N < 1)
     {
@@ -543,9 +544,21 @@ int xtract_zcr(xtract_context *ctx, const double *data, const int N, const void 
         return XTRACT_ARGUMENT_ERROR;
     }
 
-    for (n = 1; n < N; n++)
-        if (data[n] * data[n - 1] < 0)
-            count++;
+    while (n < N && !(data[n] > 0.0 || data[n] < 0.0))
+        n++;
+
+    if (n < N)
+    {
+        negative = signbit(data[n]) != 0;
+        for (n++; n < N; n++)
+        {
+            if ((negative && data[n] > 0.0) || (!negative && data[n] < 0.0))
+            {
+                count++;
+                negative = !negative;
+            }
+        }
+    }
 
     *result = (double)count / N;
 

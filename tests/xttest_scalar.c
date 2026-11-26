@@ -1241,6 +1241,53 @@ UTEST(scalar, zcr_of_single_crossing)
     CHECK_REL(result, 0.25, EPSILON);
 }
 
+UTEST(scalar, zcr_counts_a_crossing_through_zero_samples)
+{
+    /* the samples other than 0, 3 5 3 -3 -5 -3 3, change sign twice in 10 */
+    double result = 0.0;
+    double sine[] = {0.0, 3.0, 5.0, 3.0, 0.0, -3.0, -5.0, -3.0, 0.0, 3.0};
+    double step[] = {1.0, 0.0, 0.0, -1.0, 0.0, 1.0};
+    ASSERT_EQ(xtract_zcr(NULL, sine, 10, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 0.2, EPSILON);
+    ASSERT_EQ(xtract_zcr(NULL, step, 6, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 2.0 / 6.0, EPSILON);
+}
+
+UTEST(scalar, zcr_does_not_count_a_touch_of_zero)
+{
+    double result = 1.0;
+    double above[] = {2.0, 0.0, 1.0, 0.0, 0.0, 2.0};
+    double below[] = {-2.0, 0.0, -1.0};
+    ASSERT_EQ(xtract_zcr(NULL, above, 6, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(result, 0.0);
+    ASSERT_EQ(xtract_zcr(NULL, below, 3, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(result, 0.0);
+}
+
+UTEST(scalar, zcr_starts_counting_at_the_first_sample_other_than_0)
+{
+    double result = 0.0;
+    double data[] = {0.0, -1.0, 1.0};
+    ASSERT_EQ(xtract_zcr(NULL, data, 3, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 1.0 / 3.0, EPSILON);
+}
+
+UTEST(scalar, zcr_counts_crossings_between_tiny_samples)
+{
+    double result = 0.0;
+    double data[] = {1e-200, -1e-200, 1e-200, -1e-200};
+    ASSERT_EQ(xtract_zcr(NULL, data, 4, NULL, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 0.75, EPSILON);
+}
+
+UTEST(scalar, zcr_of_silence_is_0)
+{
+    double result = 1.0;
+    double data[] = {0.0, -0.0, 0.0};
+    ASSERT_EQ(xtract_zcr(NULL, data, 3, NULL, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(result, 0.0);
+}
+
 UTEST(scalar, sum_of_1_to_5)
 {
     double result = 0.0;

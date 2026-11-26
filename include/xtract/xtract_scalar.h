@@ -225,7 +225,7 @@ extern "C"
      * \param *data: a pointer to the first element in an array of doubles
      * \param N: the number of elements to be considered, at least 1
      * \param *argv: a pointer to NULL
-     * \param *result: the zero crossing rate of N values from the array pointed to by *data
+     * \param *result: the number of sign changes between successive elements that are neither 0 nor NaN, divided by N; an element of 0 between two of opposite sign does not break the crossing
      */
     int xtract_zcr(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
