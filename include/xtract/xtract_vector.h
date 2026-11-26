@@ -411,7 +411,7 @@ extern "C"
      * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles
      * \param N: the number of elements to be considered, at least 1
-     * \param *argv: a pointer to an array of three doubles: the lower bound and the upper bound, each finite and the upper not below the lower, such as the smallest and largest elements of a vector; and the number of levels, a whole number from 1 to 2147483647
+     * \param *argv: a pointer to an array of three doubles: the lower bound and the upper bound, each finite and the upper not below the lower, such as the smallest and largest elements of the vector, which is where the descriptor of this feature takes them from xtract_lowest_value() and xtract_highest_value(); and the number of levels, a whole number from 1 to 2147483647
      * \param *result: a pointer to an array of N doubles: for each element the whole number of its level, from 0 to one less than the number of levels. The range between the bounds is divided into that many steps of equal width, and an element takes the number of the step it falls in, to within rounding at the edge of a step. An element at or below the lower bound is at level 0, and any other element at or above the upper bound is at the highest level, so an element equal to both of two equal bounds is at level 0. An element that is NaN gives NaN
      */
     int xtract_quantise(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
