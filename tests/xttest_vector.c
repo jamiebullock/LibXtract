@@ -3558,6 +3558,51 @@ UTEST(vector, moving_sum_rejects_a_missing_or_out_of_range_window_and_leaves_res
     ASSERT_EQ(result[3], -1.0);
 }
 
+UTEST(vector, moving_sum_matches_xtract_sum_on_every_window)
+{
+    double data[8] = {3.0, -1.5, 4.25, 0.0, 2.0, 9.5, -6.0, 1.0};
+    double result[8];
+    double sum;
+    int window;
+    int i;
+
+    for (window = 1; window <= 8; window++)
+    {
+        ASSERT_EQ(xtract_moving_sum(NULL, data, 8, &window, result), XTRACT_SUCCESS);
+        for (i = 0; i <= 8 - window; i++)
+        {
+            ASSERT_EQ(xtract_sum(NULL, data + i, window, NULL, &sum), XTRACT_SUCCESS);
+            ASSERT_EQ(result[i], sum);
+        }
+    }
+}
+
+UTEST(vector, moving_sum_after_a_large_value_leaves_the_window_is_that_of_the_window)
+{
+    double data[4] = {1.0e20, 1.0, 1.0, 1.0};
+    double result[3];
+    int window = 2;
+
+    ASSERT_EQ(xtract_moving_sum(NULL, data, 4, &window, result), XTRACT_SUCCESS);
+    ASSERT_EQ(result[1], 2.0);
+    ASSERT_EQ(result[2], 2.0);
+    ASSERT_EQ(xtract_moving_average(NULL, data, 4, &window, result), XTRACT_SUCCESS);
+    ASSERT_EQ(result[1], 1.0);
+    ASSERT_EQ(result[2], 1.0);
+}
+
+UTEST(vector, moving_sum_of_a_window_of_1_holds_opposite_extremes)
+{
+    double data[3] = {-1.0e308, 1.0e308, 0.0};
+    double result[3];
+    int window = 1;
+
+    ASSERT_EQ(xtract_moving_sum(NULL, data, 3, &window, result), XTRACT_SUCCESS);
+    ASSERT_EQ(result[0], -1.0e308);
+    ASSERT_EQ(result[1], 1.0e308);
+    ASSERT_EQ(result[2], 0.0);
+}
+
 UTEST(vector, moving_average_of_1_to_5_over_a_window_of_2)
 {
     double data[5] = {1.0, 2.0, 3.0, 4.0, 5.0};
@@ -3583,7 +3628,7 @@ UTEST(vector, moving_average_matches_xtract_mean_on_every_window)
     for (i = 0; i <= 8 - window; i++)
     {
         ASSERT_EQ(xtract_mean(NULL, data + i, window, NULL, &mean), XTRACT_SUCCESS);
-        CHECK_REL(result[i], mean, EPSILON);
+        ASSERT_EQ(result[i], mean);
     }
 }
 
@@ -3617,7 +3662,7 @@ UTEST(vector, moving_variance_matches_xtract_variance_on_every_window)
         {
             ASSERT_EQ(xtract_mean(NULL, data + i, window, NULL, &mean), XTRACT_SUCCESS);
             ASSERT_EQ(xtract_variance(NULL, data + i, window, &mean, &variance), XTRACT_SUCCESS);
-            CHECK_REL(result[i], variance, EPSILON);
+            ASSERT_EQ(result[i], variance);
         }
     }
 }
@@ -3645,6 +3690,22 @@ UTEST(vector, moving_variance_of_a_constant_tail_after_a_large_spike_is_exactly_
     CHECK_REL(result[0], (1000000.3 - 1.1) * (1000000.3 - 1.1) / 2.0, 1e-9);
     for (i = 1; i < 7; i++)
         ASSERT_EQ(result[i], 0.0);
+}
+
+UTEST(vector, moving_variance_after_a_large_value_leaves_the_window_is_that_of_the_window)
+{
+    double spike[6] = {1.0e8, 1.0, 2.0, 3.0, 4.0, 5.0};
+    double larger[6] = {1.0e9, 1.1, 2.2, 3.3, 4.4, 5.5};
+    double result[4];
+    int window = 3;
+    int i;
+
+    ASSERT_EQ(xtract_moving_variance(NULL, spike, 6, &window, result), XTRACT_SUCCESS);
+    for (i = 1; i < 4; i++)
+        CHECK_REL(result[i], 1.0, 1e-12);
+    ASSERT_EQ(xtract_moving_variance(NULL, larger, 6, &window, result), XTRACT_SUCCESS);
+    for (i = 1; i < 4; i++)
+        CHECK_REL(result[i], 1.21, 1e-12);
 }
 
 UTEST(vector, moving_variance_rejects_a_window_below_2_and_leaves_result_untouched)

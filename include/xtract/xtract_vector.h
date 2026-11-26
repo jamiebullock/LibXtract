@@ -300,7 +300,7 @@ extern "C"
      * \param *data: a pointer to the first element in an array of doubles
      * \param N: the number of elements in the array pointed to by *data, at least the window length
      * \param *argv: a pointer to an int holding the window length, at least 1 and at most N
-     * \param *result: a pointer to an array of N - window + 1 doubles, one sum per window position, the first over the first window elements of *data
+     * \param *result: a pointer to an array of N - window + 1 doubles, one sum per window position, as xtract_sum gives for that window, the first over the first window elements of *data
      */
     int xtract_moving_sum(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
@@ -310,7 +310,7 @@ extern "C"
      * \param *data: a pointer to the first element in an array of doubles
      * \param N: the number of elements in the array pointed to by *data, at least the window length
      * \param *argv: a pointer to an int holding the window length, at least 1 and at most N
-     * \param *result: a pointer to an array of N - window + 1 doubles, one mean per window position, the first over the first window elements of *data
+     * \param *result: a pointer to an array of N - window + 1 doubles, one mean per window position, as xtract_mean gives for that window, the first over the first window elements of *data
      */
     int xtract_moving_average(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
@@ -320,7 +320,7 @@ extern "C"
      * \param *data: a pointer to the first element in an array of doubles
      * \param N: the number of elements in the array pointed to by *data, at least the window length
      * \param *argv: a pointer to an int holding the window length, at least 2 and at most N
-     * \param *result: a pointer to an array of N - window + 1 doubles, one sample variance (with Bessel's correction, as xtract_variance gives) per window position, the first over the first window elements of *data
+     * \param *result: a pointer to an array of N - window + 1 doubles, one sample variance (with Bessel's correction) per window position, as xtract_variance gives for that window and its mean from xtract_mean, the first over the first window elements of *data
      */
     int xtract_moving_variance(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
