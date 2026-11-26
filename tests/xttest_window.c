@@ -40,14 +40,14 @@ UTEST(window, gauss)
 
 UTEST(window, hamming)
 {
-    /* w[n] = 0.53836 - 0.46164 * cos(2*pi*n/M) */
+    /* w[n] = 0.54 - 0.46 * cos(2*pi*n/M) */
     double *w = xtract_init_window(5, XTRACT_HAMMING);
     ASSERT_TRUE(w != NULL);
-    CHECK_REL(w[0], 0.07672, EPSILON); /* 0.53836 - 0.46164 */
-    CHECK_REL(w[1], 0.53836, EPSILON); /* cos(pi/2) = 0 */
-    CHECK_REL(w[2], 1.0, EPSILON);     /* cos(pi) = -1 */
-    CHECK_REL(w[3], 0.53836, EPSILON);
-    CHECK_REL(w[4], 0.07672, EPSILON);
+    CHECK_REL(w[0], 0.08, EPSILON); /* 0.54 - 0.46 */
+    CHECK_REL(w[1], 0.54, EPSILON); /* cos(pi/2) = 0 */
+    CHECK_REL(w[2], 1.0, EPSILON);  /* cos(pi) = -1 */
+    CHECK_REL(w[3], 0.54, EPSILON);
+    CHECK_REL(w[4], 0.08, EPSILON);
     xtract_free_window(w);
 }
 
@@ -93,14 +93,14 @@ UTEST(window, triangular)
 
 UTEST(window, bartlett_hann)
 {
-    /* w[n] = 0.62 - 0.5*|n/M - 0.5| - 0.38*cos(2*pi*n/M) */
+    /* w[n] = 0.62 - 0.48*|n/M - 0.5| - 0.38*cos(2*pi*n/M) */
     double *w = xtract_init_window(5, XTRACT_BARTLETT_HANN);
     ASSERT_TRUE(w != NULL);
-    CHECK_REL(w[0], -0.01, EPSILON); /* 0.62 - 0.25 - 0.38 */
-    CHECK_REL(w[1], 0.495, EPSILON); /* 0.62 - 0.125 - 0 */
-    CHECK_REL(w[2], 1.0, EPSILON);   /* 0.62 - 0 + 0.38 */
-    CHECK_REL(w[3], 0.495, EPSILON);
-    CHECK_REL(w[4], -0.01, EPSILON);
+    CHECK_NEAR(w[0], 0.0, EPSILON); /* 0.62 - 0.24 - 0.38 */
+    CHECK_REL(w[1], 0.5, EPSILON);  /* 0.62 - 0.12 - 0 */
+    CHECK_REL(w[2], 1.0, EPSILON);  /* 0.62 - 0 + 0.38 */
+    CHECK_REL(w[3], 0.5, EPSILON);
+    CHECK_NEAR(w[4], 0.0, EPSILON);
     xtract_free_window(w);
 }
 
