@@ -70,13 +70,15 @@ extern "C"
     /** \brief Test whether a number is a power of two */
     bool xtract_is_poweroftwo(unsigned int x);
 
-    /** \brief Smooth a vector
+    /** \brief Smooth a vector with a two-tap filter run backward, then a one-pole filter run forward
+     *
+     * The backward pass gives each element the gain times its value plus 1 minus the gain times the next element's value, and keeps the last element. The forward pass gives each element the gain times that value plus 1 minus the gain times the previous result, and keeps the first.
      *
      * \param *ctx: a pointer to a context, or NULL
      * \param *data a pointer to an array of doubles
      * \param N the number of elements in the array pointed to by *data to be smoothed, at least 1
-     * \param *argv a pointer to a double giving the smoothing gain; NULL is an argument error
-     * \param *result a pointer to the first element an array containing the smoothed data
+     * \param *argv a pointer to a double giving the smoothing gain, from 0 to 1: 1 leaves the vector unchanged, and 0 gives every element the value of the second element; NULL or any other gain is an argument error
+     * \param *result a pointer to the first element of an array of N doubles containing the smoothed data
      *
      * \note if passing in a spectrum e.g. *result from xtract_magnitude_spectrum(), then N for xtract_smoothed() should be N / 2 with respect to the N for xtract_magnitude_spectrum() so only amplitude components are smoothed, not frequencies!
      *

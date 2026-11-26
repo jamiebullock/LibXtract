@@ -903,7 +903,7 @@
       "input": {"format": "arbitrary_series", "unit": "any"},
       "argument_type": "float",
       "arguments": [
-        {"name": "gain", "kind": "setting", "unit": "none", "default": 0.5}
+        {"name": "gain", "kind": "setting", "unit": "none", "min": 0, "max": 1, "default": 0.5}
       ],
       "invariance": {"offset": "follows", "sign": "negated"},
       "result": {"kind": "vector", "format": "arbitrary_series", "unit": "any", "length": "N"}

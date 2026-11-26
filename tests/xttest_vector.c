@@ -137,6 +137,49 @@ UTEST(helper, smoothed_output_does_not_depend_on_prior_result_buffer)
         CHECK_REL(result[n], 1.0, EPSILON);
 }
 
+UTEST(helper, smoothed_impulse_response)
+{
+    /* backward: 0, 0, 0.5, 0.5, 0, 0, 0; forward: each the mean of that
+     * value and the previous result */
+    double data[7] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0};
+    double expected[7] = {0.0, 0.0, 0.25, 0.375, 0.1875, 0.09375, 0.046875};
+    double gain = 0.5;
+    double result[7];
+    int n;
+
+    ASSERT_EQ(xtract_smoothed(NULL, data, 7, &gain, result), XTRACT_SUCCESS);
+    for (n = 0; n < 7; n++)
+        ASSERT_EQ(result[n], expected[n]);
+}
+
+UTEST(helper, smoothed_at_gains_of_1_and_0)
+{
+    double data[4] = {3.0, -1.0, 4.0, 2.0};
+    double result[4];
+    double gain = 1.0;
+    int n;
+
+    ASSERT_EQ(xtract_smoothed(NULL, data, 4, &gain, result), XTRACT_SUCCESS);
+    for (n = 0; n < 4; n++)
+        ASSERT_EQ(result[n], data[n]);
+    gain = 0.0;
+    ASSERT_EQ(xtract_smoothed(NULL, data, 4, &gain, result), XTRACT_SUCCESS);
+    for (n = 0; n < 4; n++)
+        ASSERT_EQ(result[n], -1.0);
+}
+
+UTEST(helper, smoothed_rejects_a_gain_outside_0_to_1)
+{
+    double data[4] = {3.0, -1.0, 4.0, 2.0};
+    double result[4] = {7.0, 7.0, 7.0, 7.0};
+    double gains[3] = {-0.1, 2.0, NAN};
+    int g;
+
+    for (g = 0; g < 3; g++)
+        ASSERT_EQ(xtract_smoothed(NULL, data, 4, &gains[g], result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result[0], 7.0);
+}
+
 /* ===== xtract_subbands ===== */
 
 UTEST(vector, subbands_rejects_invalid_arguments)
