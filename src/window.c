@@ -115,14 +115,13 @@ static double bessel_i0(const double x)
     const double quarter_square = x * x / 4.0;
     double term = 1.0;
     double sum = 1.0;
-    int k = 0;
+    int k;
 
-    do
+    for (k = 1; term > DBL_EPSILON * sum; k++)
     {
-        k++;
         term *= quarter_square / ((double)k * k);
         sum += term;
-    } while (term > DBL_EPSILON * sum);
+    }
 
     return sum;
 }
