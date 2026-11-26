@@ -10,7 +10,7 @@
 
 \tableofcontents
 
-Each feature's definition, the published sources it follows and its validation level. The first source is the origin, the work that introduced the feature; any other is a formulation, a later work whose form of the definition the library computes.
+Each feature's definition, the published sources it follows and its validation level. The first source is the origin, the work that introduced the feature; any other is a formulation, a later work whose form of the definition the library computes. A feature with no source is defined by the library, and its definition is the reference.
 
 The validation level states how far the feature's results have been checked against values computed independently of the library, on the inputs the checks use and on every platform the library is tested on:
 
@@ -25,7 +25,7 @@ xtract_mean()
 
 \f[ \bar{x} = \frac{1}{N} \sum_{n=0}^{N-1} x_n \f]
 
-No published source is listed.
+Defined by the library: this definition is the reference.
 
 Validation level 0, not checked.
 
@@ -35,7 +35,7 @@ xtract_variance()
 
 \f[ s^2 = \frac{1}{N-1} \sum_{n=0}^{N-1} (x_n - m)^2, \quad m \text{ the mean given in argv} \f]
 
-No published source is listed.
+Defined by the library: this definition is the reference.
 
 Validation level 0, not checked.
 
@@ -45,7 +45,7 @@ xtract_standard_deviation()
 
 \f[ s = \sqrt{v}, \quad v \ge 0 \text{ the variance given in argv} \f]
 
-No published source is listed.
+Defined by the library: this definition is the reference.
 
 Validation level 0, not checked.
 
@@ -55,7 +55,7 @@ xtract_average_deviation()
 
 \f[ \frac{1}{N} \sum_{n=0}^{N-1} |x_n - m|, \quad m \text{ the mean given in argv} \f]
 
-No published source is listed.
+Defined by the library: this definition is the reference.
 
 Validation level 0, not checked.
 
@@ -329,7 +329,7 @@ xtract_rms_amplitude()
 
 \f[ \sqrt{\frac{1}{N} \sum_{n=0}^{N-1} x_n^2} \f]
 
-No published source is listed.
+Defined by the library: this definition is the reference.
 
 Validation level 0, not checked.
 
@@ -384,7 +384,7 @@ xtract_lowest_value()
 
 \f[ \min \{x_n : x_n > t\}, \quad t \text{ the threshold given in argv}, \text{ a NaN never above it}; \text{ no result when no } x_n > t \f]
 
-No published source is listed.
+Defined by the library: this definition is the reference.
 
 Validation level 0, not checked.
 
@@ -394,7 +394,7 @@ xtract_highest_value()
 
 \f[ \max_{0 \le n < N} x_n \f]
 
-No published source is listed.
+Defined by the library: this definition is the reference.
 
 Validation level 0, not checked.
 
@@ -404,7 +404,7 @@ xtract_sum()
 
 \f[ \sum_{n=0}^{N-1} x_n \f]
 
-No published source is listed.
+Defined by the library: this definition is the reference.
 
 Validation level 0, not checked.
 
@@ -414,7 +414,7 @@ xtract_nonzero_count()
 
 \f[ \left|\{n : x_n \ne 0\}\right|, \quad \text{a NaN counts} \f]
 
-No published source is listed.
+Defined by the library: this definition is the reference.
 
 Validation level 0, not checked.
 
@@ -436,7 +436,7 @@ xtract_f0()
 
 \f[ f_0 = \frac{f_s}{\tau + D(\tau)/D(1)}, \quad \tau = \min\{k : 2 \le k \le M-1,\ D(k) < D(1)\}, \quad D(k) = \sum_{n=0}^{M-1} |z_n - z_{n+k}|, \quad M = \lfloor N/2 \rfloor, \quad z_n = \operatorname{sgn}(y_n)\max(|y_n| - 0.3c, 0), \quad y_n = \min(\max(x_n, -0.8c), 0.8c), \quad c = \max_n |x_n|, \quad f_s \text{ the sample rate given in argv}; \text{ no result when no such } \tau \text{ exists} \f]
 
-No published source is listed.
+Defined by the library: this definition is the reference.
 
 Validation level 0, not checked.
 
@@ -446,7 +446,7 @@ xtract_failsafe_f0()
 
 \f[ f = f_0 \text{ of xtract\_f0 when it has a result; otherwise } f = \min_{k \in K} \frac{f_s}{N}\left(k + \frac{1}{2}\,\frac{a_{k-1} - a_{k+1}}{a_{k-1} - 2a_k + a_{k+1}}\right), \quad K = \{k : 1 \le k \le N/2 - 2,\ a_k > a_{k-1},\ a_k > a_{k+1},\ a_k \ge 0.1\max_{j \ge 1} a_j\}, \quad a_k \text{ the magnitude of bin } k; \text{ no result when } K \text{ is empty} \f]
 
-No published source is listed.
+Defined by the library: this definition is the reference.
 
 Validation level 0, not checked.
 
@@ -478,7 +478,7 @@ xtract_midicent()
 
 \f[ m = \mathrm{round}\left(6900 + 1200 \log_2 \frac{f}{440}\right), \text{ halves away from 0}, \quad f \text{ the frequency given in argv}; \text{ no result when } f = 0 \text{ or } m \notin [0, 12700] \f]
 
-No published source is listed.
+Defined by the library: this definition is the reference.
 
 Validation level 0, not checked.
 
@@ -488,7 +488,7 @@ xtract_lnorm()
 
 \f[ \|x\|_p = \left(\sum_{k \in K} |x_k|^p\right)^{1/p}, \quad K = \text{every } k \text{, the } k \text{ with } x_k > 0 \text{, or the } k \text{ with } x_k < 0 \text{, as the filter selects}, \quad p = \text{the order given when it is above 0, else } 2 \f]
 
-No published source is listed.
+Defined by the library: this definition is the reference.
 
 Validation level 0, not checked.
 
@@ -522,7 +522,7 @@ xtract_decay_time()
 
 \f[ T_d = \frac{m - p}{f_s}, \quad p = \min\{n : x_n = x_{\max}\}, \quad m = \min\left(\{n \ge p : x_n \le c\,x_{\max}\} \cup \{N-1\}\right), \quad f_s, c \text{ the sample rate and fraction given in argv}; \text{ no result when } x_{\max} \le 0 \f]
 
-No published source is listed.
+Defined by the library: this definition is the reference.
 
 Validation level 0, not checked.
 
@@ -532,7 +532,7 @@ xtract_difference_vector()
 
 \f[ r_n = x_n - x_{N/2+n}, \quad n = 0, \ldots, N/2 - 1 \f]
 
-No published source is listed.
+Defined by the library: this definition is the reference.
 
 Validation level 0, not checked.
 
@@ -542,7 +542,7 @@ xtract_autocorrelation()
 
 \f[ r_\tau = \frac{1}{N} \sum_{n=0}^{N-1-\tau} x_n x_{n+\tau}, \quad \tau = 0, \ldots, N-1 \f]
 
-No published source is listed.
+Defined by the library: this definition is the reference.
 
 Validation level 0, not checked.
 
@@ -563,7 +563,7 @@ xtract_asdf()
 
 \f[ S_\tau = \frac{1}{N} \sum_{n=0}^{N-1-\tau} (x_n - x_{n+\tau})^2, \quad \tau = 0, \ldots, N-1 \f]
 
-No published source is listed.
+Defined by the library: this definition is the reference.
 
 Validation level 0, not checked.
 
@@ -596,7 +596,7 @@ xtract_spectrum()
 
 \f[ X_m = \frac{1}{N} \sum_{n=0}^{N-1} x_n e^{-2 \pi i m n / N}, \quad r_m = \operatorname{Re} X_m, \; r_{N/2+m} = \operatorname{Im} X_m, \quad m = 0, \ldots, \frac{N}{2} - 1, \quad \operatorname{Im} X_0 = 0 \f]
 
-No published source is listed.
+Defined by the library: this definition is the reference.
 
 Validation level 0, not checked.
 
@@ -606,7 +606,7 @@ xtract_autocorrelation_fft()
 
 \f[ r_\tau = \frac{1}{N} \sum_{n=0}^{N-1-\tau} x_n x_{n+\tau}, \quad \tau = 0, \ldots, N-1 \f]
 
-No published source is listed.
+Defined by the library: this definition is the reference.
 
 Validation level 0, not checked.
 
@@ -640,7 +640,7 @@ xtract_harmonic_spectrum()
 
 \f[ h_n = \operatorname{round}(f_n / f_0); \text{ harmonic } h \text{ takes the largest vertex amplitude among the local maxima } n \text{ with } h_n = h \text{ and } |h_n - f_n/f_0| \le t, \text{ else the element with } h_n = h \text{ nearest to } h f_0 \text{ (the lower on a tie)}; \; r_n = \hat a_n \text{ (DBL\_MIN if 0)}, \; r_{M+n} = \hat f_n, \text{ every other element 0}, \quad f_0, t \text{ the fundamental and threshold given in argv}; \text{ no result when } f_0 = 0, \text{ when a harmonic below the highest has no element nearest to it, or when no harmonic lies among the elements} \f]
 
-No published source is listed.
+Defined by the library: this definition is the reference.
 
 Validation level 0, not checked.
 
@@ -674,7 +674,7 @@ xtract_subbands()
 
 \f[ R_b = g\left(x_{u_b}, \dots, x_{u_b + w_b - 1}\right) \text{ when } u_b + w_b \le N, \text{ and } R_b = 0 \text{ otherwise}, \quad b = 0, \dots, B-1, \quad \text{linear: } w_b = \lfloor (N - s)/B \rfloor, \; u_b = s + b w_b, \quad \text{octave: } u_b = w_b = 2^b s, \quad g, B, s \text{ the feature, band count and start given in argv} \f]
 
-No published source is listed.
+Defined by the library: this definition is the reference.
 
 Validation level 0, not checked.
 
@@ -732,7 +732,7 @@ xtract_smoothed()
 
 \f[ u_{N-1} = x_{N-1}, \quad u_n = g x_n + (1-g) x_{n+1} \; (0 \le n \le N-2), \quad y_0 = u_0, \quad y_n = g u_n + (1-g) y_{n-1} \; (1 \le n \le N-1), \quad 0 \le g \le 1 \text{ the gain given in argv} \f]
 
-No published source is listed.
+Defined by the library: this definition is the reference.
 
 Validation level 0, not checked.
 
@@ -777,7 +777,7 @@ xtract_moving_sum()
 
 \f[ y_m = \sum_{n=m}^{m+w-1} x_n, \quad m = 0, \ldots, N-w, \quad 1 \le w \le N \text{ the window given in argv} \f]
 
-No published source is listed.
+Defined by the library: this definition is the reference.
 
 Validation level 0, not checked.
 
@@ -787,7 +787,7 @@ xtract_moving_average()
 
 \f[ y_m = \frac{1}{w} \sum_{n=m}^{m+w-1} x_n, \quad m = 0, \ldots, N-w, \quad 1 \le w \le N \text{ the window given in argv} \f]
 
-No published source is listed.
+Defined by the library: this definition is the reference.
 
 Validation level 0, not checked.
 
@@ -797,7 +797,7 @@ xtract_moving_variance()
 
 \f[ y_m = \frac{1}{w-1} \sum_{n=m}^{m+w-1} (x_n - \bar{x}_m)^2, \quad \bar{x}_m = \frac{1}{w} \sum_{n=m}^{m+w-1} x_n, \quad m = 0, \ldots, N-w, \quad 2 \le w \le N \text{ the window given in argv} \f]
 
-No published source is listed.
+Defined by the library: this definition is the reference.
 
 Validation level 0, not checked.
 
@@ -807,7 +807,7 @@ xtract_moving_standard_deviation()
 
 \f[ y_m = \sqrt{\frac{1}{w-1} \sum_{n=m}^{m+w-1} (x_n - \bar{x}_m)^2}, \quad \bar{x}_m = \frac{1}{w} \sum_{n=m}^{m+w-1} x_n, \quad m = 0, \ldots, N-w, \quad 2 \le w \le N \text{ the window given in argv} \f]
 
-No published source is listed.
+Defined by the library: this definition is the reference.
 
 Validation level 0, not checked.
 
@@ -817,7 +817,7 @@ xtract_moving_max()
 
 \f[ y_m = \max_{m \le n \le m+w-1} x_n, \quad m = 0, \ldots, N-w, \quad 1 \le w \le N \text{ the window given in argv} \f]
 
-No published source is listed.
+Defined by the library: this definition is the reference.
 
 Validation level 0, not checked.
 
@@ -827,7 +827,7 @@ xtract_moving_min()
 
 \f[ y_m = \min_{m \le n \le m+w-1} x_n, \quad m = 0, \ldots, N-w, \quad 1 \le w \le N \text{ the window given in argv} \f]
 
-No published source is listed.
+Defined by the library: this definition is the reference.
 
 Validation level 0, not checked.
 
@@ -860,7 +860,7 @@ xtract_median()
 
 \f[ \mathrm{med}(x) = x_{((N+1)/2)} \text{ for odd } N, \quad \frac{1}{2}\left(x_{(N/2)} + x_{(N/2+1)}\right) \text{ for even } N, \quad x_{(k)} \text{ the } k\text{th smallest value, a NaN ordered after every number} \f]
 
-No published source is listed.
+Defined by the library: this definition is the reference.
 
 Validation level 0, not checked.
 
@@ -870,7 +870,7 @@ xtract_median_absolute_deviation()
 
 \f[ \mathrm{MAD} = \mathrm{med}_n |x_n - c|, \quad c \text{ the median given in argv}, \quad \mathrm{med} \text{ the median of xtract\_median, without a scale factor} \f]
 
-No published source is listed.
+Defined by the library: this definition is the reference.
 
 Validation level 0, not checked.
 
@@ -1062,7 +1062,7 @@ xtract_max_position()
 
 \f[ P_{\max} = \frac{\min\{n : x_n = \max_{0 \le m < N} x_m\}}{N-1} \f]
 
-No published source is listed.
+Defined by the library: this definition is the reference.
 
 Validation level 0, not checked.
 
@@ -1072,7 +1072,7 @@ xtract_min_position()
 
 \f[ P_{\min} = \frac{\min\{n : x_n = \min_{0 \le m < N} x_m\}}{N-1} \f]
 
-No published source is listed.
+Defined by the library: this definition is the reference.
 
 Validation level 0, not checked.
 
@@ -1082,7 +1082,7 @@ xtract_peak_asymmetry()
 
 \f[ A = \frac{\sum_{n=p}^{N-1} x_n^2}{\sum_{n=0}^{p} x_n^2}, \quad p = \min\{n : x_n = \max_{0 \le m < N} x_m\}; \text{ no result when } \sum_{n=0}^{p} x_n^2 = 0 \f]
 
-No published source is listed.
+Defined by the library: this definition is the reference.
 
 Validation level 0, not checked.
 
@@ -1092,7 +1092,7 @@ xtract_cross_correlation()
 
 \f[ r_k = \frac{1}{M} \sum_{n=\max(0,-k)}^{\min(M-1,\,M-1-k)} x_{n+k} \, y_n, \quad k = -(M-1), \dots, M-1, \quad M = N/2, \; x_n = d_n, \; y_n = d_{M+n} \f]
 
-No published source is listed.
+Defined by the library: this definition is the reference.
 
 Validation level 0, not checked.
 
@@ -1102,7 +1102,7 @@ xtract_cross_correlation_lag()
 
 \f[ \hat{k} = \arg\max_{k} \rho_k, \quad \rho_k \text{ the normalised cross-correlation}, \text{ the least } |k| \text{ on a tie and the negative of } \pm k; \text{ no result when } \rho \text{ has none} \f]
 
-No published source is listed.
+Defined by the library: this definition is the reference.
 
 Validation level 0, not checked.
 
@@ -1192,7 +1192,7 @@ xtract_covariance_matrix()
 
 \f[ S_{ij} = \frac{1}{M-1} \sum_{n=0}^{M-1} (x^{(i)}_n - \bar{x}^{(i)})(x^{(j)}_n - \bar{x}^{(j)}), \quad i, j = 0, \dots, C-1, \quad M = N/C, \quad x^{(i)}_n = d_{iM+n}, \quad C \text{ the number of series given in argv} \f]
 
-No published source is listed.
+Defined by the library: this definition is the reference.
 
 Validation level 0, not checked.
 
@@ -1202,7 +1202,7 @@ xtract_correlation_matrix()
 
 \f[ R_{ij} = \frac{S_{ij}}{\sqrt{S_{ii}} \sqrt{S_{jj}}} \text{ limited to } [-1, 1] \text{ for } i \ne j, \; R_{ii} = 1, \quad S_{ij} = S_{ji} = d_{iC+j} \text{ for } i \le j \text{ (the upper triangle)}, \quad C = \sqrt{N}; \text{ no result when some } S_{ii} \le 0 \f]
 
-No published source is listed.
+Defined by the library: this definition is the reference.
 
 Validation level 0, not checked.
 
@@ -1212,7 +1212,7 @@ xtract_average_correlation()
 
 \f[ \bar{r} = \frac{1}{C(C-1)} \sum_{i=0}^{C-1} \sum_{j \ne i} R_{ij}, \quad C = \sqrt{N} \ge 2 \f]
 
-No published source is listed.
+Defined by the library: this definition is the reference.
 
 Validation level 0, not checked.
 
@@ -1289,7 +1289,7 @@ xtract_quantise()
 
 \f[ q_n = 0 \text{ if } x_n \le a, \quad \text{otherwise } L-1 \text{ if } x_n \ge b, \quad \text{otherwise } \min\left(\left\lfloor L \frac{x_n - a}{b - a} \right\rfloor, L-1\right), \quad \text{NaN for a NaN } x_n, \quad a, b, L \text{ the bounds and the number of levels given in argv} \f]
 
-No published source is listed.
+Defined by the library: this definition is the reference.
 
 Validation level 0, not checked.
 
@@ -1299,7 +1299,7 @@ xtract_histogram()
 
 \f[ h_k = \frac{1}{N} \left|\{n : x_n = k\}\right|, \quad k = 0, \dots, L-1, \quad L \text{ the number of levels given in argv}; \text{ an argument error when some } x_n \text{ is not a whole number in } [0, L) \f]
 
-No published source is listed.
+Defined by the library: this definition is the reference.
 
 Validation level 0, not checked.
 
@@ -1375,7 +1375,7 @@ xtract_last_n()
 
 \f[ y_k = v_{t-N+1+k}, \quad k = 0, \ldots, N-1, \quad v_t \text{ the value given at call } t \text{ (from 0)}, \quad v_j = 0 \text{ for } j < 0 \f]
 
-No published source is listed.
+Defined by the library: this definition is the reference.
 
 Validation level 0, not checked.
 
@@ -1385,7 +1385,7 @@ xtract_packed()
 
 \f[ r_k = a_{n_k}, \; r_{M+k} = f_{n_k} \text{ for the } K \text{ indices } n_0 < \ldots < n_{K-1} \text{ with } a_n \ne 0; \; r_k = r_{M+k} = 0 \text{ for } k \ge K, \quad a_n = x_n, \; f_n = x_{M+n}, \; M = N/2 \f]
 
-No published source is listed.
+Defined by the library: this definition is the reference.
 
 Validation level 0, not checked.
 
@@ -1395,7 +1395,7 @@ xtract_magnitude_spectrum()
 
 \f[ r_m = \sqrt{a_m^2 + b_m^2}, \quad r_{M+m} = m \Delta f, \quad a_m = x_m, \; b_m = x_{M+m}, \quad m = 0, \ldots, M-1, \quad M = N/2, \quad \Delta f \text{ the bin spacing given in argv} \f]
 
-No published source is listed.
+Defined by the library: this definition is the reference.
 
 Validation level 0, not checked.
 
@@ -1405,7 +1405,7 @@ xtract_power_spectrum()
 
 \f[ r_m = a_m^2 + b_m^2, \quad r_{M+m} = m \Delta f, \quad a_m = x_m, \; b_m = x_{M+m}, \quad m = 0, \ldots, M-1, \quad M = N/2, \quad \Delta f \text{ the bin spacing given in argv} \f]
 
-No published source is listed.
+Defined by the library: this definition is the reference.
 
 Validation level 0, not checked.
 
@@ -1415,7 +1415,7 @@ xtract_log_spectrum()
 
 \f[ r_m = 1 + \frac{\ln P_m}{-\ln \epsilon^2} \text{ if } P_m > \epsilon^2, \text{ else } 0, \quad P_m = a_m^2 + b_m^2, \quad r_{M+m} = m \Delta f, \quad a_m = x_m, \; b_m = x_{M+m}, \quad M = N/2, \quad \epsilon = 2^{-52} \f]
 
-No published source is listed.
+Defined by the library: this definition is the reference.
 
 Validation level 0, not checked.
 
@@ -1425,7 +1425,7 @@ xtract_phase_spectrum()
 
 \f[ r_m = \operatorname{atan2}(b_m, a_m) \in [-\pi, \pi], \; \operatorname{atan2}(0, 0) = 0, \quad r_{M+m} = m \Delta f, \quad a_m = x_m, \; b_m = x_{M+m}, \quad M = N/2 \f]
 
-No published source is listed.
+Defined by the library: this definition is the reference.
 
 Validation level 0, not checked.
 
@@ -1446,7 +1446,7 @@ xtract_normalised_cross_correlation()
 
 \f[ \rho_k = \frac{\sum_{n=\max(0,-k)}^{\min(M-1,\,M-1-k)} (x_{n+k} - \bar{x})(y_n - \bar{y})}{\sqrt{\sum_{n=0}^{M-1} (x_n - \bar{x})^2} \sqrt{\sum_{n=0}^{M-1} (y_n - \bar{y})^2}} \text{ limited to } [-1, 1], \quad k = -(M-1), \dots, M-1, \quad M = N/2, \; x_n = d_n, \; y_n = d_{M+n}; \text{ no result when either series is constant} \f]
 
-No published source is listed.
+Defined by the library: this definition is the reference.
 
 Validation level 0, not checked.
 

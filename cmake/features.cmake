@@ -646,21 +646,22 @@ foreach(i RANGE ${last})
     c_string(title_c "${where}" title "${title}")
     c_string(description_c "${where}" description "${description}")
 
-    optional(definition "${where}" "${feature}" STRING definition "")
+    required(definition "${where}" "${feature}" STRING definition)
+    if(definition STREQUAL "")
+        fail("${where}" "'definition' is empty")
+    endif()
     doc_text(title_doc "${where}" title "${title}")
     string(APPEND page_text "\\section definition_${name} ${title_doc}\n\nxtract_${name}()\n\n")
-    if(NOT definition STREQUAL "")
-        if(NOT definition MATCHES "^[ -~]*$")
-            fail("${where}" "'definition' has a character that is not printable ASCII")
-        endif()
-        foreach(ending "*/" "\\f]" "\\f$" "\\f)" "\\f}" "@f]" "@f$" "@f)" "@f}")
-            string(FIND "${definition}" "${ending}" found)
-            if(NOT found EQUAL -1)
-                fail("${where}" "'definition' has ${ending}, which ends the documentation page or its formula")
-            endif()
-        endforeach()
-        string(APPEND page_text "\\f[ ${definition} \\f]\n\n")
+    if(NOT definition MATCHES "^[ -~]*$")
+        fail("${where}" "'definition' has a character that is not printable ASCII")
     endif()
+    foreach(ending "*/" "\\f]" "\\f$" "\\f)" "\\f}" "@f]" "@f$" "@f)" "@f}")
+        string(FIND "${definition}" "${ending}" found)
+        if(NOT found EQUAL -1)
+            fail("${where}" "'definition' has ${ending}, which ends the documentation page or its formula")
+        endif()
+    endforeach()
+    string(APPEND page_text "\\f[ ${definition} \\f]\n\n")
 
     optional(sources "${where}" "${feature}" ARRAY sources "[]")
     string(JSON source_count LENGTH "${sources}")
@@ -767,7 +768,7 @@ foreach(i RANGE ${last})
     if(source_count GREATER 0)
         string(APPEND page_text "Sources:\n${source_lines}\n")
     else()
-        string(APPEND page_text "No published source is listed.\n\n")
+        string(APPEND page_text "Defined by the library: this definition is the reference.\n\n")
     endif()
     list(GET LEVEL_NAMES ${validation_level} level_name)
     string(APPEND page_text "Validation level ${validation_level}, ${level_name}.\n\n")
@@ -1133,7 +1134,7 @@ string(CONCAT page_file_text
     "\\tableofcontents\n\n"
     "Each feature's definition, the published sources it follows and its validation level. "
     "The first source is the origin, the work that introduced the feature; any other is a formulation, "
-    "a later work whose form of the definition the library computes.\n\n"
+    "a later work whose form of the definition the library computes. A feature with no source is defined by the library, and its definition is the reference.\n\n"
     "The validation level states how far the feature's results have been checked against values computed "
     "independently of the library, on the inputs the checks use and on every platform the library is tested on:\n\n"
     "- 3, certified: by a machine-checked proof\n"
