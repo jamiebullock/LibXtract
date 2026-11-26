@@ -252,15 +252,10 @@ static const xtract_provider_t providers_standard_deviation[] = {
 };
 static const xtract_quantity_t quantity_standard_deviation = {"standard_deviation", XTRACT_TRUE, XTRACT_ARBITRARY_SERIES, 1, providers_standard_deviation};
 
-static const xtract_provider_t providers_coefficients_and_frequencies[] = {
+static const xtract_provider_t providers_magnitude_spectrum[] = {
     {XTRACT_MAGNITUDE_SPECTRUM, XTRACT_PART_WHOLE, NULL},
-    {XTRACT_PEAK_SPECTRUM, XTRACT_PART_WHOLE, NULL},
-    {XTRACT_HARMONIC_SPECTRUM, XTRACT_PART_WHOLE, NULL},
-    {XTRACT_PACKED, XTRACT_PART_WHOLE, NULL},
-    {XTRACT_POWER_SPECTRUM, XTRACT_PART_WHOLE, NULL},
-    {XTRACT_LOG_SPECTRUM, XTRACT_PART_WHOLE, NULL},
 };
-static const xtract_quantity_t quantity_coefficients_and_frequencies = {"coefficients_and_frequencies", XTRACT_FALSE, XTRACT_SPECTRAL, 6, providers_coefficients_and_frequencies};
+static const xtract_quantity_t quantity_magnitude_spectrum = {"magnitude_spectrum", XTRACT_FALSE, XTRACT_SPECTRAL, 1, providers_magnitude_spectrum};
 
 static const xtract_provider_t providers_spectral_mean[] = {
     {XTRACT_SPECTRAL_MEAN, XTRACT_PART_WHOLE, NULL},
@@ -343,10 +338,15 @@ static const xtract_provider_t providers_harmonic_powers[] = {
 };
 static const xtract_quantity_t quantity_harmonic_powers = {"harmonic_powers", XTRACT_FALSE, XTRACT_SPECTRAL_HARMONICS_MAGNITUDES, 1, providers_harmonic_powers};
 
-static const xtract_provider_t providers_magnitude_spectrum[] = {
+static const xtract_provider_t providers_coefficients_and_frequencies[] = {
     {XTRACT_MAGNITUDE_SPECTRUM, XTRACT_PART_WHOLE, NULL},
+    {XTRACT_PEAK_SPECTRUM, XTRACT_PART_WHOLE, NULL},
+    {XTRACT_HARMONIC_SPECTRUM, XTRACT_PART_WHOLE, NULL},
+    {XTRACT_PACKED, XTRACT_PART_WHOLE, NULL},
+    {XTRACT_POWER_SPECTRUM, XTRACT_PART_WHOLE, NULL},
+    {XTRACT_LOG_SPECTRUM, XTRACT_PART_WHOLE, NULL},
 };
-static const xtract_quantity_t quantity_magnitude_spectrum = {"magnitude_spectrum", XTRACT_FALSE, XTRACT_SPECTRAL, 1, providers_magnitude_spectrum};
+static const xtract_quantity_t quantity_coefficients_and_frequencies = {"coefficients_and_frequencies", XTRACT_FALSE, XTRACT_SPECTRAL, 6, providers_coefficients_and_frequencies};
 
 static const xtract_provider_t providers_difference_vector[] = {
     {XTRACT_DIFFERENCE_VECTOR, XTRACT_PART_WHOLE, NULL},
@@ -426,17 +426,17 @@ static const xtract_provider_t providers_cooccurrence_matrix[] = {
 };
 static const xtract_quantity_t quantity_cooccurrence_matrix = {"cooccurrence_matrix", XTRACT_FALSE, XTRACT_SQUARE_MATRIX, 1, providers_cooccurrence_matrix};
 
-static const xtract_quantity_t *const accepted_spectral_mean[] = {&quantity_coefficients_and_frequencies};
-static const xtract_quantity_t *const accepted_spectral_variance[] = {&quantity_coefficients_and_frequencies};
-static const xtract_quantity_t *const accepted_spectral_skewness[] = {&quantity_coefficients_and_frequencies};
-static const xtract_quantity_t *const accepted_spectral_kurtosis[] = {&quantity_coefficients_and_frequencies};
-static const xtract_quantity_t *const accepted_spectral_centroid[] = {&quantity_coefficients_and_frequencies};
+static const xtract_quantity_t *const accepted_spectral_mean[] = {&quantity_magnitude_spectrum};
+static const xtract_quantity_t *const accepted_spectral_variance[] = {&quantity_magnitude_spectrum};
+static const xtract_quantity_t *const accepted_spectral_skewness[] = {&quantity_magnitude_spectrum};
+static const xtract_quantity_t *const accepted_spectral_kurtosis[] = {&quantity_magnitude_spectrum};
+static const xtract_quantity_t *const accepted_spectral_centroid[] = {&quantity_magnitude_spectrum};
 static const xtract_quantity_t *const accepted_irregularity_j[] = {&quantity_partial_amplitudes, &quantity_magnitude_bins};
 static const xtract_quantity_t *const accepted_tristimulus_1[] = {&quantity_harmonic_amplitudes};
 static const xtract_quantity_t *const accepted_tristimulus_2[] = {&quantity_harmonic_amplitudes};
 static const xtract_quantity_t *const accepted_tristimulus_3[] = {&quantity_harmonic_amplitudes};
 static const xtract_quantity_t *const accepted_smoothness[] = {&quantity_partial_amplitudes};
-static const xtract_quantity_t *const accepted_spread[] = {&quantity_coefficients_and_frequencies};
+static const xtract_quantity_t *const accepted_spread[] = {&quantity_magnitude_spectrum};
 static const xtract_quantity_t *const accepted_rolloff[] = {&quantity_power_bins};
 static const xtract_quantity_t *const accepted_loudness[] = {&quantity_bark_energies};
 static const xtract_quantity_t *const accepted_flatness[] = {&quantity_power_bins};
@@ -462,7 +462,7 @@ static const xtract_quantity_t *const accepted_gammatone_spectrogram[] = {&quant
 static const xtract_quantity_t *const accepted_peak[] = {&quantity_last_n};
 static const xtract_quantity_t *const accepted_mmbses[] = {&quantity_spectrum};
 static const xtract_quantity_t *const accepted_spectral_subband_centroids[] = {&quantity_magnitude_spectrum, &quantity_power_spectrum};
-static const xtract_quantity_t *const accepted_spectral_entropy[] = {&quantity_power_bins, &quantity_bins};
+static const xtract_quantity_t *const accepted_spectral_entropy[] = {&quantity_power_bins};
 static const xtract_quantity_t *const accepted_kullback_leibler_divergence[] = {&quantity_bins};
 static const xtract_quantity_t *const accepted_itakura_saito_divergence[] = {&quantity_power_bins};
 static const xtract_quantity_t *const accepted_modified_kullback_leibler[] = {&quantity_magnitude_bins};
@@ -521,24 +521,48 @@ static const xtract_argument_descriptor_t arguments_kurtosis[] = {
     {.name = "standard_deviation", .kind = XTRACT_ARGUMENT_RESULT, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_ANY, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .accepts = &quantity_standard_deviation, .subject = XTRACT_SUBJECT_INPUT},
 };
 
+static const char *const authors_spectral_mean_0[] = {"Peeters"};
+static const xtract_source_t sources_spectral_mean[] = {
+    {XTRACT_SOURCE_ORIGIN, 1, authors_spectral_mean_0, 2004, "A large set of audio features for sound description (similarity and classification) in the CUIDADO project", "Technical report, IRCAM", "section 6.1.1", NULL},
+};
+static const char *const authors_spectral_variance_0[] = {"Peeters"};
+static const xtract_source_t sources_spectral_variance[] = {
+    {XTRACT_SOURCE_ORIGIN, 1, authors_spectral_variance_0, 2004, "A large set of audio features for sound description (similarity and classification) in the CUIDADO project", "Technical report, IRCAM", "section 6.1.2", NULL},
+};
 static const xtract_argument_descriptor_t arguments_spectral_variance[] = {
     {.name = "mean", .kind = XTRACT_ARGUMENT_RESULT, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .accepts = &quantity_spectral_mean, .subject = XTRACT_SUBJECT_INPUT},
 };
 
+static const char *const authors_spectral_standard_deviation_0[] = {"Peeters"};
+static const xtract_source_t sources_spectral_standard_deviation[] = {
+    {XTRACT_SOURCE_ORIGIN, 1, authors_spectral_standard_deviation_0, 2004, "A large set of audio features for sound description (similarity and classification) in the CUIDADO project", "Technical report, IRCAM", "section 6.1.2", NULL},
+};
 static const xtract_argument_descriptor_t arguments_spectral_standard_deviation[] = {
     {.name = "variance", .kind = XTRACT_ARGUMENT_RESULT, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ_SQUARED, .min = 0, .max = XTRACT_UNBOUNDED_MAX, .accepts = &quantity_spectral_variance},
 };
 
+static const char *const authors_spectral_skewness_0[] = {"Peeters"};
+static const xtract_source_t sources_spectral_skewness[] = {
+    {XTRACT_SOURCE_ORIGIN, 1, authors_spectral_skewness_0, 2004, "A large set of audio features for sound description (similarity and classification) in the CUIDADO project", "Technical report, IRCAM", "section 6.1.3", NULL},
+};
 static const xtract_argument_descriptor_t arguments_spectral_skewness[] = {
     {.name = "mean", .kind = XTRACT_ARGUMENT_RESULT, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .accepts = &quantity_spectral_mean, .subject = XTRACT_SUBJECT_INPUT},
     {.name = "standard_deviation", .kind = XTRACT_ARGUMENT_RESULT, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .accepts = &quantity_spectral_standard_deviation, .subject = XTRACT_SUBJECT_INPUT},
 };
 
+static const char *const authors_spectral_kurtosis_0[] = {"Peeters"};
+static const xtract_source_t sources_spectral_kurtosis[] = {
+    {XTRACT_SOURCE_ORIGIN, 1, authors_spectral_kurtosis_0, 2004, "A large set of audio features for sound description (similarity and classification) in the CUIDADO project", "Technical report, IRCAM", "section 6.1.4", NULL},
+};
 static const xtract_argument_descriptor_t arguments_spectral_kurtosis[] = {
     {.name = "mean", .kind = XTRACT_ARGUMENT_RESULT, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .accepts = &quantity_spectral_mean, .subject = XTRACT_SUBJECT_INPUT},
     {.name = "standard_deviation", .kind = XTRACT_ARGUMENT_RESULT, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .accepts = &quantity_spectral_standard_deviation, .subject = XTRACT_SUBJECT_INPUT},
 };
 
+static const char *const authors_spectral_centroid_0[] = {"Peeters"};
+static const xtract_source_t sources_spectral_centroid[] = {
+    {XTRACT_SOURCE_ORIGIN, 1, authors_spectral_centroid_0, 2004, "A large set of audio features for sound description (similarity and classification) in the CUIDADO project", "Technical report, IRCAM", "section 6.1.1", NULL},
+};
 static const char *const authors_irregularity_k_0[] = {"Krimphoff", "McAdams", "Winsberg"};
 static const xtract_source_t sources_irregularity_k[] = {
     {XTRACT_SOURCE_ORIGIN, 3, authors_irregularity_k_0, 1994, "Caracterisation du timbre des sons complexes. II. Analyses acoustiques et quantification psychophysique", "Journal de Physique IV 4(C5)", "equation 4", "doi:10.1051/jp4:19945134"},
@@ -745,10 +769,24 @@ static const xtract_argument_descriptor_t arguments_decay_time[] = {
     {.name = "threshold", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_NONE, .min = 0, .max = 1, .default_value = 0.40000000000000002},
 };
 
+static const char *const authors_amdf_0[] = {"Ross", "Shaffer", "Cohen", "Freudberg", "Manley"};
+static const xtract_source_t sources_amdf[] = {
+    {XTRACT_SOURCE_ORIGIN, 5, authors_amdf_0, 1974, "Average magnitude difference function pitch extractor", "IEEE Transactions on Acoustics, Speech, and Signal Processing 22(5)", "equation 5", "doi:10.1109/TASSP.1974.1162598"},
+};
+static const char *const authors_bark_coefficients_0[] = {"Zwicker"};
+static const char *const authors_bark_coefficients_1[] = {"Smith", "Abel"};
+static const xtract_source_t sources_bark_coefficients[] = {
+    {XTRACT_SOURCE_ORIGIN, 1, authors_bark_coefficients_0, 1961, "Subdivision of the audible frequency range into critical bands (Frequenzgruppen)", "Journal of the Acoustical Society of America 33(2)", "table I", "doi:10.1121/1.1908630"},
+    {XTRACT_SOURCE_FORMULATION, 2, authors_bark_coefficients_1, 1999, "Bark and ERB bilinear transforms", "IEEE Transactions on Speech and Audio Processing 7(6)", "section 3, the table of band edges", "doi:10.1109/89.799695"},
+};
 static const xtract_argument_descriptor_t arguments_bark_coefficients[] = {
     {.name = "band_limits", .kind = XTRACT_ARGUMENT_OBJECT, .type = XTRACT_INTARRAY, .unit = XTRACT_UNIT_NONE, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .builder = &builder_init_bark},
 };
 
+static const char *const authors_peak_spectrum_0[] = {"Smith", "Serra"};
+static const xtract_source_t sources_peak_spectrum[] = {
+    {XTRACT_SOURCE_ORIGIN, 2, authors_peak_spectrum_0, 1987, "PARSHL: an analysis/synthesis program for non-harmonic sounds based on a sinusoidal representation", "Technical report STAN-M-43, CCRMA, Stanford University", "section 5, equations 12 to 14", "https://ccrma.stanford.edu/files/papers/stanm43.pdf"},
+};
 static const xtract_argument_descriptor_t arguments_peak_spectrum[] = {
     {.name = "bin_spacing", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_FLOAT, .unit = XTRACT_HERTZ, .min = 2.2250738585072014e-308, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_BIN_SPACING},
     {.name = "threshold", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_PERCENT, .min = 0, .max = 100, .default_value = 10},
@@ -766,6 +804,10 @@ static const xtract_argument_descriptor_t arguments_mfcc[] = {
     {.name = "filterbank", .kind = XTRACT_ARGUMENT_OBJECT, .type = XTRACT_FILTERBANK, .unit = XTRACT_UNIT_NONE, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .builder = &builder_init_mfcc},
 };
 
+static const char *const authors_dct_0[] = {"Ahmed", "Natarajan", "Rao"};
+static const xtract_source_t sources_dct[] = {
+    {XTRACT_SOURCE_ORIGIN, 3, authors_dct_0, 1974, "Discrete cosine transform", "IEEE Transactions on Computers C-23(1)", "equation 1, without its scale factors", "doi:10.1109/T-C.1974.223784"},
+};
 static const xtract_argument_descriptor_t arguments_dct[] = {
     {.name = "table", .kind = XTRACT_ARGUMENT_OBJECT, .type = XTRACT_FLOATARRAY, .unit = XTRACT_UNIT_NONE, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .builder = &builder_init_dct, .is_optional = XTRACT_TRUE},
 };
@@ -798,6 +840,14 @@ static const xtract_argument_descriptor_t arguments_subbands[] = {
     {.name = "start", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_INT, .unit = XTRACT_BINS, .min = 0, .max = XTRACT_UNBOUNDED_MAX, .default_value = 1, .is_whole = XTRACT_TRUE},
 };
 
+static const char *const authors_mel_spectrogram_0[] = {"Davis", "Mermelstein"};
+static const char *const authors_mel_spectrogram_1[] = {"Rabiner", "Juang"};
+static const char *const authors_mel_spectrogram_2[] = {"Young", "Evermann", "Gales", "Hain", "Kershaw", "Liu", "Moore", "Odell", "Ollason", "Povey", "Valtchev", "Woodland"};
+static const xtract_source_t sources_mel_spectrogram[] = {
+    {XTRACT_SOURCE_ORIGIN, 2, authors_mel_spectrogram_0, 1980, "Comparison of parametric representations for monosyllabic word recognition in continuously spoken sentences", "IEEE Transactions on Acoustics, Speech, and Signal Processing 28(4)", "equation 1 and figure 1", "doi:10.1109/TASSP.1980.1163420"},
+    {XTRACT_SOURCE_FORMULATION, 2, authors_mel_spectrogram_1, 1993, "Fundamentals of speech recognition", "PTR Prentice Hall", "section 4.5.6, equation 4.90", NULL},
+    {XTRACT_SOURCE_FORMULATION, 12, authors_mel_spectrogram_2, 2009, "The HTK book, for HTK version 3.4", "Cambridge University Engineering Department", "section 5.4, equation 5.13", NULL},
+};
 static const xtract_argument_descriptor_t arguments_mel_spectrogram[] = {
     {.name = "filterbank", .kind = XTRACT_ARGUMENT_OBJECT, .type = XTRACT_FILTERBANK, .unit = XTRACT_UNIT_NONE, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .builder = &builder_init_mfcc},
 };
@@ -820,6 +870,12 @@ static const xtract_argument_descriptor_t arguments_gammatone_spectrogram[] = {
     {.name = "filterbank", .kind = XTRACT_ARGUMENT_OBJECT, .type = XTRACT_FILTERBANK, .unit = XTRACT_UNIT_NONE, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .builder = &builder_init_gfcc},
 };
 
+static const char *const authors_windowed_0[] = {"Harris"};
+static const char *const authors_windowed_1[] = {"Ha", "Pearce"};
+static const xtract_source_t sources_windowed[] = {
+    {XTRACT_SOURCE_ORIGIN, 1, authors_windowed_0, 1978, "On the use of windows for harmonic analysis with the discrete Fourier transform", "Proceedings of the IEEE 66(1)", "equations 23a, 28a, 30b, 32, 33, 44a and 46a, and table I", "doi:10.1109/PROC.1978.10837"},
+    {XTRACT_SOURCE_FORMULATION, 2, authors_windowed_1, 1989, "A new window and comparison to standard windows", "IEEE Transactions on Acoustics, Speech, and Signal Processing 37(2)", "equation 6, the Bartlett-Hann window", "doi:10.1109/29.21693"},
+};
 static const xtract_argument_descriptor_t arguments_windowed[] = {
     {.name = "window", .kind = XTRACT_ARGUMENT_OBJECT, .type = XTRACT_FLOATARRAY, .unit = XTRACT_UNIT_NONE, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .builder = &builder_init_window},
 };
@@ -848,6 +904,10 @@ static const xtract_argument_descriptor_t arguments_mmbses[] = {
     {.name = "filterbank", .kind = XTRACT_ARGUMENT_OBJECT, .type = XTRACT_FILTERBANK, .unit = XTRACT_UNIT_NONE, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .builder = &builder_init_mfcc},
 };
 
+static const char *const authors_spectral_subband_centroids_0[] = {"Paliwal"};
+static const xtract_source_t sources_spectral_subband_centroids[] = {
+    {XTRACT_SOURCE_ORIGIN, 1, authors_spectral_subband_centroids_0, 1997, "Spectral subband centroids as features for speech recognition", "Proceedings of the IEEE Workshop on Automatic Speech Recognition and Understanding", "equation 1", "doi:10.1109/ASRU.1997.658996"},
+};
 static const xtract_argument_descriptor_t arguments_spectral_subband_centroids[] = {
     {.name = "filterbank", .kind = XTRACT_ARGUMENT_OBJECT, .type = XTRACT_FILTERBANK, .unit = XTRACT_UNIT_NONE, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .builder = &builder_init_mfcc},
 };
@@ -918,6 +978,12 @@ static const xtract_argument_descriptor_t arguments_time_reversal_asymmetry[] = 
     {.name = "lag", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = 1, .max = XTRACT_UNBOUNDED_MAX, .default_value = 1, .is_whole = XTRACT_TRUE},
 };
 
+static const char *const authors_spectral_entropy_0[] = {"Powell", "Percival"};
+static const char *const authors_spectral_entropy_1[] = {"Inouye", "Shinosaki", "Sakamoto", "Toi", "Ukai", "Iyama", "Katsuda", "Hirano"};
+static const xtract_source_t sources_spectral_entropy[] = {
+    {XTRACT_SOURCE_ORIGIN, 2, authors_spectral_entropy_0, 1979, "A spectral entropy method for distinguishing regular and irregular motion of Hamiltonian systems", "Journal of Physics A: Mathematical and General 12(11)", "equations 2.7 and 2.8", "doi:10.1088/0305-4470/12/11/017"},
+    {XTRACT_SOURCE_FORMULATION, 8, authors_spectral_entropy_1, 1991, "Quantification of EEG irregularity by use of the entropy of the power spectrum", "Electroencephalography and Clinical Neurophysiology 79(3)", "equations 1 and 2, and page 206 for the division by the largest entropy", "doi:10.1016/0013-4694(91)90138-T"},
+};
 static const char *const authors_petrosian_fractal_dimension_0[] = {"Petrosian"};
 static const xtract_source_t sources_petrosian_fractal_dimension[] = {
     {XTRACT_SOURCE_ORIGIN, 1, authors_petrosian_fractal_dimension_0, 1995, "Kolmogorov complexity of finite sequences and recognition of different preictal EEG patterns", "Proceedings of the Eighth IEEE Symposium on Computer-Based Medical Systems", "p. 214, binary sequence (c)", "doi:10.1109/CBMS.1995.465426"},
@@ -1272,8 +1338,8 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .name = "spectral_mean",
         .title = "Spectral Mean",
         .description = "Extract the mean of an input spectrum",
-        .source_count = 0,
-        .sources = NULL,
+        .source_count = 1,
+        .sources = sources_spectral_mean,
         .validation_level = 0,
         .tags = 0,
         .data = {XTRACT_SPECTRAL, XTRACT_UNIT_ANY, 1, accepted_spectral_mean, 1, "N >= 2 && N % 2 == 0"},
@@ -1288,8 +1354,8 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .name = "spectral_variance",
         .title = "Spectral Variance",
         .description = "Extract the variance of an input spectrum",
-        .source_count = 0,
-        .sources = NULL,
+        .source_count = 1,
+        .sources = sources_spectral_variance,
         .validation_level = 0,
         .tags = 0,
         .data = {XTRACT_SPECTRAL, XTRACT_UNIT_ANY, 1, accepted_spectral_variance, 1, "N >= 2 && N % 2 == 0"},
@@ -1304,8 +1370,8 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .name = "spectral_standard_deviation",
         .title = "Spectral Standard Deviation",
         .description = "Extract the standard deviation of an input spectrum",
-        .source_count = 0,
-        .sources = NULL,
+        .source_count = 1,
+        .sources = sources_spectral_standard_deviation,
         .validation_level = 0,
         .tags = 0,
         .data = {XTRACT_NO_DATA, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 0"},
@@ -1320,8 +1386,8 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .name = "spectral_skewness",
         .title = "Spectral Skewness",
         .description = "Extract the skewness of an input spectrum",
-        .source_count = 0,
-        .sources = NULL,
+        .source_count = 1,
+        .sources = sources_spectral_skewness,
         .validation_level = 0,
         .tags = 0,
         .data = {XTRACT_SPECTRAL, XTRACT_UNIT_ANY, 1, accepted_spectral_skewness, 1, "N >= 2 && N % 2 == 0"},
@@ -1336,8 +1402,8 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .name = "spectral_kurtosis",
         .title = "Spectral Kurtosis",
         .description = "Extract the kurtosis of an input spectrum",
-        .source_count = 0,
-        .sources = NULL,
+        .source_count = 1,
+        .sources = sources_spectral_kurtosis,
         .validation_level = 0,
         .tags = 0,
         .data = {XTRACT_SPECTRAL, XTRACT_UNIT_ANY, 1, accepted_spectral_kurtosis, 1, "N >= 2 && N % 2 == 0"},
@@ -1352,8 +1418,8 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .name = "spectral_centroid",
         .title = "Spectral Centroid",
         .description = "Extract the spectral centroid of a spectrum",
-        .source_count = 0,
-        .sources = NULL,
+        .source_count = 1,
+        .sources = sources_spectral_centroid,
         .validation_level = 0,
         .tags = 0,
         .data = {XTRACT_SPECTRAL, XTRACT_UNIT_ANY, 1, accepted_spectral_centroid, 1, "N >= 2 && N % 2 == 0"},
@@ -1944,8 +2010,8 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .name = "amdf",
         .title = "Average Magnitude Difference Function",
         .description = "Extract the AMDF of a signal",
-        .source_count = 0,
-        .sources = NULL,
+        .source_count = 1,
+        .sources = sources_amdf,
         .validation_level = 0,
         .tags = 0,
         .data = {XTRACT_AUDIO_SAMPLES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 1"},
@@ -1976,8 +2042,8 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .name = "bark_coefficients",
         .title = "Bark Coefficients",
         .description = "Extract bark coefficients from a spectrum",
-        .source_count = 0,
-        .sources = NULL,
+        .source_count = 2,
+        .sources = sources_bark_coefficients,
         .validation_level = 0,
         .tags = XTRACT_TAG_SOUND,
         .data = {XTRACT_SPECTRAL_MAGNITUDES, XTRACT_UNIT_ANY, 1, accepted_bark_coefficients, 1, "N >= 1"},
@@ -1992,8 +2058,8 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .name = "peak_spectrum",
         .title = "Peak Spectrum",
         .description = "Extract the spectral peaks from of a spectrum",
-        .source_count = 0,
-        .sources = NULL,
+        .source_count = 1,
+        .sources = sources_peak_spectrum,
         .validation_level = 0,
         .tags = 0,
         .data = {XTRACT_SPECTRAL_MAGNITUDES, XTRACT_UNIT_ANY, 1, accepted_peak_spectrum, 1, "N >= 1"},
@@ -2056,8 +2122,8 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .name = "dct",
         .title = "Discrete Cosine Transform",
         .description = "Extract the DCT of a signal",
-        .source_count = 0,
-        .sources = NULL,
+        .source_count = 1,
+        .sources = sources_dct,
         .validation_level = 0,
         .tags = 0,
         .data = {XTRACT_AUDIO_SAMPLES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 1"},
@@ -2136,8 +2202,8 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .name = "mel_spectrogram",
         .title = "Mel Spectrogram",
         .description = "Extract log mel energies from a spectrum",
-        .source_count = 0,
-        .sources = NULL,
+        .source_count = 3,
+        .sources = sources_mel_spectrogram,
         .validation_level = 0,
         .tags = XTRACT_TAG_SOUND,
         .data = {XTRACT_SPECTRAL_MAGNITUDES, XTRACT_UNIT_ANY, 1, accepted_mel_spectrogram, 1, "N >= 1 && 2 * N == filterbank_size(filterbank)"},
@@ -2184,8 +2250,8 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .name = "windowed",
         .title = "Windowed frame",
         .description = "Apply a window function to a frame of data",
-        .source_count = 0,
-        .sources = NULL,
+        .source_count = 2,
+        .sources = sources_windowed,
         .validation_level = 0,
         .tags = 0,
         .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 1"},
@@ -2248,8 +2314,8 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .name = "spectral_subband_centroids",
         .title = "Spectral Subband Centroids",
         .description = "Extract the centroid of each mel band from a spectrum",
-        .source_count = 0,
-        .sources = NULL,
+        .source_count = 1,
+        .sources = sources_spectral_subband_centroids,
         .validation_level = 0,
         .tags = XTRACT_TAG_SOUND,
         .data = {XTRACT_SPECTRAL, XTRACT_UNIT_ANY, 2, accepted_spectral_subband_centroids, 1, "N >= 2 && N % 2 == 0 && N == filterbank_size(filterbank)"},
@@ -2488,11 +2554,11 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .name = "spectral_entropy",
         .title = "Spectral Entropy",
         .description = "Extract the normalised Shannon entropy of a spectrum",
-        .source_count = 0,
-        .sources = NULL,
+        .source_count = 2,
+        .sources = sources_spectral_entropy,
         .validation_level = 0,
         .tags = 0,
-        .data = {XTRACT_SPECTRAL_MAGNITUDES, XTRACT_UNIT_ANY, 2, accepted_spectral_entropy, 1, "N >= 2"},
+        .data = {XTRACT_SPECTRAL_MAGNITUDES, XTRACT_UNIT_ANY, 1, accepted_spectral_entropy, 1, "N >= 2"},
         .argc = 0,
         .argv = NULL,
         .is_scalar = XTRACT_TRUE,

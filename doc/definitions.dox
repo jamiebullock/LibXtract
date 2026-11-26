@@ -87,7 +87,10 @@ Validation level 0, not checked.
 
 xtract_spectral_mean()
 
-No published source is listed.
+\f[ \mu = \frac{\sum_{k=0}^{M-1} f_k a_k}{\sum_{k=0}^{M-1} a_k}, \quad M = N/2, \; a_k = x_k, \; f_k = x_{M+k}; \text{ no result when } \sum_k a_k = 0 \f]
+
+Sources:
+- Origin: Peeters (2004). "A large set of audio features for sound description (similarity and classification) in the CUIDADO project". Technical report, IRCAM, section 6.1.1
 
 Validation level 0, not checked.
 
@@ -95,7 +98,10 @@ Validation level 0, not checked.
 
 xtract_spectral_variance()
 
-No published source is listed.
+\f[ \sigma^2 = \frac{\sum_{k=0}^{M-1} (f_k - \mu)^2 a_k}{\sum_{k=0}^{M-1} a_k}, \quad \mu \text{ the spectral mean given in argv}, \quad M = N/2, \; a_k = x_k, \; f_k = x_{M+k}; \text{ no result when } \sum_k a_k = 0 \f]
+
+Sources:
+- Origin: Peeters (2004). "A large set of audio features for sound description (similarity and classification) in the CUIDADO project". Technical report, IRCAM, section 6.1.2
 
 Validation level 0, not checked.
 
@@ -103,7 +109,10 @@ Validation level 0, not checked.
 
 xtract_spectral_standard_deviation()
 
-No published source is listed.
+\f[ \sigma = \sqrt{v}, \quad v \ge 0 \text{ the spectral variance given in argv} \f]
+
+Sources:
+- Origin: Peeters (2004). "A large set of audio features for sound description (similarity and classification) in the CUIDADO project". Technical report, IRCAM, section 6.1.2
 
 Validation level 0, not checked.
 
@@ -111,7 +120,10 @@ Validation level 0, not checked.
 
 xtract_spectral_skewness()
 
-No published source is listed.
+\f[ \gamma_1 = \frac{\sum_{k=0}^{M-1} (f_k - \mu)^3 a_k}{\sigma^3 \sum_{k=0}^{M-1} a_k}, \quad \mu, \sigma \text{ the spectral mean and standard deviation given in argv}, \; \sigma \ge 0, \quad M = N/2, \; a_k = x_k, \; f_k = x_{M+k}; \text{ no result when } \sigma = 0 \text{ or } \sum_k a_k = 0 \f]
+
+Sources:
+- Origin: Peeters (2004). "A large set of audio features for sound description (similarity and classification) in the CUIDADO project". Technical report, IRCAM, section 6.1.3
 
 Validation level 0, not checked.
 
@@ -119,7 +131,10 @@ Validation level 0, not checked.
 
 xtract_spectral_kurtosis()
 
-No published source is listed.
+\f[ \gamma_2 - 3 = \frac{\sum_{k=0}^{M-1} (f_k - \mu)^4 a_k}{\sigma^4 \sum_{k=0}^{M-1} a_k} - 3, \quad \mu, \sigma \text{ the spectral mean and standard deviation given in argv}, \; \sigma \ge 0, \quad M = N/2, \; a_k = x_k, \; f_k = x_{M+k}; \text{ no result when } \sigma = 0 \text{ or } \sum_k a_k = 0 \f]
+
+Sources:
+- Origin: Peeters (2004). "A large set of audio features for sound description (similarity and classification) in the CUIDADO project". Technical report, IRCAM, section 6.1.4
 
 Validation level 0, not checked.
 
@@ -127,7 +142,10 @@ Validation level 0, not checked.
 
 xtract_spectral_centroid()
 
-No published source is listed.
+\f[ \mu = \frac{\sum_{k=0}^{M-1} f_k a_k}{\sum_{k=0}^{M-1} a_k}, \quad M = N/2, \; a_k = x_k, \; f_k = x_{M+k}; \text{ no result when } \sum_k a_k = 0 \f]
+
+Sources:
+- Origin: Peeters (2004). "A large set of audio features for sound description (similarity and classification) in the CUIDADO project". Technical report, IRCAM, section 6.1.1
 
 Validation level 0, not checked.
 
@@ -512,6 +530,8 @@ Validation level 0, not checked.
 
 xtract_difference_vector()
 
+\f[ r_n = x_n - x_{N/2+n}, \quad n = 0, \ldots, N/2 - 1 \f]
+
 No published source is listed.
 
 Validation level 0, not checked.
@@ -519,6 +539,8 @@ Validation level 0, not checked.
 \section definition_autocorrelation Autocorrelation
 
 xtract_autocorrelation()
+
+\f[ r_\tau = \frac{1}{N} \sum_{n=0}^{N-1-\tau} x_n x_{n+\tau}, \quad \tau = 0, \ldots, N-1 \f]
 
 No published source is listed.
 
@@ -528,13 +550,18 @@ Validation level 0, not checked.
 
 xtract_amdf()
 
-No published source is listed.
+\f[ D_\tau = \frac{1}{N} \sum_{n=0}^{N-1-\tau} |x_n - x_{n+\tau}|, \quad \tau = 0, \ldots, N-1 \f]
+
+Sources:
+- Origin: Ross, Shaffer, Cohen, Freudberg and Manley (1974). "Average magnitude difference function pitch extractor". IEEE Transactions on Acoustics, Speech, and Signal Processing 22(5), equation 5. <a href="https://doi.org/10.1109/TASSP.1974.1162598">doi:10.1109/TASSP.1974.1162598</a>
 
 Validation level 0, not checked.
 
 \section definition_asdf Average Squared Difference Function
 
 xtract_asdf()
+
+\f[ S_\tau = \frac{1}{N} \sum_{n=0}^{N-1-\tau} (x_n - x_{n+\tau})^2, \quad \tau = 0, \ldots, N-1 \f]
 
 No published source is listed.
 
@@ -544,7 +571,11 @@ Validation level 0, not checked.
 
 xtract_bark_coefficients()
 
-No published source is listed.
+\f[ B_b = \sum_{k=l_b}^{\min(l_{b+1}, N)-1} x_k, \; b = 0, \dots, 24, \quad B_{25} = \sum_{k=l_{25}}^{N-1} x_k, \quad l_b \text{ the band limits given in argv}, \text{ an empty sum } 0 \f]
+
+Sources:
+- Origin: Zwicker (1961). "Subdivision of the audible frequency range into critical bands (Frequenzgruppen)". Journal of the Acoustical Society of America 33(2), table I. <a href="https://doi.org/10.1121/1.1908630">doi:10.1121/1.1908630</a>
+- Formulation: Smith and Abel (1999). "Bark and ERB bilinear transforms". IEEE Transactions on Speech and Audio Processing 7(6), section 3, the table of band edges. <a href="https://doi.org/10.1109/89.799695">doi:10.1109/89.799695</a>
 
 Validation level 0, not checked.
 
@@ -552,13 +583,18 @@ Validation level 0, not checked.
 
 xtract_peak_spectrum()
 
-No published source is listed.
+\f[ T = \frac{t}{100} \max(0, \max_{1 \le n < N} a_n); \text{ for } 1 \le n \le N-2 \text{ with } a_n \ge T, \; a_n > a_{n-1}, \; a_n > a_{n+1}: \; p = \frac{1}{2} \frac{a_{n-1} - a_{n+1}}{a_{n-1} - 2 a_n + a_{n+1}}, \; r_n = a_n - \frac{1}{4}(a_{n-1} - a_{n+1}) p, \; r_{N+n} = \Delta f (n + p); \text{ every other } r_n = r_{N+n} = 0, \quad \Delta f, t \text{ the bin spacing and threshold given in argv} \f]
+
+Sources:
+- Origin: Smith and Serra (1987). "PARSHL: an analysis/synthesis program for non-harmonic sounds based on a sinusoidal representation". Technical report STAN-M-43, CCRMA, Stanford University, section 5, equations 12 to 14. <a href="https://ccrma.stanford.edu/files/papers/stanm43.pdf">https://ccrma.stanford.edu/files/papers/stanm43.pdf</a>
 
 Validation level 0, not checked.
 
 \section definition_spectrum Spectrum
 
 xtract_spectrum()
+
+\f[ X_m = \frac{1}{N} \sum_{n=0}^{N-1} x_n e^{-2 \pi i m n / N}, \quad r_m = \operatorname{Re} X_m, \; r_{N/2+m} = \operatorname{Im} X_m, \quad m = 0, \ldots, \frac{N}{2} - 1, \quad \operatorname{Im} X_0 = 0 \f]
 
 No published source is listed.
 
@@ -567,6 +603,8 @@ Validation level 0, not checked.
 \section definition_autocorrelation_fft Autocorrelation (FFT method)
 
 xtract_autocorrelation_fft()
+
+\f[ r_\tau = \frac{1}{N} \sum_{n=0}^{N-1-\tau} x_n x_{n+\tau}, \quad \tau = 0, \ldots, N-1 \f]
 
 No published source is listed.
 
@@ -589,13 +627,18 @@ Validation level 0, not checked.
 
 xtract_dct()
 
-No published source is listed.
+\f[ X_k = \sum_{n=0}^{N-1} x_n \cos\left(\frac{\pi k (2n+1)}{2N}\right), \quad k = 0, \ldots, N-1 \f]
+
+Sources:
+- Origin: Ahmed, Natarajan and Rao (1974). "Discrete cosine transform". IEEE Transactions on Computers C-23(1), equation 1, without its scale factors. <a href="https://doi.org/10.1109/T-C.1974.223784">doi:10.1109/T-C.1974.223784</a>
 
 Validation level 0, not checked.
 
 \section definition_harmonic_spectrum Harmonic Spectrum
 
 xtract_harmonic_spectrum()
+
+\f[ h_n = \operatorname{round}(f_n / f_0); \text{ harmonic } h \text{ takes the largest vertex amplitude among the local maxima } n \text{ with } h_n = h \text{ and } |h_n - f_n/f_0| \le t, \text{ else the element with } h_n = h \text{ nearest to } h f_0 \text{ (the lower on a tie)}; \; r_n = \hat a_n \text{ (DBL\_MIN if 0)}, \; r_{M+n} = \hat f_n, \text{ every other element 0}, \quad f_0, t \text{ the fundamental and threshold given in argv}; \text{ no result when } f_0 = 0, \text{ when a harmonic below the highest has no element nearest to it, or when no harmonic lies among the elements} \f]
 
 No published source is listed.
 
@@ -629,6 +672,8 @@ Validation level 0, not checked.
 
 xtract_subbands()
 
+\f[ R_b = g\left(x_{u_b}, \dots, x_{u_b + w_b - 1}\right) \text{ when } u_b + w_b \le N, \text{ and } R_b = 0 \text{ otherwise}, \quad b = 0, \dots, B-1, \quad \text{linear: } w_b = \lfloor (N - s)/B \rfloor, \; u_b = s + b w_b, \quad \text{octave: } u_b = w_b = 2^b s, \quad g, B, s \text{ the feature, band count and start given in argv} \f]
+
 No published source is listed.
 
 Validation level 0, not checked.
@@ -637,7 +682,12 @@ Validation level 0, not checked.
 
 xtract_mel_spectrogram()
 
-No published source is listed.
+\f[ L_m = \ln \max\left(E_m, \epsilon \max_j E_j\right), \quad E_m = \sum_{k=0}^{N-1} H_m(k) P_k, \quad \epsilon = 2^{-52}, \quad H_m \text{ the gains of filter } m; \text{ no result when } \max_j E_j \le 0 \f]
+
+Sources:
+- Origin: Davis and Mermelstein (1980). "Comparison of parametric representations for monosyllabic word recognition in continuously spoken sentences". IEEE Transactions on Acoustics, Speech, and Signal Processing 28(4), equation 1 and figure 1. <a href="https://doi.org/10.1109/TASSP.1980.1163420">doi:10.1109/TASSP.1980.1163420</a>
+- Formulation: Rabiner and Juang (1993). "Fundamentals of speech recognition". PTR Prentice Hall, section 4.5.6, equation 4.90
+- Formulation: Young, Evermann, Gales, Hain, Kershaw, Liu, Moore, Odell, Ollason, Povey, Valtchev and Woodland (2009). "The HTK book, for HTK version 3.4". Cambridge University Engineering Department, section 5.4, equation 5.13
 
 Validation level 0, not checked.
 
@@ -668,7 +718,11 @@ Validation level 0, not checked.
 
 xtract_windowed()
 
-No published source is listed.
+\f[ y_n = x_n w_n, \quad n = 0, \ldots, N-1, \quad w \text{ the window given in argv; with } M = N-1, \text{ Hann } \tfrac{1}{2}(1 - \cos\tfrac{2\pi n}{M}), \text{ Hamming } 0.54 - 0.46\cos\tfrac{2\pi n}{M}, \text{ Blackman } 0.42 - 0.5\cos\tfrac{2\pi n}{M} + 0.08\cos\tfrac{4\pi n}{M}, \text{ Blackman-Harris } 0.35875 - 0.48829\cos\tfrac{2\pi n}{M} + 0.14128\cos\tfrac{4\pi n}{M} - 0.01168\cos\tfrac{6\pi n}{M}, \text{ Bartlett } 1 - \left|\tfrac{2n}{M} - 1\right|, \text{ triangular } \tfrac{2}{N}\left(\tfrac{N}{2} - \left|n - \tfrac{M}{2}\right|\right), \text{ Bartlett-Hann } 0.62 - 0.48\left|\tfrac{n}{M} - \tfrac{1}{2}\right| - 0.38\cos\tfrac{2\pi n}{M}, \text{ Gauss } \exp\left(-\tfrac{1}{2}\left(\tfrac{n - M/2}{0.4 M/2}\right)^2\right), \text{ Kaiser } \frac{I_0\left(3\pi\sqrt{1 - (2n/M - 1)^2}\right)}{I_0(3\pi)} \f]
+
+Sources:
+- Origin: Harris (1978). "On the use of windows for harmonic analysis with the discrete Fourier transform". Proceedings of the IEEE 66(1), equations 23a, 28a, 30b, 32, 33, 44a and 46a, and table I. <a href="https://doi.org/10.1109/PROC.1978.10837">doi:10.1109/PROC.1978.10837</a>
+- Formulation: Ha and Pearce (1989). "A new window and comparison to standard windows". IEEE Transactions on Acoustics, Speech, and Signal Processing 37(2), equation 6, the Bartlett-Hann window. <a href="https://doi.org/10.1109/29.21693">doi:10.1109/29.21693</a>
 
 Validation level 0, not checked.
 
@@ -710,7 +764,10 @@ Validation level 0, not checked.
 
 xtract_spectral_subband_centroids()
 
-No published source is listed.
+\f[ C_m = \frac{\sum_{k=0}^{M-1} f_k H_m(k) a_k}{\sum_{k=0}^{M-1} H_m(k) a_k}, \text{ or } 0 \text{ when the denominator is } 0, \quad m = 1, \dots, F, \quad H_m \text{ the gains of filter } m, \quad M = N/2, \; a_k = x_k, \; f_k = x_{M+k} \f]
+
+Sources:
+- Origin: Paliwal (1997). "Spectral subband centroids as features for speech recognition". Proceedings of the IEEE Workshop on Automatic Speech Recognition and Understanding, equation 1. <a href="https://doi.org/10.1109/ASRU.1997.658996">doi:10.1109/ASRU.1997.658996</a>
 
 Validation level 0, not checked.
 
@@ -865,7 +922,11 @@ Validation level 0, not checked.
 
 xtract_spectral_entropy()
 
-No published source is listed.
+\f[ H = -\frac{1}{\ln N} \sum_{k : x_k > 0} p_k \ln p_k, \quad p_k = \frac{x_k}{\sum_{j : x_j > 0} x_j}, \text{ limited to } [0, 1]; \text{ no result when no } x_k > 0 \f]
+
+Sources:
+- Origin: Powell and Percival (1979). "A spectral entropy method for distinguishing regular and irregular motion of Hamiltonian systems". Journal of Physics A: Mathematical and General 12(11), equations 2.7 and 2.8. <a href="https://doi.org/10.1088/0305-4470/12/11/017">doi:10.1088/0305-4470/12/11/017</a>
+- Formulation: Inouye, Shinosaki, Sakamoto, Toi, Ukai, Iyama, Katsuda and Hirano (1991). "Quantification of EEG irregularity by use of the entropy of the power spectrum". Electroencephalography and Clinical Neurophysiology 79(3), equations 1 and 2, and page 206 for the division by the largest entropy. <a href="https://doi.org/10.1016/0013-4694(91)90138-T">doi:10.1016/0013-4694(91)90138-T</a>
 
 Validation level 0, not checked.
 
@@ -1322,6 +1383,8 @@ Validation level 0, not checked.
 
 xtract_packed()
 
+\f[ r_k = a_{n_k}, \; r_{M+k} = f_{n_k} \text{ for the } K \text{ indices } n_0 < \ldots < n_{K-1} \text{ with } a_n \ne 0; \; r_k = r_{M+k} = 0 \text{ for } k \ge K, \quad a_n = x_n, \; f_n = x_{M+n}, \; M = N/2 \f]
+
 No published source is listed.
 
 Validation level 0, not checked.
@@ -1329,6 +1392,8 @@ Validation level 0, not checked.
 \section definition_magnitude_spectrum Magnitude Spectrum
 
 xtract_magnitude_spectrum()
+
+\f[ r_m = \sqrt{a_m^2 + b_m^2}, \quad r_{M+m} = m \Delta f, \quad a_m = x_m, \; b_m = x_{M+m}, \quad m = 0, \ldots, M-1, \quad M = N/2, \quad \Delta f \text{ the bin spacing given in argv} \f]
 
 No published source is listed.
 
@@ -1338,6 +1403,8 @@ Validation level 0, not checked.
 
 xtract_power_spectrum()
 
+\f[ r_m = a_m^2 + b_m^2, \quad r_{M+m} = m \Delta f, \quad a_m = x_m, \; b_m = x_{M+m}, \quad m = 0, \ldots, M-1, \quad M = N/2, \quad \Delta f \text{ the bin spacing given in argv} \f]
+
 No published source is listed.
 
 Validation level 0, not checked.
@@ -1346,6 +1413,8 @@ Validation level 0, not checked.
 
 xtract_log_spectrum()
 
+\f[ r_m = 1 + \frac{\ln P_m}{-\ln \epsilon^2} \text{ if } P_m > \epsilon^2, \text{ else } 0, \quad P_m = a_m^2 + b_m^2, \quad r_{M+m} = m \Delta f, \quad a_m = x_m, \; b_m = x_{M+m}, \quad M = N/2, \quad \epsilon = 2^{-52} \f]
+
 No published source is listed.
 
 Validation level 0, not checked.
@@ -1353,6 +1422,8 @@ Validation level 0, not checked.
 \section definition_phase_spectrum Phase Spectrum
 
 xtract_phase_spectrum()
+
+\f[ r_m = \operatorname{atan2}(b_m, a_m) \in [-\pi, \pi], \; \operatorname{atan2}(0, 0) = 0, \quad r_{M+m} = m \Delta f, \quad a_m = x_m, \; b_m = x_{M+m}, \quad M = N/2 \f]
 
 No published source is listed.
 

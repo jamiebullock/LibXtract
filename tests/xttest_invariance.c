@@ -108,7 +108,7 @@ UTEST(invariance, a_feature_that_takes_a_peak_spectrum_is_unchanged_by_elements_
         xttest_call_free(&call[0]);
         xttest_call_free(&call[1]);
     }
-    ASSERT_GT(checked, 5);
+    ASSERT_GT(checked, 3);
 
     free(wider.values);
     xttest_call_free(&peaks);

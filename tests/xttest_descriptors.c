@@ -1430,10 +1430,7 @@ UTEST(descriptors, a_quantity_is_a_scalar_or_an_array_as_its_providers_give)
 
 UTEST(descriptors, coefficients_with_their_frequencies_come_from_six_features)
 {
-    static const int takers[] = {XTRACT_SPECTRAL_MEAN, XTRACT_SPECTRAL_VARIANCE, XTRACT_SPECTRAL_SKEWNESS, XTRACT_SPECTRAL_KURTOSIS,
-                                 XTRACT_SPECTRAL_CENTROID, XTRACT_SPREAD, XTRACT_SPECTRAL_SLOPE};
-    const xtract_quantity_t *quantity = xtract_descriptor(XTRACT_SPECTRAL_MEAN)->data.accepts[0];
-    size_t t;
+    const xtract_quantity_t *quantity = xtract_descriptor(XTRACT_SPECTRAL_SLOPE)->data.accepts[0];
 
     ASSERT_STREQ(quantity->name, "coefficients_and_frequencies");
     ASSERT_EQ(quantity->provider_count, 6);
@@ -1443,8 +1440,20 @@ UTEST(descriptors, coefficients_with_their_frequencies_come_from_six_features)
     ASSERT_EQ(quantity->providers[3].feature, XTRACT_PACKED);
     ASSERT_EQ(quantity->providers[4].feature, XTRACT_POWER_SPECTRUM);
     ASSERT_EQ(quantity->providers[5].feature, XTRACT_LOG_SPECTRUM);
+}
+
+UTEST(descriptors, the_spectral_moments_take_a_magnitude_spectrum)
+{
+    static const int takers[] = {XTRACT_SPECTRAL_MEAN, XTRACT_SPECTRAL_VARIANCE, XTRACT_SPECTRAL_SKEWNESS,
+                                 XTRACT_SPECTRAL_KURTOSIS, XTRACT_SPECTRAL_CENTROID, XTRACT_SPREAD};
+    size_t t;
+
     for (t = 0; t < sizeof(takers) / sizeof(takers[0]); t++)
-        ASSERT_TRUE_MSG(xtract_descriptor(takers[t])->data.accepts[0] == quantity, xtract_descriptor(takers[t])->name);
+    {
+        ASSERT_EQ_MSG(xtract_descriptor(takers[t])->data.accept_count, 1, xtract_descriptor(takers[t])->name);
+        ASSERT_STREQ_MSG(xtract_descriptor(takers[t])->data.accepts[0]->name, "magnitude_spectrum",
+                         xtract_descriptor(takers[t])->name);
+    }
 }
 
 UTEST(descriptors, harmonic_amplitudes_are_the_first_half_of_a_packed_harmonic_spectrum)

@@ -96,7 +96,7 @@ extern "C"
      * \param *data: a pointer to the first element in an array of doubles representing an audio vector
      * \param N: the number of array elements to be considered, a power of two of at least 2
      * \param *argv: a pointer to NULL
-     * \param *result: the autocorrelation of N values from the array pointed to by *data
+     * \param *result: the autocorrelation of N values from the array pointed to by *data, as xtract_autocorrelation() gives it to within rounding
      */
     int xtract_autocorrelation_fft(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
@@ -168,13 +168,13 @@ extern "C"
      * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector: N/2 amplitudes followed by N/2 frequencies, the array pointed to by *result from xtract_magnitude_spectrum(), so that element k is bin k as the filterbank expects
      * \param N: the size of the array pointed to by *data, at least 2 and even, and equal to the N the filterbank was built for
      * \param *argv: a pointer to an xtract_filterbank from xtract_init_mfcc() or xtract_init_filterbank(), built for the size of the transform that produced the spectrum
-     * \param *result: a pointer to an array of n_filters doubles containing the spectral band centroids, in the unit of the frequencies
+     * \param *result: a pointer to an array of n_filters doubles containing the spectral band centroids, in the unit of the frequencies: for each filter, the mean of the frequencies weighted by the filter's gains times the amplitudes, or 0 for a filter that passes no amplitude. With magnitudes this is the centroid of Paliwal (1997) on the power spectrum raised to 0.5, and with powers raised to 1
      *
      * Note: the *result of xtract_peak_spectrum() or xtract_harmonic_spectrum() may be passed in for the interpolated peak frequencies.
      */
     int xtract_spectral_subband_centroids(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
-    /** \brief Extract the Discrete Cosine transform of a time domain signal
+    /** \brief Extract the discrete cosine transform of a time domain signal: the DCT-II, with no scale factor
      * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles representing an audio vector
      * \param N: the number of array elements to be considered, at least 1
@@ -189,7 +189,7 @@ extern "C"
      * \param *data: a pointer to the first element in an array of doubles representing an audio vector
      * \param N: the number of array elements to be considered, at least 1
      * \param *argv: a pointer to NULL
-     * \param *result: the autocorrelation of N values from the array pointed to by *data
+     * \param *result: the autocorrelation of N values from the array pointed to by *data: for each lag from 0 to N - 1, the sum of the products of the elements that lag apart, divided by N. The mean is not removed
      */
     int xtract_autocorrelation(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
@@ -199,7 +199,7 @@ extern "C"
      * \param *data: a pointer to the first element in an array of doubles representing an audio vector
      * \param N: the number of array elements to be considered, at least 1
      * \param *argv: a pointer to NULL
-     * \param *result: the AMDF of N values from the array pointed to by *data
+     * \param *result: the AMDF of N values from the array pointed to by *data: for each lag from 0 to N - 1, the sum of the magnitudes of the differences between the elements that lag apart, divided by N
      */
     int xtract_amdf(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
@@ -209,11 +209,11 @@ extern "C"
      * \param *data: a pointer to the first element in an array of doubles representing an audio vector
      * \param N: the number of array elements to be considered, at least 1
      * \param *argv: a pointer to NULL
-     * \param *result: the ASDF of N values from the array pointed to by *data
+     * \param *result: the ASDF of N values from the array pointed to by *data: for each lag from 0 to N - 1, the sum of the squared differences between the elements that lag apart, divided by N
      */
     int xtract_asdf(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
-    /** \brief Extract Bark band coefficients based on a method
+    /** \brief Extract Bark band coefficients: the sum of the spectral coefficients in each Bark band
      * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of spectral coefficients, the first half of the array pointed to by *result from xtract_magnitude_spectrum(), so that element k is bin k as the band limits expect
      * \param N: the number of coefficients, half the transform size the band limits were initialised with, at least 1
@@ -229,8 +229,8 @@ extern "C"
      * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to an array of size N containing N magnitude, power or log coefficients: the first half of the array pointed to by *result from xtract_magnitude_spectrum(), so that coefficient n is bin n and the reported frequencies follow that layout
      * \param N: the size of the input array, at least 1 (note: it is assumed that enough memory has been allocated for an output array twice the size)
-     * \param *argv: a pointer to an array of doubles, the first representing the bin spacing in Hz, the sample rate divided by the transform length (twice N for the first half of an xtract_magnitude_spectrum() output), finite and above 0, the second representing the peak threshold as percentage of the magnitude of the maximum peak found, from 0 to 100
-     * \param *result: a pointer to an array of size N * 2 containing N magnitude, power or log coefficients and N bin frequencies.
+     * \param *argv: a pointer to an array of doubles, the first representing the bin spacing in Hz, the sample rate divided by the transform length (twice N for the first half of an xtract_magnitude_spectrum() output), finite and above 0, the second representing the peak threshold as a percentage of the largest coefficient from bin 1, from 0 to 100
+     * \param *result: a pointer to an array of size N * 2 containing N magnitude, power or log coefficients and N bin frequencies. A peak is an element from bin 1 to N - 2 above both its neighbours and at least the threshold; its amplitude and frequency are those of the vertex of the parabola through it and its neighbours (Smith and Serra 1987). Every other element is 0
      *
      */
     int xtract_peak_spectrum(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
@@ -289,7 +289,7 @@ extern "C"
      * xtract_subbands() divides a spectrum into subbands and applies the function given by argv[0] to the values in each subband to give a 'reduced' representation of the spectrum as *result
      *
      * Specifying XTRACT_OCTAVE_SUBBANDS will extract subbands at each octave from the start bin until argv[1] is reached or N is reached
-     * Specifying XTRACT_LINEAR_SUBBANDS will extract argv[1] equal sized subbands between the start bin and N
+     * Specifying XTRACT_LINEAR_SUBBANDS will extract argv[1] equal sized subbands from the start bin, each of (N - start) / argv[1] bins rounded down; the bins left over at the end are not used. An octave band that would extend past N is 0
      *
      *
      * argv[0] must be a feature that reduces a plain vector to one scalar in the unit of the vector with a NULL argv: XTRACT_MEAN, XTRACT_SUM, XTRACT_HIGHEST_VALUE or XTRACT_RMS_AMPLITUDE. Any other feature is an argument error. The feature is called on each band with a NULL argv, and its own argument checks apply to the band
