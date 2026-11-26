@@ -29,9 +29,6 @@ extern "C"
     /** \brief The state xtract_last_n() keeps for one stream of values */
     typedef struct xtract_last_n_state_ xtract_last_n_state;
 
-    /** \brief The state xtract_wavelet_f0() keeps for one stream of frames */
-    typedef struct xtract_wavelet_f0_state_ xtract_wavelet_f0_state;
-
     /** \brief Allocate the state of one stream of values for xtract_last_n()
      *
      * \param capacity: the N that xtract_last_n() will be called with
@@ -54,19 +51,6 @@ extern "C"
      * \param *result: a pointer to an array of N doubles: the last N input values, the current one last, with 0 for each value before the first call
      */
     int xtract_last_n(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
-
-    /** \brief Allocate the state of one stream of frames for xtract_wavelet_f0()
-     *
-     * \param sample_rate: the sample rate of the stream in Hertz, finite and above 0
-     * \return a pointer to the new state, or NULL if the sample rate is out of range or memory cannot be allocated
-     */
-    xtract_wavelet_f0_state *xtract_wavelet_f0_state_new(double sample_rate);
-
-    /** \brief Free a state allocated by xtract_wavelet_f0_state_new()
-     *
-     * \param *wavelet_f0_state: the state to free, as returned by xtract_wavelet_f0_state_new(), or NULL
-     */
-    void xtract_wavelet_f0_state_delete(xtract_wavelet_f0_state *wavelet_f0_state);
 
     /** @} */
 

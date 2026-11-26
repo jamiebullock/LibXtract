@@ -20,7 +20,7 @@ get_filename_component(root "${CMAKE_CURRENT_LIST_DIR}/.." ABSOLUTE)
 
 execute_process(
     COMMAND git ls-files -- *.c *.h
-        :!:src/ooura/** :!:src/c-ringbuf/** :!:src/dywapitchtrack/**
+        :!:src/ooura/** :!:src/c-ringbuf/**
         :!:swig/** :!:examples/simpletest/**
         :!:tests/utest.h :!:bench/ubench.h
     WORKING_DIRECTORY "${root}"

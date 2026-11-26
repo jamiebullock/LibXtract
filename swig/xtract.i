@@ -41,11 +41,6 @@
         return (void *)state;
     }
 
-    void *wavelet_f0_state_to_voidp(xtract_wavelet_f0_state *state)
-    {
-        return (void *)state;
-    }
-
     void *filterbank_to_voidp(xtract_filterbank *filterbank)
     {
         return (void *)filterbank;

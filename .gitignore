@@ -45,3 +45,7 @@ verify/.proofs*
 .vale/styles/config/templates/
 .vale/styles/config/views/
 .vale/styles/config/vocabularies/Programming/
+
+# Output of the old Makefile build
+.build/
+/tests/xttest

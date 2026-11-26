@@ -137,7 +137,7 @@ int main(void)
 
     /* create the window functions */
     window = xtract_init_window(BLOCKSIZE, XTRACT_HANN);
-    xtract_wavelet_f0_state *wavelet_f0_state = xtract_wavelet_f0_state_new(SAMPLERATE);
+    double samplerate = SAMPLERATE;
     xtract_context *ctx = xtract_context_new(BLOCKSIZE);
 
     // fill_wavetable(344.53125f, NOISE); // 344.53125f = 128 samples @ 44100 Hz
@@ -152,7 +152,7 @@ int main(void)
     for (uint64_t n = 0; (n + BLOCKSIZE) < wavSamples; n += HALF_BLOCKSIZE) // Overlap by HALF_BLOCKSIZE
     {
         /* get the F0 */
-        xtract[XTRACT_WAVELET_F0](ctx, &data[n], BLOCKSIZE, wavelet_f0_state, &f0);
+        xtract[XTRACT_WAVELET_F0](ctx, &data[n], BLOCKSIZE, &samplerate, &f0);
 
         /* get the F0 as a MIDI note */
         if (f0 != 0.0)
@@ -222,7 +222,6 @@ int main(void)
     /* clean up */
     xtract_free_filterbank(mel_filters);
     xtract_free_window(window);
-    xtract_wavelet_f0_state_delete(wavelet_f0_state);
     xtract_last_n_state_delete(last_n_state);
     xtract_context_delete(ctx);
 

@@ -19,8 +19,8 @@
 #include <string.h>
 
 /*
- * Unit tests for stateful pitch detection (wavelet/dywapitch), the
- * xtract_failsafe_f0 fallback and the subframe/denormal helpers.
+ * Unit tests for the wavelet pitch method, the xtract_failsafe_f0 fallback
+ * and the subframe/denormal helpers.
  */
 
 static const double EPSILON = 1e-10;
@@ -222,179 +222,298 @@ UTEST(helper, features_from_subframes_takes_the_spectra_of_a_complex_spectrum_an
     xtract_context_delete(ctx);
 }
 
-UTEST(stateful, wavelet_f0_state_new_rejects_a_sample_rate_that_is_not_finite_and_above_zero)
-{
-    ASSERT_TRUE(xtract_wavelet_f0_state_new(0.0) == NULL);
-    ASSERT_TRUE(xtract_wavelet_f0_state_new(-44100.0) == NULL);
-    ASSERT_TRUE(xtract_wavelet_f0_state_new(NAN) == NULL);
-    ASSERT_TRUE(xtract_wavelet_f0_state_new(INFINITY) == NULL);
-}
-
 UTEST(stateful, state_delete_accepts_null)
 {
-    xtract_wavelet_f0_state_delete(NULL);
     xtract_last_n_state_delete(NULL);
 }
 
-UTEST(stateful, wavelet_f0_rejects_a_null_state_and_an_empty_input)
+UTEST(wavelet_f0, rejects_a_sample_rate_that_is_not_finite_and_above_zero_and_an_empty_input)
 {
+    static const double rejected[] = {0.0, -44100.0, NAN, INFINITY};
     double table[WAVELET_N];
-    xtract_wavelet_f0_state *state = xtract_wavelet_f0_state_new(44100.0);
+    double sample_rate = 44100.0;
     double result = -1.0;
-
-    ASSERT_TRUE(state != NULL);
-    ASSERT_EQ(xtract_wavelet_f0(NULL, table, WAVELET_N, NULL, &result), XTRACT_ARGUMENT_ERROR);
-    ASSERT_EQ(result, 0.0);
-    result = -1.0;
-    ASSERT_EQ(xtract_wavelet_f0(NULL, table, 0, state, &result), XTRACT_ARGUMENT_ERROR);
-    ASSERT_EQ(result, 0.0);
-    xtract_wavelet_f0_state_delete(state);
-}
-
-UTEST(stateful, wavelet_f0_detects_sine_pitch)
-{
-    /* dywapitch assumes 44100 Hz internally; generating at 44100 means the
-     * sr/44100 scaling is unity and the result should be the input pitch.
-     * dywapitch is accurate to well within 1% here (not exact to the cent
-     * like the tuned xtract_f0 frequencies), so use a relative tolerance. */
-    double table[WAVELET_N];
-    double samplerate = 44100.0;
-    double frequency = 440.0;
-    double result = -1.0;
-    xtract_wavelet_f0_state *state = xtract_wavelet_f0_state_new(samplerate);
-    int rv;
-
-    ASSERT_TRUE(state != NULL);
-    xttest_gen_sine(table, WAVELET_N, samplerate, frequency, 1.0);
-    rv = xtract_wavelet_f0(xttest_context(), table, WAVELET_N, state, &result);
-    ASSERT_EQ(rv, XTRACT_SUCCESS);
-    CHECK_REL(result, frequency, 0.01);
-    xtract_wavelet_f0_state_delete(state);
-}
-
-UTEST(stateful, wavelet_f0_scales_the_pitch_by_the_sample_rate_of_its_state)
-{
-    double table[WAVELET_N];
-    double at_44100 = -1.0;
-    double at_22050 = -1.0;
-    xtract_wavelet_f0_state *state_44100 = xtract_wavelet_f0_state_new(44100.0);
-    xtract_wavelet_f0_state *state_22050 = xtract_wavelet_f0_state_new(22050.0);
-
-    ASSERT_TRUE(state_44100 != NULL);
-    ASSERT_TRUE(state_22050 != NULL);
-    xttest_gen_sine(table, WAVELET_N, 44100.0, 440.0, 1.0);
-    ASSERT_EQ(xtract_wavelet_f0(xttest_context(), table, WAVELET_N, state_44100, &at_44100), XTRACT_SUCCESS);
-    ASSERT_EQ(xtract_wavelet_f0(xttest_context(), table, WAVELET_N, state_22050, &at_22050), XTRACT_SUCCESS);
-    CHECK_REL(at_22050, at_44100 / 2.0, EPSILON);
-    xtract_wavelet_f0_state_delete(state_44100);
-    xtract_wavelet_f0_state_delete(state_22050);
-}
-
-UTEST(stateful, wavelet_f0_follows_each_stream_in_its_own_state)
-{
-    /* The tracker drops a pitch more than 20% from the one before it, so a
-     * stream that has heard 440 Hz gives no result for a frame of 300 Hz,
-     * while a stream whose first frame it is reports it. */
-    double at_440[WAVELET_N];
-    double at_300[WAVELET_N];
-    double result = -1.0;
-    xtract_wavelet_f0_state *first = xtract_wavelet_f0_state_new(44100.0);
-    xtract_wavelet_f0_state *second = xtract_wavelet_f0_state_new(44100.0);
-
-    ASSERT_TRUE(first != NULL);
-    ASSERT_TRUE(second != NULL);
-    xttest_gen_sine(at_440, WAVELET_N, 44100.0, 440.0, 1.0);
-    xttest_gen_sine(at_300, WAVELET_N, 44100.0, 300.0, 1.0);
-
-    ASSERT_EQ(xtract_wavelet_f0(xttest_context(), at_440, WAVELET_N, first, &result), XTRACT_SUCCESS);
-    CHECK_REL(result, 440.0, 0.01);
-    ASSERT_EQ(xtract_wavelet_f0(xttest_context(), at_300, WAVELET_N, second, &result), XTRACT_SUCCESS);
-    CHECK_REL(result, 300.0, 0.01);
-    ASSERT_EQ(xtract_wavelet_f0(xttest_context(), at_300, WAVELET_N, first, &result), XTRACT_NO_RESULT);
-    xtract_wavelet_f0_state_delete(first);
-    xtract_wavelet_f0_state_delete(second);
-}
-
-UTEST(stateful, wavelet_f0_silence_yields_no_result)
-{
-    double table[WAVELET_N];
-    double result = -1.0;
-    xtract_wavelet_f0_state *state = xtract_wavelet_f0_state_new(44100.0);
-    uint32_t n;
-
-    ASSERT_TRUE(state != NULL);
-    for (n = 0; n < WAVELET_N; n++)
-        table[n] = 0.0;
-    ASSERT_EQ(xtract_wavelet_f0(xttest_context(), table, WAVELET_N, state, &result), XTRACT_NO_RESULT);
-    xtract_wavelet_f0_state_delete(state);
-}
-
-UTEST(stateful, wavelet_f0_is_in_a_bad_state_without_a_context_for_its_length)
-{
-    double table[WAVELET_N];
-    double result = -1.0;
-    xtract_context *shorter = xtract_context_new(WAVELET_N - 1);
-    xtract_wavelet_f0_state *state = xtract_wavelet_f0_state_new(44100.0);
-
-    ASSERT_TRUE(shorter != NULL);
-    ASSERT_TRUE(state != NULL);
-    xttest_gen_sine(table, WAVELET_N, 44100.0, 440.0, 1.0);
-    ASSERT_EQ(xtract_wavelet_f0(NULL, table, WAVELET_N, state, &result), XTRACT_BAD_STATE);
-    ASSERT_EQ(result, -1.0);
-    ASSERT_EQ(xtract_wavelet_f0(shorter, table, WAVELET_N, state, &result), XTRACT_BAD_STATE);
-    ASSERT_EQ(result, -1.0);
-    xtract_wavelet_f0_state_delete(state);
-    xtract_context_delete(shorter);
-}
-
-UTEST(stateful, wavelet_f0_in_a_bad_state_does_not_hear_the_frame)
-{
-    /* Had the stream heard the frame of 440 Hz, it would give no result for
-     * the frame of 300 Hz that follows */
-    double at_440[WAVELET_N];
-    double at_300[WAVELET_N];
-    double result = -1.0;
-    xtract_wavelet_f0_state *state = xtract_wavelet_f0_state_new(44100.0);
-
-    ASSERT_TRUE(state != NULL);
-    xttest_gen_sine(at_440, WAVELET_N, 44100.0, 440.0, 1.0);
-    xttest_gen_sine(at_300, WAVELET_N, 44100.0, 300.0, 1.0);
-
-    ASSERT_EQ(xtract_wavelet_f0(NULL, at_440, WAVELET_N, state, &result), XTRACT_BAD_STATE);
-    ASSERT_EQ(xtract_wavelet_f0(xttest_context(), at_300, WAVELET_N, state, &result), XTRACT_SUCCESS);
-    CHECK_REL(result, 300.0, 0.01);
-    xtract_wavelet_f0_state_delete(state);
-}
-
-UTEST(stateful, wavelet_f0_takes_a_context_created_for_exactly_its_length)
-{
-    static const int lengths[] = {1, 2, 3, 5, 64, 100, WAVELET_N};
-    double table[WAVELET_N];
-    double exact_result, shared_result;
-    xtract_context *exact;
-    xtract_wavelet_f0_state *exact_state, *shared_state;
-    int exact_code, shared_code;
     size_t i;
 
     xttest_gen_sine(table, WAVELET_N, 44100.0, 440.0, 1.0);
+    ASSERT_EQ(xtract_wavelet_f0(xttest_context(), table, WAVELET_N, NULL, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    for (i = 0; i < sizeof(rejected) / sizeof(rejected[0]); i++)
+    {
+        result = -1.0;
+        ASSERT_EQ(xtract_wavelet_f0(xttest_context(), table, WAVELET_N, &rejected[i], &result), XTRACT_ARGUMENT_ERROR);
+        ASSERT_EQ(result, 0.0);
+    }
+    result = -1.0;
+    ASSERT_EQ(xtract_wavelet_f0(xttest_context(), table, 0, &sample_rate, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+}
+
+UTEST(wavelet_f0, finds_the_period_of_a_sine_at_any_sample_rate)
+{
+    /* The generator rounds the period to a whole number of samples, so each
+     * pitch is the sample rate over that number: 44100 / 100, 8000 / 26 and
+     * 16000 / 20 */
+    static const double rates[] = {44100.0, 8000.0, 16000.0};
+    static const double tones[] = {440.0, 300.0, 800.0};
+    static const double pitches[] = {441.0, 8000.0 / 26.0, 800.0};
+    double table[WAVELET_N];
+    double result;
+    size_t i;
+
+    for (i = 0; i < sizeof(rates) / sizeof(rates[0]); i++)
+    {
+        xttest_gen_sine(table, WAVELET_N, rates[i], tones[i], 1.0);
+        result = -1.0;
+        ASSERT_EQ(xtract_wavelet_f0(xttest_context(), table, WAVELET_N, &rates[i], &result), XTRACT_SUCCESS);
+        CHECK_REL(result, pitches[i], 1e-12);
+    }
+}
+
+/* A signal of whole numbers, so that every sum, mean and approximation the
+ * method takes is exact and its pitch does not depend on the platform: two
+ * square waves of periods p1 and p2 samples and amplitudes a1 and a2 (p2 of
+ * 0 for none), pseudo-random whole numbers scaled by noise / 100, and an
+ * offset */
+typedef struct
+{
+    int n, p1, a1, p2, a2, noise, offset;
+    double sample_rate;
+    int seed;
+    double pitch;
+} wavelet_case;
+
+static void wavelet_signal(const wavelet_case *c, double *x)
+{
+    unsigned long long state = (unsigned long long)c->seed;
+    int i;
+
+    for (i = 0; i < c->n; i++)
+    {
+        long long scaled, noise;
+
+        state = (state * 1103515245ULL + 12345ULL) % 2147483648ULL;
+        scaled = (long long)c->noise * ((long long)((state >> 16) % 201) - 100);
+        /* Rounded down, as the reference values were computed */
+        noise = scaled >= 0 ? scaled / 100 : -((-scaled + 99) / 100);
+        x[i] = (double)(c->offset + ((i % c->p1) < c->p1 / 2 ? c->a1 : -c->a1) + noise);
+        if (c->p2 > 0)
+            x[i] += (i % c->p2) < c->p2 / 2 ? c->a2 : -c->a2;
+    }
+}
+
+UTEST(wavelet_f0, matches_a_port_of_larson_and_maddoxs_appendix_on_whole_number_signals)
+{
+    /* The pitches were computed by a line-by-line port of the MATLAB of
+     * Larson and Maddox (2005), appendix A, with no previous pitch; 0 is no
+     * result */
+    static const wavelet_case cases[] = {
+        {256, 40, 100, 0, 0, 0, 0, 8000.0, 11, 200.0},
+        {1000, 40, 100, 0, 0, 0, 0, 8000.0, 12, 200.0},
+        {2048, 40, 100, 0, 0, 0, 0, 8000.0, 13, 200.0},
+        {256, 100, 100, 50, 30, 0, 7, 8000.0, 14, 80.0},
+        {1000, 100, 100, 50, 30, 0, 7, 8000.0, 15, 80.0},
+        {2048, 100, 100, 50, 30, 0, 7, 8000.0, 16, 80.0},
+        {256, 64, 50, 0, 0, 20, -300, 8000.0, 17, 0.0},
+        {1000, 64, 50, 0, 0, 20, -300, 8000.0, 18, 125.0},
+        {2048, 64, 50, 0, 0, 20, -300, 8000.0, 19, 0.0},
+        {256, 30, 100, 15, 60, 10, 0, 8000.0, 20, 268.1564245810056},
+        {1000, 30, 100, 15, 60, 10, 0, 8000.0, 21, 267.3521850899743},
+        {2048, 30, 100, 15, 60, 10, 0, 8000.0, 22, 0.0},
+        {256, 200, 100, 100, 50, 40, 1000, 8000.0, 23, 0.0},
+        {1000, 200, 100, 100, 50, 40, 1000, 8000.0, 24, 39.603960396039604},
+        {2048, 200, 100, 100, 50, 40, 1000, 8000.0, 25, 40.08589835361489},
+        {256, 16, 100, 0, 0, 0, 0, 8000.0, 26, 500.0},
+        {1000, 16, 100, 0, 0, 0, 0, 8000.0, 27, 500.0},
+        {2048, 16, 100, 0, 0, 0, 0, 8000.0, 28, 500.0},
+        {256, 90, 80, 30, 40, 60, -5, 8000.0, 29, 0.0},
+        {1000, 90, 80, 30, 40, 60, -5, 8000.0, 30, 0.0},
+        {2048, 90, 80, 30, 40, 60, -5, 8000.0, 31, 88.88888888888889},
+        {256, 12, 100, 6, 20, 0, 0, 8000.0, 32, 666.6666666666666},
+        {1000, 12, 100, 6, 20, 0, 0, 8000.0, 33, 666.6666666666666},
+        {2048, 12, 100, 6, 20, 0, 0, 8000.0, 34, 666.6666666666666},
+        {256, 150, 100, 75, 100, 0, 0, 8000.0, 35, 0.0},
+        {1000, 150, 100, 75, 100, 0, 0, 8000.0, 36, 53.333333333333336},
+        {2048, 150, 100, 75, 100, 0, 0, 8000.0, 37, 53.333333333333336},
+        {256, 50, 100, 25, 95, 5, 3, 8000.0, 38, 173.91304347826087},
+        {1000, 50, 100, 25, 95, 5, 3, 8000.0, 39, 0.0},
+        {2048, 50, 100, 25, 95, 5, 3, 8000.0, 40, 0.0},
+        {256, 40, 100, 0, 0, 0, 0, 22050.0, 41, 551.25},
+        {1000, 40, 100, 0, 0, 0, 0, 22050.0, 42, 551.25},
+        {2048, 40, 100, 0, 0, 0, 0, 22050.0, 43, 551.25},
+        {256, 100, 100, 50, 30, 0, 7, 22050.0, 44, 220.5},
+        {1000, 100, 100, 50, 30, 0, 7, 22050.0, 45, 220.5},
+        {2048, 100, 100, 50, 30, 0, 7, 22050.0, 46, 220.5},
+        {256, 64, 50, 0, 0, 20, -300, 22050.0, 47, 367.5},
+        {1000, 64, 50, 0, 0, 20, -300, 22050.0, 48, 0.0},
+        {2048, 64, 50, 0, 0, 20, -300, 22050.0, 49, 172.43401759530792},
+        {256, 30, 100, 15, 60, 10, 0, 22050.0, 50, 747.457627118644},
+        {1000, 30, 100, 15, 60, 10, 0, 22050.0, 51, 0.0},
+        {2048, 30, 100, 15, 60, 10, 0, 22050.0, 52, 736.6100766703177},
+        {256, 200, 100, 100, 50, 40, 1000, 22050.0, 53, 0.0},
+        {1000, 200, 100, 100, 50, 40, 1000, 22050.0, 54, 111.20317002881845},
+        {2048, 200, 100, 100, 50, 40, 1000, 22050.0, 55, 110.30805687203792},
+        {256, 16, 100, 0, 0, 0, 0, 22050.0, 56, 1378.125},
+        {1000, 16, 100, 0, 0, 0, 0, 22050.0, 57, 1378.125},
+        {2048, 16, 100, 0, 0, 0, 0, 22050.0, 58, 1378.125},
+        {256, 90, 80, 30, 40, 60, -5, 22050.0, 59, 243.646408839779},
+        {1000, 90, 80, 30, 40, 60, -5, 22050.0, 60, 0.0},
+        {2048, 90, 80, 30, 40, 60, -5, 22050.0, 61, 0.0},
+        {256, 12, 100, 6, 20, 0, 0, 22050.0, 62, 0.0},
+        {1000, 12, 100, 6, 20, 0, 0, 22050.0, 63, 0.0},
+        {2048, 12, 100, 6, 20, 0, 0, 22050.0, 64, 0.0},
+        {256, 150, 100, 75, 100, 0, 0, 22050.0, 65, 0.0},
+        {1000, 150, 100, 75, 100, 0, 0, 22050.0, 66, 147.0},
+        {2048, 150, 100, 75, 100, 0, 0, 22050.0, 67, 147.0},
+        {256, 50, 100, 25, 95, 5, 3, 22050.0, 68, 0.0},
+        {1000, 50, 100, 25, 95, 5, 3, 22050.0, 69, 0.0},
+        {2048, 50, 100, 25, 95, 5, 3, 22050.0, 70, 0.0},
+        {256, 40, 100, 0, 0, 0, 0, 44100.0, 71, 1102.5},
+        {1000, 40, 100, 0, 0, 0, 0, 44100.0, 72, 1102.5},
+        {2048, 40, 100, 0, 0, 0, 0, 44100.0, 73, 1102.5},
+        {256, 100, 100, 50, 30, 0, 7, 44100.0, 74, 441.0},
+        {1000, 100, 100, 50, 30, 0, 7, 44100.0, 75, 441.0},
+        {2048, 100, 100, 50, 30, 0, 7, 44100.0, 76, 441.0},
+        {256, 64, 50, 0, 0, 20, -300, 44100.0, 77, 661.5},
+        {1000, 64, 50, 0, 0, 20, -300, 44100.0, 78, 229.6875},
+        {2048, 64, 50, 0, 0, 20, -300, 44100.0, 79, 680.413179916318},
+        {256, 30, 100, 15, 60, 10, 0, 44100.0, 80, 0.0},
+        {1000, 30, 100, 15, 60, 10, 0, 44100.0, 81, 0.0},
+        {2048, 30, 100, 15, 60, 10, 0, 44100.0, 82, 0.0},
+        {256, 200, 100, 100, 50, 40, 1000, 44100.0, 83, 0.0},
+        {1000, 200, 100, 100, 50, 40, 1000, 44100.0, 84, 220.77596996245308},
+        {2048, 200, 100, 100, 50, 40, 1000, 44100.0, 85, 220.73234984193888},
+        {256, 16, 100, 0, 0, 0, 0, 44100.0, 86, 0.0},
+        {1000, 16, 100, 0, 0, 0, 0, 44100.0, 87, 0.0},
+        {2048, 16, 100, 0, 0, 0, 0, 44100.0, 88, 0.0},
+        {256, 90, 80, 30, 40, 60, -5, 44100.0, 89, 0.0},
+        {1000, 90, 80, 30, 40, 60, -5, 44100.0, 90, 0.0},
+        {2048, 90, 80, 30, 40, 60, -5, 44100.0, 91, 488.5714285714286},
+        {256, 12, 100, 6, 20, 0, 0, 44100.0, 92, 0.0},
+        {1000, 12, 100, 6, 20, 0, 0, 44100.0, 93, 0.0},
+        {2048, 12, 100, 6, 20, 0, 0, 44100.0, 94, 0.0},
+        {256, 150, 100, 75, 100, 0, 0, 44100.0, 95, 0.0},
+        {1000, 150, 100, 75, 100, 0, 0, 44100.0, 96, 294.0},
+        {2048, 150, 100, 75, 100, 0, 0, 44100.0, 97, 294.0},
+        {256, 50, 100, 25, 95, 5, 3, 44100.0, 98, 873.2673267326733},
+        {1000, 50, 100, 25, 95, 5, 3, 44100.0, 99, 879.2235047219308},
+        {2048, 50, 100, 25, 95, 5, 3, 44100.0, 100, 883.8365434669444},
+        {256, 40, 100, 0, 0, 0, 0, 96000.0, 101, 0.0},
+        {1000, 40, 100, 0, 0, 0, 0, 96000.0, 102, 0.0},
+        {2048, 40, 100, 0, 0, 0, 0, 96000.0, 103, 0.0},
+        {256, 100, 100, 50, 30, 0, 7, 96000.0, 104, 0.0},
+        {1000, 100, 100, 50, 30, 0, 7, 96000.0, 105, 972.9729729729729},
+        {2048, 100, 100, 50, 30, 0, 7, 96000.0, 106, 972.0670391061452},
+        {256, 64, 50, 0, 0, 20, -300, 96000.0, 107, 0.0},
+        {1000, 64, 50, 0, 0, 20, -300, 96000.0, 108, 0.0},
+        {2048, 64, 50, 0, 0, 20, -300, 96000.0, 109, 0.0},
+        {256, 30, 100, 15, 60, 10, 0, 96000.0, 110, 0.0},
+        {1000, 30, 100, 15, 60, 10, 0, 96000.0, 111, 0.0},
+        {2048, 30, 100, 15, 60, 10, 0, 96000.0, 112, 0.0},
+        {256, 200, 100, 100, 50, 40, 1000, 96000.0, 113, 0.0},
+        {1000, 200, 100, 100, 50, 40, 1000, 96000.0, 114, 481.203007518797},
+        {2048, 200, 100, 100, 50, 40, 1000, 96000.0, 115, 479.2433000525486},
+        {256, 16, 100, 0, 0, 0, 0, 96000.0, 116, 0.0},
+        {1000, 16, 100, 0, 0, 0, 0, 96000.0, 117, 0.0},
+        {2048, 16, 100, 0, 0, 0, 0, 96000.0, 118, 0.0},
+        {256, 90, 80, 30, 40, 60, -5, 96000.0, 119, 0.0},
+        {1000, 90, 80, 30, 40, 60, -5, 96000.0, 120, 0.0},
+        {2048, 90, 80, 30, 40, 60, -5, 96000.0, 121, 0.0},
+        {256, 12, 100, 6, 20, 0, 0, 96000.0, 122, 0.0},
+        {1000, 12, 100, 6, 20, 0, 0, 96000.0, 123, 0.0},
+        {2048, 12, 100, 6, 20, 0, 0, 96000.0, 124, 0.0},
+        {256, 150, 100, 75, 100, 0, 0, 96000.0, 125, 0.0},
+        {1000, 150, 100, 75, 100, 0, 0, 96000.0, 126, 640.0},
+        {2048, 150, 100, 75, 100, 0, 0, 96000.0, 127, 640.0},
+        {256, 50, 100, 25, 95, 5, 3, 96000.0, 128, 0.0},
+        {1000, 50, 100, 25, 95, 5, 3, 96000.0, 129, 0.0},
+        {2048, 50, 100, 25, 95, 5, 3, 96000.0, 130, 0.0},
+        {512, 1, 0, 0, 0, 100, 0, 8000.0, 1000, 0.0},
+        {609, 1, 0, 0, 0, 100, 0, 44100.0, 1001, 0.0},
+        {706, 1, 0, 0, 0, 100, 0, 96000.0, 1002, 0.0},
+        {803, 1, 0, 0, 0, 100, 0, 8000.0, 1003, 0.0},
+        {900, 1, 0, 0, 0, 100, 0, 44100.0, 1004, 0.0},
+        {997, 1, 0, 0, 0, 100, 0, 96000.0, 1005, 0.0},
+        {1094, 1, 0, 0, 0, 100, 0, 8000.0, 1006, 0.0},
+        {1191, 1, 0, 0, 0, 100, 0, 44100.0, 1007, 0.0},
+        {1288, 1, 0, 0, 0, 100, 0, 96000.0, 1008, 0.0},
+        {1385, 1, 0, 0, 0, 100, 0, 8000.0, 1009, 0.0},
+        {1482, 1, 0, 0, 0, 100, 0, 44100.0, 1010, 0.0},
+        {1579, 1, 0, 0, 0, 100, 0, 96000.0, 1011, 0.0},
+    };
+    static double x[2048 + 12 * 97];
+    double result;
+    size_t i;
+    int found = 0;
+
+    for (i = 0; i < sizeof(cases) / sizeof(cases[0]); i++)
+    {
+        int rv;
+
+        wavelet_signal(&cases[i], x);
+        result = -1.0;
+        rv = xtract_wavelet_f0(xttest_context(), x, cases[i].n, &cases[i].sample_rate, &result);
+        ASSERT_EQ(rv, cases[i].pitch > 0.0 ? XTRACT_SUCCESS : XTRACT_NO_RESULT);
+        CHECK_REL(result, cases[i].pitch, 1e-15);
+        found += rv == XTRACT_SUCCESS;
+    }
+    ASSERT_GT(found, 50);
+}
+
+UTEST(wavelet_f0, each_frame_is_analysed_on_its_own)
+{
+    double at_440[WAVELET_N];
+    double at_300[WAVELET_N];
+    double silent[WAVELET_N] = {0.0};
+    double sample_rate = 44100.0;
+    double result = -1.0;
+
+    xttest_gen_sine(at_440, WAVELET_N, sample_rate, 440.0, 1.0);
+    xttest_gen_sine(at_300, WAVELET_N, sample_rate, 300.0, 1.0);
+    ASSERT_EQ(xtract_wavelet_f0(xttest_context(), at_440, WAVELET_N, &sample_rate, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_wavelet_f0(xttest_context(), at_300, WAVELET_N, &sample_rate, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 300.0, 1e-12);
+    ASSERT_EQ(xtract_wavelet_f0(xttest_context(), silent, WAVELET_N, &sample_rate, &result), XTRACT_NO_RESULT);
+    ASSERT_EQ(result, 0.0);
+}
+
+UTEST(wavelet_f0, is_in_a_bad_state_without_a_context_for_its_length)
+{
+    double table[WAVELET_N];
+    double sample_rate = 44100.0;
+    double result = -1.0;
+    xtract_context *shorter = xtract_context_new(WAVELET_N - 1);
+
+    ASSERT_TRUE(shorter != NULL);
+    xttest_gen_sine(table, WAVELET_N, sample_rate, 440.0, 1.0);
+    ASSERT_EQ(xtract_wavelet_f0(NULL, table, WAVELET_N, &sample_rate, &result), XTRACT_BAD_STATE);
+    ASSERT_EQ(result, -1.0);
+    ASSERT_EQ(xtract_wavelet_f0(shorter, table, WAVELET_N, &sample_rate, &result), XTRACT_BAD_STATE);
+    ASSERT_EQ(result, -1.0);
+    xtract_context_delete(shorter);
+}
+
+UTEST(wavelet_f0, takes_a_context_created_for_exactly_its_length)
+{
+    static const int lengths[] = {1, 2, 3, 5, 6, 64, 100, WAVELET_N};
+    double table[WAVELET_N];
+    double sample_rate = 44100.0;
+    double exact_result, shared_result;
+    xtract_context *exact;
+    int exact_code, shared_code;
+    size_t i;
+
+    xttest_gen_sine(table, WAVELET_N, sample_rate, 440.0, 1.0);
     for (i = 0; i < sizeof(lengths) / sizeof(lengths[0]); i++)
     {
         exact = xtract_context_new(lengths[i]);
-        exact_state = xtract_wavelet_f0_state_new(44100.0);
-        shared_state = xtract_wavelet_f0_state_new(44100.0);
         ASSERT_TRUE(exact != NULL);
-        ASSERT_TRUE(exact_state != NULL);
-        ASSERT_TRUE(shared_state != NULL);
-
         exact_result = shared_result = -1.0;
-        exact_code = xtract_wavelet_f0(exact, table, lengths[i], exact_state, &exact_result);
-        shared_code = xtract_wavelet_f0(xttest_context(), table, lengths[i], shared_state, &shared_result);
+        exact_code = xtract_wavelet_f0(exact, table, lengths[i], &sample_rate, &exact_result);
+        shared_code = xtract_wavelet_f0(xttest_context(), table, lengths[i], &sample_rate, &shared_result);
         ASSERT_TRUE(exact_code == XTRACT_SUCCESS || exact_code == XTRACT_NO_RESULT);
         ASSERT_EQ(exact_code, shared_code);
         ASSERT_EQ(exact_result, shared_result);
-
-        xtract_wavelet_f0_state_delete(exact_state);
-        xtract_wavelet_f0_state_delete(shared_state);
         xtract_context_delete(exact);
     }
 }

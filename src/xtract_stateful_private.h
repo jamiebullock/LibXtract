@@ -8,17 +8,10 @@
 #define XTRACT_STATEFUL_PRIVATE_H
 
 #include "c-ringbuf/ringbuf.h"
-#include "dywapitchtrack/dywapitchtrack.h"
 
 struct xtract_last_n_state_
 {
     ringbuf_t ringbuf;
-};
-
-struct xtract_wavelet_f0_state_
-{
-    dywapitchtracker tracker;
-    double sample_rate;
 };
 
 #endif

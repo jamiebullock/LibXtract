@@ -62,8 +62,6 @@ anticorrelates
 cepstrum
 denormals?
 detunings
-dywapitch
-dywapitchtrack
 eps
 [Ff]ilterbanks?
 [Gg]ammatone

@@ -3,7 +3,6 @@ mutators:
 excludePaths:
   - .*/src/ooura/.*
   - .*/src/c-ringbuf/.*
-  - .*/src/dywapitchtrack/.*
   - .*/src/descriptors\.c
   - .*/src/features\.c
   - .*/tests/.*

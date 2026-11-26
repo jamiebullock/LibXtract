@@ -21,8 +21,6 @@
 #include <Accelerate/Accelerate.h>
 #endif
 
-#include "dywapitchtrack/dywapitchtrack.h"
-
 #include "xtract/libxtract.h"
 #include "xtract/xtract_helper.h"
 #include "xtract_context_private.h"
@@ -1418,45 +1416,206 @@ int xtract_failsafe_f0(xtract_context *ctx, const double *data, const int N, con
     return rv;
 }
 
-/* dywapitch_computepitch() works in three ints for each sample */
-#define WAVELET_F0_INTS_PER_SAMPLE 3
+/* The constants of Larson and Maddox (2005), table I: the highest frequency
+ * detected, the fraction of the way from the mean to the extremes an
+ * extremum must reach, the number of extrema each distance spans at most,
+ * and the number of levels, the signal being the first */
+#define WAVELET_F0_HIGHEST 3000.0
+#define WAVELET_F0_THRESHOLD 0.75
+#define WAVELET_F0_SPANS 3
+#define WAVELET_F0_LEVELS 6
+
+/* The extrema of one level of approximation: the first maximum at or above
+ * the upper threshold and the first minimum at or below the lower one after
+ * each crossing of the mean, none within spacing elements of the extremum
+ * before it. Returns the count of each through the pointers. */
+static void wavelet_extrema(const double *x, const int width, const double mean, const double upper, const double lower,
+                            const int spacing, int *maxima, int *n_maxima, int *minima, int *n_minima)
+{
+    int j, climber, can_record = 1, too_close = 0;
+
+    *n_maxima = *n_minima = 0;
+    climber = x[1] - x[0] > 0.0 ? 1 : -1;
+    for (j = 1; j < width - 1; j++)
+    {
+        const double rise = x[j] - x[j - 1];
+
+        if (climber >= 0 && rise < 0.0)
+        {
+            if (x[j - 1] >= upper && can_record && !too_close)
+            {
+                maxima[(*n_maxima)++] = j - 1;
+                can_record = 0;
+                too_close = spacing;
+            }
+            climber = -1;
+        }
+        else if (climber <= 0 && rise > 0.0)
+        {
+            if (x[j - 1] <= lower && can_record && !too_close)
+            {
+                minima[(*n_minima)++] = j - 1;
+                can_record = 0;
+                too_close = spacing;
+            }
+            climber = 1;
+        }
+        if ((x[j] <= mean && x[j - 1] > mean) || (x[j] >= mean && x[j - 1] < mean))
+            can_record = 1;
+        if (too_close)
+            too_close--;
+    }
+}
+
+/* The distances from each extremum to the next WAVELET_F0_SPANS of its kind */
+static int wavelet_distances(const int *maxima, const int n_maxima, const int *minima, const int n_minima, int *distances)
+{
+    int j, k, count = 0;
+
+    for (j = 1; j <= WAVELET_F0_SPANS; j++)
+    {
+        for (k = 0; k + j < n_maxima; k++)
+            distances[count++] = maxima[k + j] - maxima[k];
+        for (k = 0; k + j < n_minima; k++)
+            distances[count++] = minima[k + j] - minima[k];
+    }
+
+    return count;
+}
+
+/* The modal distance of a level: the distance with the most others within
+ * spacing of it, more than a quarter of the periods of that length the
+ * level holds; on a tie, one close to twice the mode so far replaces it.
+ * Returned as the mean of the distances within spacing of it, or 0 when no
+ * distance qualifies. Every distance is between 1 and width - 1, and
+ * at_most[d] counts the distances of d or less, so the number within
+ * spacing of a distance is the difference of two of its elements. */
+static double wavelet_mode(const int *distances, const int count, const int width, const int spacing, int *at_most)
+{
+    int j, k, d, support, best_support = 1;
+    double mode = 0.0, sum = 0.0;
+    int near = 0;
+
+    memset(at_most, 0, (size_t)width * sizeof(int));
+    for (k = 0; k < count; k++)
+        at_most[distances[k]]++;
+    for (d = 1; d < width; d++)
+        at_most[d] += at_most[d - 1];
+
+    for (j = 0; j < count; j++)
+    {
+        const int highest = distances[j] + spacing < width ? distances[j] + spacing : width - 1;
+        const int below = distances[j] - spacing - 1;
+
+        support = at_most[highest] - (below > 0 ? at_most[below] : 0);
+        if (support >= best_support && support > (width / distances[j]) / 4.0)
+        {
+            if (support == best_support)
+            {
+                if (distances[j] > 1.95 * mode && distances[j] < 2.05 * mode)
+                    mode = distances[j];
+            }
+            else
+            {
+                best_support = support;
+                mode = distances[j];
+            }
+        }
+    }
+    if (mode == 0.0)
+        return 0.0;
+
+    for (k = 0; k < count; k++)
+    {
+        if (fabs(mode - distances[k]) <= spacing)
+        {
+            sum += distances[k];
+            near++;
+        }
+    }
+
+    return sum / near;
+}
 
 int xtract_wavelet_f0(xtract_context *ctx, const double *data, const int N, const void *argv, double *result)
 {
-    xtract_wavelet_f0_state *state = (xtract_wavelet_f0_state *)argv;
-    double *samples;
-    int *ints;
+    double sample_rate, mean, highest, lowest, upper, lower, mode, previous_mode = 0.0;
+    double *approximation;
+    int *maxima, *minima, *distances, *at_most;
+    int n, level, width, spacing, n_maxima, n_minima, count;
+    int previous_has_extrema = 0, rv = XTRACT_NO_RESULT;
+    const int half = N / 2;
 
-    if (N < 1 || state == NULL)
+    if (N < 1 || argv == NULL || !isfinite(*(const double *)argv) || !(*(const double *)argv > 0.0))
     {
         *result = 0.0;
         return XTRACT_ARGUMENT_ERROR;
     }
+    sample_rate = *(const double *)argv;
 
-    samples = xtract_scratch_take(ctx, N, (size_t)N);
-    if (samples == NULL)
+    approximation = xtract_scratch_take(ctx, N, (size_t)half);
+    if (approximation == NULL)
         return XTRACT_BAD_STATE;
-    ints = xtract_scratch_take_ints(ctx, N, WAVELET_F0_INTS_PER_SAMPLE * (size_t)N);
-    if (ints == NULL)
+    maxima = xtract_scratch_take_ints(ctx, N, 6 * (size_t)half);
+    if (maxima == NULL)
     {
-        xtract_scratch_return(ctx, samples, (size_t)N);
+        xtract_scratch_return(ctx, approximation, (size_t)half);
         return XTRACT_BAD_STATE;
     }
+    minima = maxima + half;
+    distances = minima + half;
+    at_most = distances + 3 * half;
+    *result = 0.0;
 
-    *result = dywapitch_computepitch(&state->tracker, data, 0, N, samples, ints);
-
-    xtract_scratch_return_ints(ctx, ints, WAVELET_F0_INTS_PER_SAMPLE * (size_t)N);
-    xtract_scratch_return(ctx, samples, (size_t)N);
-
-    if (*result == 0.0)
+    mean = 0.0;
+    highest = lowest = data[0];
+    for (n = 0; n < N; n++)
     {
-        return XTRACT_NO_RESULT;
+        mean += data[n];
+        highest = fmax(highest, data[n]);
+        lowest = fmin(lowest, data[n]);
+    }
+    mean /= N;
+    upper = WAVELET_F0_THRESHOLD * (highest - mean) + mean;
+    lower = WAVELET_F0_THRESHOLD * (lowest - mean) + mean;
+
+    width = N;
+    for (level = 1; level < WAVELET_F0_LEVELS; level++)
+    {
+        const double *source = level == 1 ? data : approximation;
+
+        width /= 2;
+        if (width < 3)
+            break;
+        for (n = 0; n < width; n++)
+            approximation[n] = (source[2 * n] + source[2 * n + 1]) / 2.0;
+
+        /* No two extrema of a level are further apart than its width, so a
+         * larger spacing has the same effect */
+        spacing = (int)fmin(fmax(floor(sample_rate / WAVELET_F0_HIGHEST / (double)(1 << level)), 1.0), (double)width);
+        wavelet_extrema(approximation, width, mean, upper, lower, spacing, maxima, &n_maxima, minima, &n_minima);
+        if (n_maxima < 2 || n_minima < 2)
+        {
+            previous_has_extrema = 0;
+            continue;
+        }
+
+        count = wavelet_distances(maxima, n_maxima, minima, n_minima, distances);
+        mode = wavelet_mode(distances, count, width, spacing, at_most);
+        if (previous_has_extrema && previous_mode != 0.0 && fabs(previous_mode - 2.0 * mode) <= spacing)
+        {
+            *result = sample_rate / previous_mode / (double)(1 << (level - 1));
+            rv = XTRACT_SUCCESS;
+            break;
+        }
+        previous_mode = mode;
+        previous_has_extrema = 1;
     }
 
-    /* dywapitchtrack assumes 44100 Hz internally; scale for actual samplerate */
-    *result *= state->sample_rate / 44100.0;
+    xtract_scratch_return_ints(ctx, maxima, 6 * (size_t)half);
+    xtract_scratch_return(ctx, approximation, (size_t)half);
 
-    return XTRACT_SUCCESS;
+    return rv;
 }
 
 /* The parabola through (tau-1, tau, tau+1) locates an NSDF key maximum at

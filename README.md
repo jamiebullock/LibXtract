@@ -158,5 +158,4 @@ Report a security problem privately, as [SECURITY.md](SECURITY.md) describes.
 ## Licence
 
 zlib. See `LICENSE`. The bundled third-party code under `src/` keeps its own
-licences, listed in `DEPENDENCIES.md`; one of them (dywapitchtrack, MIT)
-requires its copyright notice to accompany binary distributions.
+licences, listed in `DEPENDENCIES.md`.
