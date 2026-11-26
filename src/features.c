@@ -457,8 +457,8 @@ static const xtract_quantity_t *const accepted_lpc[] = {&quantity_autocorrelatio
 static const xtract_quantity_t *const accepted_lpcc[] = {&quantity_lpc_coefficients};
 static const xtract_quantity_t *const accepted_subbands[] = {&quantity_bins};
 static const xtract_quantity_t *const accepted_mel_spectrogram[] = {&quantity_power_bins};
-static const xtract_quantity_t *const accepted_gfcc[] = {&quantity_power_bins, &quantity_magnitude_bins};
-static const xtract_quantity_t *const accepted_gammatone_spectrogram[] = {&quantity_power_bins, &quantity_magnitude_bins};
+static const xtract_quantity_t *const accepted_gfcc[] = {&quantity_power_bins};
+static const xtract_quantity_t *const accepted_gammatone_spectrogram[] = {&quantity_power_bins};
 static const xtract_quantity_t *const accepted_peak[] = {&quantity_last_n};
 static const xtract_quantity_t *const accepted_mmbses[] = {&quantity_spectrum};
 static const xtract_quantity_t *const accepted_spectral_subband_centroids[] = {&quantity_magnitude_spectrum, &quantity_power_spectrum};
@@ -2064,7 +2064,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .sources = NULL,
         .validation_level = 0,
         .tags = XTRACT_TAG_SOUND,
-        .data = {XTRACT_SPECTRAL_MAGNITUDES, XTRACT_UNIT_ANY, 2, accepted_gfcc, 1, "N >= 1 && 2 * N == filterbank_size(filterbank)"},
+        .data = {XTRACT_SPECTRAL_MAGNITUDES, XTRACT_UNIT_ANY, 1, accepted_gfcc, 1, "N >= 1 && 2 * N == filterbank_size(filterbank)"},
         .argc = 1,
         .argv = arguments_gfcc,
         .is_scalar = XTRACT_FALSE,
@@ -2080,7 +2080,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .sources = NULL,
         .validation_level = 0,
         .tags = XTRACT_TAG_SOUND,
-        .data = {XTRACT_SPECTRAL_MAGNITUDES, XTRACT_UNIT_ANY, 2, accepted_gammatone_spectrogram, 1, "N >= 1 && 2 * N == filterbank_size(filterbank)"},
+        .data = {XTRACT_SPECTRAL_MAGNITUDES, XTRACT_UNIT_ANY, 1, accepted_gammatone_spectrogram, 1, "N >= 1 && 2 * N == filterbank_size(filterbank)"},
         .argc = 1,
         .argv = arguments_gammatone_spectrogram,
         .is_scalar = XTRACT_FALSE,

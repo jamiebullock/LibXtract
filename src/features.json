@@ -864,7 +864,7 @@
       "description": "Extract GFCC from a spectrum",
       "validation_level": 0,
       "tags": ["sound"],
-      "input": {"format": "spectral_magnitudes", "unit": "any", "accepts": ["power_bins", "magnitude_bins"], "length": "N >= 1 && 2 * N == filterbank_size(filterbank)"},
+      "input": {"format": "spectral_magnitudes", "unit": "any", "accepts": ["power_bins"], "length": "N >= 1 && 2 * N == filterbank_size(filterbank)"},
       "arguments": [
         {"name": "filterbank", "kind": "object", "built_by": "init_gfcc"}
       ],
@@ -877,7 +877,7 @@
       "description": "Extract log gammatone energies from a spectrum",
       "validation_level": 0,
       "tags": ["sound"],
-      "input": {"format": "spectral_magnitudes", "unit": "any", "accepts": ["power_bins", "magnitude_bins"], "length": "N >= 1 && 2 * N == filterbank_size(filterbank)"},
+      "input": {"format": "spectral_magnitudes", "unit": "any", "accepts": ["power_bins"], "length": "N >= 1 && 2 * N == filterbank_size(filterbank)"},
       "arguments": [
         {"name": "filterbank", "kind": "object", "built_by": "init_gfcc"}
       ],

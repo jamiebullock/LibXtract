@@ -127,7 +127,7 @@ extern "C"
      * bank.
      *
      * \param *ctx: a pointer to a context created for at least the larger of N and the filterbank's n_filters elements
-     * \param *data: a pointer to the first element in an array of spectral coefficients, the first half of the array pointed to by *result from xtract_power_spectrum(), so that element k is bin k as the filterbank expects. the gammatone filterbank is applied to the power spectrum in the same way; the first half of the *result of xtract_magnitude_spectrum() may be passed instead
+     * \param *data: a pointer to the first element in an array of spectral coefficients, the first half of the array pointed to by *result from xtract_power_spectrum(), so that element k is bin k as the filterbank expects
      * \param N: the number of coefficients, at least 1 and equal to half the N the filterbank was built for
      * \param *argv: a pointer to an xtract_filterbank from xtract_init_gfcc() or xtract_init_filterbank(), built for the size of the transform that produced the spectrum
      * \param *result: a pointer to an array of n_filters doubles containing the resultant GFCC: the DCT of the log of the energy each filter passes. An energy below DBL_EPSILON times the largest energy of the filters counts as that. The array is zeroed with no result when no filter has an energy above 0
@@ -137,10 +137,10 @@ extern "C"
     /** \brief Extract a gammatone spectrogram (log-scaled gammatone-filtered energies)
      *
      * This computes the intermediate step of GFCC extraction: the gammatone filter bank
-     * is applied to the magnitude spectrum and the result is log-scaled.
+     * is applied to the power spectrum and the result is log-scaled.
      *
      * \param *ctx: a pointer to a context, or NULL
-     * \param *data: a pointer to the first element in an array of spectral coefficients, the first half of the array pointed to by *result from xtract_power_spectrum(), so that element k is bin k as the filterbank expects. the gammatone filterbank is applied to the power spectrum in the same way; the first half of the *result of xtract_magnitude_spectrum() may be passed instead
+     * \param *data: a pointer to the first element in an array of spectral coefficients, the first half of the array pointed to by *result from xtract_power_spectrum(), so that element k is bin k as the filterbank expects
      * \param N: the number of coefficients, at least 1 and equal to half the N the filterbank was built for
      * \param *argv: a pointer to an xtract_filterbank from xtract_init_gfcc() or xtract_init_filterbank(), built for the size of the transform that produced the spectrum
      * \param *result: a pointer to an array of n_filters doubles containing the resultant log gammatone energies (one per filter). An energy below DBL_EPSILON times the largest energy of the filters counts as that. The array is zeroed with no result when no filter has an energy above 0

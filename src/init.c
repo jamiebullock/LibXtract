@@ -69,14 +69,15 @@ static double triangle_response(const double hz, const double *shape)
     return height * ((upper - hz) / (upper - centre));
 }
 
-/* shape: centre frequency and bandwidth in Hz. The fourth-order gammatone
- * magnitude response approximation. */
+/* shape: centre frequency and ERB in Hz. The power response of a
+ * fourth-order gammatone filter near its centre, whose bandwidth parameter
+ * is 1.019 ERB (Patterson et al. 1992) */
 static double gammatone_response(const double hz, const double *shape)
 {
-    const double ratio = (hz - shape[0]) / shape[1];
+    const double ratio = (hz - shape[0]) / (1.019 * shape[1]);
     const double gain = 1.0 / (1.0 + ratio * ratio);
 
-    return gain * gain;
+    return XTRACT_SQ(gain * gain);
 }
 
 static int is_a_transform_size(const int N)

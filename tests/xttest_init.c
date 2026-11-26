@@ -218,19 +218,55 @@ UTEST(init, gfcc_gains_match_the_fourth_order_gammatone_formula)
     ASSERT_EQ(fb_read(filterbank, tables), XTRACT_SUCCESS);
     xtract_free_filterbank(filterbank);
 
+    for (k = 0; k < FB_M; k++)
+    {
+        const double hz = (double)k / FB_N * FB_SR;
+        double expected[FB_BANDS];
+        double largest = 0.0;
+
+        for (n = 0; n < FB_BANDS; n++)
+        {
+            const double centre = hz_of_erb(erb_of(FB_MIN) + n * step);
+            const double ratio = (hz - centre) / (1.019 * erb_bandwidth(centre));
+
+            expected[n] = pow(1.0 + ratio * ratio, -4.0);
+            if (expected[n] > largest)
+                largest = expected[n];
+        }
+        /* fb_read reads a gain below DBL_EPSILON times the largest at its
+         * bin as 0 */
+        for (n = 0; n < FB_BANDS; n++)
+        {
+            if (tables[n][k] == 0.0)
+                ASSERT_LT(expected[n], 2.0 * DBL_EPSILON * largest);
+            else
+                CHECK_REL(tables[n][k], expected[n], 1e-12);
+        }
+    }
+}
+
+UTEST(init, gfcc_filters_pass_one_erb_of_power)
+{
+    xtract_filterbank *filterbank = xtract_init_gfcc(FB_N, FB_SR, FB_MIN, FB_MAX, FB_BANDS);
+    static double tables[FB_BANDS][FB_M];
+    const double step = (erb_of(FB_MAX) - erb_of(FB_MIN)) / (FB_BANDS - 1);
+    const double spacing = FB_SR / FB_N;
+    int n, k;
+
+    ASSERT_TRUE(filterbank != NULL);
+    ASSERT_EQ(fb_read(filterbank, tables), XTRACT_SUCCESS);
+    xtract_free_filterbank(filterbank);
+
     for (n = 0; n < FB_BANDS; n++)
     {
         const double centre = hz_of_erb(erb_of(FB_MIN) + n * step);
-        const double width = erb_bandwidth(centre);
+        double area = 0.0;
 
+        if (centre < 2000.0)
+            continue;
         for (k = 0; k < FB_M; k++)
-        {
-            const double hz = (double)k / FB_N * FB_SR;
-            const double ratio = (hz - centre) / width;
-            const double expected = 1.0 / ((1.0 + ratio * ratio) * (1.0 + ratio * ratio));
-
-            CHECK_REL(tables[n][k], expected, 1e-12);
-        }
+            area += tables[n][k] * spacing;
+        CHECK_REL(area, erb_bandwidth(centre), 0.01);
     }
 }
 
@@ -263,7 +299,7 @@ UTEST(init, gfcc_centres_span_min_to_max_and_peak_at_the_nearest_bin)
     }
 }
 
-UTEST(init, gfcc_has_a_gain_above_0_for_every_bin)
+UTEST(init, gfcc_gains_are_at_most_1_and_every_bin_passes_a_filter)
 {
     xtract_filterbank *filterbank = xtract_init_gfcc(FB_N, FB_SR, FB_MIN, FB_MAX, FB_BANDS);
     static double tables[FB_BANDS][FB_M];
@@ -273,10 +309,17 @@ UTEST(init, gfcc_has_a_gain_above_0_for_every_bin)
     ASSERT_EQ(fb_read(filterbank, tables), XTRACT_SUCCESS);
     xtract_free_filterbank(filterbank);
 
-    for (n = 0; n < FB_BANDS; n++)
+    for (k = 0; k < FB_M; k++)
     {
-        for (k = 0; k < FB_M; k++)
-            ASSERT_TRUE(tables[n][k] > 0.0 && tables[n][k] <= 1.0);
+        double largest = 0.0;
+
+        for (n = 0; n < FB_BANDS; n++)
+        {
+            ASSERT_LE(tables[n][k], 1.0);
+            if (tables[n][k] > largest)
+                largest = tables[n][k];
+        }
+        ASSERT_GT(largest, 0.0);
     }
 }
 
