@@ -80,7 +80,7 @@ extern "C"
      * \param *data: a pointer to the first element in an array of doubles
      * \param N: the number of elements to be considered, at least 1
      * \param *argv: a pointer to an array of values representing the mean and standard deviation of the input vector, the standard deviation at least 0
-     * \param *result: the excess kurtosis of N values from the array pointed to by *data: the mean of the fourth powers of their deviations from the mean given, each divided by the standard deviation given, less 3, which makes it 0 for a normal distribution. With the sample standard deviation, as xtract_standard_deviation() gives it from xtract_variance(), this is b2 of Joanes and Gill (1998); with the standard deviation that divides by N it is g2. 0 with no result when the standard deviation is 0
+     * \param *result: the excess kurtosis of N values from the array pointed to by *data: the mean of the fourth powers of their deviations from the mean given, each divided by the standard deviation given, less 3, which makes the population value of a normal distribution 0; the value of a sample is not 0 in general. With the sample standard deviation, as xtract_standard_deviation() gives it from xtract_variance(), this is b2 of Joanes and Gill (1998); with the standard deviation that divides by N it is g2. 0 with no result when the standard deviation is 0
      */
     int xtract_kurtosis(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
