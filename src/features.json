@@ -1739,9 +1739,9 @@
       "title": "Normalised Cross-Correlation",
       "description": "Extract the correlation coefficient of two series at every lag",
       "validation_level": 0,
-      "input": {"format": "subframes", "unit": "any", "length": "N >= 2 && N % 2 == 0"},
+      "input": {"format": "subframes", "unit": "any", "length": "N >= 4 && N % 2 == 0"},
       "arguments": [],
-      "invariance": {"sign": "unchanged", "swap": "reversed"},
+      "invariance": {"offset": "unchanged", "sign": "unchanged", "swap": "reversed"},
       "result": {"kind": "vector", "format": "arbitrary_series", "unit": "none", "length": "N - 1"}
     }
   ]
