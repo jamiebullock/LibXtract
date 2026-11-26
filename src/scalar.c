@@ -1265,11 +1265,13 @@ int xtract_hps(xtract_context *ctx, const double *data, const int N, const void 
     /* The largest peak below the chosen coefficient, near half its frequency
      * and above a tenth of its magnitude, is the fundamental of which the
      * chosen coefficient is the second harmonic (de la Cuadra, Master and
-     * Sapp 2001, section 2.1). 0 when there is no peak below */
+     * Sapp 2001, section 2.1). A peak is the last coefficient of a run of
+     * equal values above both neighbours, and the first of equal peaks is
+     * kept. 0 when there is no peak below */
     lower_peak = 0;
     for (i = first; i < peak_index; ++i)
     {
-        if (data[i] > data[i - 1] && data[i] > data[i + 1] && (lower_peak == 0 || data[i] > data[lower_peak]))
+        if (data[i] >= data[i - 1] && data[i] > data[i + 1] && (lower_peak == 0 || data[i] > data[lower_peak]))
             lower_peak = i;
     }
 

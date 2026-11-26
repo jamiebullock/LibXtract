@@ -1606,6 +1606,41 @@ UTEST(scalar, hps_keeps_the_chosen_bin_when_the_peak_below_is_weak)
     CHECK_REL(result, 200.0, 1e-12);
 }
 
+/* Edits to the spectrum of hps_octave_spectrum, whose bin 20 has the largest
+ * product and whose peak below it is 0.9 at bin 10, and the fundamental
+ * found */
+UTEST(scalar, hps_octave_rule_limits)
+{
+    struct
+    {
+        int bins[3];
+        double magnitudes[3];
+        double expected;
+    } cases[] = {
+        {{20, 10, -1}, {0.5, 0.05, 0.0}, 200.0}, /* exactly a tenth of the chosen bin */
+        {{20, 10, -1}, {0.5, 0.1, 0.0}, 100.0},  /* a fifth of the chosen bin */
+        {{10, 8, -1}, {1e-3, 0.9, 0.0}, 200.0},  /* a peak at exactly 0.4 of 200 Hz */
+        {{10, 12, -1}, {1e-3, 0.9, 0.0}, 200.0}, /* a peak at exactly 0.6 of 200 Hz */
+        {{5, -1, -1}, {0.9, 0.0, 0.0}, 200.0},   /* two equal peaks: the first, at 50 Hz */
+        {{0, -1, -1}, {2.0, 0.0, 0.0}, 100.0},   /* a DC bin above every peak */
+        {{9, -1, -1}, {0.9, 0.0, 0.0}, 95.0},    /* equal bins at 90 and 100 Hz */
+        {{10, 11, 12}, {1e-3, 0.9, 0.9}, 200.0}, /* equal bins at 110 and 120 Hz */
+    };
+    double data[128];
+    double harmonics = 3.0;
+    double result = 0.0;
+    int c, e;
+
+    for (c = 0; c < (int)(sizeof(cases) / sizeof(cases[0])); c++)
+    {
+        hps_octave_spectrum(data, 128);
+        for (e = 0; e < 3 && cases[c].bins[e] >= 0; e++)
+            data[cases[c].bins[e]] = cases[c].magnitudes[e];
+        ASSERT_EQ(xtract_hps(NULL, data, 128, &harmonics, &result), XTRACT_SUCCESS);
+        CHECK_REL(result, cases[c].expected, 1e-12);
+    }
+}
+
 UTEST(scalar, hps_floors_an_empty_bin_beside_a_subnormal_peak)
 {
     /* DBL_EPSILON times the largest magnitude rounds to 0 here, so the floor
