@@ -77,6 +77,20 @@ UTEST(normalised_cross_correlation, is_one_for_identical_series_and_minus_one_fo
     CHECK_REL(result[3], -1.0, EPSILON);
 }
 
+UTEST(normalised_cross_correlation, stays_within_one_when_rounding_carries_a_value_past_it)
+{
+    /* The second series is twice the first, so lag 0 is exactly 1; rounded
+     * sums of products divided by the norms give 1.0000000000000002 */
+    double rising[] = {0.1, 0.3, 0.8, 0.2, 0.6, 1.6};
+    double falling[] = {0.1, 0.3, 0.8, -0.2, -0.6, -1.6};
+    double result[5];
+
+    ASSERT_EQ(xtract_normalised_cross_correlation(NULL, rising, 6, NULL, result), XTRACT_SUCCESS);
+    ASSERT_EQ(result[2], 1.0);
+    ASSERT_EQ(xtract_normalised_cross_correlation(NULL, falling, 6, NULL, result), XTRACT_SUCCESS);
+    ASSERT_EQ(result[2], -1.0);
+}
+
 UTEST(normalised_cross_correlation, ignores_offset_and_scale)
 {
     double data[] = {1.0, 2.0, 4.0, 3.0, 0.0, 5.0, 1.0, 2.0};
@@ -123,7 +137,9 @@ UTEST(cross_correlation, both_reject_an_odd_or_short_input)
     ASSERT_EQ(xtract_cross_correlation(NULL, data, 0, NULL, result), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(xtract_normalised_cross_correlation(NULL, data, 3, NULL, result), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(xtract_normalised_cross_correlation(NULL, data, 0, NULL, result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_normalised_cross_correlation(NULL, data, 2, NULL, result), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(result[0], -1.0);
+    ASSERT_EQ(xtract_cross_correlation(NULL, data, 2, NULL, result), XTRACT_SUCCESS);
     ASSERT_EQ(xtract_cross_correlation(NULL, data, 4, NULL, result), XTRACT_SUCCESS);
     ASSERT_EQ(xtract_normalised_cross_correlation(NULL, data, 4, NULL, result), XTRACT_SUCCESS);
 }
@@ -181,6 +197,9 @@ UTEST(cross_correlation_lag, rejects_bad_arguments)
     result = -1.0;
     ASSERT_EQ(xtract_cross_correlation_lag(xttest_context(), data, 0, NULL, &result), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(result, 0.0);
+    result = -1.0;
+    ASSERT_EQ(xtract_cross_correlation_lag(xttest_context(), data, 2, NULL, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
 }
 
 /* ===== Pearson correlation ===== */
@@ -237,7 +256,7 @@ UTEST(pearson_correlation, matches_normalised_cross_correlation_at_lag_zero)
 
     ASSERT_EQ(xtract_normalised_cross_correlation(NULL, data, 8, NULL, lags), XTRACT_SUCCESS);
     ASSERT_EQ(xtract_pearson_correlation(NULL, data, 8, NULL, &result), XTRACT_SUCCESS);
-    CHECK_REL(result, lags[3], EPSILON);
+    ASSERT_EQ(result, lags[3]);
 }
 
 UTEST(pearson_correlation, stays_within_one_when_rounding_carries_the_quotient_past_it)

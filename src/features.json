@@ -1322,9 +1322,9 @@
       "title": "Cross-correlation Lag",
       "description": "Extract the lag at which two series are most correlated",
       "validation_level": 0,
-      "input": {"format": "subframes", "unit": "any", "length": "N >= 2 && N % 2 == 0"},
+      "input": {"format": "subframes", "unit": "any", "length": "N >= 4 && N % 2 == 0"},
       "arguments": [],
-      "invariance": {"sign": "unchanged", "swap": "negated"},
+      "invariance": {"sign": "unchanged"},
       "result": {"kind": "scalar", "unit": "none"}
     },
     {

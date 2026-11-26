@@ -36,13 +36,13 @@ extern "C"
 
     /** \brief Extract the normalised cross-correlation of two series at every lag: the correlation coefficient at each lag
      *
-     * Each series has its mean removed, and the sum of products at every lag is divided by the product of the Euclidean norms of the two resulting series, so that the value at lag 0 is the Pearson correlation coefficient of the two series and every value lies between -1 and 1
+     * Each series has its mean removed, and the sum of products at every lag is divided by the product of the Euclidean norms of the two resulting series, so that the value at lag 0 is the Pearson correlation coefficient of the two series. A value that rounding takes past -1 or 1 is given as -1 or 1
      *
      * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to the first element in an array of doubles comprising two series of equal length: the first series in the first N/2 elements, the second in the second N/2 elements
-     * \param N: the total number of elements in the array pointed to by *data (twice the series length), at least 2 and even
+     * \param N: the total number of elements in the array pointed to by *data (twice the series length), at least 4 and even
      * \param *argv: not used
-     * \param *result: a pointer to an array of N - 1 doubles, one per lag in the order xtract_cross_correlation() gives them, zeroed with no result when either series is constant
+     * \param *result: a pointer to an array of N - 1 doubles, one per lag in the order xtract_cross_correlation() gives them, each from -1 to 1, zeroed with no result when either series is constant
      */
     int xtract_normalised_cross_correlation(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
@@ -50,9 +50,9 @@ extern "C"
      *
      * \param *ctx: a pointer to a context created for at least N elements
      * \param *data: a pointer to the first element in an array of doubles comprising two series of equal length: the first series in the first N/2 elements, the second in the second N/2 elements
-     * \param N: the total number of elements in the array pointed to by *data (twice the series length), at least 2 and even
+     * \param N: the total number of elements in the array pointed to by *data (twice the series length), at least 4 and even
      * \param *argv: not used
-     * \param *result: the lag in elements, from -(N/2 - 1) to N/2 - 1, positive when the first series is delayed relative to the second, or 0 with no result when either series is constant
+     * \param *result: the lag in elements, from -(N/2 - 1) to N/2 - 1, positive when the first series is delayed relative to the second, or 0 with no result when either series is constant. Swapping the two series negates the lag except where the tie rule chooses between two lags of equal correlation
      */
     int xtract_cross_correlation_lag(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
@@ -62,7 +62,7 @@ extern "C"
      * \param *data: a pointer to the first element in an array of doubles comprising two series of equal length: the first series in the first N/2 elements, the second in the second N/2 elements
      * \param N: the total number of elements in the array pointed to by *data (twice the series length), at least 4 and even
      * \param *argv: not used
-     * \param *result: the coefficient, from -1 to 1: 1 when the second series is the first scaled by a positive factor and offset, -1 when the factor is negative, or 0 with no result when either series is constant. It is the value xtract_cross_correlation() gives at lag 0 with the coefficient selected
+     * \param *result: the coefficient, from -1 to 1: 1 when the second series is the first scaled by a positive factor and offset, -1 when the factor is negative, or 0 with no result when either series is constant. It is the value xtract_normalised_cross_correlation() gives at lag 0
      */
     int xtract_pearson_correlation(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 

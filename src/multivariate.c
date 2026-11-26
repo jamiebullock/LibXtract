@@ -72,10 +72,17 @@ int xtract_matrix_rows(const int N)
     return C <= N / C && C * C == N ? C : 0;
 }
 
+/* Rounding can take a correlation coefficient just outside [-1, 1]. NaN is
+ * kept */
+static double limited_to_unit(const double coefficient)
+{
+    return isnan(coefficient) ? coefficient : fmin(1.0, fmax(-1.0, coefficient));
+}
+
 /* The sum of products of the two halves of data at each lag, the first
- * series shifted, multiplied by scale. Each series has its mean taken off
+ * series shifted, divided by divisor. Each series has its mean taken off
  * first when the means are given */
-static void lagged_products(const double *data, const int M, const double mean_x, const double mean_y, const double scale,
+static void lagged_products(const double *data, const int M, const double mean_x, const double mean_y, const double divisor,
                             double *result)
 {
     const double *x = data;
@@ -90,7 +97,7 @@ static void lagged_products(const double *data, const int M, const double mean_x
 
         for (n = first; n <= last; n++)
             sum += (x[n + lag] - mean_x) * (y[n] - mean_y);
-        result[lag + M - 1] = sum * scale;
+        result[lag + M - 1] = sum / divisor;
     }
 }
 
@@ -101,7 +108,7 @@ int xtract_cross_correlation(xtract_context *ctx, const double *data, const int 
     if (N < 2 || (N & 1))
         return XTRACT_ARGUMENT_ERROR;
 
-    lagged_products(data, M, 0.0, 0.0, 1.0 / M, result);
+    lagged_products(data, M, 0.0, 0.0, M, result);
 
     return XTRACT_SUCCESS;
 }
@@ -110,8 +117,9 @@ int xtract_normalised_cross_correlation(xtract_context *ctx, const double *data,
 {
     const int M = N >> 1;
     double mean_x, mean_y, spread_x, spread_y;
+    int lag;
 
-    if (N < 2 || (N & 1))
+    if (N < 4 || (N & 1))
         return XTRACT_ARGUMENT_ERROR;
 
     mean_and_spread(data, M, &mean_x, &spread_x);
@@ -121,7 +129,9 @@ int xtract_normalised_cross_correlation(xtract_context *ctx, const double *data,
         memset(result, 0, (N - 1) * sizeof(double));
         return XTRACT_NO_RESULT;
     }
-    lagged_products(data, M, mean_x, mean_y, 1.0 / (sqrt(spread_x) * sqrt(spread_y)), result);
+    lagged_products(data, M, mean_x, mean_y, sqrt(spread_x) * sqrt(spread_y), result);
+    for (lag = 0; lag < N - 1; lag++)
+        result[lag] = limited_to_unit(result[lag]);
 
     return XTRACT_SUCCESS;
 }
@@ -131,7 +141,7 @@ int xtract_cross_correlation_lag(xtract_context *ctx, const double *data, const 
     double *correlation;
     int M, distance, best, rv;
 
-    if (N < 2 || (N & 1))
+    if (N < 4 || (N & 1))
     {
         *result = 0.0;
         return XTRACT_ARGUMENT_ERROR;
