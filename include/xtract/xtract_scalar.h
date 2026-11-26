@@ -130,7 +130,7 @@ extern "C"
      * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector, (e.g. the array pointed to by *result from xtract_magnitude_spectrum(), xtract_peak_spectrum() or xtract_harmonic_spectrum()), with amplitudes at least 0.
      * \param N: the size of the array pointed to by *data, at least 2 and even
      * \param *argv: a pointer to an array of values representing the spectral mean and spectral standard deviation of the input spectrum, the standard deviation at least 0
-     * \param *result: the excess kurtosis of the spectrum pointed to by *data: the amplitude-weighted mean of the fourth powers of the deviations of the frequencies from the spectral mean given, divided by the fourth power of the spectral standard deviation given, less 3, which makes it 0 for a normal distribution; or 0 with no result when the standard deviation is 0 or the amplitudes sum to 0
+     * \param *result: the excess kurtosis of the spectrum pointed to by *data: the amplitude-weighted mean of the fourth powers of the deviations of the frequencies from the spectral mean given, divided by the fourth power of the spectral standard deviation given, less 3, which makes the value for a normal distribution 0; or 0 with no result when the standard deviation is 0 or the amplitudes sum to 0
      */
     int xtract_spectral_kurtosis(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 

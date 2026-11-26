@@ -836,7 +836,7 @@
       "name": "harmonic_spectrum",
       "title": "Harmonic Spectrum",
       "description": "Extract the harmonics from a spectrum",
-      "definition": "h_n = \\operatorname{round}(f_n / f_0); \\text{ harmonic } h \\text{ takes the largest vertex amplitude among the local maxima } n \\text{ with } h_n = h \\text{ and } |h_n - f_n/f_0| \\le t, \\text{ else the element with } h_n = h \\text{ nearest to } h f_0 \\text{ (the lower on a tie)}; \\; r_n = \\hat a_n \\text{ (DBL\\_MIN if 0)}, \\; r_{M+n} = \\hat f_n, \\text{ every other element 0}, \\quad f_0, t \\text{ the fundamental and threshold given in argv}",
+      "definition": "h_n = \\operatorname{round}(f_n / f_0); \\text{ harmonic } h \\text{ takes the largest vertex amplitude among the local maxima } n \\text{ with } h_n = h \\text{ and } |h_n - f_n/f_0| \\le t, \\text{ else the element with } h_n = h \\text{ nearest to } h f_0 \\text{ (the lower on a tie)}; \\; r_n = \\hat a_n \\text{ (DBL\\_MIN if 0)}, \\; r_{M+n} = \\hat f_n, \\text{ every other element 0}, \\quad f_0, t \\text{ the fundamental and threshold given in argv}; \\text{ no result when } f_0 = 0, \\text{ when a harmonic below the highest has no element nearest to it, or when no harmonic lies among the elements}",
       "validation_level": 0,
       "provides": ["coefficients_and_frequencies", {"quantity": "power_harmonics", "given": "power_spectrum"}],
       "input": {"format": "spectral", "unit": "any", "accepts": ["magnitude_spectrum"], "length": "N >= 2 && N % 2 == 0"},
