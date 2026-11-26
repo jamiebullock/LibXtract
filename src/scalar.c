@@ -130,6 +130,9 @@ int xtract_skewness(xtract_context *ctx, const double *data, const int N, const 
 
     *result = 0.0;
 
+    if (!(arg1 >= 0.0))
+        return XTRACT_ARGUMENT_ERROR;
+
     if (arg1 == 0)
     {
         return XTRACT_NO_RESULT;
@@ -160,6 +163,12 @@ int xtract_kurtosis(xtract_context *ctx, const double *data, const int N, const 
 
     arg0 = ((double *)argv)[0];
     arg1 = ((double *)argv)[1];
+
+    if (!(arg1 >= 0.0))
+    {
+        *result = 0.0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
 
     if (arg1 == 0)
     {
@@ -299,6 +308,9 @@ int xtract_spectral_skewness(xtract_context *ctx, const double *data, const int 
 
     *result = 0.0;
 
+    if (!(arg1 >= 0.0))
+        return XTRACT_ARGUMENT_ERROR;
+
     if (arg1 == 0.0)
     {
         return XTRACT_NO_RESULT;
@@ -343,6 +355,12 @@ int xtract_spectral_kurtosis(xtract_context *ctx, const double *data, const int 
 
     arg0 = ((double *)argv)[0];
     arg1 = ((double *)argv)[1];
+
+    if (!(arg1 >= 0.0))
+    {
+        *result = 0.0;
+        return XTRACT_ARGUMENT_ERROR;
+    }
 
     if (arg1 == 0.0)
     {

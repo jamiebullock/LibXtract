@@ -2303,6 +2303,26 @@ UTEST(scalar, spectral_skewness_is_zero_for_a_symmetric_spectrum_and_signed_by_t
     ASSERT_TRUE(result > 0.0);
 }
 
+UTEST(scalar, spectral_skewness_and_kurtosis_reject_a_negative_or_nan_deviation)
+{
+    double data[8] = {1.0, 3.0, 2.0, 0.5, 100.0, 200.0, 300.0, 400.0};
+    double negative[2] = {250.0, -80.0};
+    double nan[2] = {250.0, NAN};
+    double result = 1.0;
+
+    ASSERT_EQ(xtract_spectral_skewness(NULL, data, 8, negative, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    result = 1.0;
+    ASSERT_EQ(xtract_spectral_skewness(NULL, data, 8, nan, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    result = 1.0;
+    ASSERT_EQ(xtract_spectral_kurtosis(NULL, data, 8, negative, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+    result = 1.0;
+    ASSERT_EQ(xtract_spectral_kurtosis(NULL, data, 8, nan, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(result, 0.0);
+}
+
 UTEST(scalar, spectral_moments_need_a_nonzero_spread_and_nonzero_amplitudes)
 {
     double data[8] = {1.0, 3.0, 2.0, 0.5, 100.0, 200.0, 300.0, 400.0};
