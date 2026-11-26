@@ -168,6 +168,34 @@ UTEST(helper, smoothed_at_gains_of_1_and_0)
         ASSERT_EQ(result[n], -1.0);
 }
 
+UTEST(helper, smoothed_in_place_matches_a_separate_result)
+{
+    double data[7] = {3.0, -1.0, 4.0, 2.0, -5.0, 0.5, 1.0};
+    double separate[7];
+    double gains[3] = {0.0, 0.3, 1.0};
+    double in_place[7];
+    int g, n;
+
+    for (g = 0; g < 3; g++)
+    {
+        memcpy(in_place, data, sizeof(data));
+        ASSERT_EQ(xtract_smoothed(NULL, data, 7, &gains[g], separate), XTRACT_SUCCESS);
+        ASSERT_EQ(xtract_smoothed(NULL, in_place, 7, &gains[g], in_place), XTRACT_SUCCESS);
+        for (n = 0; n < 7; n++)
+            ASSERT_EQ(in_place[n], separate[n]);
+    }
+}
+
+UTEST(helper, smoothed_of_one_element_is_that_element)
+{
+    double data[1] = {4.5};
+    double result[1] = {0.0};
+    double gain = 0.0;
+
+    ASSERT_EQ(xtract_smoothed(NULL, data, 1, &gain, result), XTRACT_SUCCESS);
+    ASSERT_EQ(result[0], 4.5);
+}
+
 UTEST(helper, smoothed_rejects_a_gain_outside_0_to_1)
 {
     double data[4] = {3.0, -1.0, 4.0, 2.0};

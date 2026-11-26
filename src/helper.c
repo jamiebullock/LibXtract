@@ -68,6 +68,7 @@ int xtract_smoothed(xtract_context *ctx, const double *data, const int N, const 
 {
     double gain;
     double oneminusgain;
+    double current, next;
     int i;
 
     if (N < 1 || argv == NULL)
@@ -78,11 +79,14 @@ int xtract_smoothed(xtract_context *ctx, const double *data, const int N, const 
         return XTRACT_ARGUMENT_ERROR;
     oneminusgain = 1.0 - gain;
 
-    result[N - 1] = data[N - 1];
+    next = data[N - 1];
+    result[N - 1] = next;
 
     for (i = N - 2; i >= 0; i--)
     {
-        result[i] = gain * data[i] + oneminusgain * data[i + 1];
+        current = data[i];
+        result[i] = gain * current + oneminusgain * next;
+        next = current;
     }
 
     for (i = 1; i < N; i++)
