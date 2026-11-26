@@ -2384,7 +2384,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .sources = NULL,
         .validation_level = 0,
         .tags = 0,
-        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 2 * lag + 1"},
+        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= lag + 1"},
         .argc = 1,
         .argv = arguments_time_reversal_asymmetry,
         .is_scalar = XTRACT_TRUE,
@@ -3346,7 +3346,7 @@ int xtract_length_is_accepted(const int feature, const int N, const void *argv)
     case XTRACT_HJORTH_COMPLEXITY:
         return (n >= 3LL) != 0;
     case XTRACT_TIME_REVERSAL_ASYMMETRY:
-        return argv != NULL && (n >= 2LL * (long long)((const int *)argv)[0] + 1LL) != 0;
+        return argv != NULL && (n >= (long long)((const int *)argv)[0] + 1LL) != 0;
     case XTRACT_SPECTRAL_ENTROPY:
         return (n >= 2LL) != 0;
     case XTRACT_PETROSIAN_FRACTAL_DIMENSION:

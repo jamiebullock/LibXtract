@@ -3961,20 +3961,20 @@ UTEST(scalar, time_reversal_asymmetry_of_1_to_5_at_lag_1)
     int lag = 1;
 
     ASSERT_EQ(xtract_time_reversal_asymmetry(NULL, data, 5, &lag, &result), XTRACT_SUCCESS);
-    CHECK_REL(result, 116.0 / 3.0, EPSILON);
+    CHECK_REL(result, 10.0, EPSILON); /* (2 + 6 + 12 + 20) / 4 */
 }
 
-UTEST(scalar, time_reversal_asymmetry_at_lag_2_uses_every_window_that_fits)
+UTEST(scalar, time_reversal_asymmetry_at_lag_2_uses_every_pair_that_fits)
 {
     double data[6] = {1.0, -2.0, 0.5, 3.0, -1.0, 2.0};
     double result = -1.0;
     double expected = 0.0;
     int lag = 2;
-    int n;
+    int t;
 
-    for (n = 0; n < 2; n++)
-        expected += data[n + 4] * data[n + 4] * data[n + 2] - data[n + 2] * data[n] * data[n];
-    expected /= 2.0;
+    for (t = 2; t < 6; t++)
+        expected += data[t] * data[t] * data[t - 2] - data[t] * data[t - 2] * data[t - 2];
+    expected /= 4.0;
     ASSERT_EQ(xtract_time_reversal_asymmetry(NULL, data, 6, &lag, &result), XTRACT_SUCCESS);
     CHECK_REL(result, expected, EPSILON);
 }
@@ -4019,17 +4019,18 @@ UTEST(scalar, time_reversal_asymmetry_rejects_a_missing_or_unusable_lag_and_sets
     result = -1.0;
     ASSERT_EQ(xtract_time_reversal_asymmetry(NULL, data, 5, &lag, &result), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(result, 0.0);
-    lag = 3;
+    lag = 5;
     result = -1.0;
     ASSERT_EQ(xtract_time_reversal_asymmetry(NULL, data, 5, &lag, &result), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(result, 0.0);
-    lag = 2;
+    lag = 4;
     ASSERT_EQ(xtract_time_reversal_asymmetry(NULL, data, 5, &lag, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 25.0 - 5.0, EPSILON); /* one pair: 5^2 1 - 5 1^2 */
     lag = 1;
     result = -1.0;
-    ASSERT_EQ(xtract_time_reversal_asymmetry(NULL, data, 2, &lag, &result), XTRACT_ARGUMENT_ERROR);
+    ASSERT_EQ(xtract_time_reversal_asymmetry(NULL, data, 1, &lag, &result), XTRACT_ARGUMENT_ERROR);
     ASSERT_EQ(result, 0.0);
-    ASSERT_EQ(xtract_time_reversal_asymmetry(NULL, data, 3, &lag, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(xtract_time_reversal_asymmetry(NULL, data, 2, &lag, &result), XTRACT_SUCCESS);
 }
 
 UTEST(scalar, spectral_entropy_of_a_flat_spectrum_is_1)
