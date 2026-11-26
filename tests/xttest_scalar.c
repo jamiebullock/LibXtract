@@ -4007,6 +4007,16 @@ UTEST(scalar, time_reversal_asymmetry_of_a_palindromic_series_is_zero)
     CHECK_NEAR(result, 0.0, EPSILON);
 }
 
+UTEST(scalar, time_reversal_asymmetry_of_equal_large_values_is_zero)
+{
+    double data[3] = {1e200, 1e200, 1e200};
+    double result = -1.0;
+    int lag = 1;
+
+    ASSERT_EQ(xtract_time_reversal_asymmetry(NULL, data, 3, &lag, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(result, 0.0);
+}
+
 UTEST(scalar, time_reversal_asymmetry_rejects_a_missing_or_unusable_lag_and_sets_the_result_to_zero)
 {
     double data[5] = {1.0, 2.0, 3.0, 4.0, 5.0};

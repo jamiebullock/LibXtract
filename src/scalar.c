@@ -2243,7 +2243,7 @@ int xtract_time_reversal_asymmetry(xtract_context *ctx, const double *data, cons
     }
 
     for (t = lag; t < N; t++)
-        sum += data[t] * data[t - lag] * (data[t] - data[t - lag]);
+        sum += (data[t] - data[t - lag]) * data[t] * data[t - lag];
 
     *result = sum / (N - lag);
 
