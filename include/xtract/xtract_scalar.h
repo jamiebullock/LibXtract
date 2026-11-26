@@ -457,7 +457,7 @@ extern "C"
      * \param *data: not used
      * \param N: not used
      * \param *argv: a pointer to a double-precision floating point value representing a frequency in Hertz, at least 0; 0 gives no result
-     * \param *result: a pointer to a double-precision floating point value representing a "pitch" in MIDI cents, from 0 to 12700; a frequency whose pitch falls outside that range gives no result
+     * \param *result: a pointer to a double-precision floating point value representing a "pitch" in MIDI cents, A440 at 6900, rounded to the nearest whole cent with halves away from 0, from 0 to 12700; a frequency whose pitch falls outside that range gives no result
      *
      */
     int xtract_midicent(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
