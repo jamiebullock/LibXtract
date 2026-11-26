@@ -214,7 +214,9 @@ extern "C"
         /* The sum of a grid and its 7 central moments of the second and third orders */
         XTRACT_CENTRAL_MOMENT_COEFFS,
         /* The 7 normalised moments of a grid of the second and third orders */
-        XTRACT_NORMALISED_MOMENT_COEFFS
+        XTRACT_NORMALISED_MOMENT_COEFFS,
+        /* One value, read from the first element whatever N is */
+        XTRACT_SINGLE_VALUE
     } xtract_vector_t;
 
     /** \brief Enumeration of the kinds of argument, which say where the value of an argument comes from */
@@ -374,7 +376,7 @@ extern "C"
             int accept_count;                        /**< the number of entries of accepts, or 0 when only the caller has such data */
             const xtract_quantity_t *const *accepts; /**< the quantities the feature's definition is stated for, the one its sources use first, or NULL when accept_count is 0. The function takes any array of the layout, and the validation level holds for these quantities only. When frames is 2, each frame is the quantity */
             int frames;                              /**< 2 when the data is two frames of equal length one after the other, successive results of one feature with the current one first, and 1 otherwise */
-            const char *lengths;                     /**< the numbers of elements N the feature accepts: an expression in N and the names of its arguments that is true for them, as xtract_length_is_accepted() evaluates it */
+            const char *lengths;                     /**< the numbers of elements N the feature accepts: an expression in N and the names of its arguments that is true for them, as xtract_length_is_accepted() evaluates it. For XTRACT_SINGLE_VALUE the feature reads one element, and N is the length of its result */
         } data;
 
         int argc;                                 /**< the number of arguments */
