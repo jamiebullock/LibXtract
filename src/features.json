@@ -1702,7 +1702,7 @@
       "description": "Extract the last N values of a stream given one value at a time",
       "definition": "y_k = v_{t-N+1+k}, \\quad k = 0, \\ldots, N-1, \\quad v_t \\text{ the value given at call } t \\text{ (from 0)}, \\quad v_j = 0 \\text{ for } j < 0",
       "validation_level": 0,
-      "input": {"format": "arbitrary_series", "unit": "any", "length": "N >= 1 && N == capacity(state)"},
+      "input": {"format": "single_value", "unit": "any", "length": "N >= 1 && N == capacity(state)"},
       "arguments": [
         {"name": "state", "kind": "object", "built_by": "last_n_state_new"}
       ],

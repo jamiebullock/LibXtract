@@ -28,7 +28,7 @@ set(FORMATS spectral spectral_magnitudes spectral_peaks spectral_peaks_magnitude
             spectral_harmonics spectral_harmonics_magnitudes spectral_harmonics_frequencies autocorrelation_coeffs
             arbitrary_series audio_samples mel_coeffs lpc_coeffs lpcc_coeffs bark_coeffs subframes no_data
             spectral_complex chroma_coeffs channels square_matrix grid central_moment_coeffs
-            normalised_moment_coeffs)
+            normalised_moment_coeffs single_value)
 set(VALUE_TYPES float int)
 set(OBJECT_TYPES floatarray intarray filterbank cqt_kernel last_n_state)
 set(PROPERTIES length sample_rate transform_size bin_spacing width series levels)

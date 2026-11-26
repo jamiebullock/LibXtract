@@ -946,7 +946,7 @@ UTEST(descriptors, appended_features_are_fully_described)
     ASSERT_EQ(xtract_descriptor(XTRACT_LAST_N)->argv[0].min, XTRACT_UNBOUNDED_MIN);
     ASSERT_EQ(xtract_descriptor(XTRACT_LAST_N)->argv[0].max, XTRACT_UNBOUNDED_MAX);
     ASSERT_EQ(xtract_descriptor(XTRACT_LAST_N)->argv[0].unit, XTRACT_UNIT_NONE);
-    ASSERT_EQ(xtract_descriptor(XTRACT_LAST_N)->data.format, XTRACT_ARBITRARY_SERIES);
+    ASSERT_EQ(xtract_descriptor(XTRACT_LAST_N)->data.format, XTRACT_SINGLE_VALUE);
     ASSERT_EQ(xtract_descriptor(XTRACT_LAST_N)->data.unit, XTRACT_UNIT_ANY);
     ASSERT_EQ(xtract_descriptor(XTRACT_LAST_N)->is_scalar, XTRACT_FALSE);
     ASSERT_EQ(xtract_descriptor(XTRACT_LAST_N)->is_delta, XTRACT_FALSE);

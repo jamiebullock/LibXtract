@@ -3148,7 +3148,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .sources = NULL,
         .validation_level = 0,
         .tags = 0,
-        .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 1 && N == capacity(state)"},
+        .data = {XTRACT_SINGLE_VALUE, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 1 && N == capacity(state)"},
         .argc = 1,
         .argv = arguments_last_n,
         .is_scalar = XTRACT_FALSE,
