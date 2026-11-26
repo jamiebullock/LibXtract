@@ -6,6 +6,7 @@
 
 /* window.c: defines window generation functions (formulae courtesy of Wikipedia (http://en.wikipedia.org/wiki/Window_function) */
 
+#include <float.h>
 #include <math.h>
 
 #ifndef M_PI
@@ -97,27 +98,22 @@ void blackman(double *window, const int N)
     }
 }
 
-#define BIZ_EPSILON 1E-21 /* Max error acceptable */
-
-/* Based on code from MPlayer window.c, and somewhat beyond me */
-double besselI0(double x)
+/* The modified Bessel function of the first kind and order 0, from its power
+ * series: the sum over k of ((x / 2)^k / k!)^2 */
+static double bessel_i0(const double x)
 {
-    double temp;
+    const double quarter_square = x * x / 4.0;
+    double term = 1.0;
     double sum = 1.0;
-    double u = 1.0;
-    double halfx = x / 2.0;
-    int n = 1;
+    int k;
 
-    do
+    for (k = 1; term > DBL_EPSILON * sum; k++)
     {
-        temp = halfx / (double)n;
-        u *= temp * temp;
-        sum += u;
-        n++;
+        term *= quarter_square / ((double)k * k);
+        sum += term;
+    }
 
-    } while (u >= BIZ_EPSILON * sum);
-
-    return (sum);
+    return sum;
 }
 
 void kaiser(double *window, const int N, const double alpha)
@@ -128,8 +124,8 @@ void kaiser(double *window, const int N, const double alpha)
 
     for (n = 0; n < N; n++)
     {
-        num = besselI0(alpha * sqrt(1.0 - pow((2.0 * n / M - 1), 2)));
-        window[n] = num / besselI0(alpha);
+        num = bessel_i0(alpha * sqrt(1.0 - pow((2.0 * n / M - 1), 2)));
+        window[n] = num / bessel_i0(alpha);
     }
 }
 
