@@ -1549,6 +1549,63 @@ UTEST(scalar, hps_finds_fundamental_of_harmonic_signal)
     CHECK_REL(result, 10.0 * freq_res, 1e-3);
 }
 
+/* Bins 10 Hz apart. The partials of a 100 Hz tone at harmonics 1, 2, 3, 4
+ * and 6 give bin 20 the largest product of three harmonics (1 * 0.8 * 0.8
+ * against 0.9 * 1 * 0.5 for bin 10), so 100 Hz rests on the octave rule */
+static void hps_octave_spectrum(double *data, const int N)
+{
+    const int M = N / 2;
+    int i;
+
+    for (i = 0; i < M; i++)
+    {
+        data[i] = 1e-3;
+        data[M + i] = 10.0 * i;
+    }
+    data[10] = 0.9;
+    data[20] = 1.0;
+    data[30] = 0.5;
+    data[40] = 0.8;
+    data[60] = 0.8;
+}
+
+UTEST(scalar, hps_takes_the_peak_near_half_the_chosen_bin_as_the_fundamental)
+{
+    double data[128];
+    double harmonics = 3.0;
+    double result = 0.0;
+
+    hps_octave_spectrum(data, 128);
+    ASSERT_EQ(xtract_hps(NULL, data, 128, &harmonics, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 100.0, 1e-12);
+}
+
+UTEST(scalar, hps_octave_rule_holds_beside_a_wide_peak_and_a_large_bin_above_it)
+{
+    double data[128];
+    double harmonics = 3.0;
+    double result = 0.0;
+
+    hps_octave_spectrum(data, 128);
+    data[19] = 0.5;
+    data[21] = 0.5;
+    data[61] = 0.95;
+    ASSERT_EQ(xtract_hps(NULL, data, 128, &harmonics, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 100.0, 1e-12);
+}
+
+UTEST(scalar, hps_keeps_the_chosen_bin_when_the_peak_below_is_weak)
+{
+    double data[128];
+    double harmonics = 3.0;
+    double result = 0.0;
+
+    hps_octave_spectrum(data, 128);
+    data[10] = 0.09;
+    ASSERT_EQ(xtract_hps(NULL, data, 128, &harmonics, &result), XTRACT_SUCCESS);
+    CHECK_REL(result, 200.0, 1e-12);
+}
+
 UTEST(scalar, hps_floors_an_empty_bin_beside_a_subnormal_peak)
 {
     /* DBL_EPSILON times the largest magnitude rounds to 0 here, so the floor
@@ -1674,10 +1731,12 @@ UTEST(scalar, hps_harmonic_count_recovers_a_tone_with_a_missing_second_harmonic)
 {
     /* q = 100 Hz. A weak fundamental at 1000 Hz (coefficient 10) whose
      * second harmonic is only leakage, with the third to sixth
-     * harmonics present. With three terms the octave at 2000 Hz wins because
-     * its own harmonics (2000, 4000, 6000) are all strong; with five terms
-     * the octave's fourth and fifth harmonics are empty and the true
-     * fundamental wins. */
+     * harmonics present. With three terms the octave at 2000 Hz has the
+     * largest product, its own harmonics at 4000 and 6000 Hz being strong,
+     * and the peak at 1000 Hz, half its frequency and fifty times its
+     * magnitude, is taken as the fundamental; with five terms the octave's
+     * fourth and fifth harmonics are empty and the true fundamental has the
+     * largest product. */
     const int N = 512;
     const int M = N / 2;
     double data[512];
@@ -1697,7 +1756,7 @@ UTEST(scalar, hps_harmonic_count_recovers_a_tone_with_a_missing_second_harmonic)
 
     harmonics = 3.0;
     ASSERT_EQ(xtract_hps(NULL, data, N, &harmonics, &result), XTRACT_SUCCESS);
-    CHECK_REL(result, 2000.0, 1e-3);
+    CHECK_REL(result, 1000.0, 1e-3);
 
     harmonics = 5.0;
     ASSERT_EQ(xtract_hps(NULL, data, N, &harmonics, &result), XTRACT_SUCCESS);
