@@ -638,8 +638,11 @@ Validation level 0, not checked.
 
 xtract_mmbses()
 
+\f[ H_b = \ln(2 \pi e) + \tfrac{1}{2} \ln \max\left(D_b, \; \epsilon \max_{c : K_c \ne \emptyset} D_c\right), \quad D_b = s_{xx,b} s_{yy,b} - s_{xy,b}^2, \quad s_{xx,b} = \frac{1}{|K_b|} \sum_{k \in K_b} (w_{bk} \operatorname{Re} X_k)^2, \; s_{yy,b} = \frac{1}{|K_b|} \sum_{k \in K_b} (w_{bk} \operatorname{Im} X_k)^2, \; s_{xy,b} = \frac{1}{|K_b|} \sum_{k \in K_b} w_{bk}^2 \operatorname{Re} X_k \operatorname{Im} X_k, \quad K_b = \{k : w_{bk} \ne 0\}, \quad \epsilon = 2^{-52}, \quad H_b = 0 \text{ when } K_b \text{ is empty}, \quad \text{and every } H_b = 0 \text{ when no } D_c > 0 \f]
+
 Sources:
-- Origin: Rincon (2013)
+- Origin: Camarena-Ibarrola and Chavez (2006). "On musical performances identification, entropy and string matching". MICAI 2006: Advances in Artificial Intelligence, Lecture Notes in Computer Science, section 1.1, equation 2. <a href="https://doi.org/10.1007/11925231_91">doi:10.1007/11925231\_91</a>
+- Formulation: Rincon, Beltran, Tentori, Favela and Chavez (2013). "A context-aware baby monitor for the automatic selective archiving of the language of infants". Mexican International Conference on Computer Science (ENC 2013), section V.C, equation 5. <a href="https://doi.org/10.1109/ENC.2013.15">doi:10.1109/ENC.2013.15</a>
 
 Validation level 0, not checked.
 
@@ -999,9 +1002,11 @@ Validation level 0, not checked.
 
 xtract_cqt()
 
+\f[ X_b = \left| \sum_{j=0}^{N/2-1} X_j \, \overline{K_{bj}} \right|, \quad K_{bj} = \frac{\sum_{n=0}^{L_b-1} w_b(n) \, e^{2 \pi i f_b n / f_s} e^{-2 \pi i j (n + s_b) / N}}{\sum_{n=0}^{L_b-1} w_b(n)}, \quad w_b(n) = \tfrac{1}{2} - \tfrac{1}{2} \cos \frac{2 \pi n}{L_b - 1}, \quad L_b = \mathrm{round}\left(\frac{Q f_s}{f_b}\right), \; s_b = \left\lfloor \frac{N - L_b}{2} \right\rfloor, \; Q = \frac{1}{2^{1/B} - 1}, \; f_b = f_{\min} 2^{b/B}, \; K_{bj} = 0 \text{ where } |K_{bj}| < \theta \max_j |K_{bj}| \f]
+
 Sources:
-- Origin: Brown (1991). "Calculation of a constant Q spectral transform". Journal of the Acoustical Society of America 89(1). <a href="https://doi.org/10.1121/1.400476">doi:10.1121/1.400476</a>
-- Formulation: Brown and Puckette (1992). "An efficient algorithm for the calculation of a constant Q transform". Journal of the Acoustical Society of America 92(5). <a href="https://doi.org/10.1121/1.404385">doi:10.1121/1.404385</a>
+- Origin: Brown (1991). "Calculation of a constant Q spectral transform". Journal of the Acoustical Society of America 89(1), section II, equations 1 to 3 and 5. <a href="https://doi.org/10.1121/1.400476">doi:10.1121/1.400476</a>
+- Formulation: Brown and Puckette (1992). "An efficient algorithm for the calculation of a constant Q transform". Journal of the Acoustical Society of America 92(5), equations 1 to 7. <a href="https://doi.org/10.1121/1.404385">doi:10.1121/1.404385</a>
 
 Validation level 0, not checked.
 
@@ -1073,7 +1078,10 @@ Validation level 0, not checked.
 
 xtract_normalised_moments()
 
-No published source is listed.
+\f[ \nu_{pq} = \frac{\mu_{pq}}{\mu_{00}^{1 + (p+q)/2}}, \quad (p, q) \in \{(2,0), (1,1), (0,2), (3,0), (2,1), (1,2), (0,3)\} \f]
+
+Sources:
+- Origin: Hu (1962). "Visual pattern recognition by moment invariants". IRE Transactions on Information Theory 8(2), equation 31. <a href="https://doi.org/10.1109/TIT.1962.1057692">doi:10.1109/TIT.1962.1057692</a>
 
 Validation level 0, not checked.
 
@@ -1081,8 +1089,10 @@ Validation level 0, not checked.
 
 xtract_hu_moments()
 
+\f[ \phi_1 = \nu_{20} + \nu_{02}, \; \phi_2 = (\nu_{20} - \nu_{02})^2 + 4 \nu_{11}^2, \; \phi_3 = (\nu_{30} - 3\nu_{12})^2 + (3\nu_{21} - \nu_{03})^2, \; \phi_4 = (\nu_{30} + \nu_{12})^2 + (\nu_{21} + \nu_{03})^2, \; \phi_5 = (\nu_{30} - 3\nu_{12})(\nu_{30} + \nu_{12})[(\nu_{30} + \nu_{12})^2 - 3(\nu_{21} + \nu_{03})^2] + (3\nu_{21} - \nu_{03})(\nu_{21} + \nu_{03})[3(\nu_{30} + \nu_{12})^2 - (\nu_{21} + \nu_{03})^2], \; \phi_6 = (\nu_{20} - \nu_{02})[(\nu_{30} + \nu_{12})^2 - (\nu_{21} + \nu_{03})^2] + 4\nu_{11}(\nu_{30} + \nu_{12})(\nu_{21} + \nu_{03}), \; \phi_7 = (3\nu_{21} - \nu_{03})(\nu_{30} + \nu_{12})[(\nu_{30} + \nu_{12})^2 - 3(\nu_{21} + \nu_{03})^2] - (\nu_{30} - 3\nu_{12})(\nu_{21} + \nu_{03})[3(\nu_{30} + \nu_{12})^2 - (\nu_{21} + \nu_{03})^2] \f]
+
 Sources:
-- Origin: Hu (1962)
+- Origin: Hu (1962). "Visual pattern recognition by moment invariants". IRE Transactions on Information Theory 8(2), equations 61 and 62. <a href="https://doi.org/10.1109/TIT.1962.1057692">doi:10.1109/TIT.1962.1057692</a>
 
 Validation level 0, not checked.
 
@@ -1117,8 +1127,10 @@ Validation level 0, not checked.
 
 xtract_cooccurrence_contrast()
 
+\f[ \sum_{i,j} (i - j)^2 p_{ij}, \quad p_{ij} = \frac{P_{ij}}{\sum_{k,l} P_{kl}} \f]
+
 Sources:
-- Origin: Haralick, Shanmugam and Dinstein (1973)
+- Origin: Haralick, Shanmugam and Dinstein (1973). "Textural features for image classification". IEEE Transactions on Systems, Man, and Cybernetics SMC-3(6), appendix I, feature 2. <a href="https://doi.org/10.1109/TSMC.1973.4309314">doi:10.1109/TSMC.1973.4309314</a>
 
 Validation level 0, not checked.
 
@@ -1126,8 +1138,10 @@ Validation level 0, not checked.
 
 xtract_cooccurrence_correlation()
 
+\f[ \frac{\sum_{i,j} (i - \mu_i)(j - \mu_j) p_{ij}}{\sigma_i \sigma_j}, \quad \mu_i = \sum_{i,j} i \, p_{ij}, \; \sigma_i^2 = \sum_{i,j} (i - \mu_i)^2 p_{ij}, \text{ and likewise for } j, \quad p_{ij} = \frac{P_{ij}}{\sum_{k,l} P_{kl}} \f]
+
 Sources:
-- Origin: Haralick, Shanmugam and Dinstein (1973)
+- Origin: Haralick, Shanmugam and Dinstein (1973). "Textural features for image classification". IEEE Transactions on Systems, Man, and Cybernetics SMC-3(6), appendix I, feature 3. <a href="https://doi.org/10.1109/TSMC.1973.4309314">doi:10.1109/TSMC.1973.4309314</a>
 
 Validation level 0, not checked.
 
@@ -1135,8 +1149,10 @@ Validation level 0, not checked.
 
 xtract_angular_second_moment()
 
+\f[ \sum_{i,j} p_{ij}^2, \quad p_{ij} = \frac{P_{ij}}{\sum_{k,l} P_{kl}} \f]
+
 Sources:
-- Origin: Haralick, Shanmugam and Dinstein (1973)
+- Origin: Haralick, Shanmugam and Dinstein (1973). "Textural features for image classification". IEEE Transactions on Systems, Man, and Cybernetics SMC-3(6), appendix I, feature 1. <a href="https://doi.org/10.1109/TSMC.1973.4309314">doi:10.1109/TSMC.1973.4309314</a>
 
 Validation level 0, not checked.
 
@@ -1144,8 +1160,10 @@ Validation level 0, not checked.
 
 xtract_inverse_difference_moment()
 
+\f[ \sum_{i,j} \frac{p_{ij}}{1 + (i - j)^2}, \quad p_{ij} = \frac{P_{ij}}{\sum_{k,l} P_{kl}} \f]
+
 Sources:
-- Origin: Haralick, Shanmugam and Dinstein (1973)
+- Origin: Haralick, Shanmugam and Dinstein (1973). "Textural features for image classification". IEEE Transactions on Systems, Man, and Cybernetics SMC-3(6), appendix I, feature 5. <a href="https://doi.org/10.1109/TSMC.1973.4309314">doi:10.1109/TSMC.1973.4309314</a>
 
 Validation level 0, not checked.
 

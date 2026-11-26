@@ -155,9 +155,7 @@ extern "C"
      * \param *argv: a pointer to an xtract_filterbank from xtract_init_mfcc() or xtract_init_filterbank(), built for the size of the transform that produced the spectrum
      * \param *result: a pointer to an array of n_filters elements containing the resultant MEL-MBSES. A determinant below DBL_EPSILON times the largest determinant of the bands counts as that, as does a band of a single bin or of bins on one line through 0, whose determinant is 0. A band that no bin passes is 0. The array is zeroed with no result when no band has a determinant above 0
      *
-     * Each filter band's complex coefficients are modelled as a zero-mean bivariate (real, imaginary) Gaussian and the band's value is that distribution's differential entropy, H = ln(2*pi*e) + (1/2)ln(det of the 2x2 covariance).
-     *
-     * The method is described by: Rincon et al: A Context-Aware Baby Monitor for the Automatic Selective Archiving of the Language of Infants (2013)
+     * Each filter band's complex coefficients are modelled as a zero-mean bivariate (real, imaginary) Gaussian, as Camarena-Ibarrola and Chavez (2006) define the spectral entropy of a band, and the band's value is that distribution's differential entropy, H = ln(2*pi*e) + (1/2)ln(det of the 2x2 covariance). The covariance is taken over the bins the filter passes, each coefficient multiplied by the filter's gain at its bin, and divided by their number. Rincon et al. (2013) apply it to the bands of a mel filterbank
      */
     int xtract_mmbses(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
@@ -258,7 +256,7 @@ extern "C"
      * \param *data: N autocorrelation values from lag 0, e.g. the data pointed to by *result from xtract_autocorrelation()
      * \param N: the number of autocorrelation values to be considered, at least 2; the order p is N - 1
      * \param *argv: a pointer to NULL
-     * \param *result: the p reflection coefficients followed by the p prediction coefficients a[1] to a[p]; the prediction error is not returned. All are 0 with no result when the prediction error is 0 or below before the last coefficient, as for a series that fewer coefficients predict exactly or a sequence that is not the autocorrelation of any series
+     * \param *result: the p reflection coefficients followed by the p prediction coefficients a[1] to a[p]; the prediction error is not returned. All are 0 with no result when the prediction error is 0 or below before the last coefficient, as for a series that fewer coefficients predict exactly or a sequence that no series has as its autocorrelation
      *
      * An array of size 2 * (N - 1) must be allocated, and *result must point to its first element.
      */

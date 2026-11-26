@@ -799,9 +799,11 @@ static const xtract_argument_descriptor_t arguments_peak[] = {
     {.name = "threshold", .kind = XTRACT_ARGUMENT_SETTING, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_ANY, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .default_value = 0},
 };
 
-static const char *const authors_mmbses_0[] = {"Rincon"};
+static const char *const authors_mmbses_0[] = {"Camarena-Ibarrola", "Chavez"};
+static const char *const authors_mmbses_1[] = {"Rincon", "Beltran", "Tentori", "Favela", "Chavez"};
 static const xtract_source_t sources_mmbses[] = {
-    {XTRACT_SOURCE_ORIGIN, 1, authors_mmbses_0, 2013, NULL, NULL, NULL, NULL},
+    {XTRACT_SOURCE_ORIGIN, 2, authors_mmbses_0, 2006, "On musical performances identification, entropy and string matching", "MICAI 2006: Advances in Artificial Intelligence, Lecture Notes in Computer Science", "section 1.1, equation 2", "doi:10.1007/11925231_91"},
+    {XTRACT_SOURCE_FORMULATION, 5, authors_mmbses_1, 2013, "A context-aware baby monitor for the automatic selective archiving of the language of infants", "Mexican International Conference on Computer Science (ENC 2013)", "section V.C, equation 5", "doi:10.1109/ENC.2013.15"},
 };
 static const xtract_argument_descriptor_t arguments_mmbses[] = {
     {.name = "filterbank", .kind = XTRACT_ARGUMENT_OBJECT, .type = XTRACT_FILTERBANK, .unit = XTRACT_UNIT_NONE, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .builder = &builder_init_mfcc},
@@ -976,8 +978,8 @@ static const xtract_argument_descriptor_t arguments_chroma[] = {
 static const char *const authors_cqt_0[] = {"Brown"};
 static const char *const authors_cqt_1[] = {"Brown", "Puckette"};
 static const xtract_source_t sources_cqt[] = {
-    {XTRACT_SOURCE_ORIGIN, 1, authors_cqt_0, 1991, "Calculation of a constant Q spectral transform", "Journal of the Acoustical Society of America 89(1)", NULL, "doi:10.1121/1.400476"},
-    {XTRACT_SOURCE_FORMULATION, 2, authors_cqt_1, 1992, "An efficient algorithm for the calculation of a constant Q transform", "Journal of the Acoustical Society of America 92(5)", NULL, "doi:10.1121/1.404385"},
+    {XTRACT_SOURCE_ORIGIN, 1, authors_cqt_0, 1991, "Calculation of a constant Q spectral transform", "Journal of the Acoustical Society of America 89(1)", "section II, equations 1 to 3 and 5", "doi:10.1121/1.400476"},
+    {XTRACT_SOURCE_FORMULATION, 2, authors_cqt_1, 1992, "An efficient algorithm for the calculation of a constant Q transform", "Journal of the Acoustical Society of America 92(5)", "equations 1 to 7", "doi:10.1121/1.404385"},
 };
 static const xtract_argument_descriptor_t arguments_cqt[] = {
     {.name = "kernel", .kind = XTRACT_ARGUMENT_OBJECT, .type = XTRACT_CQT_KERNEL, .unit = XTRACT_UNIT_NONE, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .builder = &builder_init_cqt},
@@ -999,9 +1001,13 @@ static const xtract_argument_descriptor_t arguments_grid_central_moments[] = {
     {.name = "width", .kind = XTRACT_ARGUMENT_PROPERTY, .type = XTRACT_INT, .unit = XTRACT_UNIT_NONE, .min = 1, .max = XTRACT_UNBOUNDED_MAX, .data_property = XTRACT_PROPERTY_WIDTH},
 };
 
+static const char *const authors_normalised_moments_0[] = {"Hu"};
+static const xtract_source_t sources_normalised_moments[] = {
+    {XTRACT_SOURCE_ORIGIN, 1, authors_normalised_moments_0, 1962, "Visual pattern recognition by moment invariants", "IRE Transactions on Information Theory 8(2)", "equation 31", "doi:10.1109/TIT.1962.1057692"},
+};
 static const char *const authors_hu_moments_0[] = {"Hu"};
 static const xtract_source_t sources_hu_moments[] = {
-    {XTRACT_SOURCE_ORIGIN, 1, authors_hu_moments_0, 1962, NULL, NULL, NULL, NULL},
+    {XTRACT_SOURCE_ORIGIN, 1, authors_hu_moments_0, 1962, "Visual pattern recognition by moment invariants", "IRE Transactions on Information Theory 8(2)", "equations 61 and 62", "doi:10.1109/TIT.1962.1057692"},
 };
 static const xtract_argument_descriptor_t arguments_quantise[] = {
     {.name = "lower", .kind = XTRACT_ARGUMENT_RESULT, .type = XTRACT_FLOAT, .unit = XTRACT_UNIT_ANY, .min = XTRACT_UNBOUNDED_MIN, .max = XTRACT_UNBOUNDED_MAX, .accepts = &quantity_lowest_value, .subject = XTRACT_SUBJECT_INPUT},
@@ -1027,19 +1033,19 @@ static const xtract_argument_descriptor_t arguments_cooccurrence_matrix[] = {
 
 static const char *const authors_cooccurrence_contrast_0[] = {"Haralick", "Shanmugam", "Dinstein"};
 static const xtract_source_t sources_cooccurrence_contrast[] = {
-    {XTRACT_SOURCE_ORIGIN, 3, authors_cooccurrence_contrast_0, 1973, NULL, NULL, NULL, NULL},
+    {XTRACT_SOURCE_ORIGIN, 3, authors_cooccurrence_contrast_0, 1973, "Textural features for image classification", "IEEE Transactions on Systems, Man, and Cybernetics SMC-3(6)", "appendix I, feature 2", "doi:10.1109/TSMC.1973.4309314"},
 };
 static const char *const authors_cooccurrence_correlation_0[] = {"Haralick", "Shanmugam", "Dinstein"};
 static const xtract_source_t sources_cooccurrence_correlation[] = {
-    {XTRACT_SOURCE_ORIGIN, 3, authors_cooccurrence_correlation_0, 1973, NULL, NULL, NULL, NULL},
+    {XTRACT_SOURCE_ORIGIN, 3, authors_cooccurrence_correlation_0, 1973, "Textural features for image classification", "IEEE Transactions on Systems, Man, and Cybernetics SMC-3(6)", "appendix I, feature 3", "doi:10.1109/TSMC.1973.4309314"},
 };
 static const char *const authors_angular_second_moment_0[] = {"Haralick", "Shanmugam", "Dinstein"};
 static const xtract_source_t sources_angular_second_moment[] = {
-    {XTRACT_SOURCE_ORIGIN, 3, authors_angular_second_moment_0, 1973, NULL, NULL, NULL, NULL},
+    {XTRACT_SOURCE_ORIGIN, 3, authors_angular_second_moment_0, 1973, "Textural features for image classification", "IEEE Transactions on Systems, Man, and Cybernetics SMC-3(6)", "appendix I, feature 1", "doi:10.1109/TSMC.1973.4309314"},
 };
 static const char *const authors_inverse_difference_moment_0[] = {"Haralick", "Shanmugam", "Dinstein"};
 static const xtract_source_t sources_inverse_difference_moment[] = {
-    {XTRACT_SOURCE_ORIGIN, 3, authors_inverse_difference_moment_0, 1973, NULL, NULL, NULL, NULL},
+    {XTRACT_SOURCE_ORIGIN, 3, authors_inverse_difference_moment_0, 1973, "Textural features for image classification", "IEEE Transactions on Systems, Man, and Cybernetics SMC-3(6)", "appendix I, feature 5", "doi:10.1109/TSMC.1973.4309314"},
 };
 static const char *const authors_local_binary_patterns_0[] = {"Ojala", "Pietikainen", "Maenpaa"};
 static const xtract_source_t sources_local_binary_patterns[] = {
@@ -2139,7 +2145,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .name = "mmbses",
         .title = "Mel Multi-Band Spectral Entropy Signature",
         .description = "Extract mel band spectral entropies from a complex spectrum",
-        .source_count = 1,
+        .source_count = 2,
         .sources = sources_mmbses,
         .validation_level = 0,
         .tags = XTRACT_TAG_SOUND,
@@ -2891,8 +2897,8 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .name = "normalised_moments",
         .title = "Normalised Moments",
         .description = "Extract the normalised moments of a grid from its central moments",
-        .source_count = 0,
-        .sources = NULL,
+        .source_count = 1,
+        .sources = sources_normalised_moments,
         .validation_level = 0,
         .tags = 0,
         .data = {XTRACT_CENTRAL_MOMENT_COEFFS, XTRACT_UNIT_ANY, 1, accepted_normalised_moments, 1, "N == 8"},
