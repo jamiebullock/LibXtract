@@ -153,6 +153,17 @@ UTEST(window, kaiser)
     xtract_free_window(w);
 }
 
+UTEST(window, kaiser_values_are_ratios_of_bessel_i0)
+{
+    /* I0(3 pi) = 1633.0905220588254 and I0(3 pi sqrt(3) / 2) / I0(3 pi) =
+     * 0.30470320894584039, from the power series in 50-digit arithmetic */
+    double *w = xtract_init_window(5, XTRACT_KAISER);
+    ASSERT_TRUE(w != NULL);
+    CHECK_REL(w[0], 1.0 / 1633.0905220588254, 1e-14);
+    CHECK_REL(w[1], 0.30470320894584039, 1e-14);
+    xtract_free_window(w);
+}
+
 UTEST(window, init_window_rejects_a_type_outside_the_enumeration)
 {
     ASSERT_TRUE(xtract_init_window(5, XTRACT_GAUSS - 1) == NULL);
