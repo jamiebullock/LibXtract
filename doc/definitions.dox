@@ -638,7 +638,7 @@ Validation level 0, not checked.
 
 xtract_mmbses()
 
-\f[ H_b = \ln(2 \pi e) + \tfrac{1}{2} \ln \max\left(D_b, \; \epsilon \max_{c : K_c \ne \emptyset} D_c\right), \quad D_b = s_{xx,b} s_{yy,b} - s_{xy,b}^2, \quad s_{xx,b} = \frac{1}{|K_b|} \sum_{k \in K_b} (w_{bk} \operatorname{Re} X_k)^2, \; s_{yy,b} = \frac{1}{|K_b|} \sum_{k \in K_b} (w_{bk} \operatorname{Im} X_k)^2, \; s_{xy,b} = \frac{1}{|K_b|} \sum_{k \in K_b} w_{bk}^2 \operatorname{Re} X_k \operatorname{Im} X_k, \quad K_b = \{k : w_{bk} \ne 0\}, \quad \epsilon = 2^{-52}, \quad H_b = 0 \text{ when } K_b \text{ is empty} \f]
+\f[ H_b = \ln(2 \pi e) + \tfrac{1}{2} \ln \max\left(D_b, \; \epsilon \max_{c : K_c \ne \emptyset} D_c\right), \quad D_b = s_{xx,b} s_{yy,b} - s_{xy,b}^2, \quad s_{xx,b} = \frac{1}{|K_b|} \sum_{k \in K_b} (w_{bk} \operatorname{Re} X_k)^2, \; s_{yy,b} = \frac{1}{|K_b|} \sum_{k \in K_b} (w_{bk} \operatorname{Im} X_k)^2, \; s_{xy,b} = \frac{1}{|K_b|} \sum_{k \in K_b} w_{bk}^2 \operatorname{Re} X_k \operatorname{Im} X_k, \quad K_b = \{k : w_{bk} \ne 0\}, \quad \epsilon = 2^{-52}, \quad H_b = 0 \text{ when } K_b \text{ is empty}, \quad \text{and every } H_b = 0 \text{ when no } D_c > 0 \f]
 
 Sources:
 - Origin: Camarena-Ibarrola and Chavez (2006). "On musical performances identification, entropy and string matching". MICAI 2006: Advances in Artificial Intelligence, Lecture Notes in Computer Science, section 1.1, equation 2. <a href="https://doi.org/10.1007/11925231_91">doi:10.1007/11925231\_91</a>
