@@ -476,7 +476,7 @@ extern "C"
      * \param *ctx: a pointer to a context, or NULL
      * \param *data: a pointer to an array containing a time series as provided by *result from xtract_last_n(), where the Nth value is the 'current' value
      * \param N: the number of elements in the time series, at least 1
-     * \param *argv: a pointer to a double representing the threshold: the current value is a peak if no value of the series is above it and it exceeds the average of the N values, itself included, by at least the threshold. An earlier value equal to it does not stop it being a peak, so a constant series is a peak when the threshold is below 0, and at a threshold of 0 when its mean does not round above its value
+     * \param *argv: a pointer to a double representing the threshold: the current value is a peak if no value of the series is above it and it exceeds the average of the N values, itself included, by at least the threshold. An earlier value equal to it does not stop it being a peak, so a constant series is a peak when the threshold is below 0, and at a threshold of 0 when its mean does not round above its value. The series must not hold NaN
      * \param *result: a pointer to a copy of the current value if it is a peak, or 0 with no result if it is not
      */
     int xtract_peak(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
