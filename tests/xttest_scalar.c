@@ -1320,6 +1320,45 @@ UTEST(scalar, lowest_value_skips_zeros)
     CHECK_REL(result, 3.0, EPSILON);
 }
 
+UTEST(scalar, lowest_value_can_be_the_largest_double_or_infinity)
+{
+    double result = 0.0;
+    double threshold = 0.0;
+    double largest[] = {DBL_MAX};
+    double infinite[] = {INFINITY, -5.0};
+    ASSERT_EQ(xtract_lowest_value(NULL, largest, 1, &threshold, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(result, DBL_MAX);
+    ASSERT_EQ(xtract_lowest_value(NULL, infinite, 2, &threshold, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(result, INFINITY);
+}
+
+UTEST(scalar, lowest_value_ignores_nan)
+{
+    double result = 0.0;
+    double threshold = 0.0;
+    double data[] = {NAN, 2.0, NAN, 1.5};
+    ASSERT_EQ(xtract_lowest_value(NULL, data, 4, &threshold, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(result, 1.5);
+}
+
+UTEST(scalar, lowest_value_skips_a_value_at_the_threshold_after_the_first_above_it)
+{
+    double result = 0.0;
+    double threshold = 0.0;
+    double data[] = {5.0, 0.0, 3.0};
+    ASSERT_EQ(xtract_lowest_value(NULL, data, 3, &threshold, &result), XTRACT_SUCCESS);
+    ASSERT_EQ(result, 3.0);
+}
+
+UTEST(scalar, lowest_value_is_the_first_of_equal_lowest_values)
+{
+    double result = 1.0;
+    double threshold = -1.0;
+    double data[] = {0.0, -0.0};
+    ASSERT_EQ(xtract_lowest_value(NULL, data, 2, &threshold, &result), XTRACT_SUCCESS);
+    ASSERT_FALSE(signbit(result));
+}
+
 UTEST(scalar, lowest_value_no_qualifying_values)
 {
     /* By library convention *result is 0 when XTRACT_NO_RESULT is returned. */
