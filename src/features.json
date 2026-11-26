@@ -895,7 +895,7 @@
       "name": "mel_spectrogram",
       "title": "Mel Spectrogram",
       "description": "Extract log mel energies from a spectrum",
-      "definition": "L_m = \\ln \\max\\left(E_m, \\epsilon \\max_j E_j\\right), \\quad E_m = \\sum_{k=0}^{N-1} H_m(k) P_k, \\quad \\epsilon = 2^{-52}, \\quad H_m \\text{ the gains of filter } m; \\text{ no result when } \\max_j E_j = 0",
+      "definition": "L_m = \\ln \\max\\left(E_m, \\epsilon \\max_j E_j\\right), \\quad E_m = \\sum_{k=0}^{N-1} H_m(k) P_k, \\quad \\epsilon = 2^{-52}, \\quad H_m \\text{ the gains of filter } m; \\text{ no result when } \\max_j E_j \\le 0",
       "sources": [{"role": "origin", "authors": ["Davis", "Mermelstein"], "year": 1980, "title": "Comparison of parametric representations for monosyllabic word recognition in continuously spoken sentences", "venue": "IEEE Transactions on Acoustics, Speech, and Signal Processing 28(4)", "locator": "equation 1 and figure 1", "permalink": "doi:10.1109/TASSP.1980.1163420"}, {"role": "formulation", "authors": ["Rabiner", "Juang"], "year": 1993, "title": "Fundamentals of speech recognition", "venue": "PTR Prentice Hall", "locator": "section 4.5.6, equation 4.90"}, {"role": "formulation", "authors": ["Young", "Evermann", "Gales", "Hain", "Kershaw", "Liu", "Moore", "Odell", "Ollason", "Povey", "Valtchev", "Woodland"], "year": 2009, "title": "The HTK book, for HTK version 3.4", "venue": "Cambridge University Engineering Department", "locator": "section 5.4, equation 5.13"}],
       "validation_level": 0,
       "tags": ["sound"],
