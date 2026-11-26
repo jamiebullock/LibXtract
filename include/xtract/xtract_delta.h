@@ -74,7 +74,7 @@ extern "C"
      * \param *data a pointer to an array representing two distinct vectors, e.g. two successive magnitude spectra.
      * \param N the size of the array pointed to by *data, at least 2 and even
      * \param *argv a pointer to NULL
-     * \param *result a pointer to an array of size N / 2 representing the difference between the two input vectors.
+     * \param *result a pointer to an array of size N / 2 representing the difference between the two input vectors: the first vector minus the second
      *
      * */
     int xtract_difference_vector(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);

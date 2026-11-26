@@ -497,6 +497,8 @@ extern "C"
 
     /** \brief A function to initialise bark filter bounds
      *
+     * There are XTRACT_BARK_BANDS bands. Their edges are the critical-band limits of Zwicker (1961) from 100 Hz to 15500 Hz, as Smith and Abel (1999) tabulate them. The first band starts at 0 Hz, where Zwicker starts at 20 Hz, and two bands, from 15500 Hz to 20500 Hz and from 20500 Hz to the Nyquist frequency, extend his 24
+     *
      * A pointer to an array of XTRACT_BARK_BANDS ints must be passed in, and is populated with the bin number at which each band starts, on the bin grid of an N-point transform with DC at bin 0. The spectrum these limits are applied to by xtract_bark_coefficients() therefore has N / 2 elements, element k being bin k
      *
      * \param N: the size of the transform the band limits will be applied to, at least 2
@@ -507,6 +509,8 @@ extern "C"
     int xtract_init_bark(int N, double sr, int *band_limits);
 
     /** \brief Make a window of a given type and return a pointer to it
+     *
+     * Every window is symmetric: element n of N is the window's value at n / (N - 1) of its length. The windows follow Harris (1978), and the Bartlett-Hann window Ha and Pearce (1989). The Gauss window has a standard deviation of 0.4 of half its length, and the Kaiser window an alpha of 3 pi
      *
      * \param N: the size of the window, at least 2
      * \param type: the type of the window as given in the enumeration xtract_window_types_

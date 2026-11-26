@@ -84,65 +84,65 @@ extern "C"
      */
     int xtract_kurtosis(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
-    /** \brief Extract the mean of an input spectrum
+    /** \brief Extract the spectral mean of an input spectrum: its amplitude-weighted mean frequency, as xtract_spectral_centroid() gives it
      *
      * \param *ctx: a pointer to a context, or NULL
-     * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector, (e.g. the array pointed to by *result from xtract_magnitude_spectrum(), xtract_peak_spectrum() or xtract_harmonic_spectrum()).
+     * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector, (e.g. the array pointed to by *result from xtract_magnitude_spectrum(), xtract_peak_spectrum() or xtract_harmonic_spectrum()), with amplitudes at least 0.
      * \param N: the size of the array pointed to by *data, at least 2 and even
      * \param *argv: a pointer to NULL
-     * \param *result: the mean of the spectrum pointed to by *data
+     * \param *result: the spectral mean of the spectrum pointed to by *data, or 0 with no result when the amplitudes sum to 0
      */
     int xtract_spectral_mean(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief Extract the variance of an input spectrum
      *
      * \param *ctx: a pointer to a context, or NULL
-     * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector, (e.g. the array pointed to by *result from xtract_magnitude_spectrum(), xtract_peak_spectrum() or xtract_harmonic_spectrum()).
+     * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector, (e.g. the array pointed to by *result from xtract_magnitude_spectrum(), xtract_peak_spectrum() or xtract_harmonic_spectrum()), with amplitudes at least 0.
      * \param N: the size of the array pointed to by *data, at least 2 and even
      * \param *argv: a pointer to a double representing the spectral mean of the input spectrum
-     * \param *result: the variance of the spectrum pointed to by *data
+     * \param *result: the variance of the spectrum pointed to by *data: the amplitude-weighted mean of the squared deviations of the frequencies from the spectral mean given, or 0 with no result when the amplitudes sum to 0
      */
     int xtract_spectral_variance(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
-    /** \brief Extract the deviation of an input spectrum
+    /** \brief Extract the standard deviation of an input spectrum from its variance
      *
      * \param *ctx: a pointer to a context, or NULL
-     * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector, (e.g. the array pointed to by *result from xtract_magnitude_spectrum(), xtract_peak_spectrum() or xtract_harmonic_spectrum()).
-     * \param N: the size of the array pointed to by *data
+     * \param *data: not used
+     * \param N: not used
      * \param *argv: a pointer to a double representing the spectral variance of the input spectrum, at least 0
-     * \param *result: the deviation of the spectrum pointed to by *data
+     * \param *result: the square root of the spectral variance given
      */
     int xtract_spectral_standard_deviation(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief Extract the skewness of an input spectrum
      *
      * \param *ctx: a pointer to a context, or NULL
-     * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector, (e.g. the array pointed to by *result from xtract_magnitude_spectrum(), xtract_peak_spectrum() or xtract_harmonic_spectrum()).
+     * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector, (e.g. the array pointed to by *result from xtract_magnitude_spectrum(), xtract_peak_spectrum() or xtract_harmonic_spectrum()), with amplitudes at least 0.
      * \param N: the size of the array pointed to by *data, at least 2 and even
      * \param *argv: a pointer to an array of doubles representing the spectral mean and spectral standard deviation of the input spectrum, the standard deviation at least 0
-     * \param *result: the skewness of the spectrum pointed to by *data
+     * \param *result: the skewness of the spectrum pointed to by *data: the amplitude-weighted mean of the cubed deviations of the frequencies from the spectral mean given, divided by the cube of the spectral standard deviation given, or 0 with no result when the standard deviation is 0 or the amplitudes sum to 0
      */
     int xtract_spectral_skewness(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
     /** \brief Extract the kurtosis of an input spectrum
      *
      * \param *ctx: a pointer to a context, or NULL
-     * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector, (e.g. the array pointed to by *result from xtract_magnitude_spectrum(), xtract_peak_spectrum() or xtract_harmonic_spectrum()).
+     * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector, (e.g. the array pointed to by *result from xtract_magnitude_spectrum(), xtract_peak_spectrum() or xtract_harmonic_spectrum()), with amplitudes at least 0.
      * \param N: the size of the array pointed to by *data, at least 2 and even
      * \param *argv: a pointer to an array of values representing the spectral mean and spectral standard deviation of the input spectrum, the standard deviation at least 0
-     * \param *result: the kurtosis of the spectrum pointed to by *data
+     * \param *result: the excess kurtosis of the spectrum pointed to by *data: the amplitude-weighted mean of the fourth powers of the deviations of the frequencies from the spectral mean given, divided by the fourth power of the spectral standard deviation given, less 3, which makes it 0 for a normal distribution; or 0 with no result when the standard deviation is 0 or the amplitudes sum to 0
      */
     int xtract_spectral_kurtosis(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
-    /** \brief Extract the centroid of an input vector
+    /** \brief Extract the spectral centroid of an input spectrum: its amplitude-weighted mean frequency
      *
      * \param *ctx: a pointer to a context, or NULL
-     * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector, (e.g. the array pointed to by *result from xtract_magnitude_spectrum(), xtract_peak_spectrum() or xtract_harmonic_spectrum()).
+     * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector, (e.g. the array pointed to by *result from xtract_magnitude_spectrum(), xtract_peak_spectrum() or xtract_harmonic_spectrum()), with amplitudes at least 0.
      * \param N: the size of the array pointed to by *data, at least 2 and even
      * \param *argv: a pointer to NULL
-     * \param *result: the centroid of the values pointed to by *data
+     * \param *result: the centroid of the spectrum pointed to by *data, or 0 with no result when the amplitudes sum to 0
      *
-     * Note: for a more 'accurate' result *result from xtract_peak_spectrum() can be passed in. This gives the interpolated peak frequency locations.
+     * The *result of xtract_peak_spectrum() or xtract_harmonic_spectrum() gives the centroid of the peaks at their interpolated frequencies.
      *
      */
     int xtract_spectral_centroid(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
@@ -210,7 +210,7 @@ extern "C"
     /** \brief Extract the spectral spread of a spectrum: the variance of its frequencies weighted by its coefficients, which Peeters (2004, section 6.1.2) calls the spread. It is the quantity xtract_spectral_variance() gives
      *
      * \param *ctx: a pointer to a context, or NULL
-     * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector, (e.g. the array pointed to by *result from xtract_magnitude_spectrum(), xtract_peak_spectrum() or xtract_harmonic_spectrum()).
+     * \param *data: a pointer to the first element in an array of doubles representing the spectrum of an audio vector, (e.g. the array pointed to by *result from xtract_magnitude_spectrum(), xtract_peak_spectrum() or xtract_harmonic_spectrum()), with amplitudes at least 0.
      * \param N: the size of the array pointed to by *data, at least 2 and even
      * \param *argv: a pointer to a double corresponding to the spectral centroid
      * \param *result: the spectral spread of N values from the array pointed to by *data
@@ -543,10 +543,10 @@ extern "C"
      */
     int xtract_time_reversal_asymmetry(xtract_context *ctx, const double *data, const int N, const void *argv, double *result);
 
-    /** \brief Extract the spectral entropy of a spectrum: the Shannon entropy of the spectrum normalised to sum to 1, divided by the entropy of a flat spectrum of the same length
+    /** \brief Extract the spectral entropy of a spectrum: the Shannon entropy of the spectrum normalised to sum to 1, divided by the entropy of a flat spectrum of the same length, as Inouye et al. (1991) normalise it
      *
      * \param *ctx: a pointer to a context, or NULL
-     * \param *data: a pointer to the first element in an array of doubles representing the coefficients of a spectrum, such as the first half of the array pointed to by *result from xtract_power_spectrum(); a power spectrum gives the usual definition, and a bin that is not positive counts as empty
+     * \param *data: a pointer to the first element in an array of doubles representing the coefficients of a power spectrum, such as the first half of the array pointed to by *result from xtract_power_spectrum(); a bin that is not positive counts as empty
      * \param N: the number of *data array elements to be considered, at least 2
      * \param *argv: not used
      * \param *result: the spectral entropy of N values from the array pointed to by *data, between 0 for a single occupied bin and 1 for a flat spectrum, or 0 with no result if no bin is positive
