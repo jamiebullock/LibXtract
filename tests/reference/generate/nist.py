@@ -91,6 +91,9 @@ def main():
     reference = pathlib.Path(sys.argv[2])
     for directory in ("series", "values"):
         (reference / directory).mkdir(parents=True, exist_ok=True)
+        # What an earlier run wrote under other names would be read as well
+        for earlier in (reference / directory).iterdir():
+            earlier.unlink()
     records = []
     for name, digest in SHA256.items():
         raw = (published_files / f"{name}.dat").read_bytes()
