@@ -3,8 +3,8 @@
 # SPDX-FileCopyrightText: 2026 Jamie Bullock
 # SPDX-License-Identifier: Zlib
 
-"""Writes two series, statistics of a window moved along each, and a theorem
-for every list of those values that Lean checks.
+"""Writes three series, statistics of a window moved along each, and a
+theorem for every list of those values that Lean checks.
 
 usage: lean_moving.py
 
@@ -21,7 +21,10 @@ checked.
 The first series has nine multiples of 1/4 of both signs with a zero, on
 which the library's sums are exact, and its window has four values. The
 second repeats eight values between 0.05 and 0.9, 1000 values in all, and
-its window has 993 of them, which leaves eight windows.
+its window has 993 of them, which leaves eight windows. The third repeats
+eight other values five times, with a window of three for the largest and
+the smallest value of a window: the largest of the eight leaves a window
+before the next one enters, so the results change along the series.
 """
 
 from fractions import Fraction
@@ -35,7 +38,9 @@ SERIES = {
     SHORT: (["1", "3", "-2", "0", "4.5", "2", "-1", "0.5", "6"], [], 0),
     LONG: ([], ["0.4", "0.9", "0.05", "0.3", "0.7", "0.2", "0.6", "0.1"], 125),
 }
-WINDOW = {SHORT: 4, LONG: 993}
+MIDDLE = "tenths_cycle_of_40"
+SERIES[MIDDLE] = ([], ["0.3", "0.8", "0.1", "0.5", "0.95", "0.2", "0.6", "0.05"], 5)
+WINDOW = {SHORT: 4, LONG: 993, MIDDLE: 3}
 
 
 def main():
@@ -50,7 +55,26 @@ def main():
     assert all((4 * value).denominator == 1 for value in doubles[SHORT])
     # The bound on a sum holds for terms of one sign
     assert all(value > 0 for value in doubles[LONG])
-    for series in SERIES:
+    for series in (SHORT, MIDDLE):
+        xs = doubles[series]
+        width = WINDOW[series]
+        windows = [xs[first : first + width] for first in range(len(xs) - width + 1)]
+        for feature, definition, extreme in (("moving_max", "movingMax", max), ("moving_min", "movingMin", min)):
+            results = [extreme(window) for window in windows]
+            # More than two values among the results of the longer series
+            assert series == SHORT or len(set(results)) > 2
+            out.vector(
+                feature,
+                series,
+                f"{definition} {data(series)} {width}",
+                f"{definition}_cast _ _",
+                results,
+                0,
+                "each result is a value of the series",
+                {"window": width},
+            )
+
+    for series in (SHORT, LONG):
         xs = doubles[series]
         width = WINDOW[series]
         exact = series == SHORT
