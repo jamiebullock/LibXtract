@@ -66,6 +66,16 @@ static const double series_peaks_two_to_a_harmonic_prefix[16] = {
 
 static const xttest_reference_series series_peaks_two_to_a_harmonic = {.name = "peaks_two_to_a_harmonic", .prefix = series_peaks_two_to_a_harmonic_prefix, .prefix_count = 16, .cycle = NULL, .cycle_count = 0, .repeats = 0};
 
+static const double series_halves_on_level_edges_prefix[8] = {
+    0.0, 1.0, 2.5, 4.0, 3.0, 0.5, 2.0, 1.0};
+
+static const xttest_reference_series series_halves_on_level_edges = {.name = "halves_on_level_edges", .prefix = series_halves_on_level_edges_prefix, .prefix_count = 8, .cycle = NULL, .cycle_count = 0, .repeats = 0};
+
+static const double series_tenths_to_quantise_cycle_cycle[8] = {
+    0.34999999999999998, 0.90000000000000002, 0.050000000000000003, 0.59999999999999998, 0.14999999999999999, 0.80000000000000004, 0.45000000000000001, 0.25};
+
+static const xttest_reference_series series_tenths_to_quantise_cycle = {.name = "tenths_to_quantise_cycle", .prefix = NULL, .prefix_count = 0, .cycle = series_tenths_to_quantise_cycle_cycle, .cycle_count = 8, .repeats = 5};
+
 static const double series_quarters_of_both_signs_prefix[9] = {
     1.0, 3.0, -2.0, 0.0, 4.5, 2.0, -1.0, 0.5,
     6.0};
@@ -271,6 +281,18 @@ static const xttest_reference_record records_lean_harmonicity[] = {
 };
 
 static const xttest_reference_source source_lean_harmonicity = {.id = "lean_harmonicity", .name = "Theorems about the definitions of the features that measure partials against a fundamental, checked by Lean", .level = 3, .record_count = 4, .records = records_lean_harmonicity};
+
+static const double arguments_lean_levels_0[] = {0.0, 4.0, 4.0};
+static const double expected_lean_levels_0[] = {0.0, 1.0, 2.0, 3.0, 3.0, 0.0, 2.0, 1.0};
+static const double arguments_lean_levels_1[] = {0.050000000000000003, 0.90000000000000002, 256.0};
+static const double expected_lean_levels_1[] = {90.0, 255.0, 0.0, 165.0, 30.0, 225.0, 120.0, 60.0, 90.0, 255.0, 0.0, 165.0, 30.0, 225.0, 120.0, 60.0, 90.0, 255.0, 0.0, 165.0, 30.0, 225.0, 120.0, 60.0, 90.0, 255.0, 0.0, 165.0, 30.0, 225.0, 120.0, 60.0, 90.0, 255.0, 0.0, 165.0, 30.0, 225.0, 120.0, 60.0};
+
+static const xttest_reference_record records_lean_levels[] = {
+    {.feature = XTRACT_QUANTISE, .series = &series_halves_on_level_edges, .arguments = arguments_lean_levels_0, .expected = expected_lean_levels_0, .expected_count = 8, .tolerance = 0.0},
+    {.feature = XTRACT_QUANTISE, .series = &series_tenths_to_quantise_cycle, .arguments = arguments_lean_levels_1, .expected = expected_lean_levels_1, .expected_count = 40, .tolerance = 0.0},
+};
+
+static const xttest_reference_source source_lean_levels = {.id = "lean_levels", .name = "Theorems about the definitions of the levels of a series, checked by Lean", .level = 3, .record_count = 2, .records = records_lean_levels};
 
 static const int arguments_lean_moving_0[] = {4};
 static const double expected_lean_moving_0[] = {3.0, 4.5, 4.5, 4.5, 4.5, 6.0};
@@ -565,9 +587,9 @@ static const xttest_reference_record records_lean_temporal[] = {
 
 static const xttest_reference_source source_lean_temporal = {.id = "lean_temporal", .name = "Theorems about the definitions of the features of the shape of a series over time, checked by Lean", .level = 3, .record_count = 14, .records = records_lean_temporal};
 
-const xttest_reference_source *const xttest_reference_sources[] = {&source_lean_cooccurrence, &source_lean_harmonicity, &source_lean_moving, &source_lean_smoothing, &source_lean_spectral_moments, &source_lean_spectral_shape, &source_lean_statistics, &source_lean_subframes, &source_lean_temporal};
+const xttest_reference_source *const xttest_reference_sources[] = {&source_lean_cooccurrence, &source_lean_harmonicity, &source_lean_levels, &source_lean_moving, &source_lean_smoothing, &source_lean_spectral_moments, &source_lean_spectral_shape, &source_lean_statistics, &source_lean_subframes, &source_lean_temporal};
 
-const int xttest_reference_source_count = 9;
+const int xttest_reference_source_count = 10;
 
 UTEST(reference, results_agree_with_lean_cooccurrence)
 {
@@ -577,6 +599,11 @@ UTEST(reference, results_agree_with_lean_cooccurrence)
 UTEST(reference, results_agree_with_lean_harmonicity)
 {
     xttest_reference_check(&source_lean_harmonicity, utest_result);
+}
+
+UTEST(reference, results_agree_with_lean_levels)
+{
+    xttest_reference_check(&source_lean_levels, utest_result);
 }
 
 UTEST(reference, results_agree_with_lean_moving)

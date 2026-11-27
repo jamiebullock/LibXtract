@@ -1,0 +1,91 @@
+{
+  "source": {
+    "name": "Theorems about the definitions of the levels of a series, checked by Lean",
+    "version": "Lean 4.36.0, Mathlib v4.36.0",
+    "licence": "Zlib, as the library",
+    "how": "each expected value is proved to be the value of the feature's definition at the doubles nearest the stored values, or within half a unit in its last place of it, by the theorem its record names in spec/XtractSpec/Records/Levels.lean; written by tests/reference/generate/lean_levels.py and checked by Lean's kernel",
+    "level": 3
+  },
+  "records": [
+    {
+      "feature": "quantise",
+      "data": "halves_on_level_edges",
+      "arguments": {
+        "lower": 0.0,
+        "upper": 4.0,
+        "levels": 4.0
+      },
+      "expected": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        3.0,
+        0.0,
+        2.0,
+        1.0
+      ],
+      "tolerance": {
+        "relative": 0.0,
+        "reason": "no rounding: a level is a whole number, and the library's rounded share of the range has the whole part that the exact share has for every value; the expected value is exact"
+      },
+      "call": "theorem XtractSpec.Records.quantise_halves_on_level_edges"
+    },
+    {
+      "feature": "quantise",
+      "data": "tenths_to_quantise_cycle",
+      "arguments": {
+        "lower": 0.05,
+        "upper": 0.9,
+        "levels": 256.0
+      },
+      "expected": [
+        90.0,
+        255.0,
+        0.0,
+        165.0,
+        30.0,
+        225.0,
+        120.0,
+        60.0,
+        90.0,
+        255.0,
+        0.0,
+        165.0,
+        30.0,
+        225.0,
+        120.0,
+        60.0,
+        90.0,
+        255.0,
+        0.0,
+        165.0,
+        30.0,
+        225.0,
+        120.0,
+        60.0,
+        90.0,
+        255.0,
+        0.0,
+        165.0,
+        30.0,
+        225.0,
+        120.0,
+        60.0,
+        90.0,
+        255.0,
+        0.0,
+        165.0,
+        30.0,
+        225.0,
+        120.0,
+        60.0
+      ],
+      "tolerance": {
+        "relative": 0.0,
+        "reason": "no rounding: a level is a whole number, and the library's rounded share of the range has the whole part that the exact share has for every value; the expected value is exact"
+      },
+      "call": "theorem XtractSpec.Records.quantise_tenths_to_quantise_cycle"
+    }
+  ]
+}

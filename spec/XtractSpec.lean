@@ -7,6 +7,7 @@ import XtractSpec.Axioms
 import XtractSpec.Certificate
 import XtractSpec.Cooccurrence
 import XtractSpec.Harmonicity
+import XtractSpec.Levels
 import XtractSpec.Median
 import XtractSpec.Moving
 import XtractSpec.Smoothing
@@ -17,6 +18,7 @@ import XtractSpec.Subframes
 import XtractSpec.Temporal
 import XtractSpec.Records.Cooccurrence
 import XtractSpec.Records.Harmonicity
+import XtractSpec.Records.Levels
 import XtractSpec.Records.Moving
 import XtractSpec.Records.Smoothing
 import XtractSpec.Records.SpectralMoments
