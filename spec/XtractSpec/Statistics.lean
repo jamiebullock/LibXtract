@@ -9,8 +9,8 @@ import Mathlib
 # Statistics of a series
 
 The definitions in `src/features.json` of `mean`, `variance`,
-`standard_deviation`, `sum`, `average_deviation`, `rms_amplitude`,
-`highest_value`, `lowest_value` and `nonzero_count`. A definition without a
+`standard_deviation`, `average_deviation`, `skewness`, `kurtosis`, `sum`,
+`rms_amplitude`, `highest_value`, `lowest_value` and `nonzero_count`. A definition without a
 square root is stated over any field: over ℝ it is the specification, and
 over ℚ it computes, which gives its value at a series of doubles exactly.
 
@@ -43,6 +43,16 @@ def sum (xs : List α) : α :=
 /-- The sum of the squares of the values over their count. -/
 def meanSquare (xs : List α) : α :=
   (xs.map fun x => x ^ 2).sum / (xs.length : α)
+
+/-- The mean of the cubes of the differences from the mean given, `μ`, each over the standard
+deviation given, `s`. -/
+def skewness (xs : List α) (μ s : α) : α :=
+  (xs.map fun x => ((x - μ) / s) ^ 3).sum / (xs.length : α)
+
+/-- The mean of the fourth powers of the differences from the mean given, `μ`, each over the
+standard deviation given, `s`, less 3. -/
+def kurtosis (xs : List α) (μ s : α) : α :=
+  (xs.map fun x => ((x - μ) / s) ^ 4).sum / (xs.length : α) - 3
 
 /-- The count of the values that are not zero. -/
 def nonzeroCount [DecidableEq α] (xs : List α) : α :=
@@ -98,6 +108,14 @@ theorem meanSquare_cast (xs : List ℚ) :
 theorem averageDeviation_cast (xs : List ℚ) (μ : ℚ) :
     averageDeviation (xs.map (↑) : List ℝ) (μ : ℝ) = ((averageDeviation xs μ : ℚ) : ℝ) := by
   simp [averageDeviation, List.map_map, Function.comp_def]
+
+theorem skewness_cast (xs : List ℚ) (μ s : ℚ) :
+    skewness (xs.map (↑) : List ℝ) (μ : ℝ) (s : ℝ) = ((skewness xs μ s : ℚ) : ℝ) := by
+  simp [skewness, List.map_map, Function.comp_def]
+
+theorem kurtosis_cast (xs : List ℚ) (μ s : ℚ) :
+    kurtosis (xs.map (↑) : List ℝ) (μ : ℝ) (s : ℝ) = ((kurtosis xs μ s : ℚ) : ℝ) := by
+  simp [kurtosis, List.map_map, Function.comp_def]
 
 theorem nonzeroCount_cast (xs : List ℚ) :
     nonzeroCount (xs.map (↑) : List ℝ) = ((nonzeroCount xs : ℚ) : ℝ) := by
@@ -161,6 +179,55 @@ theorem variance_perm {xs ys : List ℝ} (μ : ℝ) (h : xs.Perm ys) :
 /-- `reversal`: unchanged. -/
 theorem variance_reverse (xs : List ℝ) (μ : ℝ) : variance xs.reverse μ = variance xs μ :=
   variance_perm μ (List.reverse_perm xs)
+
+/-- `offset`: unchanged. -/
+theorem skewness_offset (xs : List ℝ) (μ s c : ℝ) :
+    skewness (xs.map (· + c)) (μ + c) s = skewness xs μ s := by
+  simp [skewness, List.map_map, Function.comp_def]
+
+/-- `sign`: negated. -/
+theorem skewness_neg (xs : List ℝ) (μ s : ℝ) :
+    skewness (xs.map (-·)) (-μ) s = -skewness xs μ s := by
+  have h : (xs.map fun x => ((-x - -μ) / s) ^ 3) = (xs.map fun x => ((x - μ) / s) ^ 3).map (-·) := by
+    rw [List.map_map]
+    apply List.map_congr_left
+    intro x _
+    simp only [Function.comp_apply]
+    ring
+  simp only [skewness, List.map_map, Function.comp_def, List.length_map]
+  rw [h, sum_map_neg, neg_div]
+
+/-- `order`: unchanged. -/
+theorem skewness_perm {xs ys : List ℝ} (μ s : ℝ) (h : xs.Perm ys) :
+    skewness xs μ s = skewness ys μ s := by
+  simp [skewness, (h.map _).sum_eq, h.length_eq]
+
+/-- `reversal`: unchanged. -/
+theorem skewness_reverse (xs : List ℝ) (μ s : ℝ) : skewness xs.reverse μ s = skewness xs μ s :=
+  skewness_perm μ s (List.reverse_perm xs)
+
+/-- `offset`: unchanged. -/
+theorem kurtosis_offset (xs : List ℝ) (μ s c : ℝ) :
+    kurtosis (xs.map (· + c)) (μ + c) s = kurtosis xs μ s := by
+  simp [kurtosis, List.map_map, Function.comp_def]
+
+/-- `sign`: unchanged. -/
+theorem kurtosis_neg (xs : List ℝ) (μ s : ℝ) :
+    kurtosis (xs.map (-·)) (-μ) s = kurtosis xs μ s := by
+  simp only [kurtosis, List.map_map, Function.comp_def, List.length_map]
+  congr 3
+  apply List.map_congr_left
+  intro x _
+  ring
+
+/-- `order`: unchanged. -/
+theorem kurtosis_perm {xs ys : List ℝ} (μ s : ℝ) (h : xs.Perm ys) :
+    kurtosis xs μ s = kurtosis ys μ s := by
+  simp [kurtosis, (h.map _).sum_eq, h.length_eq]
+
+/-- `reversal`: unchanged. -/
+theorem kurtosis_reverse (xs : List ℝ) (μ s : ℝ) : kurtosis xs.reverse μ s = kurtosis xs μ s :=
+  kurtosis_perm μ s (List.reverse_perm xs)
 
 /-- `sign`: negated. -/
 theorem sum_neg (xs : List ℝ) : sum (xs.map (-·)) = -sum xs :=

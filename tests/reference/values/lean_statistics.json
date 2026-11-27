@@ -326,6 +326,70 @@
         "reason": "no rounding: the result is a count below 2^53; the expected value is exact"
       },
       "call": "theorem XtractSpec.Records.nonzero_count_offset_1_tenths"
+    },
+    {
+      "feature": "skewness",
+      "data": "quarters_with_a_zero",
+      "arguments": {
+        "mean": 1.53125,
+        "standard_deviation": 4.500867971847208
+      },
+      "expected": [
+        0.09682659635978012
+      ],
+      "tolerance": {
+        "relative": 2.36e-14,
+        "reason": "212 roundings, each within 2^-53 relatively: the difference from the mean and the division, which the cube counts three times, and the two multiplications of the cube, in every term, and the N - 1 additions, in any order, are N + 7 roundings of a sum of magnitudes that is 14.0 times the magnitude of the sum; the division by N; and the expected value"
+      },
+      "call": "theorem XtractSpec.Records.skewness_quarters_with_a_zero"
+    },
+    {
+      "feature": "kurtosis",
+      "data": "quarters_with_a_zero",
+      "arguments": {
+        "mean": 1.53125,
+        "standard_deviation": 4.500867971847208
+      },
+      "expected": [
+        -0.7463377842708632
+      ],
+      "tolerance": {
+        "relative": 6.67e-15,
+        "reason": "60 roundings, each within 2^-53 relatively: the difference from the mean and the division, which the fourth power counts four times, and the three multiplications of the power, in every term, the N - 1 additions, in any order, and the division by N are N + 11 roundings of a mean that is 3.02 times the magnitude of the result; the subtraction of 3; and the expected value"
+      },
+      "call": "theorem XtractSpec.Records.kurtosis_quarters_with_a_zero"
+    },
+    {
+      "feature": "skewness",
+      "data": "powers_of_two_cycle",
+      "arguments": {
+        "mean": 7.96875,
+        "standard_deviation": 10.357140353099103
+      },
+      "expected": [
+        1.4520532150546244
+      ],
+      "tolerance": {
+        "relative": 1.38e-13,
+        "reason": "1242 roundings, each within 2^-53 relatively: the difference from the mean and the division, which the cube counts three times, and the two multiplications of the cube, in every term, and the N - 1 additions, in any order, are N + 7 roundings of a sum of magnitudes that is 1.24 times the magnitude of the sum; the division by N; and the expected value"
+      },
+      "call": "theorem XtractSpec.Records.skewness_powers_of_two_cycle"
+    },
+    {
+      "feature": "kurtosis",
+      "data": "powers_of_two_cycle",
+      "arguments": {
+        "mean": 7.96875,
+        "standard_deviation": 10.357140353099103
+      },
+      "expected": [
+        0.7825555422584759
+      ],
+      "tolerance": {
+        "relative": 5.43e-13,
+        "reason": "4889 roundings, each within 2^-53 relatively: the difference from the mean and the division, which the fourth power counts four times, and the three multiplications of the power, in every term, the N - 1 additions, in any order, and the division by N are N + 11 roundings of a mean that is 4.84 times the magnitude of the result; the subtraction of 3; and the expected value"
+      },
+      "call": "theorem XtractSpec.Records.kurtosis_powers_of_two_cycle"
     }
   ]
 }

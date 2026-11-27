@@ -3,7 +3,7 @@
 # SPDX-FileCopyrightText: 2026 Jamie Bullock
 # SPDX-License-Identifier: Zlib
 
-"""Writes five series, statistics of each, and a theorem for every one of
+"""Writes six series, statistics of each, and a theorem for every one of
 those values that Lean checks.
 
 usage: lean_statistics.py
@@ -19,7 +19,8 @@ proposes the values; run `lake build` in spec to have them checked.
 Four series have a large offset and a small spread, with the values of the
 datasets NumAcc1 to NumAcc4 of the NIST Statistical Reference Datasets. The
 fifth has eight multiples of 1/4 of both signs and a zero, on which the
-library's arithmetic is exact.
+library's arithmetic is exact. The sixth repeats the powers of two from 1/4 to
+32, a distribution with a long upper tail.
 """
 
 import json
@@ -37,6 +38,8 @@ OFFSET_SERIES = {
 QUARTERS = "quarters_with_a_zero"
 SERIES = dict(OFFSET_SERIES)
 SERIES[QUARTERS] = ["3", "-1.5", "4.25", "0", "2", "9.5", "-6", "1"]
+POWERS = "powers_of_two_cycle"
+SERIES[POWERS] = ["0.25", "0.5", "1", "2", "4", "8", "16", "32"] * 125
 LONG = "offset_1_tenths"
 
 # The most a correctly rounded result differs from the exact one, relatively
@@ -100,6 +103,12 @@ def tolerance(roundings, reason, exact):
     bound = Decimal(roundings) * Decimal(ROUNDING.numerator) / Decimal(ROUNDING.denominator)
     bound = bound.quantize(Decimal(1).scaleb(bound.adjusted() - 2), rounding=ROUND_CEILING)
     return {"relative": float(bound), "reason": f"{roundings} roundings, each within 2^-53 relatively: {reason}"}
+
+
+def rounded_up(value):
+    """The fraction as a decimal of three significant digits, rounded up."""
+    decimal = Decimal(value.numerator) / Decimal(value.denominator)
+    return str(decimal.quantize(Decimal(1).scaleb(decimal.adjusted() - 2), rounding=ROUND_CEILING))
 
 
 def series_definition(name, doubles):
@@ -302,6 +311,50 @@ def main():
             Fraction(sum(1 for x in xs if x != 0)),
             0,
             "the result is a count below 2^53",
+        )
+
+    # The terms of a skewness cancel, and a kurtosis subtracts 3 from a mean
+    # near it: a bound on the rounding is relative to what is summed, which
+    # is larger than the result by the factor each reason states
+    for series in (QUARTERS, POWERS):
+        xs = doubles[series]
+        n = len(xs)
+        mean = float(sum(xs) / n)
+        deviation = math.sqrt(float(sum((x - Fraction(mean)) ** 2 for x in xs) / (n - 1)))
+        arguments = {"mean": mean, "standard_deviation": deviation}
+        given = f"{cast(mean)} {cast(deviation)}"
+
+        cubes = [((x - Fraction(mean)) / Fraction(deviation)) ** 3 for x in xs]
+        factor = sum(abs(term) for term in cubes) / abs(sum(cubes))
+        out.rational(
+            "skewness",
+            series,
+            f"skewness {data(series)} {given}",
+            "skewness_cast _ _ _",
+            sum(cubes) / n,
+            math.ceil((n + 7) * factor) + 1,
+            "the difference from the mean and the division, which the cube counts three times, and the two "
+            "multiplications of the cube, in every term, and the N - 1 additions, in any order, are N + 7 "
+            f"roundings of a sum of magnitudes that is {rounded_up(factor)} times the magnitude of the sum; "
+            "the division by N",
+            arguments,
+        )
+
+        fourths = [((x - Fraction(mean)) / Fraction(deviation)) ** 4 for x in xs]
+        moment = sum(fourths) / n
+        factor = moment / abs(moment - 3)
+        out.rational(
+            "kurtosis",
+            series,
+            f"kurtosis {data(series)} {given}",
+            "kurtosis_cast _ _ _",
+            moment - 3,
+            math.ceil((n + 11) * factor) + 1,
+            "the difference from the mean and the division, which the fourth power counts four times, and "
+            "the three multiplications of the power, in every term, the N - 1 additions, in any order, and the "
+            f"division by N are N + 11 roundings of a mean that is {rounded_up(factor)} times the magnitude of "
+            "the result; the subtraction of 3",
+            arguments,
         )
 
     write(
