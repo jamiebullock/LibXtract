@@ -2012,7 +2012,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .description = "Extract the AMDF of a signal",
         .source_count = 1,
         .sources = sources_amdf,
-        .validation_level = 0,
+        .validation_level = 3,
         .tags = 0,
         .data = {XTRACT_AUDIO_SAMPLES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 1"},
         .argc = 0,
