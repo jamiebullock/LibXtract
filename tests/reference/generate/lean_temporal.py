@@ -91,6 +91,22 @@ def main():
                 else "the division of the index, a whole number, by N - 1",
             )
 
+        peak = xs.index(max(xs))
+        after = sum(x**2 for x in xs[peak:])
+        before = sum(x**2 for x in xs[: peak + 1])
+        out.rational(
+            "peak_asymmetry",
+            series,
+            f"peakAsymmetry {data(series)}",
+            f"peakAsymmetry_eq_of_rat (k := {peak}) (q := {lean(xs[peak])}) {DECIDE} {DECIDE} {DECIDE}",
+            after / before,
+            1 if exact else n + 2,
+            "the division; every value is a multiple of 1/4, so each square and each addition is exact"
+            if exact
+            else "the square of every value; the additions of the squares from the peak on, one fewer than those "
+            "squares, in any order, and of the squares up to the peak likewise; the division",
+        )
+
     out.store("temporal", "Temporal", ["Temporal"], "the features of the shape of a series over time")
 
 

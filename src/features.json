@@ -1388,7 +1388,7 @@
       "title": "Peak Asymmetry",
       "description": "Extract the peak asymmetry of an envelope",
       "definition": "A = \\frac{\\sum_{n=p}^{N-1} x_n^2}{\\sum_{n=0}^{p} x_n^2}, \\quad p = \\min\\{n : x_n = \\max_{0 \\le m < N} x_m\\}; \\text{ no result when } \\sum_{n=0}^{p} x_n^2 = 0",
-      "validation_level": 0,
+      "validation_level": 3,
       "input": {"format": "arbitrary_series", "unit": "any"},
       "arguments": [],
       "result": {"kind": "scalar", "unit": "none", "min": 0}

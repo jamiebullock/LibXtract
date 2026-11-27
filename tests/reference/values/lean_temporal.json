@@ -44,6 +44,18 @@
       "call": "theorem XtractSpec.Records.min_position_rise_and_fall_with_ties"
     },
     {
+      "feature": "peak_asymmetry",
+      "data": "rise_and_fall_with_ties",
+      "expected": [
+        1.8664688427299703
+      ],
+      "tolerance": {
+        "relative": 2.23e-16,
+        "reason": "2 roundings, each within 2^-53 relatively: the division; every value is a multiple of 1/4, so each square and each addition is exact; and the expected value"
+      },
+      "call": "theorem XtractSpec.Records.peak_asymmetry_rise_and_fall_with_ties"
+    },
+    {
       "feature": "temporal_centroid",
       "data": "tenths_with_ties_cycle",
       "expected": [
@@ -78,6 +90,18 @@
         "reason": "2 roundings, each within 2^-53 relatively: the division of the index, a whole number, by N - 1; and the expected value"
       },
       "call": "theorem XtractSpec.Records.min_position_tenths_with_ties_cycle"
+    },
+    {
+      "feature": "peak_asymmetry",
+      "data": "tenths_with_ties_cycle",
+      "expected": [
+        233.50714285714287
+      ],
+      "tolerance": {
+        "relative": 1.12e-13,
+        "reason": "1003 roundings, each within 2^-53 relatively: the square of every value; the additions of the squares from the peak on, one fewer than those squares, in any order, and of the squares up to the peak likewise; the division; and the expected value"
+      },
+      "call": "theorem XtractSpec.Records.peak_asymmetry_tenths_with_ties_cycle"
     }
   ]
 }

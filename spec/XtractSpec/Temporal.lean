@@ -8,8 +8,8 @@ import Mathlib
 /-!
 # The shape of a series over time
 
-The definitions in `src/features.json` of `temporal_centroid`, `max_position`
-and `min_position`. The data is a series in the order of time, and the
+The definitions in `src/features.json` of `temporal_centroid`, `max_position`,
+`min_position` and `peak_asymmetry`. The data is a series in the order of time, and the
 position of a value is its index, from 0. A definition without a comparison
 is stated over any field: over ℝ it is the specification, and over ℚ it
 computes, which gives its value at a series of doubles exactly. The index of
@@ -22,7 +22,8 @@ division by zero is zero, so `temporalCentroid` of values that sum to zero,
 or of one value, is zero here. The library gives no result when the values
 sum to zero or less, and refuses fewer than two values. `maxPosition` and
 `minPosition` of one value are zero here, and the library refuses fewer than
-two values.
+two values. `peakAsymmetry` is zero here when the largest value and every
+value before it are zero, where the library gives no result.
 -/
 
 namespace XtractSpec
@@ -41,6 +42,11 @@ def indexMoment : ℕ → List α → α
 last index. -/
 def temporalCentroid (xs : List α) : α :=
   indexMoment 0 xs / (((xs.length : α) - 1) * xs.sum)
+
+/-- The sum of the squares of the values from index `k` on, over the sum of the squares of the
+values up to index `k`. The value at index `k` is in both sums. -/
+def sidesRatio (k : ℕ) (xs : List α) : α :=
+  ((xs.drop k).map fun x => x ^ 2).sum / ((xs.take (k + 1)).map fun x => x ^ 2).sum
 
 end Field
 
@@ -63,6 +69,11 @@ def maxPosition (xs : List α) : α :=
 /-- The index of the first of the smallest values over the last index. -/
 def minPosition (xs : List α) : α :=
   (firstMinIndex xs : α) / ((xs.length : α) - 1)
+
+/-- The sum of the squares of the values from the first of the largest on, over the sum of the
+squares of the values up to it. That value is in both sums. -/
+def peakAsymmetry (xs : List α) : α :=
+  sidesRatio (firstMaxIndex xs) xs
 
 end Ordered
 
@@ -141,5 +152,20 @@ theorem minPosition_eq_of_rat {qs : List ℚ} {k : ℕ} {q : ℚ} (hk : qs[k]? =
   unfold minPosition
   rw [firstMinIndex_eq_of_rat hk hlb hfirst]
   simp
+
+theorem sidesRatio_cast (k : ℕ) (xs : List ℚ) :
+    sidesRatio k (xs.map (↑) : List ℝ) = ((sidesRatio k xs : ℚ) : ℝ) := by
+  unfold sidesRatio
+  rw [← List.map_drop, ← List.map_take]
+  simp [List.map_map, Function.comp_def]
+
+/-- The peak is the value at index `k` when no value is above it and every value before it is
+below it. -/
+theorem peakAsymmetry_eq_of_rat {qs : List ℚ} {k : ℕ} {q : ℚ} (hk : qs[k]? = some q)
+    (hub : ∀ y ∈ qs, y ≤ q) (hfirst : ∀ y ∈ qs.take k, y < q) :
+    peakAsymmetry (qs.map (↑) : List ℝ) = ((sidesRatio k qs : ℚ) : ℝ) := by
+  unfold peakAsymmetry
+  rw [firstMaxIndex_eq_of_rat hk hub hfirst]
+  exact sidesRatio_cast k qs
 
 end XtractSpec

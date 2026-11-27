@@ -43,6 +43,10 @@ theorem min_position_rise_and_fall_with_ties :
     minPosition (rise_and_fall_with_ties.map (↑) : List ℝ) = ((1 / 8 : ℚ) : ℝ) :=
   eq_of_rat (minPosition_eq_of_rat (k := 1) (q := 1 / 4) (by decide +kernel) (by decide +kernel) (by decide +kernel)) (by decide +kernel)
 
+theorem peak_asymmetry_rise_and_fall_with_ties :
+    |peakAsymmetry (rise_and_fall_with_ties.map (↑) : List ℝ) - ((8405828384617335 / 4503599627370496 : ℚ) : ℝ)| ≤ ((1 / 9007199254740992 : ℚ) : ℝ) :=
+  within_of_rat (peakAsymmetry_eq_of_rat (k := 3) (q := 4) (by decide +kernel) (by decide +kernel) (by decide +kernel)) (by decide +kernel)
+
 theorem temporal_centroid_tenths_with_ties_cycle :
     |temporalCentroid (tenths_with_ties_cycle.map (↑) : List ℝ) - ((2252155716927493 / 4503599627370496 : ℚ) : ℝ)| ≤ ((1 / 18014398509481984 : ℚ) : ℝ) :=
   within_of_rat (temporalCentroid_cast _) (by decide +kernel)
@@ -54,5 +58,9 @@ theorem max_position_tenths_with_ties_cycle :
 theorem min_position_tenths_with_ties_cycle :
     |minPosition (tenths_with_ties_cycle.map (↑) : List ℝ) - ((577037790093517 / 576460752303423488 : ℚ) : ℝ)| ≤ ((1 / 9223372036854775808 : ℚ) : ℝ) :=
   within_of_rat (minPosition_eq_of_rat (k := 1) (q := 3602879701896397 / 36028797018963968) (by decide +kernel) (by decide +kernel) (by decide +kernel)) (by decide +kernel)
+
+theorem peak_asymmetry_tenths_with_ties_cycle :
+    |peakAsymmetry (tenths_with_ties_cycle.map (↑) : List ℝ) - ((2053950549921441 / 8796093022208 : ℚ) : ℝ)| ≤ ((1 / 70368744177664 : ℚ) : ℝ) :=
+  within_of_rat (peakAsymmetry_eq_of_rat (k := 3) (q := 8106479329266893 / 9007199254740992) (by decide +kernel) (by decide +kernel) (by decide +kernel)) (by decide +kernel)
 
 end XtractSpec.Records
