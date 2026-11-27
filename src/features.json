@@ -1368,7 +1368,7 @@
       "title": "Maximum Position",
       "description": "Extract the position of the largest value in an input vector",
       "definition": "P_{\\max} = \\frac{\\min\\{n : x_n = \\max_{0 \\le m < N} x_m\\}}{N-1}",
-      "validation_level": 0,
+      "validation_level": 3,
       "input": {"format": "arbitrary_series", "unit": "any", "length": "N >= 2"},
       "arguments": [],
       "result": {"kind": "scalar", "unit": "none", "min": 0, "max": 1}
@@ -1378,7 +1378,7 @@
       "title": "Minimum Position",
       "description": "Extract the position of the smallest value in an input vector",
       "definition": "P_{\\min} = \\frac{\\min\\{n : x_n = \\min_{0 \\le m < N} x_m\\}}{N-1}",
-      "validation_level": 0,
+      "validation_level": 3,
       "input": {"format": "arbitrary_series", "unit": "any", "length": "N >= 2"},
       "arguments": [],
       "result": {"kind": "scalar", "unit": "none", "min": 0, "max": 1}

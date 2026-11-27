@@ -20,6 +20,30 @@
       "call": "theorem XtractSpec.Records.temporal_centroid_rise_and_fall_with_ties"
     },
     {
+      "feature": "max_position",
+      "data": "rise_and_fall_with_ties",
+      "expected": [
+        0.375
+      ],
+      "tolerance": {
+        "relative": 0.0,
+        "reason": "no rounding: the index is a whole number, and its division by N - 1 gives the quotient itself, which is a double; the expected value is exact"
+      },
+      "call": "theorem XtractSpec.Records.max_position_rise_and_fall_with_ties"
+    },
+    {
+      "feature": "min_position",
+      "data": "rise_and_fall_with_ties",
+      "expected": [
+        0.125
+      ],
+      "tolerance": {
+        "relative": 0.0,
+        "reason": "no rounding: the index is a whole number, and its division by N - 1 gives the quotient itself, which is a double; the expected value is exact"
+      },
+      "call": "theorem XtractSpec.Records.min_position_rise_and_fall_with_ties"
+    },
+    {
       "feature": "temporal_centroid",
       "data": "tenths_with_ties_cycle",
       "expected": [
@@ -30,6 +54,30 @@
         "reason": "2002 roundings, each within 2^-53 relatively: the product of a value and its index in every term, and the N - 1 additions of those terms, which are of one sign, in any order; the N - 1 additions of the values, of one sign, in any order; the division by their sum; the division by N - 1; and the expected value"
       },
       "call": "theorem XtractSpec.Records.temporal_centroid_tenths_with_ties_cycle"
+    },
+    {
+      "feature": "max_position",
+      "data": "tenths_with_ties_cycle",
+      "expected": [
+        0.003003003003003003
+      ],
+      "tolerance": {
+        "relative": 2.23e-16,
+        "reason": "2 roundings, each within 2^-53 relatively: the division of the index, a whole number, by N - 1; and the expected value"
+      },
+      "call": "theorem XtractSpec.Records.max_position_tenths_with_ties_cycle"
+    },
+    {
+      "feature": "min_position",
+      "data": "tenths_with_ties_cycle",
+      "expected": [
+        0.001001001001001001
+      ],
+      "tolerance": {
+        "relative": 2.23e-16,
+        "reason": "2 roundings, each within 2^-53 relatively: the division of the index, a whole number, by N - 1; and the expected value"
+      },
+      "call": "theorem XtractSpec.Records.min_position_tenths_with_ties_cycle"
     }
   ]
 }
