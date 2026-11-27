@@ -514,7 +514,7 @@ Sources:
 - Origin: Krimphoff, McAdams and Winsberg (1994). "Caracterisation du timbre des sons complexes. II. Analyses acoustiques et quantification psychophysique". Journal de Physique IV 4(C5), section 3.2, equation 3. <a href="https://doi.org/10.1051/jp4:19945134">doi:10.1051/jp4:19945134</a>
 - Formulation: Peeters (2004). "A large set of audio features for sound description (similarity and classification) in the CUIDADO project". Technical report, IRCAM, section 3.1.2.1
 
-Validation level 0, not checked.
+Validation level 3, certified.
 
 \section definition_decay_time Decay Time
 

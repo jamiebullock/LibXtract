@@ -71,6 +71,23 @@
       "call": "theorem XtractSpec.Records.time_reversal_asymmetry_rise_and_fall_with_ties"
     },
     {
+      "feature": "attack_time",
+      "data": "rise_and_fall_with_ties",
+      "arguments": {
+        "sample_rate": 16.0,
+        "start": 0.25,
+        "stop": 1.0
+      },
+      "expected": [
+        0.1875
+      ],
+      "tolerance": {
+        "relative": 0.0,
+        "reason": "no rounding: each fraction of the largest value is a double, so the library compares with the thresholds of the definition, and the division of the count by the sample rate gives the quotient itself, which is a double; the expected value is exact"
+      },
+      "call": "theorem XtractSpec.Records.attack_time_rise_and_fall_with_ties"
+    },
+    {
       "feature": "temporal_centroid",
       "data": "tenths_with_ties_cycle",
       "expected": [
@@ -132,6 +149,23 @@
         "reason": "26139 roundings, each within 2^-53 relatively: the difference of the two values, their product and the product of the two results, in every term, and the additions of the N - 3 terms, in any order, are N - 1 roundings of a sum of magnitudes that is 26.2 times the magnitude of the sum; the division by N - 3; and the expected value"
       },
       "call": "theorem XtractSpec.Records.time_reversal_asymmetry_tenths_with_ties_cycle"
+    },
+    {
+      "feature": "attack_time",
+      "data": "tenths_with_ties_cycle",
+      "arguments": {
+        "sample_rate": 44100.0,
+        "start": 0.2,
+        "stop": 0.9
+      },
+      "expected": [
+        6.802721088435374e-05
+      ],
+      "tolerance": {
+        "relative": 2.23e-16,
+        "reason": "2 roundings, each within 2^-53 relatively: no value is within two roundings of a threshold, so the library places every value as the definition does; the division of the count by the sample rate; and the expected value"
+      },
+      "call": "theorem XtractSpec.Records.attack_time_tenths_with_ties_cycle"
     }
   ]
 }

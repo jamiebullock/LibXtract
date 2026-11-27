@@ -27,7 +27,7 @@ largest and the smallest twice in each eight.
 import math
 from fractions import Fraction
 
-from certificates import DECIDE, Certificates, lean, rounded_up
+from certificates import DECIDE, ROUNDING, Certificates, cast, lean, rounded_up
 
 SHORT = "rise_and_fall_with_ties"
 LONG = "tenths_with_ties_cycle"
@@ -36,6 +36,13 @@ SERIES = {
     SHORT: (["1", "0.25", "2", "4", "4", "2", "0.25", "1.5", "1"], [], 0),
     LONG: ([], ["0.3", "0.1", "0.7", "0.9", "0.9", "0.2", "0.1", "0.6"], 125),
 }
+
+
+def clear_of(threshold, values):
+    """Whether no value is within two roundings of the threshold, so that
+    the product the library compares with places every value as the exact
+    threshold does."""
+    return all(abs(value - threshold) > 2 * ROUNDING * threshold for value in values)
 
 
 def main():
@@ -132,6 +139,35 @@ def main():
             "term, and the additions of the N - 3 terms, in any order, are N - 1 roundings of a sum of magnitudes "
             f"that is {rounded_up(factor)} times the magnitude of the sum; the division by N - 3",
             {"lag": lag},
+        )
+
+        # A fraction of the largest value that is a value of the short
+        # series: reaching a threshold includes equalling it
+        rate, start, stop = (16.0, 0.25, 1.0) if exact else (44100.0, 0.2, 0.9)
+        largest = max(xs)
+        low, high = Fraction(start) * largest, Fraction(stop) * largest
+        if exact:
+            assert Fraction(float(low)) == low and Fraction(float(high)) == high and low in xs
+        else:
+            assert clear_of(low, xs) and clear_of(high, xs)
+        first = next(index for index in range(n) if xs[index] >= low)
+        count = next(index for index in range(first, n) if xs[index] >= high) - first
+        attack = Fraction(count) / Fraction(rate)
+        assert count > 0 and (not exact or Fraction(float(attack)) == attack)
+        out.rational(
+            "attack_time",
+            series,
+            f"attackTime {data(series)} {cast(rate)} {cast(start)} {cast(stop)}",
+            "attackTime_cast _ _ _ _",
+            attack,
+            0 if exact else 1,
+            "each fraction of the largest value is a double, so the library compares with the thresholds of the "
+            "definition, and the division of the count by the sample rate gives the quotient itself, which is a "
+            "double"
+            if exact
+            else "no value is within two roundings of a threshold, so the library places every value as the "
+            "definition does; the division of the count by the sample rate",
+            {"sample_rate": rate, "start": start, "stop": stop},
         )
 
     out.store("temporal", "Temporal", ["Temporal"], "the features of the shape of a series over time")
