@@ -2332,7 +2332,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .description = "Extract the sum of a series over a sliding window",
         .source_count = 0,
         .sources = NULL,
-        .validation_level = 0,
+        .validation_level = 3,
         .tags = 0,
         .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= window"},
         .argc = 1,

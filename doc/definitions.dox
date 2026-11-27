@@ -779,7 +779,7 @@ xtract_moving_sum()
 
 Defined by the library: this definition is the reference.
 
-Validation level 0, not checked.
+Validation level 3, certified.
 
 \section definition_moving_average Moving Average
 

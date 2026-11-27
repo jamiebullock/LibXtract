@@ -1015,7 +1015,7 @@
       "title": "Moving Sum",
       "description": "Extract the sum of a series over a sliding window",
       "definition": "y_m = \\sum_{n=m}^{m+w-1} x_n, \\quad m = 0, \\ldots, N-w, \\quad 1 \\le w \\le N \\text{ the window given in argv}",
-      "validation_level": 0,
+      "validation_level": 3,
       "input": {"format": "arbitrary_series", "unit": "any", "length": "N >= window"},
       "argument_type": "int",
       "arguments": [

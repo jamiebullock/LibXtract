@@ -66,6 +66,17 @@ static const double series_peaks_two_to_a_harmonic_prefix[16] = {
 
 static const xttest_reference_series series_peaks_two_to_a_harmonic = {.name = "peaks_two_to_a_harmonic", .prefix = series_peaks_two_to_a_harmonic_prefix, .prefix_count = 16, .cycle = NULL, .cycle_count = 0, .repeats = 0};
 
+static const double series_quarters_of_both_signs_prefix[9] = {
+    1.0, 3.0, -2.0, 0.0, 4.5, 2.0, -1.0, 0.5,
+    6.0};
+
+static const xttest_reference_series series_quarters_of_both_signs = {.name = "quarters_of_both_signs", .prefix = series_quarters_of_both_signs_prefix, .prefix_count = 9, .cycle = NULL, .cycle_count = 0, .repeats = 0};
+
+static const double series_tenths_cycle_of_1000_cycle[8] = {
+    0.40000000000000002, 0.90000000000000002, 0.050000000000000003, 0.29999999999999999, 0.69999999999999996, 0.20000000000000001, 0.59999999999999998, 0.10000000000000001};
+
+static const xttest_reference_series series_tenths_cycle_of_1000 = {.name = "tenths_cycle_of_1000", .prefix = NULL, .prefix_count = 0, .cycle = series_tenths_cycle_of_1000_cycle, .cycle_count = 8, .repeats = 125};
+
 static const double series_uneven_spectrum_with_a_zero_prefix[14] = {
     4.0, 2.0, 0.0, 1.0, 0.5, 0.25, 0.25, 100.0,
     250.0, 300.0, 450.0, 800.0, 1600.0, 3200.0};
@@ -234,6 +245,18 @@ static const xttest_reference_record records_lean_harmonicity[] = {
 };
 
 static const xttest_reference_source source_lean_harmonicity = {.id = "lean_harmonicity", .name = "Theorems about the definitions of the features that measure partials against a fundamental, checked by Lean", .level = 3, .record_count = 4, .records = records_lean_harmonicity};
+
+static const int arguments_lean_moving_0[] = {4};
+static const double expected_lean_moving_0[] = {2.0, 5.5, 4.5, 5.5, 6.0, 7.5};
+static const int arguments_lean_moving_1[] = {993};
+static const double expected_lean_moving_1[] = {403.39999999999998, 403.89999999999998, 403.05000000000001, 403.30000000000001, 403.69999999999999, 403.19999999999999, 403.60000000000002, 403.10000000000002};
+
+static const xttest_reference_record records_lean_moving[] = {
+    {.feature = XTRACT_MOVING_SUM, .series = &series_quarters_of_both_signs, .arguments = arguments_lean_moving_0, .expected = expected_lean_moving_0, .expected_count = 6, .tolerance = 0.0},
+    {.feature = XTRACT_MOVING_SUM, .series = &series_tenths_cycle_of_1000, .arguments = arguments_lean_moving_1, .expected = expected_lean_moving_1, .expected_count = 8, .tolerance = 1.1099999999999999e-13},
+};
+
+static const xttest_reference_source source_lean_moving = {.id = "lean_moving", .name = "Theorems about the definitions of the statistics of a moving window, checked by Lean", .level = 3, .record_count = 2, .records = records_lean_moving};
 
 static const double expected_lean_spectral_moments_0[] = {368.75};
 static const double expected_lean_spectral_moments_1[] = {368.75};
@@ -458,9 +481,9 @@ static const xttest_reference_record records_lean_temporal[] = {
 
 static const xttest_reference_source source_lean_temporal = {.id = "lean_temporal", .name = "Theorems about the definitions of the features of the shape of a series over time, checked by Lean", .level = 3, .record_count = 14, .records = records_lean_temporal};
 
-const xttest_reference_source *const xttest_reference_sources[] = {&source_lean_cooccurrence, &source_lean_harmonicity, &source_lean_spectral_moments, &source_lean_spectral_shape, &source_lean_statistics, &source_lean_temporal};
+const xttest_reference_source *const xttest_reference_sources[] = {&source_lean_cooccurrence, &source_lean_harmonicity, &source_lean_moving, &source_lean_spectral_moments, &source_lean_spectral_shape, &source_lean_statistics, &source_lean_temporal};
 
-const int xttest_reference_source_count = 6;
+const int xttest_reference_source_count = 7;
 
 UTEST(reference, results_agree_with_lean_cooccurrence)
 {
@@ -470,6 +493,11 @@ UTEST(reference, results_agree_with_lean_cooccurrence)
 UTEST(reference, results_agree_with_lean_harmonicity)
 {
     xttest_reference_check(&source_lean_harmonicity, utest_result);
+}
+
+UTEST(reference, results_agree_with_lean_moving)
+{
+    xttest_reference_check(&source_lean_moving, utest_result);
 }
 
 UTEST(reference, results_agree_with_lean_spectral_moments)

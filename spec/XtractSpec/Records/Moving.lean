@@ -1,0 +1,56 @@
+/- Part of LibXtract
+ -
+ - SPDX-FileCopyrightText: 2026 Jamie Bullock
+ - SPDX-License-Identifier: Zlib
+ -/
+import XtractSpec.Certificate
+import XtractSpec.Moving
+
+/-!
+# Certified values of the statistics of a moving window
+
+Written by `tests/reference/generate/lean_moving.py` with the records of
+`tests/reference/values/lean_moving.json`. Each list is the series of that
+name in `tests/reference/series`, in the form it has there: its prefix, then
+its cycle taken a number of times. Every value is the double nearest the
+stored decimal. Each theorem is about the expected value of one record.
+-/
+
+namespace XtractSpec.Records
+
+def quarters_of_both_signs : List ℚ :=
+  [(1 : ℚ), (3 : ℚ),
+    (-2 : ℚ), (0 : ℚ),
+    (9 / 2 : ℚ), (2 : ℚ),
+    (-1 : ℚ), (1 / 2 : ℚ),
+    (6 : ℚ)]
+
+def tenths_cycle_of_1000 : List ℚ :=
+  (List.replicate 125 [(3602879701896397 / 9007199254740992 : ℚ), (8106479329266893 / 9007199254740992 : ℚ),
+    (3602879701896397 / 72057594037927936 : ℚ), (5404319552844595 / 18014398509481984 : ℚ),
+    (3152519739159347 / 4503599627370496 : ℚ), (3602879701896397 / 18014398509481984 : ℚ),
+    (5404319552844595 / 9007199254740992 : ℚ), (3602879701896397 / 36028797018963968 : ℚ)]).flatten
+
+theorem moving_sum_quarters_of_both_signs :
+    EachWithin (movingSum (quarters_of_both_signs.map (↑) : List ℝ) 4)
+    [((2 : ℚ), (0 : ℚ)),
+    ((11 / 2 : ℚ), (0 : ℚ)),
+    ((9 / 2 : ℚ), (0 : ℚ)),
+    ((11 / 2 : ℚ), (0 : ℚ)),
+    ((6 : ℚ), (0 : ℚ)),
+    ((15 / 2 : ℚ), (0 : ℚ))] :=
+  eachWithin_of_rat (movingSum_cast _ _) (by decide +kernel)
+
+theorem moving_sum_tenths_cycle_of_1000 :
+    EachWithin (movingSum (tenths_cycle_of_1000.map (↑) : List ℝ) 993)
+    [((3548343925158707 / 8796093022208 : ℚ), (1 / 35184372088832 : ℚ)),
+    ((3552741971669811 / 8796093022208 : ℚ), (1 / 35184372088832 : ℚ)),
+    ((7090530585201869 / 17592186044416 : ℚ), (1 / 35184372088832 : ℚ)),
+    ((7094928631712973 / 17592186044416 : ℚ), (1 / 35184372088832 : ℚ)),
+    ((7101965506130739 / 17592186044416 : ℚ), (1 / 35184372088832 : ℚ)),
+    ((7093169413108531 / 17592186044416 : ℚ), (1 / 35184372088832 : ℚ)),
+    ((3550103143763149 / 8796093022208 : ℚ), (1 / 35184372088832 : ℚ)),
+    ((3545705097252045 / 8796093022208 : ℚ), (1 / 35184372088832 : ℚ))] :=
+  eachWithin_of_rat (movingSum_cast _ _) (by decide +kernel)
+
+end XtractSpec.Records

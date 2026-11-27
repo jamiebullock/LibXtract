@@ -1,0 +1,53 @@
+{
+  "source": {
+    "name": "Theorems about the definitions of the statistics of a moving window, checked by Lean",
+    "version": "Lean 4.36.0, Mathlib v4.36.0",
+    "licence": "Zlib, as the library",
+    "how": "each expected value is proved to be the value of the feature's definition at the doubles nearest the stored values, or within half a unit in its last place of it, by the theorem its record names in spec/XtractSpec/Records/Moving.lean; written by tests/reference/generate/lean_moving.py and checked by Lean's kernel",
+    "level": 3
+  },
+  "records": [
+    {
+      "feature": "moving_sum",
+      "data": "quarters_of_both_signs",
+      "arguments": {
+        "window": 4
+      },
+      "expected": [
+        2.0,
+        5.5,
+        4.5,
+        5.5,
+        6.0,
+        7.5
+      ],
+      "tolerance": {
+        "relative": 0.0,
+        "reason": "no rounding: every value is a multiple of 1/4, so each addition is exact; the expected value is exact"
+      },
+      "call": "theorem XtractSpec.Records.moving_sum_quarters_of_both_signs"
+    },
+    {
+      "feature": "moving_sum",
+      "data": "tenths_cycle_of_1000",
+      "arguments": {
+        "window": 993
+      },
+      "expected": [
+        403.4,
+        403.9,
+        403.05,
+        403.3,
+        403.7,
+        403.2,
+        403.6,
+        403.1
+      ],
+      "tolerance": {
+        "relative": 1.11e-13,
+        "reason": "993 roundings, each within 2^-53 relatively: the w - 1 additions of the w values of a window, of one sign, in any order; and the expected value"
+      },
+      "call": "theorem XtractSpec.Records.moving_sum_tenths_cycle_of_1000"
+    }
+  ]
+}
