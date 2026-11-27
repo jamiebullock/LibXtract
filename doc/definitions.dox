@@ -103,7 +103,7 @@ xtract_spectral_variance()
 Sources:
 - Origin: Peeters (2004). "A large set of audio features for sound description (similarity and classification) in the CUIDADO project". Technical report, IRCAM, section 6.1.2
 
-Validation level 0, not checked.
+Validation level 3, certified.
 
 \section definition_spectral_standard_deviation Spectral Standard Deviation
 
@@ -114,7 +114,7 @@ xtract_spectral_standard_deviation()
 Sources:
 - Origin: Peeters (2004). "A large set of audio features for sound description (similarity and classification) in the CUIDADO project". Technical report, IRCAM, section 6.1.2
 
-Validation level 0, not checked.
+Validation level 3, certified.
 
 \section definition_spectral_skewness Spectral Skewness
 
@@ -223,12 +223,12 @@ Validation level 0, not checked.
 
 xtract_spread()
 
-\f[ \sigma^2 = \frac{\sum_k (f_k - \mu)^2 a_k}{\sum_k a_k}, \quad \mu \text{ the spectral mean given in argv} \f]
+\f[ \sigma^2 = \frac{\sum_{k=0}^{M-1} (f_k - \mu)^2 a_k}{\sum_{k=0}^{M-1} a_k}, \quad \mu \text{ the spectral mean given in argv}, \quad M = N/2, \; a_k = x_k, \; f_k = x_{M+k}; \text{ no result when } \sum_k a_k = 0 \f]
 
 Sources:
 - Origin: Peeters (2004). "A large set of audio features for sound description (similarity and classification) in the CUIDADO project". Technical report, IRCAM, section 6.1.2
 
-Validation level 0, not checked.
+Validation level 3, certified.
 
 \section definition_zcr Zero Crossing Rate
 

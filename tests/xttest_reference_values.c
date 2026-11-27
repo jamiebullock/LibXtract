@@ -102,17 +102,35 @@ static const xttest_reference_series series_signs_cycle = {.name = "signs_cycle"
 
 static const double expected_lean_spectral_moments_0[] = {368.75};
 static const double expected_lean_spectral_moments_1[] = {368.75};
-static const double expected_lean_spectral_moments_2[] = {3878.7535046863486};
-static const double expected_lean_spectral_moments_3[] = {3878.7535046863486};
+static const double arguments_lean_spectral_moments_2[] = {368.75};
+static const double expected_lean_spectral_moments_2[] = {349960.9375};
+static const double arguments_lean_spectral_moments_3[] = {368.75};
+static const double expected_lean_spectral_moments_3[] = {349960.9375};
+static const double arguments_lean_spectral_moments_4[] = {349960.9375};
+static const double expected_lean_spectral_moments_4[] = {591.57496355068986};
+static const double expected_lean_spectral_moments_5[] = {3878.7535046863486};
+static const double expected_lean_spectral_moments_6[] = {3878.7535046863486};
+static const double arguments_lean_spectral_moments_7[] = {3878.7535046863486};
+static const double expected_lean_spectral_moments_7[] = {28559494.573890924};
+static const double arguments_lean_spectral_moments_8[] = {3878.7535046863486};
+static const double expected_lean_spectral_moments_8[] = {28559494.573890924};
+static const double arguments_lean_spectral_moments_9[] = {28559494.573890924};
+static const double expected_lean_spectral_moments_9[] = {5344.1083984038842};
 
 static const xttest_reference_record records_lean_spectral_moments[] = {
     {.feature = XTRACT_SPECTRAL_CENTROID, .series = &series_uneven_spectrum_with_a_zero, .arguments = NULL, .expected = expected_lean_spectral_moments_0, .expected_count = 1, .tolerance = 0.0},
     {.feature = XTRACT_SPECTRAL_MEAN, .series = &series_uneven_spectrum_with_a_zero, .arguments = NULL, .expected = expected_lean_spectral_moments_1, .expected_count = 1, .tolerance = 0.0},
-    {.feature = XTRACT_SPECTRAL_CENTROID, .series = &series_decaying_spectrum_128_bins, .arguments = NULL, .expected = expected_lean_spectral_moments_2, .expected_count = 1, .tolerance = 2.8599999999999999e-14},
-    {.feature = XTRACT_SPECTRAL_MEAN, .series = &series_decaying_spectrum_128_bins, .arguments = NULL, .expected = expected_lean_spectral_moments_3, .expected_count = 1, .tolerance = 2.8599999999999999e-14},
+    {.feature = XTRACT_SPECTRAL_VARIANCE, .series = &series_uneven_spectrum_with_a_zero, .arguments = arguments_lean_spectral_moments_2, .expected = expected_lean_spectral_moments_2, .expected_count = 1, .tolerance = 0.0},
+    {.feature = XTRACT_SPREAD, .series = &series_uneven_spectrum_with_a_zero, .arguments = arguments_lean_spectral_moments_3, .expected = expected_lean_spectral_moments_3, .expected_count = 1, .tolerance = 0.0},
+    {.feature = XTRACT_SPECTRAL_STANDARD_DEVIATION, .series = NULL, .arguments = arguments_lean_spectral_moments_4, .expected = expected_lean_spectral_moments_4, .expected_count = 1, .tolerance = 2.2300000000000002e-16},
+    {.feature = XTRACT_SPECTRAL_CENTROID, .series = &series_decaying_spectrum_128_bins, .arguments = NULL, .expected = expected_lean_spectral_moments_5, .expected_count = 1, .tolerance = 2.8599999999999999e-14},
+    {.feature = XTRACT_SPECTRAL_MEAN, .series = &series_decaying_spectrum_128_bins, .arguments = NULL, .expected = expected_lean_spectral_moments_6, .expected_count = 1, .tolerance = 2.8599999999999999e-14},
+    {.feature = XTRACT_SPECTRAL_VARIANCE, .series = &series_decaying_spectrum_128_bins, .arguments = arguments_lean_spectral_moments_7, .expected = expected_lean_spectral_moments_7, .expected_count = 1, .tolerance = 2.8900000000000002e-14},
+    {.feature = XTRACT_SPREAD, .series = &series_decaying_spectrum_128_bins, .arguments = arguments_lean_spectral_moments_8, .expected = expected_lean_spectral_moments_8, .expected_count = 1, .tolerance = 2.8900000000000002e-14},
+    {.feature = XTRACT_SPECTRAL_STANDARD_DEVIATION, .series = NULL, .arguments = arguments_lean_spectral_moments_9, .expected = expected_lean_spectral_moments_9, .expected_count = 1, .tolerance = 2.2300000000000002e-16},
 };
 
-static const xttest_reference_source source_lean_spectral_moments = {.id = "lean_spectral_moments", .name = "Theorems about the definitions of the spectral moments, checked by Lean", .level = 3, .record_count = 4, .records = records_lean_spectral_moments};
+static const xttest_reference_source source_lean_spectral_moments = {.id = "lean_spectral_moments", .name = "Theorems about the definitions of the spectral moments, checked by Lean", .level = 3, .record_count = 10, .records = records_lean_spectral_moments};
 
 static const double expected_lean_statistics_0[] = {10000002.0};
 static const double arguments_lean_statistics_1[] = {10000002.0};

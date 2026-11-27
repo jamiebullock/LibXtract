@@ -32,6 +32,50 @@
       "call": "theorem XtractSpec.Records.spectral_mean_uneven_spectrum_with_a_zero"
     },
     {
+      "feature": "spectral_variance",
+      "data": "uneven_spectrum_with_a_zero",
+      "arguments": {
+        "mean": 368.75
+      },
+      "expected": [
+        349960.9375
+      ],
+      "tolerance": {
+        "relative": 0.0,
+        "reason": "no rounding: every amplitude, every frequency and the mean are multiples of 1/4, so each difference, each square, each product and each addition, in any order, is exact, and the division gives the quotient itself, which is a double; the expected value is exact"
+      },
+      "call": "theorem XtractSpec.Records.spectral_variance_uneven_spectrum_with_a_zero"
+    },
+    {
+      "feature": "spread",
+      "data": "uneven_spectrum_with_a_zero",
+      "arguments": {
+        "mean": 368.75
+      },
+      "expected": [
+        349960.9375
+      ],
+      "tolerance": {
+        "relative": 0.0,
+        "reason": "no rounding: every amplitude, every frequency and the mean are multiples of 1/4, so each difference, each square, each product and each addition, in any order, is exact, and the division gives the quotient itself, which is a double; the expected value is exact"
+      },
+      "call": "theorem XtractSpec.Records.spread_uneven_spectrum_with_a_zero"
+    },
+    {
+      "feature": "spectral_standard_deviation",
+      "arguments": {
+        "variance": 349960.9375
+      },
+      "expected": [
+        591.5749635506899
+      ],
+      "tolerance": {
+        "relative": 2.23e-16,
+        "reason": "2 roundings, each within 2^-53 relatively: the square root, which is correctly rounded; and the expected value"
+      },
+      "call": "theorem XtractSpec.Records.spectral_standard_deviation_uneven_spectrum_with_a_zero"
+    },
+    {
       "feature": "spectral_centroid",
       "data": "decaying_spectrum_128_bins",
       "expected": [
@@ -54,6 +98,50 @@
         "reason": "257 roundings, each within 2^-53 relatively: the product of a frequency and its amplitude in every term, and the M - 1 additions of those terms, which are of one sign, in any order; the M - 1 additions of the amplitudes, of one sign, in any order; the division; and the expected value"
       },
       "call": "theorem XtractSpec.Records.spectral_mean_decaying_spectrum_128_bins"
+    },
+    {
+      "feature": "spectral_variance",
+      "data": "decaying_spectrum_128_bins",
+      "arguments": {
+        "mean": 3878.7535046863486
+      },
+      "expected": [
+        28559494.573890924
+      ],
+      "tolerance": {
+        "relative": 2.89e-14,
+        "reason": "260 roundings, each within 2^-53 relatively: the difference from the mean, which its square counts twice, the square and the product with the amplitude, in every term; the M - 1 additions of those terms, which are of one sign, in any order; the M - 1 additions of the amplitudes, of one sign, in any order; the division; and the expected value"
+      },
+      "call": "theorem XtractSpec.Records.spectral_variance_decaying_spectrum_128_bins"
+    },
+    {
+      "feature": "spread",
+      "data": "decaying_spectrum_128_bins",
+      "arguments": {
+        "mean": 3878.7535046863486
+      },
+      "expected": [
+        28559494.573890924
+      ],
+      "tolerance": {
+        "relative": 2.89e-14,
+        "reason": "260 roundings, each within 2^-53 relatively: the difference from the mean, which its square counts twice, the square and the product with the amplitude, in every term; the M - 1 additions of those terms, which are of one sign, in any order; the M - 1 additions of the amplitudes, of one sign, in any order; the division; and the expected value"
+      },
+      "call": "theorem XtractSpec.Records.spread_decaying_spectrum_128_bins"
+    },
+    {
+      "feature": "spectral_standard_deviation",
+      "arguments": {
+        "variance": 28559494.573890924
+      },
+      "expected": [
+        5344.108398403884
+      ],
+      "tolerance": {
+        "relative": 2.23e-16,
+        "reason": "2 roundings, each within 2^-53 relatively: the square root, which is correctly rounded; and the expected value"
+      },
+      "call": "theorem XtractSpec.Records.spectral_standard_deviation_decaying_spectrum_128_bins"
     }
   ]
 }
