@@ -92,7 +92,7 @@ xtract_spectral_mean()
 Sources:
 - Origin: Peeters (2004). "A large set of audio features for sound description (similarity and classification) in the CUIDADO project". Technical report, IRCAM, section 6.1.1
 
-Validation level 0, not checked.
+Validation level 3, certified.
 
 \section definition_spectral_variance Spectral Variance
 
@@ -147,7 +147,7 @@ xtract_spectral_centroid()
 Sources:
 - Origin: Peeters (2004). "A large set of audio features for sound description (similarity and classification) in the CUIDADO project". Technical report, IRCAM, section 6.1.1
 
-Validation level 0, not checked.
+Validation level 3, certified.
 
 \section definition_irregularity_k Irregularity I
 
