@@ -1708,7 +1708,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .description = "Extract the odd-to-even harmonic ratio of a spectrum",
         .source_count = 1,
         .sources = sources_odd_even_ratio,
-        .validation_level = 0,
+        .validation_level = 3,
         .tags = 0,
         .data = {XTRACT_SPECTRAL_HARMONICS_MAGNITUDES, XTRACT_UNIT_ANY, 1, accepted_odd_even_ratio, 1, "N >= 1"},
         .argc = 0,
