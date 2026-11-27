@@ -14,6 +14,17 @@
 
 #include "xttest_reference.h"
 
+static const double series_matrix_of_3_rows_with_a_zero_prefix[9] = {
+    4.0, 2.0, 0.0, 1.0, 3.0, 1.5, 2.5, 1.0,
+    1.0};
+
+static const xttest_reference_series series_matrix_of_3_rows_with_a_zero = {.name = "matrix_of_3_rows_with_a_zero", .prefix = series_matrix_of_3_rows_with_a_zero_prefix, .prefix_count = 9, .cycle = NULL, .cycle_count = 0, .repeats = 0};
+
+static const double series_matrix_of_32_rows_cycle_cycle[8] = {
+    0.050000000000000003, 0.20000000000000001, 0.40000000000000002, 0.10000000000000001, 0.14999999999999999, 0.29999999999999999, 0.25, 0.34999999999999998};
+
+static const xttest_reference_series series_matrix_of_32_rows_cycle = {.name = "matrix_of_32_rows_cycle", .prefix = NULL, .prefix_count = 0, .cycle = series_matrix_of_32_rows_cycle_cycle, .cycle_count = 8, .repeats = 128};
+
 static const double series_uneven_spectrum_with_a_zero_prefix[14] = {
     4.0, 2.0, 0.0, 1.0, 0.5, 0.25, 0.25, 100.0,
     250.0, 300.0, 450.0, 800.0, 1600.0, 3200.0};
@@ -120,6 +131,16 @@ static const double series_tenths_with_ties_cycle_cycle[8] = {
     0.29999999999999999, 0.10000000000000001, 0.69999999999999996, 0.90000000000000002, 0.90000000000000002, 0.20000000000000001, 0.10000000000000001, 0.59999999999999998};
 
 static const xttest_reference_series series_tenths_with_ties_cycle = {.name = "tenths_with_ties_cycle", .prefix = NULL, .prefix_count = 0, .cycle = series_tenths_with_ties_cycle_cycle, .cycle_count = 8, .repeats = 125};
+
+static const double expected_lean_cooccurrence_0[] = {0.96875};
+static const double expected_lean_cooccurrence_1[] = {170.44444444444446};
+
+static const xttest_reference_record records_lean_cooccurrence[] = {
+    {.feature = XTRACT_COOCCURRENCE_CONTRAST, .series = &series_matrix_of_3_rows_with_a_zero, .arguments = NULL, .expected = expected_lean_cooccurrence_0, .expected_count = 1, .tolerance = 0.0},
+    {.feature = XTRACT_COOCCURRENCE_CONTRAST, .series = &series_matrix_of_32_rows_cycle, .arguments = NULL, .expected = expected_lean_cooccurrence_1, .expected_count = 1, .tolerance = 2.2799999999999999e-13},
+};
+
+static const xttest_reference_source source_lean_cooccurrence = {.id = "lean_cooccurrence", .name = "Theorems about the definitions of the statistics of a co-occurrence matrix, checked by Lean", .level = 3, .record_count = 2, .records = records_lean_cooccurrence};
 
 static const double expected_lean_spectral_moments_0[] = {368.75};
 static const double expected_lean_spectral_moments_1[] = {368.75};
@@ -328,9 +349,14 @@ static const xttest_reference_record records_lean_temporal[] = {
 
 static const xttest_reference_source source_lean_temporal = {.id = "lean_temporal", .name = "Theorems about the definitions of the features of the shape of a series over time, checked by Lean", .level = 3, .record_count = 10, .records = records_lean_temporal};
 
-const xttest_reference_source *const xttest_reference_sources[] = {&source_lean_spectral_moments, &source_lean_spectral_shape, &source_lean_statistics, &source_lean_temporal};
+const xttest_reference_source *const xttest_reference_sources[] = {&source_lean_cooccurrence, &source_lean_spectral_moments, &source_lean_spectral_shape, &source_lean_statistics, &source_lean_temporal};
 
-const int xttest_reference_source_count = 4;
+const int xttest_reference_source_count = 5;
+
+UTEST(reference, results_agree_with_lean_cooccurrence)
+{
+    xttest_reference_check(&source_lean_cooccurrence, utest_result);
+}
 
 UTEST(reference, results_agree_with_lean_spectral_moments)
 {

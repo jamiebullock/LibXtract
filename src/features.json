@@ -1679,7 +1679,7 @@
       "description": "Extract the contrast of a co-occurrence matrix",
       "definition": "\\sum_{i,j} (i - j)^2 p_{ij}, \\quad p_{ij} = \\frac{P_{ij}}{\\sum_{k,l} P_{kl}}",
       "sources": [{"role": "origin", "authors": ["Haralick", "Shanmugam", "Dinstein"], "year": 1973, "title": "Textural features for image classification", "venue": "IEEE Transactions on Systems, Man, and Cybernetics SMC-3(6)", "locator": "appendix I, feature 2", "permalink": "doi:10.1109/TSMC.1973.4309314"}],
-      "validation_level": 0,
+      "validation_level": 3,
       "input": {"format": "square_matrix", "unit": "none", "accepts": ["cooccurrence_matrix"], "length": "N >= 1 && is_square(N)"},
       "arguments": [],
       "result": {"kind": "scalar", "unit": "none", "min": 0}

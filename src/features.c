@@ -3132,7 +3132,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .description = "Extract the contrast of a co-occurrence matrix",
         .source_count = 1,
         .sources = sources_cooccurrence_contrast,
-        .validation_level = 0,
+        .validation_level = 3,
         .tags = 0,
         .data = {XTRACT_SQUARE_MATRIX, XTRACT_UNIT_NONE, 1, accepted_cooccurrence_contrast, 1, "N >= 1 && is_square(N)"},
         .argc = 0,
