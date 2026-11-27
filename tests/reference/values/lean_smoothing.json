@@ -1,0 +1,88 @@
+{
+  "source": {
+    "name": "Theorems about the definitions of the features that smooth a series by a weighted recursion, checked by Lean",
+    "version": "Lean 4.36.0, Mathlib v4.36.0",
+    "licence": "Zlib, as the library",
+    "how": "each expected value is proved to be the value of the feature's definition at the doubles nearest the stored values, or within half a unit in its last place of it, by the theorem its record names in spec/XtractSpec/Records/Smoothing.lean; written by tests/reference/generate/lean_smoothing.py and checked by Lean's kernel",
+    "level": 3
+  },
+  "records": [
+    {
+      "feature": "ewma_average",
+      "data": "quarters_to_smooth",
+      "arguments": {
+        "weight": 0.25
+      },
+      "expected": [
+        2.0,
+        1.25,
+        0.9375,
+        1.578125,
+        1.43359375,
+        0.4501953125,
+        1.337646484375,
+        1.12823486328125,
+        1.2211761474609375
+      ],
+      "tolerance": {
+        "relative": 0.0,
+        "reason": "no rounding: the values and the weight are multiples of 1/4, and every difference, every product and every average is a double, so each operation is exact; the expected value is exact"
+      },
+      "call": "theorem XtractSpec.Records.ewma_average_quarters_to_smooth"
+    },
+    {
+      "feature": "ewma_average",
+      "data": "tenths_to_smooth_cycle",
+      "arguments": {
+        "weight": 0.1
+      },
+      "expected": [
+        0.6,
+        0.5499999999999999,
+        0.585,
+        0.5565,
+        0.50585,
+        0.525265,
+        0.49273849999999997,
+        0.52346465,
+        0.531118185,
+        0.4880063665,
+        0.52920572985,
+        0.506285156865,
+        0.46065664117849997,
+        0.48459097706064996,
+        0.456131879354585,
+        0.4905186914191265,
+        0.5014668222772138,
+        0.46132014004949246,
+        0.5051881260445432,
+        0.4846693134400889,
+        0.44120238209608,
+        0.467082143886472,
+        0.4403739294978248,
+        0.4763365365480423,
+        0.4887028828932381,
+        0.4498325946039143,
+        0.49484933514352286,
+        0.4753644016291706,
+        0.4328279614662535,
+        0.45954516531962813,
+        0.43359064878766534,
+        0.4702315839088988,
+        0.4832084255180089,
+        0.44488758296620806,
+        0.49039882466958723,
+        0.47135894220262853,
+        0.42922304798236566,
+        0.4563007431841291,
+        0.4306706688657162,
+        0.4676036019791446
+      ],
+      "tolerance": {
+        "relative": 1.12e-15,
+        "reason": "10 roundings, each within 2^-53 relatively: a step rounds the difference from the average before it, the product with the weight and the sum, and carries the rounding of the average before it with the factor 1 - w; the bound that this gives from the exact values is at most 8.66 roundings of the largest result; and the expected value"
+      },
+      "call": "theorem XtractSpec.Records.ewma_average_tenths_to_smooth_cycle"
+    }
+  ]
+}

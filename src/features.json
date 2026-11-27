@@ -1100,7 +1100,7 @@
       "description": "Extract the exponentially weighted moving average of a series",
       "definition": "y_0 = x_0, \\quad y_n = y_{n-1} + \\alpha (x_n - y_{n-1}), \\quad n = 1, \\ldots, N-1, \\quad 0 \\le \\alpha \\le 1 \\text{ the factor given in argv}",
       "sources": [{"role": "origin", "authors": ["Roberts"], "year": 1959, "title": "Control chart tests based on geometric moving averages", "venue": "Technometrics 1(3)", "locator": "equation 1, page 240", "permalink": "doi:10.1080/00401706.1959.10489860"}, {"role": "formulation", "authors": ["Finch"], "year": 2009, "title": "Incremental calculation of weighted mean and variance", "venue": "Technical note, University of Cambridge Computing Service", "locator": "section 9, equations 122 and 128", "permalink": "https://fanf2.user.srcf.net/hermes/doc/antiforgery/stats.pdf"}],
-      "validation_level": 0,
+      "validation_level": 3,
       "input": {"format": "arbitrary_series", "unit": "any"},
       "argument_type": "float",
       "arguments": [
