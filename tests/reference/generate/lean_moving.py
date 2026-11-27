@@ -68,6 +68,20 @@ def main():
             {"window": width},
         )
 
+        out.vector(
+            "moving_average",
+            series,
+            f"movingAverage {data(series)} {width}",
+            "movingAverage_cast _ _",
+            [sum(window) / width for window in windows],
+            0 if exact else width + 1,
+            "every value is a multiple of 1/4, so each addition and the division by 4 are exact"
+            if exact
+            else "the w - 1 additions of the w values of a window, of one sign, in any order; the division, or "
+            "a reciprocal and a multiplication",
+            {"window": width},
+        )
+
     out.store("moving", "Moving", ["Moving"], "the statistics of a moving window")
 
 
