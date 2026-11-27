@@ -1054,7 +1054,7 @@ Sources:
 - Origin: Peeters, McAdams and Herrera (2000). "Instrument sound description in the context of MPEG-7". Proceedings of the International Computer Music Conference 2000, page 3, table. <a href="https://hal.science/hal-01161319">https://hal.science/hal-01161319</a>
 - Formulation: Peeters (2004). "A large set of audio features for sound description (similarity and classification) in the CUIDADO project". Technical report, IRCAM, section 3.2.1
 
-Validation level 0, not checked.
+Validation level 3, certified.
 
 \section definition_max_position Maximum Position
 

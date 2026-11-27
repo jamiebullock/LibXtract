@@ -2732,7 +2732,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .description = "Extract the temporal centroid of an envelope",
         .source_count = 2,
         .sources = sources_temporal_centroid,
-        .validation_level = 0,
+        .validation_level = 3,
         .tags = 0,
         .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 2"},
         .argc = 0,

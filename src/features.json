@@ -1358,7 +1358,7 @@
       "description": "Extract the temporal centroid of an envelope",
       "definition": "TC = \\frac{\\sum_{n=0}^{N-1} n\\,x_n}{(N-1)\\sum_{n=0}^{N-1} x_n}; \\text{ no result when } \\sum_{n=0}^{N-1} x_n \\le 0",
       "sources": [{"role": "origin", "authors": ["Peeters", "McAdams", "Herrera"], "year": 2000, "title": "Instrument sound description in the context of MPEG-7", "venue": "Proceedings of the International Computer Music Conference 2000", "locator": "page 3, table", "permalink": "https://hal.science/hal-01161319"}, {"role": "formulation", "authors": ["Peeters"], "year": 2004, "title": "A large set of audio features for sound description (similarity and classification) in the CUIDADO project", "venue": "Technical report, IRCAM", "locator": "section 3.2.1"}],
-      "validation_level": 0,
+      "validation_level": 3,
       "input": {"format": "arbitrary_series", "unit": "any", "length": "N >= 2"},
       "arguments": [],
       "result": {"kind": "scalar", "unit": "none", "min": 0, "max": 1}

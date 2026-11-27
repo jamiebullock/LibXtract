@@ -110,6 +110,17 @@ static const double series_signs_cycle_cycle[8] = {
 
 static const xttest_reference_series series_signs_cycle = {.name = "signs_cycle", .prefix = NULL, .prefix_count = 0, .cycle = series_signs_cycle_cycle, .cycle_count = 8, .repeats = 125};
 
+static const double series_rise_and_fall_with_ties_prefix[9] = {
+    1.0, 0.25, 2.0, 4.0, 4.0, 2.0, 0.25, 1.5,
+    1.0};
+
+static const xttest_reference_series series_rise_and_fall_with_ties = {.name = "rise_and_fall_with_ties", .prefix = series_rise_and_fall_with_ties_prefix, .prefix_count = 9, .cycle = NULL, .cycle_count = 0, .repeats = 0};
+
+static const double series_tenths_with_ties_cycle_cycle[8] = {
+    0.29999999999999999, 0.10000000000000001, 0.69999999999999996, 0.90000000000000002, 0.90000000000000002, 0.20000000000000001, 0.10000000000000001, 0.59999999999999998};
+
+static const xttest_reference_series series_tenths_with_ties_cycle = {.name = "tenths_with_ties_cycle", .prefix = NULL, .prefix_count = 0, .cycle = series_tenths_with_ties_cycle_cycle, .cycle_count = 8, .repeats = 125};
+
 static const double expected_lean_spectral_moments_0[] = {368.75};
 static const double expected_lean_spectral_moments_1[] = {368.75};
 static const double arguments_lean_spectral_moments_2[] = {368.75};
@@ -289,9 +300,19 @@ static const xttest_reference_record records_lean_statistics[] = {
 
 static const xttest_reference_source source_lean_statistics = {.id = "lean_statistics", .name = "Theorems about the definitions of the statistics, checked by Lean", .level = 3, .record_count = 38, .records = records_lean_statistics};
 
-const xttest_reference_source *const xttest_reference_sources[] = {&source_lean_spectral_moments, &source_lean_spectral_shape, &source_lean_statistics};
+static const double expected_lean_temporal_0[] = {0.486328125};
+static const double expected_lean_temporal_1[] = {0.50007902639481583};
 
-const int xttest_reference_source_count = 3;
+static const xttest_reference_record records_lean_temporal[] = {
+    {.feature = XTRACT_TEMPORAL_CENTROID, .series = &series_rise_and_fall_with_ties, .arguments = NULL, .expected = expected_lean_temporal_0, .expected_count = 1, .tolerance = 0.0},
+    {.feature = XTRACT_TEMPORAL_CENTROID, .series = &series_tenths_with_ties_cycle, .arguments = NULL, .expected = expected_lean_temporal_1, .expected_count = 1, .tolerance = 2.2300000000000001e-13},
+};
+
+static const xttest_reference_source source_lean_temporal = {.id = "lean_temporal", .name = "Theorems about the definitions of the features of the shape of a series over time, checked by Lean", .level = 3, .record_count = 2, .records = records_lean_temporal};
+
+const xttest_reference_source *const xttest_reference_sources[] = {&source_lean_spectral_moments, &source_lean_spectral_shape, &source_lean_statistics, &source_lean_temporal};
+
+const int xttest_reference_source_count = 4;
 
 UTEST(reference, results_agree_with_lean_spectral_moments)
 {
@@ -306,4 +327,9 @@ UTEST(reference, results_agree_with_lean_spectral_shape)
 UTEST(reference, results_agree_with_lean_statistics)
 {
     xttest_reference_check(&source_lean_statistics, utest_result);
+}
+
+UTEST(reference, results_agree_with_lean_temporal)
+{
+    xttest_reference_check(&source_lean_temporal, utest_result);
 }
