@@ -31,6 +31,9 @@ build/
 verify/*.gb
 verify/.proofs*
 
+# Lean build products and packages (lake build in spec)
+spec/.lake/
+
 # Vale styles that vale sync downloads
 .vale/styles/.vale-config/
 .vale/styles/Changelog/

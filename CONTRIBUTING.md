@@ -195,6 +195,18 @@ differ. The script that wrote a file of values is in
 `tests/reference/generate`. It is run by hand, and the build and the tests
 read only what it wrote.
 
+A value of level 3 has a theorem in `spec`, a [Lean](https://lean-lang.org)
+project that states each feature's definition and proves the laws that the
+feature's `invariance` in `src/features.json` states. The script that writes
+such values writes a theorem for each beside them, in `spec/XtractSpec/Records`,
+which says that the expected value is the value of the definition at the
+stored data, or how far from it at most. To check the theorems, install
+[elan](https://github.com/leanprover/elan) and run `lake exe cache get` and
+then `lake build` in `spec`. The build fails when a proof depends on an axiom
+other than the three standard axioms of Lean, so every proof is complete and
+checked by the kernel. CI runs this on a pull request that changes `spec` or
+those values.
+
 The repository has no copy of the
 [NIST Statistical Reference Datasets](https://www.itl.nist.gov/div898/strd/).
 Configuring with `-DXTRACT_NIST_TESTS=ON` downloads the nine datasets for

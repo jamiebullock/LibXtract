@@ -1,0 +1,11 @@
+name = "XtractSpec"
+version = "0.1.0"
+defaultTargets = ["XtractSpec"]
+
+[[require]]
+name = "mathlib"
+scope = "leanprover-community"
+rev = "v4.36.0"
+
+[[lean_lib]]
+name = "XtractSpec"

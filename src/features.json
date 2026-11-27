@@ -89,7 +89,7 @@
       "title": "Mean",
       "description": "Extract the mean of an input vector",
       "definition": "\\bar{x} = \\frac{1}{N} \\sum_{n=0}^{N-1} x_n",
-      "validation_level": 2,
+      "validation_level": 3,
       "input": {"format": "arbitrary_series", "unit": "any"},
       "arguments": [],
       "invariance": {"offset": "follows", "sign": "negated", "order": "unchanged", "reversal": "unchanged"},
@@ -100,7 +100,7 @@
       "title": "Variance",
       "description": "Extract the variance of an input vector",
       "definition": "s^2 = \\frac{1}{N-1} \\sum_{n=0}^{N-1} (x_n - m)^2, \\quad m \\text{ the mean given in argv}",
-      "validation_level": 2,
+      "validation_level": 3,
       "input": {"format": "arbitrary_series", "unit": "any", "length": "N >= 2"},
       "argument_type": "float",
       "arguments": [
@@ -114,7 +114,7 @@
       "title": "Standard Deviation",
       "description": "Extract the standard deviation of an input vector",
       "definition": "s = \\sqrt{v}, \\quad v \\ge 0 \\text{ the variance given in argv}",
-      "validation_level": 2,
+      "validation_level": 3,
       "input": {"format": "no_data", "unit": "any"},
       "argument_type": "float",
       "arguments": [

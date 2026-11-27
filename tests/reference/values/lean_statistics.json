@@ -1,10 +1,10 @@
 {
   "source": {
-    "name": "Exact rational arithmetic on the stored doubles",
-    "version": "Python 3.15.2, fractions and decimal",
+    "name": "Theorems about the definitions of the statistics, checked by Lean",
+    "version": "Lean 4.36.0, Mathlib v4.36.0",
     "licence": "Zlib, as the library",
-    "how": "each feature's definition evaluated on the doubles nearest the stored values, by tests/reference/generate/exact_arithmetic.py",
-    "level": 2
+    "how": "each expected value is proved to be the value of the feature's definition at the doubles nearest the stored values, or within half a unit in its last place of it, by the theorem its record names in spec/XtractSpec/Records/Statistics.lean; written by tests/reference/generate/lean_statistics.py and checked by Lean's kernel",
+    "level": 3
   },
   "records": [
     {
@@ -14,10 +14,10 @@
         10000002.0
       ],
       "tolerance": {
-        "relative": 5.56e-16,
-        "reason": "5 roundings, each within 2^-53 relatively: the N - 1 additions of values of one sign, in any order; the division, or a reciprocal and a multiplication; and the expected value"
+        "relative": 4.45e-16,
+        "reason": "4 roundings, each within 2^-53 relatively: the N - 1 additions of values of one sign, in any order; the division, or a reciprocal and a multiplication; the expected value is exact"
       },
-      "call": "the sum of the doubles over N, as a fraction"
+      "call": "theorem XtractSpec.Records.mean_offset_1e7_integers"
     },
     {
       "feature": "variance",
@@ -29,10 +29,10 @@
         1.0
       ],
       "tolerance": {
-        "relative": 7.78e-16,
-        "reason": "7 roundings, each within 2^-53 relatively: the difference from the mean, which its square counts twice, and the square, in every term; the N - 1 additions of terms of one sign, in any order; the division; and the expected value"
+        "relative": 6.67e-16,
+        "reason": "6 roundings, each within 2^-53 relatively: the difference from the mean, which its square counts twice, and the square, in every term; the N - 1 additions of terms of one sign, in any order; the division; the expected value is exact"
       },
-      "call": "the sum of the squared differences of the doubles from the mean given, over N - 1, as a fraction"
+      "call": "theorem XtractSpec.Records.variance_offset_1e7_integers"
     },
     {
       "feature": "standard_deviation",
@@ -43,10 +43,10 @@
         1.0
       ],
       "tolerance": {
-        "relative": 2.23e-16,
-        "reason": "2 roundings, each within 2^-53 relatively: the square root, which is correctly rounded, and the expected value"
+        "relative": 1.12e-16,
+        "reason": "1 roundings, each within 2^-53 relatively: the square root, which is correctly rounded; the expected value is exact"
       },
-      "call": "the square root of the variance of offset_1e7_integers to 60 digits"
+      "call": "theorem XtractSpec.Records.standard_deviation_offset_1e7_integers"
     },
     {
       "feature": "mean",
@@ -58,7 +58,7 @@
         "relative": 1.12e-13,
         "reason": "1003 roundings, each within 2^-53 relatively: the N - 1 additions of values of one sign, in any order; the division, or a reciprocal and a multiplication; and the expected value"
       },
-      "call": "the sum of the doubles over N, as a fraction"
+      "call": "theorem XtractSpec.Records.mean_offset_1_tenths"
     },
     {
       "feature": "variance",
@@ -73,7 +73,7 @@
         "relative": 1.12e-13,
         "reason": "1005 roundings, each within 2^-53 relatively: the difference from the mean, which its square counts twice, and the square, in every term; the N - 1 additions of terms of one sign, in any order; the division; and the expected value"
       },
-      "call": "the sum of the squared differences of the doubles from the mean given, over N - 1, as a fraction"
+      "call": "theorem XtractSpec.Records.variance_offset_1_tenths"
     },
     {
       "feature": "standard_deviation",
@@ -85,9 +85,9 @@
       ],
       "tolerance": {
         "relative": 2.23e-16,
-        "reason": "2 roundings, each within 2^-53 relatively: the square root, which is correctly rounded, and the expected value"
+        "reason": "2 roundings, each within 2^-53 relatively: the square root, which is correctly rounded; and the expected value"
       },
-      "call": "the square root of the variance of offset_1_tenths to 60 digits"
+      "call": "theorem XtractSpec.Records.standard_deviation_offset_1_tenths"
     },
     {
       "feature": "mean",
@@ -99,7 +99,7 @@
         "relative": 1.12e-13,
         "reason": "1003 roundings, each within 2^-53 relatively: the N - 1 additions of values of one sign, in any order; the division, or a reciprocal and a multiplication; and the expected value"
       },
-      "call": "the sum of the doubles over N, as a fraction"
+      "call": "theorem XtractSpec.Records.mean_offset_1e6_tenths"
     },
     {
       "feature": "variance",
@@ -114,7 +114,7 @@
         "relative": 1.12e-13,
         "reason": "1005 roundings, each within 2^-53 relatively: the difference from the mean, which its square counts twice, and the square, in every term; the N - 1 additions of terms of one sign, in any order; the division; and the expected value"
       },
-      "call": "the sum of the squared differences of the doubles from the mean given, over N - 1, as a fraction"
+      "call": "theorem XtractSpec.Records.variance_offset_1e6_tenths"
     },
     {
       "feature": "standard_deviation",
@@ -126,9 +126,9 @@
       ],
       "tolerance": {
         "relative": 2.23e-16,
-        "reason": "2 roundings, each within 2^-53 relatively: the square root, which is correctly rounded, and the expected value"
+        "reason": "2 roundings, each within 2^-53 relatively: the square root, which is correctly rounded; and the expected value"
       },
-      "call": "the square root of the variance of offset_1e6_tenths to 60 digits"
+      "call": "theorem XtractSpec.Records.standard_deviation_offset_1e6_tenths"
     },
     {
       "feature": "mean",
@@ -140,7 +140,7 @@
         "relative": 1.12e-13,
         "reason": "1003 roundings, each within 2^-53 relatively: the N - 1 additions of values of one sign, in any order; the division, or a reciprocal and a multiplication; and the expected value"
       },
-      "call": "the sum of the doubles over N, as a fraction"
+      "call": "theorem XtractSpec.Records.mean_offset_1e7_tenths"
     },
     {
       "feature": "variance",
@@ -153,9 +153,9 @@
       ],
       "tolerance": {
         "relative": 1.12e-13,
-        "reason": "1005 roundings, each within 2^-53 relatively: the difference from the mean, which its square counts twice, and the square, in every term; the N - 1 additions of terms of one sign, in any order; the division; and the expected value"
+        "reason": "1004 roundings, each within 2^-53 relatively: the difference from the mean, which its square counts twice, and the square, in every term; the N - 1 additions of terms of one sign, in any order; the division; the expected value is exact"
       },
-      "call": "the sum of the squared differences of the doubles from the mean given, over N - 1, as a fraction"
+      "call": "theorem XtractSpec.Records.variance_offset_1e7_tenths"
     },
     {
       "feature": "standard_deviation",
@@ -167,9 +167,9 @@
       ],
       "tolerance": {
         "relative": 2.23e-16,
-        "reason": "2 roundings, each within 2^-53 relatively: the square root, which is correctly rounded, and the expected value"
+        "reason": "2 roundings, each within 2^-53 relatively: the square root, which is correctly rounded; and the expected value"
       },
-      "call": "the square root of the variance of offset_1e7_tenths to 60 digits"
+      "call": "theorem XtractSpec.Records.standard_deviation_offset_1e7_tenths"
     }
   ]
 }

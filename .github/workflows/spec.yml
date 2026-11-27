@@ -1,0 +1,65 @@
+name: Spec
+
+# Lean checks the definitions in spec and the theorems about the stored
+# reference values. Its result changes only when those files change, so it
+# runs only on a pull request that changes them.
+on:
+  pull_request:
+    branches: [develop]
+    paths:
+      - 'spec/**'
+      - 'tests/reference/generate/lean_*.py'
+      - 'tests/reference/values/lean_*.json'
+      - 'tests/reference/series/**'
+      - '.github/workflows/spec.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: spec-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  spec:
+    name: Check the definitions and the certified values
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Check that the generators write the committed files
+        run: |
+          for generator in tests/reference/generate/lean_*.py; do
+            python3 "$generator"
+          done
+          changed=$(git status --porcelain)
+          if [ -n "$changed" ]; then
+            echo "$changed"
+            git diff
+            exit 1
+          fi
+
+      - name: Install elan 4.4.0
+        env:
+          ELAN_VERSION: 4.4.0
+          ELAN_SHA256: 0e8250aa2be86c7af929ade68db617af9edc8b9ccf6eaf5ece228250d0d032e2
+        run: |
+          curl --fail --silent --show-error --location --retry 5 --retry-all-errors --retry-delay 10 \
+            --output "$RUNNER_TEMP/elan.tar.gz" \
+            "https://github.com/leanprover/elan/releases/download/v${ELAN_VERSION}/elan-x86_64-unknown-linux-gnu.tar.gz"
+          echo "$ELAN_SHA256  $RUNNER_TEMP/elan.tar.gz" | sha256sum --check
+          tar -xzf "$RUNNER_TEMP/elan.tar.gz" -C "$RUNNER_TEMP"
+          "$RUNNER_TEMP/elan-init" -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - name: Download Mathlib's build
+        working-directory: spec
+        run: lake exe cache get
+
+      - name: Check every proof
+        working-directory: spec
+        run: lake build
