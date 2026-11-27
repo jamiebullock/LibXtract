@@ -60,6 +60,12 @@ static const double series_stretched_partials_of_110_hz_prefix[200] = {
 
 static const xttest_reference_series series_stretched_partials_of_110_hz = {.name = "stretched_partials_of_110_hz", .prefix = series_stretched_partials_of_110_hz_prefix, .prefix_count = 200, .cycle = NULL, .cycle_count = 0, .repeats = 0};
 
+static const double series_peaks_two_to_a_harmonic_prefix[16] = {
+    1.0, 0.5, 2.0, 1.0, 8.0, 0.5, 0.25, 4.0,
+    30.0, 100.0, 190.0, 210.0, 0.0, 250.0, 290.0, 310.0};
+
+static const xttest_reference_series series_peaks_two_to_a_harmonic = {.name = "peaks_two_to_a_harmonic", .prefix = series_peaks_two_to_a_harmonic_prefix, .prefix_count = 16, .cycle = NULL, .cycle_count = 0, .repeats = 0};
+
 static const double series_uneven_spectrum_with_a_zero_prefix[14] = {
     4.0, 2.0, 0.0, 1.0, 0.5, 0.25, 0.25, 100.0,
     250.0, 300.0, 450.0, 800.0, 1600.0, 3200.0};
@@ -189,13 +195,19 @@ static const double arguments_lean_harmonicity_0[] = {100.0};
 static const double expected_lean_harmonicity_0[] = {0.22696629213483147};
 static const double arguments_lean_harmonicity_1[] = {110.0};
 static const double expected_lean_harmonicity_1[] = {0.071219088861877958};
+static const double arguments_lean_harmonicity_2[] = {100.0, 0.14999999999999999};
+static const double expected_lean_harmonicity_2[] = {0.29729729729729731};
+static const double arguments_lean_harmonicity_3[] = {110.0, 0.10000000000000001};
+static const double expected_lean_harmonicity_3[] = {0.47524790677933404};
 
 static const xttest_reference_record records_lean_harmonicity[] = {
     {.feature = XTRACT_SPECTRAL_INHARMONICITY, .series = &series_peaks_about_100_hz, .arguments = arguments_lean_harmonicity_0, .expected = expected_lean_harmonicity_0, .expected_count = 1, .tolerance = 2.2300000000000002e-16},
     {.feature = XTRACT_SPECTRAL_INHARMONICITY, .series = &series_stretched_partials_of_110_hz, .arguments = arguments_lean_harmonicity_1, .expected = expected_lean_harmonicity_1, .expected_count = 1, .tolerance = 3.3400000000000002e-14},
+    {.feature = XTRACT_NOISINESS, .series = &series_peaks_two_to_a_harmonic, .arguments = arguments_lean_harmonicity_2, .expected = expected_lean_harmonicity_2, .expected_count = 1, .tolerance = 2.2300000000000002e-16},
+    {.feature = XTRACT_NOISINESS, .series = &series_stretched_partials_of_110_hz, .arguments = arguments_lean_harmonicity_3, .expected = expected_lean_harmonicity_3, .expected_count = 1, .tolerance = 2.23e-14},
 };
 
-static const xttest_reference_source source_lean_harmonicity = {.id = "lean_harmonicity", .name = "Theorems about the definitions of the features that measure partials against a fundamental, checked by Lean", .level = 3, .record_count = 2, .records = records_lean_harmonicity};
+static const xttest_reference_source source_lean_harmonicity = {.id = "lean_harmonicity", .name = "Theorems about the definitions of the features that measure partials against a fundamental, checked by Lean", .level = 3, .record_count = 4, .records = records_lean_harmonicity};
 
 static const double expected_lean_spectral_moments_0[] = {368.75};
 static const double expected_lean_spectral_moments_1[] = {368.75};

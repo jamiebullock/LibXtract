@@ -3,7 +3,7 @@
 # SPDX-FileCopyrightText: 2026 Jamie Bullock
 # SPDX-License-Identifier: Zlib
 
-"""Writes two sets of spectral peaks, features that measure each against a
+"""Writes three sets of spectral peaks, features that measure each against a
 fundamental, and a theorem for every one of those values that Lean checks.
 
 usage: lean_harmonicity.py
@@ -22,7 +22,11 @@ the fundamental, one with an amplitude of zero, one half way between two
 harmonics and one on a harmonic. Every value is a multiple of 1/4, on which
 the library's sums are exact. The second has 100 partials of a fundamental of
 110 Hz, partial k at 110 k + 0.37 k^2 Hz with an amplitude of 1 / k cut to
-four decimal places.
+four decimal places. The third has eight elements in the order of their
+frequencies against a fundamental of 100 Hz: two pairs of peaks at one
+harmonic each, the larger first in one pair and second in the other, a peak
+half way between two harmonics, and an element with a coefficient and a
+frequency of zero, which is not a peak.
 """
 
 import math
@@ -33,7 +37,8 @@ from certificates import ROUNDING, Certificates, cast, rounded_up
 
 SHORT = "peaks_about_100_hz"
 LONG = "stretched_partials_of_110_hz"
-FUNDAMENTAL = {SHORT: 100.0, LONG: 110.0}
+PAIRED = "peaks_two_to_a_harmonic"
+FUNDAMENTAL = {SHORT: 100.0, LONG: 110.0, PAIRED: 100.0}
 # A series is a prefix, then a cycle taken a number of times
 SERIES = {
     SHORT: (
@@ -44,6 +49,11 @@ SERIES = {
     LONG: (
         [str(Decimal(10000 // k) / 10000) for k in range(1, 101)]
         + [str(110 * k + Decimal("0.37") * k * k) for k in range(1, 101)],
+        [],
+        0,
+    ),
+    PAIRED: (
+        ["1", "0.5", "2", "1", "8", "0.5", "0.25", "4"] + ["30", "100", "190", "210", "0", "250", "290", "310"],
         [],
         0,
     ),
@@ -63,7 +73,7 @@ def main():
     def data(series):
         return f"({series}.map (↑) : List ℝ)"
 
-    for series in SERIES:
+    for series in (SHORT, LONG):
         exact = series == SHORT
         fundamental = Fraction(FUNDAMENTAL[series])
         partials = []
@@ -112,6 +122,49 @@ def main():
             roundings,
             reason,
             {"fundamental": float(fundamental)},
+        )
+
+    for series, threshold in ((PAIRED, 0.15), (LONG, 0.1)):
+        exact = series == PAIRED
+        fundamental = Fraction(FUNDAMENTAL[series])
+        kept = {}
+        total = Fraction(0)
+        # The library is given frequencies that do not fall
+        sounding = [f for f in frequencies[series] if f != 0]
+        assert sounding == sorted(sounding) and all(a >= 0 for a in amplitudes[series])
+        for a, f in zip(amplitudes[series], frequencies[series]):
+            if f == 0:
+                continue
+            total += a
+            ratio = f / fundamental
+            number = math.floor(ratio + Fraction(1, 2))
+            near = number >= 1 and abs(ratio - number) <= Fraction(threshold)
+            # The library rounds the ratio before it rounds it to a harmonic
+            # number and before it compares the distance with the threshold
+            rounded = float(f) / float(fundamental)
+            assert math.floor(rounded + 0.5) == number
+            assert near == (number >= 1 and abs(number - rounded) <= threshold)
+            if near:
+                kept[number] = max(kept.get(number, a), a)
+        count = len(sounding)
+        others = total - sum(kept.values())
+        if exact:
+            assert all((4 * a).denominator == 1 for a in amplitudes[series])
+            assert len(kept) < sum(1 for f in sounding if abs(f / fundamental - round(f / fundamental)) <= Fraction(threshold))
+        out.rational(
+            "noisiness",
+            series,
+            f"noisiness {data(series)} {cast(fundamental)} {cast(threshold)}",
+            "noisiness_cast _ _ _",
+            others / total,
+            1 if exact else 2 * count - 1,
+            "the division; every coefficient is a multiple of 1/4, so each addition is exact, and the library "
+            "places every peak as the definition does"
+            if exact
+            else "the library places every peak as the definition does; at most P - 1 additions of the "
+            "coefficients that are not kept, and the P - 1 additions of the coefficients of the P peaks, each of "
+            "one sign, in any order; the division",
+            {"fundamental": float(fundamental), "threshold": threshold},
         )
 
     out.store("harmonicity", "Harmonicity", ["Harmonicity"], "the features that measure partials against a fundamental")

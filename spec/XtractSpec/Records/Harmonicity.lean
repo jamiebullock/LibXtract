@@ -129,6 +129,16 @@ def stretched_partials_of_110_hz : List ℚ :=
     (7779775941747671 / 549755813888 : ℚ), (3939956981623685 / 274877906944 : ℚ),
     (7980458804049347 / 549755813888 : ℚ), (14700 : ℚ)]
 
+def peaks_two_to_a_harmonic : List ℚ :=
+  [(1 : ℚ), (1 / 2 : ℚ),
+    (2 : ℚ), (1 : ℚ),
+    (8 : ℚ), (1 / 2 : ℚ),
+    (1 / 4 : ℚ), (4 : ℚ),
+    (30 : ℚ), (100 : ℚ),
+    (190 : ℚ), (210 : ℚ),
+    (0 : ℚ), (250 : ℚ),
+    (290 : ℚ), (310 : ℚ)]
+
 theorem spectral_inharmonicity_peaks_about_100_hz :
     |spectralInharmonicity (peaks_about_100_hz.map (↑) : List ℝ) ((100 : ℚ) : ℝ) - ((8177322469472721 / 36028797018963968 : ℚ) : ℝ)| ≤ ((1 / 72057594037927936 : ℚ) : ℝ) :=
   within_of_rat (spectralInharmonicity_cast _ _) (by decide +kernel)
@@ -136,5 +146,13 @@ theorem spectral_inharmonicity_peaks_about_100_hz :
 theorem spectral_inharmonicity_stretched_partials_of_110_hz :
     |spectralInharmonicity (stretched_partials_of_110_hz.map (↑) : List ℝ) ((110 : ℚ) : ℝ) - ((5131876192960317 / 72057594037927936 : ℚ) : ℝ)| ≤ ((1 / 144115188075855872 : ℚ) : ℝ) :=
   within_of_rat (spectralInharmonicity_cast _ _) (by decide +kernel)
+
+theorem noisiness_peaks_two_to_a_harmonic :
+    |noisiness (peaks_two_to_a_harmonic.map (↑) : List ℝ) ((100 : ℚ) : ℝ) ((5404319552844595 / 36028797018963968 : ℚ) : ℝ) - ((5355631989305455 / 18014398509481984 : ℚ) : ℝ)| ≤ ((1 / 36028797018963968 : ℚ) : ℝ) :=
+  within_of_rat (noisiness_cast _ _ _) (by decide +kernel)
+
+theorem noisiness_stretched_partials_of_110_hz :
+    |noisiness (stretched_partials_of_110_hz.map (↑) : List ℝ) ((110 : ℚ) : ℝ) ((3602879701896397 / 36028797018963968 : ℚ) : ℝ) - ((2140326295880017 / 4503599627370496 : ℚ) : ℝ)| ≤ ((1 / 36028797018963968 : ℚ) : ℝ) :=
+  within_of_rat (noisiness_cast _ _ _) (by decide +kernel)
 
 end XtractSpec.Records
