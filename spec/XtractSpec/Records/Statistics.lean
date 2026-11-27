@@ -21,18 +21,6 @@ def offset_1e7_integers : List ℚ := [
   (10000001 : ℚ), (10000003 : ℚ),
   (10000002 : ℚ)]
 
-theorem mean_offset_1e7_integers :
-    mean (offset_1e7_integers.map (↑) : List ℝ) = ((10000002 : ℚ) : ℝ) :=
-  eq_of_rat (mean_cast _) (by decide +kernel)
-
-theorem variance_offset_1e7_integers :
-    variance (offset_1e7_integers.map (↑) : List ℝ) ((10000002 : ℚ) : ℝ) = ((1 : ℚ) : ℝ) :=
-  eq_of_rat (variance_cast _ _) (by decide +kernel)
-
-theorem standard_deviation_offset_1e7_integers :
-    standardDeviation ((1 : ℚ) : ℝ) = ((1 : ℚ) : ℝ) :=
-  sqrt_eq_of_rat (by decide +kernel) (by decide +kernel)
-
 def offset_1_tenths : List ℚ := [
   (5404319552844595 / 4503599627370496 : ℚ), (2476979795053773 / 2251799813685248 : ℚ),
   (5854679515581645 / 4503599627370496 : ℚ), (2476979795053773 / 2251799813685248 : ℚ),
@@ -535,18 +523,6 @@ def offset_1_tenths : List ℚ := [
   (5854679515581645 / 4503599627370496 : ℚ), (2476979795053773 / 2251799813685248 : ℚ),
   (5854679515581645 / 4503599627370496 : ℚ), (2476979795053773 / 2251799813685248 : ℚ),
   (5854679515581645 / 4503599627370496 : ℚ)]
-
-theorem mean_offset_1_tenths :
-    |mean (offset_1_tenths.map (↑) : List ℝ) - ((5404319552844595 / 4503599627370496 : ℚ) : ℝ)| ≤ ((1 / 9007199254740992 : ℚ) : ℝ) :=
-  within_of_rat (mean_cast _) (by decide +kernel)
-
-theorem variance_offset_1_tenths :
-    |variance (offset_1_tenths.map (↑) : List ℝ) ((5404319552844595 / 4503599627370496 : ℚ) : ℝ) - ((720575940379279 / 72057594037927936 : ℚ) : ℝ)| ≤ ((1 / 1152921504606846976 : ℚ) : ℝ) :=
-  within_of_rat (variance_cast _ _) (by decide +kernel)
-
-theorem standard_deviation_offset_1_tenths :
-    |standardDeviation ((720575940379279 / 72057594037927936 : ℚ) : ℝ) - ((900719925474099 / 9007199254740992 : ℚ) : ℝ)| ≤ ((1 / 144115188075855872 : ℚ) : ℝ) :=
-  sqrt_within_of_rat (by decide +kernel) (by decide +kernel) (by decide +kernel) (by decide +kernel)
 
 def offset_1e6_tenths : List ℚ := [
   (4294968154993459 / 4294967296 : ℚ), (8589935450993459 / 8589934592 : ℚ),
@@ -1051,18 +1027,6 @@ def offset_1e6_tenths : List ℚ := [
   (4294968584490189 / 4294967296 : ℚ), (8589935450993459 / 8589934592 : ℚ),
   (4294968584490189 / 4294967296 : ℚ)]
 
-theorem mean_offset_1e6_tenths :
-    |mean (offset_1e6_tenths.map (↑) : List ℝ) - ((4294968154993459 / 4294967296 : ℚ) : ℝ)| ≤ ((1 / 17179869184 : ℚ) : ℝ) :=
-  within_of_rat (mean_cast _) (by decide +kernel)
-
-theorem variance_offset_1e6_tenths :
-    |variance (offset_1e6_tenths.map (↑) : List ℝ) ((4294968154993459 / 4294967296 : ℚ) : ℝ) - ((5764607527060767 / 576460752303423488 : ℚ) : ℝ)| ≤ ((1 / 1152921504606846976 : ℚ) : ℝ) :=
-  within_of_rat (variance_cast _ _) (by decide +kernel)
-
-theorem standard_deviation_offset_1e6_tenths :
-    |standardDeviation ((5764607527060767 / 576460752303423488 : ℚ) : ℝ) - ((1717986919 / 17179869184 : ℚ) : ℝ)| ≤ ((1 / 144115188075855872 : ℚ) : ℝ) :=
-  sqrt_within_of_rat (by decide +kernel) (by decide +kernel) (by decide +kernel) (by decide +kernel)
-
 def offset_1e7_tenths : List ℚ := [
   (2684354613687091 / 268435456 : ℚ), (5368709173687091 / 536870912 : ℚ),
   (2684354640530637 / 268435456 : ℚ), (5368709173687091 / 536870912 : ℚ),
@@ -1566,6 +1530,48 @@ def offset_1e7_tenths : List ℚ := [
   (2684354640530637 / 268435456 : ℚ), (5368709173687091 / 536870912 : ℚ),
   (2684354640530637 / 268435456 : ℚ)]
 
+def quarters_with_a_zero : List ℚ := [
+  (3 : ℚ), (-3 / 2 : ℚ),
+  (17 / 4 : ℚ), (0 : ℚ),
+  (2 : ℚ), (19 / 2 : ℚ),
+  (-6 : ℚ), (1 : ℚ)]
+
+theorem mean_offset_1e7_integers :
+    mean (offset_1e7_integers.map (↑) : List ℝ) = ((10000002 : ℚ) : ℝ) :=
+  eq_of_rat (mean_cast _) (by decide +kernel)
+
+theorem variance_offset_1e7_integers :
+    variance (offset_1e7_integers.map (↑) : List ℝ) ((10000002 : ℚ) : ℝ) = ((1 : ℚ) : ℝ) :=
+  eq_of_rat (variance_cast _ _) (by decide +kernel)
+
+theorem standard_deviation_offset_1e7_integers :
+    standardDeviation ((1 : ℚ) : ℝ) = ((1 : ℚ) : ℝ) :=
+  sqrt_eq_of_rat rfl (by decide +kernel) (by decide +kernel)
+
+theorem mean_offset_1_tenths :
+    |mean (offset_1_tenths.map (↑) : List ℝ) - ((5404319552844595 / 4503599627370496 : ℚ) : ℝ)| ≤ ((1 / 9007199254740992 : ℚ) : ℝ) :=
+  within_of_rat (mean_cast _) (by decide +kernel)
+
+theorem variance_offset_1_tenths :
+    |variance (offset_1_tenths.map (↑) : List ℝ) ((5404319552844595 / 4503599627370496 : ℚ) : ℝ) - ((720575940379279 / 72057594037927936 : ℚ) : ℝ)| ≤ ((1 / 1152921504606846976 : ℚ) : ℝ) :=
+  within_of_rat (variance_cast _ _) (by decide +kernel)
+
+theorem standard_deviation_offset_1_tenths :
+    |standardDeviation ((720575940379279 / 72057594037927936 : ℚ) : ℝ) - ((900719925474099 / 9007199254740992 : ℚ) : ℝ)| ≤ ((1 / 144115188075855872 : ℚ) : ℝ) :=
+  sqrt_within_of_rat rfl (by decide +kernel) (by decide +kernel) (by decide +kernel) (by decide +kernel)
+
+theorem mean_offset_1e6_tenths :
+    |mean (offset_1e6_tenths.map (↑) : List ℝ) - ((4294968154993459 / 4294967296 : ℚ) : ℝ)| ≤ ((1 / 17179869184 : ℚ) : ℝ) :=
+  within_of_rat (mean_cast _) (by decide +kernel)
+
+theorem variance_offset_1e6_tenths :
+    |variance (offset_1e6_tenths.map (↑) : List ℝ) ((4294968154993459 / 4294967296 : ℚ) : ℝ) - ((5764607527060767 / 576460752303423488 : ℚ) : ℝ)| ≤ ((1 / 1152921504606846976 : ℚ) : ℝ) :=
+  within_of_rat (variance_cast _ _) (by decide +kernel)
+
+theorem standard_deviation_offset_1e6_tenths :
+    |standardDeviation ((5764607527060767 / 576460752303423488 : ℚ) : ℝ) - ((1717986919 / 17179869184 : ℚ) : ℝ)| ≤ ((1 / 144115188075855872 : ℚ) : ℝ) :=
+  sqrt_within_of_rat rfl (by decide +kernel) (by decide +kernel) (by decide +kernel) (by decide +kernel)
+
 theorem mean_offset_1e7_tenths :
     |mean (offset_1e7_tenths.map (↑) : List ℝ) - ((2684354613687091 / 268435456 : ℚ) : ℝ)| ≤ ((1 / 1073741824 : ℚ) : ℝ) :=
   within_of_rat (mean_cast _) (by decide +kernel)
@@ -1576,6 +1582,54 @@ theorem variance_offset_1e7_tenths :
 
 theorem standard_deviation_offset_1e7_tenths :
     |standardDeviation ((5764607587458745 / 576460752303423488 : ℚ) : ℝ) - ((107374183 / 1073741824 : ℚ) : ℝ)| ≤ ((1 / 144115188075855872 : ℚ) : ℝ) :=
-  sqrt_within_of_rat (by decide +kernel) (by decide +kernel) (by decide +kernel) (by decide +kernel)
+  sqrt_within_of_rat rfl (by decide +kernel) (by decide +kernel) (by decide +kernel) (by decide +kernel)
+
+theorem sum_quarters_with_a_zero :
+    sum (quarters_with_a_zero.map (↑) : List ℝ) = ((49 / 4 : ℚ) : ℝ) :=
+  eq_of_rat (sum_cast _) (by decide +kernel)
+
+theorem average_deviation_quarters_with_a_zero :
+    averageDeviation (quarters_with_a_zero.map (↑) : List ℝ) ((49 / 32 : ℚ) : ℝ) = ((101 / 32 : ℚ) : ℝ) :=
+  eq_of_rat (averageDeviation_cast _ _) (by decide +kernel)
+
+theorem rms_amplitude_quarters_with_a_zero :
+    |rmsAmplitude (quarters_with_a_zero.map (↑) : List ℝ) - ((2522010293763347 / 562949953421312 : ℚ) : ℝ)| ≤ ((1 / 2251799813685248 : ℚ) : ℝ) :=
+  sqrt_within_of_rat (meanSquare_cast _) (by decide +kernel) (by decide +kernel) (by decide +kernel) (by decide +kernel)
+
+theorem highest_value_quarters_with_a_zero :
+    highestValue (quarters_with_a_zero.map (↑) : List ℝ) = ((19 / 2 : ℚ) : ℝ) :=
+  highestValue_eq_of_rat (by decide +kernel) (by decide +kernel)
+
+theorem lowest_value_quarters_with_a_zero :
+    lowestValue (quarters_with_a_zero.map (↑) : List ℝ) ((0 : ℚ) : ℝ) = ((1 : ℚ) : ℝ) :=
+  lowestValue_eq_of_rat (by decide +kernel) (by decide +kernel) (by decide +kernel)
+
+theorem nonzero_count_quarters_with_a_zero :
+    nonzeroCount (quarters_with_a_zero.map (↑) : List ℝ) = ((7 : ℚ) : ℝ) :=
+  eq_of_rat (nonzeroCount_cast _) (by decide +kernel)
+
+theorem sum_offset_1_tenths :
+    |sum (offset_1_tenths.map (↑) : List ℝ) - ((5282933469138125 / 4398046511104 : ℚ) : ℝ)| ≤ ((1 / 8796093022208 : ℚ) : ℝ) :=
+  within_of_rat (sum_cast _) (by decide +kernel)
+
+theorem average_deviation_offset_1_tenths :
+    |averageDeviation (offset_1_tenths.map (↑) : List ℝ) ((5404319552844595 / 4503599627370496 : ℚ) : ℝ) - ((3599280421474921 / 36028797018963968 : ℚ) : ℝ)| ≤ ((1 / 144115188075855872 : ℚ) : ℝ) :=
+  within_of_rat (averageDeviation_cast _ _) (by decide +kernel)
+
+theorem rms_amplitude_offset_1_tenths :
+    |rmsAmplitude (offset_1_tenths.map (↑) : List ℝ) - ((5423033404269271 / 4503599627370496 : ℚ) : ℝ)| ≤ ((1 / 9007199254740992 : ℚ) : ℝ) :=
+  sqrt_within_of_rat (meanSquare_cast _) (by decide +kernel) (by decide +kernel) (by decide +kernel) (by decide +kernel)
+
+theorem highest_value_offset_1_tenths :
+    highestValue (offset_1_tenths.map (↑) : List ℝ) = ((5854679515581645 / 4503599627370496 : ℚ) : ℝ) :=
+  highestValue_eq_of_rat (by decide +kernel) (by decide +kernel)
+
+theorem lowest_value_offset_1_tenths :
+    lowestValue (offset_1_tenths.map (↑) : List ℝ) ((2476979795053773 / 2251799813685248 : ℚ) : ℝ) = ((5404319552844595 / 4503599627370496 : ℚ) : ℝ) :=
+  lowestValue_eq_of_rat (by decide +kernel) (by decide +kernel) (by decide +kernel)
+
+theorem nonzero_count_offset_1_tenths :
+    nonzeroCount (offset_1_tenths.map (↑) : List ℝ) = ((1001 : ℚ) : ℝ) :=
+  eq_of_rat (nonzeroCount_cast _) (by decide +kernel)
 
 end XtractSpec.Records

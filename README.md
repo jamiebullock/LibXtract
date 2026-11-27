@@ -24,7 +24,7 @@ The library has more than 100 features:
 
 The [API reference](https://www.jamiebullock.com/LibXtract/) lists every function with its arguments.
 
-The mean, variance and standard deviation are tested against expected values proved from their definitions in [Lean](https://lean-lang.org) (the `spec` directory), and CI tests them on Linux, macOS and Windows against the certified values of the [NIST Statistical Reference Datasets](https://www.itl.nist.gov/div898/strd/). [CONTRIBUTING.md](CONTRIBUTING.md#reference-values) describes the reference values and how a feature's validation level follows from them.
+A feature at validation level 3 is tested against expected values proved from its definition in [Lean](https://lean-lang.org) (the `spec` directory). CI tests the mean, variance and standard deviation on Linux, macOS and Windows against the certified values of the [NIST Statistical Reference Datasets](https://www.itl.nist.gov/div898/strd/). [CONTRIBUTING.md](CONTRIBUTING.md#reference-values) describes the reference values and how a feature's validation level follows from them.
 
 ## Using the library
 

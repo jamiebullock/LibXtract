@@ -57,7 +57,7 @@ xtract_average_deviation()
 
 Defined by the library: this definition is the reference.
 
-Validation level 0, not checked.
+Validation level 3, certified.
 
 \section definition_skewness Skewness
 
@@ -331,7 +331,7 @@ xtract_rms_amplitude()
 
 Defined by the library: this definition is the reference.
 
-Validation level 0, not checked.
+Validation level 3, certified.
 
 \section definition_spectral_inharmonicity Inharmonicity
 
@@ -386,7 +386,7 @@ xtract_lowest_value()
 
 Defined by the library: this definition is the reference.
 
-Validation level 0, not checked.
+Validation level 3, certified.
 
 \section definition_highest_value Highest Value
 
@@ -396,7 +396,7 @@ xtract_highest_value()
 
 Defined by the library: this definition is the reference.
 
-Validation level 0, not checked.
+Validation level 3, certified.
 
 \section definition_sum Sum of Values
 
@@ -406,7 +406,7 @@ xtract_sum()
 
 Defined by the library: this definition is the reference.
 
-Validation level 0, not checked.
+Validation level 3, certified.
 
 \section definition_nonzero_count Non-zero count
 
@@ -416,7 +416,7 @@ xtract_nonzero_count()
 
 Defined by the library: this definition is the reference.
 
-Validation level 0, not checked.
+Validation level 3, certified.
 
 \section definition_hps Harmonic Product Spectrum
 
