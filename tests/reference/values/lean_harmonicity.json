@@ -36,6 +36,38 @@
         "reason": "300 roundings, each within 2^-53 relatively: the product of a harmonic number and the fundamental in every term, whose rounding is a part of that product, and those products weighted as the terms are sum to 94.1 times the sum of the terms; the difference, the square of the amplitude and their product, in every term, and the P - 1 additions of the terms of the P partials, in any order; the square of every amplitude and the P - 1 additions of the squares, in any order; the product of the fundamental and that sum; the division; and the expected value"
       },
       "call": "theorem XtractSpec.Records.spectral_inharmonicity_stretched_partials_of_110_hz"
+    },
+    {
+      "feature": "noisiness",
+      "data": "peaks_two_to_a_harmonic",
+      "arguments": {
+        "fundamental": 100.0,
+        "threshold": 0.15
+      },
+      "expected": [
+        0.2972972972972973
+      ],
+      "tolerance": {
+        "relative": 2.23e-16,
+        "reason": "2 roundings, each within 2^-53 relatively: the division; every coefficient is a multiple of 1/4, so each addition is exact, and the library places every peak as the definition does; and the expected value"
+      },
+      "call": "theorem XtractSpec.Records.noisiness_peaks_two_to_a_harmonic"
+    },
+    {
+      "feature": "noisiness",
+      "data": "stretched_partials_of_110_hz",
+      "arguments": {
+        "fundamental": 110.0,
+        "threshold": 0.1
+      },
+      "expected": [
+        0.47524790677933404
+      ],
+      "tolerance": {
+        "relative": 2.23e-14,
+        "reason": "200 roundings, each within 2^-53 relatively: the library places every peak as the definition does; at most P - 1 additions of the coefficients that are not kept, and the P - 1 additions of the coefficients of the P peaks, each of one sign, in any order; the division; and the expected value"
+      },
+      "call": "theorem XtractSpec.Records.noisiness_stretched_partials_of_110_hz"
     }
   ]
 }

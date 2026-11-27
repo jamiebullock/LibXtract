@@ -439,7 +439,7 @@
       "description": "Extract the noisiness of a peak spectrum",
       "definition": "\\frac{\\sum_{k \\notin H} P_k}{\\sum_k P_k} \\text{ over the peaks with } f_k \\ne 0, \\quad H = \\text{for each } h \\ge 1 \\text{, the largest peak } k \\text{ with } \\mathrm{round}(f_k / f_0) = h \\text{ and } |f_k / f_0 - h| \\le t",
       "sources": [{"role": "origin", "authors": ["Peeters"], "year": 2004, "title": "A large set of audio features for sound description (similarity and classification) in the CUIDADO project", "venue": "Technical report, IRCAM", "locator": "section 7.1.2"}],
-      "validation_level": 0,
+      "validation_level": 3,
       "input": {"format": "spectral_peaks", "unit": "any", "accepts": ["power_peaks"], "length": "N >= 2 && N % 2 == 0"},
       "argument_type": "float",
       "arguments": [
