@@ -7,12 +7,35 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "utest.h"
 
 #include "xtract/libxtract.h"
 
 #include "xttest_reference.h"
+
+static int series_length(const xttest_reference_series *series)
+{
+    return series == NULL ? 0 : series->prefix_count + series->cycle_count * series->repeats;
+}
+
+/* The values of the series in a block of exactly their number, so that a
+ * feature that reads past the end of its data reads past the end of the
+ * block. NULL when there is no memory for it */
+static double *series_values(const xttest_reference_series *series)
+{
+    double *values = (double *)malloc((size_t)series_length(series) * sizeof(double));
+    int r;
+
+    if (values == NULL)
+        return NULL;
+    if (series->prefix_count > 0)
+        memcpy(values, series->prefix, (size_t)series->prefix_count * sizeof(double));
+    for (r = 0; r < series->repeats; r++)
+        memcpy(values + series->prefix_count + r * series->cycle_count, series->cycle, (size_t)series->cycle_count * sizeof(double));
+    return values;
+}
 
 void xttest_reference_check(const xttest_reference_source *source, int *utest_result)
 {
@@ -22,8 +45,8 @@ void xttest_reference_check(const xttest_reference_source *source, int *utest_re
 
     for (r = 0; r < source->record_count; r++)
     {
-        if (source->records[r].n > largest_n)
-            largest_n = source->records[r].n;
+        if (series_length(source->records[r].series) > largest_n)
+            largest_n = series_length(source->records[r].series);
         if (source->records[r].expected_count > longest)
             longest = source->records[r].expected_count;
     }
@@ -36,27 +59,32 @@ void xttest_reference_check(const xttest_reference_source *source, int *utest_re
     {
         const xttest_reference_record *record = &source->records[r];
         const char *name = xtract_descriptor(record->feature)->name;
+        const int n = series_length(record->series);
+        double *data = record->series != NULL ? series_values(record->series) : NULL;
         double largest = 0.0;
         char call[192], element[320];
         int length, status;
 
-        snprintf(call, sizeof call, "%s, record %d: %s of %s", source->id, r, name, record->series != NULL ? record->series : "its arguments");
-        length = xtract_result_length(record->feature, record->n, record->arguments);
+        snprintf(call, sizeof call, "%s, record %d: %s of %s", source->id, r, name, record->series != NULL ? record->series->name : "its arguments");
+        EXPECT_TRUE_MSG(record->series == NULL || data != NULL, call);
+        length = xtract_result_length(record->feature, n, record->arguments);
         EXPECT_EQ_MSG(length, record->expected_count, call);
-        if (length != record->expected_count)
-            continue;
-        status = xtract[record->feature](ctx, record->data, record->n, record->arguments, result);
-        EXPECT_EQ_MSG(status, XTRACT_SUCCESS, call);
-        if (status != XTRACT_SUCCESS)
-            continue;
-
-        for (i = 0; i < record->expected_count; i++)
-            largest = fmax(largest, fabs(record->expected[i]));
-        for (i = 0; i < record->expected_count; i++)
+        if ((record->series == NULL || data != NULL) && length == record->expected_count)
         {
-            snprintf(element, sizeof element, "%s, element %d: %.17g against %.17g", call, i, result[i], record->expected[i]);
-            EXPECT_TRUE_MSG(fabs(result[i] - record->expected[i]) <= record->tolerance * largest, element);
+            status = xtract[record->feature](ctx, data, n, record->arguments, result);
+            EXPECT_EQ_MSG(status, XTRACT_SUCCESS, call);
+            if (status == XTRACT_SUCCESS)
+            {
+                for (i = 0; i < record->expected_count; i++)
+                    largest = fmax(largest, fabs(record->expected[i]));
+                for (i = 0; i < record->expected_count; i++)
+                {
+                    snprintf(element, sizeof element, "%s, element %d: %.17g against %.17g", call, i, result[i], record->expected[i]);
+                    EXPECT_TRUE_MSG(fabs(result[i] - record->expected[i]) <= record->tolerance * largest, element);
+                }
+            }
         }
+        free(data);
     }
 
     free(result);

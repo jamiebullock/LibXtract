@@ -38,7 +38,7 @@ if(XTRACT_NIST_TESTS)
         COMMAND ${CMAKE_COMMAND} -DEXTRA=${nist}/reference -DOUTPUT=${reference_values}
             -P ${PROJECT_SOURCE_DIR}/cmake/reference.cmake
         COMMAND_ERROR_IS_FATAL ANY)
-    file(GLOB committed reference/values/*.json reference/series/*.txt)
+    file(GLOB committed reference/values/*.json reference/series/*.json)
     set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
         ${committed}
         reference/generate/nist.py

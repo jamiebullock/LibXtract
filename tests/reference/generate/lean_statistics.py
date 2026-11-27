@@ -10,7 +10,8 @@ usage: lean_statistics.py
 
 The series go to ../series, the values to ../values/lean_statistics.json and
 the theorems to spec/XtractSpec/Records/Statistics.lean. Each series is stored
-in decimal, and the statistics are those of the doubles nearest its values,
+in decimal, as a prefix and a cycle that follows it a number of times, and
+the statistics are those of the doubles nearest its values,
 which is what the library is given: the theorems state each double as a
 fraction. A theorem says that an expected value is the value of the feature's
 definition, or within half a unit in its last place of it. This script only
@@ -30,19 +31,20 @@ import pathlib
 from decimal import ROUND_CEILING, Decimal
 from fractions import Fraction
 
+# A series is a prefix, then a cycle taken a number of times
 OFFSET_SERIES = {
-    "offset_1e7_integers": ["10000001", "10000003", "10000002"],
-    "offset_1_tenths": ["1.2"] + ["1.1", "1.3"] * 500,
-    "offset_1e6_tenths": ["1000000.2"] + ["1000000.1", "1000000.3"] * 500,
-    "offset_1e7_tenths": ["10000000.2"] + ["10000000.1", "10000000.3"] * 500,
+    "offset_1e7_integers": (["10000001", "10000003", "10000002"], [], 0),
+    "offset_1_tenths": (["1.2"], ["1.1", "1.3"], 500),
+    "offset_1e6_tenths": (["1000000.2"], ["1000000.1", "1000000.3"], 500),
+    "offset_1e7_tenths": (["10000000.2"], ["10000000.1", "10000000.3"], 500),
 }
 QUARTERS = "quarters_with_a_zero"
 SERIES = dict(OFFSET_SERIES)
-SERIES[QUARTERS] = ["3", "-1.5", "4.25", "0", "2", "9.5", "-6", "1"]
+SERIES[QUARTERS] = (["3", "-1.5", "4.25", "0", "2", "9.5", "-6", "1"], [], 0)
 POWERS = "powers_of_two_cycle"
-SERIES[POWERS] = ["0.25", "0.5", "1", "2", "4", "8", "16", "32"] * 125
+SERIES[POWERS] = ([], ["0.25", "0.5", "1", "2", "4", "8", "16", "32"], 125)
 SIGNS = "signs_cycle"
-SERIES[SIGNS] = ["1", "-0.5", "0", "0.25", "-2", "-4", "0.5", "8"] * 125
+SERIES[SIGNS] = ([], ["1", "-0.5", "0", "0.25", "-2", "-4", "0.5", "8"], 125)
 LONG = "offset_1_tenths"
 
 # The most a correctly rounded result differs from the exact one, relatively
@@ -63,8 +65,9 @@ import XtractSpec.Statistics
 
 Written by `tests/reference/generate/lean_statistics.py` with the records of
 `tests/reference/values/lean_statistics.json`. Each list is the series of that
-name in `tests/reference/series`, every value the double nearest the stored
-decimal. Each theorem is about the expected value of one record.
+name in `tests/reference/series`, in the form it has there: its prefix, then
+its cycle taken a number of times. Every value is the double nearest the
+stored decimal. Each theorem is about the expected value of one record.
 -/
 
 namespace XtractSpec.Records
@@ -115,10 +118,31 @@ def rounded_up(value):
     return str(decimal.quantize(Decimal(1).scaleb(decimal.adjusted() - 2), rounding=ROUND_CEILING))
 
 
-def series_definition(name, doubles):
-    # A type on every element: Lean's elaborator does not finish a long list without one
-    rows = [", ".join(f"({lean(x)} : ℚ)" for x in doubles[i : i + 2]) for i in range(0, len(doubles), 2)]
-    return f"def {name} : List ℚ := [\n  " + ",\n  ".join(rows) + "]\n"
+def lean_list(values):
+    """The decimals as a Lean list of the doubles nearest them, two to a line."""
+    doubles = [f"({lean(float(value))} : ℚ)" for value in values]
+    rows = [", ".join(doubles[i : i + 2]) for i in range(0, len(doubles), 2)]
+    return "[" + ",\n    ".join(rows) + "]"
+
+
+def series_definition(name, prefix, cycle, repeats):
+    parts = []
+    if prefix:
+        parts.append(lean_list(prefix))
+    if cycle:
+        parts.append(f"(List.replicate {repeats} {lean_list(cycle)}).flatten")
+    return f"def {name} : List ℚ :=\n  " + " ++\n  ".join(parts) + "\n"
+
+
+def series_file(prefix, cycle, repeats):
+    """The series as its file in tests/reference/series has it."""
+    document = {}
+    if prefix:
+        document["prefix"] = [float(value) for value in prefix]
+    if cycle:
+        document["cycle"] = [float(value) for value in cycle]
+        document["repeats"] = repeats
+    return json.dumps(document, indent=2) + "\n"
 
 
 class Certificates:
@@ -210,10 +234,10 @@ def main():
     out = Certificates()
     doubles = {}
     means = {}
-    for series, values in SERIES.items():
-        write(reference / "series" / f"{series}.txt", "\n".join(values) + "\n")
-        doubles[series] = [Fraction(float(value)) for value in values]
-        out.blocks.append(series_definition(series, doubles[series]))
+    for series, (prefix, cycle, repeats) in SERIES.items():
+        write(reference / "series" / f"{series}.json", series_file(prefix, cycle, repeats))
+        doubles[series] = [Fraction(float(value)) for value in prefix + cycle * repeats]
+        out.blocks.append(series_definition(series, prefix, cycle, repeats))
 
     def data(series):
         return f"({series}.map (↑) : List ℝ)"

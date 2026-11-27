@@ -7,16 +7,27 @@
 #ifndef XTTEST_REFERENCE_H
 #define XTTEST_REFERENCE_H
 
+/* A series of data: the values of prefix, then the values of cycle taken
+ * repeats times. A series that does not repeat has every value in prefix,
+ * and a part that is absent has a count of 0 */
+typedef struct xttest_reference_series_
+{
+    /* The name of its file in tests/reference/series */
+    const char *name;
+    const double *prefix;
+    int prefix_count;
+    const double *cycle;
+    int cycle_count;
+    int repeats;
+} xttest_reference_series;
+
 /* One call of a feature and the result a source of reference values gives
  * for it */
 typedef struct xttest_reference_record_
 {
     int feature;
-    /* The name of the series in tests/reference/series that data holds, or
-     * NULL for a feature that takes no data */
-    const char *series;
-    const double *data;
-    int n;
+    /* The data, or NULL for a feature that takes none */
+    const xttest_reference_series *series;
     /* What the feature is given as argv: the value of each argument in the
      * order of the feature's descriptor, as doubles or as ints, or NULL for
      * a feature that has none */

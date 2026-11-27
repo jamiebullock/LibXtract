@@ -13,7 +13,7 @@ Michelso.dat, NumAcc1.dat to NumAcc4.dat and PiDigits.dat as NIST publishes
 them at https://www.itl.nist.gov/div898/strd/univ/data/<file>. Each is
 checked against the digest of the copy retrieved on 2026-11-23.
 
-Each file's data goes to <output>/series/nist_<name>.txt as published, and
+Each file's data goes to <output>/series/nist_<name>.json, and
 its certified mean and standard deviation to <output>/values/nist.json, with
 a tolerance for each that covers the distance between the certified value,
 which is a statistic of the decimal data, and the same statistic of the
@@ -91,6 +91,9 @@ def main():
     reference = pathlib.Path(sys.argv[2])
     for directory in ("series", "values"):
         (reference / directory).mkdir(parents=True, exist_ok=True)
+        # What an earlier run wrote under other names would be read as well
+        for earlier in (reference / directory).iterdir():
+            earlier.unlink()
     records = []
     for name, digest in SHA256.items():
         raw = (published_files / f"{name}.dat").read_bytes()
@@ -104,7 +107,7 @@ def main():
             if re.fullmatch(NUMBER, value) is None:
                 sys.exit(f"{name}.dat: '{value}' is not a decimal number")
         series = f"nist_{name.lower()}"
-        write(reference / "series" / f"{series}.txt", "\n".join(values) + "\n")
+        write(reference / "series" / f"{series}.json", json.dumps({"prefix": [float(value) for value in values]}) + "\n")
 
         mean = certified(text, "ybar")
         deviation = certified(text, "s")
