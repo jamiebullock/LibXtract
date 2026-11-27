@@ -8,6 +8,7 @@ import XtractSpec.Certificate
 import XtractSpec.Cooccurrence
 import XtractSpec.Grid
 import XtractSpec.Harmonicity
+import XtractSpec.Lags
 import XtractSpec.Levels
 import XtractSpec.Median
 import XtractSpec.Moving
@@ -21,6 +22,7 @@ import XtractSpec.Temporal
 import XtractSpec.Records.Cooccurrence
 import XtractSpec.Records.Grid
 import XtractSpec.Records.Harmonicity
+import XtractSpec.Records.Lags
 import XtractSpec.Records.Levels
 import XtractSpec.Records.Moving
 import XtractSpec.Records.Multivariate
