@@ -32,6 +32,18 @@
       "call": "theorem XtractSpec.Records.angular_second_moment_matrix_of_3_rows_with_a_zero"
     },
     {
+      "feature": "inverse_difference_moment",
+      "data": "matrix_of_3_rows_with_a_zero",
+      "expected": [
+        0.703125
+      ],
+      "tolerance": {
+        "relative": 0.0,
+        "reason": "no rounding: the values sum to 16, and every share, every quotient and every sum of the quotients is a double, so each division and each addition is exact; the expected value is exact"
+      },
+      "call": "theorem XtractSpec.Records.inverse_difference_moment_matrix_of_3_rows_with_a_zero"
+    },
+    {
       "feature": "cooccurrence_contrast",
       "data": "matrix_of_32_rows_cycle",
       "expected": [
@@ -54,6 +66,18 @@
         "reason": "3073 roundings, each within 2^-53 relatively: the N - 1 additions of the values, of one sign, in any order, which every share has in common, and the division of a value by their sum, all of which the square of a share counts twice; the square, in every term; the N - 1 additions of the terms, in any order; and the expected value"
       },
       "call": "theorem XtractSpec.Records.angular_second_moment_matrix_of_32_rows_cycle"
+    },
+    {
+      "feature": "inverse_difference_moment",
+      "data": "matrix_of_32_rows_cycle",
+      "expected": [
+        0.09009355236112154
+      ],
+      "tolerance": {
+        "relative": 2.28e-13,
+        "reason": "2049 roundings, each within 2^-53 relatively: the N - 1 additions of the values, of one sign, in any order, which every share has in common; the division of a value by their sum and the division by 1 and the square of the difference of its row and its column, which is a whole number, in every term; the N - 1 additions of the terms, of one sign, in any order; and the expected value"
+      },
+      "call": "theorem XtractSpec.Records.inverse_difference_moment_matrix_of_32_rows_cycle"
     }
   ]
 }

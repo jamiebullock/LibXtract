@@ -134,17 +134,21 @@ static const xttest_reference_series series_tenths_with_ties_cycle = {.name = "t
 
 static const double expected_lean_cooccurrence_0[] = {0.96875};
 static const double expected_lean_cooccurrence_1[] = {0.158203125};
-static const double expected_lean_cooccurrence_2[] = {170.44444444444446};
-static const double expected_lean_cooccurrence_3[] = {0.0012297453703703704};
+static const double expected_lean_cooccurrence_2[] = {0.703125};
+static const double expected_lean_cooccurrence_3[] = {170.44444444444446};
+static const double expected_lean_cooccurrence_4[] = {0.0012297453703703704};
+static const double expected_lean_cooccurrence_5[] = {0.090093552361121543};
 
 static const xttest_reference_record records_lean_cooccurrence[] = {
     {.feature = XTRACT_COOCCURRENCE_CONTRAST, .series = &series_matrix_of_3_rows_with_a_zero, .arguments = NULL, .expected = expected_lean_cooccurrence_0, .expected_count = 1, .tolerance = 0.0},
     {.feature = XTRACT_ANGULAR_SECOND_MOMENT, .series = &series_matrix_of_3_rows_with_a_zero, .arguments = NULL, .expected = expected_lean_cooccurrence_1, .expected_count = 1, .tolerance = 0.0},
-    {.feature = XTRACT_COOCCURRENCE_CONTRAST, .series = &series_matrix_of_32_rows_cycle, .arguments = NULL, .expected = expected_lean_cooccurrence_2, .expected_count = 1, .tolerance = 2.2799999999999999e-13},
-    {.feature = XTRACT_ANGULAR_SECOND_MOMENT, .series = &series_matrix_of_32_rows_cycle, .arguments = NULL, .expected = expected_lean_cooccurrence_3, .expected_count = 1, .tolerance = 3.4200000000000001e-13},
+    {.feature = XTRACT_INVERSE_DIFFERENCE_MOMENT, .series = &series_matrix_of_3_rows_with_a_zero, .arguments = NULL, .expected = expected_lean_cooccurrence_2, .expected_count = 1, .tolerance = 0.0},
+    {.feature = XTRACT_COOCCURRENCE_CONTRAST, .series = &series_matrix_of_32_rows_cycle, .arguments = NULL, .expected = expected_lean_cooccurrence_3, .expected_count = 1, .tolerance = 2.2799999999999999e-13},
+    {.feature = XTRACT_ANGULAR_SECOND_MOMENT, .series = &series_matrix_of_32_rows_cycle, .arguments = NULL, .expected = expected_lean_cooccurrence_4, .expected_count = 1, .tolerance = 3.4200000000000001e-13},
+    {.feature = XTRACT_INVERSE_DIFFERENCE_MOMENT, .series = &series_matrix_of_32_rows_cycle, .arguments = NULL, .expected = expected_lean_cooccurrence_5, .expected_count = 1, .tolerance = 2.2799999999999999e-13},
 };
 
-static const xttest_reference_source source_lean_cooccurrence = {.id = "lean_cooccurrence", .name = "Theorems about the definitions of the statistics of a co-occurrence matrix, checked by Lean", .level = 3, .record_count = 4, .records = records_lean_cooccurrence};
+static const xttest_reference_source source_lean_cooccurrence = {.id = "lean_cooccurrence", .name = "Theorems about the definitions of the statistics of a co-occurrence matrix, checked by Lean", .level = 3, .record_count = 6, .records = records_lean_cooccurrence};
 
 static const double expected_lean_spectral_moments_0[] = {368.75};
 static const double expected_lean_spectral_moments_1[] = {368.75};
