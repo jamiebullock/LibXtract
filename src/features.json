@@ -698,7 +698,7 @@
       "title": "Decay Time",
       "description": "Extract the decay time of an envelope",
       "definition": "T_d = \\frac{m - p}{f_s}, \\quad p = \\min\\{n : x_n = x_{\\max}\\}, \\quad m = \\min\\left(\\{n \\ge p : x_n \\le c\\,x_{\\max}\\} \\cup \\{N-1\\}\\right), \\quad f_s, c \\text{ the sample rate and fraction given in argv}; \\text{ no result when } x_{\\max} \\le 0",
-      "validation_level": 0,
+      "validation_level": 3,
       "input": {"format": "arbitrary_series", "unit": "any"},
       "argument_type": "float",
       "arguments": [
