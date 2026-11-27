@@ -28,6 +28,26 @@
       "call": "theorem XtractSpec.Records.moving_sum_quarters_of_both_signs"
     },
     {
+      "feature": "moving_average",
+      "data": "quarters_of_both_signs",
+      "arguments": {
+        "window": 4
+      },
+      "expected": [
+        0.5,
+        1.375,
+        1.125,
+        1.375,
+        1.5,
+        1.875
+      ],
+      "tolerance": {
+        "relative": 0.0,
+        "reason": "no rounding: every value is a multiple of 1/4, so each addition and the division by 4 are exact; the expected value is exact"
+      },
+      "call": "theorem XtractSpec.Records.moving_average_quarters_of_both_signs"
+    },
+    {
       "feature": "moving_sum",
       "data": "tenths_cycle_of_1000",
       "arguments": {
@@ -48,6 +68,28 @@
         "reason": "993 roundings, each within 2^-53 relatively: the w - 1 additions of the w values of a window, of one sign, in any order; and the expected value"
       },
       "call": "theorem XtractSpec.Records.moving_sum_tenths_cycle_of_1000"
+    },
+    {
+      "feature": "moving_average",
+      "data": "tenths_cycle_of_1000",
+      "arguments": {
+        "window": 993
+      },
+      "expected": [
+        0.40624370594159115,
+        0.4067472306143001,
+        0.4058912386706949,
+        0.40614300100704936,
+        0.4065458207452165,
+        0.4060422960725075,
+        0.4064451158106747,
+        0.40594159113796574
+      ],
+      "tolerance": {
+        "relative": 1.11e-13,
+        "reason": "995 roundings, each within 2^-53 relatively: the w - 1 additions of the w values of a window, of one sign, in any order; the division, or a reciprocal and a multiplication; and the expected value"
+      },
+      "call": "theorem XtractSpec.Records.moving_average_tenths_cycle_of_1000"
     }
   ]
 }

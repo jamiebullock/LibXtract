@@ -41,6 +41,16 @@ theorem moving_sum_quarters_of_both_signs :
     ((15 / 2 : ℚ), (0 : ℚ))] :=
   eachWithin_of_rat (movingSum_cast _ _) (by decide +kernel)
 
+theorem moving_average_quarters_of_both_signs :
+    EachWithin (movingAverage (quarters_of_both_signs.map (↑) : List ℝ) 4)
+    [((1 / 2 : ℚ), (0 : ℚ)),
+    ((11 / 8 : ℚ), (0 : ℚ)),
+    ((9 / 8 : ℚ), (0 : ℚ)),
+    ((11 / 8 : ℚ), (0 : ℚ)),
+    ((3 / 2 : ℚ), (0 : ℚ)),
+    ((15 / 8 : ℚ), (0 : ℚ))] :=
+  eachWithin_of_rat (movingAverage_cast _ _) (by decide +kernel)
+
 theorem moving_sum_tenths_cycle_of_1000 :
     EachWithin (movingSum (tenths_cycle_of_1000.map (↑) : List ℝ) 993)
     [((3548343925158707 / 8796093022208 : ℚ), (1 / 35184372088832 : ℚ)),
@@ -52,5 +62,17 @@ theorem moving_sum_tenths_cycle_of_1000 :
     ((3550103143763149 / 8796093022208 : ℚ), (1 / 35184372088832 : ℚ)),
     ((3545705097252045 / 8796093022208 : ℚ), (1 / 35184372088832 : ℚ))] :=
   eachWithin_of_rat (movingSum_cast _ _) (by decide +kernel)
+
+theorem moving_average_tenths_cycle_of_1000 :
+    EachWithin (movingAverage (tenths_cycle_of_1000.map (↑) : List ℝ) 993)
+    [((7318236010800637 / 18014398509481984 : ℚ), (1 / 36028797018963968 : ℚ)),
+    ((7327306704914173 / 18014398509481984 : ℚ), (1 / 36028797018963968 : ℚ)),
+    ((3655943262460581 / 9007199254740992 : ℚ), (1 / 36028797018963968 : ℚ)),
+    ((3658210935988965 / 9007199254740992 : ℚ), (1 / 36028797018963968 : ℚ)),
+    ((3661839213634379 / 9007199254740992 : ℚ), (1 / 36028797018963968 : ℚ)),
+    ((3657303866577611 / 9007199254740992 : ℚ), (1 / 36028797018963968 : ℚ)),
+    ((7321864288446051 / 18014398509481984 : ℚ), (1 / 36028797018963968 : ℚ)),
+    ((7312793594332515 / 18014398509481984 : ℚ), (1 / 36028797018963968 : ℚ))] :=
+  eachWithin_of_rat (movingAverage_cast _ _) (by decide +kernel)
 
 end XtractSpec.Records

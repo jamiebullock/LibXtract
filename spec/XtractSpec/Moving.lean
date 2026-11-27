@@ -8,11 +8,11 @@ import XtractSpec.Statistics
 /-!
 # Statistics of a moving window
 
-The definition in `src/features.json` of `moving_sum`. The result has one
-value for each window of the width given that lies in the series, in the
-order of the windows. The definition is stated over any field: over ℝ it is
-the specification, and over ℚ it computes, which gives its values at a
-series of doubles exactly.
+The definitions in `src/features.json` of `moving_sum` and `moving_average`.
+The result of each has one value for each window of the width given that
+lies in the series, in the order of the windows. A definition is stated over
+any field: over ℝ it is the specification, and over ℚ it computes, which
+gives its values at a series of doubles exactly.
 
 A definition is the feature's only where the feature gives a result. A width
 above the count of the values has no window, and the result is empty here.
@@ -50,6 +50,13 @@ theorem windows_reverse {α : Type*} (width : ℕ) (xs : List α) :
       omega
     rw [kept, dropped]
 
+theorem length_of_mem_windows {α : Type*} {width : ℕ} {xs window : List α}
+    (h : window ∈ windows width xs) : window.length = width := by
+  obtain ⟨first, hfirst, rfl⟩ := List.mem_map.mp h
+  have bound := List.mem_range.mp hfirst
+  rw [List.length_take, List.length_drop]
+  omega
+
 section Field
 
 variable {α : Type*} [Field α]
@@ -57,6 +64,10 @@ variable {α : Type*} [Field α]
 /-- The sum of each window of the width given. -/
 def movingSum (xs : List α) (width : ℕ) : List α :=
   (windows width xs).map List.sum
+
+/-- The mean of each window of the width given. -/
+def movingAverage (xs : List α) (width : ℕ) : List α :=
+  (windows width xs).map mean
 
 end Field
 
@@ -70,10 +81,18 @@ theorem movingSum_cast (xs : List ℚ) (width : ℕ) :
   intro window _
   simp
 
+theorem movingAverage_cast (xs : List ℚ) (width : ℕ) :
+    movingAverage (xs.map (↑) : List ℝ) width = (movingAverage xs width).map (↑) := by
+  unfold movingAverage
+  rw [windows_map, List.map_map, List.map_map]
+  apply List.map_congr_left
+  intro window _
+  exact mean_cast window
+
 /-!
 ## Invariance
 
-The laws that `invariance` states for `moving_sum` in `src/features.json`.
+The laws that `invariance` states for each feature in `src/features.json`.
 -/
 
 /-- `sign`: negated. -/
@@ -94,5 +113,34 @@ theorem movingSum_reverse (xs : List ℝ) (width : ℕ) :
   apply List.map_congr_left
   intro window _
   exact List.sum_reverse window
+
+/-- `offset`: follows. -/
+theorem movingAverage_offset (xs : List ℝ) (c : ℝ) {width : ℕ} (h : 0 < width) :
+    movingAverage (xs.map (· + c)) width = (movingAverage xs width).map (· + c) := by
+  unfold movingAverage
+  rw [windows_map, List.map_map, List.map_map]
+  apply List.map_congr_left
+  intro window hwindow
+  have full := length_of_mem_windows hwindow
+  exact mean_offset window c (by intro empty; rw [empty] at full; simp at full; omega)
+
+/-- `sign`: negated. -/
+theorem movingAverage_neg (xs : List ℝ) (width : ℕ) :
+    movingAverage (xs.map (-·)) width = (movingAverage xs width).map (-·) := by
+  unfold movingAverage
+  rw [windows_map, List.map_map, List.map_map]
+  apply List.map_congr_left
+  intro window _
+  exact mean_neg window
+
+/-- `reversal`: reversed. -/
+theorem movingAverage_reverse (xs : List ℝ) (width : ℕ) :
+    movingAverage xs.reverse width = (movingAverage xs width).reverse := by
+  unfold movingAverage
+  rw [windows_reverse, List.map_reverse, List.map_map]
+  congr 1
+  apply List.map_congr_left
+  intro window _
+  exact mean_reverse window
 
 end XtractSpec
