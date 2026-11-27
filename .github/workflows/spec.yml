@@ -9,6 +9,7 @@ on:
     paths:
       - 'spec/**'
       - 'tests/reference/generate/lean_*.py'
+      - 'tests/reference/generate/certificates.py'
       - 'tests/reference/values/lean_*.json'
       - 'tests/reference/series/**'
       - '.github/workflows/spec.yml'

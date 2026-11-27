@@ -6,7 +6,9 @@
 import XtractSpec.Axioms
 import XtractSpec.Certificate
 import XtractSpec.Median
+import XtractSpec.SpectralMoments
 import XtractSpec.Statistics
+import XtractSpec.Records.SpectralMoments
 import XtractSpec.Records.Statistics
 
 #assert_standard_axioms

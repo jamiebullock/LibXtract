@@ -14,6 +14,48 @@
 
 #include "xttest_reference.h"
 
+static const double series_uneven_spectrum_with_a_zero_prefix[14] = {
+    4.0, 2.0, 0.0, 1.0, 0.5, 0.25, 0.25, 100.0,
+    250.0, 300.0, 450.0, 800.0, 1600.0, 3200.0};
+
+static const xttest_reference_series series_uneven_spectrum_with_a_zero = {.name = "uneven_spectrum_with_a_zero", .prefix = series_uneven_spectrum_with_a_zero_prefix, .prefix_count = 14, .cycle = NULL, .cycle_count = 0, .repeats = 0};
+
+static const double series_decaying_spectrum_128_bins_prefix[256] = {
+    1.0, 0.5, 0.33329999999999999, 0.25, 0.20000000000000001, 0.1666, 0.14280000000000001, 0.125,
+    0.1111, 0.10000000000000001, 0.090899999999999995, 0.083299999999999999, 0.076899999999999996, 0.071400000000000005, 0.066600000000000006, 0.0625,
+    0.058799999999999998, 0.055500000000000001, 0.052600000000000001, 0.050000000000000003, 0.047600000000000003, 0.045400000000000003, 0.043400000000000001, 0.041599999999999998,
+    0.040000000000000001, 0.038399999999999997, 0.036999999999999998, 0.035700000000000003, 0.0344, 0.033300000000000003, 0.032199999999999999, 0.031199999999999999,
+    0.030300000000000001, 0.029399999999999999, 0.028500000000000001, 0.027699999999999999, 0.027, 0.0263, 0.025600000000000001, 0.025000000000000001,
+    0.024299999999999999, 0.023800000000000002, 0.023199999999999998, 0.022700000000000001, 0.022200000000000001, 0.021700000000000001, 0.0212, 0.020799999999999999,
+    0.020400000000000001, 0.02, 0.019599999999999999, 0.019199999999999998, 0.018800000000000001, 0.018499999999999999, 0.018100000000000002, 0.0178,
+    0.017500000000000002, 0.0172, 0.016899999999999998, 0.0166, 0.016299999999999999, 0.0161, 0.015800000000000002, 0.015599999999999999,
+    0.015299999999999999, 0.015100000000000001, 0.0149, 0.0147, 0.0144, 0.014200000000000001, 0.014, 0.0138,
+    0.013599999999999999, 0.0135, 0.013299999999999999, 0.013100000000000001, 0.0129, 0.012800000000000001, 0.0126, 0.012500000000000001,
+    0.0123, 0.0121, 0.012, 0.011900000000000001, 0.0117, 0.011599999999999999, 0.0114, 0.011299999999999999,
+    0.0112, 0.0111, 0.0109, 0.010800000000000001, 0.010699999999999999, 0.0106, 0.010500000000000001, 0.0104,
+    0.0103, 0.010200000000000001, 0.0101, 0.01, 0.0099000000000000008, 0.0097999999999999997, 0.0097000000000000003, 0.0095999999999999992,
+    0.0094999999999999998, 0.0094000000000000004, 0.0092999999999999992, 0.0091999999999999998, 0.0091000000000000004, 0.0089999999999999993, 0.0089999999999999993, 0.0088999999999999999,
+    0.0088000000000000005, 0.0086999999999999994, 0.0086, 0.0086, 0.0085000000000000006, 0.0083999999999999995, 0.0083999999999999995, 0.0083000000000000001,
+    0.0082000000000000007, 0.0080999999999999996, 0.0080999999999999996, 0.0080000000000000002, 0.0080000000000000002, 0.0079000000000000008, 0.0077999999999999996, 0.0077999999999999996,
+    0.0, 172.265625, 344.53125, 516.796875, 689.0625, 861.328125, 1033.59375, 1205.859375,
+    1378.125, 1550.390625, 1722.65625, 1894.921875, 2067.1875, 2239.453125, 2411.71875, 2583.984375,
+    2756.25, 2928.515625, 3100.78125, 3273.046875, 3445.3125, 3617.578125, 3789.84375, 3962.109375,
+    4134.375, 4306.640625, 4478.90625, 4651.171875, 4823.4375, 4995.703125, 5167.96875, 5340.234375,
+    5512.5, 5684.765625, 5857.03125, 6029.296875, 6201.5625, 6373.828125, 6546.09375, 6718.359375,
+    6890.625, 7062.890625, 7235.15625, 7407.421875, 7579.6875, 7751.953125, 7924.21875, 8096.484375,
+    8268.75, 8441.015625, 8613.28125, 8785.546875, 8957.8125, 9130.078125, 9302.34375, 9474.609375,
+    9646.875, 9819.140625, 9991.40625, 10163.671875, 10335.9375, 10508.203125, 10680.46875, 10852.734375,
+    11025.0, 11197.265625, 11369.53125, 11541.796875, 11714.0625, 11886.328125, 12058.59375, 12230.859375,
+    12403.125, 12575.390625, 12747.65625, 12919.921875, 13092.1875, 13264.453125, 13436.71875, 13608.984375,
+    13781.25, 13953.515625, 14125.78125, 14298.046875, 14470.3125, 14642.578125, 14814.84375, 14987.109375,
+    15159.375, 15331.640625, 15503.90625, 15676.171875, 15848.4375, 16020.703125, 16192.96875, 16365.234375,
+    16537.5, 16709.765625, 16882.03125, 17054.296875, 17226.5625, 17398.828125, 17571.09375, 17743.359375,
+    17915.625, 18087.890625, 18260.15625, 18432.421875, 18604.6875, 18776.953125, 18949.21875, 19121.484375,
+    19293.75, 19466.015625, 19638.28125, 19810.546875, 19982.8125, 20155.078125, 20327.34375, 20499.609375,
+    20671.875, 20844.140625, 21016.40625, 21188.671875, 21360.9375, 21533.203125, 21705.46875, 21877.734375};
+
+static const xttest_reference_series series_decaying_spectrum_128_bins = {.name = "decaying_spectrum_128_bins", .prefix = series_decaying_spectrum_128_bins_prefix, .prefix_count = 256, .cycle = NULL, .cycle_count = 0, .repeats = 0};
+
 static const double series_offset_1e7_integers_prefix[3] = {
     10000001.0, 10000003.0, 10000002.0};
 
@@ -57,6 +99,20 @@ static const double series_signs_cycle_cycle[8] = {
     1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0};
 
 static const xttest_reference_series series_signs_cycle = {.name = "signs_cycle", .prefix = NULL, .prefix_count = 0, .cycle = series_signs_cycle_cycle, .cycle_count = 8, .repeats = 125};
+
+static const double expected_lean_spectral_moments_0[] = {368.75};
+static const double expected_lean_spectral_moments_1[] = {368.75};
+static const double expected_lean_spectral_moments_2[] = {3878.7535046863486};
+static const double expected_lean_spectral_moments_3[] = {3878.7535046863486};
+
+static const xttest_reference_record records_lean_spectral_moments[] = {
+    {.feature = XTRACT_SPECTRAL_CENTROID, .series = &series_uneven_spectrum_with_a_zero, .arguments = NULL, .expected = expected_lean_spectral_moments_0, .expected_count = 1, .tolerance = 0.0},
+    {.feature = XTRACT_SPECTRAL_MEAN, .series = &series_uneven_spectrum_with_a_zero, .arguments = NULL, .expected = expected_lean_spectral_moments_1, .expected_count = 1, .tolerance = 0.0},
+    {.feature = XTRACT_SPECTRAL_CENTROID, .series = &series_decaying_spectrum_128_bins, .arguments = NULL, .expected = expected_lean_spectral_moments_2, .expected_count = 1, .tolerance = 2.8599999999999999e-14},
+    {.feature = XTRACT_SPECTRAL_MEAN, .series = &series_decaying_spectrum_128_bins, .arguments = NULL, .expected = expected_lean_spectral_moments_3, .expected_count = 1, .tolerance = 2.8599999999999999e-14},
+};
+
+static const xttest_reference_source source_lean_spectral_moments = {.id = "lean_spectral_moments", .name = "Theorems about the definitions of the spectral moments, checked by Lean", .level = 3, .record_count = 4, .records = records_lean_spectral_moments};
 
 static const double expected_lean_statistics_0[] = {10000002.0};
 static const double arguments_lean_statistics_1[] = {10000002.0};
@@ -161,9 +217,14 @@ static const xttest_reference_record records_lean_statistics[] = {
 
 static const xttest_reference_source source_lean_statistics = {.id = "lean_statistics", .name = "Theorems about the definitions of the statistics, checked by Lean", .level = 3, .record_count = 38, .records = records_lean_statistics};
 
-const xttest_reference_source *const xttest_reference_sources[] = {&source_lean_statistics};
+const xttest_reference_source *const xttest_reference_sources[] = {&source_lean_spectral_moments, &source_lean_statistics};
 
-const int xttest_reference_source_count = 1;
+const int xttest_reference_source_count = 2;
+
+UTEST(reference, results_agree_with_lean_spectral_moments)
+{
+    xttest_reference_check(&source_lean_spectral_moments, utest_result);
+}
 
 UTEST(reference, results_agree_with_lean_statistics)
 {
