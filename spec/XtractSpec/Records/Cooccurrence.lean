@@ -35,8 +35,16 @@ theorem cooccurrence_contrast_matrix_of_3_rows_with_a_zero :
     cooccurrenceContrast (matrix_of_3_rows_with_a_zero.map (↑) : List ℝ) = ((31 / 32 : ℚ) : ℝ) :=
   eq_of_rat (cooccurrenceContrast_cast _) (by decide +kernel)
 
+theorem angular_second_moment_matrix_of_3_rows_with_a_zero :
+    angularSecondMoment (matrix_of_3_rows_with_a_zero.map (↑) : List ℝ) = ((81 / 512 : ℚ) : ℝ) :=
+  eq_of_rat (angularSecondMoment_cast _) (by decide +kernel)
+
 theorem cooccurrence_contrast_matrix_of_32_rows_cycle :
     |cooccurrenceContrast (matrix_of_32_rows_cycle.map (↑) : List ℝ) - ((1499245188451897 / 8796093022208 : ℚ) : ℝ)| ≤ ((1 / 70368744177664 : ℚ) : ℝ) :=
   within_of_rat (cooccurrenceContrast_cast _) (by decide +kernel)
+
+theorem angular_second_moment_matrix_of_32_rows_cycle :
+    |angularSecondMoment (matrix_of_32_rows_cycle.map (↑) : List ℝ) - ((5671199530762847 / 4611686018427387904 : ℚ) : ℝ)| ≤ ((1 / 9223372036854775808 : ℚ) : ℝ) :=
+  within_of_rat (angularSecondMoment_cast _) (by decide +kernel)
 
 end XtractSpec.Records

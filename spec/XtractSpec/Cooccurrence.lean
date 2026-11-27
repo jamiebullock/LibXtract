@@ -8,16 +8,16 @@ import Mathlib
 /-!
 # Statistics of a co-occurrence matrix
 
-The definition in `src/features.json` of `cooccurrence_contrast`. The data is
-a square matrix stored by rows: with `C` rows, the value at index `n` is in
-row `n / C` and column `n % C`. The definition is stated over any field: over
-ℝ it is the specification, and over ℚ it computes, which gives its value at
-a matrix of doubles exactly.
+The definitions in `src/features.json` of `cooccurrence_contrast` and
+`angular_second_moment`. The data is a square matrix stored by rows: with `C`
+rows, the value at index `n` is in row `n / C` and column `n % C`. A
+definition is stated over any field: over ℝ it is the specification, and
+over ℚ it computes, which gives its value at a matrix of doubles exactly.
 
 A definition is the feature's only where the feature gives a result. Lean's
-division by zero is zero, so `cooccurrenceContrast` of values that sum to
-zero is zero here. The library gives no result when the values sum to zero
-or less, and refuses a count of values that is not a square.
+division by zero is zero, so each statistic of values that sum to zero is
+zero here. The library gives no result when the values sum to zero or less,
+and refuses a count of values that is not a square.
 -/
 
 namespace XtractSpec
@@ -44,6 +44,10 @@ def rowLessColumn (rows n : ℕ) : α :=
 def cooccurrenceContrast (xs : List α) : α :=
   weightedSum (fun n => rowLessColumn (Nat.sqrt xs.length) n ^ 2) 0 (shares xs)
 
+/-- The sum of the squares of the shares. -/
+def angularSecondMoment (xs : List α) : α :=
+  ((shares xs).map fun share => share ^ 2).sum
+
 end Field
 
 /-! ## Evaluation over ℚ -/
@@ -69,5 +73,9 @@ theorem cooccurrenceContrast_cast (xs : List ℚ) :
   congr 1
   funext n
   simp [rowLessColumn]
+
+theorem angularSecondMoment_cast (xs : List ℚ) :
+    angularSecondMoment (xs.map (↑) : List ℝ) = ((angularSecondMoment xs : ℚ) : ℝ) := by
+  simp [angularSecondMoment, shares_cast, List.map_map, Function.comp_def]
 
 end XtractSpec

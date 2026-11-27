@@ -85,6 +85,23 @@ def main():
             "its column, in every term; the N - 1 additions of the terms, of one sign, in any order",
         )
 
+        squares = [share**2 for share in shares]
+        assert not exact or exact_in_doubles(squares)
+        out.rational(
+            "angular_second_moment",
+            series,
+            f"angularSecondMoment {data(series)}",
+            "angularSecondMoment_cast _",
+            sum(squares),
+            0 if exact else 3 * n,
+            "the values sum to 16, and every share, every square and every sum of the squares is a double, so "
+            "each division, each multiplication and each addition is exact"
+            if exact
+            else "the N - 1 additions of the values, of one sign, in any order, which every share has in common, "
+            "and the division of a value by their sum, all of which the square of a share counts twice; the "
+            "square, in every term; the N - 1 additions of the terms, in any order",
+        )
+
     out.store("cooccurrence", "Cooccurrence", ["Cooccurrence"], "the statistics of a co-occurrence matrix")
 
 
