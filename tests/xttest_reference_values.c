@@ -215,6 +215,16 @@ static const double series_signs_cycle_cycle[8] = {
 
 static const xttest_reference_series series_signs_cycle = {.name = "signs_cycle", .prefix = NULL, .prefix_count = 0, .cycle = series_signs_cycle_cycle, .cycle_count = 8, .repeats = 125};
 
+static const double series_two_frames_of_quarters_prefix[8] = {
+    2.0, -1.5, 0.25, 3.0, 0.5, -1.5, 1.0, -2.25};
+
+static const xttest_reference_series series_two_frames_of_quarters = {.name = "two_frames_of_quarters", .prefix = series_two_frames_of_quarters_prefix, .prefix_count = 8, .cycle = NULL, .cycle_count = 0, .repeats = 0};
+
+static const double series_two_frames_of_tenths_cycle_cycle[8] = {
+    0.69999999999999996, 0.20000000000000001, 0.90000000000000002, 0.050000000000000003, 0.40000000000000002, 0.59999999999999998, 0.10000000000000001, 0.29999999999999999};
+
+static const xttest_reference_series series_two_frames_of_tenths_cycle = {.name = "two_frames_of_tenths_cycle", .prefix = NULL, .prefix_count = 0, .cycle = series_two_frames_of_tenths_cycle_cycle, .cycle_count = 8, .repeats = 5};
+
 static const double series_rise_and_fall_with_ties_prefix[9] = {
     1.0, 0.25, 2.0, 4.0, 4.0, 2.0, 0.25, 1.5,
     1.0};
@@ -505,6 +515,16 @@ static const xttest_reference_record records_lean_statistics[] = {
 
 static const xttest_reference_source source_lean_statistics = {.id = "lean_statistics", .name = "Theorems about the definitions of the statistics, checked by Lean", .level = 3, .record_count = 38, .records = records_lean_statistics};
 
+static const double expected_lean_subframes_0[] = {1.5, 0.0, -0.75, 5.25};
+static const double expected_lean_subframes_1[] = {0.29999999999999993, -0.39999999999999997, 0.80000000000000004, -0.25, -0.29999999999999993, 0.39999999999999997, -0.80000000000000004, 0.25, 0.29999999999999993, -0.39999999999999997, 0.80000000000000004, -0.25, -0.29999999999999993, 0.39999999999999997, -0.80000000000000004, 0.25, 0.29999999999999993, -0.39999999999999997, 0.80000000000000004, -0.25};
+
+static const xttest_reference_record records_lean_subframes[] = {
+    {.feature = XTRACT_DIFFERENCE_VECTOR, .series = &series_two_frames_of_quarters, .arguments = NULL, .expected = expected_lean_subframes_0, .expected_count = 4, .tolerance = 0.0},
+    {.feature = XTRACT_DIFFERENCE_VECTOR, .series = &series_two_frames_of_tenths_cycle, .arguments = NULL, .expected = expected_lean_subframes_1, .expected_count = 20, .tolerance = 2.2300000000000002e-16},
+};
+
+static const xttest_reference_source source_lean_subframes = {.id = "lean_subframes", .name = "Theorems about the definitions of the features of two frames, checked by Lean", .level = 3, .record_count = 2, .records = records_lean_subframes};
+
 static const double expected_lean_temporal_0[] = {0.486328125};
 static const double expected_lean_temporal_1[] = {0.375};
 static const double expected_lean_temporal_2[] = {0.125};
@@ -545,9 +565,9 @@ static const xttest_reference_record records_lean_temporal[] = {
 
 static const xttest_reference_source source_lean_temporal = {.id = "lean_temporal", .name = "Theorems about the definitions of the features of the shape of a series over time, checked by Lean", .level = 3, .record_count = 14, .records = records_lean_temporal};
 
-const xttest_reference_source *const xttest_reference_sources[] = {&source_lean_cooccurrence, &source_lean_harmonicity, &source_lean_moving, &source_lean_smoothing, &source_lean_spectral_moments, &source_lean_spectral_shape, &source_lean_statistics, &source_lean_temporal};
+const xttest_reference_source *const xttest_reference_sources[] = {&source_lean_cooccurrence, &source_lean_harmonicity, &source_lean_moving, &source_lean_smoothing, &source_lean_spectral_moments, &source_lean_spectral_shape, &source_lean_statistics, &source_lean_subframes, &source_lean_temporal};
 
-const int xttest_reference_source_count = 8;
+const int xttest_reference_source_count = 9;
 
 UTEST(reference, results_agree_with_lean_cooccurrence)
 {
@@ -582,6 +602,11 @@ UTEST(reference, results_agree_with_lean_spectral_shape)
 UTEST(reference, results_agree_with_lean_statistics)
 {
     xttest_reference_check(&source_lean_statistics, utest_result);
+}
+
+UTEST(reference, results_agree_with_lean_subframes)
+{
+    xttest_reference_check(&source_lean_subframes, utest_result);
 }
 
 UTEST(reference, results_agree_with_lean_temporal)

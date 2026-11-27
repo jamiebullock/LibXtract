@@ -1,0 +1,57 @@
+{
+  "source": {
+    "name": "Theorems about the definitions of the features of two frames, checked by Lean",
+    "version": "Lean 4.36.0, Mathlib v4.36.0",
+    "licence": "Zlib, as the library",
+    "how": "each expected value is proved to be the value of the feature's definition at the doubles nearest the stored values, or within half a unit in its last place of it, by the theorem its record names in spec/XtractSpec/Records/Subframes.lean; written by tests/reference/generate/lean_subframes.py and checked by Lean's kernel",
+    "level": 3
+  },
+  "records": [
+    {
+      "feature": "difference_vector",
+      "data": "two_frames_of_quarters",
+      "expected": [
+        1.5,
+        0.0,
+        -0.75,
+        5.25
+      ],
+      "tolerance": {
+        "relative": 0.0,
+        "reason": "no rounding: every value is a multiple of 1/4, so each difference is exact; the expected value is exact"
+      },
+      "call": "theorem XtractSpec.Records.difference_vector_two_frames_of_quarters"
+    },
+    {
+      "feature": "difference_vector",
+      "data": "two_frames_of_tenths_cycle",
+      "expected": [
+        0.29999999999999993,
+        -0.39999999999999997,
+        0.8,
+        -0.25,
+        -0.29999999999999993,
+        0.39999999999999997,
+        -0.8,
+        0.25,
+        0.29999999999999993,
+        -0.39999999999999997,
+        0.8,
+        -0.25,
+        -0.29999999999999993,
+        0.39999999999999997,
+        -0.8,
+        0.25,
+        0.29999999999999993,
+        -0.39999999999999997,
+        0.8,
+        -0.25
+      ],
+      "tolerance": {
+        "relative": 2.23e-16,
+        "reason": "2 roundings, each within 2^-53 relatively: the difference; and the expected value"
+      },
+      "call": "theorem XtractSpec.Records.difference_vector_two_frames_of_tenths_cycle"
+    }
+  ]
+}
