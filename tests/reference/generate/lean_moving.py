@@ -29,7 +29,7 @@ before the next one enters, so the results change along the series.
 
 from fractions import Fraction
 
-from certificates import Certificates
+from certificates import ROUNDING, Certificates
 
 SHORT = "quarters_of_both_signs"
 LONG = "tenths_cycle_of_1000"
@@ -103,6 +103,30 @@ def main():
             if exact
             else "the w - 1 additions of the w values of a window, of one sign, in any order; the division, or "
             "a reciprocal and a multiplication",
+            {"window": width},
+        )
+
+        # The library takes the variance about the rounded mean of a window,
+        # which adds the square of the rounding of the mean to every term
+        variances = []
+        for window in windows:
+            mean = sum(window) / width
+            squares = sum((x - mean) ** 2 for x in window)
+            variances.append(squares / (width - 1))
+            assert exact or width * ((width + 1) * ROUNDING * mean) ** 2 < ROUNDING * squares
+        out.vector(
+            "moving_variance",
+            series,
+            f"movingVariance {data(series)} {width}",
+            "movingVariance_cast _ _",
+            variances,
+            1 if exact else width + 4,
+            "the division by 3; every value is a multiple of 1/4 and so is the mean of every window, so each "
+            "difference, each square and each addition is exact"
+            if exact
+            else "the rounding of the mean of a window, which changes the sum of the squares by less than one "
+            "rounding; the difference from the mean, which its square counts twice, and the square, in every "
+            "term; the w - 1 additions of the terms, in any order; the division",
             {"window": width},
         )
 
