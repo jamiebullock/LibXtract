@@ -3,7 +3,7 @@
 # SPDX-FileCopyrightText: 2026 Jamie Bullock
 # SPDX-License-Identifier: Zlib
 
-"""Writes six series, statistics of each, and a theorem for every one of
+"""Writes seven series, statistics of each, and a theorem for every one of
 those values that Lean checks.
 
 usage: lean_statistics.py
@@ -20,7 +20,8 @@ Four series have a large offset and a small spread, with the values of the
 datasets NumAcc1 to NumAcc4 of the NIST Statistical Reference Datasets. The
 fifth has eight multiples of 1/4 of both signs and a zero, on which the
 library's arithmetic is exact. The sixth repeats the powers of two from 1/4 to
-32, a distribution with a long upper tail.
+32, a distribution with a long upper tail. The seventh repeats eight values
+of both signs with a zero, whose two middle values differ.
 """
 
 import json
@@ -40,6 +41,8 @@ SERIES = dict(OFFSET_SERIES)
 SERIES[QUARTERS] = ["3", "-1.5", "4.25", "0", "2", "9.5", "-6", "1"]
 POWERS = "powers_of_two_cycle"
 SERIES[POWERS] = ["0.25", "0.5", "1", "2", "4", "8", "16", "32"] * 125
+SIGNS = "signs_cycle"
+SERIES[SIGNS] = ["1", "-0.5", "0", "0.25", "-2", "-4", "0.5", "8"] * 125
 LONG = "offset_1_tenths"
 
 # The most a correctly rounded result differs from the exact one, relatively
@@ -52,6 +55,7 @@ HEADER = """/- Part of LibXtract
  - SPDX-License-Identifier: Zlib
  -/
 import XtractSpec.Certificate
+import XtractSpec.Median
 import XtractSpec.Statistics
 
 /-!
@@ -137,7 +141,7 @@ class Certificates:
         record["call"] = f"theorem XtractSpec.Records.{name}"
         self.records.append(record)
 
-    def rational(self, feature, series, call, lemma, value, roundings, reason, arguments=None):
+    def rational(self, feature, series, call, lemma, value, roundings, reason, arguments=None, takes_data=True):
         """A feature whose definition gives the fraction `value`: the
         expected double is the nearest, proved equal to it or within half a
         unit in its last place of it."""
@@ -149,8 +153,27 @@ class Certificates:
             theorem = (
                 f"|{call} - {cast(expected)}| ≤ {cast(half_unit(expected))} :=\n  within_of_rat ({lemma}) {DECIDE}"
             )
-        self.add(feature, series, theorem, expected, True, arguments, roundings, reason, exact)
+        self.add(feature, series, theorem, expected, takes_data, arguments, roundings, reason, exact)
         return expected
+
+    def middle(self, feature, series, call, bridge, values, roundings, reason, arguments=None):
+        """A feature whose definition gives the median of the fractions
+        `values`: each middle value is placed by counting the values below
+        it and the values at or below it. `bridge` wraps the theorem about
+        the median into one about the feature."""
+        ordered = sorted(values)
+        n = len(ordered)
+        if n % 2 == 1:
+            middle = ordered[n // 2]
+            lemma = f"median_eq_of_rat_odd (v := {lean(middle)}) {DECIDE} {DECIDE} {DECIDE}"
+        else:
+            low, high = ordered[n // 2 - 1], ordered[n // 2]
+            middle = (low + high) / 2
+            lemma = (
+                f"median_eq_of_rat_even (a := {lean(low)}) (b := {lean(high)}) "
+                f"{DECIDE} {DECIDE} {DECIDE} {DECIDE} {DECIDE}"
+            )
+        return self.rational(feature, series, call, bridge.format(lemma), middle, roundings, reason, arguments)
 
     def member(self, feature, series, call, proof, value, reason, arguments=None):
         """A feature whose definition gives a value of the series, proved by
@@ -355,6 +378,70 @@ def main():
             f"division by N are N + 11 roundings of a mean that is {rounded_up(factor)} times the magnitude of "
             "the result; the subtraction of 3",
             arguments,
+        )
+
+    exact_halves = "the two middle values are multiples of 1/4, so their halves and the sum of those are exact"
+    medians = {}
+    for series, roundings, reason in (
+        (QUARTERS, 0, exact_halves),
+        (LONG, 0, "the result is a value of the series"),
+        (SIGNS, 0, exact_halves),
+    ):
+        medians[series] = out.middle(
+            "median", series, f"median {data(series)}", "{}", doubles[series], roundings, reason
+        )
+
+    exact_distances = (
+        "every value and the median are multiples of 1/8, so each difference, the halves of the two middle "
+        "distances and the sum of those are exact"
+    )
+    for series, roundings, reason in (
+        (QUARTERS, 0, exact_distances),
+        (LONG, 1, "the difference from the median in the value that is the result"),
+        (SIGNS, 0, exact_distances),
+    ):
+        centre = medians[series]
+        out.middle(
+            "median_absolute_deviation",
+            series,
+            f"medianAbsoluteDeviation {data(series)} {cast(centre)}",
+            "(medianAbsoluteDeviation_cast _ _).trans ({})",
+            [abs(x - Fraction(centre)) for x in doubles[series]],
+            roundings,
+            reason,
+            {"median": centre},
+        )
+
+    for series in (QUARTERS, SIGNS):
+        xs = doubles[series]
+        nonzero = [x for x in xs if x != 0]
+        changes = sum(1 for a, b in zip(nonzero, nonzero[1:]) if a * b < 0)
+        rate = Fraction(changes, len(xs))
+        # A division whose quotient is a double gives that double
+        assert Fraction(float(rate)) == rate
+        out.rational(
+            "zcr",
+            series,
+            f"zcr {data(series)}",
+            "zcr_cast _",
+            rate,
+            0,
+            "the count is exact, and its division by N gives the quotient itself, which is a double",
+        )
+
+    for series in (QUARTERS, LONG):
+        maximum = float(max(doubles[series]))
+        mean = means[series]
+        out.rational(
+            "crest",
+            series,
+            f"crest {cast(maximum)} {cast(mean)}",
+            "crest_cast _ _",
+            Fraction(maximum) / Fraction(mean),
+            1,
+            "the division",
+            {"maximum": maximum, "mean": mean},
+            False,
         )
 
     write(
