@@ -1564,7 +1564,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .description = "Extract the rolloff point of a spectrum",
         .source_count = 2,
         .sources = sources_rolloff,
-        .validation_level = 0,
+        .validation_level = 3,
         .tags = 0,
         .data = {XTRACT_SPECTRAL_MAGNITUDES, XTRACT_UNIT_ANY, 1, accepted_rolloff, 1, "N >= 1"},
         .argc = 2,

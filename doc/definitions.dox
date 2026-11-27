@@ -251,7 +251,7 @@ Sources:
 - Origin: Scheirer and Slaney (1997). "Construction and evaluation of a robust multifeature speech/music discriminator". Proceedings of ICASSP 1997, volume 2, section 2. <a href="https://doi.org/10.1109/ICASSP.1997.596192">doi:10.1109/ICASSP.1997.596192</a>
 - Formulation: Peeters (2004). "A large set of audio features for sound description (similarity and classification) in the CUIDADO project". Technical report, IRCAM, section 6.1.7
 
-Validation level 0, not checked.
+Validation level 3, certified.
 
 \section definition_loudness Loudness
 

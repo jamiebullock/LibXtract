@@ -25,7 +25,7 @@ arithmetic is exact. The second repeats eight coefficients that fall from
 
 from fractions import Fraction
 
-from certificates import Certificates
+from certificates import ROUNDING, Certificates, cast
 
 SHORT = "harmonics_with_a_zero"
 LONG = "falling_harmonics_cycle"
@@ -113,6 +113,40 @@ def main():
             else "the difference of two amplitudes, which its square counts twice, and the square, in every term "
             "that is divided, and the N - 1 additions of those terms, in any order; the square of every "
             "amplitude and the N - 1 additions of the squares, in any order; the division",
+        )
+
+        # The percentage of the short series is that of the sum of its first
+        # four coefficients, which the running sum then equals
+        percent = 71.875 if exact else 95.0
+        spacing = 172.265625 if exact else 24.0
+        target = Fraction(percent) / 100 * sum(xs)
+        running = [sum(xs[: k + 1]) for k in range(n)]
+        index = next(k for k in range(n) if running[k] >= target)
+        frequency = Fraction(spacing) * index
+        assert index > 0 and Fraction(float(frequency)) == frequency
+        if exact:
+            assert Fraction(percent / 100.0) == Fraction(percent) / 100
+            assert Fraction(float(target)) == target and running[index] == target
+        else:
+            # The library's share and its running sums are each within N + 1
+            # roundings of the exact ones
+            margin = 2 * (n + 1) * ROUNDING * target
+            assert target - running[index - 1] > margin and running[index] - target > margin
+        out.rational(
+            "rolloff",
+            series,
+            f"rolloff {data(series)} {cast(spacing)} {cast(percent)}",
+            "rolloff_cast _ _ _",
+            frequency,
+            0,
+            "every coefficient is a multiple of 1/4, and the share is the sum of the first four of them, 11.5, so "
+            "the share and each running sum are exact, and the product of the bin number and the spacing is a "
+            "double, which the multiplication gives"
+            if exact
+            else "the running sums on either side of the share differ from it by more than the roundings of the "
+            "share and of the sums can amount to, so the bin is that of the definition, and the product of its "
+            "number and the spacing is a double, which the multiplication gives",
+            {"bin_spacing": spacing, "threshold": percent},
         )
 
     out.store("spectral_shape", "SpectralShape", ["SpectralShape"], "the features of the shape of a spectrum")
