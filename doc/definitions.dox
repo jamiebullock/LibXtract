@@ -239,7 +239,7 @@ xtract_zcr()
 Sources:
 - Origin: Gouyon, Pachet and Delerue (2000). "On the use of zero-crossing rate for an application of classification of percussive sounds". Proceedings of the COST G-6 Conference on Digital Audio Effects (DAFX-00), section 2.2.1. <a href="https://dafx.de/paper-archive/details/PMPmCG4vt7Eeuvn0803ULA">https://dafx.de/paper-archive/details/PMPmCG4vt7Eeuvn0803ULA</a>
 
-Validation level 0, not checked.
+Validation level 3, certified.
 
 \section definition_rolloff Spectral Rolloff
 
@@ -310,7 +310,7 @@ xtract_crest()
 Sources:
 - Origin: Peeters (2004). "A large set of audio features for sound description (similarity and classification) in the CUIDADO project". Technical report, IRCAM, section 9.1
 
-Validation level 0, not checked.
+Validation level 3, certified.
 
 \section definition_noisiness Noisiness
 
@@ -862,7 +862,7 @@ xtract_median()
 
 Defined by the library: this definition is the reference.
 
-Validation level 0, not checked.
+Validation level 3, certified.
 
 \section definition_median_absolute_deviation Median Absolute Deviation
 
@@ -872,7 +872,7 @@ xtract_median_absolute_deviation()
 
 Defined by the library: this definition is the reference.
 
-Validation level 0, not checked.
+Validation level 3, certified.
 
 \section definition_hjorth_activity Hjorth Activity
 

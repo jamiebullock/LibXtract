@@ -10,7 +10,8 @@ import Mathlib
 
 The definitions in `src/features.json` of `mean`, `variance`,
 `standard_deviation`, `average_deviation`, `skewness`, `kurtosis`, `sum`,
-`rms_amplitude`, `highest_value`, `lowest_value` and `nonzero_count`. A definition without a
+`rms_amplitude`, `highest_value`, `lowest_value`, `nonzero_count`, `zcr` and
+`crest`. A definition without a
 square root is stated over any field: over ℝ it is the specification, and
 over ℚ it computes, which gives its value at a series of doubles exactly.
 
@@ -19,7 +20,8 @@ division by zero is zero and its square root of a negative number is zero, so
 `mean` of no values, `variance` of one value and `standardDeviation` of a
 negative variance are all zero here, and the library refuses each of them.
 `highestValue` of no values is zero, as is `lowestValue` when no value is
-above the threshold, where the library gives no result.
+above the threshold, where the library gives no result. `crest` of a mean of
+zero is zero, where the library gives no result.
 -/
 
 namespace XtractSpec
@@ -79,6 +81,20 @@ def lowestValue (xs : List α) (t : α) : α :=
   | [] => 0
   | x :: rest => rest.foldl min x
 
+/-- The count of the neighbouring pairs of opposite sign. -/
+def signChanges : List α → ℕ
+  | x :: y :: rest => (if x * y < 0 then 1 else 0) + signChanges (y :: rest)
+  | _ => 0
+
+/-- The count of the changes of sign among the values that are not zero, over the count of all
+the values. -/
+def zcr (xs : List α) : α :=
+  (signChanges (xs.filter fun x => x ≠ 0) : α) / (xs.length : α)
+
+/-- The maximum given over the mean given. -/
+def crest (maximum μ : α) : α :=
+  maximum / μ
+
 end Ordered
 
 /-- The square root of the variance given. -/
@@ -120,6 +136,36 @@ theorem kurtosis_cast (xs : List ℚ) (μ s : ℚ) :
 theorem nonzeroCount_cast (xs : List ℚ) :
     nonzeroCount (xs.map (↑) : List ℝ) = ((nonzeroCount xs : ℚ) : ℝ) := by
   simp [nonzeroCount, List.filter_map, Function.comp_def]
+
+theorem crest_cast (maximum μ : ℚ) :
+    crest (maximum : ℝ) (μ : ℝ) = ((crest maximum μ : ℚ) : ℝ) := by
+  simp [crest]
+
+theorem signChanges_cast (qs : List ℚ) :
+    signChanges (qs.map (↑) : List ℝ) = signChanges qs := by
+  induction qs with
+  | nil => rfl
+  | cons x rest ih =>
+    cases rest with
+    | nil => rfl
+    | cons y rest =>
+      simp only [List.map_cons, signChanges] at ih ⊢
+      rw [ih]
+      congr 1
+      have : ((x : ℝ) * (y : ℝ) < 0) ↔ (x * y < 0) := by exact_mod_cast Iff.rfl
+      simp only [this]
+
+theorem zcr_cast (qs : List ℚ) : zcr (qs.map (↑) : List ℝ) = ((zcr qs : ℚ) : ℝ) := by
+  have h : (qs.map (↑) : List ℝ).filter (fun x => x ≠ 0) = (qs.filter fun x => x ≠ 0).map (↑) := by
+    induction qs with
+    | nil => rfl
+    | cons x rest ih =>
+      simp only [List.map_cons, List.filter_cons, ih]
+      by_cases hx : x = 0 <;> simp [hx]
+  unfold zcr
+  rw [h, signChanges_cast, List.length_map]
+  push_cast
+  rfl
 
 /-!
 ## Invariance
@@ -455,5 +501,55 @@ theorem lowestValue_perm {xs ys : List ℝ} (t : ℝ) (h : xs.Perm ys) :
 theorem lowestValue_reverse (xs : List ℝ) (t : ℝ) :
     lowestValue xs.reverse t = lowestValue xs t :=
   lowestValue_perm t (List.reverse_perm xs)
+
+theorem signChanges_map_neg (xs : List ℝ) : signChanges (xs.map (-·)) = signChanges xs := by
+  induction xs with
+  | nil => rfl
+  | cons x rest ih =>
+    cases rest with
+    | nil => rfl
+    | cons y rest =>
+      simp only [List.map_cons, signChanges] at ih ⊢
+      rw [ih, neg_mul_neg]
+
+theorem signChanges_append_pair (l : List ℝ) (y x : ℝ) :
+    signChanges (l ++ [y, x]) = signChanges (l ++ [y]) + (if y * x < 0 then 1 else 0) := by
+  induction l with
+  | nil => simp [signChanges]
+  | cons a rest ih =>
+    cases rest with
+    | nil => simp [signChanges]
+    | cons b rest =>
+      simp only [List.cons_append, signChanges] at ih ⊢
+      rw [ih]
+      omega
+
+theorem signChanges_reverse (xs : List ℝ) : signChanges xs.reverse = signChanges xs := by
+  induction xs with
+  | nil => rfl
+  | cons x rest ih =>
+    cases rest with
+    | nil => rfl
+    | cons y rest =>
+      have e : (x :: y :: rest).reverse = rest.reverse ++ [y, x] := by simp
+      have e' : (y :: rest).reverse = rest.reverse ++ [y] := by simp
+      rw [e, signChanges_append_pair, ← e', ih, mul_comm y x]
+      simp only [signChanges]
+      omega
+
+/-- `sign`: unchanged. -/
+theorem zcr_neg (xs : List ℝ) : zcr (xs.map (-·)) = zcr xs := by
+  have h : (xs.map (-·)).filter (fun x => x ≠ 0) = (xs.filter fun x => x ≠ 0).map (-·) := by
+    induction xs with
+    | nil => rfl
+    | cons x rest ih =>
+      simp only [List.map_cons, List.filter_cons, ih]
+      by_cases hx : x = 0 <;> simp [hx]
+  unfold zcr
+  rw [h, signChanges_map_neg, List.length_map]
+
+/-- `reversal`: unchanged. -/
+theorem zcr_reverse (xs : List ℝ) : zcr xs.reverse = zcr xs := by
+  simp [zcr, List.filter_reverse, signChanges_reverse]
 
 end XtractSpec

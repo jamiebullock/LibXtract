@@ -531,6 +531,133 @@ static const double series_powers_of_two_cycle[1000] = {
     0.25, 0.5, 1.0, 2.0, 4.0, 8.0, 16.0, 32.0,
     0.25, 0.5, 1.0, 2.0, 4.0, 8.0, 16.0, 32.0};
 
+static const double series_signs_cycle[1000] = {
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0,
+    1.0, -0.5, 0.0, 0.25, -2.0, -4.0, 0.5, 8.0};
+
 static const double expected_lean_statistics_0[] = {10000002.0};
 static const double arguments_lean_statistics_1[] = {10000002.0};
 static const double expected_lean_statistics_1[] = {1.0};
@@ -575,6 +702,21 @@ static const double arguments_lean_statistics_26[] = {7.96875, 10.35714035309910
 static const double expected_lean_statistics_26[] = {1.4520532150546244};
 static const double arguments_lean_statistics_27[] = {7.96875, 10.357140353099103};
 static const double expected_lean_statistics_27[] = {0.7825555422584759};
+static const double expected_lean_statistics_28[] = {1.5};
+static const double expected_lean_statistics_29[] = {1.2};
+static const double expected_lean_statistics_30[] = {0.125};
+static const double arguments_lean_statistics_31[] = {1.5};
+static const double expected_lean_statistics_31[] = {2.125};
+static const double arguments_lean_statistics_32[] = {1.2};
+static const double expected_lean_statistics_32[] = {0.099999999999999867};
+static const double arguments_lean_statistics_33[] = {0.125};
+static const double expected_lean_statistics_33[] = {0.75};
+static const double expected_lean_statistics_34[] = {0.5};
+static const double expected_lean_statistics_35[] = {0.5};
+static const double arguments_lean_statistics_36[] = {9.5, 1.53125};
+static const double expected_lean_statistics_36[] = {6.204081632653061};
+static const double arguments_lean_statistics_37[] = {1.3, 1.2};
+static const double expected_lean_statistics_37[] = {1.0833333333333335};
 
 static const xttest_reference_record records_lean_statistics[] = {
     {.feature = XTRACT_MEAN, .series = "offset_1e7_integers", .data = series_offset_1e7_integers, .n = 3, .arguments = NULL, .expected = expected_lean_statistics_0, .expected_count = 1, .tolerance = 4.4500000000000003e-16},
@@ -605,9 +747,19 @@ static const xttest_reference_record records_lean_statistics[] = {
     {.feature = XTRACT_KURTOSIS, .series = "quarters_with_a_zero", .data = series_quarters_with_a_zero, .n = 8, .arguments = arguments_lean_statistics_25, .expected = expected_lean_statistics_25, .expected_count = 1, .tolerance = 6.6699999999999999e-15},
     {.feature = XTRACT_SKEWNESS, .series = "powers_of_two_cycle", .data = series_powers_of_two_cycle, .n = 1000, .arguments = arguments_lean_statistics_26, .expected = expected_lean_statistics_26, .expected_count = 1, .tolerance = 1.3799999999999999e-13},
     {.feature = XTRACT_KURTOSIS, .series = "powers_of_two_cycle", .data = series_powers_of_two_cycle, .n = 1000, .arguments = arguments_lean_statistics_27, .expected = expected_lean_statistics_27, .expected_count = 1, .tolerance = 5.4300000000000001e-13},
+    {.feature = XTRACT_MEDIAN, .series = "quarters_with_a_zero", .data = series_quarters_with_a_zero, .n = 8, .arguments = NULL, .expected = expected_lean_statistics_28, .expected_count = 1, .tolerance = 0.0},
+    {.feature = XTRACT_MEDIAN, .series = "offset_1_tenths", .data = series_offset_1_tenths, .n = 1001, .arguments = NULL, .expected = expected_lean_statistics_29, .expected_count = 1, .tolerance = 0.0},
+    {.feature = XTRACT_MEDIAN, .series = "signs_cycle", .data = series_signs_cycle, .n = 1000, .arguments = NULL, .expected = expected_lean_statistics_30, .expected_count = 1, .tolerance = 0.0},
+    {.feature = XTRACT_MEDIAN_ABSOLUTE_DEVIATION, .series = "quarters_with_a_zero", .data = series_quarters_with_a_zero, .n = 8, .arguments = arguments_lean_statistics_31, .expected = expected_lean_statistics_31, .expected_count = 1, .tolerance = 0.0},
+    {.feature = XTRACT_MEDIAN_ABSOLUTE_DEVIATION, .series = "offset_1_tenths", .data = series_offset_1_tenths, .n = 1001, .arguments = arguments_lean_statistics_32, .expected = expected_lean_statistics_32, .expected_count = 1, .tolerance = 1.12e-16},
+    {.feature = XTRACT_MEDIAN_ABSOLUTE_DEVIATION, .series = "signs_cycle", .data = series_signs_cycle, .n = 1000, .arguments = arguments_lean_statistics_33, .expected = expected_lean_statistics_33, .expected_count = 1, .tolerance = 0.0},
+    {.feature = XTRACT_ZCR, .series = "quarters_with_a_zero", .data = series_quarters_with_a_zero, .n = 8, .arguments = NULL, .expected = expected_lean_statistics_34, .expected_count = 1, .tolerance = 0.0},
+    {.feature = XTRACT_ZCR, .series = "signs_cycle", .data = series_signs_cycle, .n = 1000, .arguments = NULL, .expected = expected_lean_statistics_35, .expected_count = 1, .tolerance = 0.0},
+    {.feature = XTRACT_CREST, .series = NULL, .data = NULL, .n = 0, .arguments = arguments_lean_statistics_36, .expected = expected_lean_statistics_36, .expected_count = 1, .tolerance = 2.2300000000000002e-16},
+    {.feature = XTRACT_CREST, .series = NULL, .data = NULL, .n = 0, .arguments = arguments_lean_statistics_37, .expected = expected_lean_statistics_37, .expected_count = 1, .tolerance = 2.2300000000000002e-16},
 };
 
-static const xttest_reference_source source_lean_statistics = {.id = "lean_statistics", .name = "Theorems about the definitions of the statistics, checked by Lean", .level = 3, .record_count = 28, .records = records_lean_statistics};
+static const xttest_reference_source source_lean_statistics = {.id = "lean_statistics", .name = "Theorems about the definitions of the statistics, checked by Lean", .level = 3, .record_count = 38, .records = records_lean_statistics};
 
 const xttest_reference_source *const xttest_reference_sources[] = {&source_lean_statistics};
 

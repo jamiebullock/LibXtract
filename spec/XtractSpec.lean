@@ -5,6 +5,7 @@
  -/
 import XtractSpec.Axioms
 import XtractSpec.Certificate
+import XtractSpec.Median
 import XtractSpec.Statistics
 import XtractSpec.Records.Statistics
 
