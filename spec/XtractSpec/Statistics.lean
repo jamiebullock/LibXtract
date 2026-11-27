@@ -12,6 +12,11 @@ The definitions of `mean`, `variance` and `standard_deviation` in
 `src/features.json`. `mean` and `variance` are stated over any field: over ℝ
 each is the specification, and over ℚ it computes, which gives its value at a
 series of doubles exactly.
+
+A definition is the feature's only where the feature gives a result. Lean's
+division by zero is zero and its square root of a negative number is zero, so
+`mean` of no values, `variance` of one value and `standardDeviation` of a
+negative variance are all zero here, and the library refuses each of them.
 -/
 
 namespace XtractSpec
