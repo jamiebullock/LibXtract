@@ -958,7 +958,7 @@
       "title": "Smoothed frame",
       "description": "Apply a bidirectional smoothing filter to a frame of data",
       "definition": "u_{N-1} = x_{N-1}, \\quad u_n = g x_n + (1-g) x_{n+1} \\; (0 \\le n \\le N-2), \\quad y_0 = u_0, \\quad y_n = g u_n + (1-g) y_{n-1} \\; (1 \\le n \\le N-1), \\quad 0 \\le g \\le 1 \\text{ the gain given in argv}",
-      "validation_level": 0,
+      "validation_level": 3,
       "input": {"format": "arbitrary_series", "unit": "any"},
       "argument_type": "float",
       "arguments": [

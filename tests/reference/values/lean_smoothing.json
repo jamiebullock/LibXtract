@@ -54,6 +54,29 @@
       "call": "theorem XtractSpec.Records.ewma_variance_quarters_to_smooth"
     },
     {
+      "feature": "smoothed",
+      "data": "quarters_to_smooth",
+      "arguments": {
+        "gain": 0.25
+      },
+      "expected": [
+        -0.25,
+        -0.25,
+        0.46875,
+        0.7578125,
+        0.162109375,
+        0.71533203125,
+        0.8802490234375,
+        0.972686767578125,
+        1.1045150756835938
+      ],
+      "tolerance": {
+        "relative": 0.0,
+        "reason": "no rounding: the values and the gain are multiples of 1/4, and every product and every sum of the two passes is a double, so each operation is exact; the expected value is exact"
+      },
+      "call": "theorem XtractSpec.Records.smoothed_quarters_to_smooth"
+    },
+    {
       "feature": "ewma_average",
       "data": "tenths_to_smooth_cycle",
       "arguments": {
@@ -160,6 +183,60 @@
         "reason": "60 roundings, each within 2^-53 relatively: a step rounds the difference from the average, whose own rounding it takes with it, the two products of its square with the weight, the sum, one less the weight and the last product, and carries the rounding of the variance before it with the factor 1 - w; the bound that this gives from the exact values is at most 58.3 roundings of the largest result; and the expected value"
       },
       "call": "theorem XtractSpec.Records.ewma_variance_tenths_to_smooth_cycle"
+    },
+    {
+      "feature": "smoothed",
+      "data": "tenths_to_smooth_cycle",
+      "arguments": {
+        "gain": 0.3
+      },
+      "expected": [
+        0.25,
+        0.373,
+        0.4051,
+        0.32107,
+        0.376249,
+        0.3683743,
+        0.44386201000000003,
+        0.508703407,
+        0.4310923849,
+        0.49976466943000003,
+        0.493835268601,
+        0.3831846880207,
+        0.41972928161448997,
+        0.398810497130143,
+        0.4651673479911001,
+        0.5236171435937701,
+        0.44153200051563907,
+        0.5070724003609474,
+        0.49895068025266315,
+        0.3867654761768642,
+        0.42223583332380493,
+        0.40056508332666346,
+        0.4663955583286644,
+        0.5244768908300651,
+        0.4421338235810456,
+        0.5074936765067319,
+        0.49924557355471233,
+        0.38697190148829863,
+        0.42238033104180905,
+        0.4006662317292663,
+        0.46646636221048643,
+        0.5245264535473405,
+        0.44216851748313835,
+        0.5075179622381969,
+        0.4992625735667378,
+        0.38698380149671646,
+        0.4223886610477015,
+        0.40067206273339107,
+        0.4664704439133737,
+        0.5665293107393616
+      ],
+      "tolerance": {
+        "relative": 1.23e-15,
+        "reason": "11 roundings, each within 2^-53 relatively: each pass rounds two products, one less the gain and a sum for every value; the second takes the rounding of the first with the factor of the gain and carries its own with the factor 1 - g; the bound that this gives from the exact values is at most 9.97 roundings of the largest result; and the expected value"
+      },
+      "call": "theorem XtractSpec.Records.smoothed_tenths_to_smooth_cycle"
     }
   ]
 }
