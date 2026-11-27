@@ -26,7 +26,7 @@ largest and the smallest twice in each eight.
 
 from fractions import Fraction
 
-from certificates import Certificates
+from certificates import DECIDE, Certificates, lean
 
 SHORT = "rise_and_fall_with_ties"
 LONG = "tenths_with_ties_cycle"
@@ -73,6 +73,23 @@ def main():
             "which are of one sign, in any order; the N - 1 additions of the values, of one sign, in any order; "
             "the division by their sum; the division by N - 1",
         )
+
+        # The index is found by comparing, so only its division can round
+        for feature, definition, extreme in (("max_position", "maxPosition", max), ("min_position", "minPosition", min)):
+            index = xs.index(extreme(xs))
+            position = Fraction(index, n - 1)
+            assert index > 0 and (not exact or Fraction(float(position)) == position)
+            out.rational(
+                feature,
+                series,
+                f"{definition} {data(series)}",
+                f"{definition}_eq_of_rat (k := {index}) (q := {lean(xs[index])}) {DECIDE} {DECIDE} {DECIDE}",
+                position,
+                0 if exact else 1,
+                "the index is a whole number, and its division by N - 1 gives the quotient itself, which is a double"
+                if exact
+                else "the division of the index, a whole number, by N - 1",
+            )
 
     out.store("temporal", "Temporal", ["Temporal"], "the features of the shape of a series over time")
 

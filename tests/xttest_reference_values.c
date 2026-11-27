@@ -301,14 +301,22 @@ static const xttest_reference_record records_lean_statistics[] = {
 static const xttest_reference_source source_lean_statistics = {.id = "lean_statistics", .name = "Theorems about the definitions of the statistics, checked by Lean", .level = 3, .record_count = 38, .records = records_lean_statistics};
 
 static const double expected_lean_temporal_0[] = {0.486328125};
-static const double expected_lean_temporal_1[] = {0.50007902639481583};
+static const double expected_lean_temporal_1[] = {0.375};
+static const double expected_lean_temporal_2[] = {0.125};
+static const double expected_lean_temporal_3[] = {0.50007902639481583};
+static const double expected_lean_temporal_4[] = {0.003003003003003003};
+static const double expected_lean_temporal_5[] = {0.001001001001001001};
 
 static const xttest_reference_record records_lean_temporal[] = {
     {.feature = XTRACT_TEMPORAL_CENTROID, .series = &series_rise_and_fall_with_ties, .arguments = NULL, .expected = expected_lean_temporal_0, .expected_count = 1, .tolerance = 0.0},
-    {.feature = XTRACT_TEMPORAL_CENTROID, .series = &series_tenths_with_ties_cycle, .arguments = NULL, .expected = expected_lean_temporal_1, .expected_count = 1, .tolerance = 2.2300000000000001e-13},
+    {.feature = XTRACT_MAX_POSITION, .series = &series_rise_and_fall_with_ties, .arguments = NULL, .expected = expected_lean_temporal_1, .expected_count = 1, .tolerance = 0.0},
+    {.feature = XTRACT_MIN_POSITION, .series = &series_rise_and_fall_with_ties, .arguments = NULL, .expected = expected_lean_temporal_2, .expected_count = 1, .tolerance = 0.0},
+    {.feature = XTRACT_TEMPORAL_CENTROID, .series = &series_tenths_with_ties_cycle, .arguments = NULL, .expected = expected_lean_temporal_3, .expected_count = 1, .tolerance = 2.2300000000000001e-13},
+    {.feature = XTRACT_MAX_POSITION, .series = &series_tenths_with_ties_cycle, .arguments = NULL, .expected = expected_lean_temporal_4, .expected_count = 1, .tolerance = 2.2300000000000002e-16},
+    {.feature = XTRACT_MIN_POSITION, .series = &series_tenths_with_ties_cycle, .arguments = NULL, .expected = expected_lean_temporal_5, .expected_count = 1, .tolerance = 2.2300000000000002e-16},
 };
 
-static const xttest_reference_source source_lean_temporal = {.id = "lean_temporal", .name = "Theorems about the definitions of the features of the shape of a series over time, checked by Lean", .level = 3, .record_count = 2, .records = records_lean_temporal};
+static const xttest_reference_source source_lean_temporal = {.id = "lean_temporal", .name = "Theorems about the definitions of the features of the shape of a series over time, checked by Lean", .level = 3, .record_count = 6, .records = records_lean_temporal};
 
 const xttest_reference_source *const xttest_reference_sources[] = {&source_lean_spectral_moments, &source_lean_spectral_shape, &source_lean_statistics, &source_lean_temporal};
 

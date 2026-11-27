@@ -1064,7 +1064,7 @@ xtract_max_position()
 
 Defined by the library: this definition is the reference.
 
-Validation level 0, not checked.
+Validation level 3, certified.
 
 \section definition_min_position Minimum Position
 
@@ -1074,7 +1074,7 @@ xtract_min_position()
 
 Defined by the library: this definition is the reference.
 
-Validation level 0, not checked.
+Validation level 3, certified.
 
 \section definition_peak_asymmetry Peak Asymmetry
 
