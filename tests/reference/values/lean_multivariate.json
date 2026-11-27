@@ -1,0 +1,52 @@
+{
+  "source": {
+    "name": "Theorems about the definitions of the statistics of several series, checked by Lean",
+    "version": "Lean 4.36.0, Mathlib v4.36.0",
+    "licence": "Zlib, as the library",
+    "how": "each expected value is proved to be the value of the feature's definition at the doubles nearest the stored values, or within half a unit in its last place of it, by the theorem its record names in spec/XtractSpec/Records/Multivariate.lean; written by tests/reference/generate/lean_multivariate.py and checked by Lean's kernel",
+    "level": 3
+  },
+  "records": [
+    {
+      "feature": "covariance_matrix",
+      "data": "two_series_of_4",
+      "arguments": {
+        "series": 2
+      },
+      "expected": [
+        2.8333333333333335,
+        -2.375,
+        -2.375,
+        2.4583333333333335
+      ],
+      "tolerance": {
+        "relative": 2.23e-16,
+        "reason": "2 roundings, each within 2^-53 relatively: the division by 3; the values and the means of the series are multiples of 1/4, so each difference, each product and each addition is exact; and the expected value"
+      },
+      "call": "theorem XtractSpec.Records.covariance_matrix_two_series_of_4"
+    },
+    {
+      "feature": "covariance_matrix",
+      "data": "three_series_of_325_cycle",
+      "arguments": {
+        "series": 3
+      },
+      "expected": [
+        0.08136766381766382,
+        0.032474881291547956,
+        -0.015329772079772081,
+        0.032474881291547956,
+        0.08081182336182337,
+        0.03217462013295347,
+        -0.015329772079772081,
+        0.03217462013295347,
+        0.08059472934472935
+      ],
+      "tolerance": {
+        "relative": 3.67e-14,
+        "reason": "330 roundings, each within 2^-53 relatively: the rounding of the means, which changes a sum of products by less than one rounding; the two differences from the means, their product and the M - 1 additions, in every sum of the products of two series, whose terms have both signs, and the division: the bound that this gives from the exact values is at most 329 roundings of the largest covariance; and the expected value"
+      },
+      "call": "theorem XtractSpec.Records.covariance_matrix_three_series_of_325_cycle"
+    }
+  ]
+}

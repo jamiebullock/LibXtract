@@ -11,6 +11,7 @@ import XtractSpec.Harmonicity
 import XtractSpec.Levels
 import XtractSpec.Median
 import XtractSpec.Moving
+import XtractSpec.Multivariate
 import XtractSpec.Smoothing
 import XtractSpec.SpectralMoments
 import XtractSpec.SpectralShape
@@ -22,6 +23,7 @@ import XtractSpec.Records.Grid
 import XtractSpec.Records.Harmonicity
 import XtractSpec.Records.Levels
 import XtractSpec.Records.Moving
+import XtractSpec.Records.Multivariate
 import XtractSpec.Records.Smoothing
 import XtractSpec.Records.SpectralMoments
 import XtractSpec.Records.SpectralShape
