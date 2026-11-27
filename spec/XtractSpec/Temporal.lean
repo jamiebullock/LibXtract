@@ -3,13 +3,13 @@
  - SPDX-FileCopyrightText: 2026 Jamie Bullock
  - SPDX-License-Identifier: Zlib
  -/
-import Mathlib
+import XtractSpec.Statistics
 
 /-!
 # The shape of a series over time
 
 The definitions in `src/features.json` of `temporal_centroid`, `max_position`,
-`min_position` and `peak_asymmetry`. The data is a series in the order of time, and the
+`min_position`, `peak_asymmetry` and `time_reversal_asymmetry`. The data is a series in the order of time, and the
 position of a value is its index, from 0. A definition without a comparison
 is stated over any field: over ℝ it is the specification, and over ℚ it
 computes, which gives its value at a series of doubles exactly. The index of
@@ -24,6 +24,8 @@ sum to zero or less, and refuses fewer than two values. `maxPosition` and
 `minPosition` of one value are zero here, and the library refuses fewer than
 two values. `peakAsymmetry` is zero here when the largest value and every
 value before it are zero, where the library gives no result.
+`timeReversalAsymmetry` is zero here at a lag of zero or of the count of the
+values or more, and the library refuses such a lag.
 -/
 
 namespace XtractSpec
@@ -47,6 +49,12 @@ def temporalCentroid (xs : List α) : α :=
 values up to index `k`. The value at index `k` is in both sums. -/
 def sidesRatio (k : ℕ) (xs : List α) : α :=
   ((xs.drop k).map fun x => x ^ 2).sum / ((xs.take (k + 1)).map fun x => x ^ 2).sum
+
+/-- The sum, over each value `b` and the value `a` that is `lag` places before it, of
+`b ^ 2 * a - b * a ^ 2`, over the count of those pairs. -/
+def timeReversalAsymmetry (xs : List α) (lag : ℕ) : α :=
+  ((xs.zip (xs.drop lag)).map fun pair => pair.2 ^ 2 * pair.1 - pair.2 * pair.1 ^ 2).sum /
+    ((xs.length : α) - lag)
 
 end Field
 
@@ -167,5 +175,54 @@ theorem peakAsymmetry_eq_of_rat {qs : List ℚ} {k : ℕ} {q : ℚ} (hk : qs[k]?
   unfold peakAsymmetry
   rw [firstMaxIndex_eq_of_rat hk hub hfirst]
   exact sidesRatio_cast k qs
+
+theorem timeReversalAsymmetry_cast (xs : List ℚ) (lag : ℕ) :
+    timeReversalAsymmetry (xs.map (↑) : List ℝ) lag = ((timeReversalAsymmetry xs lag : ℚ) : ℝ) := by
+  unfold timeReversalAsymmetry
+  rw [← List.map_drop, List.zip_map]
+  simp [List.map_map, Function.comp_def]
+
+/-!
+## Invariance
+
+The laws that `invariance` states for `time_reversal_asymmetry` in
+`src/features.json`.
+-/
+
+/-- The pairs of a reversed list are those of the list, each the other way round, in the
+reverse order. -/
+theorem zip_drop_reverse {β : Type*} (xs : List β) (lag : ℕ) :
+    xs.reverse.zip (xs.reverse.drop lag) = ((xs.zip (xs.drop lag)).map Prod.swap).reverse := by
+  apply List.ext_getElem
+  · simp
+  · intro i h₁ h₂
+    simp only [List.length_zip, List.length_reverse, List.length_drop, List.length_map] at h₁ h₂
+    simp only [List.getElem_zip, List.getElem_reverse, List.getElem_drop, List.getElem_map,
+      Prod.swap_prod_mk, List.length_zip, List.length_drop, List.length_map]
+    congr 2 <;> omega
+
+/-- `sign`: negated. -/
+theorem timeReversalAsymmetry_neg (xs : List ℝ) (lag : ℕ) :
+    timeReversalAsymmetry (xs.map (-·)) lag = -timeReversalAsymmetry xs lag := by
+  unfold timeReversalAsymmetry
+  rw [← List.map_drop, List.zip_map, List.map_map, List.length_map, ← neg_div, ← sum_map_neg,
+    List.map_map]
+  congr 2
+  apply List.map_congr_left
+  intro pair _
+  simp only [Function.comp_apply, Prod.map_snd, Prod.map_fst]
+  ring
+
+/-- `reversal`: negated. -/
+theorem timeReversalAsymmetry_reverse (xs : List ℝ) (lag : ℕ) :
+    timeReversalAsymmetry xs.reverse lag = -timeReversalAsymmetry xs lag := by
+  unfold timeReversalAsymmetry
+  rw [zip_drop_reverse, List.map_reverse, List.sum_reverse, List.map_map, List.length_reverse,
+    ← neg_div, ← sum_map_neg, List.map_map]
+  congr 2
+  apply List.map_congr_left
+  intro pair _
+  simp only [Function.comp_apply, Prod.fst_swap, Prod.snd_swap]
+  ring
 
 end XtractSpec

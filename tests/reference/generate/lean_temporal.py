@@ -24,9 +24,10 @@ repeats eight values between 0.1 and 0.9, 1000 values in all, with the
 largest and the smallest twice in each eight.
 """
 
+import math
 from fractions import Fraction
 
-from certificates import DECIDE, Certificates, lean
+from certificates import DECIDE, Certificates, lean, rounded_up
 
 SHORT = "rise_and_fall_with_ties"
 LONG = "tenths_with_ties_cycle"
@@ -105,6 +106,32 @@ def main():
             if exact
             else "the square of every value; the additions of the squares from the peak on, one fewer than those "
             "squares, in any order, and of the squares up to the peak likewise; the division",
+        )
+
+        # The terms have both signs: a bound on the rounding of their sum is
+        # relative to the sum of their magnitudes, which is larger than the
+        # result by the factor the reason states
+        lag = 1 if exact else 3
+        terms = [b * a * (b - a) for a, b in zip(xs, xs[lag:])]
+        asymmetry = sum(terms) / (n - lag)
+        factor = sum(abs(term) for term in terms) / abs(sum(terms))
+        if exact:
+            # Multiples of 1/64 whose magnitudes sum to less than 2^53 of them
+            assert 64 * sum(abs(term) for term in terms) < 2**53 and Fraction(float(asymmetry)) == asymmetry
+        out.rational(
+            "time_reversal_asymmetry",
+            series,
+            f"timeReversalAsymmetry {data(series)} {lag}",
+            "timeReversalAsymmetry_cast _ _",
+            asymmetry,
+            0 if exact else math.ceil((n - lag + 2) * factor) + 1,
+            "every value is a multiple of 1/4, so each difference, each product and each addition, in any order, "
+            "is exact, and the division by N - 1 gives the quotient itself, which is a double"
+            if exact
+            else "the difference of the two values, their product and the product of the two results, in every "
+            "term, and the additions of the N - 3 terms, in any order, are N - 1 roundings of a sum of magnitudes "
+            f"that is {rounded_up(factor)} times the magnitude of the sum; the division by N - 3",
+            {"lag": lag},
         )
 
     out.store("temporal", "Temporal", ["Temporal"], "the features of the shape of a series over time")

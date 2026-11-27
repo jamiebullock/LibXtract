@@ -56,6 +56,21 @@
       "call": "theorem XtractSpec.Records.peak_asymmetry_rise_and_fall_with_ties"
     },
     {
+      "feature": "time_reversal_asymmetry",
+      "data": "rise_and_fall_with_ties",
+      "arguments": {
+        "lag": 1
+      },
+      "expected": [
+        -0.05859375
+      ],
+      "tolerance": {
+        "relative": 0.0,
+        "reason": "no rounding: every value is a multiple of 1/4, so each difference, each product and each addition, in any order, is exact, and the division by N - 1 gives the quotient itself, which is a double; the expected value is exact"
+      },
+      "call": "theorem XtractSpec.Records.time_reversal_asymmetry_rise_and_fall_with_ties"
+    },
+    {
       "feature": "temporal_centroid",
       "data": "tenths_with_ties_cycle",
       "expected": [
@@ -102,6 +117,21 @@
         "reason": "1003 roundings, each within 2^-53 relatively: the square of every value; the additions of the squares from the peak on, one fewer than those squares, in any order, and of the squares up to the peak likewise; the division; and the expected value"
       },
       "call": "theorem XtractSpec.Records.peak_asymmetry_tenths_with_ties_cycle"
+    },
+    {
+      "feature": "time_reversal_asymmetry",
+      "data": "tenths_with_ties_cycle",
+      "arguments": {
+        "lag": 3
+      },
+      "expected": [
+        -0.0028064192577733228
+      ],
+      "tolerance": {
+        "relative": 2.91e-12,
+        "reason": "26139 roundings, each within 2^-53 relatively: the difference of the two values, their product and the product of the two results, in every term, and the additions of the N - 3 terms, in any order, are N - 1 roundings of a sum of magnitudes that is 26.2 times the magnitude of the sum; the division by N - 3; and the expected value"
+      },
+      "call": "theorem XtractSpec.Records.time_reversal_asymmetry_tenths_with_ties_cycle"
     }
   ]
 }

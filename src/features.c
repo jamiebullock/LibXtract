@@ -2540,7 +2540,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .description = "Extract the time reversal asymmetry statistic of an input vector",
         .source_count = 1,
         .sources = sources_time_reversal_asymmetry,
-        .validation_level = 0,
+        .validation_level = 3,
         .tags = 0,
         .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= lag + 1"},
         .argc = 1,

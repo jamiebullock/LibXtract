@@ -916,7 +916,7 @@ xtract_time_reversal_asymmetry()
 Sources:
 - Origin: Ramsey and Rothman (1996). "Time irreversibility and business cycle asymmetry". Journal of Money, Credit and Banking 28(1), equation 5, and equations 8 and 9 for the estimator. <a href="https://doi.org/10.2307/2077963">doi:10.2307/2077963</a>
 
-Validation level 0, not checked.
+Validation level 3, certified.
 
 \section definition_spectral_entropy Spectral Entropy
 
