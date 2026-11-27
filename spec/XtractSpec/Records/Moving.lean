@@ -161,6 +161,16 @@ theorem moving_average_quarters_of_both_signs :
     ((15 / 8 : ℚ), (0 : ℚ))] :=
   eachWithin_of_rat (movingAverage_cast _ _) (by decide +kernel)
 
+theorem moving_variance_quarters_of_both_signs :
+    EachWithin (movingVariance (quarters_of_both_signs.map (↑) : List ℝ) 4)
+    [((4878899596318037 / 1125899906842624 : ℚ), (1 / 2251799813685248 : ℚ)),
+    ((137 / 16 : ℚ), (0 : ℚ)),
+    ((8702268029971115 / 1125899906842624 : ℚ), (1 / 2251799813685248 : ℚ)),
+    ((6638118200759637 / 1125899906842624 : ℚ), (1 / 2251799813685248 : ℚ)),
+    ((11 / 2 : ℚ), (0 : ℚ)),
+    ((145 / 16 : ℚ), (0 : ℚ))] :=
+  eachWithin_of_rat (movingVariance_cast _ _) (by decide +kernel)
+
 theorem moving_sum_tenths_cycle_of_1000 :
     EachWithin (movingSum (tenths_cycle_of_1000.map (↑) : List ℝ) 993)
     [((3548343925158707 / 8796093022208 : ℚ), (1 / 35184372088832 : ℚ)),
@@ -184,5 +194,17 @@ theorem moving_average_tenths_cycle_of_1000 :
     ((7321864288446051 / 18014398509481984 : ℚ), (1 / 36028797018963968 : ℚ)),
     ((7312793594332515 / 18014398509481984 : ℚ), (1 / 36028797018963968 : ℚ))] :=
   eachWithin_of_rat (movingAverage_cast _ _) (by decide +kernel)
+
+theorem moving_variance_tenths_cycle_of_1000 :
+    EachWithin (movingVariance (tenths_cycle_of_1000.map (↑) : List ℝ) 993)
+    [((5784313605995891 / 72057594037927936 : ℚ), (1 / 144115188075855872 : ℚ)),
+    ((2901000729758643 / 36028797018963968 : ℚ), (1 / 144115188075855872 : ℚ)),
+    ((2896760180260565 / 36028797018963968 : ℚ), (1 / 144115188075855872 : ℚ)),
+    ((5785129968466109 / 72057594037927936 : ℚ), (1 / 144115188075855872 : ℚ)),
+    ((5790572384934231 / 72057594037927936 : ℚ), (1 / 144115188075855872 : ℚ)),
+    ((5787397641994493 / 72057594037927936 : ℚ), (1 / 144115188075855872 : ℚ)),
+    ((90422418972343 / 1125899906842624 : ℚ), (1 / 144115188075855872 : ℚ)),
+    ((5791116626581043 / 72057594037927936 : ℚ), (1 / 144115188075855872 : ℚ))] :=
+  eachWithin_of_rat (movingVariance_cast _ _) (by decide +kernel)
 
 end XtractSpec.Records

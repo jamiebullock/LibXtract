@@ -9,7 +9,7 @@ import XtractSpec.Statistics
 # Statistics of a moving window
 
 The definitions in `src/features.json` of `moving_sum`, `moving_average`,
-`moving_max` and `moving_min`.
+`moving_variance`, `moving_max` and `moving_min`.
 The result of each has one value for each window of the width given that
 lies in the series, in the order of the windows. A definition is stated over
 any field: over ℝ it is the specification, and over ℚ it computes, which
@@ -17,7 +17,9 @@ gives its values at a series of doubles exactly.
 
 A definition is the feature's only where the feature gives a result. A width
 above the count of the values has no window, and the result is empty here.
-At a width of zero every window is empty. The library refuses both.
+At a width of zero every window is empty. The library refuses both, and a
+width of one for `moving_variance`, where the variance of a window is zero
+here.
 -/
 
 namespace XtractSpec
@@ -69,6 +71,10 @@ def movingSum (xs : List α) (width : ℕ) : List α :=
 /-- The mean of each window of the width given. -/
 def movingAverage (xs : List α) (width : ℕ) : List α :=
   (windows width xs).map mean
+
+/-- The variance of each window of the width given, about the mean of that window. -/
+def movingVariance (xs : List α) (width : ℕ) : List α :=
+  (windows width xs).map fun window => variance window (mean window)
 
 end Field
 
@@ -139,6 +145,15 @@ theorem movingAverage_cast (xs : List ℚ) (width : ℕ) :
   apply List.map_congr_left
   intro window _
   exact mean_cast window
+
+theorem movingVariance_cast (xs : List ℚ) (width : ℕ) :
+    movingVariance (xs.map (↑) : List ℝ) width = (movingVariance xs width).map (↑) := by
+  unfold movingVariance
+  rw [windows_map, List.map_map, List.map_map]
+  apply List.map_congr_left
+  intro window _
+  simp only [Function.comp_apply]
+  rw [mean_cast, variance_cast]
 
 /-!
 ## Invariance
@@ -270,5 +285,36 @@ theorem movingMin_reverse (xs : List ℝ) (width : ℕ) :
   apply List.map_congr_left
   intro window _
   exact leastValue_reverse window
+
+/-- `offset`: unchanged. -/
+theorem movingVariance_offset (xs : List ℝ) (c : ℝ) {width : ℕ} (h : 0 < width) :
+    movingVariance (xs.map (· + c)) width = movingVariance xs width := by
+  unfold movingVariance
+  rw [windows_map, List.map_map]
+  apply List.map_congr_left
+  intro window hwindow
+  simp only [Function.comp_apply]
+  rw [mean_offset window c (ne_nil_of_mem_windows h hwindow), variance_offset]
+
+/-- `sign`: unchanged. -/
+theorem movingVariance_neg (xs : List ℝ) (width : ℕ) :
+    movingVariance (xs.map (-·)) width = movingVariance xs width := by
+  unfold movingVariance
+  rw [windows_map, List.map_map]
+  apply List.map_congr_left
+  intro window _
+  simp only [Function.comp_apply]
+  rw [mean_neg, variance_neg]
+
+/-- `reversal`: reversed. -/
+theorem movingVariance_reverse (xs : List ℝ) (width : ℕ) :
+    movingVariance xs.reverse width = (movingVariance xs width).reverse := by
+  unfold movingVariance
+  rw [windows_reverse, List.map_reverse, List.map_map]
+  congr 1
+  apply List.map_congr_left
+  intro window _
+  simp only [Function.comp_apply]
+  rw [mean_reverse, variance_reverse]
 
 end XtractSpec

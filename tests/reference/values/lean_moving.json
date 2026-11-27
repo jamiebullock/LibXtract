@@ -192,6 +192,26 @@
       "call": "theorem XtractSpec.Records.moving_average_quarters_of_both_signs"
     },
     {
+      "feature": "moving_variance",
+      "data": "quarters_of_both_signs",
+      "arguments": {
+        "window": 4
+      },
+      "expected": [
+        4.333333333333333,
+        8.5625,
+        7.729166666666667,
+        5.895833333333333,
+        5.5,
+        9.0625
+      ],
+      "tolerance": {
+        "relative": 2.23e-16,
+        "reason": "2 roundings, each within 2^-53 relatively: the division by 3; every value is a multiple of 1/4 and so is the mean of every window, so each difference, each square and each addition is exact; and the expected value"
+      },
+      "call": "theorem XtractSpec.Records.moving_variance_quarters_of_both_signs"
+    },
+    {
       "feature": "moving_sum",
       "data": "tenths_cycle_of_1000",
       "arguments": {
@@ -234,6 +254,28 @@
         "reason": "995 roundings, each within 2^-53 relatively: the w - 1 additions of the w values of a window, of one sign, in any order; the division, or a reciprocal and a multiplication; and the expected value"
       },
       "call": "theorem XtractSpec.Records.moving_average_tenths_cycle_of_1000"
+    },
+    {
+      "feature": "moving_variance",
+      "data": "tenths_cycle_of_1000",
+      "arguments": {
+        "window": 993
+      },
+      "expected": [
+        0.08027347683786505,
+        0.08051894511581068,
+        0.08040124622356495,
+        0.080284806143001,
+        0.08036033484390735,
+        0.08031627643504531,
+        0.08031124118831823,
+        0.08036788771399798
+      ],
+      "tolerance": {
+        "relative": 1.11e-13,
+        "reason": "998 roundings, each within 2^-53 relatively: the rounding of the mean of a window, which changes the sum of the squares by less than one rounding; the difference from the mean, which its square counts twice, and the square, in every term; the w - 1 additions of the terms, in any order; the division; and the expected value"
+      },
+      "call": "theorem XtractSpec.Records.moving_variance_tenths_cycle_of_1000"
     }
   ]
 }

@@ -263,10 +263,14 @@ static const int arguments_lean_moving_4[] = {4};
 static const double expected_lean_moving_4[] = {2.0, 5.5, 4.5, 5.5, 6.0, 7.5};
 static const int arguments_lean_moving_5[] = {4};
 static const double expected_lean_moving_5[] = {0.5, 1.375, 1.125, 1.375, 1.5, 1.875};
-static const int arguments_lean_moving_6[] = {993};
-static const double expected_lean_moving_6[] = {403.39999999999998, 403.89999999999998, 403.05000000000001, 403.30000000000001, 403.69999999999999, 403.19999999999999, 403.60000000000002, 403.10000000000002};
+static const int arguments_lean_moving_6[] = {4};
+static const double expected_lean_moving_6[] = {4.333333333333333, 8.5625, 7.729166666666667, 5.895833333333333, 5.5, 9.0625};
 static const int arguments_lean_moving_7[] = {993};
-static const double expected_lean_moving_7[] = {0.40624370594159115, 0.40674723061430013, 0.40589123867069488, 0.40614300100704936, 0.4065458207452165, 0.40604229607250752, 0.40644511581067472, 0.40594159113796574};
+static const double expected_lean_moving_7[] = {403.39999999999998, 403.89999999999998, 403.05000000000001, 403.30000000000001, 403.69999999999999, 403.19999999999999, 403.60000000000002, 403.10000000000002};
+static const int arguments_lean_moving_8[] = {993};
+static const double expected_lean_moving_8[] = {0.40624370594159115, 0.40674723061430013, 0.40589123867069488, 0.40614300100704936, 0.4065458207452165, 0.40604229607250752, 0.40644511581067472, 0.40594159113796574};
+static const int arguments_lean_moving_9[] = {993};
+static const double expected_lean_moving_9[] = {0.080273476837865052, 0.080518945115810675, 0.080401246223564954, 0.080284806143001, 0.080360334843907352, 0.080316276435045311, 0.080311241188318228, 0.080367887713997985};
 
 static const xttest_reference_record records_lean_moving[] = {
     {.feature = XTRACT_MOVING_MAX, .series = &series_quarters_of_both_signs, .arguments = arguments_lean_moving_0, .expected = expected_lean_moving_0, .expected_count = 6, .tolerance = 0.0},
@@ -275,11 +279,13 @@ static const xttest_reference_record records_lean_moving[] = {
     {.feature = XTRACT_MOVING_MIN, .series = &series_tenths_cycle_of_40, .arguments = arguments_lean_moving_3, .expected = expected_lean_moving_3, .expected_count = 38, .tolerance = 0.0},
     {.feature = XTRACT_MOVING_SUM, .series = &series_quarters_of_both_signs, .arguments = arguments_lean_moving_4, .expected = expected_lean_moving_4, .expected_count = 6, .tolerance = 0.0},
     {.feature = XTRACT_MOVING_AVERAGE, .series = &series_quarters_of_both_signs, .arguments = arguments_lean_moving_5, .expected = expected_lean_moving_5, .expected_count = 6, .tolerance = 0.0},
-    {.feature = XTRACT_MOVING_SUM, .series = &series_tenths_cycle_of_1000, .arguments = arguments_lean_moving_6, .expected = expected_lean_moving_6, .expected_count = 8, .tolerance = 1.1099999999999999e-13},
-    {.feature = XTRACT_MOVING_AVERAGE, .series = &series_tenths_cycle_of_1000, .arguments = arguments_lean_moving_7, .expected = expected_lean_moving_7, .expected_count = 8, .tolerance = 1.1099999999999999e-13},
+    {.feature = XTRACT_MOVING_VARIANCE, .series = &series_quarters_of_both_signs, .arguments = arguments_lean_moving_6, .expected = expected_lean_moving_6, .expected_count = 6, .tolerance = 2.2300000000000002e-16},
+    {.feature = XTRACT_MOVING_SUM, .series = &series_tenths_cycle_of_1000, .arguments = arguments_lean_moving_7, .expected = expected_lean_moving_7, .expected_count = 8, .tolerance = 1.1099999999999999e-13},
+    {.feature = XTRACT_MOVING_AVERAGE, .series = &series_tenths_cycle_of_1000, .arguments = arguments_lean_moving_8, .expected = expected_lean_moving_8, .expected_count = 8, .tolerance = 1.1099999999999999e-13},
+    {.feature = XTRACT_MOVING_VARIANCE, .series = &series_tenths_cycle_of_1000, .arguments = arguments_lean_moving_9, .expected = expected_lean_moving_9, .expected_count = 8, .tolerance = 1.1099999999999999e-13},
 };
 
-static const xttest_reference_source source_lean_moving = {.id = "lean_moving", .name = "Theorems about the definitions of the statistics of a moving window, checked by Lean", .level = 3, .record_count = 8, .records = records_lean_moving};
+static const xttest_reference_source source_lean_moving = {.id = "lean_moving", .name = "Theorems about the definitions of the statistics of a moving window, checked by Lean", .level = 3, .record_count = 10, .records = records_lean_moving};
 
 static const double expected_lean_spectral_moments_0[] = {368.75};
 static const double expected_lean_spectral_moments_1[] = {368.75};
