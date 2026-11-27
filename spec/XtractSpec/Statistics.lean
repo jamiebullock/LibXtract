@@ -141,6 +141,21 @@ theorem crest_cast (maximum μ : ℚ) :
     crest (maximum : ℝ) (μ : ℝ) = ((crest maximum μ : ℚ) : ℝ) := by
   simp [crest]
 
+theorem foldl_max_cast (rest : List ℚ) :
+    ∀ x : ℚ, (rest.map (↑) : List ℝ).foldl max (x : ℝ) = ((rest.foldl max x : ℚ) : ℝ) := by
+  induction rest with
+  | nil => intro x; rfl
+  | cons y rest ih =>
+    intro x
+    simp only [List.map_cons, List.foldl_cons]
+    rw [← Rat.cast_max, ih]
+
+theorem highestValue_cast (qs : List ℚ) :
+    highestValue (qs.map (↑) : List ℝ) = ((highestValue qs : ℚ) : ℝ) := by
+  cases qs with
+  | nil => simp [highestValue]
+  | cons x rest => exact foldl_max_cast rest x
+
 theorem signChanges_cast (qs : List ℚ) :
     signChanges (qs.map (↑) : List ℝ) = signChanges qs := by
   induction qs with

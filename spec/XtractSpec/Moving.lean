@@ -8,7 +8,8 @@ import XtractSpec.Statistics
 /-!
 # Statistics of a moving window
 
-The definitions in `src/features.json` of `moving_sum` and `moving_average`.
+The definitions in `src/features.json` of `moving_sum`, `moving_average`,
+`moving_max` and `moving_min`.
 The result of each has one value for each window of the width given that
 lies in the series, in the order of the windows. A definition is stated over
 any field: over ℝ it is the specification, and over ℚ it computes, which
@@ -71,7 +72,57 @@ def movingAverage (xs : List α) (width : ℕ) : List α :=
 
 end Field
 
+section Ordered
+
+variable {α : Type*} [Field α] [LinearOrder α]
+
+/-- The smallest value. -/
+def leastValue : List α → α
+  | [] => 0
+  | x :: rest => rest.foldl min x
+
+/-- The largest value of each window of the width given. -/
+def movingMax (xs : List α) (width : ℕ) : List α :=
+  (windows width xs).map highestValue
+
+/-- The smallest value of each window of the width given. -/
+def movingMin (xs : List α) (width : ℕ) : List α :=
+  (windows width xs).map leastValue
+
+end Ordered
+
 /-! ## Evaluation over ℚ -/
+
+theorem foldl_min_cast (rest : List ℚ) :
+    ∀ x : ℚ, (rest.map (↑) : List ℝ).foldl min (x : ℝ) = ((rest.foldl min x : ℚ) : ℝ) := by
+  induction rest with
+  | nil => intro x; rfl
+  | cons y rest ih =>
+    intro x
+    simp only [List.map_cons, List.foldl_cons]
+    rw [← Rat.cast_min, ih]
+
+theorem leastValue_cast (qs : List ℚ) :
+    leastValue (qs.map (↑) : List ℝ) = ((leastValue qs : ℚ) : ℝ) := by
+  cases qs with
+  | nil => simp [leastValue]
+  | cons x rest => exact foldl_min_cast rest x
+
+theorem movingMax_cast (xs : List ℚ) (width : ℕ) :
+    movingMax (xs.map (↑) : List ℝ) width = (movingMax xs width).map (↑) := by
+  unfold movingMax
+  rw [windows_map, List.map_map, List.map_map]
+  apply List.map_congr_left
+  intro window _
+  exact highestValue_cast window
+
+theorem movingMin_cast (xs : List ℚ) (width : ℕ) :
+    movingMin (xs.map (↑) : List ℝ) width = (movingMin xs width).map (↑) := by
+  unfold movingMin
+  rw [windows_map, List.map_map, List.map_map]
+  apply List.map_congr_left
+  intro window _
+  exact leastValue_cast window
 
 theorem movingSum_cast (xs : List ℚ) (width : ℕ) :
     movingSum (xs.map (↑) : List ℝ) width = (movingSum xs width).map (↑) := by
@@ -114,6 +165,14 @@ theorem movingSum_reverse (xs : List ℝ) (width : ℕ) :
   intro window _
   exact List.sum_reverse window
 
+theorem ne_nil_of_mem_windows {width : ℕ} {xs window : List ℝ} (h : 0 < width)
+    (hwindow : window ∈ windows width xs) : window ≠ [] := by
+  have full := length_of_mem_windows hwindow
+  intro empty
+  rw [empty] at full
+  simp at full
+  omega
+
 /-- `offset`: follows. -/
 theorem movingAverage_offset (xs : List ℝ) (c : ℝ) {width : ℕ} (h : 0 < width) :
     movingAverage (xs.map (· + c)) width = (movingAverage xs width).map (· + c) := by
@@ -121,8 +180,7 @@ theorem movingAverage_offset (xs : List ℝ) (c : ℝ) {width : ℕ} (h : 0 < wi
   rw [windows_map, List.map_map, List.map_map]
   apply List.map_congr_left
   intro window hwindow
-  have full := length_of_mem_windows hwindow
-  exact mean_offset window c (by intro empty; rw [empty] at full; simp at full; omega)
+  exact mean_offset window c (ne_nil_of_mem_windows h hwindow)
 
 /-- `sign`: negated. -/
 theorem movingAverage_neg (xs : List ℝ) (width : ℕ) :
@@ -142,5 +200,75 @@ theorem movingAverage_reverse (xs : List ℝ) (width : ℕ) :
   apply List.map_congr_left
   intro window _
   exact mean_reverse window
+
+theorem foldl_min_eq_neg_foldl_max (rest : List ℝ) :
+    ∀ x : ℝ, rest.foldl min x = -(rest.map (-·)).foldl max (-x) := by
+  induction rest with
+  | nil => intro x; simp
+  | cons y rest ih =>
+    intro x
+    simp only [List.map_cons, List.foldl_cons]
+    rw [ih, max_neg_neg]
+
+/-- The smallest value is the largest of the negated values, negated. -/
+theorem leastValue_eq_neg_highestValue (xs : List ℝ) :
+    leastValue xs = -highestValue (xs.map (-·)) := by
+  cases xs with
+  | nil => simp [leastValue, highestValue]
+  | cons x rest => exact foldl_min_eq_neg_foldl_max rest x
+
+theorem leastValue_offset {xs : List ℝ} (c : ℝ) (h : xs ≠ []) :
+    leastValue (xs.map (· + c)) = leastValue xs + c := by
+  have negated : (xs.map (· + c)).map (-·) = (xs.map (-·)).map (· + -c) := by
+    rw [List.map_map, List.map_map]
+    apply List.map_congr_left
+    intro x _
+    simp only [Function.comp_apply]
+    ring
+  rw [leastValue_eq_neg_highestValue, leastValue_eq_neg_highestValue, negated,
+    highestValue_offset (-c) (by simpa using h)]
+  ring
+
+theorem leastValue_reverse (xs : List ℝ) : leastValue xs.reverse = leastValue xs := by
+  rw [leastValue_eq_neg_highestValue, leastValue_eq_neg_highestValue, List.map_reverse,
+    highestValue_reverse]
+
+/-- `offset`: follows. -/
+theorem movingMax_offset (xs : List ℝ) (c : ℝ) {width : ℕ} (h : 0 < width) :
+    movingMax (xs.map (· + c)) width = (movingMax xs width).map (· + c) := by
+  unfold movingMax
+  rw [windows_map, List.map_map, List.map_map]
+  apply List.map_congr_left
+  intro window hwindow
+  exact highestValue_offset c (ne_nil_of_mem_windows h hwindow)
+
+/-- `reversal`: reversed. -/
+theorem movingMax_reverse (xs : List ℝ) (width : ℕ) :
+    movingMax xs.reverse width = (movingMax xs width).reverse := by
+  unfold movingMax
+  rw [windows_reverse, List.map_reverse, List.map_map]
+  congr 1
+  apply List.map_congr_left
+  intro window _
+  exact highestValue_reverse window
+
+/-- `offset`: follows. -/
+theorem movingMin_offset (xs : List ℝ) (c : ℝ) {width : ℕ} (h : 0 < width) :
+    movingMin (xs.map (· + c)) width = (movingMin xs width).map (· + c) := by
+  unfold movingMin
+  rw [windows_map, List.map_map, List.map_map]
+  apply List.map_congr_left
+  intro window hwindow
+  exact leastValue_offset c (ne_nil_of_mem_windows h hwindow)
+
+/-- `reversal`: reversed. -/
+theorem movingMin_reverse (xs : List ℝ) (width : ℕ) :
+    movingMin xs.reverse width = (movingMin xs width).reverse := by
+  unfold movingMin
+  rw [windows_reverse, List.map_reverse, List.map_map]
+  congr 1
+  apply List.map_congr_left
+  intro window _
+  exact leastValue_reverse window
 
 end XtractSpec

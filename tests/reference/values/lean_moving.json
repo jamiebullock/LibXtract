@@ -8,6 +8,150 @@
   },
   "records": [
     {
+      "feature": "moving_max",
+      "data": "quarters_of_both_signs",
+      "arguments": {
+        "window": 4
+      },
+      "expected": [
+        3.0,
+        4.5,
+        4.5,
+        4.5,
+        4.5,
+        6.0
+      ],
+      "tolerance": {
+        "relative": 0.0,
+        "reason": "no rounding: each result is a value of the series; the expected value is exact"
+      },
+      "call": "theorem XtractSpec.Records.moving_max_quarters_of_both_signs"
+    },
+    {
+      "feature": "moving_min",
+      "data": "quarters_of_both_signs",
+      "arguments": {
+        "window": 4
+      },
+      "expected": [
+        -2.0,
+        -2.0,
+        -2.0,
+        -1.0,
+        -1.0,
+        -1.0
+      ],
+      "tolerance": {
+        "relative": 0.0,
+        "reason": "no rounding: each result is a value of the series; the expected value is exact"
+      },
+      "call": "theorem XtractSpec.Records.moving_min_quarters_of_both_signs"
+    },
+    {
+      "feature": "moving_max",
+      "data": "tenths_cycle_of_40",
+      "arguments": {
+        "window": 3
+      },
+      "expected": [
+        0.8,
+        0.8,
+        0.95,
+        0.95,
+        0.95,
+        0.6,
+        0.6,
+        0.8,
+        0.8,
+        0.8,
+        0.95,
+        0.95,
+        0.95,
+        0.6,
+        0.6,
+        0.8,
+        0.8,
+        0.8,
+        0.95,
+        0.95,
+        0.95,
+        0.6,
+        0.6,
+        0.8,
+        0.8,
+        0.8,
+        0.95,
+        0.95,
+        0.95,
+        0.6,
+        0.6,
+        0.8,
+        0.8,
+        0.8,
+        0.95,
+        0.95,
+        0.95,
+        0.6
+      ],
+      "tolerance": {
+        "relative": 0.0,
+        "reason": "no rounding: each result is a value of the series; the expected value is exact"
+      },
+      "call": "theorem XtractSpec.Records.moving_max_tenths_cycle_of_40"
+    },
+    {
+      "feature": "moving_min",
+      "data": "tenths_cycle_of_40",
+      "arguments": {
+        "window": 3
+      },
+      "expected": [
+        0.1,
+        0.1,
+        0.1,
+        0.2,
+        0.2,
+        0.05,
+        0.05,
+        0.05,
+        0.1,
+        0.1,
+        0.1,
+        0.2,
+        0.2,
+        0.05,
+        0.05,
+        0.05,
+        0.1,
+        0.1,
+        0.1,
+        0.2,
+        0.2,
+        0.05,
+        0.05,
+        0.05,
+        0.1,
+        0.1,
+        0.1,
+        0.2,
+        0.2,
+        0.05,
+        0.05,
+        0.05,
+        0.1,
+        0.1,
+        0.1,
+        0.2,
+        0.2,
+        0.05
+      ],
+      "tolerance": {
+        "relative": 0.0,
+        "reason": "no rounding: each result is a value of the series; the expected value is exact"
+      },
+      "call": "theorem XtractSpec.Records.moving_min_tenths_cycle_of_40"
+    },
+    {
       "feature": "moving_sum",
       "data": "quarters_of_both_signs",
       "arguments": {

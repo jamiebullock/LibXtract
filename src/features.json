@@ -1071,7 +1071,7 @@
       "title": "Moving Maximum",
       "description": "Extract the largest value of a series over a sliding window",
       "definition": "y_m = \\max_{m \\le n \\le m+w-1} x_n, \\quad m = 0, \\ldots, N-w, \\quad 1 \\le w \\le N \\text{ the window given in argv}",
-      "validation_level": 0,
+      "validation_level": 3,
       "input": {"format": "arbitrary_series", "unit": "any", "length": "N >= window"},
       "argument_type": "int",
       "arguments": [
@@ -1085,7 +1085,7 @@
       "title": "Moving Minimum",
       "description": "Extract the smallest value of a series over a sliding window",
       "definition": "y_m = \\min_{m \\le n \\le m+w-1} x_n, \\quad m = 0, \\ldots, N-w, \\quad 1 \\le w \\le N \\text{ the window given in argv}",
-      "validation_level": 0,
+      "validation_level": 3,
       "input": {"format": "arbitrary_series", "unit": "any", "length": "N >= window"},
       "argument_type": "int",
       "arguments": [
