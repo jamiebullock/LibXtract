@@ -3036,7 +3036,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .description = "Extract the central moments of a grid up to the third order",
         .source_count = 1,
         .sources = sources_grid_central_moments,
-        .validation_level = 0,
+        .validation_level = 3,
         .tags = 0,
         .data = {XTRACT_GRID, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 1 && width >= 1 && N % width == 0"},
         .argc = 1,
