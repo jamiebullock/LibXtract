@@ -841,7 +841,7 @@ Sources:
 - Origin: Roberts (1959). "Control chart tests based on geometric moving averages". Technometrics 1(3), equation 1, page 240. <a href="https://doi.org/10.1080/00401706.1959.10489860">doi:10.1080/00401706.1959.10489860</a>
 - Formulation: Finch (2009). "Incremental calculation of weighted mean and variance". Technical note, University of Cambridge Computing Service, section 9, equations 122 and 128. <a href="https://fanf2.user.srcf.net/hermes/doc/antiforgery/stats.pdf">https://fanf2.user.srcf.net/hermes/doc/antiforgery/stats.pdf</a>
 
-Validation level 0, not checked.
+Validation level 3, certified.
 
 \section definition_ewma_variance Exponentially Weighted Moving Variance
 

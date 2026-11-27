@@ -1,0 +1,104 @@
+/- Part of LibXtract
+ -
+ - SPDX-FileCopyrightText: 2026 Jamie Bullock
+ - SPDX-License-Identifier: Zlib
+ -/
+import Mathlib
+
+/-!
+# Smoothing by a weighted recursion
+
+The definition in `src/features.json` of `ewma_average`. The result has one
+value for each value of the series: the first is the first value, and each
+later one is made from the one before it and the next value of the series.
+The definition is stated over any field: over ℝ it is the specification, and
+over ℚ it computes, which gives its values at a series of doubles exactly.
+
+The definition is stated for any weight. The library refuses a weight below
+zero or above one, and a series of no values.
+-/
+
+namespace XtractSpec
+
+section Field
+
+variable {α : Type*} [Field α]
+
+/-- The averages that follow the one given: each is the one before it, plus the weight times
+the difference of the next value from it. -/
+def ewmaFrom (weight : α) : α → List α → List α
+  | _, [] => []
+  | average, x :: rest =>
+    (average + weight * (x - average)) :: ewmaFrom weight (average + weight * (x - average)) rest
+
+/-- The first value, then the averages that follow it. -/
+def ewmaAverage : List α → α → List α
+  | [], _ => []
+  | x :: rest, weight => x :: ewmaFrom weight x rest
+
+end Field
+
+/-! ## Evaluation over ℚ -/
+
+theorem ewmaFrom_cast (weight : ℚ) (xs : List ℚ) :
+    ∀ average : ℚ, ewmaFrom (weight : ℝ) (average : ℝ) (xs.map (↑)) =
+      (ewmaFrom weight average xs).map (↑) := by
+  induction xs with
+  | nil => intro average; rfl
+  | cons x rest ih =>
+    intro average
+    have next := ih (average + weight * (x - average))
+    push_cast at next
+    simp only [List.map_cons, ewmaFrom, next]
+    push_cast
+    rfl
+
+theorem ewmaAverage_cast (xs : List ℚ) (weight : ℚ) :
+    ewmaAverage (xs.map (↑) : List ℝ) (weight : ℝ) = (ewmaAverage xs weight).map (↑) := by
+  cases xs with
+  | nil => rfl
+  | cons x rest => simp only [List.map_cons, ewmaAverage, ewmaFrom_cast]
+
+/-!
+## Invariance
+
+The laws that `invariance` states for `ewma_average` in `src/features.json`.
+-/
+
+theorem ewmaFrom_offset (weight c : ℝ) (xs : List ℝ) :
+    ∀ average : ℝ, ewmaFrom weight (average + c) (xs.map (· + c)) =
+      (ewmaFrom weight average xs).map (· + c) := by
+  induction xs with
+  | nil => intro average; rfl
+  | cons x rest ih =>
+    intro average
+    have step : average + c + weight * (x + c - (average + c)) =
+        average + weight * (x - average) + c := by ring
+    simp only [List.map_cons, ewmaFrom, step, ih]
+
+theorem ewmaFrom_neg (weight : ℝ) (xs : List ℝ) :
+    ∀ average : ℝ, ewmaFrom weight (-average) (xs.map (-·)) =
+      (ewmaFrom weight average xs).map (-·) := by
+  induction xs with
+  | nil => intro average; rfl
+  | cons x rest ih =>
+    intro average
+    have step : -average + weight * (-x - -average) = -(average + weight * (x - average)) := by
+      ring
+    simp only [List.map_cons, ewmaFrom, step, ih]
+
+/-- `offset`: follows. -/
+theorem ewmaAverage_offset (xs : List ℝ) (weight c : ℝ) :
+    ewmaAverage (xs.map (· + c)) weight = (ewmaAverage xs weight).map (· + c) := by
+  cases xs with
+  | nil => rfl
+  | cons x rest => simp only [List.map_cons, ewmaAverage, ewmaFrom_offset]
+
+/-- `sign`: negated. -/
+theorem ewmaAverage_neg (xs : List ℝ) (weight : ℝ) :
+    ewmaAverage (xs.map (-·)) weight = (ewmaAverage xs weight).map (-·) := by
+  cases xs with
+  | nil => rfl
+  | cons x rest => simp only [List.map_cons, ewmaAverage, ewmaFrom_neg]
+
+end XtractSpec
