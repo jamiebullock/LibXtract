@@ -45,6 +45,18 @@ theorem grid_moments_grid_of_3_rows_of_4 :
     ((101 / 2 : ℚ), (0 : ℚ))] :=
   eachWithin_of_rat (gridMoments_cast _ _) (by decide +kernel)
 
+theorem grid_central_moments_grid_of_3_rows_of_4 :
+    EachWithin (gridCentralMoments (grid_of_3_rows_of_4.map (↑) : List ℝ) 4)
+    [((16 : ℚ), (0 : ℚ)),
+    ((4439 / 256 : ℚ), (0 : ℚ)),
+    ((-217 / 128 : ℚ), (0 : ℚ)),
+    ((599 / 64 : ℚ), (0 : ℚ)),
+    ((44139 / 8192 : ℚ), (0 : ℚ)),
+    ((-16389 / 4096 : ℚ), (0 : ℚ)),
+    ((2555 / 2048 : ℚ), (0 : ℚ)),
+    ((-1173 / 1024 : ℚ), (0 : ℚ))] :=
+  eachWithin_of_rat ((gridCentralMoments_cast _ _).trans (congrArg _ (gridCentralMoments_eq_of_centre (centreColumn := 83 / 64) (centreRow := 35 / 32) (by decide +kernel) (by decide +kernel)))) (by decide +kernel)
+
 theorem grid_moments_grid_of_30_rows_cycle :
     EachWithin (gridMoments (grid_of_30_rows_cycle.map (↑) : List ℝ) 32)
     [((440 : ℚ), (1 / 35184372088832 : ℚ)),
@@ -58,5 +70,17 @@ theorem grid_moments_grid_of_30_rows_cycle :
     ((1910477 : ℚ), (1 / 8589934592 : ℚ)),
     ((2780818 : ℚ), (1 / 4294967296 : ℚ))] :=
   eachWithin_of_rat (gridMoments_cast _ _) (by decide +kernel)
+
+theorem grid_central_moments_grid_of_30_rows_cycle :
+    EachWithin (gridCentralMoments (grid_of_30_rows_cycle.map (↑) : List ℝ) 32)
+    [((440 : ℚ), (1 / 35184372088832 : ℚ)),
+    ((5149892562177229 / 137438953472 : ℚ), (1 / 274877906944 : ℚ)),
+    ((7712414361871977 / 562949953421312 : ℚ), (1 / 1125899906842624 : ℚ)),
+    ((2265159153278827 / 68719476736 : ℚ), (1 / 274877906944 : ℚ)),
+    ((5944751508129055 / 140737488355328 : ℚ), (1 / 281474976710656 : ℚ)),
+    ((5148881011479675 / 4398046511104 : ℚ), (1 / 8796093022208 : ℚ)),
+    ((1129250418639265 / 35184372088832 : ℚ), (1 / 281474976710656 : ℚ)),
+    ((-7273573646244835 / 1125899906842624 : ℚ), (1 / 2251799813685248 : ℚ))] :=
+  eachWithin_of_rat ((gridCentralMoments_cast _ _).trans (congrArg _ (gridCentralMoments_eq_of_centre (centreColumn := 3012007430785387800 / 198158383604301829) (centreRow := 46019582432322677487 / 3170534137668829264) (by decide +kernel) (by decide +kernel)))) (by decide +kernel)
 
 end XtractSpec.Records

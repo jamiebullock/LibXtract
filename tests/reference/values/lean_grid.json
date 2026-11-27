@@ -32,6 +32,28 @@
       "call": "theorem XtractSpec.Records.grid_moments_grid_of_3_rows_of_4"
     },
     {
+      "feature": "grid_central_moments",
+      "data": "grid_of_3_rows_of_4",
+      "arguments": {
+        "width": 4
+      },
+      "expected": [
+        16.0,
+        17.33984375,
+        -1.6953125,
+        9.359375,
+        5.3880615234375,
+        -4.001220703125,
+        1.24755859375,
+        -1.1455078125
+      ],
+      "tolerance": {
+        "relative": 0.0,
+        "reason": "no rounding: the values sum to 16, and every value that the library's operations give on the way, repeated in doubles, is the exact one; the expected value is exact"
+      },
+      "call": "theorem XtractSpec.Records.grid_central_moments_grid_of_3_rows_of_4"
+    },
+    {
       "feature": "grid_moments",
       "data": "grid_of_30_rows_cycle",
       "arguments": {
@@ -54,6 +76,28 @@
         "reason": "67 roundings, each within 2^-53 relatively: for a moment, at most three multiplications by a column in every term, the W - 1 additions along a row, at most three multiplications of the sum of a row by its row and the H - 1 additions of the rows, all of one sign; and the expected value"
       },
       "call": "theorem XtractSpec.Records.grid_moments_grid_of_30_rows_cycle"
+    },
+    {
+      "feature": "grid_central_moments",
+      "data": "grid_of_30_rows_cycle",
+      "arguments": {
+        "width": 32
+      },
+      "expected": [
+        440.0,
+        37470.4,
+        13.700000000000005,
+        32962.40397727273,
+        42.24,
+        1170.72,
+        32.09522727272727,
+        -6.460231146694215
+      ],
+      "tolerance": {
+        "relative": 7.16e-13,
+        "reason": "6446 roundings, each within 2^-53 relatively: the centre is a ratio of rounded sums and a deviation from it is a difference of rounded values; the bound that this, the products and the additions give for a moment, term by term from the exact values, is at most 6445 roundings of the largest moment; and the expected value"
+      },
+      "call": "theorem XtractSpec.Records.grid_central_moments_grid_of_30_rows_cycle"
     }
   ]
 }

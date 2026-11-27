@@ -290,15 +290,21 @@ static const xttest_reference_source source_lean_cooccurrence = {.id = "lean_coo
 
 static const int arguments_lean_grid_0[] = {4};
 static const double expected_lean_grid_0[] = {16.0, 20.75, 17.5, 44.25, 21.0, 28.5, 107.75, 40.0, 34.5, 50.5};
-static const int arguments_lean_grid_1[] = {32};
-static const double expected_lean_grid_1[] = {440.0, 6688.0, 6386.5, 139128.0, 97088.5, 125661.0, 3253888.0, 2020998.5, 1910477.0, 2780818.0};
+static const int arguments_lean_grid_1[] = {4};
+static const double expected_lean_grid_1[] = {16.0, 17.33984375, -1.6953125, 9.359375, 5.3880615234375, -4.001220703125, 1.24755859375, -1.1455078125};
+static const int arguments_lean_grid_2[] = {32};
+static const double expected_lean_grid_2[] = {440.0, 6688.0, 6386.5, 139128.0, 97088.5, 125661.0, 3253888.0, 2020998.5, 1910477.0, 2780818.0};
+static const int arguments_lean_grid_3[] = {32};
+static const double expected_lean_grid_3[] = {440.0, 37470.400000000001, 13.700000000000005, 32962.403977272726, 42.240000000000002, 1170.72, 32.095227272727271, -6.4602311466942153};
 
 static const xttest_reference_record records_lean_grid[] = {
     {.feature = XTRACT_GRID_MOMENTS, .series = &series_grid_of_3_rows_of_4, .arguments = arguments_lean_grid_0, .expected = expected_lean_grid_0, .expected_count = 10, .tolerance = 0.0},
-    {.feature = XTRACT_GRID_MOMENTS, .series = &series_grid_of_30_rows_cycle, .arguments = arguments_lean_grid_1, .expected = expected_lean_grid_1, .expected_count = 10, .tolerance = 7.4399999999999994e-15},
+    {.feature = XTRACT_GRID_CENTRAL_MOMENTS, .series = &series_grid_of_3_rows_of_4, .arguments = arguments_lean_grid_1, .expected = expected_lean_grid_1, .expected_count = 8, .tolerance = 0.0},
+    {.feature = XTRACT_GRID_MOMENTS, .series = &series_grid_of_30_rows_cycle, .arguments = arguments_lean_grid_2, .expected = expected_lean_grid_2, .expected_count = 10, .tolerance = 7.4399999999999994e-15},
+    {.feature = XTRACT_GRID_CENTRAL_MOMENTS, .series = &series_grid_of_30_rows_cycle, .arguments = arguments_lean_grid_3, .expected = expected_lean_grid_3, .expected_count = 8, .tolerance = 7.1599999999999998e-13},
 };
 
-static const xttest_reference_source source_lean_grid = {.id = "lean_grid", .name = "Theorems about the definitions of the moments of a grid, checked by Lean", .level = 3, .record_count = 2, .records = records_lean_grid};
+static const xttest_reference_source source_lean_grid = {.id = "lean_grid", .name = "Theorems about the definitions of the moments of a grid, checked by Lean", .level = 3, .record_count = 4, .records = records_lean_grid};
 
 static const double arguments_lean_harmonicity_0[] = {100.0};
 static const double expected_lean_harmonicity_0[] = {0.22696629213483147};

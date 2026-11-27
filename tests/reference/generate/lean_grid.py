@@ -24,7 +24,10 @@ that sum to 16, on which the library's arithmetic is exact. The second has
 each row begins two values further into the cycle than the one before it.
 """
 
-from certificates import Certificates
+import math
+from fractions import Fraction
+
+from certificates import DECIDE, Certificates, lean
 
 SHORT = "grid_of_3_rows_of_4"
 LONG = "grid_of_30_rows_cycle"
@@ -35,6 +38,72 @@ SERIES = {
 }
 WIDTH = {SHORT: 4, LONG: 32}
 ORDERS = [(0, 0), (1, 0), (0, 1), (2, 0), (1, 1), (0, 2), (3, 0), (2, 1), (1, 2), (0, 3)]
+CENTRAL = [(0, 0), (2, 0), (1, 1), (0, 2), (3, 0), (2, 1), (1, 2), (0, 3)]
+
+
+def central_as_the_library(values, width, zero):
+    """The central moments by the library's operations in its order, on
+    values of the type of `zero`, and every value met on the way."""
+    height = len(values) // width
+    met = []
+    total = total_x = total_y = zero
+    for y in range(height):
+        row = values[y * width : (y + 1) * width]
+        row_sum = row_x = zero
+        for x, value in enumerate(row):
+            row_sum = row_sum + value
+            row_x = row_x + x * value
+            met += [row_sum, x * value, row_x]
+        total = total + row_sum
+        total_x = total_x + row_x
+        total_y = total_y + y * row_sum
+        met += [total, total_x, y * row_sum, total_y]
+    centre_x = total_x / total
+    centre_y = total_y / total
+    met += [centre_x, centre_y]
+    mu20 = mu11 = mu02 = mu30 = mu21 = mu12 = mu03 = zero
+    for y in range(height):
+        dy = y - centre_y
+        row = values[y * width : (y + 1) * width]
+        row_sum = row_x = row_xx = row_xxx = zero
+        for x, value in enumerate(row):
+            dx = x - centre_x
+            row_sum = row_sum + value
+            row_x = row_x + dx * value
+            row_xx = row_xx + dx * dx * value
+            row_xxx = row_xxx + dx * dx * dx * value
+            met += [dx, dx * value, dx * dx, dx * dx * value, dx * dx * dx, dx * dx * dx * value]
+            met += [row_sum, row_x, row_xx, row_xxx]
+        mu20 = mu20 + row_xx
+        mu11 = mu11 + dy * row_x
+        mu02 = mu02 + dy * dy * row_sum
+        mu30 = mu30 + row_xxx
+        mu21 = mu21 + dy * row_xx
+        mu12 = mu12 + dy * dy * row_x
+        mu03 = mu03 + dy * dy * dy * row_sum
+        met += [dy, dy * row_x, dy * dy, dy * dy * row_sum, dy * row_xx, dy * dy * row_x, dy * dy * dy]
+        met += [dy * dy * dy * row_sum, mu20, mu11, mu02, mu30, mu21, mu12, mu03]
+    return [total, mu20, mu11, mu02, mu30, mu21, mu12, mu03], met
+
+
+def central_roundings(xs, width, centre_x, centre_y, p, q):
+    """A bound on the rounding of a central moment, in roundings: of each
+    deviation from the centre, which is a ratio of rounded sums, of each
+    product and of each addition."""
+    height = len(xs) // width
+    of_centre_x = 2 * (width + height) * abs(centre_x)
+    of_centre_y = 2 * (width + height) * abs(centre_y)
+    bound = Fraction(0)
+    for index, value in enumerate(xs):
+        dx = abs(index % width - centre_x)
+        dy = abs(index // width - centre_y)
+        term = dx**p * dy**q * abs(value)
+        if p:
+            bound += abs(value) * p * dx ** (p - 1) * dy**q * (dx + of_centre_x)
+        if q:
+            bound += abs(value) * q * dy ** (q - 1) * dx**p * (dy + of_centre_y)
+        bound += (p + q + width + height - 2) * term
+    return bound
 
 
 def main():
@@ -70,6 +139,38 @@ def main():
             else "for a moment, at most three multiplications by a column in every term, the W - 1 additions "
             "along a row, at most three multiplications of the sum of a row by its row and the H - 1 additions "
             "of the rows, all of one sign",
+            {"width": width},
+        )
+
+        total = sum(xs)
+        centre_x = moments[1] / total
+        centre_y = moments[2] / total
+        central = [
+            sum((index % width - centre_x) ** p * (index // width - centre_y) ** q * x for index, x in enumerate(xs))
+            for p, q in CENTRAL
+        ]
+        if exact:
+            in_doubles, met_in_doubles = central_as_the_library([float(x) for x in xs], width, 0.0)
+            in_fractions, met_in_fractions = central_as_the_library(xs, width, Fraction(0))
+            assert in_fractions == central
+            assert all(Fraction(a) == b for a, b in zip(met_in_doubles, met_in_fractions))
+        bound = max(central_roundings(xs, width, centre_x, centre_y, p, q) for p, q in CENTRAL) / max(
+            abs(moment) for moment in central
+        )
+        out.vector(
+            "grid_central_moments",
+            series,
+            f"gridCentralMoments {data(series)} {width}",
+            "(gridCentralMoments_cast _ _).trans (congrArg _ (gridCentralMoments_eq_of_centre "
+            f"(centreColumn := {lean(centre_x)}) (centreRow := {lean(centre_y)}) {DECIDE} {DECIDE}))",
+            central,
+            0 if exact else math.ceil(bound),
+            "the values sum to 16, and every value that the library's operations give on the way, repeated in "
+            "doubles, is the exact one"
+            if exact
+            else "the centre is a ratio of rounded sums and a deviation from it is a difference of rounded "
+            "values; the bound that this, the products and the additions give for a moment, term by term from "
+            f"the exact values, is at most {math.ceil(bound)} roundings of the largest moment",
             {"width": width},
         )
 
