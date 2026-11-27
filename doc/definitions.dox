@@ -69,7 +69,7 @@ Sources:
 - Origin: Pearson (1895). "Contributions to the mathematical theory of evolution. II. Skew variation in homogeneous material". Philosophical Transactions of the Royal Society of London, Series A 186, page 348, beta 1. <a href="https://doi.org/10.1098/rsta.1895.0010">doi:10.1098/rsta.1895.0010</a>
 - Formulation: Joanes and Gill (1998). "Comparing measures of sample skewness and kurtosis". Journal of the Royal Statistical Society: Series D (The Statistician) 47(1), section 2, page 184, b1. <a href="https://doi.org/10.1111/1467-9884.00122">doi:10.1111/1467-9884.00122</a>
 
-Validation level 0, not checked.
+Validation level 3, certified.
 
 \section definition_kurtosis Kurtosis
 
@@ -81,7 +81,7 @@ Sources:
 - Origin: Pearson (1905). "Das Fehlergesetz und seine Verallgemeinerungen durch Fechner und Pearson. A rejoinder". Biometrika 4(1-2), pages 173 and 174, beta 2. <a href="https://doi.org/10.1093/biomet/4.1-2.169">doi:10.1093/biomet/4.1-2.169</a>
 - Formulation: Joanes and Gill (1998). "Comparing measures of sample skewness and kurtosis". Journal of the Royal Statistical Society: Series D (The Statistician) 47(1), section 2, page 185, b2. <a href="https://doi.org/10.1111/1467-9884.00122">doi:10.1111/1467-9884.00122</a>
 
-Validation level 0, not checked.
+Validation level 3, certified.
 
 \section definition_spectral_mean Spectral Mean
 
