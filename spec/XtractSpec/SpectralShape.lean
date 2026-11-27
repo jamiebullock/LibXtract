@@ -9,9 +9,10 @@ import Mathlib
 # The shape of a spectrum
 
 The definitions in `src/features.json` of `tristimulus_1`, `tristimulus_2`,
-`tristimulus_3` and `odd_even_ratio`. The data of each is the coefficients of
-the harmonics of a sound in the order of their numbers, the first harmonic
-first. A
+`tristimulus_3`, `odd_even_ratio` and `irregularity_j`. The data of each is
+the coefficients of the harmonics of a sound in the order of their numbers,
+the first harmonic first, and `irregularity_j` takes the amplitudes of any
+partials or bins in the order of their frequencies. A
 definition is stated over any field: over ℝ it is the specification, and over
 ℚ it computes, which gives its value at coefficients that are doubles
 exactly.
@@ -21,7 +22,8 @@ division by zero is zero, so a tristimulus is zero here when the coefficients
 sum to zero, or when the coefficients it takes its share from do, and the
 library gives no result in either case. `oddEvenRatio` is zero here when the
 coefficients of the odd harmonics sum to zero, or those of the even harmonics
-do, and the library gives no result in either case.
+do, and the library gives no result in either case. `irregularityJ` of
+amplitudes that are all zero is zero here, where the library gives no result.
 -/
 
 namespace XtractSpec
@@ -60,6 +62,18 @@ harmonics. -/
 def oddEvenRatio (xs : List α) : α :=
   (alternate xs).sum / (alternate xs.tail).sum
 
+/-- The sum of the squared differences between each value and the one after it, with 0 after the
+last. -/
+def stepSquares : List α → α
+  | [] => 0
+  | [x] => x ^ 2
+  | x :: y :: rest => (x - y) ^ 2 + stepSquares (y :: rest)
+
+/-- The sum of the squared differences between each amplitude and the next, with 0 after the
+last, over the sum of the squares of the amplitudes. -/
+def irregularityJ (xs : List α) : α :=
+  stepSquares xs / (xs.map fun x => x ^ 2).sum
+
 /-- The three shares are of the whole: they sum to 1. -/
 theorem tristimulus_sum (xs : List α) (h : xs.sum ≠ 0) :
     tristimulus1 xs + tristimulus2 xs + tristimulus3 xs = 1 := by
@@ -91,5 +105,19 @@ theorem tristimulus3_cast (xs : List ℚ) :
 theorem oddEvenRatio_cast (xs : List ℚ) :
     oddEvenRatio (xs.map (↑) : List ℝ) = ((oddEvenRatio xs : ℚ) : ℝ) := by
   simp [oddEvenRatio, ← List.map_tail, alternate_map]
+
+theorem stepSquares_cast : ∀ xs : List ℚ, stepSquares (xs.map (↑) : List ℝ) = ((stepSquares xs : ℚ) : ℝ)
+  | [] => by simp [stepSquares]
+  | [_] => by simp [stepSquares]
+  | x :: y :: rest => by
+    have ih := stepSquares_cast (y :: rest)
+    simp only [List.map_cons, stepSquares] at ih ⊢
+    rw [ih]
+    push_cast
+    rfl
+
+theorem irregularityJ_cast (xs : List ℚ) :
+    irregularityJ (xs.map (↑) : List ℝ) = ((irregularityJ xs : ℚ) : ℝ) := by
+  simp [irregularityJ, stepSquares_cast, List.map_map, Function.comp_def]
 
 end XtractSpec

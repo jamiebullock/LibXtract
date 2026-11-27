@@ -99,6 +99,22 @@ def main():
             "the coefficients of the even harmonics likewise, each of one sign, in any order; the division",
         )
 
+        steps = [(a - b) ** 2 for a, b in zip(xs, xs[1:] + [Fraction(0)])]
+        out.rational(
+            "irregularity_j",
+            series,
+            f"irregularityJ {data(series)}",
+            "irregularityJ_cast _",
+            sum(steps) / sum(x**2 for x in xs),
+            1 if exact else 2 * n + 3,
+            "the division; every amplitude is a multiple of 1/4, so each difference, each square and each "
+            "addition is exact"
+            if exact
+            else "the difference of two amplitudes, which its square counts twice, and the square, in every term "
+            "that is divided, and the N - 1 additions of those terms, in any order; the square of every "
+            "amplitude and the N - 1 additions of the squares, in any order; the division",
+        )
+
     out.store("spectral_shape", "SpectralShape", ["SpectralShape"], "the features of the shape of a spectrum")
 
 

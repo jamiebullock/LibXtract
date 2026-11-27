@@ -56,6 +56,18 @@
       "call": "theorem XtractSpec.Records.odd_even_ratio_harmonics_with_a_zero"
     },
     {
+      "feature": "irregularity_j",
+      "data": "harmonics_with_a_zero",
+      "expected": [
+        0.6646216768916156
+      ],
+      "tolerance": {
+        "relative": 2.23e-16,
+        "reason": "2 roundings, each within 2^-53 relatively: the division; every amplitude is a multiple of 1/4, so each difference, each square and each addition is exact; and the expected value"
+      },
+      "call": "theorem XtractSpec.Records.irregularity_j_harmonics_with_a_zero"
+    },
+    {
       "feature": "tristimulus_1",
       "data": "falling_harmonics_cycle",
       "expected": [
@@ -102,6 +114,18 @@
         "reason": "1000 roundings, each within 2^-53 relatively: the additions of the coefficients of the odd harmonics, one fewer than those harmonics, and of the coefficients of the even harmonics likewise, each of one sign, in any order; the division; and the expected value"
       },
       "call": "theorem XtractSpec.Records.odd_even_ratio_falling_harmonics_cycle"
+    },
+    {
+      "feature": "irregularity_j",
+      "data": "falling_harmonics_cycle",
+      "expected": [
+        0.5046930983847284
+      ],
+      "tolerance": {
+        "relative": 2.23e-13,
+        "reason": "2004 roundings, each within 2^-53 relatively: the difference of two amplitudes, which its square counts twice, and the square, in every term that is divided, and the N - 1 additions of those terms, in any order; the square of every amplitude and the N - 1 additions of the squares, in any order; the division; and the expected value"
+      },
+      "call": "theorem XtractSpec.Records.irregularity_j_falling_harmonics_cycle"
     }
   ]
 }

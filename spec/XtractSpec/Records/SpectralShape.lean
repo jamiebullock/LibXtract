@@ -47,6 +47,10 @@ theorem odd_even_ratio_harmonics_with_a_zero :
     |oddEvenRatio (harmonics_with_a_zero.map (↑) : List ℝ) - ((1003519482185817 / 562949953421312 : ℚ) : ℝ)| ≤ ((1 / 9007199254740992 : ℚ) : ℝ) :=
   within_of_rat (oddEvenRatio_cast _) (by decide +kernel)
 
+theorem irregularity_j_harmonics_with_a_zero :
+    |irregularityJ (harmonics_with_a_zero.map (↑) : List ℝ) - ((1496594968195717 / 2251799813685248 : ℚ) : ℝ)| ≤ ((1 / 18014398509481984 : ℚ) : ℝ) :=
+  within_of_rat (irregularityJ_cast _) (by decide +kernel)
+
 theorem tristimulus_1_falling_harmonics_cycle :
     |tristimulus1 (falling_harmonics_cycle.map (↑) : List ℝ) - ((5825287602224069 / 2305843009213693952 : ℚ) : ℝ)| ≤ ((1 / 4611686018427387904 : ℚ) : ℝ) :=
   within_of_rat (tristimulus1_cast _) (by decide +kernel)
@@ -62,5 +66,9 @@ theorem tristimulus_3_falling_harmonics_cycle :
 theorem odd_even_ratio_falling_harmonics_cycle :
     |oddEvenRatio (falling_harmonics_cycle.map (↑) : List ℝ) - ((6657495101330299 / 4503599627370496 : ℚ) : ℝ)| ≤ ((1 / 9007199254740992 : ℚ) : ℝ) :=
   within_of_rat (oddEvenRatio_cast _) (by decide +kernel)
+
+theorem irregularity_j_falling_harmonics_cycle :
+    |irregularityJ (falling_harmonics_cycle.map (↑) : List ℝ) - ((568233912455481 / 1125899906842624 : ℚ) : ℝ)| ≤ ((1 / 18014398509481984 : ℚ) : ℝ) :=
+  within_of_rat (irregularityJ_cast _) (by decide +kernel)
 
 end XtractSpec.Records
