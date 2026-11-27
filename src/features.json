@@ -357,7 +357,7 @@
       "description": "Extract the rolloff point of a spectrum",
       "definition": "f_r = \\Delta f \\, k^*, \\quad k^* = \\min\\left\\{k : \\sum_{j=0}^{k} P_j \\ge \\frac{p}{100} \\sum_{j=0}^{N-1} P_j\\right\\}",
       "sources": [{"role": "origin", "authors": ["Scheirer", "Slaney"], "year": 1997, "title": "Construction and evaluation of a robust multifeature speech/music discriminator", "venue": "Proceedings of ICASSP 1997, volume 2", "locator": "section 2", "permalink": "doi:10.1109/ICASSP.1997.596192"}, {"role": "formulation", "authors": ["Peeters"], "year": 2004, "title": "A large set of audio features for sound description (similarity and classification) in the CUIDADO project", "venue": "Technical report, IRCAM", "locator": "section 6.1.7"}],
-      "validation_level": 0,
+      "validation_level": 3,
       "input": {"format": "spectral_magnitudes", "unit": "any", "accepts": ["power_bins"]},
       "argument_type": "float",
       "arguments": [

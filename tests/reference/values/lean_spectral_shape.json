@@ -68,6 +68,22 @@
       "call": "theorem XtractSpec.Records.irregularity_j_harmonics_with_a_zero"
     },
     {
+      "feature": "rolloff",
+      "data": "harmonics_with_a_zero",
+      "arguments": {
+        "bin_spacing": 172.265625,
+        "threshold": 71.875
+      },
+      "expected": [
+        516.796875
+      ],
+      "tolerance": {
+        "relative": 0.0,
+        "reason": "no rounding: every coefficient is a multiple of 1/4, and the share is the sum of the first four of them, 11.5, so the share and each running sum are exact, and the product of the bin number and the spacing is a double, which the multiplication gives; the expected value is exact"
+      },
+      "call": "theorem XtractSpec.Records.rolloff_harmonics_with_a_zero"
+    },
+    {
       "feature": "tristimulus_1",
       "data": "falling_harmonics_cycle",
       "expected": [
@@ -126,6 +142,22 @@
         "reason": "2004 roundings, each within 2^-53 relatively: the difference of two amplitudes, which its square counts twice, and the square, in every term that is divided, and the N - 1 additions of those terms, in any order; the square of every amplitude and the N - 1 additions of the squares, in any order; the division; and the expected value"
       },
       "call": "theorem XtractSpec.Records.irregularity_j_falling_harmonics_cycle"
+    },
+    {
+      "feature": "rolloff",
+      "data": "falling_harmonics_cycle",
+      "arguments": {
+        "bin_spacing": 24.0,
+        "threshold": 95.0
+      },
+      "expected": [
+        22728.0
+      ],
+      "tolerance": {
+        "relative": 0.0,
+        "reason": "no rounding: the running sums on either side of the share differ from it by more than the roundings of the share and of the sums can amount to, so the bin is that of the definition, and the product of its number and the spacing is a double, which the multiplication gives; the expected value is exact"
+      },
+      "call": "theorem XtractSpec.Records.rolloff_falling_harmonics_cycle"
     }
   ]
 }

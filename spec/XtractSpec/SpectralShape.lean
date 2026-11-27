@@ -12,7 +12,11 @@ The definitions in `src/features.json` of `tristimulus_1`, `tristimulus_2`,
 `tristimulus_3`, `odd_even_ratio` and `irregularity_j`. The data of each is
 the coefficients of the harmonics of a sound in the order of their numbers,
 the first harmonic first, and `irregularity_j` takes the amplitudes of any
-partials or bins in the order of their frequencies. A
+partials or bins in the order of their frequencies.
+
+`rolloff` is defined here too. Its data is the power coefficients of the bins
+of a spectrum from bin 0, and it is stated over an ordered field, since it
+compares the running sum of the coefficients with a share of their sum. A
 definition is stated over any field: over ℝ it is the specification, and over
 ℚ it computes, which gives its value at coefficients that are doubles
 exactly.
@@ -24,6 +28,8 @@ library gives no result in either case. `oddEvenRatio` is zero here when the
 coefficients of the odd harmonics sum to zero, or those of the even harmonics
 do, and the library gives no result in either case. `irregularityJ` of
 amplitudes that are all zero is zero here, where the library gives no result.
+When no running sum reaches the share, which takes a coefficient below zero,
+`rolloff` counts every bin here and the library stops at the last.
 -/
 
 namespace XtractSpec
@@ -86,6 +92,23 @@ theorem tristimulus_sum (xs : List α) (h : xs.sum ≠ 0) :
 
 end Field
 
+section Ordered
+
+variable {α : Type*} [Field α] [LinearOrder α]
+
+/-- The count of the values before the first at which the running sum, begun at `sum`, reaches
+the target. -/
+def reachIndex (target : α) : α → List α → ℕ
+  | _, [] => 0
+  | sum, x :: rest => if target ≤ sum + x then 0 else reachIndex target (sum + x) rest + 1
+
+/-- The bin spacing given, `spacing`, times the number of the first bin at which the running sum
+of the coefficients reaches the percentage given, `percent`, of their sum. -/
+def rolloff (xs : List α) (spacing percent : α) : α :=
+  spacing * (reachIndex (percent / 100 * xs.sum) 0 xs : α)
+
+end Ordered
+
 /-! ## Evaluation over ℚ -/
 
 theorem tristimulus1_cast (xs : List ℚ) :
@@ -119,5 +142,27 @@ theorem stepSquares_cast : ∀ xs : List ℚ, stepSquares (xs.map (↑) : List �
 theorem irregularityJ_cast (xs : List ℚ) :
     irregularityJ (xs.map (↑) : List ℝ) = ((irregularityJ xs : ℚ) : ℝ) := by
   simp [irregularityJ, stepSquares_cast, List.map_map, Function.comp_def]
+
+theorem reachIndex_cast (target : ℚ) (xs : List ℚ) :
+    ∀ sum : ℚ, reachIndex (target : ℝ) (sum : ℝ) (xs.map (↑)) = reachIndex target sum xs := by
+  induction xs with
+  | nil => intro sum; rfl
+  | cons x rest ih =>
+    intro sum
+    have reached : ((target : ℝ) ≤ (sum : ℝ) + (x : ℝ)) ↔ (target ≤ sum + x) := by
+      exact_mod_cast Iff.rfl
+    have next := ih (sum + x)
+    push_cast at next
+    simp only [List.map_cons, reachIndex, reached, next]
+
+theorem rolloff_cast (xs : List ℚ) (spacing percent : ℚ) :
+    rolloff (xs.map (↑) : List ℝ) (spacing : ℝ) (percent : ℝ) =
+      ((rolloff xs spacing percent : ℚ) : ℝ) := by
+  have index := reachIndex_cast (percent / 100 * xs.sum) xs 0
+  push_cast at index
+  simp only [rolloff]
+  rw [index]
+  push_cast
+  rfl
 
 end XtractSpec

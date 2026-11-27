@@ -51,6 +51,10 @@ theorem irregularity_j_harmonics_with_a_zero :
     |irregularityJ (harmonics_with_a_zero.map (↑) : List ℝ) - ((1496594968195717 / 2251799813685248 : ℚ) : ℝ)| ≤ ((1 / 18014398509481984 : ℚ) : ℝ) :=
   within_of_rat (irregularityJ_cast _) (by decide +kernel)
 
+theorem rolloff_harmonics_with_a_zero :
+    rolloff (harmonics_with_a_zero.map (↑) : List ℝ) ((11025 / 64 : ℚ) : ℝ) ((575 / 8 : ℚ) : ℝ) = ((33075 / 64 : ℚ) : ℝ) :=
+  eq_of_rat (rolloff_cast _ _ _) (by decide +kernel)
+
 theorem tristimulus_1_falling_harmonics_cycle :
     |tristimulus1 (falling_harmonics_cycle.map (↑) : List ℝ) - ((5825287602224069 / 2305843009213693952 : ℚ) : ℝ)| ≤ ((1 / 4611686018427387904 : ℚ) : ℝ) :=
   within_of_rat (tristimulus1_cast _) (by decide +kernel)
@@ -70,5 +74,9 @@ theorem odd_even_ratio_falling_harmonics_cycle :
 theorem irregularity_j_falling_harmonics_cycle :
     |irregularityJ (falling_harmonics_cycle.map (↑) : List ℝ) - ((568233912455481 / 1125899906842624 : ℚ) : ℝ)| ≤ ((1 / 18014398509481984 : ℚ) : ℝ) :=
   within_of_rat (irregularityJ_cast _) (by decide +kernel)
+
+theorem rolloff_falling_harmonics_cycle :
+    rolloff (falling_harmonics_cycle.map (↑) : List ℝ) ((24 : ℚ) : ℝ) ((95 : ℚ) : ℝ) = ((22728 : ℚ) : ℝ) :=
+  eq_of_rat (rolloff_cast _ _ _) (by decide +kernel)
 
 end XtractSpec.Records
