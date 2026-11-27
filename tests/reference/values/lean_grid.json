@@ -1,0 +1,59 @@
+{
+  "source": {
+    "name": "Theorems about the definitions of the moments of a grid, checked by Lean",
+    "version": "Lean 4.36.0, Mathlib v4.36.0",
+    "licence": "Zlib, as the library",
+    "how": "each expected value is proved to be the value of the feature's definition at the doubles nearest the stored values, or within half a unit in its last place of it, by the theorem its record names in spec/XtractSpec/Records/Grid.lean; written by tests/reference/generate/lean_grid.py and checked by Lean's kernel",
+    "level": 3
+  },
+  "records": [
+    {
+      "feature": "grid_moments",
+      "data": "grid_of_3_rows_of_4",
+      "arguments": {
+        "width": 4
+      },
+      "expected": [
+        16.0,
+        20.75,
+        17.5,
+        44.25,
+        21.0,
+        28.5,
+        107.75,
+        40.0,
+        34.5,
+        50.5
+      ],
+      "tolerance": {
+        "relative": 0.0,
+        "reason": "no rounding: every value is a multiple of 1/4 and every column and row is a whole number, so each product and each addition is exact; the expected value is exact"
+      },
+      "call": "theorem XtractSpec.Records.grid_moments_grid_of_3_rows_of_4"
+    },
+    {
+      "feature": "grid_moments",
+      "data": "grid_of_30_rows_cycle",
+      "arguments": {
+        "width": 32
+      },
+      "expected": [
+        440.0,
+        6688.0,
+        6386.5,
+        139128.0,
+        97088.5,
+        125661.0,
+        3253888.0,
+        2020998.5,
+        1910477.0,
+        2780818.0
+      ],
+      "tolerance": {
+        "relative": 7.44e-15,
+        "reason": "67 roundings, each within 2^-53 relatively: for a moment, at most three multiplications by a column in every term, the W - 1 additions along a row, at most three multiplications of the sum of a row by its row and the H - 1 additions of the rows, all of one sign; and the expected value"
+      },
+      "call": "theorem XtractSpec.Records.grid_moments_grid_of_30_rows_cycle"
+    }
+  ]
+}
