@@ -8,13 +8,14 @@ import Mathlib
 /-!
 # Smoothing by a weighted recursion
 
-The definition in `src/features.json` of `ewma_average`. The result has one
-value for each value of the series: the first is the first value, and each
-later one is made from the one before it and the next value of the series.
-The definition is stated over any field: over ℝ it is the specification, and
-over ℚ it computes, which gives its values at a series of doubles exactly.
+The definitions in `src/features.json` of `ewma_average` and `ewma_variance`.
+The result of each has one value for each value of the series, and each
+after the first is made from the one before it and the next value of the
+series. A definition is stated over any field: over ℝ it is the
+specification, and over ℚ it computes, which gives its values at a series of
+doubles exactly.
 
-The definition is stated for any weight. The library refuses a weight below
+A definition is stated for any weight. The library refuses a weight below
 zero or above one, and a series of no values.
 -/
 
@@ -35,6 +36,21 @@ def ewmaFrom (weight : α) : α → List α → List α
 def ewmaAverage : List α → α → List α
   | [], _ => []
   | x :: rest, weight => x :: ewmaFrom weight x rest
+
+/-- The variances that follow the one given, `spread`, about the average given: each is the
+one before it plus the weight times the square of the difference of the next value from the
+average, all times one less the weight. The average moves as `ewmaFrom` moves it. -/
+def ewmaVarianceFrom (weight : α) : α → α → List α → List α
+  | _, _, [] => []
+  | average, spread, x :: rest =>
+    ((1 - weight) * (spread + weight * (x - average) ^ 2)) ::
+      ewmaVarianceFrom weight (average + weight * (x - average))
+        ((1 - weight) * (spread + weight * (x - average) ^ 2)) rest
+
+/-- Zero, then the variances that follow it about the averages from the first value. -/
+def ewmaVariance : List α → α → List α
+  | [], _ => []
+  | x :: rest, weight => 0 :: ewmaVarianceFrom weight x 0 rest
 
 end Field
 
@@ -59,10 +75,36 @@ theorem ewmaAverage_cast (xs : List ℚ) (weight : ℚ) :
   | nil => rfl
   | cons x rest => simp only [List.map_cons, ewmaAverage, ewmaFrom_cast]
 
+theorem ewmaVarianceFrom_cast (weight : ℚ) (xs : List ℚ) :
+    ∀ average spread : ℚ,
+      ewmaVarianceFrom (weight : ℝ) (average : ℝ) (spread : ℝ) (xs.map (↑)) =
+        (ewmaVarianceFrom weight average spread xs).map (↑) := by
+  induction xs with
+  | nil => intro average spread; rfl
+  | cons x rest ih =>
+    intro average spread
+    have next := ih (average + weight * (x - average))
+      ((1 - weight) * (spread + weight * (x - average) ^ 2))
+    push_cast at next
+    simp only [List.map_cons, ewmaVarianceFrom, next]
+    push_cast
+    rfl
+
+theorem ewmaVariance_cast (xs : List ℚ) (weight : ℚ) :
+    ewmaVariance (xs.map (↑) : List ℝ) (weight : ℝ) = (ewmaVariance xs weight).map (↑) := by
+  cases xs with
+  | nil => rfl
+  | cons x rest =>
+    have rest_cast := ewmaVarianceFrom_cast weight rest x 0
+    push_cast at rest_cast
+    simp only [List.map_cons, ewmaVariance, rest_cast]
+    push_cast
+    rfl
+
 /-!
 ## Invariance
 
-The laws that `invariance` states for `ewma_average` in `src/features.json`.
+The laws that `invariance` states for each feature in `src/features.json`.
 -/
 
 theorem ewmaFrom_offset (weight c : ℝ) (xs : List ℝ) :
@@ -100,5 +142,43 @@ theorem ewmaAverage_neg (xs : List ℝ) (weight : ℝ) :
   cases xs with
   | nil => rfl
   | cons x rest => simp only [List.map_cons, ewmaAverage, ewmaFrom_neg]
+
+theorem ewmaVarianceFrom_offset (weight c : ℝ) (xs : List ℝ) :
+    ∀ average spread : ℝ, ewmaVarianceFrom weight (average + c) spread (xs.map (· + c)) =
+      ewmaVarianceFrom weight average spread xs := by
+  induction xs with
+  | nil => intro average spread; rfl
+  | cons x rest ih =>
+    intro average spread
+    have difference : x + c - (average + c) = x - average := by ring
+    have step : average + c + weight * (x - average) = average + weight * (x - average) + c := by
+      ring
+    simp only [List.map_cons, ewmaVarianceFrom, difference, step, ih]
+
+theorem ewmaVarianceFrom_neg (weight : ℝ) (xs : List ℝ) :
+    ∀ average spread : ℝ, ewmaVarianceFrom weight (-average) spread (xs.map (-·)) =
+      ewmaVarianceFrom weight average spread xs := by
+  induction xs with
+  | nil => intro average spread; rfl
+  | cons x rest ih =>
+    intro average spread
+    have square : (-x - -average) ^ 2 = (x - average) ^ 2 := by ring
+    have step : -average + weight * (-x - -average) = -(average + weight * (x - average)) := by
+      ring
+    simp only [List.map_cons, ewmaVarianceFrom, square, step, ih]
+
+/-- `offset`: unchanged. -/
+theorem ewmaVariance_offset (xs : List ℝ) (weight c : ℝ) :
+    ewmaVariance (xs.map (· + c)) weight = ewmaVariance xs weight := by
+  cases xs with
+  | nil => rfl
+  | cons x rest => simp only [List.map_cons, ewmaVariance, ewmaVarianceFrom_offset]
+
+/-- `sign`: unchanged. -/
+theorem ewmaVariance_neg (xs : List ℝ) (weight : ℝ) :
+    ewmaVariance (xs.map (-·)) weight = ewmaVariance xs weight := by
+  cases xs with
+  | nil => rfl
+  | cons x rest => simp only [List.map_cons, ewmaVariance, ewmaVarianceFrom_neg]
 
 end XtractSpec

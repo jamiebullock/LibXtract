@@ -31,6 +31,29 @@
       "call": "theorem XtractSpec.Records.ewma_average_quarters_to_smooth"
     },
     {
+      "feature": "ewma_variance",
+      "data": "quarters_to_smooth",
+      "arguments": {
+        "weight": 0.25
+      },
+      "expected": [
+        0.0,
+        1.6875,
+        1.55859375,
+        2.400146484375,
+        1.8627777099609375,
+        4.298300743103027,
+        5.586434304714203,
+        4.321385409682989,
+        3.26695330417715
+      ],
+      "tolerance": {
+        "relative": 0.0,
+        "reason": "no rounding: the values and the weight are multiples of 1/4, and every difference, every product, every sum and every variance is a double, so each operation is exact; the expected value is exact"
+      },
+      "call": "theorem XtractSpec.Records.ewma_variance_quarters_to_smooth"
+    },
+    {
       "feature": "ewma_average",
       "data": "tenths_to_smooth_cycle",
       "arguments": {
@@ -83,6 +106,60 @@
         "reason": "10 roundings, each within 2^-53 relatively: a step rounds the difference from the average before it, the product with the weight and the sum, and carries the rounding of the average before it with the factor 1 - w; the bound that this gives from the exact values is at most 8.66 roundings of the largest result; and the expected value"
       },
       "call": "theorem XtractSpec.Records.ewma_average_tenths_to_smooth_cycle"
+    },
+    {
+      "feature": "ewma_variance",
+      "data": "tenths_to_smooth_cycle",
+      "arguments": {
+        "weight": 0.1
+      },
+      "expected": [
+        0.0,
+        0.0225,
+        0.031275000000000004,
+        0.03545775,
+        0.0550007775,
+        0.052893179775,
+        0.05712562061775,
+        0.0599099252003775,
+        0.05444612206230578,
+        0.06572916990546768,
+        0.07443274077892882,
+        0.07171764069468235,
+        0.0832835296189927,
+        0.08011084856416958,
+        0.07938904588794281,
+        0.0820922168948074,
+        0.0749617493288989,
+        0.08197137924105177,
+        0.09109384307430432,
+        0.0857736538031443,
+        0.09420065550701293,
+        0.09080844858925853,
+        0.08814756217280215,
+        0.09097258790815713,
+        0.08325166781470544,
+        0.08852459483849119,
+        0.09791069771393603,
+        0.09153659164907098,
+        0.09866707115976468,
+        0.09522464487947321,
+        0.09176491274719727,
+        0.09467144461150351,
+        0.08671988591368454,
+        0.09126428008723532,
+        0.1007793101709624,
+        0.09396403327306659,
+        0.10054653218143055,
+        0.09709069316024391,
+        0.09329373023032583,
+        0.09624073114254203
+      ],
+      "tolerance": {
+        "relative": 6.67e-15,
+        "reason": "60 roundings, each within 2^-53 relatively: a step rounds the difference from the average, whose own rounding it takes with it, the two products of its square with the weight, the sum, one less the weight and the last product, and carries the rounding of the variance before it with the factor 1 - w; the bound that this gives from the exact values is at most 58.3 roundings of the largest result; and the expected value"
+      },
+      "call": "theorem XtractSpec.Records.ewma_variance_tenths_to_smooth_cycle"
     }
   ]
 }

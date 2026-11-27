@@ -88,6 +88,40 @@ def main():
             {"weight": float(weight)},
         )
 
+        # The variance takes the difference from the average, whose
+        # rounding `errors` bounds, and carries its own with the factor
+        # 1 - weight: `spread_errors` bounds each result, in roundings
+        spreads = [Fraction(0)]
+        spread_errors = [Fraction(0)]
+        operands = [1 - weight]
+        for x, average, error in zip(xs[1:], averages, errors):
+            difference = x - average
+            term = weight * difference**2
+            of_term = 2 * abs(weight * difference) * (error + abs(difference)) + 2 * abs(term)
+            of_sum = spread_errors[-1] + of_term + abs(spreads[-1] + term)
+            spread = (1 - weight) * (spreads[-1] + term)
+            spread_errors.append(abs(1 - weight) * of_sum + 2 * abs(spread))
+            operands += [difference, weight * difference, term, spreads[-1] + term]
+            spreads.append(spread)
+        exact_variance = exact and all_doubles(spreads) and all_doubles(operands)
+        bound = max(spread_errors) / max(spreads)
+        out.vector(
+            "ewma_variance",
+            series,
+            f"ewmaVariance {data(series)} {cast(weight)}",
+            "ewmaVariance_cast _ _",
+            spreads,
+            0 if exact_variance else math.ceil(bound),
+            "the values and the weight are multiples of 1/4, and every difference, every product, every sum and "
+            "every variance is a double, so each operation is exact"
+            if exact_variance
+            else "a step rounds the difference from the average, whose own rounding it takes with it, the two "
+            "products of its square with the weight, the sum, one less the weight and the last product, and "
+            "carries the rounding of the variance before it with the factor 1 - w; the bound that this gives "
+            f"from the exact values is at most {rounded_up(bound)} roundings of the largest result",
+            {"weight": float(weight)},
+        )
+
     out.store("smoothing", "Smoothing", ["Smoothing"], "the features that smooth a series by a weighted recursion")
 
 
