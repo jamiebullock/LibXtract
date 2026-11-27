@@ -56,6 +56,16 @@ static const double series_decaying_spectrum_128_bins_prefix[256] = {
 
 static const xttest_reference_series series_decaying_spectrum_128_bins = {.name = "decaying_spectrum_128_bins", .prefix = series_decaying_spectrum_128_bins_prefix, .prefix_count = 256, .cycle = NULL, .cycle_count = 0, .repeats = 0};
 
+static const double series_harmonics_with_a_zero_prefix[7] = {
+    6.0, 3.0, 0.0, 2.5, 1.5, 0.25, 2.75};
+
+static const xttest_reference_series series_harmonics_with_a_zero = {.name = "harmonics_with_a_zero", .prefix = series_harmonics_with_a_zero_prefix, .prefix_count = 7, .cycle = NULL, .cycle_count = 0, .repeats = 0};
+
+static const double series_falling_harmonics_cycle_cycle[8] = {
+    0.90000000000000002, 0.69999999999999996, 0.5, 0.29999999999999999, 0.20000000000000001, 0.10000000000000001, 0.10000000000000001, 0.050000000000000003};
+
+static const xttest_reference_series series_falling_harmonics_cycle = {.name = "falling_harmonics_cycle", .prefix = NULL, .prefix_count = 0, .cycle = series_falling_harmonics_cycle_cycle, .cycle_count = 8, .repeats = 125};
+
 static const double series_offset_1e7_integers_prefix[3] = {
     10000001.0, 10000003.0, 10000002.0};
 
@@ -143,6 +153,24 @@ static const xttest_reference_record records_lean_spectral_moments[] = {
 };
 
 static const xttest_reference_source source_lean_spectral_moments = {.id = "lean_spectral_moments", .name = "Theorems about the definitions of the spectral moments, checked by Lean", .level = 3, .record_count = 14, .records = records_lean_spectral_moments};
+
+static const double expected_lean_spectral_shape_0[] = {0.375};
+static const double expected_lean_spectral_shape_1[] = {0.34375};
+static const double expected_lean_spectral_shape_2[] = {0.28125};
+static const double expected_lean_spectral_shape_3[] = {0.0025263157894736842};
+static const double expected_lean_spectral_shape_4[] = {0.0042105263157894736};
+static const double expected_lean_spectral_shape_5[] = {0.99326315789473685};
+
+static const xttest_reference_record records_lean_spectral_shape[] = {
+    {.feature = XTRACT_TRISTIMULUS_1, .series = &series_harmonics_with_a_zero, .arguments = NULL, .expected = expected_lean_spectral_shape_0, .expected_count = 1, .tolerance = 0.0},
+    {.feature = XTRACT_TRISTIMULUS_2, .series = &series_harmonics_with_a_zero, .arguments = NULL, .expected = expected_lean_spectral_shape_1, .expected_count = 1, .tolerance = 0.0},
+    {.feature = XTRACT_TRISTIMULUS_3, .series = &series_harmonics_with_a_zero, .arguments = NULL, .expected = expected_lean_spectral_shape_2, .expected_count = 1, .tolerance = 0.0},
+    {.feature = XTRACT_TRISTIMULUS_1, .series = &series_falling_harmonics_cycle, .arguments = NULL, .expected = expected_lean_spectral_shape_3, .expected_count = 1, .tolerance = 1.12e-13},
+    {.feature = XTRACT_TRISTIMULUS_2, .series = &series_falling_harmonics_cycle, .arguments = NULL, .expected = expected_lean_spectral_shape_4, .expected_count = 1, .tolerance = 1.12e-13},
+    {.feature = XTRACT_TRISTIMULUS_3, .series = &series_falling_harmonics_cycle, .arguments = NULL, .expected = expected_lean_spectral_shape_5, .expected_count = 1, .tolerance = 2.2199999999999999e-13},
+};
+
+static const xttest_reference_source source_lean_spectral_shape = {.id = "lean_spectral_shape", .name = "Theorems about the definitions of the features of the shape of a spectrum, checked by Lean", .level = 3, .record_count = 6, .records = records_lean_spectral_shape};
 
 static const double expected_lean_statistics_0[] = {10000002.0};
 static const double arguments_lean_statistics_1[] = {10000002.0};
@@ -247,13 +275,18 @@ static const xttest_reference_record records_lean_statistics[] = {
 
 static const xttest_reference_source source_lean_statistics = {.id = "lean_statistics", .name = "Theorems about the definitions of the statistics, checked by Lean", .level = 3, .record_count = 38, .records = records_lean_statistics};
 
-const xttest_reference_source *const xttest_reference_sources[] = {&source_lean_spectral_moments, &source_lean_statistics};
+const xttest_reference_source *const xttest_reference_sources[] = {&source_lean_spectral_moments, &source_lean_spectral_shape, &source_lean_statistics};
 
-const int xttest_reference_source_count = 2;
+const int xttest_reference_source_count = 3;
 
 UTEST(reference, results_agree_with_lean_spectral_moments)
 {
     xttest_reference_check(&source_lean_spectral_moments, utest_result);
+}
+
+UTEST(reference, results_agree_with_lean_spectral_shape)
+{
+    xttest_reference_check(&source_lean_spectral_shape, utest_result);
 }
 
 UTEST(reference, results_agree_with_lean_statistics)

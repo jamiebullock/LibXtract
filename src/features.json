@@ -285,7 +285,7 @@
       "description": "Extract the tristimulus (type I) of a spectrum",
       "definition": "T_1 = \\frac{a_1}{\\sum_{h=1}^{N} a_h}",
       "sources": [{"role": "origin", "authors": ["Pollard", "Jansson"], "year": 1982, "title": "A tristimulus method for the specification of musical timbre", "venue": "Acustica 51(3)", "locator": "equations 4 to 6"}, {"role": "formulation", "authors": ["Peeters"], "year": 2004, "title": "A large set of audio features for sound description (similarity and classification) in the CUIDADO project", "venue": "Technical report, IRCAM", "locator": "section 7.1.6"}],
-      "validation_level": 0,
+      "validation_level": 3,
       "input": {"format": "spectral_harmonics_magnitudes", "unit": "any", "accepts": ["harmonic_amplitudes"]},
       "arguments": [],
       "result": {"kind": "scalar", "unit": "none", "min": 0, "max": 1}
@@ -296,7 +296,7 @@
       "description": "Extract the tristimulus (type II) of a spectrum",
       "definition": "T_2 = \\frac{\\sum_{h=2}^{\\min(4, N)} a_h}{\\sum_{h=1}^{N} a_h}",
       "sources": [{"role": "origin", "authors": ["Pollard", "Jansson"], "year": 1982, "title": "A tristimulus method for the specification of musical timbre", "venue": "Acustica 51(3)", "locator": "equations 4 to 6"}, {"role": "formulation", "authors": ["Peeters"], "year": 2004, "title": "A large set of audio features for sound description (similarity and classification) in the CUIDADO project", "venue": "Technical report, IRCAM", "locator": "section 7.1.6"}],
-      "validation_level": 0,
+      "validation_level": 3,
       "input": {"format": "spectral_harmonics_magnitudes", "unit": "any", "accepts": ["harmonic_amplitudes"]},
       "arguments": [],
       "result": {"kind": "scalar", "unit": "none", "min": 0, "max": 1}
@@ -307,7 +307,7 @@
       "description": "Extract the tristimulus (type III) of a spectrum",
       "definition": "T_3 = \\frac{\\sum_{h=5}^{N} a_h}{\\sum_{h=1}^{N} a_h}",
       "sources": [{"role": "origin", "authors": ["Pollard", "Jansson"], "year": 1982, "title": "A tristimulus method for the specification of musical timbre", "venue": "Acustica 51(3)", "locator": "equations 4 to 6"}, {"role": "formulation", "authors": ["Peeters"], "year": 2004, "title": "A large set of audio features for sound description (similarity and classification) in the CUIDADO project", "venue": "Technical report, IRCAM", "locator": "section 7.1.6"}],
-      "validation_level": 0,
+      "validation_level": 3,
       "input": {"format": "spectral_harmonics_magnitudes", "unit": "any", "accepts": ["harmonic_amplitudes"]},
       "arguments": [],
       "result": {"kind": "scalar", "unit": "none", "min": 0, "max": 1}
