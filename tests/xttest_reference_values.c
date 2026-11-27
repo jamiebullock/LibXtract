@@ -76,6 +76,19 @@ static const double series_tenths_to_quantise_cycle_cycle[8] = {
 
 static const xttest_reference_series series_tenths_to_quantise_cycle = {.name = "tenths_to_quantise_cycle", .prefix = NULL, .prefix_count = 0, .cycle = series_tenths_to_quantise_cycle_cycle, .cycle_count = 8, .repeats = 5};
 
+static const double series_eight_levels_below_4_prefix[8] = {
+    2.0, 0.0, 3.0, 3.0, 1.0, 3.0, 0.0, 2.0};
+
+static const xttest_reference_series series_eight_levels_below_4 = {.name = "eight_levels_below_4", .prefix = series_eight_levels_below_4_prefix, .prefix_count = 8, .cycle = NULL, .cycle_count = 0, .repeats = 0};
+
+static const double series_levels_below_8_cycle_prefix[1] = {
+    2.0};
+
+static const double series_levels_below_8_cycle_cycle[8] = {
+    0.0, 3.0, 3.0, 7.0, 1.0, 3.0, 0.0, 5.0};
+
+static const xttest_reference_series series_levels_below_8_cycle = {.name = "levels_below_8_cycle", .prefix = series_levels_below_8_cycle_prefix, .prefix_count = 1, .cycle = series_levels_below_8_cycle_cycle, .cycle_count = 8, .repeats = 125};
+
 static const double series_quarters_of_both_signs_prefix[9] = {
     1.0, 3.0, -2.0, 0.0, 4.5, 2.0, -1.0, 0.5,
     6.0};
@@ -286,13 +299,19 @@ static const double arguments_lean_levels_0[] = {0.0, 4.0, 4.0};
 static const double expected_lean_levels_0[] = {0.0, 1.0, 2.0, 3.0, 3.0, 0.0, 2.0, 1.0};
 static const double arguments_lean_levels_1[] = {0.050000000000000003, 0.90000000000000002, 256.0};
 static const double expected_lean_levels_1[] = {90.0, 255.0, 0.0, 165.0, 30.0, 225.0, 120.0, 60.0, 90.0, 255.0, 0.0, 165.0, 30.0, 225.0, 120.0, 60.0, 90.0, 255.0, 0.0, 165.0, 30.0, 225.0, 120.0, 60.0, 90.0, 255.0, 0.0, 165.0, 30.0, 225.0, 120.0, 60.0, 90.0, 255.0, 0.0, 165.0, 30.0, 225.0, 120.0, 60.0};
+static const int arguments_lean_levels_2[] = {5};
+static const double expected_lean_levels_2[] = {0.25, 0.125, 0.25, 0.375, 0.0};
+static const int arguments_lean_levels_3[] = {8};
+static const double expected_lean_levels_3[] = {0.24975024975024976, 0.12487512487512488, 0.000999000999000999, 0.37462537462537465, 0.0, 0.12487512487512488, 0.0, 0.12487512487512488};
 
 static const xttest_reference_record records_lean_levels[] = {
     {.feature = XTRACT_QUANTISE, .series = &series_halves_on_level_edges, .arguments = arguments_lean_levels_0, .expected = expected_lean_levels_0, .expected_count = 8, .tolerance = 0.0},
     {.feature = XTRACT_QUANTISE, .series = &series_tenths_to_quantise_cycle, .arguments = arguments_lean_levels_1, .expected = expected_lean_levels_1, .expected_count = 40, .tolerance = 0.0},
+    {.feature = XTRACT_HISTOGRAM, .series = &series_eight_levels_below_4, .arguments = arguments_lean_levels_2, .expected = expected_lean_levels_2, .expected_count = 5, .tolerance = 0.0},
+    {.feature = XTRACT_HISTOGRAM, .series = &series_levels_below_8_cycle, .arguments = arguments_lean_levels_3, .expected = expected_lean_levels_3, .expected_count = 8, .tolerance = 2.2300000000000002e-16},
 };
 
-static const xttest_reference_source source_lean_levels = {.id = "lean_levels", .name = "Theorems about the definitions of the levels of a series, checked by Lean", .level = 3, .record_count = 2, .records = records_lean_levels};
+static const xttest_reference_source source_lean_levels = {.id = "lean_levels", .name = "Theorems about the definitions of the levels of a series, checked by Lean", .level = 3, .record_count = 4, .records = records_lean_levels};
 
 static const int arguments_lean_moving_0[] = {4};
 static const double expected_lean_moving_0[] = {3.0, 4.5, 4.5, 4.5, 4.5, 6.0};

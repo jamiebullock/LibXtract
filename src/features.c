@@ -3100,7 +3100,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .description = "Extract the fraction of the elements of an input vector at each level",
         .source_count = 0,
         .sources = NULL,
-        .validation_level = 0,
+        .validation_level = 3,
         .tags = 0,
         .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_NONE, 1, accepted_histogram, 1, "N >= 1"},
         .argc = 1,

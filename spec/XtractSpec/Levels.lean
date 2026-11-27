@@ -8,14 +8,19 @@ import Mathlib
 /-!
 # Levels of a series
 
-The definition in `src/features.json` of `quantise`. Each value of the series
-is given the number of one of the equal parts of the range between two
-bounds, counted from zero. The definition is stated over an ordered field
-with a floor: over ℝ it is the specification, and over ℚ it computes, which
-gives its values at a series of doubles exactly.
+The definitions in `src/features.json` of `quantise` and `histogram`.
+`quantise` gives each value of the series the number of one of the equal
+parts of the range between two bounds, counted from zero, and `histogram`
+gives the share of a series of such numbers that each level has. A
+definition is stated over an ordered field with a floor, or over any field:
+over ℝ it is the specification, and over ℚ it computes, which gives its
+values at a series of doubles exactly.
 
-The definition is stated for any bounds and any count of levels. The library
+`quantise` is stated for any bounds and any count of levels. The library
 refuses an upper bound below the lower one and a count of levels below one.
+`histogram` counts the values equal to each level, whatever the others are,
+and is zero for no values. The library refuses a value that is not a whole
+number from zero to below the count of levels, and a series of no values.
 -/
 
 namespace XtractSpec
@@ -38,7 +43,33 @@ def quantise (xs : List α) (lower upper : α) (levels : ℕ) : List α :=
 
 end Floor
 
+section Field
+
+variable {α : Type*} [Field α] [DecidableEq α]
+
+/-- For each level from zero, the count of the values equal to it over the count of all the
+values. -/
+def histogram (xs : List α) (levels : ℕ) : List α :=
+  (List.range levels).map fun (level : ℕ) =>
+    ((xs.filter fun x => decide (x = (level : α))).length : α) / (xs.length : α)
+
+end Field
+
 /-! ## Evaluation over ℚ -/
+
+theorem histogram_cast (xs : List ℚ) (levels : ℕ) :
+    histogram (xs.map (↑) : List ℝ) levels = (histogram xs levels).map (↑) := by
+  unfold histogram
+  rw [List.map_map]
+  apply List.map_congr_left
+  intro level _
+  have same : (fun x : ℚ => decide ((x : ℝ) = (level : ℝ))) = fun x => decide (x = (level : ℚ)) := by
+    funext x
+    congr 1
+    exact propext (by exact_mod_cast Iff.rfl)
+  simp only [Function.comp_apply, List.filter_map, List.length_map, Function.comp_def, same]
+  push_cast
+  rfl
 
 theorem levelOf_cast (lower upper : ℚ) (levels : ℕ) (x : ℚ) :
     levelOf (lower : ℝ) (upper : ℝ) levels (x : ℝ) = ((levelOf lower upper levels x : ℚ) : ℝ) := by
@@ -65,9 +96,9 @@ theorem quantise_cast (xs : List ℚ) (lower upper : ℚ) (levels : ℕ) :
 /-!
 ## Invariance
 
-The laws that `invariance` states for `quantise` in `src/features.json`. The
-bounds are the lowest and the highest value of the series, which follow an
-offset of it.
+The laws that `invariance` states for each feature in `src/features.json`. The
+bounds of `quantise` are the lowest and the highest value of the series, which
+follow an offset of it.
 -/
 
 theorem levelOf_offset (lower upper c : ℝ) (levels : ℕ) (x : ℝ) :
@@ -94,5 +125,18 @@ theorem quantise_perm {xs ys : List ℝ} (lower upper : ℝ) (levels : ℕ) (h :
 theorem quantise_reverse (xs : List ℝ) (lower upper : ℝ) (levels : ℕ) :
     quantise xs.reverse lower upper levels = (quantise xs lower upper levels).reverse :=
   List.map_reverse
+
+/-- `order`: unchanged. -/
+theorem histogram_perm {xs ys : List ℝ} (levels : ℕ) (h : xs.Perm ys) :
+    histogram xs levels = histogram ys levels := by
+  unfold histogram
+  apply List.map_congr_left
+  intro level _
+  rw [(h.filter _).length_eq, h.length_eq]
+
+/-- `reversal`: unchanged. -/
+theorem histogram_reverse (xs : List ℝ) (levels : ℕ) :
+    histogram xs.reverse levels = histogram xs levels :=
+  histogram_perm levels (List.reverse_perm xs)
 
 end XtractSpec
