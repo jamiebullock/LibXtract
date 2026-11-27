@@ -13,6 +13,7 @@ import XtractSpec.Smoothing
 import XtractSpec.SpectralMoments
 import XtractSpec.SpectralShape
 import XtractSpec.Statistics
+import XtractSpec.Subframes
 import XtractSpec.Temporal
 import XtractSpec.Records.Cooccurrence
 import XtractSpec.Records.Harmonicity
@@ -21,6 +22,7 @@ import XtractSpec.Records.Smoothing
 import XtractSpec.Records.SpectralMoments
 import XtractSpec.Records.SpectralShape
 import XtractSpec.Records.Statistics
+import XtractSpec.Records.Subframes
 import XtractSpec.Records.Temporal
 
 #assert_standard_axioms
