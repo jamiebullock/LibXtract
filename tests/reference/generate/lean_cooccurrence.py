@@ -102,6 +102,24 @@ def main():
             "square, in every term; the N - 1 additions of the terms, in any order",
         )
 
+        quotients = [share / (1 + difference**2) for share, difference in zip(shares, differences)]
+        assert not exact or exact_in_doubles(quotients)
+        out.rational(
+            "inverse_difference_moment",
+            series,
+            f"inverseDifferenceMoment {data(series)}",
+            "inverseDifferenceMoment_cast _",
+            sum(quotients),
+            0 if exact else 2 * n,
+            "the values sum to 16, and every share, every quotient and every sum of the quotients is a double, so "
+            "each division and each addition is exact"
+            if exact
+            else "the N - 1 additions of the values, of one sign, in any order, which every share has in common; "
+            "the division of a value by their sum and the division by 1 and the square of the difference of its "
+            "row and its column, which is a whole number, in every term; the N - 1 additions of the terms, of "
+            "one sign, in any order",
+        )
+
     out.store("cooccurrence", "Cooccurrence", ["Cooccurrence"], "the statistics of a co-occurrence matrix")
 
 

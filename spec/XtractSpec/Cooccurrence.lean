@@ -8,8 +8,8 @@ import Mathlib
 /-!
 # Statistics of a co-occurrence matrix
 
-The definitions in `src/features.json` of `cooccurrence_contrast` and
-`angular_second_moment`. The data is a square matrix stored by rows: with `C`
+The definitions in `src/features.json` of `cooccurrence_contrast`,
+`angular_second_moment` and `inverse_difference_moment`. The data is a square matrix stored by rows: with `C`
 rows, the value at index `n` is in row `n / C` and column `n % C`. A
 definition is stated over any field: over ℝ it is the specification, and
 over ℚ it computes, which gives its value at a matrix of doubles exactly.
@@ -48,6 +48,10 @@ def cooccurrenceContrast (xs : List α) : α :=
 def angularSecondMoment (xs : List α) : α :=
   ((shares xs).map fun share => share ^ 2).sum
 
+/-- The sum of each share over 1 and the square of its row less its column. -/
+def inverseDifferenceMoment (xs : List α) : α :=
+  weightedSum (fun n => 1 / (1 + rowLessColumn (Nat.sqrt xs.length) n ^ 2)) 0 (shares xs)
+
 end Field
 
 /-! ## Evaluation over ℚ -/
@@ -77,5 +81,13 @@ theorem cooccurrenceContrast_cast (xs : List ℚ) :
 theorem angularSecondMoment_cast (xs : List ℚ) :
     angularSecondMoment (xs.map (↑) : List ℝ) = ((angularSecondMoment xs : ℚ) : ℝ) := by
   simp [angularSecondMoment, shares_cast, List.map_map, Function.comp_def]
+
+theorem inverseDifferenceMoment_cast (xs : List ℚ) :
+    inverseDifferenceMoment (xs.map (↑) : List ℝ) = ((inverseDifferenceMoment xs : ℚ) : ℝ) := by
+  unfold inverseDifferenceMoment
+  rw [shares_cast, List.length_map, ← weightedSum_cast]
+  congr 1
+  funext n
+  simp [rowLessColumn]
 
 end XtractSpec
