@@ -465,7 +465,7 @@
       "description": "Extract the inharmonicity of a spectrum",
       "definition": "\\frac{2}{f_0} \\frac{\\sum_k |f_k - h_k f_0| \\, a_k^2}{\\sum_k a_k^2}, \\quad h_k = \\mathrm{round}(f_k / f_0), \\text{ over the peaks with } a_k \\ne 0 \\text{ and } h_k \\ne 0",
       "sources": [{"role": "origin", "authors": ["Peeters"], "year": 2004, "title": "A large set of audio features for sound description (similarity and classification) in the CUIDADO project", "venue": "Technical report, IRCAM", "locator": "section 7.1.3"}],
-      "validation_level": 0,
+      "validation_level": 3,
       "input": {"format": "spectral_peaks", "unit": "any", "accepts": ["peak_spectrum"], "length": "N >= 2 && N % 2 == 0"},
       "argument_type": "float",
       "arguments": [

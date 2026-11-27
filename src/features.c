@@ -1692,7 +1692,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .description = "Extract the inharmonicity of a spectrum",
         .source_count = 1,
         .sources = sources_spectral_inharmonicity,
-        .validation_level = 0,
+        .validation_level = 3,
         .tags = 0,
         .data = {XTRACT_SPECTRAL_PEAKS, XTRACT_UNIT_ANY, 1, accepted_spectral_inharmonicity, 1, "N >= 2 && N % 2 == 0"},
         .argc = 1,

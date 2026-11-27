@@ -25,6 +25,41 @@ static const double series_matrix_of_32_rows_cycle_cycle[8] = {
 
 static const xttest_reference_series series_matrix_of_32_rows_cycle = {.name = "matrix_of_32_rows_cycle", .prefix = NULL, .prefix_count = 0, .cycle = series_matrix_of_32_rows_cycle_cycle, .cycle_count = 8, .repeats = 128};
 
+static const double series_peaks_about_100_hz_prefix[14] = {
+    1.0, 0.5, 0.0, 2.0, 0.5, 1.0, 0.25, 30.0,
+    100.0, 150.0, 210.0, 250.0, 290.0, 410.0};
+
+static const xttest_reference_series series_peaks_about_100_hz = {.name = "peaks_about_100_hz", .prefix = series_peaks_about_100_hz_prefix, .prefix_count = 14, .cycle = NULL, .cycle_count = 0, .repeats = 0};
+
+static const double series_stretched_partials_of_110_hz_prefix[200] = {
+    1.0, 0.5, 0.33329999999999999, 0.25, 0.20000000000000001, 0.1666, 0.14280000000000001, 0.125,
+    0.1111, 0.10000000000000001, 0.090899999999999995, 0.083299999999999999, 0.076899999999999996, 0.071400000000000005, 0.066600000000000006, 0.0625,
+    0.058799999999999998, 0.055500000000000001, 0.052600000000000001, 0.050000000000000003, 0.047600000000000003, 0.045400000000000003, 0.043400000000000001, 0.041599999999999998,
+    0.040000000000000001, 0.038399999999999997, 0.036999999999999998, 0.035700000000000003, 0.0344, 0.033300000000000003, 0.032199999999999999, 0.031199999999999999,
+    0.030300000000000001, 0.029399999999999999, 0.028500000000000001, 0.027699999999999999, 0.027, 0.0263, 0.025600000000000001, 0.025000000000000001,
+    0.024299999999999999, 0.023800000000000002, 0.023199999999999998, 0.022700000000000001, 0.022200000000000001, 0.021700000000000001, 0.0212, 0.020799999999999999,
+    0.020400000000000001, 0.02, 0.019599999999999999, 0.019199999999999998, 0.018800000000000001, 0.018499999999999999, 0.018100000000000002, 0.0178,
+    0.017500000000000002, 0.0172, 0.016899999999999998, 0.0166, 0.016299999999999999, 0.0161, 0.015800000000000002, 0.015599999999999999,
+    0.015299999999999999, 0.015100000000000001, 0.0149, 0.0147, 0.0144, 0.014200000000000001, 0.014, 0.0138,
+    0.013599999999999999, 0.0135, 0.013299999999999999, 0.013100000000000001, 0.0129, 0.012800000000000001, 0.0126, 0.012500000000000001,
+    0.0123, 0.0121, 0.012, 0.011900000000000001, 0.0117, 0.011599999999999999, 0.0114, 0.011299999999999999,
+    0.0112, 0.0111, 0.0109, 0.010800000000000001, 0.010699999999999999, 0.0106, 0.010500000000000001, 0.0104,
+    0.0103, 0.010200000000000001, 0.0101, 0.01, 110.37, 221.47999999999999, 333.32999999999998, 445.92000000000002,
+    559.25, 673.32000000000005, 788.13, 903.67999999999995, 1019.97, 1137.0, 1254.77, 1373.28,
+    1492.53, 1612.52, 1733.25, 1854.72, 1976.9300000000001, 2099.8800000000001, 2223.5700000000002, 2348.0,
+    2473.1700000000001, 2599.0799999999999, 2725.73, 2853.1199999999999, 2981.25, 3110.1199999999999, 3239.73, 3370.0799999999999,
+    3501.1700000000001, 3633.0, 3765.5700000000002, 3898.8800000000001, 4032.9299999999998, 4167.7200000000003, 4303.25, 4439.5200000000004,
+    4576.5299999999997, 4714.2799999999997, 4852.7700000000004, 4992.0, 5131.9700000000003, 5272.6800000000003, 5414.1300000000001, 5556.3199999999997,
+    5699.25, 5842.9200000000001, 5987.3299999999999, 6132.4799999999996, 6278.3699999999999, 6425.0, 6572.3699999999999, 6720.4799999999996,
+    6869.3299999999999, 7018.9200000000001, 7169.25, 7320.3199999999997, 7472.1300000000001, 7624.6800000000003, 7777.9700000000003, 7932.0,
+    8086.7700000000004, 8242.2800000000007, 8398.5300000000007, 8555.5200000000004, 8713.25, 8871.7199999999993, 9030.9300000000003, 9190.8799999999992,
+    9351.5699999999997, 9513.0, 9675.1700000000001, 9838.0799999999999, 10001.73, 10166.120000000001, 10331.25, 10497.120000000001,
+    10663.73, 10831.08, 10999.17, 11168.0, 11337.57, 11507.879999999999, 11678.93, 11850.719999999999,
+    12023.25, 12196.52, 12370.530000000001, 12545.280000000001, 12720.77, 12897.0, 13073.969999999999, 13251.68,
+    13430.129999999999, 13609.32, 13789.25, 13969.92, 14151.33, 14333.48, 14516.370000000001, 14700.0};
+
+static const xttest_reference_series series_stretched_partials_of_110_hz = {.name = "stretched_partials_of_110_hz", .prefix = series_stretched_partials_of_110_hz_prefix, .prefix_count = 200, .cycle = NULL, .cycle_count = 0, .repeats = 0};
+
 static const double series_uneven_spectrum_with_a_zero_prefix[14] = {
     4.0, 2.0, 0.0, 1.0, 0.5, 0.25, 0.25, 100.0,
     250.0, 300.0, 450.0, 800.0, 1600.0, 3200.0};
@@ -149,6 +184,18 @@ static const xttest_reference_record records_lean_cooccurrence[] = {
 };
 
 static const xttest_reference_source source_lean_cooccurrence = {.id = "lean_cooccurrence", .name = "Theorems about the definitions of the statistics of a co-occurrence matrix, checked by Lean", .level = 3, .record_count = 6, .records = records_lean_cooccurrence};
+
+static const double arguments_lean_harmonicity_0[] = {100.0};
+static const double expected_lean_harmonicity_0[] = {0.22696629213483147};
+static const double arguments_lean_harmonicity_1[] = {110.0};
+static const double expected_lean_harmonicity_1[] = {0.071219088861877958};
+
+static const xttest_reference_record records_lean_harmonicity[] = {
+    {.feature = XTRACT_SPECTRAL_INHARMONICITY, .series = &series_peaks_about_100_hz, .arguments = arguments_lean_harmonicity_0, .expected = expected_lean_harmonicity_0, .expected_count = 1, .tolerance = 2.2300000000000002e-16},
+    {.feature = XTRACT_SPECTRAL_INHARMONICITY, .series = &series_stretched_partials_of_110_hz, .arguments = arguments_lean_harmonicity_1, .expected = expected_lean_harmonicity_1, .expected_count = 1, .tolerance = 3.3400000000000002e-14},
+};
+
+static const xttest_reference_source source_lean_harmonicity = {.id = "lean_harmonicity", .name = "Theorems about the definitions of the features that measure partials against a fundamental, checked by Lean", .level = 3, .record_count = 2, .records = records_lean_harmonicity};
 
 static const double expected_lean_spectral_moments_0[] = {368.75};
 static const double expected_lean_spectral_moments_1[] = {368.75};
@@ -369,13 +416,18 @@ static const xttest_reference_record records_lean_temporal[] = {
 
 static const xttest_reference_source source_lean_temporal = {.id = "lean_temporal", .name = "Theorems about the definitions of the features of the shape of a series over time, checked by Lean", .level = 3, .record_count = 14, .records = records_lean_temporal};
 
-const xttest_reference_source *const xttest_reference_sources[] = {&source_lean_cooccurrence, &source_lean_spectral_moments, &source_lean_spectral_shape, &source_lean_statistics, &source_lean_temporal};
+const xttest_reference_source *const xttest_reference_sources[] = {&source_lean_cooccurrence, &source_lean_harmonicity, &source_lean_spectral_moments, &source_lean_spectral_shape, &source_lean_statistics, &source_lean_temporal};
 
-const int xttest_reference_source_count = 5;
+const int xttest_reference_source_count = 6;
 
 UTEST(reference, results_agree_with_lean_cooccurrence)
 {
     xttest_reference_check(&source_lean_cooccurrence, utest_result);
+}
+
+UTEST(reference, results_agree_with_lean_harmonicity)
+{
+    xttest_reference_check(&source_lean_harmonicity, utest_result);
 }
 
 UTEST(reference, results_agree_with_lean_spectral_moments)
