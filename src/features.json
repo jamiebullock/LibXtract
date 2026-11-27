@@ -1630,7 +1630,7 @@
       "title": "Quantise",
       "description": "Extract the level of each element of an input vector on a scale of equal steps",
       "definition": "q_n = 0 \\text{ if } x_n \\le a, \\quad \\text{otherwise } L-1 \\text{ if } x_n \\ge b, \\quad \\text{otherwise } \\min\\left(\\left\\lfloor L \\frac{x_n - a}{b - a} \\right\\rfloor, L-1\\right), \\quad \\text{NaN for a NaN } x_n, \\quad a, b, L \\text{ the bounds and the number of levels given in argv}",
-      "validation_level": 0,
+      "validation_level": 3,
       "input": {"format": "arbitrary_series", "unit": "any"},
       "argument_type": "float",
       "arguments": [
