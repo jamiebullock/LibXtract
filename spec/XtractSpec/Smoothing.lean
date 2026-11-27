@@ -8,14 +8,14 @@ import Mathlib
 /-!
 # Smoothing by a weighted recursion
 
-The definitions in `src/features.json` of `ewma_average` and `ewma_variance`.
-The result of each has one value for each value of the series, and each
-after the first is made from the one before it and the next value of the
-series. A definition is stated over any field: over ℝ it is the
+The definitions in `src/features.json` of `ewma_average`, `ewma_variance` and
+`smoothed`. The result of each has one value for each value of the series,
+and each after the first is made from the one before it and the next value
+of the series. `smoothed` first mixes each value with the one after it. A definition is stated over any field: over ℝ it is the
 specification, and over ℚ it computes, which gives its values at a series of
 doubles exactly.
 
-A definition is stated for any weight. The library refuses a weight below
+A definition is stated for any weight or gain. The library refuses one below
 zero or above one, and a series of no values.
 -/
 
@@ -51,6 +51,27 @@ def ewmaVarianceFrom (weight : α) : α → α → List α → List α
 def ewmaVariance : List α → α → List α
   | [], _ => []
   | x :: rest, weight => 0 :: ewmaVarianceFrom weight x 0 rest
+
+/-- Each value mixed with the one after it: the gain times the value, plus one less the gain
+times the next. The last value is as it was. -/
+def mixedWithNext (gain : α) : List α → List α
+  | [] => []
+  | [x] => [x]
+  | x :: y :: rest => (gain * x + (1 - gain) * y) :: mixedWithNext gain (y :: rest)
+
+/-- Each value mixed with the result before it, the first with `before`: the gain times the
+value, plus one less the gain times that result. -/
+def mixedWithBefore (gain : α) : α → List α → List α
+  | _, [] => []
+  | before, x :: rest =>
+    (gain * x + (1 - gain) * before) :: mixedWithBefore gain (gain * x + (1 - gain) * before) rest
+
+/-- The values mixed with the ones after them, and then each but the first of those mixed with
+the result before it. -/
+def smoothed (xs : List α) (gain : α) : List α :=
+  match mixedWithNext gain xs with
+  | [] => []
+  | first :: rest => first :: mixedWithBefore gain first rest
 
 end Field
 
@@ -100,6 +121,41 @@ theorem ewmaVariance_cast (xs : List ℚ) (weight : ℚ) :
     simp only [List.map_cons, ewmaVariance, rest_cast]
     push_cast
     rfl
+
+theorem mixedWithNext_map {β : Type*} [Field β] (f : ℚ → β) (gain : ℚ)
+    (mix : ∀ x y : ℚ, (f gain) * f x + (1 - f gain) * f y = f (gain * x + (1 - gain) * y)) :
+    ∀ xs : List ℚ, mixedWithNext (f gain) (xs.map f) = (mixedWithNext gain xs).map f
+  | [] => rfl
+  | [_] => rfl
+  | x :: y :: rest => by
+    have ih := mixedWithNext_map f gain mix (y :: rest)
+    simp only [List.map_cons, mixedWithNext] at ih ⊢
+    rw [ih, mix]
+
+theorem mixedWithNext_cast (gain : ℚ) (xs : List ℚ) :
+    mixedWithNext (gain : ℝ) (xs.map (↑)) = (mixedWithNext gain xs).map (↑) :=
+  mixedWithNext_map (fun q : ℚ => (q : ℝ)) gain (by intro x y; push_cast; rfl) xs
+
+theorem mixedWithBefore_cast (gain : ℚ) (xs : List ℚ) :
+    ∀ before : ℚ, mixedWithBefore (gain : ℝ) (before : ℝ) (xs.map (↑)) =
+      (mixedWithBefore gain before xs).map (↑) := by
+  induction xs with
+  | nil => intro before; rfl
+  | cons x rest ih =>
+    intro before
+    have next := ih (gain * x + (1 - gain) * before)
+    push_cast at next
+    simp only [List.map_cons, mixedWithBefore, next]
+    push_cast
+    rfl
+
+theorem smoothed_cast (xs : List ℚ) (gain : ℚ) :
+    smoothed (xs.map (↑) : List ℝ) (gain : ℝ) = (smoothed xs gain).map (↑) := by
+  unfold smoothed
+  rw [mixedWithNext_cast]
+  cases mixedWithNext gain xs with
+  | nil => rfl
+  | cons first rest => simp only [List.map_cons, mixedWithBefore_cast]
 
 /-!
 ## Invariance
@@ -180,5 +236,64 @@ theorem ewmaVariance_neg (xs : List ℝ) (weight : ℝ) :
   cases xs with
   | nil => rfl
   | cons x rest => simp only [List.map_cons, ewmaVariance, ewmaVarianceFrom_neg]
+
+theorem mixedWithNext_offset (gain c : ℝ) :
+    ∀ xs : List ℝ, mixedWithNext gain (xs.map (· + c)) = (mixedWithNext gain xs).map (· + c)
+  | [] => rfl
+  | [_] => rfl
+  | x :: y :: rest => by
+    have ih := mixedWithNext_offset gain c (y :: rest)
+    have step : gain * (x + c) + (1 - gain) * (y + c) = gain * x + (1 - gain) * y + c := by ring
+    simp only [List.map_cons, mixedWithNext] at ih ⊢
+    rw [ih, step]
+
+theorem mixedWithNext_neg (gain : ℝ) :
+    ∀ xs : List ℝ, mixedWithNext gain (xs.map (-·)) = (mixedWithNext gain xs).map (-·)
+  | [] => rfl
+  | [_] => rfl
+  | x :: y :: rest => by
+    have ih := mixedWithNext_neg gain (y :: rest)
+    have step : gain * -x + (1 - gain) * -y = -(gain * x + (1 - gain) * y) := by ring
+    simp only [List.map_cons, mixedWithNext] at ih ⊢
+    rw [ih, step]
+
+theorem mixedWithBefore_offset (gain c : ℝ) (xs : List ℝ) :
+    ∀ before : ℝ, mixedWithBefore gain (before + c) (xs.map (· + c)) =
+      (mixedWithBefore gain before xs).map (· + c) := by
+  induction xs with
+  | nil => intro before; rfl
+  | cons x rest ih =>
+    intro before
+    have step : gain * (x + c) + (1 - gain) * (before + c) =
+        gain * x + (1 - gain) * before + c := by ring
+    simp only [List.map_cons, mixedWithBefore, step, ih]
+
+theorem mixedWithBefore_neg (gain : ℝ) (xs : List ℝ) :
+    ∀ before : ℝ, mixedWithBefore gain (-before) (xs.map (-·)) =
+      (mixedWithBefore gain before xs).map (-·) := by
+  induction xs with
+  | nil => intro before; rfl
+  | cons x rest ih =>
+    intro before
+    have step : gain * -x + (1 - gain) * -before = -(gain * x + (1 - gain) * before) := by ring
+    simp only [List.map_cons, mixedWithBefore, step, ih]
+
+/-- `offset`: follows. -/
+theorem smoothed_offset (xs : List ℝ) (gain c : ℝ) :
+    smoothed (xs.map (· + c)) gain = (smoothed xs gain).map (· + c) := by
+  unfold smoothed
+  rw [mixedWithNext_offset]
+  cases mixedWithNext gain xs with
+  | nil => rfl
+  | cons first rest => simp only [List.map_cons, mixedWithBefore_offset]
+
+/-- `sign`: negated. -/
+theorem smoothed_neg (xs : List ℝ) (gain : ℝ) :
+    smoothed (xs.map (-·)) gain = (smoothed xs gain).map (-·) := by
+  unfold smoothed
+  rw [mixedWithNext_neg]
+  cases mixedWithNext gain xs with
+  | nil => rfl
+  | cons first rest => simp only [List.map_cons, mixedWithBefore_neg]
 
 end XtractSpec

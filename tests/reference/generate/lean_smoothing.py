@@ -22,7 +22,7 @@ A result is as long as its series, so the series are short. The first has
 nine multiples of 1/4 of both signs with a zero, and is smoothed with a
 weight of 1/4, on which the library's arithmetic is exact. The second repeats
 eight values between 0.05 and 0.9 five times, and is smoothed with a weight
-of 0.1.
+of 0.1, or a gain of 0.3.
 """
 
 import math
@@ -38,6 +38,7 @@ SERIES = {
     LONG: ([], ["0.6", "0.1", "0.9", "0.3", "0.05", "0.7", "0.2", "0.8"], 5),
 }
 WEIGHT = {SHORT: 0.25, LONG: 0.1}
+GAIN = {SHORT: 0.25, LONG: 0.3}
 
 
 def all_doubles(values):
@@ -120,6 +121,48 @@ def main():
             "carries the rounding of the variance before it with the factor 1 - w; the bound that this gives "
             f"from the exact values is at most {rounded_up(bound)} roundings of the largest result",
             {"weight": float(weight)},
+        )
+
+        # The first pass rounds the two products, one less the gain and the
+        # sum; the second takes the rounding of the first with the factor of
+        # the gain and carries its own with the factor 1 - gain
+        gain = Fraction(GAIN[series])
+        mixed = [gain * x + (1 - gain) * y for x, y in zip(xs, xs[1:])] + [xs[-1]]
+        mixed_errors = [
+            abs(gain * x) + 2 * abs((1 - gain) * y) + abs(u) for x, y, u in zip(xs, xs[1:], mixed)
+        ] + [Fraction(0)]
+        results = [mixed[0]]
+        result_errors = [mixed_errors[0]]
+        operands = [1 - gain] + mixed
+        for u, error in zip(mixed[1:], mixed_errors[1:]):
+            result = gain * u + (1 - gain) * results[-1]
+            result_errors.append(
+                abs(gain) * error
+                + abs(gain * u)
+                + abs(1 - gain) * result_errors[-1]
+                + 2 * abs((1 - gain) * results[-1])
+                + abs(result)
+            )
+            operands += [gain * u, (1 - gain) * results[-1]]
+            results.append(result)
+        operands += [gain * x for x in xs] + [(1 - gain) * y for y in xs[1:]]
+        exact_smoothing = exact and all_doubles(results) and all_doubles(operands)
+        bound = max(result_errors) / max(abs(result) for result in results)
+        out.vector(
+            "smoothed",
+            series,
+            f"smoothed {data(series)} {cast(gain)}",
+            "smoothed_cast _ _",
+            results,
+            0 if exact_smoothing else math.ceil(bound),
+            "the values and the gain are multiples of 1/4, and every product and every sum of the two passes is "
+            "a double, so each operation is exact"
+            if exact_smoothing
+            else "each pass rounds two products, one less the gain and a sum for every value; the second takes "
+            "the rounding of the first with the factor of the gain and carries its own with the factor 1 - g; "
+            f"the bound that this gives from the exact values is at most {rounded_up(bound)} roundings of the "
+            "largest result",
+            {"gain": float(gain)},
         )
 
     out.store("smoothing", "Smoothing", ["Smoothing"], "the features that smooth a series by a weighted recursion")
