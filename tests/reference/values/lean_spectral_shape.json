@@ -158,6 +158,30 @@
         "reason": "no rounding: the running sums on either side of the share differ from it by more than the roundings of the share and of the sums can amount to, so the bin is that of the definition, and the product of its number and the spacing is a double, which the multiplication gives; the expected value is exact"
       },
       "call": "theorem XtractSpec.Records.rolloff_falling_harmonics_cycle"
+    },
+    {
+      "feature": "spectral_slope",
+      "data": "spectrum_with_two_empty_bins",
+      "expected": [
+        0.00025
+      ],
+      "tolerance": {
+        "relative": 2.23e-16,
+        "reason": "2 roundings, each within 2^-53 relatively: the division by the sum of the squared deviations; the frequencies, the coefficients and their two means are whole numbers and the coefficients sum to 8, so every operation before it is exact; and the expected value"
+      },
+      "call": "theorem XtractSpec.Records.spectral_slope_spectrum_with_two_empty_bins"
+    },
+    {
+      "feature": "spectral_slope",
+      "data": "falling_spectrum_64_bins",
+      "expected": [
+        -2.5277684622846678e-06
+      ],
+      "tolerance": {
+        "relative": 6.18e-14,
+        "reason": "556 roundings, each within 2^-53 relatively: a deviation from a mean is a difference of rounded values, so the rounding of the sum of the products of the deviations is bounded term by term from the exact values, at 228 roundings of that sum, and that of the sum of the squared deviations likewise, at 261; the P - 1 additions of the coefficients of the P points, of one sign, in any order; the reciprocal of their sum, its product with the first sum and the division by the second; and the expected value"
+      },
+      "call": "theorem XtractSpec.Records.spectral_slope_falling_spectrum_64_bins"
     }
   ]
 }
