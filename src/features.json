@@ -1191,7 +1191,7 @@
       "description": "Extract the time reversal asymmetry statistic of an input vector",
       "definition": "T(k) = \\frac{1}{N - k} \\sum_{t=k}^{N-1} \\left(x_t^2 x_{t-k} - x_t x_{t-k}^2\\right), \\quad 1 \\le k \\le N-1 \\text{ the lag given in argv}",
       "sources": [{"role": "origin", "authors": ["Ramsey", "Rothman"], "year": 1996, "title": "Time irreversibility and business cycle asymmetry", "venue": "Journal of Money, Credit and Banking 28(1)", "locator": "equation 5, and equations 8 and 9 for the estimator", "permalink": "doi:10.2307/2077963"}],
-      "validation_level": 0,
+      "validation_level": 3,
       "input": {"format": "arbitrary_series", "unit": "any", "length": "N >= lag + 1"},
       "argument_type": "int",
       "arguments": [
