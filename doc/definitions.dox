@@ -181,7 +181,7 @@ Sources:
 - Origin: Pollard and Jansson (1982). "A tristimulus method for the specification of musical timbre". Acustica 51(3), equations 4 to 6
 - Formulation: Peeters (2004). "A large set of audio features for sound description (similarity and classification) in the CUIDADO project". Technical report, IRCAM, section 7.1.6
 
-Validation level 0, not checked.
+Validation level 3, certified.
 
 \section definition_tristimulus_2 Tristimulus II
 
@@ -193,7 +193,7 @@ Sources:
 - Origin: Pollard and Jansson (1982). "A tristimulus method for the specification of musical timbre". Acustica 51(3), equations 4 to 6
 - Formulation: Peeters (2004). "A large set of audio features for sound description (similarity and classification) in the CUIDADO project". Technical report, IRCAM, section 7.1.6
 
-Validation level 0, not checked.
+Validation level 3, certified.
 
 \section definition_tristimulus_3 Tristimulus III
 
@@ -205,7 +205,7 @@ Sources:
 - Origin: Pollard and Jansson (1982). "A tristimulus method for the specification of musical timbre". Acustica 51(3), equations 4 to 6
 - Formulation: Peeters (2004). "A large set of audio features for sound description (similarity and classification) in the CUIDADO project". Technical report, IRCAM, section 7.1.6
 
-Validation level 0, not checked.
+Validation level 3, certified.
 
 \section definition_smoothness Spectral Smoothness
 

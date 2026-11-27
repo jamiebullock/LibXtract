@@ -1,0 +1,83 @@
+{
+  "source": {
+    "name": "Theorems about the definitions of the features of the shape of a spectrum, checked by Lean",
+    "version": "Lean 4.36.0, Mathlib v4.36.0",
+    "licence": "Zlib, as the library",
+    "how": "each expected value is proved to be the value of the feature's definition at the doubles nearest the stored values, or within half a unit in its last place of it, by the theorem its record names in spec/XtractSpec/Records/SpectralShape.lean; written by tests/reference/generate/lean_spectral_shape.py and checked by Lean's kernel",
+    "level": 3
+  },
+  "records": [
+    {
+      "feature": "tristimulus_1",
+      "data": "harmonics_with_a_zero",
+      "expected": [
+        0.375
+      ],
+      "tolerance": {
+        "relative": 0.0,
+        "reason": "no rounding: every coefficient is a multiple of 1/4, so each addition is exact, and the division gives the quotient itself, which is a double; the expected value is exact"
+      },
+      "call": "theorem XtractSpec.Records.tristimulus_1_harmonics_with_a_zero"
+    },
+    {
+      "feature": "tristimulus_2",
+      "data": "harmonics_with_a_zero",
+      "expected": [
+        0.34375
+      ],
+      "tolerance": {
+        "relative": 0.0,
+        "reason": "no rounding: every coefficient is a multiple of 1/4, so each addition is exact, and the division gives the quotient itself, which is a double; the expected value is exact"
+      },
+      "call": "theorem XtractSpec.Records.tristimulus_2_harmonics_with_a_zero"
+    },
+    {
+      "feature": "tristimulus_3",
+      "data": "harmonics_with_a_zero",
+      "expected": [
+        0.28125
+      ],
+      "tolerance": {
+        "relative": 0.0,
+        "reason": "no rounding: every coefficient is a multiple of 1/4, so each addition is exact, and the division gives the quotient itself, which is a double; the expected value is exact"
+      },
+      "call": "theorem XtractSpec.Records.tristimulus_3_harmonics_with_a_zero"
+    },
+    {
+      "feature": "tristimulus_1",
+      "data": "falling_harmonics_cycle",
+      "expected": [
+        0.0025263157894736842
+      ],
+      "tolerance": {
+        "relative": 1.12e-13,
+        "reason": "1001 roundings, each within 2^-53 relatively: the N - 1 additions of all the coefficients, of one sign, in any order; the division; and the expected value"
+      },
+      "call": "theorem XtractSpec.Records.tristimulus_1_falling_harmonics_cycle"
+    },
+    {
+      "feature": "tristimulus_2",
+      "data": "falling_harmonics_cycle",
+      "expected": [
+        0.004210526315789474
+      ],
+      "tolerance": {
+        "relative": 1.12e-13,
+        "reason": "1003 roundings, each within 2^-53 relatively: the two additions of the coefficients of the second, third and fourth harmonics; the N - 1 additions of all the coefficients, of one sign, in any order; the division; and the expected value"
+      },
+      "call": "theorem XtractSpec.Records.tristimulus_2_falling_harmonics_cycle"
+    },
+    {
+      "feature": "tristimulus_3",
+      "data": "falling_harmonics_cycle",
+      "expected": [
+        0.9932631578947368
+      ],
+      "tolerance": {
+        "relative": 2.22e-13,
+        "reason": "1996 roundings, each within 2^-53 relatively: the N - 5 additions of the coefficients from the fifth harmonic, of one sign, in any order; the N - 1 additions of all the coefficients, of one sign, in any order; the division; and the expected value"
+      },
+      "call": "theorem XtractSpec.Records.tristimulus_3_falling_harmonics_cycle"
+    }
+  ]
+}
