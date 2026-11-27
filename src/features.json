@@ -1579,7 +1579,7 @@
       "description": "Extract the moments of a grid up to the third order",
       "definition": "m_{pq} = \\sum_{y=0}^{H-1} \\sum_{x=0}^{W-1} x^p y^q \\, g_{yW+x}, \\quad (p, q) \\in \\{(0,0), (1,0), (0,1), (2,0), (1,1), (0,2), (3,0), (2,1), (1,2), (0,3)\\}, \\quad W \\text{ the width given in argv}, \\; H = N/W",
       "sources": [{"role": "origin", "authors": ["Hu"], "year": 1962, "title": "Visual pattern recognition by moment invariants", "venue": "IRE Transactions on Information Theory 8(2)", "locator": "equation 1", "permalink": "doi:10.1109/TIT.1962.1057692"}],
-      "validation_level": 0,
+      "validation_level": 3,
       "input": {"format": "grid", "unit": "any", "length": "N >= 1 && width >= 1 && N % width == 0"},
       "argument_type": "int",
       "arguments": [
