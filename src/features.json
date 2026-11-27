@@ -1115,7 +1115,7 @@
       "description": "Extract the exponentially weighted moving variance of a series",
       "definition": "\\mu_0 = x_0, \\; s_0 = 0, \\quad \\mu_n = \\mu_{n-1} + \\alpha (x_n - \\mu_{n-1}), \\quad s_n = (1-\\alpha)\\left(s_{n-1} + \\alpha (x_n - \\mu_{n-1})^2\\right), \\quad n = 1, \\ldots, N-1, \\quad 0 \\le \\alpha \\le 1 \\text{ the factor given in argv}",
       "sources": [{"role": "origin", "authors": ["Finch"], "year": 2009, "title": "Incremental calculation of weighted mean and variance", "venue": "Technical note, University of Cambridge Computing Service", "locator": "section 9, equation 143", "permalink": "https://fanf2.user.srcf.net/hermes/doc/antiforgery/stats.pdf"}],
-      "validation_level": 0,
+      "validation_level": 3,
       "input": {"format": "arbitrary_series", "unit": "any"},
       "argument_type": "float",
       "arguments": [

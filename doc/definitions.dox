@@ -852,7 +852,7 @@ xtract_ewma_variance()
 Sources:
 - Origin: Finch (2009). "Incremental calculation of weighted mean and variance". Technical note, University of Cambridge Computing Service, section 9, equation 143. <a href="https://fanf2.user.srcf.net/hermes/doc/antiforgery/stats.pdf">https://fanf2.user.srcf.net/hermes/doc/antiforgery/stats.pdf</a>
 
-Validation level 0, not checked.
+Validation level 3, certified.
 
 \section definition_median Median
 
