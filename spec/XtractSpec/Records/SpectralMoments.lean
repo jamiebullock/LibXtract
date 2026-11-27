@@ -166,6 +166,18 @@ theorem spectral_mean_uneven_spectrum_with_a_zero :
     spectralMean (uneven_spectrum_with_a_zero.map (↑) : List ℝ) = ((1475 / 4 : ℚ) : ℝ) :=
   eq_of_rat (spectralCentroid_cast _) (by decide +kernel)
 
+theorem spectral_variance_uneven_spectrum_with_a_zero :
+    spectralVariance (uneven_spectrum_with_a_zero.map (↑) : List ℝ) ((1475 / 4 : ℚ) : ℝ) = ((5599375 / 16 : ℚ) : ℝ) :=
+  eq_of_rat (spectralVariance_cast _ _) (by decide +kernel)
+
+theorem spread_uneven_spectrum_with_a_zero :
+    spread (uneven_spectrum_with_a_zero.map (↑) : List ℝ) ((1475 / 4 : ℚ) : ℝ) = ((5599375 / 16 : ℚ) : ℝ) :=
+  eq_of_rat (spectralVariance_cast _ _) (by decide +kernel)
+
+theorem spectral_standard_deviation_uneven_spectrum_with_a_zero :
+    |spectralStandardDeviation ((5599375 / 16 : ℚ) : ℝ) - ((5203548409001175 / 8796093022208 : ℚ) : ℝ)| ≤ ((1 / 17592186044416 : ℚ) : ℝ) :=
+  sqrt_within_of_rat rfl (by decide +kernel) (by decide +kernel) (by decide +kernel) (by decide +kernel)
+
 theorem spectral_centroid_decaying_spectrum_128_bins :
     |spectralCentroid (decaying_spectrum_128_bins.map (↑) : List ℝ) - ((66636477807493 / 17179869184 : ℚ) : ℝ)| ≤ ((1 / 4398046511104 : ℚ) : ℝ) :=
   within_of_rat (spectralCentroid_cast _) (by decide +kernel)
@@ -173,5 +185,17 @@ theorem spectral_centroid_decaying_spectrum_128_bins :
 theorem spectral_mean_decaying_spectrum_128_bins :
     |spectralMean (decaying_spectrum_128_bins.map (↑) : List ℝ) - ((66636477807493 / 17179869184 : ℚ) : ℝ)| ≤ ((1 / 4398046511104 : ℚ) : ℝ) :=
   within_of_rat (spectralCentroid_cast _) (by decide +kernel)
+
+theorem spectral_variance_decaying_spectrum_128_bins :
+    |spectralVariance (decaying_spectrum_128_bins.map (↑) : List ℝ) ((66636477807493 / 17179869184 : ℚ) : ℝ) - ((119787202329249 / 4194304 : ℚ) : ℝ)| ≤ ((1 / 536870912 : ℚ) : ℝ) :=
+  within_of_rat (spectralVariance_cast _ _) (by decide +kernel)
+
+theorem spread_decaying_spectrum_128_bins :
+    |spread (decaying_spectrum_128_bins.map (↑) : List ℝ) ((66636477807493 / 17179869184 : ℚ) : ℝ) - ((119787202329249 / 4194304 : ℚ) : ℝ)| ≤ ((1 / 536870912 : ℚ) : ℝ) :=
+  within_of_rat (spectralVariance_cast _ _) (by decide +kernel)
+
+theorem spectral_standard_deviation_decaying_spectrum_128_bins :
+    |spectralStandardDeviation ((119787202329249 / 4194304 : ℚ) : ℝ) - ((5875909324140447 / 1099511627776 : ℚ) : ℝ)| ≤ ((1 / 2199023255552 : ℚ) : ℝ) :=
+  sqrt_within_of_rat rfl (by decide +kernel) (by decide +kernel) (by decide +kernel) (by decide +kernel)
 
 end XtractSpec.Records

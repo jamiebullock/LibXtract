@@ -28,7 +28,7 @@ amplitude in bin k of 1 / (k + 1) cut to four decimal places.
 from decimal import Decimal
 from fractions import Fraction
 
-from certificates import Certificates
+from certificates import Certificates, cast
 
 UNEVEN = "uneven_spectrum_with_a_zero"
 DECAYING = "decaying_spectrum_128_bins"
@@ -72,11 +72,12 @@ def main():
     for series in SERIES:
         exact = series == UNEVEN
         bins = len(amplitudes[series])
-        centroid = sum(f * a for f, a in zip(frequencies[series], amplitudes[series])) / sum(amplitudes[series])
+        total = sum(amplitudes[series])
+        centroid = sum(f * a for f, a in zip(frequencies[series], amplitudes[series])) / total
         # A division whose quotient is a double gives that double
         assert not exact or Fraction(float(centroid)) == centroid
         for feature, definition in (("spectral_centroid", "spectralCentroid"), ("spectral_mean", "spectralMean")):
-            out.rational(
+            mean = out.rational(
                 feature,
                 series,
                 f"{definition} {data(series)}",
@@ -90,6 +91,41 @@ def main():
                 "those terms, which are of one sign, in any order; the M - 1 additions of the amplitudes, of one "
                 "sign, in any order; the division",
             )
+
+        squares = [(f - Fraction(mean)) ** 2 * a for f, a in zip(frequencies[series], amplitudes[series])]
+        if exact:
+            # Multiples of 1/64 whose sum is below 2^53 sixty-fourths
+            assert (4 * Fraction(mean)).denominator == 1 and 64 * sum(squares) < 2**53
+            assert Fraction(float(sum(squares) / total)) == sum(squares) / total
+        for feature, definition in (("spectral_variance", "spectralVariance"), ("spread", "spread")):
+            variance = out.rational(
+                feature,
+                series,
+                f"{definition} {data(series)} {cast(mean)}",
+                "spectralVariance_cast _ _",
+                sum(squares) / total,
+                0 if exact else 2 * bins + 3,
+                "every amplitude, every frequency and the mean are multiples of 1/4, so each difference, each "
+                "square, each product and each addition, in any order, is exact, and the division gives the "
+                "quotient itself, which is a double"
+                if exact
+                else "the difference from the mean, which its square counts twice, the square and the product "
+                "with the amplitude, in every term; the M - 1 additions of those terms, which are of one sign, in "
+                "any order; the M - 1 additions of the amplitudes, of one sign, in any order; the division",
+                {"mean": mean},
+            )
+
+        out.root(
+            "spectral_standard_deviation",
+            series,
+            f"spectralStandardDeviation {cast(variance)}",
+            "rfl",
+            Fraction(variance),
+            1,
+            "the square root, which is correctly rounded",
+            False,
+            {"variance": variance},
+        )
 
     out.store("spectral_moments", "SpectralMoments", ["SpectralMoments"], "the spectral moments")
 
