@@ -3,9 +3,8 @@
 # SPDX-FileCopyrightText: 2026 Jamie Bullock
 # SPDX-License-Identifier: Zlib
 
-"""Writes four series that have a large offset and a small spread, the mean,
-variance and standard deviation of each, and a theorem for every one of those
-values that Lean checks.
+"""Writes five series, statistics of each, and a theorem for every one of
+those values that Lean checks.
 
 usage: lean_statistics.py
 
@@ -15,9 +14,12 @@ in decimal, and the statistics are those of the doubles nearest its values,
 which is what the library is given: the theorems state each double as a
 fraction. A theorem says that an expected value is the value of the feature's
 definition, or within half a unit in its last place of it. This script only
-proposes the values; run `lake build` in spec to have them checked. The series
-have the values of the datasets NumAcc1 to NumAcc4 of the NIST Statistical
-Reference Datasets.
+proposes the values; run `lake build` in spec to have them checked.
+
+Four series have a large offset and a small spread, with the values of the
+datasets NumAcc1 to NumAcc4 of the NIST Statistical Reference Datasets. The
+fifth has eight multiples of 1/4 of both signs and a zero, on which the
+library's arithmetic is exact.
 """
 
 import json
@@ -26,15 +28,20 @@ import pathlib
 from decimal import ROUND_CEILING, Decimal
 from fractions import Fraction
 
-SERIES = {
+OFFSET_SERIES = {
     "offset_1e7_integers": ["10000001", "10000003", "10000002"],
     "offset_1_tenths": ["1.2"] + ["1.1", "1.3"] * 500,
     "offset_1e6_tenths": ["1000000.2"] + ["1000000.1", "1000000.3"] * 500,
     "offset_1e7_tenths": ["10000000.2"] + ["10000000.1", "10000000.3"] * 500,
 }
+QUARTERS = "quarters_with_a_zero"
+SERIES = dict(OFFSET_SERIES)
+SERIES[QUARTERS] = ["3", "-1.5", "4.25", "0", "2", "9.5", "-6", "1"]
+LONG = "offset_1_tenths"
 
 # The most a correctly rounded result differs from the exact one, relatively
 ROUNDING = Fraction(1, 2**53)
+DECIDE = "(by decide +kernel)"
 
 HEADER = """/- Part of LibXtract
  -
@@ -88,6 +95,8 @@ def tolerance(roundings, reason, exact):
     else:
         roundings += 1
         reason += "; and the expected value"
+    if roundings == 0:
+        return {"relative": 0.0, "reason": f"no rounding: {reason}"}
     bound = Decimal(roundings) * Decimal(ROUNDING.numerator) / Decimal(ROUNDING.denominator)
     bound = bound.quantize(Decimal(1).scaleb(bound.adjusted() - 2), rounding=ROUND_CEILING)
     return {"relative": float(bound), "reason": f"{roundings} roundings, each within 2^-53 relatively: {reason}"}
@@ -99,12 +108,63 @@ def series_definition(name, doubles):
     return f"def {name} : List ℚ := [\n  " + ",\n  ".join(rows) + "]\n"
 
 
-def theorem(name, value, expected, exact, by_equality, by_distance):
-    """A theorem that the value is the expected double when that is exact,
-    and otherwise that it is within half a unit in its last place of it."""
-    if exact:
-        return f"theorem {name} :\n    {value} = {cast(expected)} :=\n  {by_equality}\n"
-    return f"theorem {name} :\n    |{value} - {cast(expected)}| ≤ {cast(half_unit(expected))} :=\n  {by_distance}\n"
+class Certificates:
+    """The theorems and the records, one of each for every expected value."""
+
+    def __init__(self):
+        self.blocks = []
+        self.records = []
+
+    def add(self, feature, series, theorem, expected, takes_data, arguments, roundings, reason, exact):
+        name = f"{feature}_{series}"
+        self.blocks.append(f"theorem {name} :\n    {theorem}\n")
+        record = {"feature": feature}
+        if takes_data:
+            record["data"] = series
+        if arguments:
+            record["arguments"] = arguments
+        record["expected"] = [expected]
+        record["tolerance"] = tolerance(roundings, reason, exact)
+        record["call"] = f"theorem XtractSpec.Records.{name}"
+        self.records.append(record)
+
+    def rational(self, feature, series, call, lemma, value, roundings, reason, arguments=None):
+        """A feature whose definition gives the fraction `value`: the
+        expected double is the nearest, proved equal to it or within half a
+        unit in its last place of it."""
+        expected = float(value)
+        exact = Fraction(expected) == value
+        if exact:
+            theorem = f"{call} = {cast(expected)} :=\n  eq_of_rat ({lemma}) {DECIDE}"
+        else:
+            theorem = (
+                f"|{call} - {cast(expected)}| ≤ {cast(half_unit(expected))} :=\n  within_of_rat ({lemma}) {DECIDE}"
+            )
+        self.add(feature, series, theorem, expected, True, arguments, roundings, reason, exact)
+        return expected
+
+    def member(self, feature, series, call, proof, value, reason, arguments=None):
+        """A feature whose definition gives a value of the series, proved by
+        comparing it with every value."""
+        expected = float(value)
+        assert Fraction(expected) == value
+        theorem = f"{call} = {cast(expected)} :=\n  {proof}"
+        self.add(feature, series, theorem, expected, True, arguments, 0, reason, True)
+
+    def root(self, feature, series, call, lemma, square, roundings, reason, takes_data, arguments=None):
+        """A feature whose definition gives the square root of the fraction
+        `square`, placed by comparing squares."""
+        expected = math.sqrt(square)
+        exact = Fraction(expected) ** 2 == square
+        if exact:
+            theorem = f"{call} = {cast(expected)} :=\n  sqrt_eq_of_rat {lemma} {DECIDE} {DECIDE}"
+        else:
+            theorem = (
+                f"|{call} - {cast(expected)}| ≤ {cast(half_unit(expected))} :=\n"
+                f"  sqrt_within_of_rat {lemma} {DECIDE} {DECIDE} {DECIDE} {DECIDE}"
+            )
+        self.add(feature, series, theorem, expected, takes_data, arguments, roundings, reason, exact)
+        return expected
 
 
 def main():
@@ -115,101 +175,139 @@ def main():
     manifest = json.loads((spec / "lake-manifest.json").read_text(encoding="ascii"))
     mathlib = next(package["inputRev"] for package in manifest["packages"] if package["name"] == "mathlib")
 
-    records = []
-    blocks = []
+    out = Certificates()
+    doubles = {}
+    means = {}
     for series, values in SERIES.items():
         write(reference / "series" / f"{series}.txt", "\n".join(values) + "\n")
-        doubles = [Fraction(float(value)) for value in values]
-        n = len(doubles)
-        # The bound on the sum holds for terms of one sign
-        assert all(x > 0 for x in doubles)
-        blocks.append(series_definition(series, doubles))
-        data = f"({series}.map (↑) : List ℝ)"
+        doubles[series] = [Fraction(float(value)) for value in values]
+        out.blocks.append(series_definition(series, doubles[series]))
 
-        exact_mean = sum(doubles) / n
-        mean = float(exact_mean)
-        name = f"mean_{series}"
-        exact = Fraction(mean) == exact_mean
-        blocks.append(
-            theorem(
-                name,
-                f"mean {data}",
-                mean,
-                exact,
-                "eq_of_rat (mean_cast _) (by decide +kernel)",
-                "within_of_rat (mean_cast _) (by decide +kernel)",
-            )
-        )
-        records.append(
-            {
-                "feature": "mean",
-                "data": series,
-                "expected": [mean],
-                "tolerance": tolerance(
-                    n + 1,
-                    "the N - 1 additions of values of one sign, in any order; the division, "
-                    "or a reciprocal and a multiplication",
-                    exact,
-                ),
-                "call": f"theorem XtractSpec.Records.{name}",
-            }
-        )
+    def data(series):
+        return f"({series}.map (↑) : List ℝ)"
 
-        exact_variance = sum((x - Fraction(mean)) ** 2 for x in doubles) / (n - 1)
-        variance = float(exact_variance)
-        name = f"variance_{series}"
-        exact = Fraction(variance) == exact_variance
-        blocks.append(
-            theorem(
-                name,
-                f"variance {data} {cast(mean)}",
-                variance,
-                exact,
-                "eq_of_rat (variance_cast _ _) (by decide +kernel)",
-                "within_of_rat (variance_cast _ _) (by decide +kernel)",
-            )
+    for series in OFFSET_SERIES:
+        xs = doubles[series]
+        n = len(xs)
+        # The bound on a sum holds for terms of one sign
+        assert all(x > 0 for x in xs)
+        mean = out.rational(
+            "mean",
+            series,
+            f"mean {data(series)}",
+            "mean_cast _",
+            sum(xs) / n,
+            n + 1,
+            "the N - 1 additions of values of one sign, in any order; the division, "
+            "or a reciprocal and a multiplication",
         )
-        records.append(
-            {
-                "feature": "variance",
-                "data": series,
-                "arguments": {"mean": mean},
-                "expected": [variance],
-                "tolerance": tolerance(
-                    n + 3,
-                    "the difference from the mean, which its square counts twice, and the square, in every term; "
-                    "the N - 1 additions of terms of one sign, in any order; the division",
-                    exact,
-                ),
-                "call": f"theorem XtractSpec.Records.{name}",
-            }
+        means[series] = mean
+        variance = out.rational(
+            "variance",
+            series,
+            f"variance {data(series)} {cast(mean)}",
+            "variance_cast _ _",
+            sum((x - Fraction(mean)) ** 2 for x in xs) / (n - 1),
+            n + 3,
+            "the difference from the mean, which its square counts twice, and the square, in every term; "
+            "the N - 1 additions of terms of one sign, in any order; the division",
+            {"mean": mean},
+        )
+        out.root(
+            "standard_deviation",
+            series,
+            f"standardDeviation {cast(variance)}",
+            "rfl",
+            Fraction(variance),
+            1,
+            "the square root, which is correctly rounded",
+            False,
+            {"variance": variance},
         )
 
-        deviation = math.sqrt(variance)
-        name = f"standard_deviation_{series}"
-        decide = "(by decide +kernel)"
-        exact = Fraction(deviation) ** 2 == Fraction(variance)
-        blocks.append(
-            theorem(
-                name,
-                f"standardDeviation {cast(variance)}",
-                deviation,
-                exact,
-                f"sqrt_eq_of_rat {decide} {decide}",
-                f"sqrt_within_of_rat {decide} {decide} {decide} {decide}",
-            )
+    # On the multiples of 1/4 every operation before a square root is exact
+    quarters = doubles[QUARTERS]
+    assert all((4 * x).denominator == 1 for x in quarters)
+    quarters_mean = sum(quarters) / len(quarters)
+    assert Fraction(float(quarters_mean)) == quarters_mean and (32 * quarters_mean).denominator == 1
+    means[QUARTERS] = float(quarters_mean)
+    exact_sums = "every value is a multiple of 1/4, so each addition is exact"
+
+    for series in (QUARTERS, LONG):
+        xs = doubles[series]
+        n = len(xs)
+        short = series == QUARTERS
+        mean = means[series]
+        out.rational(
+            "sum",
+            series,
+            f"sum {data(series)}",
+            "sum_cast _",
+            sum(xs),
+            0 if short else n - 1,
+            exact_sums if short else "the N - 1 additions of values of one sign, in any order",
         )
-        records.append(
-            {
-                "feature": "standard_deviation",
-                "arguments": {"variance": variance},
-                "expected": [deviation],
-                "tolerance": tolerance(1, "the square root, which is correctly rounded", exact),
-                "call": f"theorem XtractSpec.Records.{name}",
-            }
+        out.rational(
+            "average_deviation",
+            series,
+            f"averageDeviation {data(series)} {cast(mean)}",
+            "averageDeviation_cast _ _",
+            sum(abs(x - Fraction(mean)) for x in xs) / n,
+            0 if short else n + 1,
+            "every value and the mean are multiples of 1/32, so each difference, each addition "
+            "and the division by 8 are exact"
+            if short
+            else "the difference from the mean in every term; the N - 1 additions of terms of one sign, "
+            "in any order; the division",
+            {"mean": mean},
+        )
+        out.root(
+            "rms_amplitude",
+            series,
+            f"rmsAmplitude {data(series)}",
+            "(meanSquare_cast _)",
+            sum(x**2 for x in xs) / n,
+            1 if short else n + 2,
+            "the square root, which is correctly rounded; every value is a multiple of 1/4, so each square, "
+            "each addition and the division by 8 are exact"
+            if short
+            else "the square of every value; the N - 1 additions, in any order; the division; the square root",
+            True,
+        )
+        out.member(
+            "highest_value",
+            series,
+            f"highestValue {data(series)}",
+            f"highestValue_eq_of_rat {DECIDE} {DECIDE}",
+            max(xs),
+            "the result is a value of the series",
+        )
+        # A threshold that is a value of the series: the values above it leave that value out
+        threshold = 0.0 if short else float("1.1")
+        assert Fraction(threshold) in xs
+        out.member(
+            "lowest_value",
+            series,
+            f"lowestValue {data(series)} {cast(threshold)}",
+            f"lowestValue_eq_of_rat {DECIDE} {DECIDE} {DECIDE}",
+            min(x for x in xs if x > Fraction(threshold)),
+            "the result is a value of the series",
+            {"threshold": threshold},
+        )
+        out.rational(
+            "nonzero_count",
+            series,
+            f"nonzeroCount {data(series)}",
+            "nonzeroCount_cast _",
+            Fraction(sum(1 for x in xs if x != 0)),
+            0,
+            "the result is a count below 2^53",
         )
 
-    write(spec / "XtractSpec" / "Records" / "Statistics.lean", HEADER + "\n" + "\n".join(blocks) + "\nend XtractSpec.Records\n")
+    write(
+        spec / "XtractSpec" / "Records" / "Statistics.lean",
+        HEADER + "\n" + "\n".join(out.blocks) + "\nend XtractSpec.Records\n",
+    )
     document = {
         "source": {
             "name": "Theorems about the definitions of the statistics, checked by Lean",
@@ -221,7 +319,7 @@ def main():
             "written by tests/reference/generate/lean_statistics.py and checked by Lean's kernel",
             "level": 3,
         },
-        "records": records,
+        "records": out.records,
     }
     write(reference / "values" / "lean_statistics.json", json.dumps(document, indent=2) + "\n")
 

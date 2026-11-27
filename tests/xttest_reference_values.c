@@ -401,6 +401,9 @@ static const double series_offset_1e7_tenths[1001] = {
     10000000.3, 10000000.1, 10000000.3, 10000000.1, 10000000.3, 10000000.1, 10000000.3, 10000000.1,
     10000000.3};
 
+static const double series_quarters_with_a_zero[8] = {
+    3.0, -1.5, 4.25, 0.0, 2.0, 9.5, -6.0, 1.0};
+
 static const double expected_lean_statistics_0[] = {10000002.0};
 static const double arguments_lean_statistics_1[] = {10000002.0};
 static const double expected_lean_statistics_1[] = {1.0};
@@ -421,6 +424,22 @@ static const double arguments_lean_statistics_10[] = {10000000.199999999};
 static const double expected_lean_statistics_10[] = {0.01000000011175871};
 static const double arguments_lean_statistics_11[] = {0.01000000011175871};
 static const double expected_lean_statistics_11[] = {0.10000000055879354};
+static const double expected_lean_statistics_12[] = {12.25};
+static const double arguments_lean_statistics_13[] = {1.53125};
+static const double expected_lean_statistics_13[] = {3.15625};
+static const double expected_lean_statistics_14[] = {4.4799902343643563};
+static const double expected_lean_statistics_15[] = {9.5};
+static const double arguments_lean_statistics_16[] = {0.0};
+static const double expected_lean_statistics_16[] = {1.0};
+static const double expected_lean_statistics_17[] = {7.0};
+static const double expected_lean_statistics_18[] = {1201.2};
+static const double arguments_lean_statistics_19[] = {1.2};
+static const double expected_lean_statistics_19[] = {0.099900099900099876};
+static const double expected_lean_statistics_20[] = {1.2041553097462179};
+static const double expected_lean_statistics_21[] = {1.3};
+static const double arguments_lean_statistics_22[] = {1.1000000000000001};
+static const double expected_lean_statistics_22[] = {1.2};
+static const double expected_lean_statistics_23[] = {1001.0};
 
 static const xttest_reference_record records_lean_statistics[] = {
     {.feature = XTRACT_MEAN, .series = "offset_1e7_integers", .data = series_offset_1e7_integers, .n = 3, .arguments = NULL, .expected = expected_lean_statistics_0, .expected_count = 1, .tolerance = 4.4500000000000003e-16},
@@ -435,9 +454,21 @@ static const xttest_reference_record records_lean_statistics[] = {
     {.feature = XTRACT_MEAN, .series = "offset_1e7_tenths", .data = series_offset_1e7_tenths, .n = 1001, .arguments = NULL, .expected = expected_lean_statistics_9, .expected_count = 1, .tolerance = 1.12e-13},
     {.feature = XTRACT_VARIANCE, .series = "offset_1e7_tenths", .data = series_offset_1e7_tenths, .n = 1001, .arguments = arguments_lean_statistics_10, .expected = expected_lean_statistics_10, .expected_count = 1, .tolerance = 1.12e-13},
     {.feature = XTRACT_STANDARD_DEVIATION, .series = NULL, .data = NULL, .n = 0, .arguments = arguments_lean_statistics_11, .expected = expected_lean_statistics_11, .expected_count = 1, .tolerance = 2.2300000000000002e-16},
+    {.feature = XTRACT_SUM, .series = "quarters_with_a_zero", .data = series_quarters_with_a_zero, .n = 8, .arguments = NULL, .expected = expected_lean_statistics_12, .expected_count = 1, .tolerance = 0.0},
+    {.feature = XTRACT_AVERAGE_DEVIATION, .series = "quarters_with_a_zero", .data = series_quarters_with_a_zero, .n = 8, .arguments = arguments_lean_statistics_13, .expected = expected_lean_statistics_13, .expected_count = 1, .tolerance = 0.0},
+    {.feature = XTRACT_RMS_AMPLITUDE, .series = "quarters_with_a_zero", .data = series_quarters_with_a_zero, .n = 8, .arguments = NULL, .expected = expected_lean_statistics_14, .expected_count = 1, .tolerance = 2.2300000000000002e-16},
+    {.feature = XTRACT_HIGHEST_VALUE, .series = "quarters_with_a_zero", .data = series_quarters_with_a_zero, .n = 8, .arguments = NULL, .expected = expected_lean_statistics_15, .expected_count = 1, .tolerance = 0.0},
+    {.feature = XTRACT_LOWEST_VALUE, .series = "quarters_with_a_zero", .data = series_quarters_with_a_zero, .n = 8, .arguments = arguments_lean_statistics_16, .expected = expected_lean_statistics_16, .expected_count = 1, .tolerance = 0.0},
+    {.feature = XTRACT_NONZERO_COUNT, .series = "quarters_with_a_zero", .data = series_quarters_with_a_zero, .n = 8, .arguments = NULL, .expected = expected_lean_statistics_17, .expected_count = 1, .tolerance = 0.0},
+    {.feature = XTRACT_SUM, .series = "offset_1_tenths", .data = series_offset_1_tenths, .n = 1001, .arguments = NULL, .expected = expected_lean_statistics_18, .expected_count = 1, .tolerance = 1.12e-13},
+    {.feature = XTRACT_AVERAGE_DEVIATION, .series = "offset_1_tenths", .data = series_offset_1_tenths, .n = 1001, .arguments = arguments_lean_statistics_19, .expected = expected_lean_statistics_19, .expected_count = 1, .tolerance = 1.12e-13},
+    {.feature = XTRACT_RMS_AMPLITUDE, .series = "offset_1_tenths", .data = series_offset_1_tenths, .n = 1001, .arguments = NULL, .expected = expected_lean_statistics_20, .expected_count = 1, .tolerance = 1.12e-13},
+    {.feature = XTRACT_HIGHEST_VALUE, .series = "offset_1_tenths", .data = series_offset_1_tenths, .n = 1001, .arguments = NULL, .expected = expected_lean_statistics_21, .expected_count = 1, .tolerance = 0.0},
+    {.feature = XTRACT_LOWEST_VALUE, .series = "offset_1_tenths", .data = series_offset_1_tenths, .n = 1001, .arguments = arguments_lean_statistics_22, .expected = expected_lean_statistics_22, .expected_count = 1, .tolerance = 0.0},
+    {.feature = XTRACT_NONZERO_COUNT, .series = "offset_1_tenths", .data = series_offset_1_tenths, .n = 1001, .arguments = NULL, .expected = expected_lean_statistics_23, .expected_count = 1, .tolerance = 0.0},
 };
 
-static const xttest_reference_source source_lean_statistics = {.id = "lean_statistics", .name = "Theorems about the definitions of the statistics, checked by Lean", .level = 3, .record_count = 12, .records = records_lean_statistics};
+static const xttest_reference_source source_lean_statistics = {.id = "lean_statistics", .name = "Theorems about the definitions of the statistics, checked by Lean", .level = 3, .record_count = 24, .records = records_lean_statistics};
 
 const xttest_reference_source *const xttest_reference_sources[] = {&source_lean_statistics};
 
