@@ -118,6 +118,32 @@ static const double series_falling_harmonics_cycle_cycle[8] = {
 
 static const xttest_reference_series series_falling_harmonics_cycle = {.name = "falling_harmonics_cycle", .prefix = NULL, .prefix_count = 0, .cycle = series_falling_harmonics_cycle_cycle, .cycle_count = 8, .repeats = 125};
 
+static const double series_spectrum_with_two_empty_bins_prefix[10] = {
+    0.0, 4.0, 0.0, 3.0, 1.0, 0.0, 100.0, 0.0,
+    200.0, 300.0};
+
+static const xttest_reference_series series_spectrum_with_two_empty_bins = {.name = "spectrum_with_two_empty_bins", .prefix = series_spectrum_with_two_empty_bins_prefix, .prefix_count = 10, .cycle = NULL, .cycle_count = 0, .repeats = 0};
+
+static const double series_falling_spectrum_64_bins_prefix[128] = {
+    1.0, 0.5, 0.33329999999999999, 0.25, 0.20000000000000001, 0.1666, 0.14280000000000001, 0.125,
+    0.1111, 0.10000000000000001, 0.090899999999999995, 0.083299999999999999, 0.076899999999999996, 0.071400000000000005, 0.066600000000000006, 0.0625,
+    0.058799999999999998, 0.055500000000000001, 0.052600000000000001, 0.050000000000000003, 0.047600000000000003, 0.045400000000000003, 0.043400000000000001, 0.041599999999999998,
+    0.040000000000000001, 0.038399999999999997, 0.036999999999999998, 0.035700000000000003, 0.0344, 0.033300000000000003, 0.032199999999999999, 0.031199999999999999,
+    0.030300000000000001, 0.029399999999999999, 0.028500000000000001, 0.027699999999999999, 0.027, 0.0263, 0.025600000000000001, 0.025000000000000001,
+    0.024299999999999999, 0.023800000000000002, 0.023199999999999998, 0.022700000000000001, 0.022200000000000001, 0.021700000000000001, 0.0212, 0.020799999999999999,
+    0.020400000000000001, 0.02, 0.019599999999999999, 0.019199999999999998, 0.018800000000000001, 0.018499999999999999, 0.018100000000000002, 0.0178,
+    0.017500000000000002, 0.0172, 0.016899999999999998, 0.0166, 0.016299999999999999, 0.0161, 0.015800000000000002, 0.015599999999999999,
+    0.0, 344.53125, 689.0625, 1033.59375, 1378.125, 1722.65625, 2067.1875, 2411.71875,
+    2756.25, 3100.78125, 3445.3125, 3789.84375, 4134.375, 4478.90625, 4823.4375, 5167.96875,
+    5512.5, 5857.03125, 6201.5625, 6546.09375, 6890.625, 7235.15625, 7579.6875, 7924.21875,
+    8268.75, 8613.28125, 8957.8125, 9302.34375, 9646.875, 9991.40625, 10335.9375, 10680.46875,
+    11025.0, 11369.53125, 11714.0625, 12058.59375, 12403.125, 12747.65625, 13092.1875, 13436.71875,
+    13781.25, 14125.78125, 14470.3125, 14814.84375, 15159.375, 15503.90625, 15848.4375, 16192.96875,
+    16537.5, 16882.03125, 17226.5625, 17571.09375, 17915.625, 18260.15625, 18604.6875, 18949.21875,
+    19293.75, 19638.28125, 19982.8125, 20327.34375, 20671.875, 21016.40625, 21360.9375, 21705.46875};
+
+static const xttest_reference_series series_falling_spectrum_64_bins = {.name = "falling_spectrum_64_bins", .prefix = series_falling_spectrum_64_bins_prefix, .prefix_count = 128, .cycle = NULL, .cycle_count = 0, .repeats = 0};
+
 static const double series_offset_1e7_integers_prefix[3] = {
     10000001.0, 10000003.0, 10000002.0};
 
@@ -267,6 +293,8 @@ static const double expected_lean_spectral_shape_9[] = {1.4782608695652175};
 static const double expected_lean_spectral_shape_10[] = {0.50469309838472842};
 static const double arguments_lean_spectral_shape_11[] = {24.0, 95.0};
 static const double expected_lean_spectral_shape_11[] = {22728.0};
+static const double expected_lean_spectral_shape_12[] = {0.00025000000000000001};
+static const double expected_lean_spectral_shape_13[] = {-2.5277684622846678e-06};
 
 static const xttest_reference_record records_lean_spectral_shape[] = {
     {.feature = XTRACT_TRISTIMULUS_1, .series = &series_harmonics_with_a_zero, .arguments = NULL, .expected = expected_lean_spectral_shape_0, .expected_count = 1, .tolerance = 0.0},
@@ -281,9 +309,11 @@ static const xttest_reference_record records_lean_spectral_shape[] = {
     {.feature = XTRACT_ODD_EVEN_RATIO, .series = &series_falling_harmonics_cycle, .arguments = NULL, .expected = expected_lean_spectral_shape_9, .expected_count = 1, .tolerance = 1.12e-13},
     {.feature = XTRACT_IRREGULARITY_J, .series = &series_falling_harmonics_cycle, .arguments = NULL, .expected = expected_lean_spectral_shape_10, .expected_count = 1, .tolerance = 2.2300000000000001e-13},
     {.feature = XTRACT_ROLLOFF, .series = &series_falling_harmonics_cycle, .arguments = arguments_lean_spectral_shape_11, .expected = expected_lean_spectral_shape_11, .expected_count = 1, .tolerance = 0.0},
+    {.feature = XTRACT_SPECTRAL_SLOPE, .series = &series_spectrum_with_two_empty_bins, .arguments = NULL, .expected = expected_lean_spectral_shape_12, .expected_count = 1, .tolerance = 2.2300000000000002e-16},
+    {.feature = XTRACT_SPECTRAL_SLOPE, .series = &series_falling_spectrum_64_bins, .arguments = NULL, .expected = expected_lean_spectral_shape_13, .expected_count = 1, .tolerance = 6.1799999999999999e-14},
 };
 
-static const xttest_reference_source source_lean_spectral_shape = {.id = "lean_spectral_shape", .name = "Theorems about the definitions of the features of the shape of a spectrum, checked by Lean", .level = 3, .record_count = 12, .records = records_lean_spectral_shape};
+static const xttest_reference_source source_lean_spectral_shape = {.id = "lean_spectral_shape", .name = "Theorems about the definitions of the features of the shape of a spectrum, checked by Lean", .level = 3, .record_count = 14, .records = records_lean_spectral_shape};
 
 static const double expected_lean_statistics_0[] = {10000002.0};
 static const double arguments_lean_statistics_1[] = {10000002.0};

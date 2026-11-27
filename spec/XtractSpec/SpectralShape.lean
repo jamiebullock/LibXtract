@@ -3,7 +3,7 @@
  - SPDX-FileCopyrightText: 2026 Jamie Bullock
  - SPDX-License-Identifier: Zlib
  -/
-import Mathlib
+import XtractSpec.SpectralMoments
 
 /-!
 # The shape of a spectrum
@@ -16,7 +16,11 @@ partials or bins in the order of their frequencies.
 
 `rolloff` is defined here too. Its data is the power coefficients of the bins
 of a spectrum from bin 0, and it is stated over an ordered field, since it
-compares the running sum of the coefficients with a share of their sum. A
+compares the running sum of the coefficients with a share of their sum.
+
+`spectral_slope` takes the coefficients of the bins of a spectrum, then the
+frequencies of the same bins, which `bins` pairs. Its line is fitted to the
+first bin and to every other bin whose frequency or coefficient is not zero. A
 definition is stated over any field: over ℝ it is the specification, and over
 ℚ it computes, which gives its value at coefficients that are doubles
 exactly.
@@ -30,6 +34,8 @@ do, and the library gives no result in either case. `irregularityJ` of
 amplitudes that are all zero is zero here, where the library gives no result.
 When no running sum reaches the share, which takes a coefficient below zero,
 `rolloff` counts every bin here and the library stops at the last.
+`spectralSlope` is zero here when the coefficients sum to zero, or when every
+point has one frequency, where the library gives no result.
 -/
 
 namespace XtractSpec
@@ -79,6 +85,28 @@ def stepSquares : List α → α
 last, over the sum of the squares of the amplitudes. -/
 def irregularityJ (xs : List α) : α :=
   stepSquares xs / (xs.map fun x => x ^ 2).sum
+
+/-- The bins that hold a point of the line: the first, and every other whose frequency or
+coefficient is not zero. -/
+def slopePoints [DecidableEq α] (xs : List α) : List (α × α) :=
+  match bins xs with
+  | [] => []
+  | first :: rest => first :: rest.filter fun bin => decide (bin.2 ≠ 0 ∨ bin.1 ≠ 0)
+
+/-- The slope of the line fitted to a list of points of a coefficient and a frequency: the sum
+of the products of the deviations of each frequency and each coefficient from their means, over
+the sum of the squared deviations of the frequencies, over the sum of the coefficients. -/
+def slopeOf (points : List (α × α)) : α :=
+  1 / (points.map Prod.fst).sum *
+    ((points.map fun point =>
+        (point.2 - (points.map Prod.snd).sum / (points.length : α)) *
+          (point.1 - (points.map Prod.fst).sum / (points.length : α))).sum /
+      (points.map fun point =>
+        (point.2 - (points.map Prod.snd).sum / (points.length : α)) ^ 2).sum)
+
+/-- The slope of the line fitted to the points of the spectrum. -/
+def spectralSlope [DecidableEq α] (xs : List α) : α :=
+  slopeOf (slopePoints xs)
 
 /-- The three shares are of the whole: they sum to 1. -/
 theorem tristimulus_sum (xs : List α) (h : xs.sum ≠ 0) :
@@ -164,5 +192,57 @@ theorem rolloff_cast (xs : List ℚ) (spacing percent : ℚ) :
   rw [index]
   push_cast
   rfl
+
+theorem slopePoints_cast (xs : List ℚ) :
+    slopePoints (xs.map (↑) : List ℝ) = (slopePoints xs).map (Prod.map (↑) (↑)) := by
+  unfold slopePoints
+  rw [bins_map]
+  cases bins xs with
+  | nil => rfl
+  | cons first rest =>
+    simp only [List.map_cons, List.filter_map]
+    congr 2
+    apply List.filter_congr
+    intro bin _
+    simp
+
+theorem slopeOf_cast (points : List (ℚ × ℚ)) :
+    slopeOf (points.map (Prod.map (↑) (↑)) : List (ℝ × ℝ)) = ((slopeOf points : ℚ) : ℝ) := by
+  simp [slopeOf, List.map_map, Function.comp_def]
+
+theorem spectralSlope_cast (xs : List ℚ) :
+    spectralSlope (xs.map (↑) : List ℝ) = ((spectralSlope xs : ℚ) : ℝ) := by
+  unfold spectralSlope
+  rw [slopePoints_cast, slopeOf_cast]
+
+/-!
+## Invariance
+
+The law that `invariance` states for `spectral_slope` in `src/features.json`.
+The order is that of the bins after the first, each coefficient with its
+frequency: the definition counts the first bin whatever it holds, and a bin
+of zero frequency and zero coefficient only there.
+-/
+
+theorem slopeOf_perm {ps qs : List (ℝ × ℝ)} (h : ps.Perm qs) : slopeOf ps = slopeOf qs := by
+  simp [slopeOf, (h.map _).sum_eq, h.length_eq]
+
+/-- `order`: unchanged, the first bin staying first. -/
+theorem spectralSlope_perm {xs ys : List ℝ} (first : (bins xs).head? = (bins ys).head?)
+    (rest : (bins xs).tail.Perm (bins ys).tail) : spectralSlope xs = spectralSlope ys := by
+  apply slopeOf_perm
+  unfold slopePoints
+  cases hx : bins xs with
+  | nil =>
+    cases hy : bins ys with
+    | nil => exact List.Perm.refl _
+    | cons b bs => simp [hx, hy] at first
+  | cons a as =>
+    cases hy : bins ys with
+    | nil => simp [hx, hy] at first
+    | cons b bs =>
+      simp only [hx, hy, List.head?_cons, Option.some.injEq, List.tail_cons] at first rest
+      subst first
+      exact (rest.filter _).cons a
 
 end XtractSpec

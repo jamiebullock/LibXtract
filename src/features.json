@@ -503,7 +503,7 @@
       "description": "Extract the spectral slope of a spectrum",
       "definition": "\\frac{1}{\\sum_k a_k} \\frac{\\sum_k (f_k - \\bar{f})(a_k - \\bar{a})}{\\sum_k (f_k - \\bar{f})^2}, \\text{ over } k = 0 \\text{ and the } k \\text{ with } f_k \\ne 0 \\text{ or } a_k \\ne 0",
       "sources": [{"role": "origin", "authors": ["Peeters"], "year": 2004, "title": "A large set of audio features for sound description (similarity and classification) in the CUIDADO project", "venue": "Technical report, IRCAM", "locator": "section 6.1.5"}],
-      "validation_level": 0,
+      "validation_level": 3,
       "input": {"format": "spectral", "unit": "any", "accepts": ["coefficients_and_frequencies"], "length": "N >= 2 && N % 2 == 0"},
       "arguments": [],
       "invariance": {"order": "unchanged"},
