@@ -11,6 +11,8 @@ import Mathlib
 A certificate states how far a stored expected value `d` is from the value `x`
 that a definition gives: `x = d`, or `|x - d| ≤ ε`. The lemmas here reduce
 such a statement over ℝ to comparisons of rationals, which the kernel decides.
+A definition that gives a list has one certificate for the list: `EachWithin`
+states each expected value with its bound.
 -/
 
 namespace XtractSpec
@@ -44,5 +46,28 @@ theorem sqrt_within_of_rat {x : ℝ} {v d ε : ℚ} (h : x = (v : ℝ)) (hε : 0
     exact_mod_cast hhi
   rw [abs_le]
   constructor <;> linarith
+
+/-- There are as many values as expected values, and each value is within the bound of the
+expected value at its place. An expected value is given with its bound, and a bound of zero says
+that the two are equal. -/
+def EachWithin {α : Type*} [Field α] [LinearOrder α] (xs : List α) (expected : List (ℚ × ℚ)) :
+    Prop :=
+  xs.length = expected.length ∧
+    ∀ pair ∈ xs.zip expected, |pair.1 - (pair.2.1 : α)| ≤ (pair.2.2 : α)
+
+instance (qs : List ℚ) (expected : List (ℚ × ℚ)) : Decidable (EachWithin qs expected) := by
+  unfold EachWithin
+  infer_instance
+
+theorem eachWithin_of_rat {xs : List ℝ} {qs : List ℚ} {expected : List (ℚ × ℚ)}
+    (h : xs = qs.map (↑)) (hq : EachWithin qs expected) : EachWithin xs expected := by
+  subst h
+  refine ⟨by simpa using hq.1, ?_⟩
+  intro pair hpair
+  rw [List.zip_map_left] at hpair
+  obtain ⟨p, hp, rfl⟩ := List.mem_map.mp hpair
+  have bound := hq.2 p hp
+  simp only [Prod.map_fst, Prod.map_snd, id]
+  exact_mod_cast bound
 
 end XtractSpec

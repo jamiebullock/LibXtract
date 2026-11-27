@@ -200,9 +200,10 @@ read only what it wrote.
 A value of level 3 has a theorem in `spec`, a [Lean](https://lean-lang.org)
 project that states each feature's definition and proves the laws that the
 feature's `invariance` in `src/features.json` states. The script that writes
-such values writes a theorem for each beside them, in `spec/XtractSpec/Records`,
-which says that the expected value is the value of the definition at the
-stored data, or how far from it at most. To check the theorems, install
+such values writes a theorem for each record beside them, in
+`spec/XtractSpec/Records`, which says of every expected value of the record
+that it is the value of the definition at the stored data, or how far from it
+at most. To check the theorems, install
 [elan](https://github.com/leanprover/elan) and run `lake exe cache get` and
 then `lake build` in `spec`. The build fails when a proof depends on an axiom
 other than the three standard axioms of Lean, so every proof is complete and

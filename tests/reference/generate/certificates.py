@@ -133,7 +133,7 @@ class Certificates:
             record["data"] = series
         if arguments:
             record["arguments"] = arguments
-        record["expected"] = [expected]
+        record["expected"] = expected if isinstance(expected, list) else [expected]
         record["tolerance"] = tolerance(roundings, reason, exact)
         record["call"] = f"theorem XtractSpec.Records.{name}"
         self.records.append(record)
@@ -193,6 +193,19 @@ class Certificates:
                 f"  sqrt_within_of_rat {lemma} {DECIDE} {DECIDE} {DECIDE} {DECIDE}"
             )
         self.add(feature, series, theorem, expected, takes_data, arguments, roundings, reason, exact)
+        return expected
+
+    def vector(self, feature, series, call, lemma, values, roundings, reason, arguments=None):
+        """A feature whose definition gives the fractions `values`, in
+        order: each expected double is the nearest, and one theorem states
+        every one of them with the most it is from its value, which is zero
+        for a value that is a double. The roundings are counted against the
+        largest magnitude among the expected values."""
+        expected = [float(value) for value in values]
+        bounds = [Fraction(0) if Fraction(d) == value else half_unit(d) for d, value in zip(expected, values)]
+        pairs = ",\n    ".join(f"(({lean(d)} : ℚ), ({lean(bound)} : ℚ))" for d, bound in zip(expected, bounds))
+        theorem = f"EachWithin ({call})\n    [{pairs}] :=\n  eachWithin_of_rat ({lemma}) {DECIDE}"
+        self.add(feature, series, theorem, expected, True, arguments, roundings, reason, not any(bounds))
         return expected
 
     def store(self, family, module, imports, title):
