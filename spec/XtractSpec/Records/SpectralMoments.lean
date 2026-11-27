@@ -178,6 +178,14 @@ theorem spectral_standard_deviation_uneven_spectrum_with_a_zero :
     |spectralStandardDeviation ((5599375 / 16 : ℚ) : ℝ) - ((5203548409001175 / 8796093022208 : ℚ) : ℝ)| ≤ ((1 / 17592186044416 : ℚ) : ℝ) :=
   sqrt_within_of_rat rfl (by decide +kernel) (by decide +kernel) (by decide +kernel) (by decide +kernel)
 
+theorem spectral_skewness_uneven_spectrum_with_a_zero :
+    |spectralSkewness (uneven_spectrum_with_a_zero.map (↑) : List ℝ) ((1475 / 4 : ℚ) : ℝ) ((5203548409001175 / 8796093022208 : ℚ) : ℝ) - ((8293668383497409 / 2251799813685248 : ℚ) : ℝ)| ≤ ((1 / 4503599627370496 : ℚ) : ℝ) :=
+  within_of_rat (spectralSkewness_cast _ _ _) (by decide +kernel)
+
+theorem spectral_kurtosis_uneven_spectrum_with_a_zero :
+    |spectralKurtosis (uneven_spectrum_with_a_zero.map (↑) : List ℝ) ((1475 / 4 : ℚ) : ℝ) ((5203548409001175 / 8796093022208 : ℚ) : ℝ) - ((7893271298029755 / 562949953421312 : ℚ) : ℝ)| ≤ ((1 / 1125899906842624 : ℚ) : ℝ) :=
+  within_of_rat (spectralKurtosis_cast _ _ _) (by decide +kernel)
+
 theorem spectral_centroid_decaying_spectrum_128_bins :
     |spectralCentroid (decaying_spectrum_128_bins.map (↑) : List ℝ) - ((66636477807493 / 17179869184 : ℚ) : ℝ)| ≤ ((1 / 4398046511104 : ℚ) : ℝ) :=
   within_of_rat (spectralCentroid_cast _) (by decide +kernel)
@@ -197,5 +205,13 @@ theorem spread_decaying_spectrum_128_bins :
 theorem spectral_standard_deviation_decaying_spectrum_128_bins :
     |spectralStandardDeviation ((119787202329249 / 4194304 : ℚ) : ℝ) - ((5875909324140447 / 1099511627776 : ℚ) : ℝ)| ≤ ((1 / 2199023255552 : ℚ) : ℝ) :=
   sqrt_within_of_rat rfl (by decide +kernel) (by decide +kernel) (by decide +kernel) (by decide +kernel)
+
+theorem spectral_skewness_decaying_spectrum_128_bins :
+    |spectralSkewness (decaying_spectrum_128_bins.map (↑) : List ℝ) ((66636477807493 / 17179869184 : ℚ) : ℝ) ((5875909324140447 / 1099511627776 : ℚ) : ℝ) - ((3685357510334703 / 2251799813685248 : ℚ) : ℝ)| ≤ ((1 / 9007199254740992 : ℚ) : ℝ) :=
+  within_of_rat (spectralSkewness_cast _ _ _) (by decide +kernel)
+
+theorem spectral_kurtosis_decaying_spectrum_128_bins :
+    |spectralKurtosis (decaying_spectrum_128_bins.map (↑) : List ℝ) ((66636477807493 / 17179869184 : ℚ) : ℝ) ((5875909324140447 / 1099511627776 : ℚ) : ℝ) - ((7918571995180693 / 4503599627370496 : ℚ) : ℝ)| ≤ ((1 / 9007199254740992 : ℚ) : ℝ) :=
+  within_of_rat (spectralKurtosis_cast _ _ _) (by decide +kernel)
 
 end XtractSpec.Records

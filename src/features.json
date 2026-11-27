@@ -215,7 +215,7 @@
       "description": "Extract the skewness of an input spectrum",
       "definition": "\\gamma_1 = \\frac{\\sum_{k=0}^{M-1} (f_k - \\mu)^3 a_k}{\\sigma^3 \\sum_{k=0}^{M-1} a_k}, \\quad \\mu, \\sigma \\text{ the spectral mean and standard deviation given in argv}, \\; \\sigma \\ge 0, \\quad M = N/2, \\; a_k = x_k, \\; f_k = x_{M+k}; \\text{ no result when } \\sigma = 0 \\text{ or } \\sum_k a_k = 0",
       "sources": [{"role": "origin", "authors": ["Peeters"], "year": 2004, "title": "A large set of audio features for sound description (similarity and classification) in the CUIDADO project", "venue": "Technical report, IRCAM", "locator": "section 6.1.3"}],
-      "validation_level": 0,
+      "validation_level": 3,
       "input": {"format": "spectral", "unit": "any", "accepts": ["magnitude_spectrum"], "length": "N >= 2 && N % 2 == 0"},
       "argument_type": "float",
       "arguments": [
@@ -231,7 +231,7 @@
       "description": "Extract the kurtosis of an input spectrum",
       "definition": "\\gamma_2 - 3 = \\frac{\\sum_{k=0}^{M-1} (f_k - \\mu)^4 a_k}{\\sigma^4 \\sum_{k=0}^{M-1} a_k} - 3, \\quad \\mu, \\sigma \\text{ the spectral mean and standard deviation given in argv}, \\; \\sigma \\ge 0, \\quad M = N/2, \\; a_k = x_k, \\; f_k = x_{M+k}; \\text{ no result when } \\sigma = 0 \\text{ or } \\sum_k a_k = 0",
       "sources": [{"role": "origin", "authors": ["Peeters"], "year": 2004, "title": "A large set of audio features for sound description (similarity and classification) in the CUIDADO project", "venue": "Technical report, IRCAM", "locator": "section 6.1.4"}],
-      "validation_level": 0,
+      "validation_level": 3,
       "input": {"format": "spectral", "unit": "any", "accepts": ["magnitude_spectrum"], "length": "N >= 2 && N % 2 == 0"},
       "argument_type": "float",
       "arguments": [

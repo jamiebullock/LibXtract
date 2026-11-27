@@ -125,7 +125,7 @@ xtract_spectral_skewness()
 Sources:
 - Origin: Peeters (2004). "A large set of audio features for sound description (similarity and classification) in the CUIDADO project". Technical report, IRCAM, section 6.1.3
 
-Validation level 0, not checked.
+Validation level 3, certified.
 
 \section definition_spectral_kurtosis Spectral Kurtosis
 
@@ -136,7 +136,7 @@ xtract_spectral_kurtosis()
 Sources:
 - Origin: Peeters (2004). "A large set of audio features for sound description (similarity and classification) in the CUIDADO project". Technical report, IRCAM, section 6.1.4
 
-Validation level 0, not checked.
+Validation level 3, certified.
 
 \section definition_spectral_centroid Spectral Centroid
 
