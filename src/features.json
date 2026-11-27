@@ -747,7 +747,7 @@
       "title": "Average Squared Difference Function",
       "description": "Extract the ASDF of a signal",
       "definition": "S_\\tau = \\frac{1}{N} \\sum_{n=0}^{N-1-\\tau} (x_n - x_{n+\\tau})^2, \\quad \\tau = 0, \\ldots, N-1",
-      "validation_level": 0,
+      "validation_level": 3,
       "input": {"format": "audio_samples", "unit": "any"},
       "arguments": [],
       "invariance": {"offset": "unchanged", "sign": "unchanged", "reversal": "unchanged"},

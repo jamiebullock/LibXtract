@@ -8,8 +8,8 @@ import XtractSpec.Temporal
 /-!
 # A series against itself at every lag
 
-The definitions in `src/features.json` of `autocorrelation` and `amdf`. The
-result of each has one value for each lag from zero to the count of the
+The definitions in `src/features.json` of `autocorrelation`, `amdf` and
+`asdf`. The result of each has one value for each lag from zero to the count of the
 values less one, and the value at a lag is a sum over each value of the
 series and the value that lag after it. A definition is stated over any
 field, or any ordered one: over ℝ it is the specification, and over ℚ it
@@ -35,6 +35,11 @@ def atEveryLag (term : α → α → α) (xs : List α) : List α :=
 the count of the values. -/
 def autocorrelation (xs : List α) : List α :=
   atEveryLag (fun a b => a * b) xs
+
+/-- For each lag, the sum of the squared differences between each value and the value that lag
+after it, over the count of the values. -/
+def asdf (xs : List α) : List α :=
+  atEveryLag (fun a b => (a - b) ^ 2) xs
 
 end Field
 
@@ -67,6 +72,9 @@ theorem autocorrelation_cast (xs : List ℚ) :
   atEveryLag_cast _ _ (by intro a b; push_cast; rfl) xs
 
 theorem amdf_cast (xs : List ℚ) : amdf (xs.map (↑) : List ℝ) = (amdf xs).map (↑) :=
+  atEveryLag_cast _ _ (by intro a b; push_cast; rfl) xs
+
+theorem asdf_cast (xs : List ℚ) : asdf (xs.map (↑) : List ℝ) = (asdf xs).map (↑) :=
   atEveryLag_cast _ _ (by intro a b; push_cast; rfl) xs
 
 /-!
@@ -128,5 +136,17 @@ theorem amdf_neg (xs : List ℝ) : amdf (xs.map (-·)) = amdf xs :=
 /-- `reversal`: unchanged. -/
 theorem amdf_reverse (xs : List ℝ) : amdf xs.reverse = amdf xs :=
   atEveryLag_reverse _ (by intro a b; exact abs_sub_comm b a) xs
+
+/-- `offset`: unchanged. -/
+theorem asdf_offset (xs : List ℝ) (c : ℝ) : asdf (xs.map (· + c)) = asdf xs :=
+  atEveryLag_offset _ c (by intro a b; ring) xs
+
+/-- `sign`: unchanged. -/
+theorem asdf_neg (xs : List ℝ) : asdf (xs.map (-·)) = asdf xs :=
+  atEveryLag_neg _ (by intro a b; ring) xs
+
+/-- `reversal`: unchanged. -/
+theorem asdf_reverse (xs : List ℝ) : asdf xs.reverse = asdf xs :=
+  atEveryLag_reverse _ (by intro a b; ring) xs
 
 end XtractSpec
