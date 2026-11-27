@@ -1323,7 +1323,7 @@ xtract_cooccurrence_contrast()
 Sources:
 - Origin: Haralick, Shanmugam and Dinstein (1973). "Textural features for image classification". IEEE Transactions on Systems, Man, and Cybernetics SMC-3(6), appendix I, feature 2. <a href="https://doi.org/10.1109/TSMC.1973.4309314">doi:10.1109/TSMC.1973.4309314</a>
 
-Validation level 0, not checked.
+Validation level 3, certified.
 
 \section definition_cooccurrence_correlation Co-occurrence Correlation
 
