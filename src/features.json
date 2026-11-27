@@ -1646,7 +1646,7 @@
       "title": "Histogram",
       "description": "Extract the fraction of the elements of an input vector at each level",
       "definition": "h_k = \\frac{1}{N} \\left|\\{n : x_n = k\\}\\right|, \\quad k = 0, \\dots, L-1, \\quad L \\text{ the number of levels given in argv}; \\text{ an argument error when some } x_n \\text{ is not a whole number in } [0, L)",
-      "validation_level": 0,
+      "validation_level": 3,
       "input": {"format": "arbitrary_series", "unit": "none", "accepts": ["quantise"]},
       "argument_type": "int",
       "arguments": [

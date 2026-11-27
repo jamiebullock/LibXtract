@@ -86,4 +86,38 @@ theorem quantise_tenths_to_quantise_cycle :
     ((60 : ℚ), (0 : ℚ))] :=
   eachWithin_of_rat (quantise_cast _ _ _ _) (by decide +kernel)
 
+def eight_levels_below_4 : List ℚ :=
+  [(2 : ℚ), (0 : ℚ),
+    (3 : ℚ), (3 : ℚ),
+    (1 : ℚ), (3 : ℚ),
+    (0 : ℚ), (2 : ℚ)]
+
+theorem histogram_eight_levels_below_4 :
+    EachWithin (histogram (eight_levels_below_4.map (↑) : List ℝ) 5)
+    [((1 / 4 : ℚ), (0 : ℚ)),
+    ((1 / 8 : ℚ), (0 : ℚ)),
+    ((1 / 4 : ℚ), (0 : ℚ)),
+    ((3 / 8 : ℚ), (0 : ℚ)),
+    ((0 : ℚ), (0 : ℚ))] :=
+  eachWithin_of_rat (histogram_cast _ _) (by decide +kernel)
+
+def levels_below_8_cycle : List ℚ :=
+  [(2 : ℚ)] ++
+  (List.replicate 125 [(0 : ℚ), (3 : ℚ),
+    (3 : ℚ), (7 : ℚ),
+    (1 : ℚ), (3 : ℚ),
+    (0 : ℚ), (5 : ℚ)]).flatten
+
+theorem histogram_levels_below_8_cycle :
+    EachWithin (histogram (levels_below_8_cycle.map (↑) : List ℝ) 8)
+    [((8998201053687305 / 36028797018963968 : ℚ), (1 / 72057594037927936 : ℚ)),
+    ((8998201053687305 / 72057594037927936 : ℚ), (1 / 144115188075855872 : ℚ)),
+    ((1151769734871975 / 1152921504606846976 : ℚ), (1 / 9223372036854775808 : ℚ)),
+    ((6748650790265479 / 18014398509481984 : ℚ), (1 / 36028797018963968 : ℚ)),
+    ((0 : ℚ), (0 : ℚ)),
+    ((8998201053687305 / 72057594037927936 : ℚ), (1 / 144115188075855872 : ℚ)),
+    ((0 : ℚ), (0 : ℚ)),
+    ((8998201053687305 / 72057594037927936 : ℚ), (1 / 144115188075855872 : ℚ))] :=
+  eachWithin_of_rat (histogram_cast _ _) (by decide +kernel)
+
 end XtractSpec.Records

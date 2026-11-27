@@ -86,6 +86,47 @@
         "reason": "no rounding: a level is a whole number, and the library's rounded share of the range has the whole part that the exact share has for every value; the expected value is exact"
       },
       "call": "theorem XtractSpec.Records.quantise_tenths_to_quantise_cycle"
+    },
+    {
+      "feature": "histogram",
+      "data": "eight_levels_below_4",
+      "arguments": {
+        "levels": 5
+      },
+      "expected": [
+        0.25,
+        0.125,
+        0.25,
+        0.375,
+        0.0
+      ],
+      "tolerance": {
+        "relative": 0.0,
+        "reason": "no rounding: a count is a whole number, and its division by 8 is exact; the expected value is exact"
+      },
+      "call": "theorem XtractSpec.Records.histogram_eight_levels_below_4"
+    },
+    {
+      "feature": "histogram",
+      "data": "levels_below_8_cycle",
+      "arguments": {
+        "levels": 8
+      },
+      "expected": [
+        0.24975024975024976,
+        0.12487512487512488,
+        0.000999000999000999,
+        0.37462537462537465,
+        0.0,
+        0.12487512487512488,
+        0.0,
+        0.12487512487512488
+      ],
+      "tolerance": {
+        "relative": 2.23e-16,
+        "reason": "2 roundings, each within 2^-53 relatively: the division of a count, a whole number, by N; and the expected value"
+      },
+      "call": "theorem XtractSpec.Records.histogram_levels_below_8_cycle"
     }
   ]
 }

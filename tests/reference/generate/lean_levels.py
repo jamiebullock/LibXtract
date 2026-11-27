@@ -3,8 +3,9 @@
 # SPDX-FileCopyrightText: 2026 Jamie Bullock
 # SPDX-License-Identifier: Zlib
 
-"""Writes two series, the levels of the values of each, and a theorem for
-every list of those values that Lean checks.
+"""Writes four series, the levels of the values of two and the shares of the
+levels of the other two, and a theorem for every list of those values that
+Lean checks.
 
 usage: lean_levels.py
 
@@ -21,6 +22,10 @@ The first series has eight multiples of 1/2 from 0 to 4, quantised to four
 levels between its lowest and its highest value: it has both bounds and
 values on the edge between two levels. The second repeats eight values
 between 0.05 and 0.9 five times, quantised to 256 levels.
+
+The other two are series of levels. The third has eight levels below 4, with
+a histogram of five levels, the last of which has no value. The fourth has
+1001 levels below 8, and two of the eight have no value.
 """
 
 import math
@@ -36,6 +41,13 @@ SERIES = {
     LONG: ([], ["0.35", "0.9", "0.05", "0.6", "0.15", "0.8", "0.45", "0.25"], 5),
 }
 LEVELS = {SHORT: 4, LONG: 256}
+FEW = "eight_levels_below_4"
+MANY = "levels_below_8_cycle"
+LEVEL_SERIES = {
+    FEW: (["2", "0", "3", "3", "1", "3", "0", "2"], [], 0),
+    MANY: (["2"], ["0", "3", "3", "7", "1", "3", "0", "5"], 125),
+}
+BINS = {FEW: 5, MANY: 8}
 
 
 def main():
@@ -77,6 +89,26 @@ def main():
             "a level is a whole number, and the library's rounded share of the range has the whole part that "
             "the exact share has for every value",
             {"lower": float(lower), "upper": float(upper), "levels": float(levels)},
+        )
+
+    for series, (prefix, cycle, repeats) in LEVEL_SERIES.items():
+        xs = out.series(series, prefix, cycle, repeats)
+        levels = BINS[series]
+        assert all(x.denominator == 1 and 0 <= x < levels for x in xs)
+        shares = [Fraction(sum(1 for x in xs if x == level), len(xs)) for level in range(levels)]
+        exact = all(Fraction(float(share)) == share for share in shares)
+        assert exact == (series == FEW) and Fraction(0) in shares
+        out.vector(
+            "histogram",
+            series,
+            f"histogram {data(series)} {levels}",
+            "histogram_cast _ _",
+            shares,
+            0 if exact else 1,
+            "a count is a whole number, and its division by 8 is exact"
+            if exact
+            else "the division of a count, a whole number, by N",
+            {"levels": levels},
         )
 
     out.store("levels", "Levels", ["Levels"], "the levels of a series")
