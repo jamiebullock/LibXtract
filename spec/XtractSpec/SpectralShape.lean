@@ -8,9 +8,10 @@ import Mathlib
 /-!
 # The shape of a spectrum
 
-The definitions in `src/features.json` of `tristimulus_1`, `tristimulus_2`
-and `tristimulus_3`. The data of each is the coefficients of the harmonics of
-a sound in the order of their numbers, the first harmonic first. A
+The definitions in `src/features.json` of `tristimulus_1`, `tristimulus_2`,
+`tristimulus_3` and `odd_even_ratio`. The data of each is the coefficients of
+the harmonics of a sound in the order of their numbers, the first harmonic
+first. A
 definition is stated over any field: over ℝ it is the specification, and over
 ℚ it computes, which gives its value at coefficients that are doubles
 exactly.
@@ -18,10 +19,23 @@ exactly.
 A definition is the feature's only where the feature gives a result. Lean's
 division by zero is zero, so a tristimulus is zero here when the coefficients
 sum to zero, or when the coefficients it takes its share from do, and the
-library gives no result in either case.
+library gives no result in either case. `oddEvenRatio` is zero here when the
+coefficients of the odd harmonics sum to zero, or those of the even harmonics
+do, and the library gives no result in either case.
 -/
 
 namespace XtractSpec
+
+/-- Every second value of the list, from the first. -/
+def alternate {α : Type*} : List α → List α
+  | x :: _ :: rest => x :: alternate rest
+  | xs => xs
+
+theorem alternate_map {α β : Type*} (f : α → β) :
+    ∀ xs : List α, alternate (xs.map f) = (alternate xs).map f
+  | [] => rfl
+  | [_] => rfl
+  | x :: _ :: rest => by simp [alternate, alternate_map f rest]
 
 section Field
 
@@ -40,6 +54,11 @@ def tristimulus2 (xs : List α) : α :=
 the coefficients. -/
 def tristimulus3 (xs : List α) : α :=
   (xs.drop 4).sum / xs.sum
+
+/-- The sum of the coefficients of the odd harmonics over the sum of those of the even
+harmonics. -/
+def oddEvenRatio (xs : List α) : α :=
+  (alternate xs).sum / (alternate xs.tail).sum
 
 /-- The three shares are of the whole: they sum to 1. -/
 theorem tristimulus_sum (xs : List α) (h : xs.sum ≠ 0) :
@@ -68,5 +87,9 @@ theorem tristimulus2_cast (xs : List ℚ) :
 theorem tristimulus3_cast (xs : List ℚ) :
     tristimulus3 (xs.map (↑) : List ℝ) = ((tristimulus3 xs : ℚ) : ℝ) := by
   simp [tristimulus3, ← List.map_drop]
+
+theorem oddEvenRatio_cast (xs : List ℚ) :
+    oddEvenRatio (xs.map (↑) : List ℝ) = ((oddEvenRatio xs : ℚ) : ℝ) := by
+  simp [oddEvenRatio, ← List.map_tail, alternate_map]
 
 end XtractSpec

@@ -43,6 +43,10 @@ theorem tristimulus_3_harmonics_with_a_zero :
     tristimulus3 (harmonics_with_a_zero.map (↑) : List ℝ) = ((9 / 32 : ℚ) : ℝ) :=
   eq_of_rat (tristimulus3_cast _) (by decide +kernel)
 
+theorem odd_even_ratio_harmonics_with_a_zero :
+    |oddEvenRatio (harmonics_with_a_zero.map (↑) : List ℝ) - ((1003519482185817 / 562949953421312 : ℚ) : ℝ)| ≤ ((1 / 9007199254740992 : ℚ) : ℝ) :=
+  within_of_rat (oddEvenRatio_cast _) (by decide +kernel)
+
 theorem tristimulus_1_falling_harmonics_cycle :
     |tristimulus1 (falling_harmonics_cycle.map (↑) : List ℝ) - ((5825287602224069 / 2305843009213693952 : ℚ) : ℝ)| ≤ ((1 / 4611686018427387904 : ℚ) : ℝ) :=
   within_of_rat (tristimulus1_cast _) (by decide +kernel)
@@ -54,5 +58,9 @@ theorem tristimulus_2_falling_harmonics_cycle :
 theorem tristimulus_3_falling_harmonics_cycle :
     |tristimulus3 (falling_harmonics_cycle.map (↑) : List ℝ) - ((4473259587775579 / 4503599627370496 : ℚ) : ℝ)| ≤ ((1 / 18014398509481984 : ℚ) : ℝ) :=
   within_of_rat (tristimulus3_cast _) (by decide +kernel)
+
+theorem odd_even_ratio_falling_harmonics_cycle :
+    |oddEvenRatio (falling_harmonics_cycle.map (↑) : List ℝ) - ((6657495101330299 / 4503599627370496 : ℚ) : ℝ)| ≤ ((1 / 9007199254740992 : ℚ) : ℝ) :=
+  within_of_rat (oddEvenRatio_cast _) (by decide +kernel)
 
 end XtractSpec.Records

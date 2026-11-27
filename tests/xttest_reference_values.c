@@ -157,20 +157,24 @@ static const xttest_reference_source source_lean_spectral_moments = {.id = "lean
 static const double expected_lean_spectral_shape_0[] = {0.375};
 static const double expected_lean_spectral_shape_1[] = {0.34375};
 static const double expected_lean_spectral_shape_2[] = {0.28125};
-static const double expected_lean_spectral_shape_3[] = {0.0025263157894736842};
-static const double expected_lean_spectral_shape_4[] = {0.0042105263157894736};
-static const double expected_lean_spectral_shape_5[] = {0.99326315789473685};
+static const double expected_lean_spectral_shape_3[] = {1.7826086956521738};
+static const double expected_lean_spectral_shape_4[] = {0.0025263157894736842};
+static const double expected_lean_spectral_shape_5[] = {0.0042105263157894736};
+static const double expected_lean_spectral_shape_6[] = {0.99326315789473685};
+static const double expected_lean_spectral_shape_7[] = {1.4782608695652175};
 
 static const xttest_reference_record records_lean_spectral_shape[] = {
     {.feature = XTRACT_TRISTIMULUS_1, .series = &series_harmonics_with_a_zero, .arguments = NULL, .expected = expected_lean_spectral_shape_0, .expected_count = 1, .tolerance = 0.0},
     {.feature = XTRACT_TRISTIMULUS_2, .series = &series_harmonics_with_a_zero, .arguments = NULL, .expected = expected_lean_spectral_shape_1, .expected_count = 1, .tolerance = 0.0},
     {.feature = XTRACT_TRISTIMULUS_3, .series = &series_harmonics_with_a_zero, .arguments = NULL, .expected = expected_lean_spectral_shape_2, .expected_count = 1, .tolerance = 0.0},
-    {.feature = XTRACT_TRISTIMULUS_1, .series = &series_falling_harmonics_cycle, .arguments = NULL, .expected = expected_lean_spectral_shape_3, .expected_count = 1, .tolerance = 1.12e-13},
-    {.feature = XTRACT_TRISTIMULUS_2, .series = &series_falling_harmonics_cycle, .arguments = NULL, .expected = expected_lean_spectral_shape_4, .expected_count = 1, .tolerance = 1.12e-13},
-    {.feature = XTRACT_TRISTIMULUS_3, .series = &series_falling_harmonics_cycle, .arguments = NULL, .expected = expected_lean_spectral_shape_5, .expected_count = 1, .tolerance = 2.2199999999999999e-13},
+    {.feature = XTRACT_ODD_EVEN_RATIO, .series = &series_harmonics_with_a_zero, .arguments = NULL, .expected = expected_lean_spectral_shape_3, .expected_count = 1, .tolerance = 2.2300000000000002e-16},
+    {.feature = XTRACT_TRISTIMULUS_1, .series = &series_falling_harmonics_cycle, .arguments = NULL, .expected = expected_lean_spectral_shape_4, .expected_count = 1, .tolerance = 1.12e-13},
+    {.feature = XTRACT_TRISTIMULUS_2, .series = &series_falling_harmonics_cycle, .arguments = NULL, .expected = expected_lean_spectral_shape_5, .expected_count = 1, .tolerance = 1.12e-13},
+    {.feature = XTRACT_TRISTIMULUS_3, .series = &series_falling_harmonics_cycle, .arguments = NULL, .expected = expected_lean_spectral_shape_6, .expected_count = 1, .tolerance = 2.2199999999999999e-13},
+    {.feature = XTRACT_ODD_EVEN_RATIO, .series = &series_falling_harmonics_cycle, .arguments = NULL, .expected = expected_lean_spectral_shape_7, .expected_count = 1, .tolerance = 1.12e-13},
 };
 
-static const xttest_reference_source source_lean_spectral_shape = {.id = "lean_spectral_shape", .name = "Theorems about the definitions of the features of the shape of a spectrum, checked by Lean", .level = 3, .record_count = 6, .records = records_lean_spectral_shape};
+static const xttest_reference_source source_lean_spectral_shape = {.id = "lean_spectral_shape", .name = "Theorems about the definitions of the features of the shape of a spectrum, checked by Lean", .level = 3, .record_count = 8, .records = records_lean_spectral_shape};
 
 static const double expected_lean_statistics_0[] = {10000002.0};
 static const double arguments_lean_statistics_1[] = {10000002.0};

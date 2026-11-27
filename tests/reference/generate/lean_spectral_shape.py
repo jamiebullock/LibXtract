@@ -85,6 +85,20 @@ def main():
                 else reason,
             )
 
+        odd, even = xs[0::2], xs[1::2]
+        out.rational(
+            "odd_even_ratio",
+            series,
+            f"oddEvenRatio {data(series)}",
+            "oddEvenRatio_cast _",
+            sum(odd) / sum(even),
+            1 if exact else len(odd) + len(even) - 1,
+            "the division; every coefficient is a multiple of 1/4, so each addition is exact"
+            if exact
+            else "the additions of the coefficients of the odd harmonics, one fewer than those harmonics, and of "
+            "the coefficients of the even harmonics likewise, each of one sign, in any order; the division",
+        )
+
     out.store("spectral_shape", "SpectralShape", ["SpectralShape"], "the features of the shape of a spectrum")
 
 

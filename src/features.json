@@ -480,7 +480,7 @@
       "description": "Extract the odd-to-even harmonic ratio of a spectrum",
       "definition": "\\frac{\\sum_{h \\text{ odd}} E_h}{\\sum_{h \\text{ even}} E_h}, \\quad h = 1, \\dots, N",
       "sources": [{"role": "origin", "authors": ["Peeters"], "year": 2004, "title": "A large set of audio features for sound description (similarity and classification) in the CUIDADO project", "venue": "Technical report, IRCAM", "locator": "section 7.1.5"}],
-      "validation_level": 0,
+      "validation_level": 3,
       "input": {"format": "spectral_harmonics_magnitudes", "unit": "any", "accepts": ["harmonic_powers"]},
       "arguments": [],
       "result": {"kind": "scalar", "unit": "none", "min": 0}
