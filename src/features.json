@@ -1519,7 +1519,7 @@
       "title": "Covariance Matrix",
       "description": "Extract the covariance matrix of a set of series",
       "definition": "S_{ij} = \\frac{1}{M-1} \\sum_{n=0}^{M-1} (x^{(i)}_n - \\bar{x}^{(i)})(x^{(j)}_n - \\bar{x}^{(j)}), \\quad i, j = 0, \\dots, C-1, \\quad M = N/C, \\quad x^{(i)}_n = d_{iM+n}, \\quad C \\text{ the number of series given in argv}",
-      "validation_level": 0,
+      "validation_level": 3,
       "input": {"format": "channels", "unit": "any", "length": "series >= 1 && N >= 2 * series && N % series == 0"},
       "argument_type": "int",
       "arguments": [

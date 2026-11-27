@@ -2940,7 +2940,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .description = "Extract the covariance matrix of a set of series",
         .source_count = 0,
         .sources = NULL,
-        .validation_level = 0,
+        .validation_level = 3,
         .tags = 0,
         .data = {XTRACT_CHANNELS, XTRACT_UNIT_ANY, 0, NULL, 1, "series >= 1 && N >= 2 * series && N % series == 0"},
         .argc = 1,
