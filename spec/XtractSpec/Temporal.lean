@@ -9,7 +9,7 @@ import XtractSpec.Statistics
 # The shape of a series over time
 
 The definitions in `src/features.json` of `temporal_centroid`, `max_position`,
-`min_position`, `peak_asymmetry` and `time_reversal_asymmetry`. The data is a series in the order of time, and the
+`min_position`, `peak_asymmetry`, `time_reversal_asymmetry` and `attack_time`. The data is a series in the order of time, and the
 position of a value is its index, from 0. A definition without a comparison
 is stated over any field: over ℝ it is the specification, and over ℚ it
 computes, which gives its value at a series of doubles exactly. The index of
@@ -25,7 +25,9 @@ sum to zero or less, and refuses fewer than two values. `maxPosition` and
 two values. `peakAsymmetry` is zero here when the largest value and every
 value before it are zero, where the library gives no result.
 `timeReversalAsymmetry` is zero here at a lag of zero or of the count of the
-values or more, and the library refuses such a lag.
+values or more, and the library refuses such a lag. `attackTime` is defined
+here for any largest value and any sample rate, and the library gives no
+result when the largest value is zero or less.
 -/
 
 namespace XtractSpec
@@ -82,6 +84,17 @@ def minPosition (xs : List α) : α :=
 squares of the values up to it. That value is in both sums. -/
 def peakAsymmetry (xs : List α) : α :=
   sidesRatio (firstMaxIndex xs) xs
+
+/-- The largest value: the first value that no value is above. -/
+def largest (xs : List α) : α :=
+  xs.getD (firstMaxIndex xs) 0
+
+/-- The count of the values from the first that is at least the fraction `start` of the largest,
+up to the first of them that is at least the fraction `stop` of the largest, over the sample
+rate given, `rate`. -/
+def attackTime (xs : List α) (rate start stop : α) : α :=
+  (((xs.drop (xs.findIdx fun x => decide (start * largest xs ≤ x))).findIdx fun x =>
+    decide (stop * largest xs ≤ x) : ℕ) : α) / rate
 
 end Ordered
 
@@ -181,6 +194,30 @@ theorem timeReversalAsymmetry_cast (xs : List ℚ) (lag : ℕ) :
   unfold timeReversalAsymmetry
   rw [← List.map_drop, List.zip_map]
   simp [List.map_map, Function.comp_def]
+
+theorem firstMaxIndex_cast (qs : List ℚ) : firstMaxIndex (qs.map (↑) : List ℝ) = firstMaxIndex qs := by
+  simp [firstMaxIndex, List.findIdx_map, List.all_map, Function.comp_def]
+
+theorem largest_cast (qs : List ℚ) : largest (qs.map (↑) : List ℝ) = ((largest qs : ℚ) : ℝ) := by
+  unfold largest
+  rw [firstMaxIndex_cast]
+  by_cases h : firstMaxIndex qs < qs.length
+  · simp [List.getD_eq_getElem?_getD, h]
+  · simp [List.getD_eq_getElem?_getD, Nat.le_of_not_lt h]
+
+theorem attackTime_cast (qs : List ℚ) (rate start stop : ℚ) :
+    attackTime (qs.map (↑) : List ℝ) (rate : ℝ) (start : ℝ) (stop : ℝ) =
+      ((attackTime qs rate start stop : ℚ) : ℝ) := by
+  have reaches : ∀ fraction x : ℚ,
+      decide ((fraction : ℝ) * ((largest qs : ℚ) : ℝ) ≤ (x : ℝ)) = decide (fraction * largest qs ≤ x) := by
+    intro fraction x
+    congr 1
+    exact propext (by exact_mod_cast Iff.rfl)
+  unfold attackTime
+  rw [largest_cast, List.findIdx_map, ← List.map_drop, List.findIdx_map]
+  simp only [Function.comp_def, reaches]
+  push_cast
+  rfl
 
 /-!
 ## Invariance

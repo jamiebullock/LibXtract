@@ -1948,7 +1948,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .description = "Extract the attack time of an envelope",
         .source_count = 2,
         .sources = sources_attack_time,
-        .validation_level = 0,
+        .validation_level = 3,
         .tags = 0,
         .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 0, NULL, 1, "N >= 1"},
         .argc = 3,

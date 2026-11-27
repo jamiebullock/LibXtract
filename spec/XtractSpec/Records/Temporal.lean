@@ -51,6 +51,10 @@ theorem time_reversal_asymmetry_rise_and_fall_with_ties :
     timeReversalAsymmetry (rise_and_fall_with_ties.map (↑) : List ℝ) 1 = ((-15 / 256 : ℚ) : ℝ) :=
   eq_of_rat (timeReversalAsymmetry_cast _ _) (by decide +kernel)
 
+theorem attack_time_rise_and_fall_with_ties :
+    attackTime (rise_and_fall_with_ties.map (↑) : List ℝ) ((16 : ℚ) : ℝ) ((1 / 4 : ℚ) : ℝ) ((1 : ℚ) : ℝ) = ((3 / 16 : ℚ) : ℝ) :=
+  eq_of_rat (attackTime_cast _ _ _ _) (by decide +kernel)
+
 theorem temporal_centroid_tenths_with_ties_cycle :
     |temporalCentroid (tenths_with_ties_cycle.map (↑) : List ℝ) - ((2252155716927493 / 4503599627370496 : ℚ) : ℝ)| ≤ ((1 / 18014398509481984 : ℚ) : ℝ) :=
   within_of_rat (temporalCentroid_cast _) (by decide +kernel)
@@ -70,5 +74,9 @@ theorem peak_asymmetry_tenths_with_ties_cycle :
 theorem time_reversal_asymmetry_tenths_with_ties_cycle :
     |timeReversalAsymmetry (tenths_with_ties_cycle.map (↑) : List ℝ) 3 - ((-1617790556614825 / 576460752303423488 : ℚ) : ℝ)| ≤ ((1 / 4611686018427387904 : ℚ) : ℝ) :=
   within_of_rat (timeReversalAsymmetry_cast _ _) (by decide +kernel)
+
+theorem attack_time_tenths_with_ties_cycle :
+    |attackTime (tenths_with_ties_cycle.map (↑) : List ℝ) ((44100 : ℚ) : ℝ) ((3602879701896397 / 18014398509481984 : ℚ) : ℝ) ((8106479329266893 / 9007199254740992 : ℚ) : ℝ) - ((5019522196927769 / 73786976294838206464 : ℚ) : ℝ)| ≤ ((1 / 147573952589676412928 : ℚ) : ℝ) :=
+  within_of_rat (attackTime_cast _ _ _ _) (by decide +kernel)
 
 end XtractSpec.Records

@@ -683,7 +683,7 @@
       "description": "Extract the attack time of an envelope",
       "definition": "T_a = \\frac{n_2 - n_1}{f_s}, \\quad n_1 = \\min\\{n : x_n \\ge s\\,x_{\\max}\\}, \\quad n_2 = \\min\\{n \\ge n_1 : x_n \\ge e\\,x_{\\max}\\}, \\quad x_{\\max} = \\max_n x_n, \\quad f_s, s, e \\text{ the sample rate and fractions given in argv}; \\text{ no result when } x_{\\max} \\le 0",
       "sources": [{"role": "origin", "authors": ["Krimphoff", "McAdams", "Winsberg"], "year": 1994, "title": "Caracterisation du timbre des sons complexes. II. Analyses acoustiques et quantification psychophysique", "venue": "Journal de Physique IV 4(C5)", "locator": "section 3.2, equation 3", "permalink": "doi:10.1051/jp4:19945134"}, {"role": "formulation", "authors": ["Peeters"], "year": 2004, "title": "A large set of audio features for sound description (similarity and classification) in the CUIDADO project", "venue": "Technical report, IRCAM", "locator": "section 3.1.2.1"}],
-      "validation_level": 0,
+      "validation_level": 3,
       "input": {"format": "arbitrary_series", "unit": "any"},
       "argument_type": "float",
       "arguments": [
