@@ -180,8 +180,10 @@ and commit the result.
   for a value derived from the definition or certified published data, 3 for
   a value certified by a machine-checked proof.
 - A record is one call of a `feature`. `data` names a series in
-  `tests/reference/series`, a file of one number to a line, and is left out
-  for a feature that takes no data. `arguments` gives a value for each
+  `tests/reference/series` and is left out for a feature that takes no data.
+  A series file gives the values of its `prefix`, then a `cycle` of values
+  that follows the prefix `repeats` times. A series that does not repeat has
+  only a `prefix`. `arguments` gives a value for each
   argument by its name in `src/features.json`. `expected` lists every
   element of the result.
 - `tolerance` gives the most an element may differ from its expected value,
