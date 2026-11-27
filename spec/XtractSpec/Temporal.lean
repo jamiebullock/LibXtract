@@ -9,7 +9,8 @@ import XtractSpec.Statistics
 # The shape of a series over time
 
 The definitions in `src/features.json` of `temporal_centroid`, `max_position`,
-`min_position`, `peak_asymmetry`, `time_reversal_asymmetry` and `attack_time`. The data is a series in the order of time, and the
+`min_position`, `peak_asymmetry`, `time_reversal_asymmetry`, `attack_time` and
+`decay_time`. The data is a series in the order of time, and the
 position of a value is its index, from 0. A definition without a comparison
 is stated over any field: over ℝ it is the specification, and over ℚ it
 computes, which gives its value at a series of doubles exactly. The index of
@@ -25,9 +26,9 @@ sum to zero or less, and refuses fewer than two values. `maxPosition` and
 two values. `peakAsymmetry` is zero here when the largest value and every
 value before it are zero, where the library gives no result.
 `timeReversalAsymmetry` is zero here at a lag of zero or of the count of the
-values or more, and the library refuses such a lag. `attackTime` is defined
-here for any largest value and any sample rate, and the library gives no
-result when the largest value is zero or less.
+values or more, and the library refuses such a lag. `attackTime` and
+`decayTime` are defined here for any largest value and any sample rate, and
+the library gives no result when the largest value is zero or less.
 -/
 
 namespace XtractSpec
@@ -95,6 +96,13 @@ rate given, `rate`. -/
 def attackTime (xs : List α) (rate start stop : α) : α :=
   (((xs.drop (xs.findIdx fun x => decide (start * largest xs ≤ x))).findIdx fun x =>
     decide (stop * largest xs ≤ x) : ℕ) : α) / rate
+
+/-- The count of the values from the first of the largest up to the first of them that is at
+most the fraction `threshold` of the largest, or up to the last value when none is, over the
+sample rate given, `rate`. -/
+def decayTime (xs : List α) (rate threshold : α) : α :=
+  ((min ((xs.drop (firstMaxIndex xs)).findIdx fun x => decide (x ≤ threshold * largest xs))
+    ((xs.drop (firstMaxIndex xs)).length - 1) : ℕ) : α) / rate
 
 end Ordered
 
@@ -216,6 +224,20 @@ theorem attackTime_cast (qs : List ℚ) (rate start stop : ℚ) :
   unfold attackTime
   rw [largest_cast, List.findIdx_map, ← List.map_drop, List.findIdx_map]
   simp only [Function.comp_def, reaches]
+  push_cast
+  rfl
+
+theorem decayTime_cast (qs : List ℚ) (rate threshold : ℚ) :
+    decayTime (qs.map (↑) : List ℝ) (rate : ℝ) (threshold : ℝ) =
+      ((decayTime qs rate threshold : ℚ) : ℝ) := by
+  have falls : ∀ x : ℚ,
+      decide ((x : ℝ) ≤ (threshold : ℝ) * ((largest qs : ℚ) : ℝ)) = decide (x ≤ threshold * largest qs) := by
+    intro x
+    congr 1
+    exact propext (by exact_mod_cast Iff.rfl)
+  unfold decayTime
+  rw [largest_cast, firstMaxIndex_cast, ← List.map_drop, List.findIdx_map, List.length_map]
+  simp only [Function.comp_def, falls]
   push_cast
   rfl
 

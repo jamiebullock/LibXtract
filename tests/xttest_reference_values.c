@@ -337,14 +337,18 @@ static const int arguments_lean_temporal_4[] = {1};
 static const double expected_lean_temporal_4[] = {-0.05859375};
 static const double arguments_lean_temporal_5[] = {16.0, 0.25, 1.0};
 static const double expected_lean_temporal_5[] = {0.1875};
-static const double expected_lean_temporal_6[] = {0.50007902639481583};
-static const double expected_lean_temporal_7[] = {0.003003003003003003};
-static const double expected_lean_temporal_8[] = {0.001001001001001001};
-static const double expected_lean_temporal_9[] = {233.50714285714287};
-static const int arguments_lean_temporal_10[] = {3};
-static const double expected_lean_temporal_10[] = {-0.0028064192577733228};
-static const double arguments_lean_temporal_11[] = {44100.0, 0.20000000000000001, 0.90000000000000002};
-static const double expected_lean_temporal_11[] = {6.802721088435374e-05};
+static const double arguments_lean_temporal_6[] = {16.0, 0.5};
+static const double expected_lean_temporal_6[] = {0.125};
+static const double expected_lean_temporal_7[] = {0.50007902639481583};
+static const double expected_lean_temporal_8[] = {0.003003003003003003};
+static const double expected_lean_temporal_9[] = {0.001001001001001001};
+static const double expected_lean_temporal_10[] = {233.50714285714287};
+static const int arguments_lean_temporal_11[] = {3};
+static const double expected_lean_temporal_11[] = {-0.0028064192577733228};
+static const double arguments_lean_temporal_12[] = {44100.0, 0.20000000000000001, 0.90000000000000002};
+static const double expected_lean_temporal_12[] = {6.802721088435374e-05};
+static const double arguments_lean_temporal_13[] = {44100.0, 0.40000000000000002};
+static const double expected_lean_temporal_13[] = {4.5351473922902495e-05};
 
 static const xttest_reference_record records_lean_temporal[] = {
     {.feature = XTRACT_TEMPORAL_CENTROID, .series = &series_rise_and_fall_with_ties, .arguments = NULL, .expected = expected_lean_temporal_0, .expected_count = 1, .tolerance = 0.0},
@@ -353,15 +357,17 @@ static const xttest_reference_record records_lean_temporal[] = {
     {.feature = XTRACT_PEAK_ASYMMETRY, .series = &series_rise_and_fall_with_ties, .arguments = NULL, .expected = expected_lean_temporal_3, .expected_count = 1, .tolerance = 2.2300000000000002e-16},
     {.feature = XTRACT_TIME_REVERSAL_ASYMMETRY, .series = &series_rise_and_fall_with_ties, .arguments = arguments_lean_temporal_4, .expected = expected_lean_temporal_4, .expected_count = 1, .tolerance = 0.0},
     {.feature = XTRACT_ATTACK_TIME, .series = &series_rise_and_fall_with_ties, .arguments = arguments_lean_temporal_5, .expected = expected_lean_temporal_5, .expected_count = 1, .tolerance = 0.0},
-    {.feature = XTRACT_TEMPORAL_CENTROID, .series = &series_tenths_with_ties_cycle, .arguments = NULL, .expected = expected_lean_temporal_6, .expected_count = 1, .tolerance = 2.2300000000000001e-13},
-    {.feature = XTRACT_MAX_POSITION, .series = &series_tenths_with_ties_cycle, .arguments = NULL, .expected = expected_lean_temporal_7, .expected_count = 1, .tolerance = 2.2300000000000002e-16},
-    {.feature = XTRACT_MIN_POSITION, .series = &series_tenths_with_ties_cycle, .arguments = NULL, .expected = expected_lean_temporal_8, .expected_count = 1, .tolerance = 2.2300000000000002e-16},
-    {.feature = XTRACT_PEAK_ASYMMETRY, .series = &series_tenths_with_ties_cycle, .arguments = NULL, .expected = expected_lean_temporal_9, .expected_count = 1, .tolerance = 1.12e-13},
-    {.feature = XTRACT_TIME_REVERSAL_ASYMMETRY, .series = &series_tenths_with_ties_cycle, .arguments = arguments_lean_temporal_10, .expected = expected_lean_temporal_10, .expected_count = 1, .tolerance = 2.9099999999999999e-12},
-    {.feature = XTRACT_ATTACK_TIME, .series = &series_tenths_with_ties_cycle, .arguments = arguments_lean_temporal_11, .expected = expected_lean_temporal_11, .expected_count = 1, .tolerance = 2.2300000000000002e-16},
+    {.feature = XTRACT_DECAY_TIME, .series = &series_rise_and_fall_with_ties, .arguments = arguments_lean_temporal_6, .expected = expected_lean_temporal_6, .expected_count = 1, .tolerance = 0.0},
+    {.feature = XTRACT_TEMPORAL_CENTROID, .series = &series_tenths_with_ties_cycle, .arguments = NULL, .expected = expected_lean_temporal_7, .expected_count = 1, .tolerance = 2.2300000000000001e-13},
+    {.feature = XTRACT_MAX_POSITION, .series = &series_tenths_with_ties_cycle, .arguments = NULL, .expected = expected_lean_temporal_8, .expected_count = 1, .tolerance = 2.2300000000000002e-16},
+    {.feature = XTRACT_MIN_POSITION, .series = &series_tenths_with_ties_cycle, .arguments = NULL, .expected = expected_lean_temporal_9, .expected_count = 1, .tolerance = 2.2300000000000002e-16},
+    {.feature = XTRACT_PEAK_ASYMMETRY, .series = &series_tenths_with_ties_cycle, .arguments = NULL, .expected = expected_lean_temporal_10, .expected_count = 1, .tolerance = 1.12e-13},
+    {.feature = XTRACT_TIME_REVERSAL_ASYMMETRY, .series = &series_tenths_with_ties_cycle, .arguments = arguments_lean_temporal_11, .expected = expected_lean_temporal_11, .expected_count = 1, .tolerance = 2.9099999999999999e-12},
+    {.feature = XTRACT_ATTACK_TIME, .series = &series_tenths_with_ties_cycle, .arguments = arguments_lean_temporal_12, .expected = expected_lean_temporal_12, .expected_count = 1, .tolerance = 2.2300000000000002e-16},
+    {.feature = XTRACT_DECAY_TIME, .series = &series_tenths_with_ties_cycle, .arguments = arguments_lean_temporal_13, .expected = expected_lean_temporal_13, .expected_count = 1, .tolerance = 2.2300000000000002e-16},
 };
 
-static const xttest_reference_source source_lean_temporal = {.id = "lean_temporal", .name = "Theorems about the definitions of the features of the shape of a series over time, checked by Lean", .level = 3, .record_count = 12, .records = records_lean_temporal};
+static const xttest_reference_source source_lean_temporal = {.id = "lean_temporal", .name = "Theorems about the definitions of the features of the shape of a series over time, checked by Lean", .level = 3, .record_count = 14, .records = records_lean_temporal};
 
 const xttest_reference_source *const xttest_reference_sources[] = {&source_lean_cooccurrence, &source_lean_spectral_moments, &source_lean_spectral_shape, &source_lean_statistics, &source_lean_temporal};
 

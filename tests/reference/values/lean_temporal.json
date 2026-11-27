@@ -88,6 +88,22 @@
       "call": "theorem XtractSpec.Records.attack_time_rise_and_fall_with_ties"
     },
     {
+      "feature": "decay_time",
+      "data": "rise_and_fall_with_ties",
+      "arguments": {
+        "sample_rate": 16.0,
+        "threshold": 0.5
+      },
+      "expected": [
+        0.125
+      ],
+      "tolerance": {
+        "relative": 0.0,
+        "reason": "no rounding: the fraction of the largest value is a double, so the library compares with the threshold of the definition, and the division of the count by the sample rate gives the quotient itself, which is a double; the expected value is exact"
+      },
+      "call": "theorem XtractSpec.Records.decay_time_rise_and_fall_with_ties"
+    },
+    {
       "feature": "temporal_centroid",
       "data": "tenths_with_ties_cycle",
       "expected": [
@@ -166,6 +182,22 @@
         "reason": "2 roundings, each within 2^-53 relatively: no value is within two roundings of a threshold, so the library places every value as the definition does; the division of the count by the sample rate; and the expected value"
       },
       "call": "theorem XtractSpec.Records.attack_time_tenths_with_ties_cycle"
+    },
+    {
+      "feature": "decay_time",
+      "data": "tenths_with_ties_cycle",
+      "arguments": {
+        "sample_rate": 44100.0,
+        "threshold": 0.4
+      },
+      "expected": [
+        4.5351473922902495e-05
+      ],
+      "tolerance": {
+        "relative": 2.23e-16,
+        "reason": "2 roundings, each within 2^-53 relatively: no value is within two roundings of the threshold, so the library places every value as the definition does; the division of the count by the sample rate; and the expected value"
+      },
+      "call": "theorem XtractSpec.Records.decay_time_tenths_with_ties_cycle"
     }
   ]
 }

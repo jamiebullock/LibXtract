@@ -170,6 +170,33 @@ def main():
             {"sample_rate": rate, "start": start, "stop": stop},
         )
 
+        # A fraction of the largest value that is a value of the short
+        # series: falling to a threshold includes equalling it
+        fraction = 0.5 if exact else 0.4
+        floor = Fraction(fraction) * largest
+        if exact:
+            assert Fraction(float(floor)) == floor and floor in xs[peak:]
+        else:
+            assert clear_of(floor, xs)
+        fallen = next((index for index in range(peak, n) if xs[index] <= floor), n - 1) - peak
+        decay = Fraction(fallen) / Fraction(rate)
+        assert 0 < fallen < n - 1 - peak and (not exact or Fraction(float(decay)) == decay)
+        out.rational(
+            "decay_time",
+            series,
+            f"decayTime {data(series)} {cast(rate)} {cast(fraction)}",
+            "decayTime_cast _ _ _",
+            decay,
+            0 if exact else 1,
+            "the fraction of the largest value is a double, so the library compares with the threshold of the "
+            "definition, and the division of the count by the sample rate gives the quotient itself, which is a "
+            "double"
+            if exact
+            else "no value is within two roundings of the threshold, so the library places every value as the "
+            "definition does; the division of the count by the sample rate",
+            {"sample_rate": rate, "threshold": fraction},
+        )
+
     out.store("temporal", "Temporal", ["Temporal"], "the features of the shape of a series over time")
 
 
