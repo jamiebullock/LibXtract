@@ -9,10 +9,10 @@ import Mathlib
 # Moments of a spectrum
 
 The definitions in `src/features.json` of `spectral_centroid`,
-`spectral_mean`, `spectral_variance`, `spread` and
-`spectral_standard_deviation`. The data of each but the last is one list: the
-amplitudes of the bins of a spectrum, then the frequencies of the same bins
-in the same order. `bins` pairs each amplitude with its frequency, and a
+`spectral_mean`, `spectral_variance`, `spread`, `spectral_standard_deviation`,
+`spectral_skewness` and `spectral_kurtosis`. The data of each but the
+standard deviation is one list: the amplitudes of the bins of a spectrum,
+then the frequencies of the same bins in the same order. `bins` pairs each amplitude with its frequency, and a
 definition without a square root is stated on the pairs, over any field: over
 ℝ it is the specification, and over ℚ it computes, which gives its value at a
 spectrum of doubles exactly.
@@ -20,10 +20,12 @@ spectrum of doubles exactly.
 A definition is the feature's only where the feature gives a result. Lean's
 division by zero is zero, so `spectralCentroid` and `spectralVariance` of
 amplitudes that sum to zero are zero here, where the library gives no result.
-`bins` of a list of odd length leaves the last value out, and the library
-refuses such a list. Lean's square root of a negative number is zero, so
-`spectralStandardDeviation` of a negative variance is zero, and the library
-refuses it.
+With amplitudes that sum to zero, or a standard deviation of zero,
+`spectralSkewness` is zero and `spectralKurtosis` is -3, and the library
+gives no result. `bins` of a list of odd length leaves the last value out,
+and the library refuses such a list. Lean's square root of a negative number
+is zero, so `spectralStandardDeviation` of a negative variance is zero, and
+the library refuses it, as it does a negative standard deviation.
 -/
 
 namespace XtractSpec
@@ -69,6 +71,17 @@ def spectralVariance (xs : List α) (μ : α) : α :=
 abbrev spread (xs : List α) (μ : α) : α :=
   spectralVariance xs μ
 
+/-- The sum of the cubed differences of each frequency from the mean given, `μ`, each times its
+amplitude, over the cube of the standard deviation given, `σ`, times the sum of the amplitudes. -/
+def spectralSkewness (xs : List α) (μ σ : α) : α :=
+  ((bins xs).map fun bin => (bin.2 - μ) ^ 3 * bin.1).sum / (σ ^ 3 * ((bins xs).map Prod.fst).sum)
+
+/-- The sum of the fourth powers of the differences of each frequency from the mean given, `μ`,
+each times its amplitude, over the fourth power of the standard deviation given, `σ`, times the
+sum of the amplitudes, less 3. -/
+def spectralKurtosis (xs : List α) (μ σ : α) : α :=
+  ((bins xs).map fun bin => (bin.2 - μ) ^ 4 * bin.1).sum / (σ ^ 4 * ((bins xs).map Prod.fst).sum) - 3
+
 end Field
 
 /-- The square root of the variance given. -/
@@ -84,6 +97,14 @@ theorem spectralCentroid_cast (xs : List ℚ) :
 theorem spectralVariance_cast (xs : List ℚ) (μ : ℚ) :
     spectralVariance (xs.map (↑) : List ℝ) (μ : ℝ) = ((spectralVariance xs μ : ℚ) : ℝ) := by
   simp [spectralVariance, bins_map, List.map_map, Function.comp_def]
+
+theorem spectralSkewness_cast (xs : List ℚ) (μ σ : ℚ) :
+    spectralSkewness (xs.map (↑) : List ℝ) (μ : ℝ) (σ : ℝ) = ((spectralSkewness xs μ σ : ℚ) : ℝ) := by
+  simp [spectralSkewness, bins_map, List.map_map, Function.comp_def]
+
+theorem spectralKurtosis_cast (xs : List ℚ) (μ σ : ℚ) :
+    spectralKurtosis (xs.map (↑) : List ℝ) (μ : ℝ) (σ : ℝ) = ((spectralKurtosis xs μ σ : ℚ) : ℝ) := by
+  simp [spectralKurtosis, bins_map, List.map_map, Function.comp_def]
 
 /-!
 ## Invariance
@@ -113,5 +134,15 @@ theorem spectralVariance_perm {xs ys : List ℝ} (μ : ℝ) (h : (bins xs).Perm 
 theorem spread_perm {xs ys : List ℝ} (μ : ℝ) (h : (bins xs).Perm (bins ys)) :
     spread xs μ = spread ys μ :=
   spectralVariance_perm μ h
+
+/-- `order`: unchanged. -/
+theorem spectralSkewness_perm {xs ys : List ℝ} (μ σ : ℝ) (h : (bins xs).Perm (bins ys)) :
+    spectralSkewness xs μ σ = spectralSkewness ys μ σ := by
+  simp [spectralSkewness, (h.map _).sum_eq]
+
+/-- `order`: unchanged. -/
+theorem spectralKurtosis_perm {xs ys : List ℝ} (μ σ : ℝ) (h : (bins xs).Perm (bins ys)) :
+    spectralKurtosis xs μ σ = spectralKurtosis ys μ σ := by
+  simp [spectralKurtosis, (h.map _).sum_eq]
 
 end XtractSpec

@@ -76,6 +76,38 @@
       "call": "theorem XtractSpec.Records.spectral_standard_deviation_uneven_spectrum_with_a_zero"
     },
     {
+      "feature": "spectral_skewness",
+      "data": "uneven_spectrum_with_a_zero",
+      "arguments": {
+        "mean": 368.75,
+        "standard_deviation": 591.5749635506899
+      },
+      "expected": [
+        3.6831286391858105
+      ],
+      "tolerance": {
+        "relative": 2.67e-15,
+        "reason": "24 roundings, each within 2^-53 relatively: the difference from the mean, which the cube counts three times, the two multiplications of the cube and the product with the amplitude, in every term, and the M - 1 additions of those terms, in any order, are M + 5 roundings of a sum of magnitudes that is 1.03 times the magnitude of the sum; the M - 1 additions of the amplitudes, of one sign, in any order; the two multiplications of the cube of the standard deviation; the product of that cube and the sum of the amplitudes; the division; and the expected value"
+      },
+      "call": "theorem XtractSpec.Records.spectral_skewness_uneven_spectrum_with_a_zero"
+    },
+    {
+      "feature": "spectral_kurtosis",
+      "data": "uneven_spectrum_with_a_zero",
+      "arguments": {
+        "mean": 368.75,
+        "standard_deviation": 591.5749635506899
+      },
+      "expected": [
+        14.021266455496848
+      ],
+      "tolerance": {
+        "relative": 3.67e-15,
+        "reason": "33 roundings, each within 2^-53 relatively: the difference from the mean, which the fourth power counts four times, the three multiplications of the power and the product with the amplitude, in every term, the M - 1 additions of those terms, which are of one sign, in any order, the M - 1 additions of the amplitudes, of one sign, in any order, the three multiplications of the fourth power of the standard deviation, the product of that power and the sum of the amplitudes, and the division are 2M + 11 roundings of a ratio that is 1.22 times the magnitude of the result; the subtraction of 3; and the expected value"
+      },
+      "call": "theorem XtractSpec.Records.spectral_kurtosis_uneven_spectrum_with_a_zero"
+    },
+    {
       "feature": "spectral_centroid",
       "data": "decaying_spectrum_128_bins",
       "expected": [
@@ -142,6 +174,38 @@
         "reason": "2 roundings, each within 2^-53 relatively: the square root, which is correctly rounded; and the expected value"
       },
       "call": "theorem XtractSpec.Records.spectral_standard_deviation_decaying_spectrum_128_bins"
+    },
+    {
+      "feature": "spectral_skewness",
+      "data": "decaying_spectrum_128_bins",
+      "arguments": {
+        "mean": 3878.7535046863486,
+        "standard_deviation": 5344.108398403884
+      },
+      "expected": [
+        1.6366275047795322
+      ],
+      "tolerance": {
+        "relative": 3.24e-14,
+        "reason": "291 roundings, each within 2^-53 relatively: the difference from the mean, which the cube counts three times, the two multiplications of the cube and the product with the amplitude, in every term, and the M - 1 additions of those terms, in any order, are M + 5 roundings of a sum of magnitudes that is 1.20 times the magnitude of the sum; the M - 1 additions of the amplitudes, of one sign, in any order; the two multiplications of the cube of the standard deviation; the product of that cube and the sum of the amplitudes; the division; and the expected value"
+      },
+      "call": "theorem XtractSpec.Records.spectral_skewness_decaying_spectrum_128_bins"
+    },
+    {
+      "feature": "spectral_kurtosis",
+      "data": "decaying_spectrum_128_bins",
+      "arguments": {
+        "mean": 3878.7535046863486,
+        "standard_deviation": 5344.108398403884
+      },
+      "expected": [
+        1.758276190240314
+      ],
+      "tolerance": {
+        "relative": 8.05e-14,
+        "reason": "725 roundings, each within 2^-53 relatively: the difference from the mean, which the fourth power counts four times, the three multiplications of the power and the product with the amplitude, in every term, the M - 1 additions of those terms, which are of one sign, in any order, the M - 1 additions of the amplitudes, of one sign, in any order, the three multiplications of the fourth power of the standard deviation, the product of that power and the sum of the amplitudes, and the division are 2M + 11 roundings of a ratio that is 2.71 times the magnitude of the result; the subtraction of 3; and the expected value"
+      },
+      "call": "theorem XtractSpec.Records.spectral_kurtosis_decaying_spectrum_128_bins"
     }
   ]
 }

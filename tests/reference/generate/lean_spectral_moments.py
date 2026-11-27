@@ -25,10 +25,11 @@ the 128 bins of a transform of 256 samples at 44100 Hz, from 0 Hz, with an
 amplitude in bin k of 1 / (k + 1) cut to four decimal places.
 """
 
+import math
 from decimal import Decimal
 from fractions import Fraction
 
-from certificates import Certificates, cast
+from certificates import Certificates, cast, rounded_up
 
 UNEVEN = "uneven_spectrum_with_a_zero"
 DECAYING = "decaying_spectrum_128_bins"
@@ -115,7 +116,7 @@ def main():
                 {"mean": mean},
             )
 
-        out.root(
+        deviation = out.root(
             "spectral_standard_deviation",
             series,
             f"spectralStandardDeviation {cast(variance)}",
@@ -125,6 +126,51 @@ def main():
             "the square root, which is correctly rounded",
             False,
             {"variance": variance},
+        )
+
+        # The terms of a skewness cancel, and a kurtosis subtracts 3 from a
+        # ratio near it: a bound on the rounding is relative to what is
+        # summed or to the ratio, which is larger than the result by the
+        # factor each reason states
+        arguments = {"mean": mean, "standard_deviation": deviation}
+        given = f"{cast(mean)} {cast(deviation)}"
+        differences = [f - Fraction(mean) for f in frequencies[series]]
+
+        cubes = [d**3 * a for d, a in zip(differences, amplitudes[series])]
+        factor = sum(abs(term) for term in cubes) / abs(sum(cubes))
+        out.rational(
+            "spectral_skewness",
+            series,
+            f"spectralSkewness {data(series)} {given}",
+            "spectralSkewness_cast _ _ _",
+            sum(cubes) / (Fraction(deviation) ** 3 * total),
+            math.ceil((bins + 5) * factor) + bins + 3,
+            "the difference from the mean, which the cube counts three times, the two multiplications of the "
+            "cube and the product with the amplitude, in every term, and the M - 1 additions of those terms, in "
+            f"any order, are M + 5 roundings of a sum of magnitudes that is {rounded_up(factor)} times the "
+            "magnitude of the sum; the M - 1 additions of the amplitudes, of one sign, in any order; the two "
+            "multiplications of the cube of the standard deviation; the product of that cube and the sum of the "
+            "amplitudes; the division",
+            arguments,
+        )
+
+        fourths = [d**4 * a for d, a in zip(differences, amplitudes[series])]
+        ratio = sum(fourths) / (Fraction(deviation) ** 4 * total)
+        factor = ratio / abs(ratio - 3)
+        out.rational(
+            "spectral_kurtosis",
+            series,
+            f"spectralKurtosis {data(series)} {given}",
+            "spectralKurtosis_cast _ _ _",
+            ratio - 3,
+            math.ceil((2 * bins + 11) * factor) + 1,
+            "the difference from the mean, which the fourth power counts four times, the three multiplications "
+            "of the power and the product with the amplitude, in every term, the M - 1 additions of those terms, "
+            "which are of one sign, in any order, the M - 1 additions of the amplitudes, of one sign, in any "
+            "order, the three multiplications of the fourth power of the standard deviation, the product of "
+            "that power and the sum of the amplitudes, and the division are 2M + 11 roundings of a ratio that "
+            f"is {rounded_up(factor)} times the magnitude of the result; the subtraction of 3",
+            arguments,
         )
 
     out.store("spectral_moments", "SpectralMoments", ["SpectralMoments"], "the spectral moments")
