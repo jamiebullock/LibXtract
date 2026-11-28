@@ -1,6 +1,6 @@
 {
   "source": {
-    "name": "Theorems about the definitions of the statistics of a co-occurrence matrix, checked by Lean",
+    "name": "Theorems about the definitions of a co-occurrence matrix and the statistics of one, checked by Lean",
     "version": "Lean 4.36.0, Mathlib v4.36.0",
     "licence": "Zlib, as the library",
     "how": "each expected value is proved to be the value of the feature's definition at the doubles nearest the stored values, or within half a unit in its last place of it, by the theorem its record names in spec/XtractSpec/Records/Cooccurrence.lean; written by tests/reference/generate/lean_cooccurrence.py and checked by Lean's kernel",
@@ -78,6 +78,67 @@
         "reason": "2049 roundings, each within 2^-53 relatively: the N - 1 additions of the values, of one sign, in any order, which every share has in common; the division of a value by their sum and the division by 1 and the square of the difference of its row and its column, which is a whole number, in every term; the N - 1 additions of the terms, of one sign, in any order; and the expected value"
       },
       "call": "theorem XtractSpec.Records.inverse_difference_moment_matrix_of_32_rows_cycle"
+    },
+    {
+      "feature": "cooccurrence_matrix",
+      "data": "levels_of_5_rows_of_5",
+      "arguments": {
+        "width": 5,
+        "levels": 3,
+        "column_offset": -1,
+        "row_offset": 1,
+        "symmetric": 0
+      },
+      "expected": [
+        0.0625,
+        0.25,
+        0.0,
+        0.125,
+        0.0625,
+        0.1875,
+        0.1875,
+        0.0,
+        0.125
+      ],
+      "tolerance": {
+        "relative": 0.0,
+        "reason": "no rounding: a count is a whole number and there are 16 pairs, a power of two, so each division is exact; the expected value is exact"
+      },
+      "call": "theorem XtractSpec.Records.cooccurrence_matrix_levels_of_5_rows_of_5"
+    },
+    {
+      "feature": "cooccurrence_matrix",
+      "data": "levels_of_30_rows_cycle",
+      "arguments": {
+        "width": 32,
+        "levels": 4,
+        "column_offset": 2,
+        "row_offset": 1,
+        "symmetric": 1
+      },
+      "expected": [
+        0.0,
+        0.08333333333333333,
+        0.0,
+        0.08333333333333333,
+        0.08333333333333333,
+        0.16666666666666666,
+        0.16666666666666666,
+        0.08333333333333333,
+        0.0,
+        0.16666666666666666,
+        0.0,
+        0.0,
+        0.08333333333333333,
+        0.08333333333333333,
+        0.0,
+        0.0
+      ],
+      "tolerance": {
+        "relative": 2.23e-16,
+        "reason": "2 roundings, each within 2^-53 relatively: the division of a count, which is a whole number, by the 1740 pairs; and the expected value"
+      },
+      "call": "theorem XtractSpec.Records.cooccurrence_matrix_levels_of_30_rows_cycle"
     }
   ]
 }

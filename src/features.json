@@ -1661,7 +1661,7 @@
       "description": "Extract the co-occurrence matrix of the levels of a grid at an offset",
       "definition": "P_{ij} = \\frac{\\#\\{(y,x) : g_{y,x} = i, \\, g_{y+\\Delta r, x+\\Delta c} = j\\} + s \\, \\#\\{(y,x) : g_{y,x} = j, \\, g_{y+\\Delta r, x+\\Delta c} = i\\}}{(1 + s)(W - |\\Delta c|)(H - |\\Delta r|)}, \\quad s \\in \\{0, 1\\}, \\; i, j = 0, \\dots, L-1",
       "sources": [{"role": "origin", "authors": ["Haralick", "Shanmugam", "Dinstein"], "year": 1973, "title": "Textural features for image classification", "venue": "IEEE Transactions on Systems, Man, and Cybernetics SMC-3(6)", "locator": "equation 1 and figure 3", "permalink": "doi:10.1109/TSMC.1973.4309314"}],
-      "validation_level": 0,
+      "validation_level": 3,
       "input": {"format": "grid", "unit": "none", "accepts": ["quantise"], "length": "N >= 1 && width >= 1 && N % width == 0"},
       "argument_type": "int",
       "arguments": [

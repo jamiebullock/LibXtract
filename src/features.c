@@ -3116,7 +3116,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .description = "Extract the co-occurrence matrix of the levels of a grid at an offset",
         .source_count = 1,
         .sources = sources_cooccurrence_matrix,
-        .validation_level = 0,
+        .validation_level = 3,
         .tags = 0,
         .data = {XTRACT_GRID, XTRACT_UNIT_NONE, 1, accepted_cooccurrence_matrix, 1, "N >= 1 && width >= 1 && N % width == 0"},
         .argc = 5,
