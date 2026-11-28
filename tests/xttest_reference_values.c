@@ -36,6 +36,16 @@ static const double series_grid_of_30_rows_cycle_cycle[6] = {
 
 static const xttest_reference_series series_grid_of_30_rows_cycle = {.name = "grid_of_30_rows_cycle", .prefix = NULL, .prefix_count = 0, .cycle = series_grid_of_30_rows_cycle_cycle, .cycle_count = 6, .repeats = 160};
 
+static const double series_moments_in_powers_of_two_prefix[7] = {
+    0.5, 0.125, 0.25, 0.25, -0.125, 0.0625, -0.375};
+
+static const xttest_reference_series series_moments_in_powers_of_two = {.name = "moments_in_powers_of_two", .prefix = series_moments_in_powers_of_two_prefix, .prefix_count = 7, .cycle = NULL, .cycle_count = 0, .repeats = 0};
+
+static const double series_moments_in_decimal_prefix[7] = {
+    0.19, 0.012999999999999999, 0.11, 0.041000000000000002, -0.023, 0.017000000000000001, -0.035999999999999997};
+
+static const xttest_reference_series series_moments_in_decimal = {.name = "moments_in_decimal", .prefix = series_moments_in_decimal_prefix, .prefix_count = 7, .cycle = NULL, .cycle_count = 0, .repeats = 0};
+
 static const double series_peaks_about_100_hz_prefix[14] = {
     1.0, 0.5, 0.0, 2.0, 0.5, 1.0, 0.25, 30.0,
     100.0, 150.0, 210.0, 250.0, 290.0, 410.0};
@@ -340,15 +350,19 @@ static const int arguments_lean_grid_2[] = {32};
 static const double expected_lean_grid_2[] = {440.0, 6688.0, 6386.5, 139128.0, 97088.5, 125661.0, 3253888.0, 2020998.5, 1910477.0, 2780818.0};
 static const int arguments_lean_grid_3[] = {32};
 static const double expected_lean_grid_3[] = {440.0, 37470.400000000001, 13.700000000000005, 32962.403977272726, 42.240000000000002, 1170.72, 32.095227272727271, -6.4602311466942153};
+static const double expected_lean_grid_4[] = {0.75, 0.125, 0.00390625, 0.34765625, -0.0127410888671875, -0.1162109375, 0.0013427734375};
+static const double expected_lean_grid_5[] = {0.29999999999999999, 0.0070759999999999998, 0.0011890000000000002, 0.0068450000000000004, 1.6977437000000002e-05, -0.00018730399999999993, 9.6487159999999967e-06};
 
 static const xttest_reference_record records_lean_grid[] = {
     {.feature = XTRACT_GRID_MOMENTS, .series = &series_grid_of_3_rows_of_4, .arguments = arguments_lean_grid_0, .expected = expected_lean_grid_0, .expected_count = 10, .tolerance = 0.0},
     {.feature = XTRACT_GRID_CENTRAL_MOMENTS, .series = &series_grid_of_3_rows_of_4, .arguments = arguments_lean_grid_1, .expected = expected_lean_grid_1, .expected_count = 8, .tolerance = 0.0},
     {.feature = XTRACT_GRID_MOMENTS, .series = &series_grid_of_30_rows_cycle, .arguments = arguments_lean_grid_2, .expected = expected_lean_grid_2, .expected_count = 10, .tolerance = 7.4399999999999994e-15},
     {.feature = XTRACT_GRID_CENTRAL_MOMENTS, .series = &series_grid_of_30_rows_cycle, .arguments = arguments_lean_grid_3, .expected = expected_lean_grid_3, .expected_count = 8, .tolerance = 7.1599999999999998e-13},
+    {.feature = XTRACT_HU_MOMENTS, .series = &series_moments_in_powers_of_two, .arguments = NULL, .expected = expected_lean_grid_4, .expected_count = 7, .tolerance = 0.0},
+    {.feature = XTRACT_HU_MOMENTS, .series = &series_moments_in_decimal, .arguments = NULL, .expected = expected_lean_grid_5, .expected_count = 7, .tolerance = 2.2300000000000002e-16},
 };
 
-static const xttest_reference_source source_lean_grid = {.id = "lean_grid", .name = "Theorems about the definitions of the moments of a grid, checked by Lean", .level = 3, .record_count = 4, .records = records_lean_grid};
+static const xttest_reference_source source_lean_grid = {.id = "lean_grid", .name = "Theorems about the definitions of the moments of a grid and the invariants of Hu, checked by Lean", .level = 3, .record_count = 6, .records = records_lean_grid};
 
 static const double arguments_lean_harmonicity_0[] = {100.0};
 static const double expected_lean_harmonicity_0[] = {0.22696629213483147};

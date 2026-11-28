@@ -1619,7 +1619,7 @@
       "description": "Extract the seven Hu moments of a grid from its normalised moments",
       "definition": "\\phi_1 = \\nu_{20} + \\nu_{02}, \\; \\phi_2 = (\\nu_{20} - \\nu_{02})^2 + 4 \\nu_{11}^2, \\; \\phi_3 = (\\nu_{30} - 3\\nu_{12})^2 + (3\\nu_{21} - \\nu_{03})^2, \\; \\phi_4 = (\\nu_{30} + \\nu_{12})^2 + (\\nu_{21} + \\nu_{03})^2, \\; \\phi_5 = (\\nu_{30} - 3\\nu_{12})(\\nu_{30} + \\nu_{12})[(\\nu_{30} + \\nu_{12})^2 - 3(\\nu_{21} + \\nu_{03})^2] + (3\\nu_{21} - \\nu_{03})(\\nu_{21} + \\nu_{03})[3(\\nu_{30} + \\nu_{12})^2 - (\\nu_{21} + \\nu_{03})^2], \\; \\phi_6 = (\\nu_{20} - \\nu_{02})[(\\nu_{30} + \\nu_{12})^2 - (\\nu_{21} + \\nu_{03})^2] + 4\\nu_{11}(\\nu_{30} + \\nu_{12})(\\nu_{21} + \\nu_{03}), \\; \\phi_7 = (3\\nu_{21} - \\nu_{03})(\\nu_{30} + \\nu_{12})[(\\nu_{30} + \\nu_{12})^2 - 3(\\nu_{21} + \\nu_{03})^2] - (\\nu_{30} - 3\\nu_{12})(\\nu_{21} + \\nu_{03})[3(\\nu_{30} + \\nu_{12})^2 - (\\nu_{21} + \\nu_{03})^2]",
       "sources": [{"role": "origin", "authors": ["Hu"], "year": 1962, "title": "Visual pattern recognition by moment invariants", "venue": "IRE Transactions on Information Theory 8(2)", "permalink": "doi:10.1109/TIT.1962.1057692", "locator": "equations 61 and 62"}],
-      "validation_level": 0,
+      "validation_level": 3,
       "input": {"format": "normalised_moment_coeffs", "unit": "none", "accepts": ["normalised_moments"], "length": "N == 7"},
       "arguments": [],
       "invariance": {"level": "unstated"},

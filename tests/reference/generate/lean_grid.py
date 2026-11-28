@@ -3,8 +3,9 @@
 # SPDX-FileCopyrightText: 2026 Jamie Bullock
 # SPDX-License-Identifier: Zlib
 
-"""Writes two grids, moments of each, and a theorem for every list of those
-values that Lean checks.
+"""Writes two grids, moments of each, two lists of normalised moments, the
+invariants of Hu of each, and a theorem for every list of those values that
+Lean checks.
 
 usage: lean_grid.py
 
@@ -22,12 +23,17 @@ The first grid has three rows of four multiples of 1/4, two of them zero,
 that sum to 16, on which the library's arithmetic is exact. The second has
 30 rows of 32 values, a cycle of six values between 0.05 and 0.9, so that
 each row begins two values further into the cycle than the one before it.
+
+The normalised moments are not those of a stored grid: `hu_moments` reads
+seven of them in the order of the result of `normalised_moments`. The first
+list has powers of two and small multiples of them, on which the library's
+arithmetic is exact, and the second has decimals.
 """
 
 import math
 from fractions import Fraction
 
-from certificates import DECIDE, Certificates, lean
+from certificates import DECIDE, ROUNDING, Carried, Certificates, lean
 
 SHORT = "grid_of_3_rows_of_4"
 LONG = "grid_of_30_rows_cycle"
@@ -37,6 +43,10 @@ SERIES = {
     LONG: ([], ["0.5", "0.05", "0.8", "0.2", "0.9", "0.3"], 160),
 }
 WIDTH = {SHORT: 4, LONG: 32}
+MOMENTS = {
+    "moments_in_powers_of_two": (["0.5", "0.125", "0.25", "0.25", "-0.125", "0.0625", "-0.375"], [], 0),
+    "moments_in_decimal": (["0.19", "0.013", "0.11", "0.041", "-0.023", "0.017", "-0.036"], [], 0),
+}
 ORDERS = [(0, 0), (1, 0), (0, 1), (2, 0), (1, 1), (0, 2), (3, 0), (2, 1), (1, 2), (0, 3)]
 CENTRAL = [(0, 0), (2, 0), (1, 1), (0, 2), (3, 0), (2, 1), (1, 2), (0, 3)]
 
@@ -104,6 +114,26 @@ def central_roundings(xs, width, centre_x, centre_y, p, q):
             bound += abs(value) * q * dy ** (q - 1) * dx**p * (dy + of_centre_y)
         bound += (p + q + width + height - 2) * term
     return bound
+
+
+def hu_as_the_library(nu20, nu11, nu02, nu30, nu21, nu12, nu03):
+    """The invariants of Hu by the library's operations in its order."""
+    spread = nu20 - nu02
+    sum_x = nu30 + nu12
+    sum_y = nu21 + nu03
+    difference_x = nu30 - 3 * nu12
+    difference_y = 3 * nu21 - nu03
+    return [
+        nu20 + nu02,
+        spread * spread + 4 * nu11 * nu11,
+        difference_x * difference_x + difference_y * difference_y,
+        sum_x * sum_x + sum_y * sum_y,
+        difference_x * sum_x * (sum_x * sum_x - 3 * sum_y * sum_y)
+        + difference_y * sum_y * (3 * sum_x * sum_x - sum_y * sum_y),
+        spread * (sum_x * sum_x - sum_y * sum_y) + 4 * nu11 * sum_x * sum_y,
+        difference_y * sum_x * (sum_x * sum_x - 3 * sum_y * sum_y)
+        - difference_x * sum_y * (3 * sum_x * sum_x - sum_y * sum_y),
+    ]
 
 
 def main():
@@ -174,7 +204,30 @@ def main():
             {"width": width},
         )
 
-    out.store("grid", "Grid", ["Grid"], "the moments of a grid")
+    for series, (prefix, cycle, repeats) in MOMENTS.items():
+        nu = out.series(series, prefix, cycle, repeats)
+        carried = hu_as_the_library(*[Carried(value) for value in nu])
+        invariants = [value.exact for value in carried]
+        assert invariants == hu_as_the_library(*nu)
+        # No invariant is zero or equal to another, so each has its own place and sign
+        assert len({abs(value) for value in invariants}) == 7 and 0 not in invariants
+        largest = max(abs(value) for value in invariants)
+        roundings = math.ceil(max(value.bound for value in carried) / (ROUNDING * largest))
+        out.vector(
+            "hu_moments",
+            series,
+            f"huMoments {data(series)}",
+            "huMoments_cast _",
+            invariants,
+            roundings,
+            "every moment is a small multiple of a power of two, and so is the exact result of each of the "
+            "library's operations, which is then a double"
+            if roundings == 0
+            else "the rounding of each of the library's operations, carried through its expressions from the "
+            f"exact values, moves an invariant by at most {roundings} times the rounding of the largest invariant",
+        )
+
+    out.store("grid", "Grid", ["Grid"], "the moments of a grid and the invariants of Hu")
 
 
 if __name__ == "__main__":

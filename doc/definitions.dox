@@ -1281,7 +1281,7 @@ xtract_hu_moments()
 Sources:
 - Origin: Hu (1962). "Visual pattern recognition by moment invariants". IRE Transactions on Information Theory 8(2), equations 61 and 62. <a href="https://doi.org/10.1109/TIT.1962.1057692">doi:10.1109/TIT.1962.1057692</a>
 
-Validation level 0, not checked.
+Validation level 3, certified.
 
 \section definition_quantise Quantise
 

@@ -3068,7 +3068,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .description = "Extract the seven Hu moments of a grid from its normalised moments",
         .source_count = 1,
         .sources = sources_hu_moments,
-        .validation_level = 0,
+        .validation_level = 3,
         .tags = 0,
         .data = {XTRACT_NORMALISED_MOMENT_COEFFS, XTRACT_UNIT_NONE, 1, accepted_hu_moments, 1, "N == 7"},
         .argc = 0,

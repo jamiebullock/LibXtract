@@ -7,7 +7,7 @@ import XtractSpec.Certificate
 import XtractSpec.Grid
 
 /-!
-# Certified values of the moments of a grid
+# Certified values of the moments of a grid and the invariants of Hu
 
 Written by `tests/reference/generate/lean_grid.py` with the records of
 `tests/reference/values/lean_grid.json`. Each list is the series of that name
@@ -82,5 +82,39 @@ theorem grid_central_moments_grid_of_30_rows_cycle :
     ((1129250418639265 / 35184372088832 : ℚ), (1 / 281474976710656 : ℚ)),
     ((-7273573646244835 / 1125899906842624 : ℚ), (1 / 2251799813685248 : ℚ))] :=
   eachWithin_of_rat ((gridCentralMoments_cast _ _).trans (congrArg _ (gridCentralMoments_eq_of_centre (centreColumn := 3012007430785387800 / 198158383604301829) (centreRow := 46019582432322677487 / 3170534137668829264) (by decide +kernel) (by decide +kernel)))) (by decide +kernel)
+
+def moments_in_powers_of_two : List ℚ :=
+  [(1 / 2 : ℚ), (1 / 8 : ℚ),
+    (1 / 4 : ℚ), (1 / 4 : ℚ),
+    (-1 / 8 : ℚ), (1 / 16 : ℚ),
+    (-3 / 8 : ℚ)]
+
+theorem hu_moments_moments_in_powers_of_two :
+    EachWithin (huMoments (moments_in_powers_of_two.map (↑) : List ℝ))
+    [((3 / 4 : ℚ), (0 : ℚ)),
+    ((1 / 8 : ℚ), (0 : ℚ)),
+    ((1 / 256 : ℚ), (0 : ℚ)),
+    ((89 / 256 : ℚ), (0 : ℚ)),
+    ((-835 / 65536 : ℚ), (0 : ℚ)),
+    ((-119 / 1024 : ℚ), (0 : ℚ)),
+    ((11 / 8192 : ℚ), (0 : ℚ))] :=
+  eachWithin_of_rat (huMoments_cast _) (by decide +kernel)
+
+def moments_in_decimal : List ℚ :=
+  [(3422735716801577 / 18014398509481984 : ℚ), (7493989779944505 / 576460752303423488 : ℚ),
+    (7926335344172073 / 72057594037927936 : ℚ), (5908722711110091 / 144115188075855872 : ℚ),
+    (-3314649325744685 / 144115188075855872 : ℚ), (1224979098644775 / 72057594037927936 : ℚ),
+    (-5188146770730811 / 144115188075855872 : ℚ)]
+
+theorem hu_moments_moments_in_decimal :
+    EachWithin (huMoments (moments_in_decimal.map (↑) : List ℝ))
+    [((5404319552844595 / 18014398509481984 : ℚ), (1 / 36028797018963968 : ℚ)),
+    ((8158072566598049 / 1152921504606846976 : ℚ), (1 / 2305843009213693952 : ℚ)),
+    ((5483294675910165 / 4611686018427387904 : ℚ), (1 / 9223372036854775808 : ℚ)),
+    ((1972936924758467 / 288230376151711744 : ℚ), (1 / 2305843009213693952 : ℚ)),
+    ((5010854965864437 / 295147905179352825856 : ℚ), (1 / 590295810358705651712 : ℚ)),
+    ((-6910297903964185 / 36893488147419103232 : ℚ), (1 / 73786976294838206464 : ℚ)),
+    ((5695596630141007 / 590295810358705651712 : ℚ), (1 / 1180591620717411303424 : ℚ))] :=
+  eachWithin_of_rat (huMoments_cast _) (by decide +kernel)
 
 end XtractSpec.Records
