@@ -1542,7 +1542,7 @@
       "title": "Average Correlation",
       "description": "Extract the average correlation of a set of series from their correlation matrix",
       "definition": "\\bar{r} = \\frac{1}{C(C-1)} \\sum_{i=0}^{C-1} \\sum_{j \\ne i} R_{ij}, \\quad C = \\sqrt{N} \\ge 2",
-      "validation_level": 0,
+      "validation_level": 3,
       "input": {"format": "square_matrix", "unit": "none", "accepts": ["correlation_matrix"], "length": "N >= 4 && is_square(N)"},
       "arguments": [],
       "result": {"kind": "scalar", "unit": "none", "min": -1, "max": 1}
