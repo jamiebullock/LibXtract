@@ -122,6 +122,18 @@ class Carried:
 
     __rmul__ = __mul__
 
+    def __truediv__(self, other):
+        other = Carried.of(other)
+        assert abs(other.exact) > other.bound
+        exact = self.exact / other.exact
+        return self.result(exact, (self.bound + abs(exact) * other.bound) / (abs(other.exact) - other.bound))
+
+    def __radd__(self, other):
+        return Carried.of(other) + self
+
+    def __rsub__(self, other):
+        return Carried.of(other) - self
+
 
 def lean_list(values):
     """The decimals as a Lean list of the doubles nearest them, two to a line."""

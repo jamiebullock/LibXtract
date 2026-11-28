@@ -588,7 +588,7 @@ xtract_peak_spectrum()
 Sources:
 - Origin: Smith and Serra (1987). "PARSHL: an analysis/synthesis program for non-harmonic sounds based on a sinusoidal representation". Technical report STAN-M-43, CCRMA, Stanford University, section 5, equations 12 to 14. <a href="https://ccrma.stanford.edu/files/papers/stanm43.pdf">https://ccrma.stanford.edu/files/papers/stanm43.pdf</a>
 
-Validation level 0, not checked.
+Validation level 3, certified.
 
 \section definition_spectrum Spectrum
 
