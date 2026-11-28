@@ -2060,7 +2060,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .description = "Extract the spectral peaks from of a spectrum",
         .source_count = 1,
         .sources = sources_peak_spectrum,
-        .validation_level = 0,
+        .validation_level = 3,
         .tags = 0,
         .data = {XTRACT_SPECTRAL_MAGNITUDES, XTRACT_UNIT_ANY, 1, accepted_peak_spectrum, 1, "N >= 1"},
         .argc = 2,

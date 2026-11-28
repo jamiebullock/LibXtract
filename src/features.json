@@ -774,7 +774,7 @@
       "description": "Extract the spectral peaks from of a spectrum",
       "definition": "T = \\frac{t}{100} \\max(0, \\max_{1 \\le n < N} a_n); \\text{ for } 1 \\le n \\le N-2 \\text{ with } a_n \\ge T, \\; a_n > a_{n-1}, \\; a_n > a_{n+1}: \\; p = \\frac{1}{2} \\frac{a_{n-1} - a_{n+1}}{a_{n-1} - 2 a_n + a_{n+1}}, \\; r_n = a_n - \\frac{1}{4}(a_{n-1} - a_{n+1}) p, \\; r_{N+n} = \\Delta f (n + p); \\text{ every other } r_n = r_{N+n} = 0, \\quad \\Delta f, t \\text{ the bin spacing and threshold given in argv}",
       "sources": [{"role": "origin", "authors": ["Smith", "Serra"], "year": 1987, "title": "PARSHL: an analysis/synthesis program for non-harmonic sounds based on a sinusoidal representation", "venue": "Technical report STAN-M-43, CCRMA, Stanford University", "locator": "section 5, equations 12 to 14", "permalink": "https://ccrma.stanford.edu/files/papers/stanm43.pdf"}],
-      "validation_level": 0,
+      "validation_level": 3,
       "provides": ["coefficients_and_frequencies", {"quantity": "power_peaks", "given": "power_bins"}],
       "input": {"format": "spectral_magnitudes", "unit": "any", "accepts": ["bins"]},
       "argument_type": "float",
