@@ -84,6 +84,14 @@ def rounded_up(value):
     return str(decimal.quantize(Decimal(1).scaleb(decimal.adjusted() - 2), rounding=ROUND_CEILING))
 
 
+def coarser(bound):
+    """A bound at or above the one given that has at most 64 significant
+    bits, which keeps the bounds of a long computation short."""
+    spare = bound.numerator.bit_length() - bound.denominator.bit_length() - 64
+    unit = Fraction(2) ** spare
+    return math.ceil(bound / unit) * unit
+
+
 class Carried:
     """A value that the library computes: the exact value of its expression
     at the exact data, and the most that the rounding of each operation on
@@ -105,7 +113,7 @@ class Carried:
         assert exact == 0 or Fraction(2) ** -1000 < abs(exact) < Fraction(2) ** 1000
         if moved == 0 and Fraction(float(exact)) == exact:
             return Carried(exact)
-        return Carried(exact, moved + ROUNDING * (abs(exact) + moved))
+        return Carried(exact, coarser(moved + ROUNDING * (abs(exact) + moved)))
 
     def __add__(self, other):
         other = Carried.of(other)
@@ -127,6 +135,9 @@ class Carried:
         assert abs(other.exact) > other.bound
         exact = self.exact / other.exact
         return self.result(exact, (self.bound + abs(exact) * other.bound) / (abs(other.exact) - other.bound))
+
+    def __neg__(self):
+        return Carried(-self.exact, self.bound)
 
     def __radd__(self, other):
         return Carried.of(other) + self
