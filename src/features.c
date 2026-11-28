@@ -2972,7 +2972,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .description = "Extract the average correlation of a set of series from their correlation matrix",
         .source_count = 0,
         .sources = NULL,
-        .validation_level = 0,
+        .validation_level = 3,
         .tags = 0,
         .data = {XTRACT_SQUARE_MATRIX, XTRACT_UNIT_NONE, 1, accepted_average_correlation, 1, "N >= 4 && is_square(N)"},
         .argc = 0,

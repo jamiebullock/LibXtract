@@ -47,6 +47,30 @@
         "reason": "330 roundings, each within 2^-53 relatively: the rounding of the means, which changes a sum of products by less than one rounding; the two differences from the means, their product and the M - 1 additions, in every sum of the products of two series, whose terms have both signs, and the division: the bound that this gives from the exact values is at most 329 roundings of the largest covariance; and the expected value"
       },
       "call": "theorem XtractSpec.Records.covariance_matrix_three_series_of_325_cycle"
+    },
+    {
+      "feature": "average_correlation",
+      "data": "correlations_of_3_series",
+      "expected": [
+        0.3333333333333333
+      ],
+      "tolerance": {
+        "relative": 2.23e-16,
+        "reason": "2 roundings, each within 2^-53 relatively: the division; every value is a multiple of 1/4, so each addition is exact; and the expected value"
+      },
+      "call": "theorem XtractSpec.Records.average_correlation_correlations_of_3_series"
+    },
+    {
+      "feature": "average_correlation",
+      "data": "matrix_of_32_rows_of_both_signs",
+      "expected": [
+        0.2625
+      ],
+      "tolerance": {
+        "relative": 2.26e-13,
+        "reason": "2032 roundings, each within 2^-53 relatively: the additions of the values off the diagonal, one fewer than those values, in any order, are roundings of a sum of magnitudes that is 2.05 times the magnitude of the sum; the division; and the expected value"
+      },
+      "call": "theorem XtractSpec.Records.average_correlation_matrix_of_32_rows_of_both_signs"
     }
   ]
 }

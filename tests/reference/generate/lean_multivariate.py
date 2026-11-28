@@ -3,8 +3,9 @@
 # SPDX-FileCopyrightText: 2026 Jamie Bullock
 # SPDX-License-Identifier: Zlib
 
-"""Writes two sets of series, statistics of each set, and a theorem for
-every list of those values that Lean checks.
+"""Writes two sets of series and two square matrices, statistics of each,
+and a theorem for every one of those values, or list of them, that Lean
+checks.
 
 usage: lean_multivariate.py
 
@@ -23,12 +24,16 @@ The first set has two series of four multiples of 1/4 whose means are
 multiples of 1/4 too, on which the library's arithmetic is exact up to its
 last division. The second has three series of 325 values of one cycle of
 eight, each beginning at another place in the cycle.
+
+A matrix is stored by rows. The first has three rows, a diagonal of ones and
+multiples of 1/4 of both signs off it. The second has 32 rows of a cycle of
+eight values between -0.6 and 1.
 """
 
 import math
 from fractions import Fraction
 
-from certificates import ROUNDING, Certificates
+from certificates import ROUNDING, Certificates, rounded_up
 
 SHORT = "two_series_of_4"
 LONG = "three_series_of_325_cycle"
@@ -39,6 +44,12 @@ SERIES = {
     LONG: (CYCLE[1:], CYCLE, 121),
 }
 COUNT = {SHORT: 2, LONG: 3}
+SMALL = "correlations_of_3_series"
+LARGE = "matrix_of_32_rows_of_both_signs"
+MATRICES = {
+    SMALL: (["1", "0.5", "-0.25", "0.5", "1", "0.75", "-0.25", "0.75", "1"], [], 0),
+    LARGE: ([], ["1", "0.4", "-0.3", "0.8", "-0.6", "0.1", "0.9", "-0.2"], 128),
+}
 
 
 def main():
@@ -91,6 +102,30 @@ def main():
             "two series, whose terms have both signs, and the division: the bound that this gives from the "
             f"exact values is at most {math.ceil(bound)} roundings of the largest covariance",
             {"series": count},
+        )
+
+    for series, (prefix, cycle, repeats) in MATRICES.items():
+        xs = out.series(series, prefix, cycle, repeats)
+        rows = math.isqrt(len(xs))
+        assert rows * rows == len(xs)
+        off = [x for index, x in enumerate(xs) if index // rows != index % rows]
+        exact = series == SMALL
+        # The terms have both signs: a bound on the rounding of their sum
+        # is relative to the sum of their magnitudes
+        factor = sum(abs(x) for x in off) / abs(sum(off))
+        assert not exact or all((4 * x).denominator == 1 for x in xs)
+        out.rational(
+            "average_correlation",
+            series,
+            f"averageCorrelation {data(series)}",
+            "averageCorrelation_cast _",
+            sum(off) / (rows * (rows - 1)),
+            1 if exact else math.ceil((len(off) - 1) * factor) + 1,
+            "the division; every value is a multiple of 1/4, so each addition is exact"
+            if exact
+            else "the additions of the values off the diagonal, one fewer than those values, in any order, are "
+            f"roundings of a sum of magnitudes that is {rounded_up(factor)} times the magnitude of the sum; the "
+            "division",
         )
 
     out.store("multivariate", "Multivariate", ["Multivariate"], "the statistics of several series")

@@ -55,4 +55,25 @@ theorem covariance_matrix_three_series_of_325_cycle :
     ((5807462288719185 / 72057594037927936 : ℚ), (1 / 144115188075855872 : ℚ))] :=
   eachWithin_of_rat (covarianceMatrix_cast _ _) (by decide +kernel)
 
+def correlations_of_3_series : List ℚ :=
+  [(1 : ℚ), (1 / 2 : ℚ),
+    (-1 / 4 : ℚ), (1 / 2 : ℚ),
+    (1 : ℚ), (3 / 4 : ℚ),
+    (-1 / 4 : ℚ), (3 / 4 : ℚ),
+    (1 : ℚ)]
+
+theorem average_correlation_correlations_of_3_series :
+    |averageCorrelation (correlations_of_3_series.map (↑) : List ℝ) - ((6004799503160661 / 18014398509481984 : ℚ) : ℝ)| ≤ ((1 / 36028797018963968 : ℚ) : ℝ) :=
+  within_of_rat (averageCorrelation_cast _) (by decide +kernel)
+
+def matrix_of_32_rows_of_both_signs : List ℚ :=
+  (List.replicate 128 [(1 : ℚ), (3602879701896397 / 9007199254740992 : ℚ),
+    (-5404319552844595 / 18014398509481984 : ℚ), (3602879701896397 / 4503599627370496 : ℚ),
+    (-5404319552844595 / 9007199254740992 : ℚ), (3602879701896397 / 36028797018963968 : ℚ),
+    (8106479329266893 / 9007199254740992 : ℚ), (-3602879701896397 / 18014398509481984 : ℚ)]).flatten
+
+theorem average_correlation_matrix_of_32_rows_of_both_signs :
+    |averageCorrelation (matrix_of_32_rows_of_both_signs.map (↑) : List ℝ) - ((4728779608739021 / 18014398509481984 : ℚ) : ℝ)| ≤ ((1 / 36028797018963968 : ℚ) : ℝ) :=
+  within_of_rat (averageCorrelation_cast _) (by decide +kernel)
+
 end XtractSpec.Records
