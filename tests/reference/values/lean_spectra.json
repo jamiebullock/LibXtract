@@ -1,0 +1,87 @@
+{
+  "source": {
+    "name": "Theorems about the definitions of the spectra made from a complex spectrum, checked by Lean",
+    "version": "Lean 4.36.0, Mathlib v4.36.0",
+    "licence": "Zlib, as the library",
+    "how": "each expected value is proved to be the value of the feature's definition at the doubles nearest the stored values, or within half a unit in its last place of it, by the theorem its record names in spec/XtractSpec/Records/Spectra.lean; written by tests/reference/generate/lean_spectra.py and checked by Lean's kernel",
+    "level": 3
+  },
+  "records": [
+    {
+      "feature": "power_spectrum",
+      "data": "four_complex_bins",
+      "arguments": {
+        "bin_spacing": 172.265625
+      },
+      "expected": [
+        13.0,
+        2.5,
+        0.0,
+        3.125,
+        0.0,
+        172.265625,
+        344.53125,
+        516.796875
+      ],
+      "tolerance": {
+        "relative": 0.0,
+        "reason": "no rounding: every part is a multiple of 1/4, so each square and each addition is exact, and each product of a bin number and the spacing is a double; the expected value is exact"
+      },
+      "call": "theorem XtractSpec.Records.power_spectrum_four_complex_bins"
+    },
+    {
+      "feature": "power_spectrum",
+      "data": "twenty_complex_bins_cycle",
+      "arguments": {
+        "bin_spacing": 1102.5
+      },
+      "expected": [
+        0.3625,
+        0.49999999999999994,
+        0.8500000000000001,
+        0.7300000000000001,
+        0.3625,
+        0.49999999999999994,
+        0.8500000000000001,
+        0.7300000000000001,
+        0.3625,
+        0.49999999999999994,
+        0.8500000000000001,
+        0.7300000000000001,
+        0.3625,
+        0.49999999999999994,
+        0.8500000000000001,
+        0.7300000000000001,
+        0.3625,
+        0.49999999999999994,
+        0.8500000000000001,
+        0.7300000000000001,
+        0.0,
+        1102.5,
+        2205.0,
+        3307.5,
+        4410.0,
+        5512.5,
+        6615.0,
+        7717.5,
+        8820.0,
+        9922.5,
+        11025.0,
+        12127.5,
+        13230.0,
+        14332.5,
+        15435.0,
+        16537.5,
+        17640.0,
+        18742.5,
+        19845.0,
+        20947.5
+      ],
+      "tolerance": {
+        "relative": 4.45e-16,
+        "reason": "4 roundings, each within 2^-53 relatively: the two squares and their addition, for a coefficient; each product of a bin number and the spacing is a double; and the expected value"
+      },
+      "call": "theorem XtractSpec.Records.power_spectrum_twenty_complex_bins_cycle"
+    }
+  ]
+}

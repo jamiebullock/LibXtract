@@ -1407,7 +1407,7 @@ xtract_power_spectrum()
 
 Defined by the library: this definition is the reference.
 
-Validation level 0, not checked.
+Validation level 3, certified.
 
 \section definition_log_spectrum Log Spectrum
 

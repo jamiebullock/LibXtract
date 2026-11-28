@@ -1783,7 +1783,7 @@
       "title": "Power Spectrum",
       "description": "Extract the power spectrum from a complex spectrum",
       "definition": "r_m = a_m^2 + b_m^2, \\quad r_{M+m} = m \\Delta f, \\quad a_m = x_m, \\; b_m = x_{M+m}, \\quad m = 0, \\ldots, M-1, \\quad M = N/2, \\quad \\Delta f \\text{ the bin spacing given in argv}",
-      "validation_level": 0,
+      "validation_level": 3,
       "provides": [
         "coefficients_and_frequencies",
         {"quantity": "bins", "part": "first_half"},
