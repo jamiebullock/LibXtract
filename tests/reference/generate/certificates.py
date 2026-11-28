@@ -84,6 +84,45 @@ def rounded_up(value):
     return str(decimal.quantize(Decimal(1).scaleb(decimal.adjusted() - 2), rounding=ROUND_CEILING))
 
 
+class Carried:
+    """A value that the library computes: the exact value of its expression
+    at the exact data, and the most that the rounding of each operation on
+    the way can have moved the library's value from it. An operation on
+    exact operands whose result is a double rounds nothing."""
+
+    def __init__(self, exact, bound=Fraction(0)):
+        self.exact = Fraction(exact)
+        self.bound = bound
+
+    @staticmethod
+    def of(value):
+        return value if isinstance(value, Carried) else Carried(value)
+
+    def result(self, exact, moved):
+        """The rounded result of an operation whose exact operands give
+        `exact` and whose operands are within their bounds, which moves the
+        result by at most `moved` before it is rounded."""
+        assert exact == 0 or Fraction(2) ** -1000 < abs(exact) < Fraction(2) ** 1000
+        if moved == 0 and Fraction(float(exact)) == exact:
+            return Carried(exact)
+        return Carried(exact, moved + ROUNDING * (abs(exact) + moved))
+
+    def __add__(self, other):
+        other = Carried.of(other)
+        return self.result(self.exact + other.exact, self.bound + other.bound)
+
+    def __sub__(self, other):
+        other = Carried.of(other)
+        return self.result(self.exact - other.exact, self.bound + other.bound)
+
+    def __mul__(self, other):
+        other = Carried.of(other)
+        moved = abs(self.exact) * other.bound + abs(other.exact) * self.bound + self.bound * other.bound
+        return self.result(self.exact * other.exact, moved)
+
+    __rmul__ = __mul__
+
+
 def lean_list(values):
     """The decimals as a Lean list of the doubles nearest them, two to a line."""
     doubles = [f"({lean(float(value))} : ℚ)" for value in values]

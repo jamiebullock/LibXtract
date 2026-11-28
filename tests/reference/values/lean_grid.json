@@ -1,6 +1,6 @@
 {
   "source": {
-    "name": "Theorems about the definitions of the moments of a grid, checked by Lean",
+    "name": "Theorems about the definitions of the moments of a grid and the invariants of Hu, checked by Lean",
     "version": "Lean 4.36.0, Mathlib v4.36.0",
     "licence": "Zlib, as the library",
     "how": "each expected value is proved to be the value of the feature's definition at the doubles nearest the stored values, or within half a unit in its last place of it, by the theorem its record names in spec/XtractSpec/Records/Grid.lean; written by tests/reference/generate/lean_grid.py and checked by Lean's kernel",
@@ -98,6 +98,42 @@
         "reason": "6446 roundings, each within 2^-53 relatively: the centre is a ratio of rounded sums and a deviation from it is a difference of rounded values; the bound that this, the products and the additions give for a moment, term by term from the exact values, is at most 6445 roundings of the largest moment; and the expected value"
       },
       "call": "theorem XtractSpec.Records.grid_central_moments_grid_of_30_rows_cycle"
+    },
+    {
+      "feature": "hu_moments",
+      "data": "moments_in_powers_of_two",
+      "expected": [
+        0.75,
+        0.125,
+        0.00390625,
+        0.34765625,
+        -0.0127410888671875,
+        -0.1162109375,
+        0.0013427734375
+      ],
+      "tolerance": {
+        "relative": 0.0,
+        "reason": "no rounding: every moment is a small multiple of a power of two, and so is the exact result of each of the library's operations, which is then a double; the expected value is exact"
+      },
+      "call": "theorem XtractSpec.Records.hu_moments_moments_in_powers_of_two"
+    },
+    {
+      "feature": "hu_moments",
+      "data": "moments_in_decimal",
+      "expected": [
+        0.3,
+        0.007076,
+        0.0011890000000000002,
+        0.006845,
+        1.6977437000000002e-05,
+        -0.00018730399999999993,
+        9.648715999999997e-06
+      ],
+      "tolerance": {
+        "relative": 2.23e-16,
+        "reason": "2 roundings, each within 2^-53 relatively: the rounding of each of the library's operations, carried through its expressions from the exact values, moves an invariant by at most 1 times the rounding of the largest invariant; and the expected value"
+      },
+      "call": "theorem XtractSpec.Records.hu_moments_moments_in_decimal"
     }
   ]
 }
