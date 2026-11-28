@@ -77,6 +77,21 @@ def main():
             "those of the sum at lag zero, which gives the largest result; the division",
         )
 
+        distances = [sum(abs(a - b) for a, b in zip(xs, xs[lag:])) / n for lag in range(n)]
+        assert not exact or all_doubles(distances)
+        out.vector(
+            "amdf",
+            series,
+            f"amdf {data(series)}",
+            "amdf_cast _",
+            distances,
+            0 if exact else n + 1,
+            "every value is a multiple of 1/4, so each difference and each addition is exact, and the division "
+            "by 8 gives the quotient itself, which is a double"
+            if exact
+            else "the difference in every term and at most N - 1 additions of terms of one sign; the division",
+        )
+
     out.store("lags", "Lags", ["Lags"], "the features of a series against itself at every lag")
 
 

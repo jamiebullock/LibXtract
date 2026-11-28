@@ -736,7 +736,7 @@
       "description": "Extract the AMDF of a signal",
       "definition": "D_\\tau = \\frac{1}{N} \\sum_{n=0}^{N-1-\\tau} |x_n - x_{n+\\tau}|, \\quad \\tau = 0, \\ldots, N-1",
       "sources": [{"role": "origin", "authors": ["Ross", "Shaffer", "Cohen", "Freudberg", "Manley"], "year": 1974, "title": "Average magnitude difference function pitch extractor", "venue": "IEEE Transactions on Acoustics, Speech, and Signal Processing 22(5)", "locator": "equation 5", "permalink": "doi:10.1109/TASSP.1974.1162598"}],
-      "validation_level": 0,
+      "validation_level": 3,
       "input": {"format": "audio_samples", "unit": "any"},
       "arguments": [],
       "invariance": {"offset": "unchanged", "sign": "unchanged", "reversal": "unchanged"},

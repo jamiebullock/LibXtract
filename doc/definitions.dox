@@ -555,7 +555,7 @@ xtract_amdf()
 Sources:
 - Origin: Ross, Shaffer, Cohen, Freudberg and Manley (1974). "Average magnitude difference function pitch extractor". IEEE Transactions on Acoustics, Speech, and Signal Processing 22(5), equation 5. <a href="https://doi.org/10.1109/TASSP.1974.1162598">doi:10.1109/TASSP.1974.1162598</a>
 
-Validation level 0, not checked.
+Validation level 3, certified.
 
 \section definition_asdf Average Squared Difference Function
 

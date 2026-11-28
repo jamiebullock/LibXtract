@@ -27,6 +27,25 @@
       "call": "theorem XtractSpec.Records.autocorrelation_eight_quarters_of_both_signs"
     },
     {
+      "feature": "amdf",
+      "data": "eight_quarters_of_both_signs",
+      "expected": [
+        0.0,
+        2.40625,
+        0.96875,
+        1.6875,
+        0.625,
+        0.9375,
+        0.28125,
+        0.21875
+      ],
+      "tolerance": {
+        "relative": 0.0,
+        "reason": "no rounding: every value is a multiple of 1/4, so each difference and each addition is exact, and the division by 8 gives the quotient itself, which is a double; the expected value is exact"
+      },
+      "call": "theorem XtractSpec.Records.amdf_eight_quarters_of_both_signs"
+    },
+    {
       "feature": "autocorrelation",
       "data": "tenths_of_both_signs_cycle",
       "expected": [
@@ -76,6 +95,57 @@
         "reason": "42 roundings, each within 2^-53 relatively: the product in every term and at most N - 1 additions, in a sum whose magnitudes are at most those of the sum at lag zero, which gives the largest result; the division; and the expected value"
       },
       "call": "theorem XtractSpec.Records.autocorrelation_tenths_of_both_signs_cycle"
+    },
+    {
+      "feature": "amdf",
+      "data": "tenths_of_both_signs_cycle",
+      "expected": [
+        0.0,
+        0.8775,
+        0.36,
+        0.83,
+        0.52875,
+        0.8125,
+        0.3375,
+        0.765,
+        0.0,
+        0.695,
+        0.28250000000000003,
+        0.6475,
+        0.41125,
+        0.63,
+        0.26,
+        0.5825,
+        0.0,
+        0.5125,
+        0.20500000000000002,
+        0.465,
+        0.29375,
+        0.4475,
+        0.1825,
+        0.4,
+        0.0,
+        0.33,
+        0.1275,
+        0.2825,
+        0.17625,
+        0.265,
+        0.10500000000000001,
+        0.2175,
+        0.0,
+        0.1475,
+        0.05,
+        0.1,
+        0.05875,
+        0.0825,
+        0.0275,
+        0.035
+      ],
+      "tolerance": {
+        "relative": 4.67e-15,
+        "reason": "42 roundings, each within 2^-53 relatively: the difference in every term and at most N - 1 additions of terms of one sign; the division; and the expected value"
+      },
+      "call": "theorem XtractSpec.Records.amdf_tenths_of_both_signs_cycle"
     }
   ]
 }
