@@ -1398,7 +1398,7 @@
       "title": "Cross-correlation",
       "description": "Extract the cross-correlation of two series at every lag",
       "definition": "r_k = \\frac{1}{M} \\sum_{n=\\max(0,-k)}^{\\min(M-1,\\,M-1-k)} x_{n+k} \\, y_n, \\quad k = -(M-1), \\dots, M-1, \\quad M = N/2, \\; x_n = d_n, \\; y_n = d_{M+n}",
-      "validation_level": 0,
+      "validation_level": 3,
       "input": {"format": "subframes", "unit": "any", "length": "N >= 2 && N % 2 == 0"},
       "arguments": [],
       "invariance": {"sign": "unchanged", "swap": "reversed"},

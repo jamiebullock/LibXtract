@@ -639,14 +639,18 @@ static const xttest_reference_record records_lean_statistics[] = {
 static const xttest_reference_source source_lean_statistics = {.id = "lean_statistics", .name = "Theorems about the definitions of the statistics, checked by Lean", .level = 3, .record_count = 38, .records = records_lean_statistics};
 
 static const double expected_lean_subframes_0[] = {1.5, 0.0, -0.75, 5.25};
-static const double expected_lean_subframes_1[] = {0.29999999999999993, -0.39999999999999997, 0.80000000000000004, -0.25, -0.29999999999999993, 0.39999999999999997, -0.80000000000000004, 0.25, 0.29999999999999993, -0.39999999999999997, 0.80000000000000004, -0.25, -0.29999999999999993, 0.39999999999999997, -0.80000000000000004, 0.25, 0.29999999999999993, -0.39999999999999997, 0.80000000000000004, -0.25};
+static const double expected_lean_subframes_1[] = {-1.125, 1.34375, -1.265625, -0.8125, 0.46875, -1.09375, 0.375};
+static const double expected_lean_subframes_2[] = {0.29999999999999993, -0.39999999999999997, 0.80000000000000004, -0.25, -0.29999999999999993, 0.39999999999999997, -0.80000000000000004, 0.25, 0.29999999999999993, -0.39999999999999997, 0.80000000000000004, -0.25, -0.29999999999999993, 0.39999999999999997, -0.80000000000000004, 0.25, 0.29999999999999993, -0.39999999999999997, 0.80000000000000004, -0.25};
+static const double expected_lean_subframes_3[] = {0.010499999999999999, 0.0064999999999999997, 0.035499999999999997, 0.025250000000000002, 0.039, 0.0625, 0.035750000000000004, 0.098125000000000004, 0.056750000000000002, 0.075499999999999998, 0.11, 0.075749999999999998, 0.1135, 0.13150000000000001, 0.082000000000000003, 0.19625000000000001, 0.10299999999999999, 0.14449999999999999, 0.1845, 0.12625, 0.18024999999999999, 0.1575, 0.0935, 0.19625000000000001, 0.091499999999999998, 0.11849999999999999, 0.11774999999999999, 0.075749999999999998, 0.10575, 0.088499999999999995, 0.04725, 0.098125000000000004, 0.045249999999999999, 0.049499999999999995, 0.043249999999999997, 0.025250000000000002, 0.03125, 0.0195, 0.001};
 
 static const xttest_reference_record records_lean_subframes[] = {
     {.feature = XTRACT_DIFFERENCE_VECTOR, .series = &series_two_frames_of_quarters, .arguments = NULL, .expected = expected_lean_subframes_0, .expected_count = 4, .tolerance = 0.0},
-    {.feature = XTRACT_DIFFERENCE_VECTOR, .series = &series_two_frames_of_tenths_cycle, .arguments = NULL, .expected = expected_lean_subframes_1, .expected_count = 20, .tolerance = 2.2300000000000002e-16},
+    {.feature = XTRACT_CROSS_CORRELATION, .series = &series_two_frames_of_quarters, .arguments = NULL, .expected = expected_lean_subframes_1, .expected_count = 7, .tolerance = 0.0},
+    {.feature = XTRACT_DIFFERENCE_VECTOR, .series = &series_two_frames_of_tenths_cycle, .arguments = NULL, .expected = expected_lean_subframes_2, .expected_count = 20, .tolerance = 2.2300000000000002e-16},
+    {.feature = XTRACT_CROSS_CORRELATION, .series = &series_two_frames_of_tenths_cycle, .arguments = NULL, .expected = expected_lean_subframes_3, .expected_count = 39, .tolerance = 2.45e-15},
 };
 
-static const xttest_reference_source source_lean_subframes = {.id = "lean_subframes", .name = "Theorems about the definitions of the features of two frames, checked by Lean", .level = 3, .record_count = 2, .records = records_lean_subframes};
+static const xttest_reference_source source_lean_subframes = {.id = "lean_subframes", .name = "Theorems about the definitions of the features of two frames, checked by Lean", .level = 3, .record_count = 4, .records = records_lean_subframes};
 
 static const double expected_lean_temporal_0[] = {0.486328125};
 static const double expected_lean_temporal_1[] = {0.375};

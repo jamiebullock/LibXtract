@@ -63,6 +63,27 @@ def main():
             "every value is a multiple of 1/4, so each difference is exact" if exact else "the difference",
         )
 
+        first, second = xs[:half], xs[half:]
+        correlations = []
+        for lag in range(-(half - 1), half):
+            pairs = zip(first[lag:], second) if lag >= 0 else zip(first, second[-lag:])
+            correlations.append(sum(a * b for a, b in pairs) / half)
+        # The bound on a sum holds for terms of one sign
+        assert exact or all(x > 0 for x in xs)
+        assert not exact or all(Fraction(float(value)) == value for value in correlations)
+        out.vector(
+            "cross_correlation",
+            series,
+            f"crossCorrelation {data(series)}",
+            "crossCorrelation_cast _",
+            correlations,
+            0 if exact else half + 1,
+            "every value is a multiple of 1/4, so each product and each addition is exact, and the division by "
+            "4 gives the quotient itself, which is a double"
+            if exact
+            else "the product in every term and at most M - 1 additions of terms of one sign; the division",
+        )
+
     out.store("subframes", "Subframes", ["Subframes"], "the features of two frames")
 
 

@@ -23,6 +23,24 @@
       "call": "theorem XtractSpec.Records.difference_vector_two_frames_of_quarters"
     },
     {
+      "feature": "cross_correlation",
+      "data": "two_frames_of_quarters",
+      "expected": [
+        -1.125,
+        1.34375,
+        -1.265625,
+        -0.8125,
+        0.46875,
+        -1.09375,
+        0.375
+      ],
+      "tolerance": {
+        "relative": 0.0,
+        "reason": "no rounding: every value is a multiple of 1/4, so each product and each addition is exact, and the division by 4 gives the quotient itself, which is a double; the expected value is exact"
+      },
+      "call": "theorem XtractSpec.Records.cross_correlation_two_frames_of_quarters"
+    },
+    {
       "feature": "difference_vector",
       "data": "two_frames_of_tenths_cycle",
       "expected": [
@@ -52,6 +70,56 @@
         "reason": "2 roundings, each within 2^-53 relatively: the difference; and the expected value"
       },
       "call": "theorem XtractSpec.Records.difference_vector_two_frames_of_tenths_cycle"
+    },
+    {
+      "feature": "cross_correlation",
+      "data": "two_frames_of_tenths_cycle",
+      "expected": [
+        0.010499999999999999,
+        0.0065,
+        0.0355,
+        0.02525,
+        0.039,
+        0.0625,
+        0.035750000000000004,
+        0.098125,
+        0.05675,
+        0.0755,
+        0.11,
+        0.07575,
+        0.1135,
+        0.1315,
+        0.082,
+        0.19625,
+        0.103,
+        0.1445,
+        0.1845,
+        0.12625,
+        0.18025,
+        0.1575,
+        0.0935,
+        0.19625,
+        0.0915,
+        0.1185,
+        0.11775,
+        0.07575,
+        0.10575,
+        0.0885,
+        0.04725,
+        0.098125,
+        0.04525,
+        0.049499999999999995,
+        0.04325,
+        0.02525,
+        0.03125,
+        0.0195,
+        0.001
+      ],
+      "tolerance": {
+        "relative": 2.45e-15,
+        "reason": "22 roundings, each within 2^-53 relatively: the product in every term and at most M - 1 additions of terms of one sign; the division; and the expected value"
+      },
+      "call": "theorem XtractSpec.Records.cross_correlation_two_frames_of_tenths_cycle"
     }
   ]
 }
