@@ -3,20 +3,25 @@
  - SPDX-FileCopyrightText: 2026 Jamie Bullock
  - SPDX-License-Identifier: Zlib
  -/
+import XtractSpec.SpectralMoments
 import XtractSpec.Statistics
 
 /-!
 # The peaks of a spectrum
 
-The definition in `src/features.json` of `peak_spectrum`. The data is the
-coefficients of a spectrum in the order of their bins, and the result has
-an amplitude for each bin and then a frequency for each bin. A definition is
-stated over an ordered field: over ℝ it is the specification, and over ℚ it
-computes, which gives its values at a spectrum of doubles exactly.
+The definitions in `src/features.json` of `peak_spectrum` and `packed`. The
+data of `peak_spectrum` is the coefficients of a spectrum in the order of
+their bins, and its result has an amplitude for each bin and then a
+frequency for each bin. The data of `packed` is such a result: the
+amplitudes of its bins and then the frequencies of the same bins. A
+definition is stated over a field, ordered where it compares: over ℝ it is
+the specification, and over ℚ it computes, which gives its values at a
+spectrum of doubles exactly.
 
 `peakSpectrum` is stated for any bin spacing and any threshold. The library
 refuses a bin spacing that is not above zero and a threshold that is not
-from 0 to 100.
+from 0 to 100. `packed` leaves out the last value of an odd count of values,
+and the library refuses an odd count.
 -/
 
 namespace XtractSpec
@@ -68,6 +73,22 @@ def peakSpectrum (xs : List α) (spacing threshold : α) : List α :=
     (List.range xs.length).map (peakFrequency xs spacing (peakLimit xs threshold))
 
 end Ordered
+
+section Field
+
+variable {α : Type*} [Field α] [DecidableEq α]
+
+/-- The bins whose amplitude is not zero, in their order. -/
+def sounding (xs : List α) : List (α × α) :=
+  (bins xs).filter fun bin => decide (bin.1 ≠ 0)
+
+/-- The amplitudes that are not zero, in their order, then a zero for each one that is, and
+then the frequencies of the same bins and as many zeros. -/
+def packed (xs : List α) : List α :=
+  (sounding xs).map Prod.fst ++ List.replicate (xs.length / 2 - (sounding xs).length) 0 ++
+    ((sounding xs).map Prod.snd ++ List.replicate (xs.length / 2 - (sounding xs).length) 0)
+
+end Field
 
 /-!
 ## The parabola
@@ -146,5 +167,24 @@ theorem peakSpectrum_cast (xs : List ℚ) (spacing threshold : ℚ) :
   · apply List.map_congr_left
     intro n _
     exact peakFrequency_cast xs spacing _ n
+
+theorem bins_cast (xs : List ℚ) :
+    bins (xs.map (↑) : List ℝ) = (bins xs).map (Prod.map (↑) (↑)) := by
+  unfold bins
+  rw [List.length_map, ← List.map_take, ← List.map_drop, List.zip_map]
+
+theorem sounding_cast (xs : List ℚ) :
+    sounding (xs.map (↑) : List ℝ) = (sounding xs).map (Prod.map (↑) (↑)) := by
+  have same : ((fun bin : ℝ × ℝ => decide (bin.1 ≠ 0)) ∘ Prod.map ((↑) : ℚ → ℝ) ((↑) : ℚ → ℝ)) =
+      fun bin : ℚ × ℚ => decide (bin.1 ≠ 0) := by
+    funext bin
+    simp
+  unfold sounding
+  rw [bins_cast, List.filter_map, same]
+
+theorem packed_cast (xs : List ℚ) : packed (xs.map (↑) : List ℝ) = (packed xs).map (↑) := by
+  unfold packed
+  rw [sounding_cast]
+  simp [Function.comp_def]
 
 end XtractSpec

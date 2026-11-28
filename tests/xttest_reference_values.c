@@ -184,6 +184,21 @@ static const double series_forty_coefficients_cycle_cycle[8] = {
 
 static const xttest_reference_series series_forty_coefficients_cycle = {.name = "forty_coefficients_cycle", .prefix = NULL, .prefix_count = 0, .cycle = series_forty_coefficients_cycle_cycle, .cycle_count = 8, .repeats = 5};
 
+static const double series_six_bins_three_of_no_amplitude_prefix[12] = {
+    0.0, 2.5, 0.0, -1.0, 0.25, 0.0, 125.0, 250.0,
+    375.0, 500.0, 625.0, 750.0};
+
+static const xttest_reference_series series_six_bins_three_of_no_amplitude = {.name = "six_bins_three_of_no_amplitude", .prefix = series_six_bins_three_of_no_amplitude_prefix, .prefix_count = 12, .cycle = NULL, .cycle_count = 0, .repeats = 0};
+
+static const double series_twenty_bins_cycle_with_zeros_prefix[40] = {
+    0.29999999999999999, 0.0, 0.69999999999999996, 0.050000000000000003, 0.0, 0.29999999999999999, 0.0, 0.69999999999999996,
+    0.050000000000000003, 0.0, 0.29999999999999999, 0.0, 0.69999999999999996, 0.050000000000000003, 0.0, 0.29999999999999999,
+    0.0, 0.69999999999999996, 0.050000000000000003, 0.0, 55.125, 110.25, 165.375, 220.5,
+    275.625, 330.75, 385.875, 441.0, 496.125, 551.25, 606.375, 661.5,
+    716.625, 771.75, 826.875, 882.0, 937.125, 992.25, 1047.375, 1102.5};
+
+static const xttest_reference_series series_twenty_bins_cycle_with_zeros = {.name = "twenty_bins_cycle_with_zeros", .prefix = series_twenty_bins_cycle_with_zeros_prefix, .prefix_count = 40, .cycle = NULL, .cycle_count = 0, .repeats = 0};
+
 static const double series_quarters_to_smooth_prefix[9] = {
     2.0, -1.0, 0.0, 3.5, 1.0, -2.5, 4.0, 0.5,
     1.5};
@@ -514,13 +529,17 @@ static const double arguments_lean_peaks_0[] = {172.265625, 25.0};
 static const double expected_lean_peaks_0[] = {0.0, 0.0, 4.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 4.125, 0.0, 0.0, 0.0, 344.53125, 0.0, 0.0, 861.328125, 0.0, 0.0, 0.0, 0.0, 1765.72265625, 0.0};
 static const double arguments_lean_peaks_1[] = {0.025000000000000001, 70.0};
 static const double expected_lean_peaks_1[] = {0.0, 0.8041666666666667, 0.0, 0.0, 0.95937499999999998, 0.0, 0.0, 0.0, 0.0, 0.8041666666666667, 0.0, 0.0, 0.95937499999999998, 0.0, 0.0, 0.0, 0.0, 0.8041666666666667, 0.0, 0.0, 0.95937499999999998, 0.0, 0.0, 0.0, 0.0, 0.8041666666666667, 0.0, 0.0, 0.95937499999999998, 0.0, 0.0, 0.0, 0.0, 0.8041666666666667, 0.0, 0.0, 0.95937499999999998, 0.0, 0.0, 0.0, 0.0, 0.022916666666666669, 0.0, 0.0, 0.096875000000000003, 0.0, 0.0, 0.0, 0.0, 0.22291666666666668, 0.0, 0.0, 0.296875, 0.0, 0.0, 0.0, 0.0, 0.42291666666666666, 0.0, 0.0, 0.49687500000000001, 0.0, 0.0, 0.0, 0.0, 0.62291666666666667, 0.0, 0.0, 0.69687500000000002, 0.0, 0.0, 0.0, 0.0, 0.82291666666666674, 0.0, 0.0, 0.89687500000000009, 0.0, 0.0, 0.0};
+static const double expected_lean_peaks_2[] = {2.5, -1.0, 0.25, 0.0, 0.0, 0.0, 250.0, 500.0, 625.0, 0.0, 0.0, 0.0};
+static const double expected_lean_peaks_3[] = {0.29999999999999999, 0.69999999999999996, 0.050000000000000003, 0.29999999999999999, 0.69999999999999996, 0.050000000000000003, 0.29999999999999999, 0.69999999999999996, 0.050000000000000003, 0.29999999999999999, 0.69999999999999996, 0.050000000000000003, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 55.125, 165.375, 220.5, 330.75, 441.0, 496.125, 606.375, 716.625, 771.75, 882.0, 992.25, 1047.375, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 
 static const xttest_reference_record records_lean_peaks[] = {
     {.feature = XTRACT_PEAK_SPECTRUM, .series = &series_twelve_coefficients_with_peaks, .arguments = arguments_lean_peaks_0, .expected = expected_lean_peaks_0, .expected_count = 24, .tolerance = 0.0},
     {.feature = XTRACT_PEAK_SPECTRUM, .series = &series_forty_coefficients_cycle, .arguments = arguments_lean_peaks_1, .expected = expected_lean_peaks_1, .expected_count = 80, .tolerance = 3.34e-16},
+    {.feature = XTRACT_PACKED, .series = &series_six_bins_three_of_no_amplitude, .arguments = NULL, .expected = expected_lean_peaks_2, .expected_count = 12, .tolerance = 0.0},
+    {.feature = XTRACT_PACKED, .series = &series_twenty_bins_cycle_with_zeros, .arguments = NULL, .expected = expected_lean_peaks_3, .expected_count = 40, .tolerance = 0.0},
 };
 
-static const xttest_reference_source source_lean_peaks = {.id = "lean_peaks", .name = "Theorems about the definitions of the peaks of a spectrum, checked by Lean", .level = 3, .record_count = 2, .records = records_lean_peaks};
+static const xttest_reference_source source_lean_peaks = {.id = "lean_peaks", .name = "Theorems about the definitions of the peaks of a spectrum, checked by Lean", .level = 3, .record_count = 4, .records = records_lean_peaks};
 
 static const double arguments_lean_smoothing_0[] = {0.25};
 static const double expected_lean_smoothing_0[] = {2.0, 1.25, 0.9375, 1.578125, 1.43359375, 0.4501953125, 1.337646484375, 1.12823486328125, 1.2211761474609375};

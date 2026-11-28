@@ -3,8 +3,9 @@
 # SPDX-FileCopyrightText: 2026 Jamie Bullock
 # SPDX-License-Identifier: Zlib
 
-"""Writes two lists of coefficients, the peaks of each, and a theorem for
-every list of those values that Lean checks.
+"""Writes two lists of coefficients, the peaks of each, two spectra, each
+without its bins of no amplitude, and a theorem for every list of those
+values that Lean checks.
 
 usage: lean_peaks.py
 
@@ -25,6 +26,11 @@ coefficient above both neighbours and below the threshold, and a peak whose
 neighbours differ. The second has 40 coefficients, a cycle of eight between
 0.05 and 0.95, with one coefficient in each cycle that is above both
 neighbours and below the threshold.
+
+A spectrum for `packed` is the amplitudes of its bins and then their
+frequencies. The first has six bins, three of them of no amplitude, the
+first and the last among them, and an amplitude below zero. The second has
+20 bins, a cycle of five amplitudes of which two are zero.
 """
 
 import math
@@ -43,6 +49,18 @@ SERIES = {
 # The spacing of the second list keeps its frequencies near its amplitudes,
 # since one tolerance holds for both
 SETTINGS = {SHORT: (172.265625, 25.0), LONG: (0.025, 70.0)}
+SPECTRA = {
+    "six_bins_three_of_no_amplitude": (
+        ["0", "2.5", "0", "-1", "0.25", "0"] + ["125", "250", "375", "500", "625", "750"],
+        [],
+        0,
+    ),
+    "twenty_bins_cycle_with_zeros": (
+        ["0.3", "0", "0.7", "0.05", "0"] * 4 + [str(55.125 * bin) for bin in range(1, 21)],
+        [],
+        0,
+    ),
+}
 
 
 def peak_as_the_library(below, middle, above, spacing, n):
@@ -110,6 +128,23 @@ def main():
             f"its expressions from the exact values, moves a result by at most {roundings} times the rounding of "
             "the largest result",
             {"bin_spacing": float(spacing), "threshold": float(threshold)},
+        )
+
+    for series, (prefix, cycle, repeats) in SPECTRA.items():
+        xs = out.series(series, prefix, cycle, repeats)
+        half = len(xs) // 2
+        kept = [(amplitude, frequency) for amplitude, frequency in zip(xs[:half], xs[half:]) if amplitude != 0]
+        # A bin of no amplitude has a frequency, which the result does not have
+        assert 0 < len(kept) < half and all(frequency != 0 for frequency in xs[half:])
+        zeros = [Fraction(0)] * (half - len(kept))
+        out.vector(
+            "packed",
+            series,
+            f"packed {data(series)}",
+            "packed_cast _",
+            [amplitude for amplitude, _ in kept] + zeros + [frequency for _, frequency in kept] + zeros,
+            0,
+            "each result is a value of the spectrum or zero",
         )
 
     out.store("peaks", "Peaks", ["Peaks"], "the peaks of a spectrum")

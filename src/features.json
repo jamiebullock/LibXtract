@@ -1748,7 +1748,7 @@
       "title": "Packed Spectrum",
       "description": "Extract the elements of a spectrum that have an amplitude other than 0",
       "definition": "r_k = a_{n_k}, \\; r_{M+k} = f_{n_k} \\text{ for the } K \\text{ indices } n_0 < \\ldots < n_{K-1} \\text{ with } a_n \\ne 0; \\; r_k = r_{M+k} = 0 \\text{ for } k \\ge K, \\quad a_n = x_n, \\; f_n = x_{M+n}, \\; M = N/2",
-      "validation_level": 0,
+      "validation_level": 3,
       "provides": [
         "coefficients_and_frequencies",
         {"quantity": "partial_amplitudes", "part": "first_half"},
