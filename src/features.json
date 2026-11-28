@@ -724,7 +724,7 @@
       "title": "Autocorrelation",
       "description": "Extract the autocorrelation of a signal",
       "definition": "r_\\tau = \\frac{1}{N} \\sum_{n=0}^{N-1-\\tau} x_n x_{n+\\tau}, \\quad \\tau = 0, \\ldots, N-1",
-      "validation_level": 0,
+      "validation_level": 3,
       "input": {"format": "audio_samples", "unit": "any"},
       "arguments": [],
       "invariance": {"sign": "unchanged", "reversal": "unchanged"},

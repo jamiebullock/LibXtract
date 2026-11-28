@@ -1,0 +1,81 @@
+{
+  "source": {
+    "name": "Theorems about the definitions of the features of a series against itself at every lag, checked by Lean",
+    "version": "Lean 4.36.0, Mathlib v4.36.0",
+    "licence": "Zlib, as the library",
+    "how": "each expected value is proved to be the value of the feature's definition at the doubles nearest the stored values, or within half a unit in its last place of it, by the theorem its record names in spec/XtractSpec/Records/Lags.lean; written by tests/reference/generate/lean_lags.py and checked by Lean's kernel",
+    "level": 3
+  },
+  "records": [
+    {
+      "feature": "autocorrelation",
+      "data": "eight_quarters_of_both_signs",
+      "expected": [
+        2.546875,
+        -1.34375,
+        1.1171875,
+        -1.109375,
+        0.8125,
+        -0.703125,
+        0.4375,
+        -0.09375
+      ],
+      "tolerance": {
+        "relative": 0.0,
+        "reason": "no rounding: every value is a multiple of 1/4, so each product and each addition is exact, and the division by 8 gives the quotient itself, which is a double; the expected value is exact"
+      },
+      "call": "theorem XtractSpec.Records.autocorrelation_eight_quarters_of_both_signs"
+    },
+    {
+      "feature": "autocorrelation",
+      "data": "tenths_of_both_signs_cycle",
+      "expected": [
+        0.3053125,
+        -0.14425000000000002,
+        0.194375,
+        -0.230375,
+        0.117,
+        -0.2365,
+        0.1645,
+        -0.137,
+        0.24425,
+        -0.113,
+        0.1545,
+        -0.1785,
+        0.091,
+        -0.184625,
+        0.124625,
+        -0.10575,
+        0.1831875,
+        -0.08175,
+        0.114625,
+        -0.126625,
+        0.065,
+        -0.13275,
+        0.08475,
+        -0.0745,
+        0.122125,
+        -0.0505,
+        0.07475,
+        -0.07475,
+        0.039,
+        -0.080875,
+        0.044875,
+        -0.043250000000000004,
+        0.0610625,
+        -0.01925,
+        0.034874999999999996,
+        -0.022875,
+        0.013000000000000001,
+        -0.029,
+        0.005,
+        -0.012
+      ],
+      "tolerance": {
+        "relative": 4.67e-15,
+        "reason": "42 roundings, each within 2^-53 relatively: the product in every term and at most N - 1 additions, in a sum whose magnitudes are at most those of the sum at lag zero, which gives the largest result; the division; and the expected value"
+      },
+      "call": "theorem XtractSpec.Records.autocorrelation_tenths_of_both_signs_cycle"
+    }
+  ]
+}
