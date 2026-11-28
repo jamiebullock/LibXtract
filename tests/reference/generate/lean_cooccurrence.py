@@ -4,7 +4,8 @@
 # SPDX-License-Identifier: Zlib
 
 """Writes two square matrices, statistics of each as a co-occurrence matrix,
-and a theorem for every one of those values that Lean checks.
+two grids of levels, the co-occurrence matrix of each, and a theorem for
+every one of those values that Lean checks.
 
 usage: lean_cooccurrence.py
 
@@ -22,6 +23,14 @@ The first matrix has three rows. It is not symmetric, one of its values is
 zero, and its values sum to 16, on which the library's arithmetic is exact.
 The second has 32 rows, each of them eight values between 0.05 and 0.4 taken
 four times.
+
+The first grid of levels has five rows of five values at three levels. Its
+record pairs a value with the one a row below and a column to the left, in
+that order alone, which gives 16 pairs, so every share is a double. The
+second has 30 rows of 32 values at four levels, a cycle of six, so that
+each row begins two values further into the cycle than the one before it.
+Its record pairs a value with the one a row below and two columns to the
+right, in both orders.
 """
 
 from fractions import Fraction
@@ -36,6 +45,19 @@ SERIES = {
     LONG: ([], ["0.05", "0.2", "0.4", "0.1", "0.15", "0.3", "0.25", "0.35"], 128),
 }
 ROWS = {SHORT: 3, LONG: 32}
+SMALL_GRID = "levels_of_5_rows_of_5"
+LARGE_GRID = "levels_of_30_rows_cycle"
+GRIDS = {
+    SMALL_GRID: (
+        ["0", "1", "1", "2", "0", "2", "2", "0", "1", "1", "0", "0", "2", "1", "2"]
+        + ["1", "2", "0", "0", "1", "2", "1", "1", "0", "2"],
+        [],
+        0,
+    ),
+    LARGE_GRID: ([], ["0", "1", "3", "2", "1", "1"], 160),
+}
+# The width, the levels, the offset in columns and in rows, and whether a pair counts in both orders
+SETTINGS = {SMALL_GRID: (5, 3, -1, 1, 0), LARGE_GRID: (32, 4, 2, 1, 1)}
 
 
 def exact_in_doubles(terms):
@@ -43,6 +65,24 @@ def exact_in_doubles(terms):
     first of them."""
     running = [sum(terms[: count + 1]) for count in range(len(terms))]
     return all(Fraction(float(value)) == value for value in terms + running)
+
+
+def cooccurrence_matrix(levels_of, width, levels, column_offset, row_offset, symmetric):
+    """The share of the pairs of a value and its partner that each pair of
+    levels has, by rows, and the count of the pairs."""
+    height = len(levels_of) // width
+    counts = [0] * (levels * levels)
+    for y in range(height):
+        for x in range(width):
+            if 0 <= x + column_offset < width and 0 <= y + row_offset < height:
+                level = int(levels_of[y * width + x])
+                partner = int(levels_of[(y + row_offset) * width + x + column_offset])
+                counts[level * levels + partner] += 1
+                if symmetric:
+                    counts[partner * levels + level] += 1
+    pairs = (1 + symmetric) * (width - abs(column_offset)) * (height - abs(row_offset))
+    assert sum(counts) == pairs
+    return [Fraction(count, pairs) for count in counts], pairs
 
 
 def main():
@@ -120,7 +160,40 @@ def main():
             "one sign, in any order",
         )
 
-    out.store("cooccurrence", "Cooccurrence", ["Cooccurrence"], "the statistics of a co-occurrence matrix")
+    for series, (prefix, cycle, repeats) in GRIDS.items():
+        grid = out.series(series, prefix, cycle, repeats)
+        width, levels, column_offset, row_offset, symmetric = SETTINGS[series]
+        assert all(value.denominator == 1 and 0 <= value < levels for value in grid)
+        matrix, pairs = cooccurrence_matrix(grid, width, levels, column_offset, row_offset, symmetric)
+        exact = all(Fraction(float(share)) == share for share in matrix)
+        assert exact == (series == SMALL_GRID)
+        # The order of a pair matters: the matrix is not its transpose
+        assert symmetric or any(
+            matrix[i * levels + j] != matrix[j * levels + i] for i in range(levels) for j in range(levels)
+        )
+        out.vector(
+            "cooccurrence_matrix",
+            series,
+            f"cooccurrenceMatrix {data(series)} {width} {levels} ({column_offset}) ({row_offset}) "
+            f"{'true' if symmetric else 'false'}",
+            "cooccurrenceMatrix_cast _ _ _ _ _ _",
+            matrix,
+            0 if exact else 1,
+            f"a count is a whole number and there are {pairs} pairs, a power of two, so each division is exact"
+            if exact
+            else f"the division of a count, which is a whole number, by the {pairs} pairs",
+            {
+                "width": width,
+                "levels": levels,
+                "column_offset": column_offset,
+                "row_offset": row_offset,
+                "symmetric": symmetric,
+            },
+        )
+
+    out.store(
+        "cooccurrence", "Cooccurrence", ["Cooccurrence"], "a co-occurrence matrix and the statistics of one"
+    )
 
 
 if __name__ == "__main__":

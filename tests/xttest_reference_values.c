@@ -25,6 +25,19 @@ static const double series_matrix_of_32_rows_cycle_cycle[8] = {
 
 static const xttest_reference_series series_matrix_of_32_rows_cycle = {.name = "matrix_of_32_rows_cycle", .prefix = NULL, .prefix_count = 0, .cycle = series_matrix_of_32_rows_cycle_cycle, .cycle_count = 8, .repeats = 128};
 
+static const double series_levels_of_5_rows_of_5_prefix[25] = {
+    0.0, 1.0, 1.0, 2.0, 0.0, 2.0, 2.0, 0.0,
+    1.0, 1.0, 0.0, 0.0, 2.0, 1.0, 2.0, 1.0,
+    2.0, 0.0, 0.0, 1.0, 2.0, 1.0, 1.0, 0.0,
+    2.0};
+
+static const xttest_reference_series series_levels_of_5_rows_of_5 = {.name = "levels_of_5_rows_of_5", .prefix = series_levels_of_5_rows_of_5_prefix, .prefix_count = 25, .cycle = NULL, .cycle_count = 0, .repeats = 0};
+
+static const double series_levels_of_30_rows_cycle_cycle[6] = {
+    0.0, 1.0, 3.0, 2.0, 1.0, 1.0};
+
+static const xttest_reference_series series_levels_of_30_rows_cycle = {.name = "levels_of_30_rows_cycle", .prefix = NULL, .prefix_count = 0, .cycle = series_levels_of_30_rows_cycle_cycle, .cycle_count = 6, .repeats = 160};
+
 static const double series_grid_of_3_rows_of_4_prefix[12] = {
     1.0, 0.0, 2.5, 0.5, 3.0, 1.5, 0.0, 2.0,
     0.25, 4.0, 1.0, 0.25};
@@ -330,6 +343,10 @@ static const double expected_lean_cooccurrence_2[] = {0.703125};
 static const double expected_lean_cooccurrence_3[] = {170.44444444444446};
 static const double expected_lean_cooccurrence_4[] = {0.0012297453703703704};
 static const double expected_lean_cooccurrence_5[] = {0.090093552361121543};
+static const int arguments_lean_cooccurrence_6[] = {5, 3, -1, 1, 0};
+static const double expected_lean_cooccurrence_6[] = {0.0625, 0.25, 0.0, 0.125, 0.0625, 0.1875, 0.1875, 0.0, 0.125};
+static const int arguments_lean_cooccurrence_7[] = {32, 4, 2, 1, 1};
+static const double expected_lean_cooccurrence_7[] = {0.0, 0.083333333333333329, 0.0, 0.083333333333333329, 0.083333333333333329, 0.16666666666666666, 0.16666666666666666, 0.083333333333333329, 0.0, 0.16666666666666666, 0.0, 0.0, 0.083333333333333329, 0.083333333333333329, 0.0, 0.0};
 
 static const xttest_reference_record records_lean_cooccurrence[] = {
     {.feature = XTRACT_COOCCURRENCE_CONTRAST, .series = &series_matrix_of_3_rows_with_a_zero, .arguments = NULL, .expected = expected_lean_cooccurrence_0, .expected_count = 1, .tolerance = 0.0},
@@ -338,9 +355,11 @@ static const xttest_reference_record records_lean_cooccurrence[] = {
     {.feature = XTRACT_COOCCURRENCE_CONTRAST, .series = &series_matrix_of_32_rows_cycle, .arguments = NULL, .expected = expected_lean_cooccurrence_3, .expected_count = 1, .tolerance = 2.2799999999999999e-13},
     {.feature = XTRACT_ANGULAR_SECOND_MOMENT, .series = &series_matrix_of_32_rows_cycle, .arguments = NULL, .expected = expected_lean_cooccurrence_4, .expected_count = 1, .tolerance = 3.4200000000000001e-13},
     {.feature = XTRACT_INVERSE_DIFFERENCE_MOMENT, .series = &series_matrix_of_32_rows_cycle, .arguments = NULL, .expected = expected_lean_cooccurrence_5, .expected_count = 1, .tolerance = 2.2799999999999999e-13},
+    {.feature = XTRACT_COOCCURRENCE_MATRIX, .series = &series_levels_of_5_rows_of_5, .arguments = arguments_lean_cooccurrence_6, .expected = expected_lean_cooccurrence_6, .expected_count = 9, .tolerance = 0.0},
+    {.feature = XTRACT_COOCCURRENCE_MATRIX, .series = &series_levels_of_30_rows_cycle, .arguments = arguments_lean_cooccurrence_7, .expected = expected_lean_cooccurrence_7, .expected_count = 16, .tolerance = 2.2300000000000002e-16},
 };
 
-static const xttest_reference_source source_lean_cooccurrence = {.id = "lean_cooccurrence", .name = "Theorems about the definitions of the statistics of a co-occurrence matrix, checked by Lean", .level = 3, .record_count = 6, .records = records_lean_cooccurrence};
+static const xttest_reference_source source_lean_cooccurrence = {.id = "lean_cooccurrence", .name = "Theorems about the definitions of a co-occurrence matrix and the statistics of one, checked by Lean", .level = 3, .record_count = 8, .records = records_lean_cooccurrence};
 
 static const int arguments_lean_grid_0[] = {4};
 static const double expected_lean_grid_0[] = {16.0, 20.75, 17.5, 44.25, 21.0, 28.5, 107.75, 40.0, 34.5, 50.5};
