@@ -746,7 +746,7 @@ Sources:
 - Origin: Dixon (2006). "Onset detection revisited". Proceedings of the 9th International Conference on Digital Audio Effects (DAFx-06), section 2.6, the first two conditions. <a href="https://www.dafx.de/paper-archive/2006/papers/p_133.pdf">https://www.dafx.de/paper-archive/2006/papers/p\_133.pdf</a>
 - Formulation: Boeck, Krebs and Schedl (2012). "Evaluating the online capabilities of onset detection methods". Proceedings of the 13th International Society for Music Information Retrieval Conference, section 2.3.4, conditions 1 and 2 with w2 = w4 = 0. <a href="https://doi.org/10.5281/zenodo.1416036">doi:10.5281/zenodo.1416036</a>
 
-Validation level 0, not checked.
+Validation level 3, certified.
 
 \section definition_mmbses Mel Multi-Band Spectral Entropy Signature
 

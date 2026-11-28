@@ -198,6 +198,36 @@
         "reason": "2 roundings, each within 2^-53 relatively: no value is within two roundings of the threshold, so the library places every value as the definition does; the division of the count by the sample rate; and the expected value"
       },
       "call": "theorem XtractSpec.Records.decay_time_tenths_with_ties_cycle"
+    },
+    {
+      "feature": "peak",
+      "data": "quarters_ending_at_a_tied_peak",
+      "arguments": {
+        "threshold": 1.375
+      },
+      "expected": [
+        3.0
+      ],
+      "tolerance": {
+        "relative": 0.0,
+        "reason": "no rounding: the result is the last value; every value is a multiple of 1/4 and their mean is a double, as is its sum with the threshold, which is the last value, so the library compares as the definition does; the expected value is exact"
+      },
+      "call": "theorem XtractSpec.Records.peak_quarters_ending_at_a_tied_peak"
+    },
+    {
+      "feature": "peak",
+      "data": "tenths_cycle_ending_at_its_peak",
+      "arguments": {
+        "threshold": 0.25
+      },
+      "expected": [
+        0.95
+      ],
+      "tolerance": {
+        "relative": 0.0,
+        "reason": "no rounding: the result is the last value, which is above the mean and the threshold by more than the rounding of the N - 1 additions of the values, the division and the addition of the threshold, so the library compares as the definition does; the expected value is exact"
+      },
+      "call": "theorem XtractSpec.Records.peak_tenths_cycle_ending_at_its_peak"
     }
   ]
 }

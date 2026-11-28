@@ -337,6 +337,16 @@ static const double series_tenths_with_ties_cycle_cycle[8] = {
 
 static const xttest_reference_series series_tenths_with_ties_cycle = {.name = "tenths_with_ties_cycle", .prefix = NULL, .prefix_count = 0, .cycle = series_tenths_with_ties_cycle_cycle, .cycle_count = 8, .repeats = 125};
 
+static const double series_quarters_ending_at_a_tied_peak_prefix[6] = {
+    1.0, 0.25, 3.0, 0.5, 2.0, 3.0};
+
+static const xttest_reference_series series_quarters_ending_at_a_tied_peak = {.name = "quarters_ending_at_a_tied_peak", .prefix = series_quarters_ending_at_a_tied_peak_prefix, .prefix_count = 6, .cycle = NULL, .cycle_count = 0, .repeats = 0};
+
+static const double series_tenths_cycle_ending_at_its_peak_cycle[8] = {
+    0.29999999999999999, 0.20000000000000001, 0.69999999999999996, 0.10000000000000001, 0.59999999999999998, 0.40000000000000002, 0.5, 0.94999999999999996};
+
+static const xttest_reference_series series_tenths_cycle_ending_at_its_peak = {.name = "tenths_cycle_ending_at_its_peak", .prefix = NULL, .prefix_count = 0, .cycle = series_tenths_cycle_ending_at_its_peak_cycle, .cycle_count = 8, .repeats = 125};
+
 static const double expected_lean_cooccurrence_0[] = {0.96875};
 static const double expected_lean_cooccurrence_1[] = {0.158203125};
 static const double expected_lean_cooccurrence_2[] = {0.703125};
@@ -742,6 +752,10 @@ static const double arguments_lean_temporal_12[] = {44100.0, 0.20000000000000001
 static const double expected_lean_temporal_12[] = {6.802721088435374e-05};
 static const double arguments_lean_temporal_13[] = {44100.0, 0.40000000000000002};
 static const double expected_lean_temporal_13[] = {4.5351473922902495e-05};
+static const double arguments_lean_temporal_14[] = {1.375};
+static const double expected_lean_temporal_14[] = {3.0};
+static const double arguments_lean_temporal_15[] = {0.25};
+static const double expected_lean_temporal_15[] = {0.94999999999999996};
 
 static const xttest_reference_record records_lean_temporal[] = {
     {.feature = XTRACT_TEMPORAL_CENTROID, .series = &series_rise_and_fall_with_ties, .arguments = NULL, .expected = expected_lean_temporal_0, .expected_count = 1, .tolerance = 0.0},
@@ -758,9 +772,11 @@ static const xttest_reference_record records_lean_temporal[] = {
     {.feature = XTRACT_TIME_REVERSAL_ASYMMETRY, .series = &series_tenths_with_ties_cycle, .arguments = arguments_lean_temporal_11, .expected = expected_lean_temporal_11, .expected_count = 1, .tolerance = 2.9099999999999999e-12},
     {.feature = XTRACT_ATTACK_TIME, .series = &series_tenths_with_ties_cycle, .arguments = arguments_lean_temporal_12, .expected = expected_lean_temporal_12, .expected_count = 1, .tolerance = 2.2300000000000002e-16},
     {.feature = XTRACT_DECAY_TIME, .series = &series_tenths_with_ties_cycle, .arguments = arguments_lean_temporal_13, .expected = expected_lean_temporal_13, .expected_count = 1, .tolerance = 2.2300000000000002e-16},
+    {.feature = XTRACT_PEAK, .series = &series_quarters_ending_at_a_tied_peak, .arguments = arguments_lean_temporal_14, .expected = expected_lean_temporal_14, .expected_count = 1, .tolerance = 0.0},
+    {.feature = XTRACT_PEAK, .series = &series_tenths_cycle_ending_at_its_peak, .arguments = arguments_lean_temporal_15, .expected = expected_lean_temporal_15, .expected_count = 1, .tolerance = 0.0},
 };
 
-static const xttest_reference_source source_lean_temporal = {.id = "lean_temporal", .name = "Theorems about the definitions of the features of the shape of a series over time, checked by Lean", .level = 3, .record_count = 14, .records = records_lean_temporal};
+static const xttest_reference_source source_lean_temporal = {.id = "lean_temporal", .name = "Theorems about the definitions of the features of the shape of a series over time, checked by Lean", .level = 3, .record_count = 16, .records = records_lean_temporal};
 
 const xttest_reference_source *const xttest_reference_sources[] = {&source_lean_cooccurrence, &source_lean_grid, &source_lean_harmonicity, &source_lean_lags, &source_lean_levels, &source_lean_moving, &source_lean_multivariate, &source_lean_smoothing, &source_lean_spectra, &source_lean_spectral_moments, &source_lean_spectral_shape, &source_lean_statistics, &source_lean_subframes, &source_lean_temporal};
 

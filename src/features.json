@@ -973,7 +973,7 @@
       "description": "Report whether the last value of a series is a peak",
       "definition": "y = x_{N-1} \\text{ if } x_{N-1} = \\max_{0 \\le n < N} x_n \\text{ and } x_{N-1} \\ge \\frac{1}{N} \\sum_{n=0}^{N-1} x_n + \\delta, \\quad \\delta \\text{ the threshold given in argv}; \\text{ otherwise no result}",
       "sources": [{"role": "origin", "authors": ["Dixon"], "year": 2006, "title": "Onset detection revisited", "venue": "Proceedings of the 9th International Conference on Digital Audio Effects (DAFx-06)", "locator": "section 2.6, the first two conditions", "permalink": "https://www.dafx.de/paper-archive/2006/papers/p_133.pdf"}, {"role": "formulation", "authors": ["Boeck", "Krebs", "Schedl"], "year": 2012, "title": "Evaluating the online capabilities of onset detection methods", "venue": "Proceedings of the 13th International Society for Music Information Retrieval Conference", "locator": "section 2.3.4, conditions 1 and 2 with w2 = w4 = 0", "permalink": "doi:10.5281/zenodo.1416036"}],
-      "validation_level": 0,
+      "validation_level": 3,
       "input": {"format": "arbitrary_series", "unit": "any", "accepts": ["last_n"]},
       "argument_type": "float",
       "arguments": [

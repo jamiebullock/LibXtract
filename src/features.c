@@ -2284,7 +2284,7 @@ const xtract_function_descriptor_t xtract_descriptor_table[XTRACT_FEATURES] = {
         .description = "Report whether the last value of a series is a peak",
         .source_count = 2,
         .sources = sources_peak,
-        .validation_level = 0,
+        .validation_level = 3,
         .tags = 0,
         .data = {XTRACT_ARBITRARY_SERIES, XTRACT_UNIT_ANY, 1, accepted_peak, 1, "N >= 1"},
         .argc = 1,
