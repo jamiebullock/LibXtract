@@ -14,6 +14,7 @@ import XtractSpec.Median
 import XtractSpec.Moving
 import XtractSpec.Multivariate
 import XtractSpec.Peaks
+import XtractSpec.Prediction
 import XtractSpec.Smoothing
 import XtractSpec.Spectra
 import XtractSpec.SpectralMoments
@@ -29,6 +30,7 @@ import XtractSpec.Records.Levels
 import XtractSpec.Records.Moving
 import XtractSpec.Records.Multivariate
 import XtractSpec.Records.Peaks
+import XtractSpec.Records.Prediction
 import XtractSpec.Records.Smoothing
 import XtractSpec.Records.Spectra
 import XtractSpec.Records.SpectralMoments

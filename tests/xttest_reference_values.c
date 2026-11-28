@@ -199,6 +199,16 @@ static const double series_twenty_bins_cycle_with_zeros_prefix[40] = {
 
 static const xttest_reference_series series_twenty_bins_cycle_with_zeros = {.name = "twenty_bins_cycle_with_zeros", .prefix = series_twenty_bins_cycle_with_zeros_prefix, .prefix_count = 40, .cycle = NULL, .cycle_count = 0, .repeats = 0};
 
+static const double series_four_lags_in_binary_prefix[4] = {
+    4.0, 2.0, 2.5, 1.0625};
+
+static const xttest_reference_series series_four_lags_in_binary = {.name = "four_lags_in_binary", .prefix = series_four_lags_in_binary_prefix, .prefix_count = 4, .cycle = NULL, .cycle_count = 0, .repeats = 0};
+
+static const double series_eight_lags_in_decimal_prefix[8] = {
+    1.0, 0.45000000000000001, 0.29999999999999999, -0.10000000000000001, 0.14999999999999999, -0.20000000000000001, 0.050000000000000003, 0.10000000000000001};
+
+static const xttest_reference_series series_eight_lags_in_decimal = {.name = "eight_lags_in_decimal", .prefix = series_eight_lags_in_decimal_prefix, .prefix_count = 8, .cycle = NULL, .cycle_count = 0, .repeats = 0};
+
 static const double series_quarters_to_smooth_prefix[9] = {
     2.0, -1.0, 0.0, 3.5, 1.0, -2.5, 4.0, 0.5,
     1.5};
@@ -541,6 +551,16 @@ static const xttest_reference_record records_lean_peaks[] = {
 
 static const xttest_reference_source source_lean_peaks = {.id = "lean_peaks", .name = "Theorems about the definitions of the peaks of a spectrum, checked by Lean", .level = 3, .record_count = 4, .records = records_lean_peaks};
 
+static const double expected_lean_prediction_0[] = {-0.5, -0.5, 0.25, -0.375, -0.5625, 0.25};
+static const double expected_lean_prediction_1[] = {-0.45000000000000001, -0.12225705329153602, 0.34816440542697524, -0.39471972948367801, 0.5008368480953338, -0.44991515374550228, -0.37169539088745512, -0.83077012398354078, 0.095414632905290245, 0.51428910183324328, -0.81971495348517487, 0.69578376375495166, -0.078962591293998366, -0.37169539088745512};
+
+static const xttest_reference_record records_lean_prediction[] = {
+    {.feature = XTRACT_LPC, .series = &series_four_lags_in_binary, .arguments = NULL, .expected = expected_lean_prediction_0, .expected_count = 6, .tolerance = 0.0},
+    {.feature = XTRACT_LPC, .series = &series_eight_lags_in_decimal, .arguments = NULL, .expected = expected_lean_prediction_1, .expected_count = 14, .tolerance = 7.5499999999999994e-14},
+};
+
+static const xttest_reference_source source_lean_prediction = {.id = "lean_prediction", .name = "Theorems about the definitions of the coefficients of linear prediction, checked by Lean", .level = 3, .record_count = 2, .records = records_lean_prediction};
+
 static const double arguments_lean_smoothing_0[] = {0.25};
 static const double expected_lean_smoothing_0[] = {2.0, 1.25, 0.9375, 1.578125, 1.43359375, 0.4501953125, 1.337646484375, 1.12823486328125, 1.2211761474609375};
 static const double arguments_lean_smoothing_1[] = {0.25};
@@ -820,9 +840,9 @@ static const xttest_reference_record records_lean_temporal[] = {
 
 static const xttest_reference_source source_lean_temporal = {.id = "lean_temporal", .name = "Theorems about the definitions of the features of the shape of a series over time, checked by Lean", .level = 3, .record_count = 16, .records = records_lean_temporal};
 
-const xttest_reference_source *const xttest_reference_sources[] = {&source_lean_cooccurrence, &source_lean_grid, &source_lean_harmonicity, &source_lean_lags, &source_lean_levels, &source_lean_moving, &source_lean_multivariate, &source_lean_peaks, &source_lean_smoothing, &source_lean_spectra, &source_lean_spectral_moments, &source_lean_spectral_shape, &source_lean_statistics, &source_lean_subframes, &source_lean_temporal};
+const xttest_reference_source *const xttest_reference_sources[] = {&source_lean_cooccurrence, &source_lean_grid, &source_lean_harmonicity, &source_lean_lags, &source_lean_levels, &source_lean_moving, &source_lean_multivariate, &source_lean_peaks, &source_lean_prediction, &source_lean_smoothing, &source_lean_spectra, &source_lean_spectral_moments, &source_lean_spectral_shape, &source_lean_statistics, &source_lean_subframes, &source_lean_temporal};
 
-const int xttest_reference_source_count = 15;
+const int xttest_reference_source_count = 16;
 
 UTEST(reference, results_agree_with_lean_cooccurrence)
 {
@@ -862,6 +882,11 @@ UTEST(reference, results_agree_with_lean_multivariate)
 UTEST(reference, results_agree_with_lean_peaks)
 {
     xttest_reference_check(&source_lean_peaks, utest_result);
+}
+
+UTEST(reference, results_agree_with_lean_prediction)
+{
+    xttest_reference_check(&source_lean_prediction, utest_result);
 }
 
 UTEST(reference, results_agree_with_lean_smoothing)

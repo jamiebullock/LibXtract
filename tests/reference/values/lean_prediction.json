@@ -1,0 +1,53 @@
+{
+  "source": {
+    "name": "Theorems about the definitions of the coefficients of linear prediction, checked by Lean",
+    "version": "Lean 4.36.0, Mathlib v4.36.0",
+    "licence": "Zlib, as the library",
+    "how": "each expected value is proved to be the value of the feature's definition at the doubles nearest the stored values, or within half a unit in its last place of it, by the theorem its record names in spec/XtractSpec/Records/Prediction.lean; written by tests/reference/generate/lean_prediction.py and checked by Lean's kernel",
+    "level": 3
+  },
+  "records": [
+    {
+      "feature": "lpc",
+      "data": "four_lags_in_binary",
+      "expected": [
+        -0.5,
+        -0.5,
+        0.25,
+        -0.375,
+        -0.5625,
+        0.25
+      ],
+      "tolerance": {
+        "relative": 0.0,
+        "reason": "no rounding: the exact result of each of the library's operations is a double; the expected value is exact"
+      },
+      "call": "theorem XtractSpec.Records.lpc_four_lags_in_binary"
+    },
+    {
+      "feature": "lpc",
+      "data": "eight_lags_in_decimal",
+      "expected": [
+        -0.45,
+        -0.12225705329153602,
+        0.34816440542697524,
+        -0.394719729483678,
+        0.5008368480953338,
+        -0.4499151537455023,
+        -0.3716953908874551,
+        -0.8307701239835408,
+        0.09541463290529024,
+        0.5142891018332433,
+        -0.8197149534851749,
+        0.6957837637549517,
+        -0.07896259129399837,
+        -0.3716953908874551
+      ],
+      "tolerance": {
+        "relative": 7.55e-14,
+        "reason": "680 roundings, each within 2^-53 relatively: the rounding of each of the library's operations, carried through the recursion from the exact values, moves a coefficient by at most 679 times the rounding of the largest coefficient; and the expected value"
+      },
+      "call": "theorem XtractSpec.Records.lpc_eight_lags_in_decimal"
+    }
+  ]
+}

@@ -654,7 +654,7 @@ Sources:
 - Origin: Atal and Hanauer (1971). "Speech analysis and synthesis by linear prediction of the speech wave". Journal of the Acoustical Society of America 50(2B), appendix E, equations E8 to E10, with the opposite sign. <a href="https://doi.org/10.1121/1.1912679">doi:10.1121/1.1912679</a>
 - Formulation: Makhoul (1975). "Linear prediction: a tutorial review". Proceedings of the IEEE 63(4), equations 12 and 38a to 38e. <a href="https://doi.org/10.1109/PROC.1975.9792">doi:10.1109/PROC.1975.9792</a>
 
-Validation level 0, not checked.
+Validation level 3, certified.
 
 \section definition_lpcc Linear predictive coding cepstral coefficients
 
