@@ -22,6 +22,11 @@ there twice and so is its smallest, every value is a multiple of 1/4 and
 they sum to 16, on which the library's arithmetic is exact. The second
 repeats eight values between 0.1 and 0.9, 1000 values in all, with the
 largest and the smallest twice in each eight.
+
+`peak` has two series of its own, which end at their largest value. The
+first has six multiples of 1/4, its largest value is there twice, and its
+mean and the threshold of its record sum to that value. The second repeats
+eight values between 0.1 and 0.95, 1000 values in all.
 """
 
 import math
@@ -35,6 +40,13 @@ LONG = "tenths_with_ties_cycle"
 SERIES = {
     SHORT: (["1", "0.25", "2", "4", "4", "2", "0.25", "1.5", "1"], [], 0),
     LONG: ([], ["0.3", "0.1", "0.7", "0.9", "0.9", "0.2", "0.1", "0.6"], 125),
+}
+
+
+# A series that ends at its largest value, and the threshold of its record
+PEAKS = {
+    "quarters_ending_at_a_tied_peak": ((["1", "0.25", "3", "0.5", "2", "3"], [], 0), 1.375),
+    "tenths_cycle_ending_at_its_peak": (([], ["0.3", "0.2", "0.7", "0.1", "0.6", "0.4", "0.5", "0.95"], 125), 0.25),
 }
 
 
@@ -195,6 +207,34 @@ def main():
             else "no value is within two roundings of the threshold, so the library places every value as the "
             "definition does; the division of the count by the sample rate",
             {"sample_rate": rate, "threshold": fraction},
+        )
+
+    for series, ((prefix, cycle, repeats), threshold) in PEAKS.items():
+        xs = out.series(series, prefix, cycle, repeats)
+        n = len(xs)
+        last = xs[-1]
+        level = sum(xs) / n + Fraction(threshold)
+        assert last == max(xs) and last >= level
+        exact = last == level
+        if exact:
+            # The sum, the mean and its sum with the threshold are doubles
+            assert all((4 * value).denominator == 1 for value in xs)
+            assert Fraction(float(sum(xs) / n)) == sum(xs) / n and Fraction(float(level)) == level
+        else:
+            assert last - level > (n + 2) * ROUNDING * (sum(abs(x) for x in xs) / n + abs(Fraction(threshold)))
+        out.member(
+            "peak",
+            series,
+            f"peak {data(series)} {cast(threshold)}",
+            f"peak_eq_of_rat {DECIDE} {DECIDE} {DECIDE}",
+            last,
+            "the result is the last value; every value is a multiple of 1/4 and their mean is a double, as is "
+            "its sum with the threshold, which is the last value, so the library compares as the definition does"
+            if exact
+            else "the result is the last value, which is above the mean and the threshold by more than the "
+            "rounding of the N - 1 additions of the values, the division and the addition of the threshold, so "
+            "the library compares as the definition does",
+            {"threshold": threshold},
         )
 
     out.store("temporal", "Temporal", ["Temporal"], "the features of the shape of a series over time")

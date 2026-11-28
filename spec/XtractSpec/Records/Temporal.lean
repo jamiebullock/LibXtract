@@ -87,4 +87,23 @@ theorem decay_time_tenths_with_ties_cycle :
     |decayTime (tenths_with_ties_cycle.map (↑) : List ℝ) ((44100 : ℚ) : ℝ) ((3602879701896397 / 9007199254740992 : ℚ) : ℝ) - ((6692696262570359 / 147573952589676412928 : ℚ) : ℝ)| ≤ ((1 / 295147905179352825856 : ℚ) : ℝ) :=
   within_of_rat (decayTime_cast _ _ _) (by decide +kernel)
 
+def quarters_ending_at_a_tied_peak : List ℚ :=
+  [(1 : ℚ), (1 / 4 : ℚ),
+    (3 : ℚ), (1 / 2 : ℚ),
+    (2 : ℚ), (3 : ℚ)]
+
+theorem peak_quarters_ending_at_a_tied_peak :
+    peak (quarters_ending_at_a_tied_peak.map (↑) : List ℝ) ((11 / 8 : ℚ) : ℝ) = ((3 : ℚ) : ℝ) :=
+  peak_eq_of_rat (by decide +kernel) (by decide +kernel) (by decide +kernel)
+
+def tenths_cycle_ending_at_its_peak : List ℚ :=
+  (List.replicate 125 [(5404319552844595 / 18014398509481984 : ℚ), (3602879701896397 / 18014398509481984 : ℚ),
+    (3152519739159347 / 4503599627370496 : ℚ), (3602879701896397 / 36028797018963968 : ℚ),
+    (5404319552844595 / 9007199254740992 : ℚ), (3602879701896397 / 9007199254740992 : ℚ),
+    (1 / 2 : ℚ), (4278419646001971 / 4503599627370496 : ℚ)]).flatten
+
+theorem peak_tenths_cycle_ending_at_its_peak :
+    peak (tenths_cycle_ending_at_its_peak.map (↑) : List ℝ) ((1 / 4 : ℚ) : ℝ) = ((4278419646001971 / 4503599627370496 : ℚ) : ℝ) :=
+  peak_eq_of_rat (by decide +kernel) (by decide +kernel) (by decide +kernel)
+
 end XtractSpec.Records

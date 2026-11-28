@@ -9,8 +9,8 @@ import XtractSpec.Statistics
 # The shape of a series over time
 
 The definitions in `src/features.json` of `temporal_centroid`, `max_position`,
-`min_position`, `peak_asymmetry`, `time_reversal_asymmetry`, `attack_time` and
-`decay_time`. The data is a series in the order of time, and the
+`min_position`, `peak_asymmetry`, `time_reversal_asymmetry`, `attack_time`,
+`decay_time` and `peak`. The data is a series in the order of time, and the
 position of a value is its index, from 0. A definition without a comparison
 is stated over any field: over ℝ it is the specification, and over ℚ it
 computes, which gives its value at a series of doubles exactly. The index of
@@ -28,7 +28,9 @@ value before it are zero, where the library gives no result.
 `timeReversalAsymmetry` is zero here at a lag of zero or of the count of the
 values or more, and the library refuses such a lag. `attackTime` and
 `decayTime` are defined here for any largest value and any sample rate, and
-the library gives no result when the largest value is zero or less.
+the library gives no result when the largest value is zero or less. `peak`
+is zero here where the last value is not a peak, and the library gives no
+result there.
 -/
 
 namespace XtractSpec
@@ -103,6 +105,12 @@ sample rate given, `rate`. -/
 def decayTime (xs : List α) (rate threshold : α) : α :=
   ((min ((xs.drop (firstMaxIndex xs)).findIdx fun x => decide (x ≤ threshold * largest xs))
     ((xs.drop (firstMaxIndex xs)).length - 1) : ℕ) : α) / rate
+
+/-- The last value when no value is above it and it is at least the mean of the values and the
+threshold, and zero when it is not. -/
+def peak (xs : List α) (threshold : α) : α :=
+  if xs.getLastD 0 = highestValue xs ∧ mean xs + threshold ≤ xs.getLastD 0 then xs.getLastD 0
+  else 0
 
 end Ordered
 
@@ -240,6 +248,19 @@ theorem decayTime_cast (qs : List ℚ) (rate threshold : ℚ) :
   simp only [Function.comp_def, falls]
   push_cast
   rfl
+
+/-- The last value is the peak when no value is above it and it is at least the mean and the
+threshold, which are comparisons of rationals. -/
+theorem peak_eq_of_rat {qs : List ℚ} {threshold q : ℚ} (hlast : qs.getLast? = some q)
+    (hub : ∀ y ∈ qs, y ≤ q) (hmean : mean qs + threshold ≤ q) :
+    peak (qs.map (↑) : List ℝ) (threshold : ℝ) = (q : ℝ) := by
+  have last : (qs.map (↑) : List ℝ).getLastD 0 = (q : ℝ) := by
+    rw [List.getLastD_eq_getLast?, List.getLast?_map, hlast]
+    rfl
+  have above : ((mean qs : ℚ) : ℝ) + (threshold : ℝ) ≤ (q : ℝ) := by exact_mod_cast hmean
+  unfold peak
+  rw [last, highestValue_eq_of_rat (List.mem_of_getLast? hlast) hub, mean_cast]
+  simp only [above, and_self, ↓reduceIte]
 
 /-!
 ## Invariance
